@@ -1,5 +1,4 @@
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/Header';
 import { WizardStepper } from '@/components/wizard/WizardStepper';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
 import { GoalStep } from '@/components/wizard/steps/GoalStep';
@@ -49,22 +48,19 @@ export default function WizardPage() {
   const validation = getStepValidation(currentStep);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-      <main className="container max-w-4xl mx-auto px-4 py-6">
-        <WizardStepper currentStep={currentStep} currentStepIndex={currentStepIndex} onStepClick={setStep} />
-        <div className="mt-6 mb-8">{renderStep()}</div>
-        <WizardNavigation
-          canGoBack={currentStepIndex > 0}
-          canGoForward={validation.valid}
-          isLastStep={currentStep === 'review'}
-          isGenerating={isGenerating}
-          onBack={prevStep}
-          onNext={nextStep}
-          onGenerate={handleGenerate}
-          validationMessage={!validation.valid ? validation.message : undefined}
-        />
-      </main>
-    </div>
+    <main className="container max-w-4xl mx-auto px-4 py-6">
+      <WizardStepper currentStep={currentStep} currentStepIndex={currentStepIndex} onStepClick={setStep} />
+      <div className="mt-6 mb-8">{renderStep()}</div>
+      <WizardNavigation
+        canGoBack={currentStepIndex > 0}
+        canGoForward={validation.valid}
+        isLastStep={currentStep === 'review'}
+        isGenerating={isGenerating}
+        onBack={prevStep}
+        onNext={nextStep}
+        onGenerate={handleGenerate}
+        validationMessage={!validation.valid ? validation.message : undefined}
+      />
+    </main>
   );
 }
