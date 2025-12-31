@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { WizardStepper } from '@/components/wizard/WizardStepper';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
+import { MotivationalQuote } from '@/components/wizard/MotivationalQuote';
 import { GoalStep } from '@/components/wizard/steps/GoalStep';
 import { EquipmentStep } from '@/components/wizard/steps/EquipmentStep';
 import { AnatomyStep } from '@/components/wizard/steps/AnatomyStep';
@@ -15,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function WizardPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { currentStep, currentStepIndex, nextStep, prevStep, setStep, canAdvance, getStepValidation, selections, isGenerating, setIsGenerating } = useWizardStore();
+  const { currentStep, currentStepIndex, nextStep, prevStep, setStep, getStepValidation, selections, isGenerating, setIsGenerating } = useWizardStore();
   const { setCurrentPlan, savePlanToHistory } = usePlanStore();
 
   const handleGenerate = async () => {
@@ -25,7 +26,10 @@ export default function WizardPage() {
       const plan = generatePlan(selections);
       setCurrentPlan(plan);
       savePlanToHistory(plan);
-      toast({ title: 'Plan Generated!', description: 'Your personalized workout plan is ready.' });
+      toast({ 
+        title: '🎉 Plan Generated!', 
+        description: 'Your personalized workout plan is ready. You got this!' 
+      });
       navigate('/plan');
     } catch (error) {
       toast({ title: 'Error', description: 'Failed to generate plan. Please try again.', variant: 'destructive' });
@@ -50,7 +54,24 @@ export default function WizardPage() {
   return (
     <main className="container max-w-4xl mx-auto px-4 py-6">
       <WizardStepper currentStep={currentStep} currentStepIndex={currentStepIndex} onStepClick={setStep} />
-      <div className="mt-6 mb-8">{renderStep()}</div>
+      
+      {/* Motivational Quote */}
+      <MotivationalQuote stepIndex={currentStepIndex} />
+      
+      {/* Progress Percentage */}
+      <div className="flex items-center justify-center gap-2 mb-4">
+        <div className="h-2 flex-1 max-w-xs bg-muted rounded-full overflow-hidden">
+          <div 
+            className="h-full gradient-primary transition-all duration-500 ease-out"
+            style={{ width: `${((currentStepIndex + 1) / 6) * 100}%` }}
+          />
+        </div>
+        <span className="text-sm font-medium text-muted-foreground">
+          {Math.round(((currentStepIndex + 1) / 6) * 100)}% complete
+        </span>
+      </div>
+      
+      <div className="mt-4 mb-8 animate-slide-in">{renderStep()}</div>
       <WizardNavigation
         canGoBack={currentStepIndex > 0}
         canGoForward={validation.valid}

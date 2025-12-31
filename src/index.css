@@ -2,38 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
-/* FitWizard Design System - Fitness-focused with WCAG 2.2 AA compliance */
+/* FitWizard Design System - Purple/Pink Professional Gradient Theme */
 
 @layer base {
   :root {
-    /* Core palette - energetic fitness theme */
-    --background: 210 20% 98%;
-    --foreground: 220 25% 10%;
+    /* Core palette - professional purple/pink theme */
+    --background: 270 20% 98%;
+    --foreground: 270 25% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 25% 10%;
+    --card-foreground: 270 25% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 25% 10%;
+    --popover-foreground: 270 25% 10%;
 
-    /* Primary - vibrant fitness orange */
-    --primary: 24 95% 53%;
+    /* Primary - vibrant purple #8B5CF6 */
+    --primary: 262 83% 66%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - calm steel blue */
-    --secondary: 210 25% 93%;
-    --secondary-foreground: 220 25% 15%;
+    /* Secondary - hot pink #EC4899 */
+    --secondary: 330 81% 60%;
+    --secondary-foreground: 0 0% 100%;
 
-    /* Muted - subtle grays */
-    --muted: 210 15% 95%;
-    --muted-foreground: 215 16% 46%;
+    /* Muted - subtle grays with purple tint */
+    --muted: 270 15% 95%;
+    --muted-foreground: 270 16% 46%;
 
-    /* Accent - energetic teal */
-    --accent: 174 62% 47%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - soft purple/lavender #C084FC */
+    --accent: 270 91% 75%;
+    --accent-foreground: 270 25% 10%;
 
-    /* Success - healthy green */
-    --success: 142 71% 45%;
+    /* Success - motivational rose #F472B6 */
+    --success: 330 86% 70%;
     --success-foreground: 0 0% 100%;
 
     /* Warning - attention yellow */
@@ -44,104 +44,113 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Muscle highlight - vibrant selection color */
-    --muscle-highlight: 24 95% 53%;
-    --muscle-hover: 24 80% 65%;
-    --muscle-default: 210 15% 85%;
+    /* Muscle highlight - purple glow */
+    --muscle-highlight: 262 83% 66%;
+    --muscle-hover: 270 91% 75%;
+    --muscle-default: 270 15% 85%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 24 95% 53%;
+    --border: 270 32% 91%;
+    --input: 270 32% 91%;
+    --ring: 262 83% 66%;
 
     --radius: 0.75rem;
 
     /* Sidebar */
-    --sidebar-background: 210 20% 98%;
-    --sidebar-foreground: 220 25% 15%;
-    --sidebar-primary: 24 95% 53%;
+    --sidebar-background: 270 20% 98%;
+    --sidebar-foreground: 270 25% 15%;
+    --sidebar-primary: 262 83% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 15% 93%;
-    --sidebar-accent-foreground: 220 25% 15%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 24 95% 53%;
+    --sidebar-accent: 270 15% 93%;
+    --sidebar-accent-foreground: 270 25% 15%;
+    --sidebar-border: 270 32% 91%;
+    --sidebar-ring: 262 83% 66%;
 
-    /* Wizard stepper */
-    --stepper-active: 24 95% 53%;
-    --stepper-complete: 142 71% 45%;
-    --stepper-inactive: 210 15% 85%;
+    /* Wizard stepper - gradient animation */
+    --stepper-active: 262 83% 66%;
+    --stepper-complete: 330 86% 70%;
+    --stepper-inactive: 270 15% 85%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(24 95% 53%), hsl(24 85% 45%));
-    --gradient-hero: linear-gradient(135deg, hsl(220 25% 10%) 0%, hsl(220 20% 20%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(174 62% 47%), hsl(174 72% 35%));
+    /* Gradients - Purple to Pink */
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 66%), hsl(330 81% 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(263 70% 15%) 0%, hsl(270 50% 25%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(270 91% 75%), hsl(330 86% 70%));
+    --gradient-subtle: linear-gradient(135deg, hsl(262 83% 66% / 0.1), hsl(330 81% 60% / 0.1));
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 hsl(220 25% 10% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(220 25% 10% / 0.1), 0 2px 4px -2px hsl(220 25% 10% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(220 25% 10% / 0.1), 0 4px 6px -4px hsl(220 25% 10% / 0.1);
-    --shadow-glow: 0 0 20px hsl(24 95% 53% / 0.3);
+    /* Shadows with purple glow */
+    --shadow-sm: 0 1px 2px 0 hsl(270 25% 10% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(270 25% 10% / 0.1), 0 2px 4px -2px hsl(270 25% 10% / 0.1);
+    --shadow-lg: 0 10px 15px -3px hsl(270 25% 10% / 0.1), 0 4px 6px -4px hsl(270 25% 10% / 0.1);
+    --shadow-glow: 0 0 20px hsl(262 83% 66% / 0.4);
+    --shadow-glow-pink: 0 0 20px hsl(330 81% 60% / 0.3);
   }
 
   .dark {
-    --background: 220 25% 8%;
-    --foreground: 210 20% 98%;
+    --background: 263 30% 8%;
+    --foreground: 270 20% 98%;
 
-    --card: 220 25% 12%;
-    --card-foreground: 210 20% 98%;
+    --card: 263 30% 12%;
+    --card-foreground: 270 20% 98%;
 
-    --popover: 220 25% 12%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 263 30% 12%;
+    --popover-foreground: 270 20% 98%;
 
-    --primary: 24 95% 58%;
+    /* Primary - vibrant purple */
+    --primary: 262 83% 70%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 20% 18%;
-    --secondary-foreground: 210 20% 98%;
+    /* Secondary - hot pink */
+    --secondary: 330 81% 65%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 20% 18%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 263 25% 18%;
+    --muted-foreground: 270 20% 65%;
 
-    --accent: 174 62% 50%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent - lavender */
+    --accent: 270 91% 78%;
+    --accent-foreground: 263 30% 10%;
 
-    --success: 142 71% 50%;
+    /* Success - rose */
+    --success: 330 86% 75%;
     --success-foreground: 0 0% 100%;
 
     --warning: 38 92% 55%;
     --warning-foreground: 0 0% 0%;
 
     --destructive: 0 62% 50%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 270 20% 98%;
 
-    --muscle-highlight: 24 95% 58%;
-    --muscle-hover: 24 80% 70%;
-    --muscle-default: 220 20% 30%;
+    /* Muscle highlight - purple glow */
+    --muscle-highlight: 262 83% 70%;
+    --muscle-hover: 270 91% 78%;
+    --muscle-default: 263 25% 30%;
 
-    --border: 220 20% 20%;
-    --input: 220 20% 20%;
-    --ring: 24 95% 58%;
+    --border: 263 25% 20%;
+    --input: 263 25% 20%;
+    --ring: 262 83% 70%;
 
-    --sidebar-background: 220 25% 10%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 24 95% 58%;
+    --sidebar-background: 263 30% 10%;
+    --sidebar-foreground: 270 20% 98%;
+    --sidebar-primary: 262 83% 70%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 18%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 220 20% 20%;
-    --sidebar-ring: 24 95% 58%;
+    --sidebar-accent: 263 25% 18%;
+    --sidebar-accent-foreground: 270 20% 98%;
+    --sidebar-border: 263 25% 20%;
+    --sidebar-ring: 262 83% 70%;
 
-    --stepper-active: 24 95% 58%;
-    --stepper-complete: 142 71% 50%;
-    --stepper-inactive: 220 20% 30%;
+    --stepper-active: 262 83% 70%;
+    --stepper-complete: 330 86% 75%;
+    --stepper-inactive: 263 25% 30%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(24 95% 58%), hsl(24 85% 48%));
-    --gradient-hero: linear-gradient(135deg, hsl(220 25% 5%) 0%, hsl(220 20% 15%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(174 62% 50%), hsl(174 72% 38%));
+    --gradient-primary: linear-gradient(135deg, hsl(262 83% 70%), hsl(330 81% 65%));
+    --gradient-hero: linear-gradient(135deg, hsl(263 30% 5%) 0%, hsl(270 40% 15%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(270 91% 78%), hsl(330 86% 75%));
+    --gradient-subtle: linear-gradient(135deg, hsl(262 83% 70% / 0.15), hsl(330 81% 65% / 0.15));
 
     --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
     --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
     --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
-    --shadow-glow: 0 0 20px hsl(24 95% 58% / 0.4);
+    --shadow-glow: 0 0 20px hsl(262 83% 70% / 0.5);
+    --shadow-glow-pink: 0 0 20px hsl(330 81% 65% / 0.4);
   }
 }
 
@@ -178,28 +187,91 @@
   .gradient-accent {
     background: var(--gradient-accent);
   }
+
+  .gradient-subtle {
+    background: var(--gradient-subtle);
+  }
   
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
 
-  /* Muscle highlight utilities */
+  .shadow-glow-pink {
+    box-shadow: var(--shadow-glow-pink);
+  }
+
+  /* Gradient text utility */
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Muscle highlight utilities - purple glow */
   .muscle-selected {
     fill: hsl(var(--muscle-highlight));
     stroke: hsl(var(--primary-foreground));
     stroke-width: 1.5;
-    transition: fill 0.15s ease-out;
+    filter: drop-shadow(0 0 8px hsl(var(--muscle-highlight) / 0.6));
+    transition: all 0.2s ease-out;
   }
   
   .muscle-hover {
     fill: hsl(var(--muscle-hover));
     cursor: pointer;
+    filter: drop-shadow(0 0 4px hsl(var(--muscle-hover) / 0.4));
   }
   
   .muscle-default {
     fill: hsl(var(--muscle-default));
     stroke: hsl(var(--border));
     stroke-width: 0.5;
-    transition: fill 0.15s ease-out;
+    transition: all 0.2s ease-out;
   }
+
+  /* Glassmorphism card */
+  .glass-card {
+    background: hsl(var(--card) / 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  /* Animated gradient border */
+  .gradient-border {
+    position: relative;
+    background: hsl(var(--card));
+    border-radius: var(--radius);
+  }
+
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: calc(var(--radius) + 2px);
+    background: var(--gradient-primary);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .gradient-border:hover::before,
+  .gradient-border:focus-within::before {
+    opacity: 1;
+  }
+}
+
+/* Animation keyframes for gradient effects */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
 }

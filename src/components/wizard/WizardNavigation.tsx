@@ -48,9 +48,10 @@ export function WizardNavigation({
 
         {isLastStep ? (
           <Button
+            variant="gradient"
             onClick={onGenerate}
             disabled={!canGoForward || isGenerating}
-            className="touch-target flex items-center gap-2 gradient-primary text-primary-foreground px-8"
+            className="touch-target flex items-center gap-2 px-8"
             aria-label="Generate workout plan"
           >
             {isGenerating ? (
@@ -67,6 +68,7 @@ export function WizardNavigation({
           </Button>
         ) : (
           <Button
+            variant="gradient"
             onClick={onNext}
             disabled={!canGoForward}
             className="touch-target flex items-center gap-2"

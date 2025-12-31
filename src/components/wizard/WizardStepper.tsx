@@ -50,9 +50,9 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
                 <div
                   className={cn(
                     "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-300",
-                    isComplete && "border-stepper-complete bg-stepper-complete text-primary-foreground",
-                    isCurrent && "border-stepper-active bg-stepper-active text-primary-foreground shadow-glow animate-pulse-glow",
-                    !isComplete && !isCurrent && "border-stepper-inactive bg-background text-muted-foreground"
+                    isComplete && "border-success bg-success text-primary-foreground",
+                    isCurrent && "gradient-primary border-primary text-primary-foreground shadow-glow animate-pulse-glow",
+                    !isComplete && !isCurrent && "border-muted bg-background text-muted-foreground"
                   )}
                 >
                   {isComplete ? (
