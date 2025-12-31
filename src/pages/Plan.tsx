@@ -14,10 +14,12 @@ export default function PlanPage() {
   if (!currentPlan) {
     return (
       <main className="container max-w-4xl mx-auto px-4 py-20 text-center">
-        <Wand2 className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
+        <div className="mx-auto w-20 h-20 rounded-full gradient-primary flex items-center justify-center mb-6 shadow-glow">
+          <Wand2 className="h-10 w-10 text-primary-foreground" />
+        </div>
         <h1 className="text-2xl font-bold mb-4">No Plan Generated Yet</h1>
         <p className="text-muted-foreground mb-8">Create your personalized workout plan using the wizard.</p>
-        <Link to="/wizard"><Button className="gradient-primary text-primary-foreground">Start Wizard</Button></Link>
+        <Link to="/wizard"><Button variant="gradient" size="lg">Start Wizard</Button></Link>
       </main>
     );
   }
@@ -26,22 +28,57 @@ export default function PlanPage() {
 
   const exportPDF = () => {
     const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text('FitWizard Workout Plan', 14, 22);
+    
+    // Purple/Pink branded header
+    doc.setFillColor(139, 92, 246); // Primary purple
+    doc.rect(0, 0, 220, 35, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('FitWizard', 14, 20);
     doc.setFontSize(12);
-    doc.text(`Split: ${currentPlan.splitType.replace('_', ' ').toUpperCase()}`, 14, 32);
-    doc.text(`Days/Week: ${currentPlan.selections.daysPerWeek}`, 14, 40);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Your Personalized Workout Plan', 14, 28);
+    
+    // Plan details
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(12);
+    doc.text(`Split: ${currentPlan.splitType.replace('_', ' ').toUpperCase()}`, 14, 45);
+    doc.text(`Days/Week: ${currentPlan.selections.daysPerWeek}`, 14, 52);
+    doc.text(`Session Duration: ${currentPlan.selections.sessionDuration} min`, 14, 59);
+    doc.text(`Goal: ${currentPlan.selections.goal.charAt(0).toUpperCase() + currentPlan.selections.goal.slice(1)}`, 14, 66);
 
-    let y = 55;
+    let y = 80;
     currentPlan.workoutDays.forEach((day) => {
-      doc.setFontSize(14);
-      doc.text(day.name, 14, y);
-      y += 8;
+      // Day header with pink accent
+      doc.setFillColor(236, 72, 153); // Secondary pink
+      doc.rect(14, y - 5, 182, 8, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(day.name, 16, y);
+      y += 10;
+      
+      doc.setTextColor(0, 0, 0);
       const rows = day.exercises.map(e => [e.exercise.name, `${e.sets}`, e.reps, `${e.rir}`, `${e.restSeconds}s`]);
-      autoTable(doc, { startY: y, head: [['Exercise', 'Sets', 'Reps', 'RIR', 'Rest']], body: rows, margin: { left: 14 } });
-      y = (doc as any).lastAutoTable.finalY + 10;
-      if (y > 270) { doc.addPage(); y = 20; }
+      autoTable(doc, { 
+        startY: y, 
+        head: [['Exercise', 'Sets', 'Reps', 'RIR', 'Rest']], 
+        body: rows, 
+        margin: { left: 14 },
+        headStyles: { fillColor: [139, 92, 246] },
+        alternateRowStyles: { fillColor: [250, 245, 255] }
+      });
+      y = (doc as any).lastAutoTable.finalY + 15;
+      if (y > 260) { doc.addPage(); y = 20; }
     });
+
+    // Motivational footer
+    doc.setFontSize(10);
+    doc.setTextColor(139, 92, 246);
+    doc.setFont('helvetica', 'italic');
+    doc.text("You've got this! Every rep counts. 💪", 14, 285);
 
     doc.save('FitWizard_Plan.pdf');
   };
@@ -49,24 +86,26 @@ export default function PlanPage() {
   return (
     <main className="container max-w-5xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Your Workout Plan</h1>
-        <Button onClick={exportPDF} className="gap-2"><Download className="h-4 w-4" /> Export PDF</Button>
+        <h1 className="text-2xl font-bold gradient-text">Your Workout Plan</h1>
+        <Button onClick={exportPDF} variant="gradient" className="gap-2"><Download className="h-4 w-4" /> Export PDF</Button>
       </div>
 
       {/* Summary */}
-      <Card className="mb-6">
+      <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
         <CardContent className="p-6 flex flex-wrap gap-6">
-          <div className="flex items-center gap-2"><Calendar className="h-5 w-5 text-primary" /><span>{currentPlan.selections.daysPerWeek} days/week</span></div>
-          <div className="flex items-center gap-2"><Clock className="h-5 w-5 text-primary" /><span>{currentPlan.selections.sessionDuration} min sessions</span></div>
-          <div className="flex items-center gap-2"><Target className="h-5 w-5 text-primary" /><span>{currentPlan.splitType.replace('_', ' ')}</span></div>
+          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Calendar className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.selections.daysPerWeek} days/week</span></div>
+          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Clock className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.selections.sessionDuration} min sessions</span></div>
+          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Target className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.splitType.replace('_', ' ')}</span></div>
         </CardContent>
       </Card>
 
       {/* Workout Days */}
       <div className="space-y-6">
         {currentPlan.workoutDays.map((day) => (
-          <Card key={day.dayIndex}>
-            <CardHeader><CardTitle>{day.name}</CardTitle></CardHeader>
+          <Card key={day.dayIndex} className="hover:shadow-lg transition-shadow hover:border-primary/30">
+            <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent rounded-t-lg">
+              <CardTitle className="text-primary">{day.name}</CardTitle>
+            </CardHeader>
             <CardContent>
               <div className="divide-y">
                 {day.exercises.map((ex, i) => (
@@ -76,8 +115,8 @@ export default function PlanPage() {
                       <p className="text-sm text-muted-foreground">{ex.exercise.primaryMuscles.map(getMuscleLabel).join(', ')}</p>
                     </div>
                     <div className="flex gap-2 flex-wrap">
-                      <Badge variant="secondary">{ex.sets} sets</Badge>
-                      <Badge variant="secondary">{ex.reps} reps</Badge>
+                      <Badge className="bg-primary/10 text-primary hover:bg-primary/20">{ex.sets} sets</Badge>
+                      <Badge className="bg-secondary/10 text-secondary hover:bg-secondary/20">{ex.reps} reps</Badge>
                       <Badge variant="outline">RIR {ex.rir}</Badge>
                       <Badge variant="outline">{ex.restSeconds}s rest</Badge>
                     </div>
@@ -87,6 +126,11 @@ export default function PlanPage() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Motivational Footer */}
+      <div className="mt-8 text-center py-6">
+        <p className="text-lg font-medium gradient-text">"Consistency beats perfection. You've got this!"</p>
       </div>
     </main>
   );

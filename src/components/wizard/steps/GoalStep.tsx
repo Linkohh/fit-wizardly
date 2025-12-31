@@ -70,9 +70,9 @@ export function GoalStep() {
             >
               <Card
                 className={cn(
-                  "relative transition-all duration-200 hover:shadow-md touch-target",
+                  "relative transition-all duration-300 hover:shadow-md touch-target group",
                   selections.goal === goal.id 
-                    ? "border-primary ring-2 ring-primary/20 bg-primary/5" 
+                    ? "border-primary ring-2 ring-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5 shadow-glow" 
                     : "border-border hover:border-primary/50"
                 )}
               >
@@ -84,8 +84,10 @@ export function GoalStep() {
                     aria-describedby={`${goal.id}-description`}
                   />
                   <div className={cn(
-                    "p-3 rounded-full transition-colors",
-                    selections.goal === goal.id ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
+                    "p-3 rounded-full transition-all duration-300",
+                    selections.goal === goal.id 
+                      ? "gradient-primary text-primary-foreground shadow-glow" 
+                      : "bg-muted text-muted-foreground group-hover:bg-primary/10"
                   )}>
                     {goal.icon}
                   </div>
@@ -96,7 +98,7 @@ export function GoalStep() {
                     </p>
                   </div>
                   {selections.goal === goal.id && (
-                    <div className="absolute top-3 right-3 h-3 w-3 rounded-full bg-primary" aria-hidden="true" />
+                    <div className="absolute top-3 right-3 h-3 w-3 rounded-full gradient-primary" aria-hidden="true" />
                   )}
                 </CardContent>
               </Card>
@@ -125,9 +127,9 @@ export function GoalStep() {
             >
               <Card
                 className={cn(
-                  "relative transition-all duration-200 hover:shadow-md touch-target",
+                  "relative transition-all duration-300 hover:shadow-md touch-target",
                   selections.experienceLevel === level.id 
-                    ? "border-primary ring-2 ring-primary/20 bg-primary/5" 
+                    ? "border-primary ring-2 ring-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5" 
                     : "border-border hover:border-primary/50"
                 )}
               >
@@ -146,7 +148,7 @@ export function GoalStep() {
                       </p>
                     </div>
                     {selections.experienceLevel === level.id && (
-                      <div className="h-3 w-3 rounded-full bg-primary" aria-hidden="true" />
+                      <div className="h-3 w-3 rounded-full gradient-primary" aria-hidden="true" />
                     )}
                   </div>
                 </CardContent>
