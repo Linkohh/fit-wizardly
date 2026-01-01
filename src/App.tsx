@@ -3,9 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { useThemeStore } from "@/stores/themeStore";
+import { PageTransition } from "@/components/ui/page-transition";
 import Index from "./pages/Index";
 import WizardPage from "./pages/Wizard";
 import PlanPage from "./pages/Plan";
@@ -39,20 +40,30 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function AnimatedRoutes() {
+  const location = useLocation();
+  
+  return (
+    <PageTransition key={location.pathname}>
+      <Routes location={location}>
+        <Route path="/" element={<Index />} />
+        <Route path="/wizard" element={<WizardPage />} />
+        <Route path="/plan" element={<PlanPage />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </PageTransition>
+  );
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ThemeProvider>
         <Toaster />
         <Sonner />
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background transition-colors duration-300">
           <Header />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/wizard" element={<WizardPage />} />
-            <Route path="/plan" element={<PlanPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AnimatedRoutes />
         </div>
       </ThemeProvider>
     </TooltipProvider>
