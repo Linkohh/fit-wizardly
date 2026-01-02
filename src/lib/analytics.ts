@@ -63,7 +63,7 @@ export function trackStepExit(stepName: string, stepIndex: number, duration: num
     trackEvent('step_exit', { stepName, stepIndex, duration });
 }
 
-export function trackWizardComplete(metadata: EventMetadata) {
+export function trackWizardComplete(metadata: EventMetadata = {}) {
     trackEvent('wizard_complete', metadata);
 }
 

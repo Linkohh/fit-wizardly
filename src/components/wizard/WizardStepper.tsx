@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { WizardStep } from '@/stores/wizardStore';
@@ -8,16 +10,18 @@ interface WizardStepperProps {
   onStepClick?: (step: WizardStep) => void;
 }
 
-const STEPS: { id: WizardStep; label: string; shortLabel: string }[] = [
-  { id: 'goal', label: 'Training Goal', shortLabel: 'Goal' },
-  { id: 'equipment', label: 'Equipment', shortLabel: 'Equip' },
-  { id: 'anatomy', label: 'Target Muscles', shortLabel: 'Muscles' },
-  { id: 'constraints', label: 'Constraints', shortLabel: 'Limits' },
-  { id: 'schedule', label: 'Schedule', shortLabel: 'Days' },
-  { id: 'review', label: 'Review', shortLabel: 'Review' },
-];
-
 export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: WizardStepperProps) {
+  const { t } = useTranslation();
+
+  const steps = useMemo(() => [
+    { id: 'goal', label: t('wizard.steps.goal'), shortLabel: 'Goal' },
+    { id: 'equipment', label: t('wizard.steps.equipment'), shortLabel: 'Equip' },
+    { id: 'anatomy', label: t('wizard.steps.anatomy'), shortLabel: 'Muscles' },
+    { id: 'constraints', label: t('wizard.steps.constraints'), shortLabel: 'Limits' },
+    { id: 'schedule', label: t('wizard.steps.schedule'), shortLabel: 'Days' },
+    { id: 'review', label: t('wizard.steps.review'), shortLabel: 'Review' },
+  ] as const, [t]);
+
   return (
     <nav
       className="w-full py-4 px-2"
@@ -25,7 +29,7 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
       aria-label="Wizard progress"
     >
       <ol className="flex items-center justify-between gap-2">
-        {STEPS.map((step, index) => {
+        {steps.map((step, index) => {
           const isComplete = index < currentStepIndex;
           const isCurrent = step.id === currentStep;
           const isClickable = index <= currentStepIndex && onStepClick;

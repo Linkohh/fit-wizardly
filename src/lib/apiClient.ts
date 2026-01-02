@@ -6,7 +6,7 @@ import type { Plan } from '@/types/fitness';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 // Feature flag for API usage
-const USE_API = import.meta.env.VITE_USE_API === 'true';
+const USE_API = import.meta.env.VITE_USE_API === 'true' || import.meta.env.DEV;
 
 interface ApiResponse<T> {
     data?: T;

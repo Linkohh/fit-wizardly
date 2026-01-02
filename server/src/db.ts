@@ -1,126 +1,90 @@
-import Database from 'better-sqlite3';
+import { Low } from 'lowdb';
+import { JSONFile } from 'lowdb/node';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Initialize database
-const db = new Database(path.join(__dirname, '../../data/fitwizard.db'));
-
-// Enable foreign keys
-db.pragma('journal_mode = WAL');
-
-// Create tables
-db.exec(`
-  CREATE TABLE IF NOT EXISTS plans (
-    id TEXT PRIMARY KEY,
-    user_id TEXT,
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-    selections TEXT NOT NULL,
-    split_type TEXT NOT NULL,
-    workout_days TEXT NOT NULL,
-    weekly_volume TEXT NOT NULL,
-    rir_progression TEXT NOT NULL,
-    notes TEXT NOT NULL,
-    schema_version INTEGER DEFAULT 1
-  );
-
-  CREATE INDEX IF NOT EXISTS idx_plans_user_id ON plans(user_id);
-  CREATE INDEX IF NOT EXISTS idx_plans_created_at ON plans(created_at);
-`);
-
-// Plan CRUD operations
+// Define database schema
 export interface DbPlan {
-    id: string;
-    user_id: string | null;
-    created_at: string;
-    updated_at: string;
-    selections: string;
-    split_type: string;
-    workout_days: string;
-    weekly_volume: string;
-    rir_progression: string;
-    notes: string;
-    schema_version: number;
+  id: string;
+  user_id: string | null;
+  created_at: string;
+  updated_at: string;
+  selections: string;
+  split_type: string;
+  workout_days: string;
+  weekly_volume: string;
+  rir_progression: string;
+  notes: string;
+  schema_version: number;
 }
 
-export function createPlan(plan: Omit<DbPlan, 'updated_at'>): DbPlan {
-    const now = new Date().toISOString();
-    const stmt = db.prepare(`
-    INSERT INTO plans (id, user_id, created_at, updated_at, selections, split_type, workout_days, weekly_volume, rir_progression, notes, schema_version)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
+interface DbSchema {
+  plans: DbPlan[];
+}
 
-    stmt.run(
-        plan.id,
-        plan.user_id,
-        plan.created_at,
-        now,
-        plan.selections,
-        plan.split_type,
-        plan.workout_days,
-        plan.weekly_volume,
-        plan.rir_progression,
-        plan.notes,
-        plan.schema_version
-    );
+// Initialize database
+const defaultData: DbSchema = { plans: [] };
+const dbPath = path.join(__dirname, '../data/db.json');
+const adapter = new JSONFile<DbSchema>(dbPath);
+const db = new Low<DbSchema>(adapter, defaultData);
 
-    return { ...plan, updated_at: now };
+// Read database on startup
+await db.read();
+
+// Helper to save after mutations
+async function save() {
+  await db.write();
+}
+
+// Plan CRUD operations
+export async function createPlan(plan: Omit<DbPlan, 'updated_at'>): Promise<DbPlan> {
+  const now = new Date().toISOString();
+  const fullPlan: DbPlan = { ...plan, updated_at: now };
+
+  db.data.plans.push(fullPlan);
+  await save();
+
+  return fullPlan;
 }
 
 export function getPlanById(id: string): DbPlan | undefined {
-    const stmt = db.prepare('SELECT * FROM plans WHERE id = ?');
-    return stmt.get(id) as DbPlan | undefined;
+  return db.data.plans.find(p => p.id === id);
 }
 
 export function getPlansByUserId(userId: string): DbPlan[] {
-    const stmt = db.prepare('SELECT * FROM plans WHERE user_id = ? ORDER BY created_at DESC');
-    return stmt.all(userId) as DbPlan[];
+  return db.data.plans
+    .filter(p => p.user_id === userId)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }
 
 export function getAllPlans(limit = 50): DbPlan[] {
-    const stmt = db.prepare('SELECT * FROM plans ORDER BY created_at DESC LIMIT ?');
-    return stmt.all(limit) as DbPlan[];
+  return db.data.plans
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, limit);
 }
 
-export function updatePlan(id: string, updates: Partial<DbPlan>): DbPlan | undefined {
-    const existing = getPlanById(id);
-    if (!existing) return undefined;
+export async function updatePlan(id: string, updates: Partial<DbPlan>): Promise<DbPlan | undefined> {
+  const index = db.data.plans.findIndex(p => p.id === id);
+  if (index === -1) return undefined;
 
-    const now = new Date().toISOString();
-    const merged = { ...existing, ...updates, updated_at: now };
+  const now = new Date().toISOString();
+  db.data.plans[index] = { ...db.data.plans[index], ...updates, updated_at: now };
+  await save();
 
-    const stmt = db.prepare(`
-    UPDATE plans SET
-      selections = ?,
-      split_type = ?,
-      workout_days = ?,
-      weekly_volume = ?,
-      rir_progression = ?,
-      notes = ?,
-      updated_at = ?
-    WHERE id = ?
-  `);
-
-    stmt.run(
-        merged.selections,
-        merged.split_type,
-        merged.workout_days,
-        merged.weekly_volume,
-        merged.rir_progression,
-        merged.notes,
-        now,
-        id
-    );
-
-    return merged;
+  return db.data.plans[index];
 }
 
-export function deletePlan(id: string): boolean {
-    const stmt = db.prepare('DELETE FROM plans WHERE id = ?');
-    const result = stmt.run(id);
-    return result.changes > 0;
+export async function deletePlan(id: string): Promise<boolean> {
+  const initialLength = db.data.plans.length;
+  db.data.plans = db.data.plans.filter(p => p.id !== id);
+
+  if (db.data.plans.length < initialLength) {
+    await save();
+    return true;
+  }
+  return false;
 }
 
 export { db };

@@ -1,4 +1,5 @@
 import { ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +24,8 @@ export function WizardNavigation({
   onGenerate,
   validationMessage,
 }: WizardNavigationProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="w-full space-y-4">
       {validationMessage && (
@@ -30,7 +33,7 @@ export function WizardNavigation({
           {validationMessage}
         </p>
       )}
-      
+
       <div className="flex items-center justify-between gap-4">
         <Button
           variant="outline"
@@ -40,10 +43,10 @@ export function WizardNavigation({
             "touch-target flex items-center gap-2",
             !canGoBack && "invisible"
           )}
-          aria-label="Go to previous step"
+          aria-label={t('wizard.navigation.back')}
         >
           <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Back</span>
+          <span className="hidden sm:inline">{t('wizard.navigation.back')}</span>
         </Button>
 
         {isLastStep ? (
@@ -52,16 +55,16 @@ export function WizardNavigation({
             onClick={onGenerate}
             disabled={!canGoForward || isGenerating}
             className="touch-target flex items-center gap-2 px-8"
-            aria-label="Generate workout plan"
+            aria-label={t('wizard.navigation.generate')}
           >
             {isGenerating ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Generating...</span>
+                <span>{t('common.loading')}</span>
               </>
             ) : (
               <>
-                <span>Generate Plan</span>
+                <span>{t('wizard.navigation.generate')}</span>
                 <ArrowRight className="h-4 w-4" />
               </>
             )}
@@ -72,9 +75,9 @@ export function WizardNavigation({
             onClick={onNext}
             disabled={!canGoForward}
             className="touch-target flex items-center gap-2"
-            aria-label="Go to next step"
+            aria-label={t('wizard.navigation.next')}
           >
-            <span className="hidden sm:inline">Next</span>
+            <span className="hidden sm:inline">{t('wizard.navigation.next')}</span>
             <ArrowRight className="h-4 w-4" />
           </Button>
         )}

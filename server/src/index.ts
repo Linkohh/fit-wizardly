@@ -18,7 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 // Request logging
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     req.headers['x-request-id'] = requestId;
     console.log(`[${requestId}] ${req.method} ${req.path}`);
@@ -26,7 +26,7 @@ app.use((req, res, next) => {
 });
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -35,7 +35,7 @@ app.get('/health', (req, res) => {
 // ============================================================================
 
 // Create plan
-app.post('/plans', (req, res) => {
+app.post('/plans', async (req, res) => {
     try {
         const { id, selections, splitType, workoutDays, weeklyVolume, rirProgression, notes, userId } = req.body;
 
@@ -56,7 +56,7 @@ app.post('/plans', (req, res) => {
             schema_version: 1,
         };
 
-        const created = createPlan(dbPlan);
+        const created = await createPlan(dbPlan);
         res.status(201).json(parsePlan(created));
     } catch (error) {
         console.error('Error creating plan:', error);
@@ -91,7 +91,7 @@ app.get('/plans', (req, res) => {
 });
 
 // Update plan
-app.patch('/plans/:id', (req, res) => {
+app.patch('/plans/:id', async (req, res) => {
     try {
         const { workoutDays, notes } = req.body;
         const updates: Partial<DbPlan> = {};
@@ -99,7 +99,7 @@ app.patch('/plans/:id', (req, res) => {
         if (workoutDays) updates.workout_days = JSON.stringify(workoutDays);
         if (notes) updates.notes = JSON.stringify(notes);
 
-        const updated = updatePlan(req.params.id, updates);
+        const updated = await updatePlan(req.params.id, updates);
         if (!updated) {
             return res.status(404).json({ error: 'Plan not found' });
         }
@@ -111,9 +111,9 @@ app.patch('/plans/:id', (req, res) => {
 });
 
 // Delete plan
-app.delete('/plans/:id', (req, res) => {
+app.delete('/plans/:id', async (req, res) => {
     try {
-        const deleted = deletePlan(req.params.id);
+        const deleted = await deletePlan(req.params.id);
         if (!deleted) {
             return res.status(404).json({ error: 'Plan not found' });
         }

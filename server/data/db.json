@@ -1,0 +1,17 @@
+{
+  "plans": [
+    {
+      "id": "plan_1767376380360_7ip6uprc1",
+      "user_id": null,
+      "created_at": "2026-01-02T17:53:00.412Z",
+      "selections": "{\"goal\":\"hypertrophy\",\"experienceLevel\":\"intermediate\",\"equipment\":[\"bodyweight\"],\"targetMuscles\":[\"chest\"],\"constraints\":[\"shoulder_injury\"],\"daysPerWeek\":3,\"sessionDuration\":45}",
+      "split_type": "full_body",
+      "workout_days": "[{\"dayIndex\":0,\"name\":\"Full Body A\",\"focusTags\":[\"full_body\"],\"exercises\":[{\"exercise\":{\"id\":\"pushup\",\"name\":\"Push-Up\",\"primaryMuscles\":[\"chest\"],\"secondaryMuscles\":[\"front_deltoid\",\"triceps\",\"abs\"],\"equipment\":[\"bodyweight\"],\"patterns\":[\"horizontal_push\"],\"contraindications\":[\"wrist_injury\"],\"cues\":[\"Body in straight line\",\"Elbows at 45°\",\"Full range of motion\"]},\"sets\":4,\"reps\":\"8-12\",\"rir\":2,\"restSeconds\":90,\"rationale\":\"Compound movement targeting chest. Prioritized for volume efficiency. Equipment: bodyweight.\"}],\"estimatedDuration\":12},{\"dayIndex\":1,\"name\":\"Full Body B\",\"focusTags\":[\"full_body\"],\"exercises\":[{\"exercise\":{\"id\":\"pushup\",\"name\":\"Push-Up\",\"primaryMuscles\":[\"chest\"],\"secondaryMuscles\":[\"front_deltoid\",\"triceps\",\"abs\"],\"equipment\":[\"bodyweight\"],\"patterns\":[\"horizontal_push\"],\"contraindications\":[\"wrist_injury\"],\"cues\":[\"Body in straight line\",\"Elbows at 45°\",\"Full range of motion\"]},\"sets\":4,\"reps\":\"8-12\",\"rir\":2,\"restSeconds\":90,\"rationale\":\"Compound movement targeting chest. Prioritized for volume efficiency. Equipment: bodyweight.\"}],\"estimatedDuration\":12},{\"dayIndex\":2,\"name\":\"Full Body C\",\"focusTags\":[\"full_body\"],\"exercises\":[{\"exercise\":{\"id\":\"pushup\",\"name\":\"Push-Up\",\"primaryMuscles\":[\"chest\"],\"secondaryMuscles\":[\"front_deltoid\",\"triceps\",\"abs\"],\"equipment\":[\"bodyweight\"],\"patterns\":[\"horizontal_push\"],\"contraindications\":[\"wrist_injury\"],\"cues\":[\"Body in straight line\",\"Elbows at 45°\",\"Full range of motion\"]},\"sets\":4,\"reps\":\"8-12\",\"rir\":2,\"restSeconds\":90,\"rationale\":\"Compound movement targeting chest. Prioritized for volume efficiency. Equipment: bodyweight.\"}],\"estimatedDuration\":12}]",
+      "weekly_volume": "[{\"muscleGroup\":\"chest\",\"sets\":12,\"isWithinCap\":true}]",
+      "rir_progression": "[{\"week\":1,\"targetRIR\":3,\"isDeload\":false},{\"week\":2,\"targetRIR\":2,\"isDeload\":false},{\"week\":3,\"targetRIR\":1,\"isDeload\":false},{\"week\":4,\"targetRIR\":4,\"isDeload\":true}]",
+      "notes": "[\"Split: FULL BODY\",\"Goal: Hypertrophy\",\"Experience: Intermediate\",\"Days per week: 3\",\"Constraints applied: shoulder_injury\"]",
+      "schema_version": 1,
+      "updated_at": "2026-01-02T17:53:00.413Z"
+    }
+  ]
+}
