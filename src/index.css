@@ -6,151 +6,81 @@
 
 @layer base {
   :root {
-    /* Core palette - professional purple/pink theme */
-    --background: 270 20% 98%;
-    --foreground: 270 25% 10%;
+    /* Cosmic Theme - Light Mode (Clean/Bright) */
+    --background: 260 30% 98%;
+    --foreground: 270 50% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 270 25% 10%;
+    --card-foreground: 270 50% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 270 25% 10%;
+    --popover-foreground: 270 50% 10%;
 
-    /* Primary - vibrant purple #8B5CF6 */
-    --primary: 262 83% 66%;
+    /* Primary: Electric Purple */
+    --primary: 270 80% 60%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - hot pink #EC4899 */
-    --secondary: 330 81% 60%;
+    /* Secondary: Hot Pink */
+    --secondary: 330 85% 60%;
     --secondary-foreground: 0 0% 100%;
 
-    /* Muted - subtle grays with purple tint */
-    --muted: 270 15% 95%;
-    --muted-foreground: 270 16% 46%;
+    /* Accent: Electric Cyan */
+    --accent: 180 70% 45%;
+    --accent-foreground: 0 0% 100%;
 
-    /* Accent - soft purple/lavender #C084FC */
-    --accent: 270 91% 75%;
-    --accent-foreground: 270 25% 10%;
+    --muted: 270 20% 96%;
+    --muted-foreground: 270 20% 40%;
 
-    /* Success - motivational rose #F472B6 */
-    --success: 330 86% 70%;
-    --success-foreground: 0 0% 100%;
-
-    /* Warning - attention yellow */
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 0%;
-
-    /* Destructive - alert red */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Muscle highlight - purple glow */
-    --muscle-highlight: 262 83% 66%;
-    --muscle-hover: 270 91% 75%;
-    --muscle-default: 270 15% 85%;
+    --border: 270 20% 90%;
+    --input: 270 20% 90%;
+    --ring: 270 80% 60%;
 
-    --border: 270 32% 91%;
-    --input: 270 32% 91%;
-    --ring: 262 83% 66%;
-
-    --radius: 0.75rem;
-
-    /* Sidebar */
-    --sidebar-background: 270 20% 98%;
-    --sidebar-foreground: 270 25% 15%;
-    --sidebar-primary: 262 83% 66%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 270 15% 93%;
-    --sidebar-accent-foreground: 270 25% 15%;
-    --sidebar-border: 270 32% 91%;
-    --sidebar-ring: 262 83% 66%;
-
-    /* Wizard stepper - gradient animation */
-    --stepper-active: 262 83% 66%;
-    --stepper-complete: 330 86% 70%;
-    --stepper-inactive: 270 15% 85%;
-
-    /* Gradients - Purple to Pink */
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 66%), hsl(330 81% 60%));
-    --gradient-hero: linear-gradient(135deg, hsl(263 70% 15%) 0%, hsl(270 50% 25%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(270 91% 75%), hsl(330 86% 70%));
-    --gradient-subtle: linear-gradient(135deg, hsl(262 83% 66% / 0.1), hsl(330 81% 60% / 0.1));
-
-    /* Shadows with purple glow */
-    --shadow-sm: 0 1px 2px 0 hsl(270 25% 10% / 0.05);
-    --shadow-md: 0 4px 6px -1px hsl(270 25% 10% / 0.1), 0 2px 4px -2px hsl(270 25% 10% / 0.1);
-    --shadow-lg: 0 10px 15px -3px hsl(270 25% 10% / 0.1), 0 4px 6px -4px hsl(270 25% 10% / 0.1);
-    --shadow-glow: 0 0 20px hsl(262 83% 66% / 0.4);
-    --shadow-glow-pink: 0 0 20px hsl(330 81% 60% / 0.3);
+    --radius: 1rem;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(270 80% 60%), hsl(330 85% 60%));
+    --gradient-hero: linear-gradient(135deg, hsl(270 80% 60% / 0.1), hsl(330 85% 60% / 0.1));
   }
 
   .dark {
-    --background: 263 30% 8%;
-    --foreground: 270 20% 98%;
+    /* Cosmic Theme - Dark Mode (Deep/Vibrant) */
+    --background: 270 50% 8%; /* Deep Purple Black */
+    --foreground: 0 0% 100%;
 
-    --card: 263 30% 12%;
-    --card-foreground: 270 20% 98%;
+    --card: 270 40% 12%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 263 30% 12%;
-    --popover-foreground: 270 20% 98%;
+    --popover: 270 40% 12%;
+    --popover-foreground: 0 0% 100%;
 
-    /* Primary - vibrant purple */
-    --primary: 262 83% 70%;
+    /* Primary: Neon Purple */
+    --primary: 270 90% 65%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary - hot pink */
-    --secondary: 330 81% 65%;
+    /* Secondary: Neon Pink */
+    --secondary: 330 90% 65%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 263 25% 18%;
-    --muted-foreground: 270 20% 65%;
+    /* Accent: Neon Cyan */
+    --accent: 180 80% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    /* Accent - lavender */
-    --accent: 270 91% 78%;
-    --accent-foreground: 263 30% 10%;
-
-    /* Success - rose */
-    --success: 330 86% 75%;
-    --success-foreground: 0 0% 100%;
-
-    --warning: 38 92% 55%;
-    --warning-foreground: 0 0% 0%;
+    --muted: 270 30% 20%;
+    --muted-foreground: 270 20% 70%;
 
     --destructive: 0 62% 50%;
-    --destructive-foreground: 270 20% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    /* Muscle highlight - purple glow */
-    --muscle-highlight: 262 83% 70%;
-    --muscle-hover: 270 91% 78%;
-    --muscle-default: 263 25% 30%;
-
-    --border: 263 25% 20%;
-    --input: 263 25% 20%;
-    --ring: 262 83% 70%;
-
-    --sidebar-background: 263 30% 10%;
-    --sidebar-foreground: 270 20% 98%;
-    --sidebar-primary: 262 83% 70%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 263 25% 18%;
-    --sidebar-accent-foreground: 270 20% 98%;
-    --sidebar-border: 263 25% 20%;
-    --sidebar-ring: 262 83% 70%;
-
-    --stepper-active: 262 83% 70%;
-    --stepper-complete: 330 86% 75%;
-    --stepper-inactive: 263 25% 30%;
-
-    --gradient-primary: linear-gradient(135deg, hsl(262 83% 70%), hsl(330 81% 65%));
-    --gradient-hero: linear-gradient(135deg, hsl(263 30% 5%) 0%, hsl(270 40% 15%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(270 91% 78%), hsl(330 86% 75%));
-    --gradient-subtle: linear-gradient(135deg, hsl(262 83% 70% / 0.15), hsl(330 81% 65% / 0.15));
-
-    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
-    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.3);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.3);
-    --shadow-glow: 0 0 20px hsl(262 83% 70% / 0.5);
-    --shadow-glow-pink: 0 0 20px hsl(330 81% 65% / 0.4);
+    --border: 270 30% 25%;
+    --input: 270 30% 25%;
+    --ring: 270 90% 65%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(270 90% 65%), hsl(330 90% 65%));
+    --gradient-hero: linear-gradient(to bottom right, #0F0518, #1A0B2E);
   }
 }
 

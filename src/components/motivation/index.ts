@@ -6,3 +6,5 @@ export { ContextualTip } from './ContextualTip';
 export { GoalVisualization } from './GoalVisualization';
 export { BadgeUnlockModal } from './BadgeUnlockModal';
 export { TrainerDashboard, TrainerLevelBadge } from './TrainerDashboard';
+export { DailyQuote } from './DailyQuote';
+export { WelcomeHero } from './WelcomeHero';

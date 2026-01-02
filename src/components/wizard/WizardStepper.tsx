@@ -19,9 +19,9 @@ const STEPS: { id: WizardStep; label: string; shortLabel: string }[] = [
 
 export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: WizardStepperProps) {
   return (
-    <nav 
-      className="w-full py-4 px-2" 
-      role="navigation" 
+    <nav
+      className="w-full py-4 px-2"
+      role="navigation"
       aria-label="Wizard progress"
     >
       <ol className="flex items-center justify-between gap-2">
@@ -31,9 +31,9 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
           const isClickable = index <= currentStepIndex && onStepClick;
 
           return (
-            <li 
+            <li
               key={step.id}
-              className="flex-1 flex flex-col items-center"
+              className="relative flex-1 flex flex-col items-center min-w-0"
             >
               <button
                 onClick={() => isClickable && onStepClick?.(step.id)}
@@ -84,17 +84,6 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
                   {step.shortLabel}
                 </span>
               </button>
-
-              {/* Connector line */}
-              {index < STEPS.length - 1 && (
-                <div 
-                  className={cn(
-                    "hidden lg:block absolute top-5 left-[calc(50%+24px)] w-[calc(100%-48px)] h-0.5",
-                    isComplete ? "bg-stepper-complete" : "bg-stepper-inactive"
-                  )}
-                  aria-hidden="true"
-                />
-              )}
             </li>
           );
         })}
