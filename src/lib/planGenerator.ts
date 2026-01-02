@@ -92,8 +92,8 @@ function filterExercises(
   constraints: Constraint[]
 ): Exercise[] {
   return exercises.filter(exercise => {
-    // Must have at least one required equipment
-    const hasEquipment = exercise.equipment.some(eq => equipment.includes(eq));
+    // Must have all required equipment
+    const hasEquipment = exercise.equipment.every(eq => equipment.includes(eq));
     if (!hasEquipment) return false;
 
     // Must not have any contraindications that match constraints
