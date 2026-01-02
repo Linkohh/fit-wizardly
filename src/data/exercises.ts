@@ -250,7 +250,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     secondaryMuscles: ['lower_back', 'abs'],
     equipment: ['kettlebells'],
     patterns: ['hinge'],
-    contraindications: ['back_injury'],
+    contraindications: ['back_injury', 'no_impact'],
     cues: ['Hinge not squat', 'Snap hips forward', 'Arms are pendulum'],
   },
   {
@@ -282,7 +282,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     secondaryMuscles: ['hamstrings'],
     equipment: ['bodyweight', 'dumbbells'],
     patterns: ['lunge'],
-    contraindications: ['knee_injury'],
+    contraindications: ['knee_injury', 'no_impact'],
     cues: ['Long stride', 'Front knee over ankle', 'Push through front heel'],
   },
   {
@@ -312,7 +312,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     secondaryMuscles: [],
     equipment: ['bench', 'dumbbells', 'bodyweight'],
     patterns: ['lunge'],
-    contraindications: ['knee_injury'],
+    contraindications: ['knee_injury', 'no_impact'],
     cues: ['Full foot on box', 'Push through working leg only', 'Control down'],
   },
 
