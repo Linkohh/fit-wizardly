@@ -77,13 +77,27 @@ const QUOTES = [
 ];
 
 export function DailyQuote({ className }: { className?: string }) {
-    const [quote, setQuote] = useState("");
+    const [quoteIndex, setQuoteIndex] = useState(0);
+    const [isTransitioning, setIsTransitioning] = useState(false);
 
     useEffect(() => {
-        // Deterministic random quote based on date so it persists for the day
+        // Start with a deterministic quote based on date
         const today = new Date();
-        const index = (today.getDate() + today.getMonth()) % QUOTES.length;
-        setQuote(QUOTES[index]);
+        const startIndex = (today.getDate() + today.getMonth()) % QUOTES.length;
+        setQuoteIndex(startIndex);
+    }, []);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setIsTransitioning(true);
+            
+            setTimeout(() => {
+                setQuoteIndex((prev) => (prev + 1) % QUOTES.length);
+                setIsTransitioning(false);
+            }, 500);
+        }, 12000);
+
+        return () => clearInterval(interval);
     }, []);
 
     return (
@@ -96,8 +110,13 @@ export function DailyQuote({ className }: { className?: string }) {
                 <div className="mb-4 p-2 rounded-full bg-primary/10 text-primary">
                     <Sparkles className="w-5 h-5 animate-pulse" />
                 </div>
-                <p className="text-xl md:text-2xl font-medium italic text-foreground/90 leading-relaxed max-w-2xl">
-                    "{quote}"
+                <p 
+                    className={cn(
+                        "text-xl md:text-2xl font-medium italic text-foreground/90 leading-relaxed max-w-2xl transition-all duration-500",
+                        isTransitioning ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
+                    )}
+                >
+                    "{QUOTES[quoteIndex]}"
                 </p>
                 <div className="mt-4 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary" />
                 <p className="mt-2 text-sm text-muted-foreground font-medium uppercase tracking-wider">
