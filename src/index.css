@@ -39,7 +39,7 @@
     --ring: 270 80% 60%;
 
     --radius: 1rem;
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(270 80% 60%), hsl(330 85% 60%));
     --gradient-hero: linear-gradient(135deg, hsl(270 80% 60% / 0.1), hsl(330 85% 60% / 0.1));
@@ -47,7 +47,8 @@
 
   .dark {
     /* Cosmic Theme - Dark Mode (Deep/Vibrant) */
-    --background: 270 50% 8%; /* Deep Purple Black */
+    --background: 270 50% 8%;
+    /* Deep Purple Black */
     --foreground: 0 0% 100%;
 
     --card: 270 40% 12%;
@@ -77,7 +78,7 @@
     --border: 270 30% 25%;
     --input: 270 30% 25%;
     --ring: 270 90% 65%;
-    
+
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(270 90% 65%), hsl(330 90% 65%));
     --gradient-hero: linear-gradient(to bottom right, #0F0518, #1A0B2E);
@@ -109,11 +110,11 @@
   .gradient-primary {
     background: var(--gradient-primary);
   }
-  
+
   .gradient-hero {
     background: var(--gradient-hero);
   }
-  
+
   .gradient-accent {
     background: var(--gradient-accent);
   }
@@ -121,7 +122,7 @@
   .gradient-subtle {
     background: var(--gradient-subtle);
   }
-  
+
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
@@ -146,13 +147,13 @@
     filter: drop-shadow(0 0 8px hsl(var(--muscle-highlight) / 0.6));
     transition: all 0.2s ease-out;
   }
-  
+
   .muscle-hover {
     fill: hsl(var(--muscle-hover));
     cursor: pointer;
     filter: drop-shadow(0 0 4px hsl(var(--muscle-hover) / 0.4));
   }
-  
+
   .muscle-default {
     fill: hsl(var(--muscle-default));
     stroke: hsl(var(--border));
@@ -166,7 +167,7 @@
     backdrop-filter: blur(16px) saturate(180%);
     -webkit-backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid hsl(var(--border) / 0.3);
-    box-shadow: 
+    box-shadow:
       0 4px 6px -1px hsl(var(--primary) / 0.08),
       0 2px 4px -2px hsl(var(--secondary) / 0.06),
       inset 0 1px 0 hsl(var(--primary-foreground) / 0.1);
@@ -175,7 +176,7 @@
   .dark .glass-card {
     background: hsl(var(--card) / 0.6);
     border: 1px solid hsl(var(--primary) / 0.15);
-    box-shadow: 
+    box-shadow:
       0 4px 6px -1px hsl(0 0% 0% / 0.3),
       0 2px 4px -2px hsl(0 0% 0% / 0.2),
       inset 0 1px 0 hsl(var(--primary) / 0.1);
@@ -211,7 +212,7 @@
 
   .card-interactive:hover {
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 
+    box-shadow:
       0 20px 25px -5px hsl(var(--primary) / 0.15),
       0 8px 10px -6px hsl(var(--secondary) / 0.1);
   }
@@ -219,44 +220,42 @@
   /* Neumorphism button styling */
   .neumorphic {
     background: hsl(var(--background));
-    box-shadow: 
+    box-shadow:
       6px 6px 12px hsl(var(--primary) / 0.08),
       -6px -6px 12px hsl(var(--primary-foreground) / 0.5);
     transition: all 0.2s ease;
   }
 
   .neumorphic:hover {
-    box-shadow: 
+    box-shadow:
       8px 8px 16px hsl(var(--primary) / 0.12),
       -8px -8px 16px hsl(var(--primary-foreground) / 0.6);
   }
 
   .neumorphic:active {
-    box-shadow: 
+    box-shadow:
       inset 4px 4px 8px hsl(var(--primary) / 0.1),
       inset -4px -4px 8px hsl(var(--primary-foreground) / 0.4);
   }
 
   .dark .neumorphic {
-    box-shadow: 
+    box-shadow:
       6px 6px 12px hsl(0 0% 0% / 0.4),
       -6px -6px 12px hsl(var(--primary) / 0.1);
   }
 
   .dark .neumorphic:hover {
-    box-shadow: 
+    box-shadow:
       8px 8px 16px hsl(0 0% 0% / 0.5),
       -8px -8px 16px hsl(var(--primary) / 0.15);
   }
 
   /* Purple shimmer loading effect */
   .shimmer-purple {
-    background: linear-gradient(
-      90deg,
-      hsl(var(--muted)) 0%,
-      hsl(var(--primary) / 0.3) 50%,
-      hsl(var(--muted)) 100%
-    );
+    background: linear-gradient(90deg,
+        hsl(var(--muted)) 0%,
+        hsl(var(--primary) / 0.3) 50%,
+        hsl(var(--muted)) 100%);
     background-size: 200% 100%;
   }
 
@@ -302,12 +301,10 @@
 
   /* Gradient text with animation */
   .gradient-text-animated {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--primary)) 0%,
-      hsl(var(--secondary)) 50%,
-      hsl(var(--primary)) 100%
-    );
+    background: linear-gradient(135deg,
+        hsl(var(--primary)) 0%,
+        hsl(var(--secondary)) 50%,
+        hsl(var(--primary)) 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -318,9 +315,12 @@
 
 /* Animation keyframes for gradient effects */
 @keyframes gradient-shift {
-  0%, 100% {
+
+  0%,
+  100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
@@ -331,6 +331,7 @@
     transform: translateY(-10px) rotate(0deg);
     opacity: 1;
   }
+
   100% {
     transform: translateY(100vh) rotate(720deg);
     opacity: 0;
@@ -341,15 +342,19 @@
   0% {
     stroke-dashoffset: 166;
   }
+
   100% {
     stroke-dashoffset: 0;
   }
 }
 
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 5px hsl(262 83% 66% / 0.3), 0 0 10px hsl(330 81% 60% / 0.2);
   }
+
   50% {
     box-shadow: 0 0 20px hsl(262 83% 66% / 0.5), 0 0 40px hsl(330 81% 60% / 0.3);
   }
@@ -362,4 +367,40 @@
 
 .animate-confetti-fall {
   animation: confetti-fall 3s ease-out forwards;
+}
+
+/* Organic "Breathing" animation for bio-feedback */
+@keyframes bio-breathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+
+  50% {
+    transform: scale(1.012);
+    filter: brightness(1.04);
+  }
+}
+
+.animate-bio-breathe {
+  animation: bio-breathe 6s ease-in-out infinite;
+}
+
+/* Muscle glow pulse */
+@keyframes muscle-glow {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(168, 85, 247, 0.4));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 12px rgba(168, 85, 247, 0.7));
+  }
+}
+
+.animate-muscle-glow {
+  animation: muscle-glow 2s ease-in-out infinite;
 }
