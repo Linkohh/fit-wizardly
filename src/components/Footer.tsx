@@ -1,0 +1,32 @@
+import { Link } from "react-router-dom";
+import { Heart } from "lucide-react";
+
+export function Footer() {
+    const year = new Date().getFullYear();
+
+    return (
+        <footer className="w-full border-t border-border bg-background/50 backdrop-blur py-6 mt-auto">
+            <div className="container flex flex-col md:flex-row items-center justify-between gap-4 px-4 text-sm text-muted-foreground">
+
+                <div className="flex items-center gap-1">
+                    <span>© {year} FitWizard. Built with</span>
+                    <Heart className="h-3 w-3 text-red-500 fill-red-500 animate-pulse" />
+                    <span>for fitness enthusiasts.</span>
+                </div>
+
+                <nav className="flex items-center gap-6">
+                    <Link to="/legal" className="hover:text-foreground transition-colors">
+                        Terms of Service
+                    </Link>
+                    <Link to="/legal" className="hover:text-foreground transition-colors">
+                        Privacy Policy
+                    </Link>
+                    <Link to="/legal" className="hover:text-foreground transition-colors">
+                        Medical Disclaimer
+                    </Link>
+                </nav>
+
+            </div>
+        </footer>
+    );
+}

@@ -52,19 +52,22 @@ function AnimatedRoutes() {
         <Route path="/" element={<Index />} />
         <Route path="/wizard" element={<WizardPage />} />
         <Route path="/plan" element={<PlanPage />} />
-        <Route
-          path="/clients"
-          element={
-            <TrainerGuard>
-              <ClientsPage />
-            </TrainerGuard>
-          }
+        <Route path="/clients" element={
+          <TrainerGuard>
+            <ClientsPage />
+          </TrainerGuard>
+        }
         />
+        <Route path="/legal" element={<LegalPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>
   );
 }
+
+import LegalPage from "./pages/Legal";
+import { Footer } from "@/components/Footer";
+import { ConsentModal } from "@/components/legal/ConsentModal";
 
 const App = () => (
   <ErrorBoundary>
@@ -73,9 +76,11 @@ const App = () => (
         <ThemeProvider>
           <Toaster />
           <Sonner />
-          <div className="min-h-screen bg-background transition-colors duration-300">
+          <div className="min-h-screen flex flex-col bg-background transition-colors duration-300">
             <Header />
+            <ConsentModal />
             <AnimatedRoutes />
+            <Footer />
           </div>
         </ThemeProvider>
       </TooltipProvider>
