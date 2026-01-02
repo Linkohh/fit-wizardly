@@ -78,7 +78,7 @@ const QUOTES = [
 
 export function DailyQuote({ className }: { className?: string }) {
     const [quoteIndex, setQuoteIndex] = useState(0);
-    const [isTransitioning, setIsTransitioning] = useState(false);
+    const [animationState, setAnimationState] = useState<'visible' | 'exiting' | 'entering'>('visible');
 
     useEffect(() => {
         // Start with a deterministic quote based on date
@@ -89,16 +89,34 @@ export function DailyQuote({ className }: { className?: string }) {
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setIsTransitioning(true);
+            // Start exit animation
+            setAnimationState('exiting');
             
             setTimeout(() => {
+                // Change quote and start enter animation
                 setQuoteIndex((prev) => (prev + 1) % QUOTES.length);
-                setIsTransitioning(false);
-            }, 500);
+                setAnimationState('entering');
+                
+                setTimeout(() => {
+                    setAnimationState('visible');
+                }, 600);
+            }, 600);
         }, 12000);
 
         return () => clearInterval(interval);
     }, []);
+
+    const getAnimationClasses = () => {
+        switch (animationState) {
+            case 'exiting':
+                return 'opacity-0 scale-95 blur-sm -translate-y-4 rotate-1';
+            case 'entering':
+                return 'opacity-0 scale-105 blur-sm translate-y-4 -rotate-1';
+            case 'visible':
+            default:
+                return 'opacity-100 scale-100 blur-0 translate-y-0 rotate-0';
+        }
+    };
 
     return (
         <div className={cn("relative p-6 mt-8 rounded-xl glass-card overflow-hidden group hover:shadow-glow transition-all duration-300", className)}>
@@ -108,17 +126,23 @@ export function DailyQuote({ className }: { className?: string }) {
 
             <div className="relative z-10 flex flex-col items-center text-center">
                 <div className="mb-4 p-2 rounded-full bg-primary/10 text-primary">
-                    <Sparkles className="w-5 h-5 animate-pulse" />
+                    <Sparkles className={cn(
+                        "w-5 h-5 transition-all duration-300",
+                        animationState !== 'visible' ? "animate-spin" : "animate-pulse"
+                    )} />
                 </div>
                 <p 
                     className={cn(
-                        "text-xl md:text-2xl font-medium italic text-foreground/90 leading-relaxed max-w-2xl transition-all duration-500",
-                        isTransitioning ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
+                        "text-xl md:text-2xl font-medium italic text-foreground/90 leading-relaxed max-w-2xl transition-all duration-500 ease-out transform",
+                        getAnimationClasses()
                     )}
                 >
                     "{QUOTES[quoteIndex]}"
                 </p>
-                <div className="mt-4 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary" />
+                <div className={cn(
+                    "mt-4 h-1 rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-500",
+                    animationState !== 'visible' ? "w-0" : "w-12"
+                )} />
                 <p className="mt-2 text-sm text-muted-foreground font-medium uppercase tracking-wider">
                     Daily Motivation
                 </p>
