@@ -11,6 +11,8 @@ import Index from "./pages/Index";
 import WizardPage from "./pages/Wizard";
 import PlanPage from "./pages/Plan";
 import NotFound from "./pages/NotFound";
+import ClientsPage from "./pages/Clients";
+import { TrainerGuard } from "./components/TrainerGuard";
 
 const queryClient = new QueryClient();
 
@@ -42,13 +44,21 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 function AnimatedRoutes() {
   const location = useLocation();
-  
+
   return (
     <PageTransition key={location.pathname}>
       <Routes location={location}>
         <Route path="/" element={<Index />} />
         <Route path="/wizard" element={<WizardPage />} />
         <Route path="/plan" element={<PlanPage />} />
+        <Route
+          path="/clients"
+          element={
+            <TrainerGuard>
+              <ClientsPage />
+            </TrainerGuard>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </PageTransition>
