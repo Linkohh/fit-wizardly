@@ -227,9 +227,13 @@ export function generatePlan(selections: WizardSelections): Plan {
     const dayMuscles = getMusclesForDay(dayStructure.focusTags, targetMuscles, splitType);
     const usedExerciseIds = new Set<string>();
     const exercises: ExercisePrescription[] = [];
+    const setBudget = Math.max(1, Math.floor(sessionDuration / 3));
+    let totalSets = 0;
     
     // Allocate exercises per muscle
     for (const muscle of dayMuscles) {
+      if (totalSets >= setBudget) break;
+
       const cap = volumeCaps[muscle] || 10;
       const currentVolume = weeklyVolumeTracker[muscle] || 0;
       const remainingCap = cap - currentVolume;
@@ -238,8 +242,11 @@ export function generatePlan(selections: WizardSelections): Plan {
 
       const targetSetsForDay = Math.min(
         Math.ceil(cap / Math.max(1, Math.ceil(daysPerWeek / 2))),
-        remainingCap
+        remainingCap,
+        setBudget - totalSets
       );
+
+      if (targetSetsForDay <= 0) break;
 
       const { exercises: muscleExercises, setsAssigned } = selectExercisesForMuscle(
         muscle,
@@ -257,10 +264,10 @@ export function generatePlan(selections: WizardSelections): Plan {
 
       exercises.push(...muscleExercises);
       weeklyVolumeTracker[muscle] = (weeklyVolumeTracker[muscle] || 0) + setsAssigned;
+      totalSets += setsAssigned;
     }
 
     // Estimate duration (3 min per set average)
-    const totalSets = exercises.reduce((sum, e) => sum + e.sets, 0);
     const estimatedDuration = Math.round(totalSets * 3);
 
     return {
