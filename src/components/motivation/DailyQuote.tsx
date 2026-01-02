@@ -3,14 +3,73 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 const QUOTES = [
+    // Fitness & Physical Health
     "The only bad workout is the one that didn't happen.",
-    "Your body can stand almost anything. It's your mind that you have to convince.",
-    "Fitness is not about being better than someone else. It's about being better than you were yesterday.",
-    "Motivation is what gets you started. Habit is what keeps you going.",
-    "Don't stop when you're tired. Stop when you're done.",
-    "Discipline is doing what needs to be done, even if you don't want to do it.",
-    "Sweat is just fat crying.",
-    "The hard part isn't getting your body in shape. The hard part is getting your mind in shape.",
+    "Your body can stand almost anything. It's your mind that you have to convince. — Unknown",
+    "Take care of your body. It's the only place you have to live. — Jim Rohn",
+    "The body achieves what the mind believes. — Napoleon Hill",
+    "Strength does not come from physical capacity. It comes from an indomitable will. — Mahatma Gandhi",
+    "To keep the body in good health is a duty... otherwise we shall not be able to keep our mind strong and clear. — Buddha",
+    "Physical fitness is the first requisite of happiness. — Joseph Pilates",
+    "The groundwork for all happiness is good health. — Leigh Hunt",
+    "Movement is a medicine for creating change in a person's physical, emotional, and mental states. — Carol Welch",
+    
+    // Mental Health & Mindfulness
+    "Mental health is not a destination, but a process. It's about how you drive, not where you're going. — Noam Shpancer",
+    "You don't have to control your thoughts. You just have to stop letting them control you. — Dan Millman",
+    "Self-care is not self-indulgence, it is self-preservation. — Audre Lorde",
+    "Almost everything will work again if you unplug it for a few minutes, including you. — Anne Lamott",
+    "Feelings are just visitors, let them come and go. — Mooji",
+    "Be gentle with yourself, you're doing the best you can. — Unknown",
+    "Your mental health is a priority. Your happiness is essential. Your self-care is a necessity. — Unknown",
+    "Healing takes time, and asking for help is a courageous step. — Mariska Hargitay",
+    
+    // Holistic Wellness
+    "Wellness is the complete integration of body, mind, and spirit. — Greg Anderson",
+    "Health is a state of complete harmony of the body, mind, and spirit. — B.K.S. Iyengar",
+    "The greatest wealth is health. — Virgil",
+    "Nurturing yourself is not selfish — it's essential to your survival and your well-being. — Renee Peterson Trudeau",
+    "When you recover or discover something that nourishes your soul and brings joy, care enough about yourself to make room for it in your life. — Jean Shinoda Bolen",
+    "Balance is not something you find, it's something you create. — Jana Kingsford",
+    
+    // Self-Care & Self-Love
+    "You yourself, as much as anybody in the entire universe, deserve your love and affection. — Buddha",
+    "Rest and self-care are so important. When you take time to replenish your spirit, it allows you to serve others from the overflow. — Eleanor Brown",
+    "Caring for myself is not self-indulgence. It is self-preservation, and that is an act of political warfare. — Audre Lorde",
+    "Self-care means giving yourself permission to pause. — Cecilia Tran",
+    "Love yourself first and everything else falls into line. — Lucille Ball",
+    "Put yourself at the top of your to-do list every single day. — Unknown",
+    
+    // Celebrity & Influencer Quotes
+    "I really think a champion is defined not by their wins but by how they can recover when they fall. — Serena Williams",
+    "Success is liking yourself, liking what you do, and liking how you do it. — Maya Angelou",
+    "No matter how you feel, get up, dress up, show up, and never give up. — Unknown",
+    "The real workout starts when you want to stop. — Ronnie Coleman",
+    "Don't limit your challenges. Challenge your limits. — Jerry Dunn",
+    "If it doesn't challenge you, it doesn't change you. — Fred DeVito",
+    "Training gives us an outlet for suppressed energies created by stress and thus tones the spirit just as exercise conditions the body. — Arnold Schwarzenegger",
+    "I hated every minute of training, but I said, don't quit. Suffer now and live the rest of your life as a champion. — Muhammad Ali",
+    "Your health is an investment, not an expense. — Unknown",
+    "What seems impossible today will one day become your warm-up. — Unknown",
+    
+    // Dwayne 'The Rock' Johnson
+    "Success isn't overnight. It's when every day you get a little better than the day before. — Dwayne Johnson",
+    "Be humble. Be hungry. And always be the hardest worker in the room. — Dwayne Johnson",
+    
+    // Arnold Schwarzenegger
+    "The mind is the limit. As long as the mind can envision the fact that you can do something, you can do it. — Arnold Schwarzenegger",
+    
+    // Inspirational & Motivational
+    "You are allowed to be both a masterpiece and a work in progress simultaneously. — Sophia Bush",
+    "Happiness is not something ready-made. It comes from your own actions. — Dalai Lama",
+    "The only person you are destined to become is the person you decide to be. — Ralph Waldo Emerson",
+    "Start where you are. Use what you have. Do what you can. — Arthur Ashe",
+    "Every day is a new opportunity to change your life. — Unknown",
+    "Progress, not perfection. — Unknown",
+    "One day or day one. You decide. — Unknown",
+    "Your body hears everything your mind says. Stay positive. — Unknown",
+    "Breathe. It's just a bad day, not a bad life. — Unknown",
+    "Be the energy you want to attract. — Unknown",
 ];
 
 export function DailyQuote({ className }: { className?: string }) {
