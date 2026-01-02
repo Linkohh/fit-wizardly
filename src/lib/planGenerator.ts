@@ -176,6 +176,10 @@ function getMusclesForDay(
   if (focusTags.includes('pull')) {
     relevantMuscles = [...relevantMuscles, ...pullMuscles];
   }
+  const shouldIncludeCore = focusTags.some(tag => ['upper', 'lower', 'push', 'pull'].includes(tag));
+  if (shouldIncludeCore) {
+    relevantMuscles = [...relevantMuscles, ...coreMuscles];
+  }
   if (focusTags.includes('full_body')) {
     relevantMuscles = [...upperMuscles, ...lowerMuscles, ...coreMuscles];
   }
