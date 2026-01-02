@@ -1,7 +1,7 @@
-import type { 
-  WizardSelections, 
-  Plan, 
-  WorkoutDay, 
+import type {
+  WizardSelections,
+  Plan,
+  WorkoutDay,
   ExercisePrescription,
   Exercise,
   SplitType,
@@ -132,12 +132,26 @@ function selectExercisesForMuscle(
     const setsForExercise = Math.min(4, targetSets - setsAssigned);
     usedExerciseIds.add(exercise.id);
 
+    // Generate rationale explaining why this exercise was selected
+    const isCompound = !exercise.patterns.includes('isolation');
+    const muscleNames = exercise.primaryMuscles.map(m => m.replace(/_/g, ' ')).join(', ');
+    const equipmentList = exercise.equipment.map(e => e.replace(/_/g, ' ')).join(', ');
+
+    let rationale = '';
+    if (isCompound) {
+      rationale = `Compound movement targeting ${muscleNames}. Prioritized for volume efficiency.`;
+    } else {
+      rationale = `Isolation exercise for focused ${muscleNames} development.`;
+    }
+    rationale += ` Equipment: ${equipmentList}.`;
+
     prescriptions.push({
       exercise,
       sets: setsForExercise,
       reps: '8-12',
       rir: 2,
       restSeconds: 120,
+      rationale,
     });
 
     setsAssigned += setsForExercise;
@@ -190,14 +204,14 @@ function getMusclesForDay(
 
 // Main generator function - DETERMINISTIC
 export function generatePlan(selections: WizardSelections): Plan {
-  const { 
-    goal, 
-    experienceLevel, 
-    equipment, 
-    targetMuscles, 
-    constraints, 
-    daysPerWeek, 
-    sessionDuration 
+  const {
+    goal,
+    experienceLevel,
+    equipment,
+    targetMuscles,
+    constraints,
+    daysPerWeek,
+    sessionDuration
   } = selections;
 
   // Determine split type
@@ -229,7 +243,7 @@ export function generatePlan(selections: WizardSelections): Plan {
     const exercises: ExercisePrescription[] = [];
     const setBudget = Math.max(1, Math.floor(sessionDuration / 3));
     let totalSets = 0;
-    
+
     // Allocate exercises per muscle
     for (const muscle of dayMuscles) {
       if (totalSets >= setBudget) break;
@@ -237,7 +251,7 @@ export function generatePlan(selections: WizardSelections): Plan {
       const cap = volumeCaps[muscle] || 10;
       const currentVolume = weeklyVolumeTracker[muscle] || 0;
       const remainingCap = cap - currentVolume;
-      
+
       if (remainingCap <= 0) continue;
 
       const targetSetsForDay = Math.min(

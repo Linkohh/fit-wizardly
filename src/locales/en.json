@@ -1,0 +1,63 @@
+{
+    "app": {
+        "name": "FitWizard",
+        "tagline": "Your AI-Powered Workout Companion"
+    },
+    "nav": {
+        "home": "Home",
+        "wizard": "Wizard",
+        "plan": "My Plan",
+        "history": "History",
+        "clients": "Clients"
+    },
+    "wizard": {
+        "title": "Create Your Workout Plan",
+        "steps": {
+            "goal": "Training Goal",
+            "equipment": "Equipment",
+            "anatomy": "Target Muscles",
+            "constraints": "Constraints",
+            "schedule": "Schedule",
+            "review": "Review"
+        },
+        "navigation": {
+            "back": "Back",
+            "next": "Next",
+            "generate": "Generate Plan"
+        },
+        "progress": "{{percent}}% complete"
+    },
+    "plan": {
+        "title": "Your Workout Plan",
+        "export": "Export PDF",
+        "noplan": {
+            "title": "No Plan Generated Yet",
+            "description": "Create your personalized workout plan using the wizard.",
+            "cta": "Start Wizard"
+        },
+        "exercise": {
+            "sets": "{{count}} sets",
+            "reps": "{{range}} reps",
+            "rest": "{{seconds}}s rest",
+            "tips": "Tips",
+            "swap": "Swap"
+        }
+    },
+    "goals": {
+        "strength": "Strength",
+        "hypertrophy": "Muscle Growth",
+        "general": "General Fitness"
+    },
+    "experience": {
+        "beginner": "Beginner",
+        "intermediate": "Intermediate",
+        "advanced": "Advanced"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Something went wrong",
+        "save": "Save",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+    }
+}

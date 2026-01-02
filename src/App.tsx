@@ -7,6 +7,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { useThemeStore } from "@/stores/themeStore";
 import { PageTransition } from "@/components/ui/page-transition";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import WizardPage from "./pages/Wizard";
 import PlanPage from "./pages/Plan";
@@ -66,18 +67,20 @@ function AnimatedRoutes() {
 }
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <ThemeProvider>
-        <Toaster />
-        <Sonner />
-        <div className="min-h-screen bg-background transition-colors duration-300">
-          <Header />
-          <AnimatedRoutes />
-        </div>
-      </ThemeProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <ThemeProvider>
+          <Toaster />
+          <Sonner />
+          <div className="min-h-screen bg-background transition-colors duration-300">
+            <Header />
+            <AnimatedRoutes />
+          </div>
+        </ThemeProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

@@ -4,7 +4,7 @@ export type Goal = 'strength' | 'hypertrophy' | 'general';
 export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
 export type SplitType = 'full_body' | 'upper_lower' | 'push_pull_legs';
 
-export type Equipment = 
+export type Equipment =
   | 'barbell'
   | 'dumbbells'
   | 'kettlebells'
@@ -49,7 +49,7 @@ export type MovementPattern =
   | 'rotation'
   | 'isolation';
 
-export type Constraint = 
+export type Constraint =
   | 'no_overhead'
   | 'no_jumping'
   | 'no_heavy_spinal_load'
@@ -89,6 +89,7 @@ export interface ExercisePrescription {
   rir: number; // Reps in Reserve
   restSeconds: number;
   notes?: string;
+  rationale?: string; // Explains why this exercise was selected
 }
 
 export interface WorkoutDay {
