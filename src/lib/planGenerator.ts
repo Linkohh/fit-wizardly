@@ -78,10 +78,8 @@ function getWorkoutDayStructure(splitType: SplitType, daysPerWeek: number): { na
         { name: 'Pull', focusTags: ['pull', 'back', 'biceps'] },
         { name: 'Legs', focusTags: ['lower', 'quads', 'hinge', 'calves'] },
       ];
-      if (daysPerWeek === 6) {
-        return [...pplDays, ...pplDays.map(d => ({ ...d, name: `${d.name} 2` }))];
-      }
-      return pplDays.slice(0, daysPerWeek);
+      const extendedPplDays = [...pplDays, ...pplDays.map(d => ({ ...d, name: `${d.name} 2` }))];
+      return extendedPplDays.slice(0, daysPerWeek);
   }
 }
 
