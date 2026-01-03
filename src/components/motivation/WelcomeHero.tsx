@@ -5,7 +5,7 @@ import { FloatingElement } from "@/components/ui/page-transition";
 
 export function WelcomeHero() {
     return (
-        <section className="relative pt-24 pb-48 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#140821] via-[#1a0b2e] to-transparent">
+        <section className="relative pt-24 pb-28 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#140821] via-[#1a0b2e] to-transparent">
             {/* Background Glows - Reduced Intensity (10-15% reduction) */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] -z-10 opacity-40 animate-pulse-glow pointer-events-none" />
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[100px] -z-10 opacity-30 pointer-events-none" />

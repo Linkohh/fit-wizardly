@@ -24,21 +24,21 @@ export default function Index() {
       {/* Hero */}
       <WelcomeHero />
 
-      {/* BRIDGE: Premium Transition - Intense Horizon Glow */}
-      <section className="relative h-32 w-full -mt-[2px] z-30 pointer-events-none">
+      {/* BRIDGE: Premium Transition - Seamless Horizon Glow */}
+      <section className="relative h-20 w-full -mt-16 z-30 pointer-events-none">
         
-        {/* 1. Wide Atmospheric Purple Bloom - centered ellipse shape */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[120%] h-48 bg-[radial-gradient(ellipse_80%_100%_at_50%_50%,rgba(124,58,237,0.25)_0%,transparent_70%)]" />
+        {/* 1. Ultra-wide Atmospheric Purple Bloom - very soft edges */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[200%] h-40 bg-[radial-gradient(ellipse_50%_80%_at_50%_50%,rgba(124,58,237,0.15)_0%,transparent_100%)]" />
         
-        {/* 2. Magenta Glow Spread - ellipse for natural fade */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[100%] h-32 bg-[radial-gradient(ellipse_70%_100%_at_50%_50%,rgba(219,39,119,0.4)_0%,transparent_60%)]" />
+        {/* 2. Magenta Glow Spread - extremely soft fade */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[180%] h-28 bg-[radial-gradient(ellipse_45%_90%_at_50%_50%,rgba(219,39,119,0.25)_0%,transparent_100%)]" />
         
-        {/* 3. Intense Pink Core Glow - tighter ellipse */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[80%] h-16 bg-[radial-gradient(ellipse_60%_100%_at_50%_50%,rgba(236,72,153,0.6)_0%,transparent_50%)]" />
+        {/* 3. Intense Pink Core Glow - soft center */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[160%] h-16 bg-[radial-gradient(ellipse_40%_100%_at_50%_50%,rgba(236,72,153,0.4)_0%,transparent_100%)]" />
         
-        {/* 4. Bright White-Hot Center Line - fades at edges */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[70%] h-[3px] bg-[radial-gradient(ellipse_50%_100%_at_50%_50%,rgba(255,255,255,0.9)_0%,transparent_70%)]" />
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[50%] h-[2px] bg-[radial-gradient(ellipse_40%_100%_at_50%_50%,rgba(253,244,255,1)_0%,transparent_60%)]" />
+        {/* 4. Bright White-Hot Center Line - seamless fade to edges */}
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[140%] h-[2px] bg-[radial-gradient(ellipse_35%_100%_at_50%_50%,rgba(255,255,255,0.7)_0%,transparent_100%)]" />
+        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-[100%] h-[1px] bg-[radial-gradient(ellipse_30%_100%_at_50%_50%,rgba(253,244,255,0.9)_0%,transparent_100%)]" />
 
       </section>
 
