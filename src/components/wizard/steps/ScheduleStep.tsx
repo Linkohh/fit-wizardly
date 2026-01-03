@@ -1,5 +1,6 @@
 import { Calendar, Clock } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { useWizardStore } from '@/stores/wizardStore';
 import { cn } from '@/lib/utils';
@@ -24,6 +25,22 @@ export function ScheduleStep() {
         <p className="text-muted-foreground mt-1">How often and how long can you train?</p>
       </div>
 
+      {(selections.daysPerWeek !== 3 || selections.sessionDuration !== 60) && (
+        <div className="flex justify-start">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setDaysPerWeek(3);
+              setSessionDuration(60);
+            }}
+            className="touch-target border-primary/50 text-primary hover:bg-primary/10"
+          >
+            Reset to Recommended
+          </Button>
+        </div>
+      )}
+
       {/* Days per week */}
       <Card>
         <CardContent className="p-6 space-y-6">
@@ -37,7 +54,7 @@ export function ScheduleStep() {
             </div>
           </div>
 
-          <div 
+          <div
             className="flex justify-center gap-2"
             role="radiogroup"
             aria-label="Days per week"
@@ -84,7 +101,7 @@ export function ScheduleStep() {
           </div>
 
           <div className="space-y-4">
-            <div 
+            <div
               className="flex justify-center gap-2 flex-wrap"
               role="radiogroup"
               aria-label="Session duration"

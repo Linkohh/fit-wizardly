@@ -60,8 +60,29 @@ export type Constraint =
   | 'back_injury'
   | 'wrist_injury';
 
+// NASM OPT Model Types
+export type OptLevel = 1 | 2 | 3;
+
+export type OptPhase =
+  | 'stabilization_endurance'  // Phase 1
+  | 'strength_endurance'       // Phase 2
+  | 'muscular_development'     // Phase 3 (Hypertrophy)
+  | 'maximal_strength'         // Phase 4
+  | 'power';                   // Phase 5
+
+export interface Tempo {
+  eccentric: number;
+  isometric: number;
+  concentric: number;
+  finish?: number; // distinct pause or explosive finish
+}
+
+export type StabilityLevel = 'stable' | 'unstable';
+export type ExerciseType = 'strength' | 'plyometric' | 'cardio' | 'power';
+
 export interface WizardSelections {
   goal: Goal;
+  optPhase?: OptPhase; // New field for NASM logic
   experienceLevel: ExperienceLevel;
   equipment: Equipment[];
   targetMuscles: MuscleGroup[];
@@ -77,6 +98,11 @@ export interface Exercise {
   secondaryMuscles: MuscleGroup[];
   equipment: Equipment[];
   patterns: MovementPattern[];
+
+  // NASM Specifics
+  stabilityLevel?: StabilityLevel; // 'stable' vs 'unstable'
+  type?: ExerciseType;             // 'strength' vs 'plyometric' vs 'power'
+
   contraindications: Constraint[];
   cues: string[];
   videoUrl?: string;
@@ -87,7 +113,9 @@ export interface ExercisePrescription {
   sets: number;
   reps: string; // e.g., "8-12" or "5"
   rir: number; // Reps in Reserve
+  tempo?: string; // e.g. "4-2-1" or "Fast/Explosive"
   restSeconds: number;
+  supersetGroup?: number; // If set, exercises with same ID are done back-to-back
   notes?: string;
   rationale?: string; // Explains why this exercise was selected
 }

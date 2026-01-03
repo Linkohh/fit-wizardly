@@ -24,57 +24,65 @@ export default function Index() {
       {/* Hero */}
       <WelcomeHero />
 
-      <div className="container max-w-4xl mx-auto px-4 -mt-10 relative z-20">
-        <DailyQuote />
-      </div>
+      {/* Zone 2: Middle Content - Premium Dark, Visual Rest */}
+      {/* Zone 2: Middle Content - Premium Dark, Visual Rest */}
+      {/* Fix: Pull wrapper up significantly (-mt-24) to cover the "Dark Band" gap */}
+      <div className="bg-gradient-to-b from-[#0F0518] to-[#08020D] pb-24 pt-12 relative -mt-24 z-20">
+        {/* Quote sits comfortably inside the dark background */}
+        <div className="container max-w-4xl mx-auto px-4 mb-20">
+          <div className="rounded-2xl p-1 bg-gradient-to-b from-[#140821] to-[#0F0518] border border-primary/20 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.4)] ring-1 ring-white/5">
+            <DailyQuote />
+          </div>
+        </div>
 
-      {/* Stats Section - show if user has activity */}
-      {hasActivity && (
-        <section className="py-8 px-4 bg-muted/20">
-          <div className="container max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-6">
-              <StreakTracker />
-              <GoalVisualization />
+        {/* Stats Section */}
+        {hasActivity && (
+          <section className="px-4 mb-20 animate-fade-in">
+            <div className="container max-w-4xl mx-auto">
+              <div className="grid md:grid-cols-2 gap-6">
+                <StreakTracker />
+                <GoalVisualization />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Trainer Dashboard */}
+        {isTrainerMode && (
+          <section className="px-4 mb-20">
+            <div className="container max-w-4xl mx-auto">
+              <TrainerDashboard />
+            </div>
+          </section>
+        )}
+
+        {/* Features */}
+        <section className="px-4 pb-12">
+          <div className="container max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-16 text-foreground tracking-tight drop-shadow-sm">How FitWizard Works</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {features.map((f, index) => (
+                <Card
+                  key={f.title}
+                  variant="interactive"
+                  className="text-center group animate-fade-in bg-white/[0.03] backdrop-blur-md border border-white/10 hover:border-primary/20 hover:bg-white/[0.06] rounded-2xl shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <CardContent className="pt-6">
+                    <div className="mx-auto w-12 h-12 rounded-full gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow group-hover:animate-glow-pulse transition-all duration-300">
+                      <AnimatedIcon>
+                        <f.icon className="h-6 w-6 text-primary-foreground" />
+                      </AnimatedIcon>
+                    </div>
+                    <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">{f.title}</h3>
+                    <p className="text-sm text-muted-foreground">{f.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
-      )}
-
-      {/* Trainer Dashboard - show if trainer mode */}
-      {isTrainerMode && (
-        <section className="py-8 px-4">
-          <div className="container max-w-4xl mx-auto">
-            <TrainerDashboard />
-          </div>
-        </section>
-      )}
-
-      {/* Features */}
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="container max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-10">How FitWizard Works</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((f, index) => (
-              <Card
-                key={f.title}
-                variant="interactive"
-                className="text-center group animate-fade-in"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <CardContent className="pt-6">
-                  <div className="mx-auto w-12 h-12 rounded-full gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow group-hover:animate-glow-pulse transition-all duration-300">
-                    <AnimatedIcon>
-                      <f.icon className="h-6 w-6 text-primary-foreground" />
-                    </AnimatedIcon>
-                  </div>
-                  <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground">{f.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      </div>
     </main>
   );
 }

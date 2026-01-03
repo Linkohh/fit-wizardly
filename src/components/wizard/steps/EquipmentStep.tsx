@@ -20,10 +20,20 @@ export function EquipmentStep() {
         <p className="text-muted-foreground mt-1">Select all available equipment for exercise options</p>
       </div>
 
-      {/* Presets */}
+      {/* Presets and Clear */}
       <div className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">Quick presets:</p>
         <div className="flex flex-wrap gap-2">
+          {selections.equipment.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setEquipment([])}
+              className="touch-target border-destructive/50 text-destructive hover:bg-destructive/10"
+            >
+              Clear All
+            </Button>
+          )}
           {EQUIPMENT_PRESETS.map((preset) => (
             <Button
               key={preset.name}
@@ -44,14 +54,14 @@ export function EquipmentStep() {
       </div>
 
       {/* Equipment Grid */}
-      <div 
+      <div
         className="grid grid-cols-2 sm:grid-cols-3 gap-3"
         role="group"
         aria-label="Equipment selection"
       >
         {EQUIPMENT_OPTIONS.map((item) => {
           const isSelected = selections.equipment.includes(item.id);
-          
+
           return (
             <button
               key={item.id}
@@ -63,8 +73,8 @@ export function EquipmentStep() {
               <Card
                 className={cn(
                   "relative h-full transition-all duration-200 hover:shadow-md",
-                  isSelected 
-                    ? "border-primary ring-2 ring-primary/20 bg-primary/5" 
+                  isSelected
+                    ? "border-primary ring-2 ring-primary/20 bg-primary/5"
                     : "border-border hover:border-primary/50"
                 )}
               >
@@ -79,7 +89,7 @@ export function EquipmentStep() {
                     {item.name}
                   </span>
                   {isSelected && (
-                    <div 
+                    <div
                       className="absolute top-2 right-2 h-5 w-5 rounded-full bg-primary flex items-center justify-center"
                       aria-hidden="true"
                     >

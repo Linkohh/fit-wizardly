@@ -1,6 +1,25 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Goal, ExperienceLevel, Equipment, MuscleGroup, Constraint, WizardSelections } from '@/types/fitness';
+import type { Goal, ExperienceLevel, Equipment, MuscleGroup, Constraint, WizardSelections, OptPhase } from '@/types/fitness';
+
+// Helper to determine NASM Phase
+function determineOptPhase(goal: Goal, experience: ExperienceLevel): OptPhase {
+  if (experience === 'beginner') return 'stabilization_endurance';
+
+  if (experience === 'intermediate') {
+    if (goal === 'strength') return 'strength_endurance'; // Phase 2
+    if (goal === 'hypertrophy') return 'muscular_development'; // Phase 3
+    return 'stabilization_endurance'; // Phase 1 (General fallback)
+  }
+
+  if (experience === 'advanced') {
+    if (goal === 'strength') return 'maximal_strength'; // Phase 4
+    if (goal === 'hypertrophy') return 'muscular_development'; // Phase 3
+    return 'power'; // Phase 5 (General/Performance)
+  }
+
+  return 'stabilization_endurance';
+}
 
 export type WizardStep = 'goal' | 'equipment' | 'anatomy' | 'constraints' | 'schedule' | 'review';
 
@@ -11,7 +30,7 @@ interface WizardState {
   currentStepIndex: number;
   selections: WizardSelections;
   isGenerating: boolean;
-  
+
   // Actions
   setStep: (step: WizardStep) => void;
   nextStep: () => void;
@@ -59,9 +78,9 @@ export const useWizardStore = create<WizardState>()(
         const { currentStepIndex } = get();
         if (currentStepIndex < WIZARD_STEPS.length - 1) {
           const nextIndex = currentStepIndex + 1;
-          set({ 
-            currentStep: WIZARD_STEPS[nextIndex], 
-            currentStepIndex: nextIndex 
+          set({
+            currentStep: WIZARD_STEPS[nextIndex],
+            currentStepIndex: nextIndex
           });
         }
       },
@@ -70,19 +89,27 @@ export const useWizardStore = create<WizardState>()(
         const { currentStepIndex } = get();
         if (currentStepIndex > 0) {
           const prevIndex = currentStepIndex - 1;
-          set({ 
-            currentStep: WIZARD_STEPS[prevIndex], 
-            currentStepIndex: prevIndex 
+          set({
+            currentStep: WIZARD_STEPS[prevIndex],
+            currentStepIndex: prevIndex
           });
         }
       },
 
       setGoal: (goal) => set((state) => ({
-        selections: { ...state.selections, goal }
+        selections: {
+          ...state.selections,
+          goal,
+          optPhase: determineOptPhase(goal, state.selections.experienceLevel)
+        }
       })),
 
       setExperienceLevel: (experienceLevel) => set((state) => ({
-        selections: { ...state.selections, experienceLevel }
+        selections: {
+          ...state.selections,
+          experienceLevel,
+          optPhase: determineOptPhase(state.selections.goal, experienceLevel)
+        }
       })),
 
       setEquipment: (equipment) => set((state) => ({
@@ -145,24 +172,24 @@ export const useWizardStore = create<WizardState>()(
 
       getStepValidation: (step) => {
         const { selections } = get();
-        
+
         switch (step) {
           case 'goal':
             return { valid: !!selections.goal && !!selections.experienceLevel };
           case 'equipment':
-            return { 
+            return {
               valid: selections.equipment.length > 0,
               message: selections.equipment.length === 0 ? 'Select at least one equipment option' : undefined
             };
           case 'anatomy':
-            return { 
+            return {
               valid: selections.targetMuscles.length > 0,
               message: selections.targetMuscles.length === 0 ? 'Select at least one muscle group to target' : undefined
             };
           case 'constraints':
             return { valid: true }; // Constraints are optional
           case 'schedule':
-            return { 
+            return {
               valid: selections.daysPerWeek >= 2 && selections.daysPerWeek <= 6 && selections.sessionDuration >= 30,
               message: 'Select 2-6 days per week and at least 30 minutes per session'
             };
@@ -175,7 +202,7 @@ export const useWizardStore = create<WizardState>()(
     }),
     {
       name: 'fitwizard-wizard',
-      partialize: (state) => ({ 
+      partialize: (state) => ({
         selections: state.selections,
         currentStep: state.currentStep,
         currentStepIndex: state.currentStepIndex,

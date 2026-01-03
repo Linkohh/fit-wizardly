@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import type { MuscleGroup } from '@/types/fitness';
 import { MUSCLE_DATA } from '@/types/fitness';
 import { cn } from '@/lib/utils';
@@ -32,12 +33,14 @@ export function SelectedMusclesChips({ selectedMuscles, onRemove, onClearAll }: 
                 <span className="text-sm font-medium text-muted-foreground">
                     {selectedMuscles.length} muscle{selectedMuscles.length !== 1 ? 's' : ''} selected
                 </span>
-                <button
+                <Button
+                    variant="outline"
+                    size="sm"
                     onClick={onClearAll}
-                    className="text-xs text-muted-foreground hover:text-destructive transition-colors underline-offset-2 hover:underline"
+                    className="touch-target border-destructive/50 text-destructive hover:bg-destructive/10 h-7 text-xs px-2"
                 >
-                    Clear all
-                </button>
+                    Clear selections
+                </Button>
             </div>
 
             <div className="flex flex-wrap gap-2">

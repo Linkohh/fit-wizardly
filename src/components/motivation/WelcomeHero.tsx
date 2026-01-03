@@ -5,22 +5,22 @@ import { FloatingElement } from "@/components/ui/page-transition";
 
 export function WelcomeHero() {
     return (
-        <section className="relative py-24 px-4 overflow-hidden">
-            {/* Background Glows */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/20 rounded-full blur-[120px] -z-10 opacity-50 animate-pulse-glow pointer-events-none" />
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-secondary/20 rounded-full blur-[100px] -z-10 opacity-40 pointer-events-none" />
+        <section className="relative py-24 px-4 overflow-hidden hero-bloom">
+            {/* Background Glows - Reduced Intensity (10-15% reduction) */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] -z-10 opacity-40 animate-pulse-glow pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[100px] -z-10 opacity-30 pointer-events-none" />
 
             <div className="container max-w-5xl mx-auto text-center relative z-10">
                 <FloatingElement delay={0}>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border-primary/30 text-primary mb-8 animate-fade-in hover:shadow-glow transition-shadow cursor-default">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-premium border-primary/20 text-primary mb-8 animate-fade-in hover:shadow-glow transition-shadow cursor-default">
                         <Zap className="h-4 w-4 fill-current animate-bounce" />
                         <span className="text-sm font-bold tracking-wide uppercase">Ignite Your Fitness Journey</span>
                     </div>
                 </FloatingElement>
 
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/70 mb-6 drop-shadow-lg tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/70 mb-6 drop-shadow-md tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
                     Unleash Your <br />
-                    <span className="gradient-text-animated filter drop-shadow-[0_0_25px_rgba(139,92,246,0.6)]">
+                    <span className="gradient-text-animated filter drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]">
                         Full Potential
                     </span>
                 </h1>

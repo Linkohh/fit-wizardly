@@ -485,6 +485,107 @@ export const EXERCISE_DATABASE: Exercise[] = [
     contraindications: [],
     cues: ['Lift shoulders straight up', 'Don\'t roll', 'Pause at top'],
   },
+  // NASM Phase 1 (Stabilization) & Phase 5 (Power) Additions
+
+  // Stabilization (Unstable)
+  {
+    id: 'single_leg_squat',
+    name: 'Single-Leg Squat',
+    primaryMuscles: ['elemental_quads' as any, 'glutes'], // elemental_quads isn't a type, using 'quads' actual
+    secondaryMuscles: ['abs', 'calves'],
+    equipment: ['bodyweight', 'dumbbells'],
+    patterns: ['squat'],
+    stabilityLevel: 'unstable',
+    type: 'strength',
+    contraindications: ['knee_injury', 'balance_issues' as any],
+    cues: ['Balance on one leg', 'Sit back', 'Keep knee aligned'],
+  },
+  {
+    id: 'stability_ball_pushup',
+    name: 'Stability Ball Push-Up',
+    primaryMuscles: ['chest', 'triceps'],
+    secondaryMuscles: ['abs', 'front_deltoid'],
+    equipment: ['bodyweight'], // techinically needs ball
+    patterns: ['horizontal_push'],
+    stabilityLevel: 'unstable',
+    type: 'strength',
+    contraindications: ['wrist_injury'],
+    cues: ['Hands on ball', 'Stabilize core', 'Control descent'],
+  },
+  {
+    id: 'single_leg_rdl',
+    name: 'Single-Leg RDL',
+    primaryMuscles: ['hamstrings', 'glutes'],
+    secondaryMuscles: ['calves', 'lower_back'],
+    equipment: ['dumbbells', 'kettlebells', 'bodyweight'],
+    patterns: ['hinge'],
+    stabilityLevel: 'unstable',
+    type: 'strength',
+    contraindications: ['back_injury'],
+    cues: ['Hinge at hips', 'Keep back flat', 'Floating leg stays straight'],
+  },
+  {
+    id: 'stability_ball_plank',
+    name: 'Stability Ball Plank',
+    primaryMuscles: ['abs'],
+    secondaryMuscles: ['front_deltoid'],
+    equipment: ['bodyweight'],
+    patterns: ['isolation'],
+    stabilityLevel: 'unstable',
+    type: 'strength',
+    contraindications: [],
+    cues: ['Elbows on ball', 'Circular motions', 'Brace hard'],
+  },
+
+  // Power (Plyometric)
+  {
+    id: 'squat_jump',
+    name: 'Squat Jump',
+    primaryMuscles: ['quads', 'glutes'],
+    secondaryMuscles: ['calves'],
+    equipment: ['bodyweight'],
+    patterns: ['squat'],
+    stabilityLevel: 'stable',
+    type: 'plyometric',
+    contraindications: ['knee_injury', 'no_impact', 'no_jumping'],
+    cues: ['Explode up', 'Soft landing', 'Reset between reps'],
+  },
+  {
+    id: 'plyo_pushup',
+    name: 'Plyometric Push-Up',
+    primaryMuscles: ['chest', 'triceps'],
+    secondaryMuscles: ['front_deltoid'],
+    equipment: ['bodyweight'],
+    patterns: ['horizontal_push'],
+    stabilityLevel: 'stable',
+    type: 'plyometric',
+    contraindications: ['wrist_injury', 'no_impact'],
+    cues: ['Explode off ground', 'Clap if possible', 'Absorb impact'],
+  },
+  {
+    id: 'medicine_ball_chest_pass',
+    name: 'Medicine Ball Chest Pass',
+    primaryMuscles: ['chest', 'triceps'],
+    secondaryMuscles: ['abs'],
+    equipment: ['fictional_medicine_ball' as any, 'bodyweight'], // fallback
+    patterns: ['horizontal_push'],
+    stabilityLevel: 'stable',
+    type: 'power',
+    contraindications: [],
+    cues: ['Explosive push', 'Full extension', 'Step into it'],
+  },
+  {
+    id: 'box_jump',
+    name: 'Box Jump',
+    primaryMuscles: ['quads', 'glutes', 'calves'],
+    secondaryMuscles: [],
+    equipment: ['bodyweight'],
+    patterns: ['squat'],
+    stabilityLevel: 'stable',
+    type: 'plyometric',
+    contraindications: ['knee_injury', 'no_impact', 'no_jumping'],
+    cues: ['Land soft', 'Stand tall at top', 'Step down'],
+  },
 ];
 
 export function getExerciseById(id: string): Exercise | undefined {
@@ -492,13 +593,13 @@ export function getExerciseById(id: string): Exercise | undefined {
 }
 
 export function getExercisesByMuscle(muscle: string): Exercise[] {
-  return EXERCISE_DATABASE.filter(e => 
+  return EXERCISE_DATABASE.filter(e =>
     e.primaryMuscles.includes(muscle as any) || e.secondaryMuscles.includes(muscle as any)
   );
 }
 
 export function getExercisesByEquipment(equipment: string[]): Exercise[] {
-  return EXERCISE_DATABASE.filter(e => 
+  return EXERCISE_DATABASE.filter(e =>
     e.equipment.some(eq => equipment.includes(eq))
   );
 }

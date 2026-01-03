@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { usePlanStore } from '@/stores/planStore';
 import { MUSCLE_DATA, type ExercisePrescription } from '@/types/fitness';
-import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, ChevronDown, ChevronUp, AlertTriangle, Lightbulb, ArrowLeftRight } from 'lucide-react';
+import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, ChevronDown, ChevronUp, AlertTriangle, Lightbulb, ArrowLeftRight, Calculator } from 'lucide-react';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { OneRepMaxCalculator } from '@/components/tools/OneRepMaxCalculator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -97,6 +99,21 @@ export default function PlanPage() {
     <main className="container max-w-5xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
         <h1 className="text-2xl font-bold gradient-text self-start sm:self-center">Your Workout Plan</h1>
+
+
+
+        {/* 1RM Calculator Modal */}
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="outline" className="gap-2 w-full sm:w-auto border-dashed border-primary/40 hover:border-primary">
+              <Calculator className="h-4 w-4 text-primary" />
+              1RM Tools
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-md">
+            <OneRepMaxCalculator />
+          </DialogContent>
+        </Dialog>
 
         {/* PDF Export with Privacy Dialog */}
         <AlertDialog>

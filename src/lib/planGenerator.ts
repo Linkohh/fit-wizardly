@@ -9,9 +9,82 @@ import type {
   WeeklyVolume,
   RIRProgression,
   Equipment,
-  Constraint
+  Constraint,
+  OptPhase,
+  Tempo,
+  ExerciseType,
+  StabilityLevel
 } from '@/types/fitness';
 import { EXERCISE_DATABASE } from '@/data/exercises';
+
+// Helper to determine NASM Phase (Duplicate of store logic for safety)
+function determineOptPhase(goal: string, experience: string): OptPhase {
+  if (experience === 'beginner') return 'stabilization_endurance';
+  if (experience === 'intermediate') {
+    if (goal === 'strength') return 'strength_endurance';
+    if (goal === 'hypertrophy') return 'muscular_development';
+    return 'stabilization_endurance';
+  }
+  if (experience === 'advanced') {
+    if (goal === 'strength') return 'maximal_strength';
+    if (goal === 'hypertrophy') return 'muscular_development';
+    return 'power';
+  }
+  return 'stabilization_endurance';
+}
+
+// NASM Phase Variables
+function getPhaseVariables(phase: OptPhase) {
+  switch (phase) {
+    case 'stabilization_endurance': // Phase 1
+      return {
+        reps: '12-20',
+        sets: 2, // 1-3
+        tempo: '4-2-1',
+        rest: 90,
+        intensity: '50-70%',
+        focus: 'unstable' as StabilityLevel
+      };
+    case 'strength_endurance': // Phase 2 (Supersets)
+      return {
+        reps: '8-12', // Strength: 8-12, Stab: 8-12
+        sets: 3, // 2-4
+        tempo: '2-0-2', // Strength: 2-0-2, Stab: 4-2-1
+        rest: 60,
+        intensity: '70-80%',
+        isSuperset: true
+      };
+    case 'muscular_development': // Phase 3
+      return {
+        reps: '6-12',
+        sets: 4, // 3-6
+        tempo: '2-0-2',
+        rest: 60, // 0-60s
+        intensity: '75-85%',
+        focus: 'stable' as StabilityLevel // Hypertrophy relies on stability
+      };
+    case 'maximal_strength': // Phase 4
+      return {
+        reps: '1-5',
+        sets: 5, // 4-6
+        tempo: 'X-X-X', // Explosive/Controlled
+        rest: 180, // 3-5 min
+        intensity: '85-100%',
+        focus: 'stable' as StabilityLevel
+      };
+    case 'power': // Phase 5 (Supersets)
+      return {
+        reps: '1-5', // Strength: 1-5, Power: 8-10
+        sets: 4, // 3-5
+        tempo: 'X-X-X',
+        rest: 180, // 1-2 min between pairs
+        intensity: '85-100% / 30-45%',
+        isSuperset: true
+      };
+    default:
+      return { reps: '10', sets: 3, tempo: '2-0-2', rest: 60, intensity: '60%' };
+  }
+}
 
 // Volume caps by experience level (weekly sets per muscle group)
 const VOLUME_CAPS: Record<string, Record<MuscleGroup, number>> = {
@@ -104,57 +177,150 @@ function filterExercises(
   });
 }
 
+// Find a matching exercise for superset/contrast
+function findPairExercise(
+  primaryExercise: Exercise,
+  available: Exercise[],
+  requiredType: ExerciseType | undefined,
+  requiredStability: StabilityLevel | undefined,
+  usedIds: Set<string>
+): Exercise | undefined {
+  // Look for same muscle group but specific characteristics
+  return available.find(e =>
+    e.id !== primaryExercise.id &&
+    !usedIds.has(e.id) &&
+    e.primaryMuscles.some(m => primaryExercise.primaryMuscles.includes(m)) &&
+    (!requiredType || e.type === requiredType) &&
+    (!requiredStability || e.stabilityLevel === requiredStability)
+  );
+}
+
 // Select exercises for a muscle group
 function selectExercisesForMuscle(
   muscle: MuscleGroup,
   availableExercises: Exercise[],
   targetSets: number,
-  usedExerciseIds: Set<string>
+  usedExerciseIds: Set<string>,
+  phase: OptPhase // NEW argument
 ): { exercises: ExercisePrescription[]; setsAssigned: number } {
-  const muscleExercises = availableExercises.filter(
+  const settings = getPhaseVariables(phase);
+
+  // Filter for relevant exercises
+  let muscleExercises = availableExercises.filter(
     e => e.primaryMuscles.includes(muscle)
   );
 
+  // Phase 1 Optimization: Prioritize unstable if available, else standard
+  if (phase === 'stabilization_endurance') {
+    const unstable = muscleExercises.filter(e => e.stabilityLevel === 'unstable');
+    if (unstable.length > 0) {
+      // Mix unstable and stable but prioritize unstable
+      muscleExercises = [...unstable, ...muscleExercises.filter(e => e.stabilityLevel !== 'unstable')];
+    }
+  }
+
+  // Phase 4/5 Optimization: Prioritize stable/heavy
+  if (phase === 'maximal_strength' || phase === 'power') {
+    muscleExercises = muscleExercises.filter(e => e.stabilityLevel !== 'unstable'); // Avoid ball work for max strength
+  }
+
   const prescriptions: ExercisePrescription[] = [];
   let setsAssigned = 0;
+  let supersetCounter = 1;
 
-  // Prioritize compound movements, then isolation
+  // Sort by priority (Compound > Isolation)
+  // For Phase 5, we specifically need Strength first, then Power
   const sortedExercises = [...muscleExercises].sort((a, b) => {
     const aIsCompound = a.patterns.includes('isolation') ? 1 : 0;
     const bIsCompound = b.patterns.includes('isolation') ? 1 : 0;
     return aIsCompound - bIsCompound;
   });
 
-  for (const exercise of sortedExercises) {
+  for (let i = 0; i < sortedExercises.length; i++) {
+    const exercise = sortedExercises[i];
     if (setsAssigned >= targetSets) break;
     if (usedExerciseIds.has(exercise.id)) continue;
 
-    const setsForExercise = Math.min(4, targetSets - setsAssigned);
+    const setsForExercise = Math.min(settings.sets, targetSets - setsAssigned);
     usedExerciseIds.add(exercise.id);
 
-    // Generate rationale explaining why this exercise was selected
+    // Standard rationale
     const isCompound = !exercise.patterns.includes('isolation');
-    const muscleNames = exercise.primaryMuscles.map(m => m.replace(/_/g, ' ')).join(', ');
-    const equipmentList = exercise.equipment.map(e => e.replace(/_/g, ' ')).join(', ');
+    let rationale = isCompound
+      ? `Primary compound movement for ${phase.replace('_', ' ')}.`
+      : `Isolation assistance for ${muscle.replace('_', ' ')}.`;
 
-    let rationale = '';
-    if (isCompound) {
-      rationale = `Compound movement targeting ${muscleNames}. Prioritized for volume efficiency.`;
+    // SUPERSET LOGIC (Phase 2 & 5)
+    if (settings.isSuperset) {
+      let pairExercise: Exercise | undefined;
+      let pairRationale = "";
+      let pairReps = settings.reps;
+      let pairTempo = settings.tempo;
+
+      if (phase === 'strength_endurance') {
+        // Phase 2: Strength (Stable) + Stabilization (Unstable)
+        pairExercise = findPairExercise(exercise, availableExercises, undefined, 'unstable', usedExerciseIds);
+        pairRationale = "Superset: Biomechanically similar stabilization exercise.";
+        pairTempo = "4-2-1"; // Slow for stabilization
+      } else if (phase === 'power') {
+        // Phase 5: Strength (Heavy) + Power (Explosive)
+        pairExercise = findPairExercise(exercise, availableExercises, 'plyometric', undefined, usedExerciseIds);
+        if (!pairExercise) pairExercise = findPairExercise(exercise, availableExercises, 'power', undefined, usedExerciseIds);
+
+        pairRationale = "Contrast Set: Explosive movement to recruit fast-twitch fibers.";
+        pairReps = "8-10";
+        pairTempo = "X-X-X"; // Max velocity
+      }
+
+      // Add Primary
+      prescriptions.push({
+        exercise,
+        sets: setsForExercise,
+        reps: phase === 'power' ? '1-5' : settings.reps, // Heavy for power phase first leg
+        rir: phase === 'power' ? 1 : 2,
+        tempo: settings.tempo,
+        restSeconds: 0, // No rest inside superset
+        supersetGroup: supersetCounter,
+        rationale,
+        notes: phase === 'strength_endurance' ? "Perform Strength movement first" : "Heavy resistance exercise"
+      });
+
+      if (pairExercise) {
+        usedExerciseIds.add(pairExercise.id);
+        prescriptions.push({
+          exercise: pairExercise,
+          sets: setsForExercise,
+          reps: pairReps,
+          rir: 0, // Push hard on second leg
+          tempo: pairTempo,
+          restSeconds: settings.rest, // Rest after pair
+          supersetGroup: supersetCounter,
+          rationale: pairRationale,
+          notes: "Perform immediately after previous exercise"
+        });
+        // Superset counts as 1 "set" of volume for the muscle roughly, but we track actual sets
+        setsAssigned += setsForExercise; // Count primary volume
+      } else {
+        // Fallback if no pair found: Just standard set
+        prescriptions[prescriptions.length - 1].restSeconds = settings.rest;
+        prescriptions[prescriptions.length - 1].supersetGroup = undefined;
+        setsAssigned += setsForExercise;
+      }
+      supersetCounter++;
+
     } else {
-      rationale = `Isolation exercise for focused ${muscleNames} development.`;
+      // Standard Straight Sets
+      prescriptions.push({
+        exercise,
+        sets: setsForExercise,
+        reps: settings.reps,
+        rir: 2,
+        tempo: settings.tempo,
+        restSeconds: settings.rest,
+        rationale,
+      });
+      setsAssigned += setsForExercise;
     }
-    rationale += ` Equipment: ${equipmentList}.`;
-
-    prescriptions.push({
-      exercise,
-      sets: setsForExercise,
-      reps: '8-12',
-      rir: 2,
-      restSeconds: 120,
-      rationale,
-    });
-
-    setsAssigned += setsForExercise;
   }
 
   return { exercises: prescriptions, setsAssigned };
@@ -211,8 +377,13 @@ export function generatePlan(selections: WizardSelections): Plan {
     targetMuscles,
     constraints,
     daysPerWeek,
-    sessionDuration
+    sessionDuration,
+    optPhase // New
   } = selections;
+
+  // Determine OPT Phase if not provided (fallback)
+  const currentPhase = optPhase || determineOptPhase(goal, experienceLevel);
+  const phaseSettings = getPhaseVariables(currentPhase);
 
   // Determine split type
   const splitType = selectSplit(daysPerWeek);
@@ -224,7 +395,8 @@ export function generatePlan(selections: WizardSelections): Plan {
   const availableExercises = filterExercises(EXERCISE_DATABASE, equipment, constraints);
 
   // Get rep range for goal
-  const repRange = REP_RANGES[goal];
+  // Get rep range for goal (Legacy support but Phase logic overrides)
+  // const repRange = REP_RANGES[goal];
 
   // Get volume caps for experience level
   const volumeCaps = VOLUME_CAPS[experienceLevel];
@@ -266,15 +438,16 @@ export function generatePlan(selections: WizardSelections): Plan {
         muscle,
         availableExercises,
         targetSetsForDay,
-        usedExerciseIds
+        usedExerciseIds,
+        currentPhase // pass phase
       );
 
       // Update rep ranges and rest based on goal
-      muscleExercises.forEach(ex => {
-        ex.reps = `${repRange.min}-${repRange.max}`;
-        ex.rir = 2;
-        ex.restSeconds = goal === 'strength' ? 180 : goal === 'hypertrophy' ? 90 : 60;
-      });
+      // Update rep ranges and rest based on goal (LEGACY OVERRIDE CHECK)
+      // We rely on selectExercisesForMuscle to set these now via getPhaseVariables, 
+      // so we largely skip this or just ensure nothing is wildly off.
+      // muscleExercises.forEach(ex => { ... }); 
+      // Actually we should just leave them be as selectExercises... does it better now.
 
       exercises.push(...muscleExercises);
       weeklyVolumeTracker[muscle] = (weeklyVolumeTracker[muscle] || 0) + setsAssigned;
@@ -307,6 +480,7 @@ export function generatePlan(selections: WizardSelections): Plan {
   const notes: string[] = [
     `Split: ${splitType.replace('_', ' ').toUpperCase()}`,
     `Goal: ${goal.charAt(0).toUpperCase() + goal.slice(1)}`,
+    `Phase: ${currentPhase.replace(/_/g, ' ').toUpperCase()}`,
     `Experience: ${experienceLevel.charAt(0).toUpperCase() + experienceLevel.slice(1)}`,
     `Days per week: ${daysPerWeek}`,
   ];
