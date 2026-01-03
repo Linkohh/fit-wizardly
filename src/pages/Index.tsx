@@ -74,9 +74,7 @@ export default function Index() {
       <div className="bg-gradient-to-b from-[#1a0b2e] via-[#0F0518] to-[#08020D] pb-32 pt-12 relative z-20 w-full -mt-12 md:-mt-16">
         {/* Quote sits comfortably inside the dark background */}
         <div className="container max-w-4xl mx-auto px-4 mb-20 pt-12">
-          <div className="rounded-2xl p-1 bg-gradient-to-b from-[#140821] to-[#0F0518] border border-primary/20 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.4)] ring-1 ring-white/5">
-            <DailyQuote />
-          </div>
+          <DailyQuote />
         </div>
 
         {/* Stats Section */}
