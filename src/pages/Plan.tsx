@@ -95,13 +95,13 @@ export default function PlanPage() {
 
   return (
     <main className="container max-w-5xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold gradient-text">Your Workout Plan</h1>
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
+        <h1 className="text-2xl font-bold gradient-text self-start sm:self-center">Your Workout Plan</h1>
 
         {/* PDF Export with Privacy Dialog */}
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="gradient" className="gap-2">
+            <Button variant="gradient" className="gap-2 w-full sm:w-auto">
               <Download className="h-4 w-4" /> Export PDF
             </Button>
           </AlertDialogTrigger>

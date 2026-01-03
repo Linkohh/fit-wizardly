@@ -27,7 +27,7 @@ export function WizardNavigation({
   const { t } = useTranslation();
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 md:space-y-4 fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur border-t z-50 md:static md:bg-transparent md:border-none md:p-0 md:z-auto">
       {validationMessage && (
         <p className="text-sm text-destructive text-center" role="alert">
           {validationMessage}
