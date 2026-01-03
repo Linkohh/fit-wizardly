@@ -25,26 +25,20 @@ export default function Index() {
       <WelcomeHero />
 
       {/* BRIDGE: Premium Transition - Intense Horizon Glow */}
-      <section className="relative h-32 w-full overflow-hidden -mt-[2px] z-30 pointer-events-none">
+      <section className="relative h-32 w-full -mt-[2px] z-30 pointer-events-none">
         
-        {/* 1. Wide Atmospheric Purple Bloom (background layer) */}
-        <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 h-40 bg-gradient-to-b from-transparent via-[#7c3aed]/20 to-transparent blur-[40px]" />
+        {/* 1. Wide Atmospheric Purple Bloom - centered ellipse shape */}
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[120%] h-48 bg-[radial-gradient(ellipse_80%_100%_at_50%_50%,rgba(124,58,237,0.25)_0%,transparent_70%)]" />
         
-        {/* 2. Magenta Glow Spread (mid layer) */}
-        <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 h-24 bg-gradient-to-b from-transparent via-[#db2777]/40 to-transparent blur-[30px]" />
+        {/* 2. Magenta Glow Spread - ellipse for natural fade */}
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[100%] h-32 bg-[radial-gradient(ellipse_70%_100%_at_50%_50%,rgba(219,39,119,0.4)_0%,transparent_60%)]" />
         
-        {/* 3. Intense Pink Core Glow */}
-        <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 h-12 bg-gradient-to-b from-transparent via-[#ec4899]/60 to-transparent blur-[15px]" />
+        {/* 3. Intense Pink Core Glow - tighter ellipse */}
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[80%] h-16 bg-[radial-gradient(ellipse_60%_100%_at_50%_50%,rgba(236,72,153,0.6)_0%,transparent_50%)]" />
         
-        {/* 4. Bright White-Hot Center Line */}
-        <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 h-[3px] bg-gradient-to-r from-transparent via-white to-transparent opacity-90" />
-        <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#fdf4ff] to-transparent opacity-100" />
-        
-        {/* 5. Top fade into hero */}
-        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#1a0b2e] to-transparent" />
-        
-        {/* 6. Bottom fade into content zone */}
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#1a0b2e] to-transparent" />
+        {/* 4. Bright White-Hot Center Line - fades at edges */}
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[70%] h-[3px] bg-[radial-gradient(ellipse_50%_100%_at_50%_50%,rgba(255,255,255,0.9)_0%,transparent_70%)]" />
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[50%] h-[2px] bg-[radial-gradient(ellipse_40%_100%_at_50%_50%,rgba(253,244,255,1)_0%,transparent_60%)]" />
 
       </section>
 
