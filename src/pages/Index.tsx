@@ -24,49 +24,27 @@ export default function Index() {
       {/* Hero */}
       <WelcomeHero />
 
-      {/* BRIDGE: Premium Transition - intense Horizon Glow (Curved) */}
-      <section className="relative h-24 w-full overflow-hidden -mt-[2px] z-30 pointer-events-none">
-
-        {/* 1. Deep Atmosphere Blend */}
-        <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-transparent via-[#1a0b2e]/80 to-[#1a0b2e]" />
-
-        {/* 2. Curved Horizon SVG */}
-        <div className="absolute inset-x-0 top-0 h-full flex items-end justify-center">
-          <svg
-            viewBox="0 0 1440 320"
-            preserveAspectRatio="none"
-            className="w-full h-full opacity-90"
-            style={{ filter: "drop-shadow(0 -4px 10px rgba(236, 72, 153, 0.5))" }}
-          >
-            <defs>
-              <linearGradient id="horizon-glow" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="transparent" />
-                <stop offset="40%" stopColor="white" />
-                <stop offset="60%" stopColor="white" />
-                <stop offset="100%" stopColor="transparent" />
-              </linearGradient>
-            </defs>
-            {/* Core White-Hot Curve */}
-            <path
-              d="M -100 320 Q 720 100 1540 320"
-              fill="none"
-              stroke="url(#horizon-glow)"
-              strokeWidth="2"
-              className="opacity-90 blur-[0.5px]"
-            />
-            {/* Magenta Energy Bloom */}
-            <path
-              d="M -100 320 Q 720 100 1540 320"
-              fill="none"
-              stroke="#db2777"
-              strokeWidth="4"
-              className="opacity-60 blur-[6px]"
-            />
-          </svg>
-        </div>
-
-        {/* 3. Wide Ambient Atmosphere */}
-        <div className="absolute left-1/2 bottom-0 -translate-x-1/2 h-16 w-full md:w-[70%] bg-secondary/20 blur-[60px] rounded-full" />
+      {/* BRIDGE: Premium Transition - Intense Horizon Glow */}
+      <section className="relative h-32 w-full overflow-hidden -mt-[2px] z-30 pointer-events-none">
+        
+        {/* 1. Wide Atmospheric Purple Bloom (background layer) */}
+        <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 h-40 bg-gradient-to-b from-transparent via-[#7c3aed]/20 to-transparent blur-[40px]" />
+        
+        {/* 2. Magenta Glow Spread (mid layer) */}
+        <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 h-24 bg-gradient-to-b from-transparent via-[#db2777]/40 to-transparent blur-[30px]" />
+        
+        {/* 3. Intense Pink Core Glow */}
+        <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 h-12 bg-gradient-to-b from-transparent via-[#ec4899]/60 to-transparent blur-[15px]" />
+        
+        {/* 4. Bright White-Hot Center Line */}
+        <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 h-[3px] bg-gradient-to-r from-transparent via-white to-transparent opacity-90" />
+        <div className="absolute inset-x-0 bottom-1/2 translate-y-1/2 h-[2px] bg-gradient-to-r from-transparent via-[#fdf4ff] to-transparent opacity-100" />
+        
+        {/* 5. Top fade into hero */}
+        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#1a0b2e] to-transparent" />
+        
+        {/* 6. Bottom fade into content zone */}
+        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#1a0b2e] to-transparent" />
 
       </section>
 
