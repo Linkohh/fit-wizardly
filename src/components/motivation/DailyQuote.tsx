@@ -119,7 +119,7 @@ export function DailyQuote({ className }: { className?: string }) {
     };
 
     return (
-        <div className={cn("relative p-6 mt-8 rounded-xl glass-card overflow-hidden group hover:shadow-glow transition-all duration-300", className)}>
+        <div className={cn("relative p-8 rounded-2xl bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-primary/20 overflow-hidden group hover:shadow-glow hover:border-primary/30 transition-all duration-500", className)}>
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                 <Quote className="w-24 h-24 text-primary rotate-12" />
             </div>
