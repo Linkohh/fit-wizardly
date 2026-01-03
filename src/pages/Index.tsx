@@ -24,27 +24,56 @@ export default function Index() {
       {/* Hero */}
       <WelcomeHero />
 
-      {/* BRIDGE: Premium Transition - intense Horizon Glow */}
+      {/* BRIDGE: Premium Transition - intense Horizon Glow (Curved) */}
       <section className="relative h-24 w-full overflow-hidden -mt-[2px] z-30 pointer-events-none">
 
-        {/* 1. Deep Atmosphere Blend (Fade from Hero to Abyss) */}
+        {/* 1. Deep Atmosphere Blend */}
         <div className="absolute inset-x-0 top-0 h-full bg-gradient-to-b from-transparent via-[#1a0b2e]/80 to-[#1a0b2e]" />
 
-        {/* 2. The 'Hot' Horizon Line (The Core) */}
-        <div className="absolute left-1/2 top-6 -translate-x-1/2 h-[2px] w-[80%] md:w-[60%] bg-gradient-to-r from-transparent via-white to-transparent opacity-90 blur-[1px] shadow-[0_0_20px_rgba(255,255,255,0.8)]" />
+        {/* 2. Curved Horizon SVG */}
+        <div className="absolute inset-x-0 top-0 h-full flex items-end justify-center">
+          <svg
+            viewBox="0 0 1440 320"
+            preserveAspectRatio="none"
+            className="w-full h-full opacity-90"
+            style={{ filter: "drop-shadow(0 -4px 10px rgba(236, 72, 153, 0.5))" }}
+          >
+            <defs>
+              <linearGradient id="horizon-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="transparent" />
+                <stop offset="40%" stopColor="white" />
+                <stop offset="60%" stopColor="white" />
+                <stop offset="100%" stopColor="transparent" />
+              </linearGradient>
+            </defs>
+            {/* Core White-Hot Curve */}
+            <path
+              d="M -100 320 Q 720 100 1540 320"
+              fill="none"
+              stroke="url(#horizon-glow)"
+              strokeWidth="2"
+              className="opacity-90 blur-[0.5px]"
+            />
+            {/* Magenta Energy Bloom */}
+            <path
+              d="M -100 320 Q 720 100 1540 320"
+              fill="none"
+              stroke="#db2777"
+              strokeWidth="4"
+              className="opacity-60 blur-[6px]"
+            />
+          </svg>
+        </div>
 
-        {/* 3. The Magenta Plasma Bloom (The Energy) */}
-        <div className="absolute left-1/2 top-6 -translate-x-1/2 h-[4px] w-[90%] md:w-[70%] bg-gradient-to-r from-transparent via-secondary to-transparent opacity-80 blur-[8px]" />
-
-        {/* 4. Ambient Under-Glow (The Atmosphere) */}
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-24 w-full md:w-[60%] bg-secondary/20 blur-3xl rounded-[100%]" />
+        {/* 3. Wide Ambient Atmosphere */}
+        <div className="absolute left-1/2 bottom-0 -translate-x-1/2 h-16 w-full md:w-[70%] bg-secondary/20 blur-[60px] rounded-full" />
 
       </section>
 
       {/* Zone 2: Middle Content - Feature Cards & Motivation */}
-      <div className="bg-gradient-to-b from-[#1a0b2e] via-[#0F0518] to-[#08020D] pb-32 pt-12 relative z-20 w-full -mt-16">
+      <div className="bg-gradient-to-b from-[#1a0b2e] via-[#0F0518] to-[#08020D] pb-32 pt-12 relative z-20 w-full -mt-12 md:-mt-16">
         {/* Quote sits comfortably inside the dark background */}
-        <div className="container max-w-4xl mx-auto px-4 mb-20">
+        <div className="container max-w-4xl mx-auto px-4 mb-20 pt-12">
           <div className="rounded-2xl p-1 bg-gradient-to-b from-[#140821] to-[#0F0518] border border-primary/20 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.4)] ring-1 ring-white/5">
             <DailyQuote />
           </div>
