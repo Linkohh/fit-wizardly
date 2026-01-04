@@ -5,7 +5,7 @@ import { FloatingElement } from "@/components/ui/page-transition";
 
 export function WelcomeHero() {
     return (
-        <section className="relative pt-24 pb-16 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#140821] via-[#1a0b2e] to-transparent">
+        <section className="relative pt-24 pb-16 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-background via-muted/50 to-transparent dark:from-[#140821] dark:via-[#1a0b2e] dark:to-transparent">
             {/* Background Glows - Reduced Intensity (10-15% reduction) */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] -z-10 opacity-40 animate-pulse-glow pointer-events-none" />
             <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[100px] -z-10 opacity-30 pointer-events-none" />
@@ -18,7 +18,7 @@ export function WelcomeHero() {
                     </div>
                 </FloatingElement>
 
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/70 mb-6 drop-shadow-md tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:via-white dark:to-white/70 mb-6 drop-shadow-md tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
                     Unleash Your <br />
                     <span className="gradient-text-animated filter drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]">
                         Full Potential
