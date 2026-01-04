@@ -1,0 +1,1717 @@
+{
+    "version": "2.0",
+    "categories": [
+        {
+            "id": "inner-body",
+            "title": "Inner Body",
+            "description": "Deep Stabilizers & Core",
+            "iconKey": "Activity",
+            "subcategories": [
+                {
+                    "id": "deep-core",
+                    "title": "Deep Core",
+                    "exerciseIds": [
+                        "stomach-vacuum",
+                        "dead-bug",
+                        "bird-dog",
+                        "hollow-body-hold",
+                        "pallof-press",
+                        "rkc-plank",
+                        "swiss-ball-stir-pot"
+                    ]
+                },
+                {
+                    "id": "spinal-stabilizers",
+                    "title": "Spinal Stabilizers",
+                    "exerciseIds": [
+                        "jefferson-curl",
+                        "superman-hold",
+                        "reverse-hyperextension",
+                        "good-morning-seated",
+                        "back-extension-iso",
+                        "cat-cow"
+                    ]
+                },
+                {
+                    "id": "rotator-cuff",
+                    "title": "Rotator Cuff & Shoulder Health",
+                    "exerciseIds": [
+                        "face-pulls",
+                        "external-rotation-cable",
+                        "yz-raise",
+                        "cuban-press",
+                        "scapular-pull-up",
+                        "band-pull-aparts",
+                        "lu-raises"
+                    ]
+                },
+                {
+                    "id": "hip-stabilizers",
+                    "title": "Hip Stabilizers",
+                    "exerciseIds": [
+                        "clamshells",
+                        "banded-lateral-walk",
+                        "single-leg-rdl",
+                        "couch-stretch",
+                        "hip-airplane",
+                        "90-90-stretch"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "upper-push",
+            "title": "Upper Push",
+            "description": "Chest, Shoulders, Triceps",
+            "iconKey": "Dumbbell",
+            "subcategories": [
+                {
+                    "id": "chest-compound",
+                    "title": "Chest (Compound)",
+                    "exerciseIds": [
+                        "bench-press",
+                        "incline-bench",
+                        "decline-bench",
+                        "dumbbell-bench-press",
+                        "dumbbell-incline-press",
+                        "chest-dip",
+                        "push-up",
+                        "weighted-push-up",
+                        "floor-press",
+                        "smith-machine-bench"
+                    ]
+                },
+                {
+                    "id": "chest-isolation",
+                    "title": "Chest (Isolation)",
+                    "exerciseIds": [
+                        "cable-fly",
+                        "pec-deck",
+                        "dumbbell-fly",
+                        "svend-press",
+                        "landmine-press-chest"
+                    ]
+                },
+                {
+                    "id": "shoulders-compound",
+                    "title": "Shoulders (Compound)",
+                    "exerciseIds": [
+                        "overhead-press",
+                        "seated-military-press",
+                        "arnold-press",
+                        "push-press",
+                        "z-press",
+                        "handstand-push-up",
+                        "pike-push-up"
+                    ]
+                },
+                {
+                    "id": "shoulders-isolation",
+                    "title": "Shoulders (Isolation)",
+                    "exerciseIds": [
+                        "lateral-raise",
+                        "front-raise",
+                        "rear-delt-fly",
+                        "upright-row",
+                        "egyptian-lateral-raise",
+                        "cable-lateral-raise"
+                    ]
+                },
+                {
+                    "id": "triceps",
+                    "title": "Triceps",
+                    "exerciseIds": [
+                        "skullcrushers",
+                        "tricep-pushdown",
+                        "overhead-tricep-extension",
+                        "close-grip-bench",
+                        "tricep-dip",
+                        "diamond-push-up",
+                        "jm-press"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "upper-pull",
+            "title": "Upper Pull",
+            "description": "Back, Biceps, Forearms",
+            "iconKey": "Anchor",
+            "subcategories": [
+                {
+                    "id": "vertical-pull",
+                    "title": "Vertical Pulling (Lats)",
+                    "exerciseIds": [
+                        "pull-up",
+                        "chin-up",
+                        "lat-pulldown",
+                        "neutral-grip-pull-up",
+                        "straight-arm-pulldown",
+                        "single-arm-lat-pulldown"
+                    ]
+                },
+                {
+                    "id": "horizontal-pull",
+                    "title": "Horizontal Pulling (Rowing)",
+                    "exerciseIds": [
+                        "barbell-row",
+                        "dumbbell-row",
+                        "seated-cable-row",
+                        "chest-supported-row",
+                        "meadows-row",
+                        "pendlay-row",
+                        "inverted-row",
+                        "t-bar-row"
+                    ]
+                },
+                {
+                    "id": "traps",
+                    "title": "Traps & Upper Back",
+                    "exerciseIds": [
+                        "bicep-curl",
+                        "shrugs",
+                        "kelso-shrug",
+                        "farmers-walk",
+                        "rack-pull"
+                    ]
+                },
+                {
+                    "id": "biceps",
+                    "title": "Biceps",
+                    "exerciseIds": [
+                        "barbell-curl",
+                        "hammer-curl",
+                        "preacher-curl",
+                        "incline-dumbbell-curl",
+                        "spider-curl",
+                        "concentration-curl",
+                        "cable-curl",
+                        "bayesian-curl"
+                    ]
+                },
+                {
+                    "id": "forearms",
+                    "title": "Forearms & Grip",
+                    "exerciseIds": [
+                        "wrist-curl",
+                        "reverse-curl",
+                        "dead-hang",
+                        "plate-pinch",
+                        "rice-bucket",
+                        "zottman-curl"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "lower-body",
+            "title": "Lower Body",
+            "description": "Legs & Hips",
+            "iconKey": "Footprints",
+            "subcategories": [
+                {
+                    "id": "quad-dominant",
+                    "title": "Quads (Squat Pattern)",
+                    "exerciseIds": [
+                        "squat",
+                        "front-squat",
+                        "goblet-squat",
+                        "leg-press",
+                        "hack-squat",
+                        "leg-extension",
+                        "sissy-squat",
+                        "pistol-squat",
+                        "bulgarian-split-squat",
+                        "step-up",
+                        "lunge"
+                    ]
+                },
+                {
+                    "id": "hinge-dominant",
+                    "title": "Hamstrings & Glutes (Hinge)",
+                    "exerciseIds": [
+                        "deadlift",
+                        "romanian-deadlift",
+                        "stiff-leg-deadlift",
+                        "good-morning",
+                        "kettlebell-swing",
+                        "hip-thrust",
+                        "glute-bridge",
+                        "cable-pull-through",
+                        "back-extension"
+                    ]
+                },
+                {
+                    "id": "hamstring-isolation",
+                    "title": "Hamstring Isolation",
+                    "exerciseIds": [
+                        "leg-curl-seated",
+                        "leg-curl-lying",
+                        "nordic-hamstring-curl",
+                        "slider-leg-curl"
+                    ]
+                },
+                {
+                    "id": "calves",
+                    "title": "Calves",
+                    "exerciseIds": [
+                        "standing-calf-raise",
+                        "seated-calf-raise",
+                        "donkey-calf-raise",
+                        "tibialis-raise",
+                        "jump-rope-calves"
+                    ]
+                },
+                {
+                    "id": "abductors",
+                    "title": "Abductors & Adductors",
+                    "exerciseIds": [
+                        "abductor-machine",
+                        "adductor-machine",
+                        "copenhagen-plank",
+                        "curtsy-lunge"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "superficial-core",
+            "title": "Visible Core",
+            "description": "The 'Six Pack' Muscles",
+            "iconKey": "LayoutGrid",
+            "subcategories": [
+                {
+                    "id": "upper-abs",
+                    "title": "Upper Abs (Flexion)",
+                    "exerciseIds": [
+                        "cable-crunch",
+                        "decline-crunch",
+                        "swiss-ball-crunch",
+                        "ab-wheel",
+                        "ghd-sit-up"
+                    ]
+                },
+                {
+                    "id": "lower-abs",
+                    "title": "Lower Abs",
+                    "exerciseIds": [
+                        "hanging-leg-raise",
+                        "hanging-knee-raise",
+                        "reverse-crunch",
+                        "dragon-flag",
+                        "flutter-kicks",
+                        "l-sit"
+                    ]
+                },
+                {
+                    "id": "obliques",
+                    "title": "Obliques (Rotation/Anti-Rotation)",
+                    "exerciseIds": [
+                        "russian-twist",
+                        "woodchopper",
+                        "side-plank",
+                        "pallof-press-iso",
+                        "bicycle-crunch",
+                        "windshield-wiper"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "explosive-power",
+            "title": "Explosive Power",
+            "description": "Plyometrics & Ballistics",
+            "iconKey": "Zap",
+            "subcategories": [
+                {
+                    "id": "jumping",
+                    "title": "Jumping Plyometrics",
+                    "exerciseIds": [
+                        "box-jump",
+                        "depth-jump",
+                        "broad-jump",
+                        "vertical-jump",
+                        "hurdle-hop",
+                        "single-leg-box-jump",
+                        "skater-jump"
+                    ]
+                },
+                {
+                    "id": "upper-body-power",
+                    "title": "Upper Body Power",
+                    "exerciseIds": [
+                        "plyo-push-up",
+                        "med-ball-slam",
+                        "med-ball-chest-pass",
+                        "muscle-up-explosive"
+                    ]
+                },
+                {
+                    "id": "olympic-derivatives",
+                    "title": "Olympic Lifts",
+                    "exerciseIds": [
+                        "power-clean",
+                        "hang-clean",
+                        "snatch",
+                        "clean-and-jerk",
+                        "dumbbell-snatch"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "forgotten-muscles",
+            "title": "Forgotten Muscles",
+            "description": "Injury Prevention",
+            "iconKey": "ShieldPlus",
+            "subcategories": [
+                {
+                    "id": "neck",
+                    "title": "Neck",
+                    "exerciseIds": [
+                        "neck-flexion",
+                        "neck-extension",
+                        "neck-bridge"
+                    ]
+                },
+                {
+                    "id": "serratus",
+                    "title": "Serratus Anterior",
+                    "exerciseIds": [
+                        "serratus-punch",
+                        "scapular-push-up"
+                    ]
+                },
+                {
+                    "id": "tibialis",
+                    "title": "Tibialis Anterior",
+                    "exerciseIds": [
+                        "tibialis-raise",
+                        "heel-walk"
+                    ]
+                },
+                {
+                    "id": "grip",
+                    "title": "Grip Strength",
+                    "exerciseIds": [
+                        "plate-pinch",
+                        "farmers-walk-grip",
+                        "dead-hang-one-arm"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "functional-strongman",
+            "title": "Functional Strength",
+            "description": "Real World Power",
+            "iconKey": "Truck",
+            "subcategories": [
+                {
+                    "id": "carries",
+                    "title": "Loaded Carries",
+                    "exerciseIds": [
+                        "farmers-walk-heavy",
+                        "suitcase-carry",
+                        "overhead-carry",
+                        "zercher-carry",
+                        "yoke-walk"
+                    ]
+                },
+                {
+                    "id": "odd-objects",
+                    "title": "Odd Objects",
+                    "exerciseIds": [
+                        "atlas-stone",
+                        "sandbag-load",
+                        "sandbag-shoulder",
+                        "keg-press",
+                        "tire-flip"
+                    ]
+                },
+                {
+                    "id": "sled-work",
+                    "title": "Sled Work",
+                    "exerciseIds": [
+                        "sled-push",
+                        "sled-pull",
+                        "sled-drag-reverse"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "calisthenics",
+            "title": "Calisthenics",
+            "description": "Bodyweight Mastery",
+            "iconKey": "PersonStanding",
+            "subcategories": [
+                {
+                    "id": "static-skills",
+                    "title": "Static Skills",
+                    "exerciseIds": [
+                        "planche",
+                        "front-lever",
+                        "back-lever",
+                        "human-flag",
+                        "l-sit-hold",
+                        "handstand-hold"
+                    ]
+                },
+                {
+                    "id": "dynamic-skills",
+                    "title": "Dynamic Skills",
+                    "exerciseIds": [
+                        "muscle-up",
+                        "handstand-push-up-freestanding",
+                        "pistol-squat-bw",
+                        "shrimp-squat",
+                        "one-arm-push-up",
+                        "one-arm-pull-up"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "rotational",
+            "title": "Rotational",
+            "description": "Unconventional Lines",
+            "iconKey": "RotateCw",
+            "subcategories": [
+                {
+                    "id": "landmine",
+                    "title": "Landmine Work",
+                    "exerciseIds": [
+                        "landmine-press",
+                        "landmine-twist",
+                        "landmine-row",
+                        "meadows-row"
+                    ]
+                },
+                {
+                    "id": "kettlebell-flows",
+                    "title": "Kettlebell Flows",
+                    "exerciseIds": [
+                        "turkish-get-up",
+                        "kettlebell-windmill",
+                        "kettlebell-snatch",
+                        "kettlebell-clean"
+                    ]
+                },
+                {
+                    "id": "cable-rotation",
+                    "title": "Cable Rotation",
+                    "exerciseIds": [
+                        "woodchopper-high-to-low",
+                        "woodchopper-low-to-high",
+                        "pallof-press-rotation"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "hybrids",
+            "title": "Hybrids",
+            "description": "Force Multipliers",
+            "iconKey": "Workflow",
+            "subcategories": [
+                {
+                    "id": "combo-movements",
+                    "title": "Combo Movements",
+                    "exerciseIds": [
+                        "renegade-row",
+                        "thruster",
+                        "bear-complex",
+                        "man-maker"
+                    ]
+                },
+                {
+                    "id": "unconventional",
+                    "title": "Unconventional Lifts",
+                    "exerciseIds": [
+                        "zercher-deadlift",
+                        "zercher-squat",
+                        "jefferson-deadlift",
+                        "steinborn-squat",
+                        "hack-squat-barbell"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "cardio",
+            "title": "Cardio & Conditioning",
+            "description": "Heart Health & Endurance",
+            "iconKey": "HeartPulse",
+            "subcategories": [
+                {
+                    "id": "steady-state",
+                    "title": "LISS (Low Intensity)",
+                    "exerciseIds": [
+                        "running",
+                        "cycling",
+                        "rowing",
+                        "elliptical",
+                        "rucking",
+                        "swimming"
+                    ]
+                },
+                {
+                    "id": "hiit",
+                    "title": "HIIT (High Intensity)",
+                    "exerciseIds": [
+                        "sprint-intervals",
+                        "assault-bike",
+                        "burpees",
+                        "mountain-climbers",
+                        "jump-rope-double-unders",
+                        "battle-rope-slam"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "flexibility",
+            "title": "Flexibility & Mobility",
+            "description": "Range of Motion Health",
+            "iconKey": "MoveHorizontal",
+            "subcategories": [
+                {
+                    "id": "dynamic-mobility",
+                    "title": "Dynamic Mobility",
+                    "exerciseIds": [
+                        "dynamic-stretching",
+                        "cars-shoulders",
+                        "cars-hips",
+                        "world-greatest-stretch",
+                        "thoracic-rotation"
+                    ]
+                },
+                {
+                    "id": "static-stretching",
+                    "title": "Static Stretching",
+                    "exerciseIds": [
+                        "pigeon-pose",
+                        "couch-stretch-static",
+                        "hamstring-stretch",
+                        "chest-stretch-doorway"
+                    ]
+                },
+                {
+                    "id": "smyofascial",
+                    "title": "Self Myofascial Release",
+                    "exerciseIds": [
+                        "foam-rolling",
+                        "lacrosse-ball-pecs",
+                        "lacrosse-ball-glutes"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        },
+        {
+            "id": "animal-flow",
+            "title": "Animal Flow",
+            "description": "Primal Movement",
+            "iconKey": "Cat",
+            "subcategories": [
+                {
+                    "id": "locomotion",
+                    "title": "Locomotion",
+                    "exerciseIds": [
+                        "beast-crawl",
+                        "crab-walk",
+                        "bear-crawl",
+                        "duck-walk",
+                        "frog-hop"
+                    ]
+                },
+                {
+                    "id": "switches",
+                    "title": "Switches & Transitions",
+                    "exerciseIds": [
+                        "underswitch",
+                        "side-kick-through",
+                        "scorpion-reach",
+                        "ape-reach"
+                    ]
+                }
+            ],
+            "exerciseIds": []
+        }
+    ],
+    "exercises": [
+        {
+            "id": "stomach-vacuum",
+            "name": "Stomach Vacuum",
+            "description": "Isometric contraction of the Transverse Abdominis to tighten the waist.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Transverse Abdominis"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "dead-bug",
+            "name": "Dead Bug",
+            "description": "Core stability exercise moving opposite limbs while keeping spine flat.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Core",
+                "Hip Flexors"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "bird-dog",
+            "name": "Bird Dog",
+            "description": "Spinal stability movement extending opposite arm and leg.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Spinal Stabilizers",
+                "Core",
+                "Glutes"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "hollow-body-hold",
+            "name": "Hollow Body Hold",
+            "description": "Gymnastic core hold creating a 'dish' shape.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Rectus Abdominis",
+                "Hip Flexors"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "pallof-press",
+            "name": "Pallof Press",
+            "description": "Anti-rotation hold resisting sideways cable tension.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Obliques",
+                "Core"
+            ],
+            "equipment": [
+                "Cable",
+                "Band"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "rkc-plank",
+            "name": "RKC Plank",
+            "description": "High-tension plank maximizing full body contraction.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Core",
+                "Glutes",
+                "Quads"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "swiss-ball-stir-pot",
+            "name": "Swiss Ball Stir the Pot",
+            "description": "Dynamic plank rolling elbows in circles on a stability ball.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Core"
+            ],
+            "equipment": [
+                "Stability Ball"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "jefferson-curl",
+            "name": "Jefferson Curl",
+            "description": "Segmental spinal flexion and extension with weight.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Spinal Erectors",
+                "Hamstrings"
+            ],
+            "equipment": [
+                "Barbell",
+                "Kettlebell"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "cat-cow",
+            "name": "Cat-Cow",
+            "description": "Gentle spinal mobility flow.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Spine"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "bench-press",
+            "name": "Barbell Bench Press",
+            "description": "The king of upper body pushing strength.",
+            "category": "upper-push",
+            "primaryMuscles": [
+                "Chest"
+            ],
+            "secondaryMuscles": [
+                "Triceps",
+                "Front Delts"
+            ],
+            "equipment": [
+                "Barbell",
+                "Bench"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "push-up",
+            "name": "Push-Up",
+            "description": "Classic bodyweight chest and tricep builder.",
+            "category": "upper-push",
+            "primaryMuscles": [
+                "Chest",
+                "Core"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "overhead-press",
+            "name": "Overhead Press",
+            "description": "Standing barbell press for shoulder strength.",
+            "category": "upper-push",
+            "primaryMuscles": [
+                "Shoulders"
+            ],
+            "secondaryMuscles": [
+                "Triceps",
+                "Core"
+            ],
+            "equipment": [
+                "Barbell"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "lateral-raise",
+            "name": "Dumbbell Lateral Raise",
+            "description": "Isolation movement for the side delts to build width.",
+            "category": "upper-push",
+            "primaryMuscles": [
+                "Side Delts"
+            ],
+            "equipment": [
+                "Dumbbells"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "skullcrushers",
+            "name": "Skullcrushers",
+            "description": "Tricep isolation exercise lying on a bench.",
+            "category": "upper-push",
+            "primaryMuscles": [
+                "Triceps"
+            ],
+            "equipment": [
+                "EZ Bar",
+                "Dumbbells"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "pull-up",
+            "name": "Pull-Up",
+            "description": "Vertical pulling exercise for back width.",
+            "category": "upper-pull",
+            "primaryMuscles": [
+                "Lats"
+            ],
+            "secondaryMuscles": [
+                "Biceps"
+            ],
+            "equipment": [
+                "Pull-up Bar"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "barbell-row",
+            "name": "Barbell Row",
+            "description": "Bent-over row for back thickness and strength.",
+            "category": "upper-pull",
+            "primaryMuscles": [
+                "Lats",
+                "Rhomboids"
+            ],
+            "equipment": [
+                "Barbell"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "deadlift",
+            "name": "Deadlift",
+            "description": "Full body posterior chain strength builder.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Hamstrings",
+                "Glutes",
+                "Back"
+            ],
+            "equipment": [
+                "Barbell"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "squat",
+            "name": "Barbell Back Squat",
+            "description": "The king of lower body exercises.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Quads",
+                "Glutes"
+            ],
+            "equipment": [
+                "Barbell",
+                "Rack"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "leg-press",
+            "name": "Leg Press",
+            "description": "Machine-based heavy leg builder.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Quads"
+            ],
+            "equipment": [
+                "Machine"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "bulgarian-split-squat",
+            "name": "Bulgarian Split Squat",
+            "description": "Unilateral leg exercise for balance and hypertrophy.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Quads",
+                "Glutes"
+            ],
+            "equipment": [
+                "Dumbbells",
+                "Bench"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "romanian-deadlift",
+            "name": "Romanian Deadlift",
+            "description": "Hip hinge focusing on hamstring stretch.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Hamstrings",
+                "Glutes"
+            ],
+            "equipment": [
+                "Barbell"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "calf-raise",
+            "name": "Standing Calf Raise",
+            "description": "Isolation for the gastrocnemius muscle.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Calves"
+            ],
+            "equipment": [
+                "Machine",
+                "Dumbbell"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "cable-crunch",
+            "name": "Cable Crunch",
+            "description": "Weighted abdominal flexion using a high cable.",
+            "category": "superficial-core",
+            "primaryMuscles": [
+                "Rectus Abdominis"
+            ],
+            "equipment": [
+                "Cable"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "russian-twist",
+            "name": "Russian Twist",
+            "description": "Rotational core exercise sitting on floor.",
+            "category": "superficial-core",
+            "primaryMuscles": [
+                "Obliques"
+            ],
+            "equipment": [
+                "Medicine Ball"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "box-jump",
+            "name": "Box Jump",
+            "description": "Explosive jump onto a box.",
+            "category": "explosive-power",
+            "primaryMuscles": [
+                "Quads",
+                "Glutes"
+            ],
+            "equipment": [
+                "Box"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "farmers-walk",
+            "name": "Farmer's Walk",
+            "description": "Walking with heavy weights for grip and core.",
+            "category": "functional-strongman",
+            "primaryMuscles": [
+                "Grip",
+                "Traps",
+                "Core"
+            ],
+            "equipment": [
+                "Dumbbells"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "face-pulls",
+            "name": "Face Pulls",
+            "description": "Rear delt and rotator cuff exercise for posture.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Rear Delts",
+                "Rotator Cuff"
+            ],
+            "equipment": [
+                "Cable"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "incline-bench",
+            "name": "Incline Bench Press",
+            "description": "Pressing movement targeting the upper chest.",
+            "category": "upper-push",
+            "primaryMuscles": [
+                "Upper Chest",
+                "Front Delts"
+            ],
+            "equipment": [
+                "Barbell",
+                "Bench"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "dips",
+            "name": "Dips",
+            "description": "Bodyweight pushing exercise for chest and triceps.",
+            "category": "upper-push",
+            "primaryMuscles": [
+                "Triceps",
+                "Chest"
+            ],
+            "equipment": [
+                "Dip Bars"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "tricep-pushdown",
+            "name": "Tricep Pushdown",
+            "description": "Cable isolation for triceps.",
+            "category": "upper-push",
+            "primaryMuscles": [
+                "Triceps"
+            ],
+            "equipment": [
+                "Cable"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "lat-pulldown",
+            "name": "Lat Pulldown",
+            "description": "Vertical pull machine for back width.",
+            "category": "upper-pull",
+            "primaryMuscles": [
+                "Lats"
+            ],
+            "equipment": [
+                "Cable"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "dumbbell-row",
+            "name": "Dumbbell Row",
+            "description": "Unilateral rowing for back thickness.",
+            "category": "upper-pull",
+            "primaryMuscles": [
+                "Lats",
+                "Rhomboids"
+            ],
+            "equipment": [
+                "Dumbbell"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "bicep-curl",
+            "name": "Barbell Bicep Curl",
+            "description": "Classic bicep mass builder.",
+            "category": "upper-pull",
+            "primaryMuscles": [
+                "Biceps"
+            ],
+            "equipment": [
+                "Barbell"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "hammer-curl",
+            "name": "Hammer Curl",
+            "description": "Neutral grip curl targeting brachialis.",
+            "category": "upper-pull",
+            "primaryMuscles": [
+                "Biceps",
+                "Forearms"
+            ],
+            "equipment": [
+                "Dumbbells"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "leg-curl",
+            "name": "Lying Leg Curl",
+            "description": "Hamstring isolation machine.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Hamstrings"
+            ],
+            "equipment": [
+                "Machine"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "hip-thrust",
+            "name": "Hip Thrust",
+            "description": "Loaded glute bridge for maximum glute hypertrophy.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Glutes"
+            ],
+            "equipment": [
+                "Barbell",
+                "Bench"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "hanging-leg-raise",
+            "name": "Hanging Leg Raise",
+            "description": "Advanced core flexion hanging from a bar.",
+            "category": "superficial-core",
+            "primaryMuscles": [
+                "Rectus Abdominis"
+            ],
+            "equipment": [
+                "Pull-up Bar"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "ab-wheel",
+            "name": "Ab Wheel Rollout",
+            "description": "Anti-extension core rollout.",
+            "category": "superficial-core",
+            "primaryMuscles": [
+                "Core"
+            ],
+            "equipment": [
+                "Ab Wheel"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "bicycle-crunch",
+            "name": "Bicycle Crunch",
+            "description": "Dynamic core exercise hitting abs and obliques.",
+            "category": "superficial-core",
+            "primaryMuscles": [
+                "Rectus Abdominis",
+                "Obliques"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "med-ball-slam",
+            "name": "Med Ball Slam",
+            "description": "Explosive full body slam for power.",
+            "category": "explosive-power",
+            "primaryMuscles": [
+                "Core",
+                "Lats"
+            ],
+            "equipment": [
+                "Medicine Ball"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "plyo-push-up",
+            "name": "Plyometric Push-Up",
+            "description": "Explosive push-up leaving the ground.",
+            "category": "explosive-power",
+            "primaryMuscles": [
+                "Chest",
+                "Triceps"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "serratus-punch",
+            "name": "Serratus Punch",
+            "description": "Scapular protraction exercise.",
+            "category": "forgotten-muscles",
+            "primaryMuscles": [
+                "Serratus Anterior"
+            ],
+            "equipment": [
+                "Dumbbell",
+                "Band"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "tibialis-raise",
+            "name": "Tibialis Raise",
+            "description": "Shin muscle exercise for knee health.",
+            "category": "forgotten-muscles",
+            "primaryMuscles": [
+                "Tibialis Anterior"
+            ],
+            "equipment": [
+                "Wall",
+                "Tib Bar"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "farmers-walk-heavy",
+            "name": "Heavy Farmer's Walk",
+            "description": "Walking with heavy weights for strongman conditioning.",
+            "category": "functional-strongman",
+            "primaryMuscles": [
+                "Traps",
+                "Link"
+            ],
+            "equipment": [
+                "Dumbbells"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "sled-push",
+            "name": "Sled Push",
+            "description": "Conditioning exercise pushing a weighted sled.",
+            "category": "functional-strongman",
+            "primaryMuscles": [
+                "Quads",
+                "Glutes",
+                "Cardio"
+            ],
+            "equipment": [
+                "Sled"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "planche",
+            "name": "Planche",
+            "description": "Static hold with body parallel to ground.",
+            "category": "calisthenics",
+            "primaryMuscles": [
+                "Shoulders",
+                "Core"
+            ],
+            "equipment": [
+                "Floor"
+            ],
+            "difficulty": "Elite"
+        },
+        {
+            "id": "muscle-up",
+            "name": "Muscle Up",
+            "description": "Explosive pull-up transitioning into a dip.",
+            "category": "calisthenics",
+            "primaryMuscles": [
+                "Lats",
+                "Triceps",
+                "Chest"
+            ],
+            "equipment": [
+                "Bar",
+                "Rings"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "landmine-press",
+            "name": "Landmine Press",
+            "description": "Unilateral shoulder press with leverage.",
+            "category": "rotational",
+            "primaryMuscles": [
+                "Shoulders",
+                "Upper Chest"
+            ],
+            "equipment": [
+                "Landmine"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "renegade-row",
+            "name": "Renegade Row",
+            "description": "Plank row hybrid for anti-rotation core strength.",
+            "category": "hybrids",
+            "primaryMuscles": [
+                "Core",
+                "Lats"
+            ],
+            "equipment": [
+                "Dumbbells"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "beast-crawl",
+            "name": "Beast Crawl",
+            "description": "Quadrupedal movement pattern.",
+            "category": "animal-flow",
+            "primaryMuscles": [
+                "Full Body"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "running",
+            "name": "Running",
+            "description": "Fundamental human locomotion.",
+            "category": "cardio",
+            "primaryMuscles": [
+                "Legs",
+                "Heart"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "yoga",
+            "name": "Yoga",
+            "description": "Mind-body practice for flexibility.",
+            "category": "flexibility",
+            "primaryMuscles": [
+                "Full Body"
+            ],
+            "equipment": [
+                "Mat"
+            ],
+            "difficulty": "All Levels"
+        },
+        {
+            "id": "foam-rolling",
+            "name": "Foam Rolling",
+            "description": "Self-myofascial release technique.",
+            "category": "flexibility",
+            "primaryMuscles": [
+                "Fascia"
+            ],
+            "equipment": [
+                "Foam Roller"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "clamshells",
+            "name": "Clamshells",
+            "description": "Glute medius isolation for hip stability.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Glute Medius"
+            ],
+            "equipment": [
+                "Band"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "banded-lateral-walk",
+            "name": "Banded Lateral Walk",
+            "description": "Walking sideways with band tension for hips.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Glutes",
+                "Hips"
+            ],
+            "equipment": [
+                "Mini Band"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "single-leg-rdl",
+            "name": "Single Leg RDL",
+            "description": "Unilateral hinge for balance and hamstring strength.",
+            "category": "inner-body",
+            "primaryMuscles": [
+                "Hamstrings",
+                "Glutes",
+                "Balance"
+            ],
+            "equipment": [
+                "Dumbbell"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "decline-bench",
+            "name": "Decline Bench Press",
+            "description": "Bench press with feet elevated targeting lower chest.",
+            "category": "upper-push",
+            "primaryMuscles": [
+                "Lower Chest"
+            ],
+            "equipment": [
+                "Barbell",
+                "Bench"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "frontal-raise",
+            "name": "Front Raise",
+            "description": "Anterior deltoid isolation.",
+            "category": "upper-push",
+            "primaryMuscles": [
+                "Front Delts"
+            ],
+            "equipment": [
+                "Dumbbells"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "seated-cable-row",
+            "name": "Seated Cable Row",
+            "description": "Horizontal row for mid-back thickness.",
+            "category": "upper-pull",
+            "primaryMuscles": [
+                "Lats",
+                "Rhomboids"
+            ],
+            "equipment": [
+                "Cable"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "preacher-curl",
+            "name": "Preacher Curl",
+            "description": "Bicep isolation removing momentum.",
+            "category": "upper-pull",
+            "primaryMuscles": [
+                "Biceps"
+            ],
+            "equipment": [
+                "EZ Bar",
+                "Bench"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "front-squat",
+            "name": "Front Squat",
+            "description": "Squat with bar on front delts, targeting quads and core.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Quads",
+                "Upper Back"
+            ],
+            "equipment": [
+                "Barbell"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "goblet-squat",
+            "name": "Goblet Squat",
+            "description": "Squat holding dumbbell at chest, great for beginners.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Quads",
+                "Glutes"
+            ],
+            "equipment": [
+                "Dumbbell"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "glute-bridge",
+            "name": "Glute Bridge",
+            "description": "Bodyweight hip extension from floor.",
+            "category": "lower-body",
+            "primaryMuscles": [
+                "Glutes"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "woodchopper",
+            "name": "Cable Woodchopper",
+            "description": "Rotational power movement across the body.",
+            "category": "superficial-core",
+            "primaryMuscles": [
+                "Obliques"
+            ],
+            "equipment": [
+                "Cable"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "depth-jump",
+            "name": "Depth Jump",
+            "description": "Stepping off box and immediately jumping up.",
+            "category": "explosive-power",
+            "primaryMuscles": [
+                "Legs"
+            ],
+            "equipment": [
+                "Box"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "neck-flexion",
+            "name": "Neck Flexion",
+            "description": "Strengthening the front neck muscles.",
+            "category": "forgotten-muscles",
+            "primaryMuscles": [
+                "Neck"
+            ],
+            "equipment": [
+                "Plate"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "sandbag-load",
+            "name": "Sandbag Load",
+            "description": "Lifting unstable object to a platform.",
+            "category": "functional-strongman",
+            "primaryMuscles": [
+                "Full Body"
+            ],
+            "equipment": [
+                "Sandbag"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "atlas-stone",
+            "name": "Atlas Stone Lift",
+            "description": "Lifting a concrete stone to a platform.",
+            "category": "functional-strongman",
+            "primaryMuscles": [
+                "Posterior Chain"
+            ],
+            "equipment": [
+                "Stone"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "front-lever",
+            "name": "Front Lever",
+            "description": "Static hold hanging horizontally from bar.",
+            "category": "calisthenics",
+            "primaryMuscles": [
+                "Lats",
+                "Core"
+            ],
+            "equipment": [
+                "Bar"
+            ],
+            "difficulty": "Elite"
+        },
+        {
+            "id": "human-flag",
+            "name": "Human Flag",
+            "description": "Sideways static hold on a vertical pole.",
+            "category": "calisthenics",
+            "primaryMuscles": [
+                "Obliques",
+                "Shoulders"
+            ],
+            "equipment": [
+                "Pole"
+            ],
+            "difficulty": "Elite"
+        },
+        {
+            "id": "turkish-get-up",
+            "name": "Turkish Get-Up",
+            "description": "Standing up from floor with weight held overhead.",
+            "category": "rotational",
+            "primaryMuscles": [
+                "Full Body"
+            ],
+            "equipment": [
+                "Kettlebell"
+            ],
+            "difficulty": "Advanced"
+        },
+        {
+            "id": "cossack-squat",
+            "name": "Cossack Squat",
+            "description": "Side-to-side deep squat for mobility and strength.",
+            "category": "hybrids",
+            "primaryMuscles": [
+                "Adductors",
+                "Quads"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Intermediate"
+        },
+        {
+            "id": "crab-walk",
+            "name": "Crab Walk",
+            "description": "Walking on hands and feet in reverse bridge.",
+            "category": "animal-flow",
+            "primaryMuscles": [
+                "Triceps",
+                "Glutes"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "jump-rope",
+            "name": "Jump Rope",
+            "description": "Bouncing conditioning for calves and coordination.",
+            "category": "cardio",
+            "primaryMuscles": [
+                "Calves",
+                "Cardio"
+            ],
+            "equipment": [
+                "Rope"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "rowing",
+            "name": "Rowing",
+            "description": "Full body cardio pulling movement.",
+            "category": "cardio",
+            "primaryMuscles": [
+                "Back",
+                "Legs"
+            ],
+            "equipment": [
+                "Erg"
+            ],
+            "difficulty": "Beginner"
+        },
+        {
+            "id": "dynamic-stretching",
+            "name": "Dynamic Stretching",
+            "description": "Moving through range of motion to warm up.",
+            "category": "flexibility",
+            "primaryMuscles": [
+                "Full Body"
+            ],
+            "equipment": [
+                "None"
+            ],
+            "difficulty": "Beginner"
+        }
+    ]
+}

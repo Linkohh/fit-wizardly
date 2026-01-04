@@ -43,7 +43,7 @@ export default function Index() {
       </section>
 
       {/* Zone 2: Middle Content - Feature Cards & Motivation */}
-      <div className="bg-gradient-to-b from-[#1a0b2e] via-[#0F0518] to-[#08020D] pb-32 pt-8 sm:pt-12 relative z-20 w-full -mt-8 sm:-mt-12 md:-mt-16">
+      <div className="bg-gradient-to-b from-background via-purple-50/30 to-background dark:from-[#1a0b2e] dark:via-[#0F0518] dark:to-[#08020D] pb-32 pt-8 sm:pt-12 relative z-20 w-full -mt-8 sm:-mt-12 md:-mt-16 transition-colors duration-500">
         {/* Quote sits comfortably inside the dark background */}
         <div className="container max-w-4xl mx-auto px-4 mb-20 pt-8 sm:pt-12 md:pt-16">
           <DailyQuote />

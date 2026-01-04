@@ -13,6 +13,9 @@ import WizardPage from "./pages/Wizard";
 import PlanPage from "./pages/Plan";
 import NotFound from "./pages/NotFound";
 import ClientsPage from "./pages/Clients";
+import ExerciseCategories from "./pages/exercises/ExerciseCategories";
+import ExerciseList from "./pages/exercises/ExerciseList";
+import ExerciseDetail from "./pages/exercises/ExerciseDetail";
 import { TrainerGuard } from "./components/TrainerGuard";
 
 const queryClient = new QueryClient();
@@ -52,6 +55,9 @@ function AnimatedRoutes() {
         <Route path="/" element={<Index />} />
         <Route path="/wizard" element={<WizardPage />} />
         <Route path="/plan" element={<PlanPage />} />
+        <Route path="/exercises" element={<ExerciseCategories />} />
+        <Route path="/exercises/:categoryId" element={<ExerciseList />} />
+        <Route path="/exercises/:categoryId/:exerciseId" element={<ExerciseDetail />} />
         <Route path="/clients" element={
           <TrainerGuard>
             <ClientsPage />
