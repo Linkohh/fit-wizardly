@@ -24,21 +24,35 @@ export default function Index() {
       {/* Hero */}
       <WelcomeHero />
 
-      {/* BRIDGE: Premium Transition - Only visible in dark mode */}
-      <section className="relative h-32 w-full -mt-[2px] z-30 pointer-events-none overflow-hidden dark:block hidden">
-        {/* 1. Wide Atmospheric Purple Bloom - centered ellipse shape */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[120%] h-48 bg-[radial-gradient(ellipse_80%_100%_at_50%_50%,rgba(124,58,237,0.25)_0%,transparent_70%)]" />
-        {/* 2. Magenta Glow Spread - ellipse for natural fade */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[100%] h-32 bg-[radial-gradient(ellipse_70%_100%_at_50%_50%,rgba(219,39,119,0.4)_0%,transparent_60%)]" />
-        {/* 3. Intense Pink Core Glow - tighter ellipse */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[80%] h-16 bg-[radial-gradient(ellipse_60%_100%_at_50%_50%,rgba(236,72,153,0.6)_0%,transparent_50%)]" />
-        {/* 4. Bright White-Hot Center Line - fades at edges */}
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[70%] h-[3px] bg-[radial-gradient(ellipse_50%_100%_at_50%_50%,rgba(255,255,255,0.9)_0%,transparent_70%)]" />
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-1/2 translate-y-1/2 w-[50%] h-[2px] bg-[radial-gradient(ellipse_40%_100%_at_50%_50%,rgba(253,244,255,1)_0%,transparent_60%)]" />
-      </section>
+      {/* BRIDGE: Premium Transition - Adaptive Horizon Bloom (Divine Dawn / Cosmic Abyss) */}
+      <section
+        className="relative h-40 w-full -mt-[2px] z-30 pointer-events-none overflow-hidden"
+        style={{
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%), radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%), radial-gradient(ellipse 70% 70% at 50% 50%, black 40%, transparent 100%)',
+          maskComposite: 'intersect',
+          WebkitMaskComposite: 'source-in'
+        }}
+      >
 
-      {/* Light mode subtle divider */}
-      <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent dark:hidden" />
+        {/* Layer 1: Base Atmosphere (Wide & Faint) - 30% Vertical Compression */}
+        <div className="absolute inset-0 w-[140%] left-1/2 -translate-x-1/2
+          bg-[radial-gradient(ellipse_60%_30%_at_50%_50%,rgba(236,72,153,0.05)_0%,transparent_70%)] 
+          dark:bg-[radial-gradient(ellipse_80%_30%_at_50%_50%,rgba(124,58,237,0.08)_0%,transparent_70%)]"
+        />
+
+        {/* Layer 2: Core Bloom (Intense & Focused) - 30% Vertical Compression */}
+        <div className="absolute inset-0 w-[90%] left-1/2 -translate-x-1/2
+          bg-[radial-gradient(ellipse_60%_30%_at_50%_50%,rgba(236,72,153,0.3)_0%,transparent_50%)] 
+          dark:bg-[radial-gradient(ellipse_60%_30%_at_50%_50%,rgba(236,72,153,0.3)_0%,transparent_50%)]"
+        />
+
+        {/* Layer 3: Horizon Line (Sharp & Bright) */}
+        <div className="absolute inset-0 w-[70%] h-full left-1/2 -translate-x-1/2
+          bg-[radial-gradient(ellipse_50%_2px_at_50%_50%,rgba(255,255,255,0.8)_0%,transparent_70%)] 
+          dark:bg-[radial-gradient(ellipse_50%_2px_at_50%_50%,rgba(255,255,255,0.9)_0%,transparent_70%)]"
+        />
+      </section>
 
       {/* Zone 2: Middle Content - Feature Cards & Motivation */}
       <div className="bg-gradient-to-b from-background via-purple-50/30 to-background dark:from-[#1a0b2e] dark:via-[#0F0518] dark:to-[#08020D] pb-32 pt-8 sm:pt-12 relative z-20 w-full -mt-8 sm:-mt-12 md:-mt-16 transition-colors duration-500">
