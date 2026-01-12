@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { usePlanStore } from '@/stores/planStore';
 import { MUSCLE_DATA, type ExercisePrescription } from '@/types/fitness';
-import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, ChevronDown, ChevronUp, AlertTriangle, Lightbulb, ArrowLeftRight, Calculator } from 'lucide-react';
+import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, ChevronDown, ChevronUp, AlertTriangle, Lightbulb, ArrowLeftRight, Calculator, PlayCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { OneRepMaxCalculator } from '@/components/tools/OneRepMaxCalculator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -14,19 +15,103 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ExerciseSwapModal } from '@/components/plan/ExerciseSwapModal';
+import { WisdomBubble } from '@/components/wisdom/WisdomBubble';
+import { useWisdomStore } from '@/stores/wisdomStore';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function PlanPage() {
+  const navigate = useNavigate();
   const { currentPlan, swapExercise } = usePlanStore();
   const [redactSensitive, setRedactSensitive] = useState(true);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; exerciseIndex: number; exercise: ExercisePrescription } | null>(null);
+  const [isLoadingPlan, setIsLoadingPlan] = useState(true);
+  const { setContext } = useWisdomStore();
+
+  // Simulate loading state on mount
+  useEffect(() => {
+    if (currentPlan) {
+      const timer = setTimeout(() => setIsLoadingPlan(false), 400);
+      return () => clearTimeout(timer);
+    } else {
+      setIsLoadingPlan(false);
+    }
+  }, [currentPlan]);
+
+  // Set Wisdom AI context when plan changes
+  useEffect(() => {
+    if (currentPlan) {
+      setContext({
+        planId: currentPlan.id,
+        exerciseId: null,
+        weekNumber: 1,
+        phase: currentPlan.selections.optPhase,
+      });
+    }
+  }, [currentPlan, setContext]);
+
+  // Show skeleton while loading
+  if (isLoadingPlan && currentPlan) {
+    return (
+      <main className="container max-w-5xl mx-auto px-4 py-8 animate-fade-in">
+        {/* Header skeleton */}
+        <div className="flex items-center justify-between mb-6">
+          <Skeleton variant="shimmer" className="h-8 w-56 rounded-lg" />
+          <div className="flex gap-2">
+            <Skeleton variant="shimmer" className="h-10 w-32 rounded-xl" />
+            <Skeleton variant="shimmer" className="h-10 w-32 rounded-xl" />
+          </div>
+        </div>
+
+        {/* Summary skeleton */}
+        <Card className="mb-6">
+          <CardContent className="p-6 flex flex-wrap gap-6">
+            <Skeleton variant="shimmer" className="h-10 w-32 rounded-md" />
+            <Skeleton variant="shimmer" className="h-10 w-40 rounded-md" />
+            <Skeleton variant="shimmer" className="h-10 w-36 rounded-md" />
+          </CardContent>
+        </Card>
+
+        {/* Workout days skeleton */}
+        <div className="space-y-6">
+          {[1, 2, 3].map(dayIndex => (
+            <Card key={dayIndex}>
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <Skeleton variant="shimmer" className="h-6 w-32 rounded-md" />
+                  <Skeleton variant="shimmer" className="h-9 w-36 rounded-lg" />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {[1, 2, 3, 4].map(exerciseIndex => (
+                  <div key={exerciseIndex} className="flex gap-4 p-3 rounded-lg border border-border/50">
+                    {/* Exercise details skeleton */}
+                    <div className="flex-1 space-y-2">
+                      <Skeleton variant="shimmer" className="h-5 w-40 rounded-md" />
+                      <Skeleton variant="shimmer" className="h-4 w-32 rounded-md" />
+                    </div>
+
+                    {/* Badges skeleton */}
+                    <div className="flex gap-2">
+                      <Skeleton variant="shimmer" className="h-6 w-16 rounded-full" />
+                      <Skeleton variant="shimmer" className="h-6 w-16 rounded-full" />
+                      <Skeleton variant="shimmer" className="h-6 w-16 rounded-full" />
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </main>
+    );
+  }
 
   if (!currentPlan) {
     return (
       <main className="container max-w-4xl mx-auto px-4 py-20 text-center">
-        <div className="mx-auto w-20 h-20 rounded-full gradient-primary flex items-center justify-center mb-6 shadow-glow">
+        <div className="mx-auto w-20 h-20 rounded-full gradient-primary flex items-center justify-center mb-6 shadow-glow animate-float">
           <Wand2 className="h-10 w-10 text-primary-foreground" />
         </div>
         <h1 className="text-2xl font-bold mb-4">No Plan Generated Yet</h1>
@@ -179,7 +264,18 @@ export default function PlanPage() {
         {currentPlan.workoutDays.map((day) => (
           <Card key={day.dayIndex} className="hover:shadow-lg transition-shadow hover:border-primary/30">
             <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent rounded-t-lg">
-              <CardTitle className="text-primary">{day.name}</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-primary">{day.name}</CardTitle>
+                <Button
+                  variant="gradient"
+                  size="sm"
+                  className="gap-2"
+                  onClick={() => navigate(`/workout/${currentPlan.id}/${day.dayIndex}`)}
+                >
+                  <PlayCircle className="h-4 w-4" />
+                  Start Workout
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="divide-y">
@@ -311,6 +407,9 @@ export default function PlanPage() {
           allowedEquipment={currentPlan.selections.equipment}
         />
       )}
+
+      {/* Wisdom AI Floating Bubble */}
+      <WisdomBubble />
     </main>
   );
 }

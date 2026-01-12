@@ -32,6 +32,9 @@ export function Header() {
   }, {
     path: '/exercises',
     label: 'Exercises'
+  }, {
+    path: '/circles',
+    label: 'Circles'
   }, ...(isTrainerMode ? [{
     path: '/clients',
     label: 'Clients'

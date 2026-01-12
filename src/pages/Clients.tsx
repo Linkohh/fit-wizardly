@@ -1,35 +1,26 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function ClientsPage() {
+    const navigate = useNavigate();
+
     return (
-        <div className="container px-4 py-8 mx-auto animate-in fade-in zoom-in duration-500">
-            <div className="flex items-center gap-4 mb-8">
-                <div className="p-3 rounded-lg bg-primary/10">
-                    <Users className="w-8 h-8 text-primary" />
-                </div>
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Clients</h1>
-                    <p className="text-muted-foreground">Manage your clients and their workout plans</p>
-                </div>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {/* Placeholder for client list */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Total Clients</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold">0</p>
-                        <p className="text-sm text-muted-foreground">Active clients</p>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="mt-12 text-center p-12 border rounded-lg bg-secondary/10 border-dashed">
-                <p className="text-muted-foreground">Client management features coming soon</p>
-            </div>
-        </div>
+        <main className="container max-w-4xl mx-auto px-4 py-12">
+            <EmptyState
+                icon={Users}
+                title="Client Management Coming Soon"
+                description="We're building powerful tools to help you manage clients, track their progress, and scale your training business. In the meantime, explore Accountability Circles to connect with your community!"
+                action={{
+                    label: "Explore Circles",
+                    onClick: () => navigate('/circles'),
+                    variant: 'gradient'
+                }}
+                secondaryAction={{
+                    label: "Back to Dashboard",
+                    onClick: () => navigate('/')
+                }}
+            />
+        </main>
     );
 }

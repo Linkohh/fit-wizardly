@@ -17,6 +17,11 @@ import ExerciseCategories from "./pages/exercises/ExerciseCategories";
 import ExerciseList from "./pages/exercises/ExerciseList";
 import ExerciseDetail from "./pages/exercises/ExerciseDetail";
 import { TrainerGuard } from "./components/TrainerGuard";
+import { WorkoutLogger } from "./components/logging/WorkoutLogger";
+import CirclesPage from "./pages/Circles";
+import { useAuthStore } from "./stores/authStore";
+import { CommandPalette } from "@/components/CommandPalette";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +51,17 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Auth initialization wrapper
+function AuthProvider({ children }: { children: React.ReactNode }) {
+  const { initialize } = useAuthStore();
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  return <>{children}</>;
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
 
@@ -55,6 +71,7 @@ function AnimatedRoutes() {
         <Route path="/" element={<Index />} />
         <Route path="/wizard" element={<WizardPage />} />
         <Route path="/plan" element={<PlanPage />} />
+        <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
         <Route path="/exercises" element={<ExerciseCategories />} />
         <Route path="/exercises/:categoryId" element={<ExerciseList />} />
         <Route path="/exercises/:categoryId/:exerciseId" element={<ExerciseDetail />} />
@@ -64,6 +81,7 @@ function AnimatedRoutes() {
           </TrainerGuard>
         }
         />
+        <Route path="/circles" element={<CirclesPage />} />
         <Route path="/legal" element={<LegalPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
@@ -75,23 +93,31 @@ import LegalPage from "./pages/Legal";
 import { Footer } from "@/components/Footer";
 import { ConsentModal } from "@/components/legal/ConsentModal";
 
-const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ThemeProvider>
-          <Toaster />
-          <Sonner />
-          <div className="min-h-screen flex flex-col bg-background transition-colors duration-300">
-            <Header />
-            <ConsentModal />
-            <AnimatedRoutes />
-            <Footer />
-          </div>
-        </ThemeProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
-);
+const App = () => {
+  // Monitor network status and show notifications
+  useNetworkStatus();
+
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <Toaster />
+              <Sonner />
+              <CommandPalette />
+              <div className="min-h-screen flex flex-col bg-background transition-colors duration-300">
+                <Header />
+                <ConsentModal />
+                <AnimatedRoutes />
+                <Footer />
+              </div>
+            </AuthProvider>
+          </ThemeProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

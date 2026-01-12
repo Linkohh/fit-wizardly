@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type BadgeId = 
+export type BadgeId =
   | 'first_plan'
   | 'plans_10'
   | 'plans_25'
@@ -18,7 +18,24 @@ export type BadgeId =
   | 'streak_30'
   | 'template_creator'
   | 'all_equipment'
-  | 'full_body_fan';
+  | 'full_body_fan'
+  // Logging badges
+  | 'first_workout'
+  | 'logger'
+  | 'data_nerd'
+  | 'iron_will'
+  | 'tonnage_king'
+  | 'pr_machine'
+  // Wisdom badges
+  | 'exercise_scientist'
+  | 'programming_nerd'
+  | 'wisdom_master'
+  | 'concept_collector'
+  // Circle badges
+  | 'circle_founder'
+  | 'team_player'
+  | 'circle_champion'
+  | 'social_butterfly';
 
 export interface Badge {
   id: BadgeId;
@@ -149,6 +166,107 @@ export const BADGES: Record<BadgeId, Omit<Badge, 'unlockedAt'>> = {
     icon: '🧬',
     tier: 'bronze',
   },
+  // Logging badges
+  first_workout: {
+    id: 'first_workout',
+    name: 'First Rep',
+    description: 'Logged your first workout',
+    icon: '💪',
+    tier: 'bronze',
+  },
+  logger: {
+    id: 'logger',
+    name: 'Logger',
+    description: 'Logged 10 workouts',
+    icon: '📓',
+    tier: 'bronze',
+  },
+  data_nerd: {
+    id: 'data_nerd',
+    name: 'Data Nerd',
+    description: 'Logged 50 workouts',
+    icon: '📊',
+    tier: 'silver',
+  },
+  iron_will: {
+    id: 'iron_will',
+    name: 'Iron Will',
+    description: '4 weeks with 100% workout completion',
+    icon: '⚔️',
+    tier: 'gold',
+  },
+  tonnage_king: {
+    id: 'tonnage_king',
+    name: 'Tonnage King',
+    description: 'Lifted 1,000,000 lbs total volume',
+    icon: '👑',
+    tier: 'platinum',
+  },
+  pr_machine: {
+    id: 'pr_machine',
+    name: 'PR Machine',
+    description: 'Set 10 personal records',
+    icon: '🏆',
+    tier: 'gold',
+  },
+  // Wisdom badges
+  exercise_scientist: {
+    id: 'exercise_scientist',
+    name: 'Exercise Scientist',
+    description: 'Asked 10 questions to Wisdom AI',
+    icon: '🔬',
+    tier: 'bronze',
+  },
+  programming_nerd: {
+    id: 'programming_nerd',
+    name: 'Programming Nerd',
+    description: 'Asked 25 questions to Wisdom AI',
+    icon: '🧠',
+    tier: 'silver',
+  },
+  wisdom_master: {
+    id: 'wisdom_master',
+    name: 'Wisdom Master',
+    description: 'Asked 50 questions to Wisdom AI',
+    icon: '🎓',
+    tier: 'gold',
+  },
+  concept_collector: {
+    id: 'concept_collector',
+    name: 'Concept Collector',
+    description: 'Learned 10 training concepts',
+    icon: '📚',
+    tier: 'silver',
+  },
+  // Circle badges
+  circle_founder: {
+    id: 'circle_founder',
+    name: 'Circle Founder',
+    description: 'Created your first accountability circle',
+    icon: '👥',
+    tier: 'bronze',
+  },
+  team_player: {
+    id: 'team_player',
+    name: 'Team Player',
+    description: 'Joined your first circle',
+    icon: '🤝',
+    tier: 'bronze',
+  },
+  circle_champion: {
+    id: 'circle_champion',
+    name: 'Circle Champion',
+    description: 'Won a weekly challenge',
+    icon: '🏅',
+    tier: 'gold',
+  },
+  social_butterfly: {
+    id: 'social_butterfly',
+    name: 'Social Butterfly',
+    description: 'Member of 3 or more circles',
+    icon: '🦋',
+    tier: 'silver',
+  },
 };
 
 interface AchievementState {
@@ -160,11 +278,11 @@ interface AchievementState {
   weeklyGoal: number;
   weeklyProgress: number;
   userName: string;
-  
+
   // Badges
   unlockedBadges: BadgeId[];
   newBadges: BadgeId[]; // Badges unlocked but not yet seen
-  
+
   // Actions
   incrementPlansGenerated: () => BadgeId[];
   updateStreak: () => BadgeId[];
@@ -193,10 +311,10 @@ export const useAchievementStore = create<AchievementState>()(
 
       incrementPlansGenerated: () => {
         const newBadges: BadgeId[] = [];
-        
+
         set((state) => {
           const newTotal = state.totalPlansGenerated + 1;
-          
+
           // Check plan milestones
           if (newTotal === 1 && !state.unlockedBadges.includes('first_plan')) {
             newBadges.push('first_plan');
@@ -213,7 +331,7 @@ export const useAchievementStore = create<AchievementState>()(
           if (newTotal >= 100 && !state.unlockedBadges.includes('plans_100')) {
             newBadges.push('plans_100');
           }
-          
+
           return {
             totalPlansGenerated: newTotal,
             weeklyProgress: state.weeklyProgress + 1,
@@ -221,21 +339,21 @@ export const useAchievementStore = create<AchievementState>()(
             newBadges: [...state.newBadges, ...newBadges],
           };
         });
-        
+
         return newBadges;
       },
 
       updateStreak: () => {
         const newBadges: BadgeId[] = [];
         const today = new Date().toDateString();
-        
+
         set((state) => {
           const yesterday = new Date();
           yesterday.setDate(yesterday.getDate() - 1);
           const yesterdayStr = yesterday.toDateString();
-          
+
           let newStreak = state.currentStreak;
-          
+
           if (state.lastActivityDate === today) {
             // Already active today
             return state;
@@ -246,7 +364,7 @@ export const useAchievementStore = create<AchievementState>()(
             // Streak broken or first activity
             newStreak = 1;
           }
-          
+
           // Check streak badges
           if (newStreak >= 3 && !state.unlockedBadges.includes('streak_3')) {
             newBadges.push('streak_3');
@@ -260,7 +378,7 @@ export const useAchievementStore = create<AchievementState>()(
           if (newStreak >= 30 && !state.unlockedBadges.includes('streak_30')) {
             newBadges.push('streak_30');
           }
-          
+
           return {
             currentStreak: newStreak,
             longestStreak: Math.max(newStreak, state.longestStreak),
@@ -269,7 +387,7 @@ export const useAchievementStore = create<AchievementState>()(
             newBadges: [...state.newBadges, ...newBadges],
           };
         });
-        
+
         return newBadges;
       },
 
@@ -278,12 +396,12 @@ export const useAchievementStore = create<AchievementState>()(
         if (state.unlockedBadges.includes(badgeId)) {
           return false;
         }
-        
+
         set((state) => ({
           unlockedBadges: [...state.unlockedBadges, badgeId],
           newBadges: [...state.newBadges, badgeId],
         }));
-        
+
         return true;
       },
 

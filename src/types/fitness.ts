@@ -173,6 +173,123 @@ export interface Template {
   createdAt: Date;
 }
 
+// ============================================
+// WORKOUT LOGGING TYPES
+// ============================================
+
+export type WeightUnit = 'lbs' | 'kg';
+
+export type PerceivedDifficulty = 'too_easy' | 'just_right' | 'challenging' | 'too_hard';
+
+export type PerceivedEffort = 'easy' | 'moderate' | 'hard';
+
+export interface SetLog {
+  setNumber: number;
+  weight: number;
+  weightUnit: WeightUnit;
+  reps: number;
+  rir: number;
+  completed: boolean;
+  notes?: string;
+}
+
+export interface ExerciseLog {
+  exerciseId: string;
+  exerciseName: string;
+  sets: SetLog[];
+  perceivedEffort?: PerceivedEffort;
+  skipped?: boolean;
+  skipReason?: string;
+}
+
+export interface WorkoutLog {
+  id: string;
+  planId: string;
+  dayIndex: number;
+  dayName: string;
+  startedAt: Date;
+  completedAt: Date;
+  duration: number; // minutes
+  exercises: ExerciseLog[];
+  perceivedDifficulty: PerceivedDifficulty;
+  notes?: string;
+  totalVolume: number; // weight × reps across all sets
+}
+
+// ============================================
+// PROGRESSION & ANALYTICS TYPES
+// ============================================
+
+export type ProgressionConfidence = 'high' | 'medium' | 'low';
+
+export type ProgressionAction = 'increase' | 'maintain' | 'decrease' | 'swap';
+
+export interface ProgressionRecommendation {
+  exerciseId: string;
+  exerciseName: string;
+  action: ProgressionAction;
+  currentLoad: number;
+  recommendedLoad: number;
+  changePercentage: number;
+  rationale: string;
+  confidence: ProgressionConfidence;
+}
+
+export interface WeeklySummary {
+  weekNumber: number;
+  startDate: Date;
+  endDate: Date;
+  workoutsCompleted: number;
+  workoutsPlanned: number;
+  completionRate: number;
+  totalVolume: number;
+  avgRIR: number;
+  targetRIR: number;
+  muscleGroupBreakdown: {
+    muscleGroup: MuscleGroup;
+    sets: number;
+    avgLoad: number;
+  }[];
+  personalRecords: PersonalRecord[];
+}
+
+export interface PersonalRecord {
+  id: string;
+  exerciseId: string;
+  exerciseName: string;
+  type: 'weight' | 'reps' | 'volume';
+  previousValue: number;
+  newValue: number;
+  achievedAt: Date;
+  workoutLogId: string;
+}
+
+// ============================================
+// WISDOM AI TYPES
+// ============================================
+
+export type WisdomMessageRole = 'user' | 'assistant';
+
+export interface WisdomMessage {
+  id: string;
+  role: WisdomMessageRole;
+  content: string;
+  timestamp: Date;
+}
+
+export interface WisdomResponse {
+  content: string;
+  suggestedFollowUps?: string[];
+  conceptsIntroduced?: string[];
+}
+
+export interface WisdomContext {
+  planId: string | null;
+  exerciseId: string | null;
+  weekNumber: number;
+  phase?: OptPhase;
+}
+
 // Muscle data for anatomy picker
 export interface MuscleData {
   id: MuscleGroup;
