@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Dumbbell, Target, FileText, Users, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AnimatedIcon } from '@/components/ui/page-transition';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { WelcomeMessage, StreakTracker, GoalVisualization, WelcomeHero, DailyQuote } from '@/components/motivation';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useTrainerStore } from '@/stores/trainerStore';
@@ -163,42 +164,51 @@ export default function Index() {
               }}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
             >
-              {features.map((f) => (
-                <motion.div
-                  key={f.title}
-                  variants={{
-                    hidden: { opacity: 0, y: 30 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-                  }}
-                  whileHover={{
-                    scale: 1.03,
-                    rotateX: 5,
-                    rotateY: -5,
-                    z: 50
-                  }}
-                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  style={{ perspective: 1000, transformStyle: "preserve-3d" }}
-                >
-                  <Card
-                    variant="interactive"
-                    className="text-center group bg-card/80 backdrop-blur-md border border-border hover:border-primary/30 hover:bg-card rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+              <TooltipProvider delayDuration={200}>
+                {features.map((f) => (
+                  <motion.div
+                    key={f.title}
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+                    }}
+                    whileHover={{
+                      scale: 1.03,
+                      rotateX: 5,
+                      rotateY: -5,
+                      z: 50
+                    }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    style={{ perspective: 1000, transformStyle: "preserve-3d" }}
                   >
-                    <CardContent className="p-6">
-                      <motion.div
-                        className="mx-auto w-14 h-14 rounded-full gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow transition-all duration-300"
-                        whileHover={{ y: -4, scale: 1.1 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                      >
-                        <AnimatedIcon>
-                          <f.icon className="h-7 w-7 text-primary-foreground" />
-                        </AnimatedIcon>
-                      </motion.div>
-                      <h3 className="font-semibold text-base mb-2 text-foreground group-hover:text-primary transition-colors">{f.title}</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                    <Card
+                      variant="interactive"
+                      className="text-center group bg-card/80 backdrop-blur-md border border-border hover:border-primary/30 hover:bg-card rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <CardContent className="p-6">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <motion.div
+                              className="mx-auto w-14 h-14 rounded-full gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow transition-all duration-300 cursor-help"
+                              whileHover={{ y: -4, scale: 1.1 }}
+                              transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                            >
+                              <AnimatedIcon>
+                                <f.icon className="h-7 w-7 text-primary-foreground" />
+                              </AnimatedIcon>
+                            </motion.div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="max-w-xs">{f.description}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <h3 className="font-semibold text-base mb-2 text-foreground group-hover:text-primary transition-colors">{f.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </TooltipProvider>
             </motion.div>
           </div>
         </motion.section>

@@ -7,11 +7,27 @@ import { SelectedMusclesChips } from './SelectedMusclesChips';
 import { useWizardStore } from '@/stores/wizardStore';
 import { MUSCLE_DATA } from '@/types/fitness';
 import type { MuscleGroup } from '@/types/fitness';
+import { useWizardForm, anatomyStepSchema } from '@/hooks/useWizardForm';
+import { FormError } from '@/components/ui/form-error';
 
 export function AnatomyPanel() {
-    const { selections, toggleMuscle, setTargetMuscles } = useWizardStore();
+    const { selections, setTargetMuscles } = useWizardStore();
     const [view, setView] = useState<'front' | 'back'>('front');
     const [hoveredMuscle, setHoveredMuscle] = useState<MuscleGroup | null>(null);
+
+    // React Hook Form integration with Zustand sync
+    const { watch, setValue, formState: { errors }, trigger } = useWizardForm({
+        schema: anatomyStepSchema,
+        defaultValues: {
+            targetMuscles: selections.targetMuscles,
+        },
+        onSync: (values) => {
+            if (values.targetMuscles !== undefined) setTargetMuscles(values.targetMuscles);
+        },
+    });
+
+    // Watch target muscles for reactive updates
+    const watchedTargetMuscles = watch('targetMuscles') || [];
 
     // Filter muscles for the list based on current view
     const currentMuscles = MUSCLE_DATA
@@ -20,9 +36,15 @@ export function AnatomyPanel() {
 
     // Performance measurement wrapper with dev logging
     const handleToggle = useCallback((muscleId: MuscleGroup) => {
+        const current = watchedTargetMuscles;
+        const newMuscles = current.includes(muscleId)
+            ? current.filter((m) => m !== muscleId)
+            : [...current, muscleId];
+
         if (import.meta.env.DEV) {
             const start = performance.now();
-            toggleMuscle(muscleId);
+            setValue('targetMuscles', newMuscles);
+            trigger('targetMuscles');
             requestAnimationFrame(() => {
                 const end = performance.now();
                 const duration = end - start;
@@ -32,11 +54,15 @@ export function AnatomyPanel() {
                 }
             });
         } else {
-            toggleMuscle(muscleId);
+            setValue('targetMuscles', newMuscles);
+            trigger('targetMuscles');
         }
-    }, [toggleMuscle]);
+    }, [watchedTargetMuscles, setValue, trigger]);
 
-    const handleClear = useCallback(() => setTargetMuscles([]), [setTargetMuscles]);
+    const handleClear = useCallback(() => {
+        setValue('targetMuscles', []);
+        trigger('targetMuscles');
+    }, [setValue, trigger]);
 
     const toggleView = useCallback(() => setView(v => v === 'front' ? 'back' : 'front'), []);
 
@@ -48,10 +74,13 @@ export function AnatomyPanel() {
         <div className="w-full space-y-6">
             {/* Selected Muscles Chips */}
             <SelectedMusclesChips
-                selectedMuscles={selections.targetMuscles}
+                selectedMuscles={watchedTargetMuscles}
                 onRemove={handleToggle}
                 onClearAll={handleClear}
             />
+
+            {/* Validation error */}
+            <FormError error={errors.targetMuscles?.message} />
 
             {/* View Toggle Header */}
             <div className="flex items-center justify-center">
@@ -84,7 +113,7 @@ export function AnatomyPanel() {
                     <div className="w-full max-w-sm">
                         <MuscleDiagram
                             view={view}
-                            selectedMuscles={selections.targetMuscles}
+                            selectedMuscles={watchedTargetMuscles}
                             onToggle={handleToggle}
                             hoveredMuscle={hoveredMuscle}
                             onHover={handleHover}
@@ -107,7 +136,7 @@ export function AnatomyPanel() {
                     </div>
                     <MuscleList
                         muscles={currentMuscles}
-                        selectedMuscles={selections.targetMuscles}
+                        selectedMuscles={watchedTargetMuscles}
                         onToggle={handleToggle}
                         hoveredMuscle={hoveredMuscle}
                         onHover={handleHover}

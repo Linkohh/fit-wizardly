@@ -7,6 +7,7 @@ import { useTrainerStore } from '@/stores/trainerStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useState } from 'react';
 import { LayoutGroup, motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -47,20 +48,32 @@ export function Header() {
   return <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
     <div className="container flex h-16 items-center justify-between px-4">
       {/* Logo */}
-      <Link to="/" className="flex items-center gap-3 touch-target group">
-        <motion.div
-          className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden"
-          whileHover={{
-            scale: 1.1,
-            rotate: [0, -5, 5, 0],
-          }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 400, damping: 15 }}
-        >
-          <img alt="FitWizard Logo" className="h-full w-full object-contain" src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png" />
-        </motion.div>
-        <span className="text-3xl font-bold gradient-text">FitWizard</span>
-      </Link>
+      <TooltipProvider delayDuration={300}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link to="/" className="flex items-center gap-3 touch-target group">
+              <motion.div
+                className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden"
+                whileHover={{
+                  scale: 1.1,
+                  rotate: [0, -5, 5, 0],
+                }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              >
+                <img alt="FitWizard Logo" className="h-full w-full object-contain" src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png" />
+              </motion.div>
+              <span className="text-3xl font-bold gradient-text">FitWizard</span>
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p className="flex items-center gap-1.5">
+              <span className="text-primary font-bold">✨</span>
+              Your path to peak fitness potential
+            </p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       {/* Desktop Navigation */}
       <nav className="hidden md:flex items-center gap-1" role="navigation" aria-label="Main navigation">

@@ -360,6 +360,17 @@
   }
 }
 
+@keyframes toast-slide-in-right {
+  0% {
+    transform: translateX(100%) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradient-shift 3s ease infinite;

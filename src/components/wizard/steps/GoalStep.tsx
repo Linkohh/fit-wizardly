@@ -9,6 +9,10 @@ import { useWizardStore } from '@/stores/wizardStore';
 import type { Goal, ExperienceLevel } from '@/types/fitness';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { shakeVariants } from '@/lib/formAnimations';
+import { FormError } from '@/components/ui/form-error';
+import { useWizardForm, goalStepSchema } from '@/hooks/useWizardForm';
+import { Controller } from 'react-hook-form';
 
 const GOALS: { id: Goal; label: string; description: string; icon: React.ReactNode }[] = [
   {
@@ -96,6 +100,31 @@ const PHASE_INFO = {
 export function GoalStep() {
   const { selections, setGoal, setExperienceLevel, setFirstName, setLastName, setPersonalGoalNote } = useWizardStore();
 
+  // React Hook Form integration with Zustand sync
+  const { control, formState: { errors }, watch, setValue } = useWizardForm({
+    schema: goalStepSchema,
+    defaultValues: {
+      firstName: selections.firstName || '',
+      lastName: selections.lastName || '',
+      personalGoalNote: selections.personalGoalNote || '',
+      goal: selections.goal,
+      experienceLevel: selections.experienceLevel,
+    },
+    onSync: (values) => {
+      // Sync form values to Zustand store
+      if (values.firstName !== undefined) setFirstName(values.firstName);
+      if (values.lastName !== undefined) setLastName(values.lastName);
+      if (values.personalGoalNote !== undefined) setPersonalGoalNote(values.personalGoalNote);
+      if (values.goal !== undefined) setGoal(values.goal);
+      if (values.experienceLevel !== undefined) setExperienceLevel(values.experienceLevel);
+    },
+  });
+
+  // Watch values for reactive UI updates
+  const watchedGoal = watch('goal');
+  const watchedExperienceLevel = watch('experienceLevel');
+  const watchedPersonalGoalNote = watch('personalGoalNote') || '';
+
   // Helper to determine phase for display (if not set in store yet)
   const getPhase = (g: Goal, e: ExperienceLevel) => {
     if (e === 'beginner') return 'stabilization_endurance';
@@ -104,7 +133,7 @@ export function GoalStep() {
     return 'stabilization_endurance';
   };
 
-  const currentPhaseKey = selections.optPhase || getPhase(selections.goal, selections.experienceLevel);
+  const currentPhaseKey = selections.optPhase || getPhase(watchedGoal || selections.goal, watchedExperienceLevel || selections.experienceLevel);
   const currentPhase = PHASE_INFO[currentPhaseKey];
 
   return (
@@ -125,22 +154,58 @@ export function GoalStep() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
-                <Input
-                  id="firstName"
-                  placeholder="John"
-                  value={selections.firstName || ''}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className="bg-background/50"
+                <Controller
+                  name="firstName"
+                  control={control}
+                  render={({ field }) => (
+                    <>
+                      <motion.div
+                        variants={shakeVariants}
+                        animate={errors.firstName ? "error" : "initial"}
+                      >
+                        <Input
+                          {...field}
+                          id="firstName"
+                          placeholder="John"
+                          aria-invalid={!!errors.firstName}
+                          aria-describedby={errors.firstName ? "firstName-error" : undefined}
+                          className={cn(
+                            "bg-background/50",
+                            errors.firstName && "border-destructive"
+                          )}
+                        />
+                      </motion.div>
+                      <FormError error={errors.firstName?.message} />
+                    </>
+                  )}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName" className="text-sm font-medium">Last Name</Label>
-                <Input
-                  id="lastName"
-                  placeholder="Doe"
-                  value={selections.lastName || ''}
-                  onChange={(e) => setLastName(e.target.value)}
-                  className="bg-background/50"
+                <Controller
+                  name="lastName"
+                  control={control}
+                  render={({ field }) => (
+                    <>
+                      <motion.div
+                        variants={shakeVariants}
+                        animate={errors.lastName ? "error" : "initial"}
+                      >
+                        <Input
+                          {...field}
+                          id="lastName"
+                          placeholder="Doe"
+                          aria-invalid={!!errors.lastName}
+                          aria-describedby={errors.lastName ? "lastName-error" : undefined}
+                          className={cn(
+                            "bg-background/50",
+                            errors.lastName && "border-destructive"
+                          )}
+                        />
+                      </motion.div>
+                      <FormError error={errors.lastName?.message} />
+                    </>
+                  )}
                 />
               </div>
             </div>
@@ -153,31 +218,36 @@ export function GoalStep() {
                 </Label>
                 <AnimatePresence mode="popLayout">
                   <motion.span
-                    key={(selections.personalGoalNote || '').length}
+                    key={watchedPersonalGoalNote.length}
                     initial={{ y: -8, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 8, opacity: 0 }}
                     transition={{ duration: 0.15 }}
                     className={cn(
                       "text-xs font-medium tabular-nums transition-colors duration-200",
-                      (selections.personalGoalNote || '').length >= 60
+                      watchedPersonalGoalNote.length >= 60
                         ? "text-destructive"
-                        : (selections.personalGoalNote || '').length >= 50
+                        : watchedPersonalGoalNote.length >= 50
                           ? "text-amber-500"
                           : "text-muted-foreground"
                     )}
                   >
-                    {(selections.personalGoalNote || '').length}/60
+                    {watchedPersonalGoalNote.length}/60
                   </motion.span>
                 </AnimatePresence>
               </div>
-              <Textarea
-                id="personalGoal"
-                placeholder="e.g., Build muscle for my wedding, Run a 5K, Feel more confident..."
-                value={selections.personalGoalNote || ''}
-                onChange={(e) => setPersonalGoalNote(e.target.value)}
-                maxLength={60}
-                className="resize-none bg-background/50 min-h-[80px]"
+              <Controller
+                name="personalGoalNote"
+                control={control}
+                render={({ field }) => (
+                  <Textarea
+                    {...field}
+                    id="personalGoal"
+                    placeholder="e.g., Build muscle for my wedding, Run a 5K, Feel more confident..."
+                    maxLength={60}
+                    className="resize-none bg-background/50 min-h-[80px]"
+                  />
+                )}
               />
               <p className="text-xs text-muted-foreground">
                 This note will be included on your PDF plan as a motivational reminder
@@ -194,13 +264,13 @@ export function GoalStep() {
           <h2 className="text-2xl font-bold text-foreground">What's your training goal?</h2>
           <p className="text-muted-foreground mt-1">This helps us optimize your program structure</p>
 
-          {(selections.goal !== 'hypertrophy' || selections.experienceLevel !== 'intermediate') && (
+          {(watchedGoal !== 'hypertrophy' || watchedExperienceLevel !== 'intermediate') && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                setGoal('hypertrophy');
-                setExperienceLevel('intermediate');
+                setValue('goal', 'hypertrophy');
+                setValue('experienceLevel', 'intermediate');
               }}
               className="absolute right-0 top-0 h-8 px-2 text-muted-foreground hover:text-primary hidden sm:flex"
             >
@@ -209,15 +279,15 @@ export function GoalStep() {
           )}
         </div>
 
-        {/* ... existing mobile reset ... */}
-        {(selections.goal !== 'hypertrophy' || selections.experienceLevel !== 'intermediate') && (
+        {/* Mobile reset button */}
+        {(watchedGoal !== 'hypertrophy' || watchedExperienceLevel !== 'intermediate') && (
           <div className="flex justify-start sm:hidden">
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                setGoal('hypertrophy');
-                setExperienceLevel('intermediate');
+                setValue('goal', 'hypertrophy');
+                setValue('experienceLevel', 'intermediate');
               }}
               className="touch-target border-primary/50 text-primary hover:bg-primary/10"
             >
@@ -226,63 +296,69 @@ export function GoalStep() {
           </div>
         )}
 
-        <RadioGroup
-          value={selections.goal}
-          onValueChange={(value) => setGoal(value as Goal)}
-          className="grid gap-4 md:grid-cols-3"
-        >
-          {GOALS.map((goal) => (
-            <Label
-              key={goal.id}
-              htmlFor={goal.id}
-              className="cursor-pointer"
+        <Controller
+          name="goal"
+          control={control}
+          render={({ field }) => (
+            <RadioGroup
+              value={field.value}
+              onValueChange={(value) => field.onChange(value as Goal)}
+              className="grid gap-4 md:grid-cols-3"
             >
-              <Card
-                className={cn(
-                  "relative transition-all duration-300 hover:shadow-md touch-target group",
-                  selections.goal === goal.id
-                    ? "border-primary ring-2 ring-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5 shadow-glow"
-                    : "border-border hover:border-primary/50"
-                )}
-              >
-                <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                  <RadioGroupItem
-                    value={goal.id}
-                    id={goal.id}
-                    className="sr-only"
-                    aria-describedby={`${goal.id}-description`}
-                  />
-                  <div className={cn(
-                    "p-3 rounded-full transition-all duration-300",
-                    selections.goal === goal.id
-                      ? "gradient-primary text-primary-foreground shadow-glow"
-                      : "bg-muted text-muted-foreground group-hover:bg-primary/10"
-                  )}>
-                    {goal.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-foreground">{goal.label}</h3>
-                    <p id={`${goal.id}-description`} className="text-sm text-muted-foreground mt-1">
-                      {goal.description}
-                    </p>
-                  </div>
-                  <AnimatePresence>
-                    {selections.goal === goal.id && (
-                      <motion.div
-                        initial={{ scale: 0, rotate: -180 }}
-                        animate={{ scale: 1, rotate: 0 }}
-                        exit={{ scale: 0, rotate: 180 }}
-                        transition={{ type: "spring", stiffness: 500, damping: 15 }}
-                        className="absolute top-3 right-3 h-3 w-3 rounded-full gradient-primary"
-                        aria-hidden="true"
-                      />
+              {GOALS.map((goal) => (
+                <Label
+                  key={goal.id}
+                  htmlFor={goal.id}
+                  className="cursor-pointer"
+                >
+                  <Card
+                    className={cn(
+                      "relative transition-all duration-300 hover:shadow-md touch-target group",
+                      field.value === goal.id
+                        ? "border-primary ring-2 ring-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5 shadow-glow"
+                        : "border-border hover:border-primary/50"
                     )}
-                  </AnimatePresence>
-                </CardContent>
-              </Card>
-            </Label>
-          ))}
-        </RadioGroup>
+                  >
+                    <CardContent className="p-4 flex flex-col items-center text-center gap-3">
+                      <RadioGroupItem
+                        value={goal.id}
+                        id={goal.id}
+                        className="sr-only"
+                        aria-describedby={`${goal.id}-description`}
+                      />
+                      <div className={cn(
+                        "p-3 rounded-full transition-all duration-300",
+                        field.value === goal.id
+                          ? "gradient-primary text-primary-foreground shadow-glow"
+                          : "bg-muted text-muted-foreground group-hover:bg-primary/10"
+                      )}>
+                        {goal.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">{goal.label}</h3>
+                        <p id={`${goal.id}-description`} className="text-sm text-muted-foreground mt-1">
+                          {goal.description}
+                        </p>
+                      </div>
+                      <AnimatePresence>
+                        {field.value === goal.id && (
+                          <motion.div
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            exit={{ scale: 0, rotate: 180 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                            className="absolute top-3 right-3 h-3 w-3 rounded-full gradient-primary"
+                            aria-hidden="true"
+                          />
+                        )}
+                      </AnimatePresence>
+                    </CardContent>
+                  </Card>
+                </Label>
+              ))}
+            </RadioGroup>
+          )}
+        />
       </div>
 
       {/* Experience Level */}
@@ -292,57 +368,63 @@ export function GoalStep() {
           <p className="text-muted-foreground mt-1">This determines training volume and complexity</p>
         </div>
 
-        <RadioGroup
-          value={selections.experienceLevel}
-          onValueChange={(value) => setExperienceLevel(value as ExperienceLevel)}
-          className="grid gap-3 md:grid-cols-3"
-        >
-          {EXPERIENCE_LEVELS.map((level) => (
-            <Label
-              key={level.id}
-              htmlFor={`exp-${level.id}`}
-              className="cursor-pointer"
+        <Controller
+          name="experienceLevel"
+          control={control}
+          render={({ field }) => (
+            <RadioGroup
+              value={field.value}
+              onValueChange={(value) => field.onChange(value as ExperienceLevel)}
+              className="grid gap-3 md:grid-cols-3"
             >
-              <Card
-                className={cn(
-                  "relative transition-all duration-300 hover:shadow-md touch-target",
-                  selections.experienceLevel === level.id
-                    ? "border-primary ring-2 ring-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5"
-                    : "border-border hover:border-primary/50"
-                )}
-              >
-                <CardContent className="p-4">
-                  <RadioGroupItem
-                    value={level.id}
-                    id={`exp-${level.id}`}
-                    className="sr-only"
-                    aria-describedby={`exp-${level.id}-description`}
-                  />
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-semibold text-foreground">{level.label}</h3>
-                      <p id={`exp-${level.id}-description`} className="text-sm text-muted-foreground">
-                        {level.description}
-                      </p>
-                    </div>
-                    <AnimatePresence>
-                      {selections.experienceLevel === level.id && (
-                        <motion.div
-                          initial={{ scale: 0, rotate: -180 }}
-                          animate={{ scale: 1, rotate: 0 }}
-                          exit={{ scale: 0, rotate: 180 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 15 }}
-                          className="h-3 w-3 rounded-full gradient-primary"
-                          aria-hidden="true"
-                        />
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </CardContent>
-              </Card>
-            </Label>
-          ))}
-        </RadioGroup>
+              {EXPERIENCE_LEVELS.map((level) => (
+                <Label
+                  key={level.id}
+                  htmlFor={`exp-${level.id}`}
+                  className="cursor-pointer"
+                >
+                  <Card
+                    className={cn(
+                      "relative transition-all duration-300 hover:shadow-md touch-target",
+                      field.value === level.id
+                        ? "border-primary ring-2 ring-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5"
+                        : "border-border hover:border-primary/50"
+                    )}
+                  >
+                    <CardContent className="p-4">
+                      <RadioGroupItem
+                        value={level.id}
+                        id={`exp-${level.id}`}
+                        className="sr-only"
+                        aria-describedby={`exp-${level.id}-description`}
+                      />
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold text-foreground">{level.label}</h3>
+                          <p id={`exp-${level.id}-description`} className="text-sm text-muted-foreground">
+                            {level.description}
+                          </p>
+                        </div>
+                        <AnimatePresence>
+                          {field.value === level.id && (
+                            <motion.div
+                              initial={{ scale: 0, rotate: -180 }}
+                              animate={{ scale: 1, rotate: 0 }}
+                              exit={{ scale: 0, rotate: 180 }}
+                              transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                              className="h-3 w-3 rounded-full gradient-primary"
+                              aria-hidden="true"
+                            />
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Label>
+              ))}
+            </RadioGroup>
+          )}
+        />
       </div>
 
       {/* Recommended Phase Card */}

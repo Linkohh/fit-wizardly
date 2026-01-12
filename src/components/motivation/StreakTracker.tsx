@@ -1,5 +1,6 @@
 import { Flame, Trophy, Calendar } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useCountUp } from '@/hooks/useCountUp';
@@ -37,17 +38,37 @@ export function StreakTracker({ compact = false, className }: StreakTrackerProps
         <div className="flex items-center justify-between gap-4">
           {/* Current Streak */}
           <div className="flex items-center gap-3">
-            <div className={cn(
-              'w-12 h-12 rounded-full flex items-center justify-center',
-              currentStreak > 0 
-                ? 'bg-gradient-to-br from-orange-400 to-red-500 shadow-lg shadow-orange-500/30' 
-                : 'bg-muted'
-            )}>
-              <Flame className={cn(
-                'h-6 w-6',
-                currentStreak > 0 ? 'text-white animate-pulse' : 'text-muted-foreground'
-              )} />
-            </div>
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className={cn(
+                    'w-12 h-12 rounded-full flex items-center justify-center cursor-help transition-transform hover:scale-110',
+                    currentStreak > 0
+                      ? 'bg-gradient-to-br from-orange-400 to-red-500 shadow-lg shadow-orange-500/30'
+                      : 'bg-muted'
+                  )}>
+                    <Flame className={cn(
+                      'h-6 w-6',
+                      currentStreak > 0 ? 'text-white animate-pulse' : 'text-muted-foreground'
+                    )} />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="flex flex-col gap-1">
+                    <span className="font-bold">
+                      {currentStreak > 0
+                        ? `🔥 ${currentStreak} day streak!`
+                        : '💪 Start your streak today!'}
+                    </span>
+                    <span className="text-xs opacity-90">
+                      {currentStreak > 0
+                        ? 'Keep the momentum going!'
+                        : 'Create your first plan to begin'}
+                    </span>
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <div>
               <div className="text-2xl font-bold text-foreground">{animatedCurrentStreak}</div>
               <div className="text-xs text-muted-foreground">Day Streak</div>
