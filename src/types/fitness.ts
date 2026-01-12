@@ -81,6 +81,12 @@ export type StabilityLevel = 'stable' | 'unstable';
 export type ExerciseType = 'strength' | 'plyometric' | 'cardio' | 'power';
 
 export interface WizardSelections {
+  // Personal Info
+  firstName: string;
+  lastName: string;
+  personalGoalNote: string; // Max 60 characters - what the user wants to achieve
+
+  // Training Config
   goal: Goal;
   optPhase?: OptPhase; // New field for NASM logic
   experienceLevel: ExperienceLevel;

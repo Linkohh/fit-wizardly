@@ -1,11 +1,14 @@
-import { Target, TrendingUp, Activity } from 'lucide-react';
+import { Target, TrendingUp, Activity, User, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useWizardStore } from '@/stores/wizardStore';
 import type { Goal, ExperienceLevel } from '@/types/fitness';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const GOALS: { id: Goal; label: string; description: string; icon: React.ReactNode }[] = [
   {
@@ -91,7 +94,7 @@ const PHASE_INFO = {
 };
 
 export function GoalStep() {
-  const { selections, setGoal, setExperienceLevel } = useWizardStore();
+  const { selections, setGoal, setExperienceLevel, setFirstName, setLastName, setPersonalGoalNote } = useWizardStore();
 
   // Helper to determine phase for display (if not set in store yet)
   const getPhase = (g: Goal, e: ExperienceLevel) => {
@@ -106,6 +109,84 @@ export function GoalStep() {
 
   return (
     <div className="space-y-8 animate-slide-in">
+      {/* Personal Info Section */}
+      <div className="space-y-4">
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary mb-4">
+            <User className="h-4 w-4" />
+            <span className="text-sm font-medium">Personalize Your Plan</span>
+          </div>
+          <h2 className="text-2xl font-bold text-foreground">Let's get to know you</h2>
+          <p className="text-muted-foreground mt-1">Your name will appear on your personalized workout plan</p>
+        </div>
+
+        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
+          <CardContent className="p-6 space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
+                <Input
+                  id="firstName"
+                  placeholder="John"
+                  value={selections.firstName || ''}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className="bg-background/50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName" className="text-sm font-medium">Last Name</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Doe"
+                  value={selections.lastName || ''}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="bg-background/50"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="personalGoal" className="text-sm font-medium flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-secondary" />
+                  What do you want to achieve?
+                </Label>
+                <AnimatePresence mode="popLayout">
+                  <motion.span
+                    key={(selections.personalGoalNote || '').length}
+                    initial={{ y: -8, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 8, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className={cn(
+                      "text-xs font-medium tabular-nums transition-colors duration-200",
+                      (selections.personalGoalNote || '').length >= 60
+                        ? "text-destructive"
+                        : (selections.personalGoalNote || '').length >= 50
+                          ? "text-amber-500"
+                          : "text-muted-foreground"
+                    )}
+                  >
+                    {(selections.personalGoalNote || '').length}/60
+                  </motion.span>
+                </AnimatePresence>
+              </div>
+              <Textarea
+                id="personalGoal"
+                placeholder="e.g., Build muscle for my wedding, Run a 5K, Feel more confident..."
+                value={selections.personalGoalNote || ''}
+                onChange={(e) => setPersonalGoalNote(e.target.value)}
+                maxLength={60}
+                className="resize-none bg-background/50 min-h-[80px]"
+              />
+              <p className="text-xs text-muted-foreground">
+                This note will be included on your PDF plan as a motivational reminder
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Goal Selection */}
       <div className="space-y-4">
         {/* ... existing header code ... */}
@@ -185,9 +266,18 @@ export function GoalStep() {
                       {goal.description}
                     </p>
                   </div>
-                  {selections.goal === goal.id && (
-                    <div className="absolute top-3 right-3 h-3 w-3 rounded-full gradient-primary" aria-hidden="true" />
-                  )}
+                  <AnimatePresence>
+                    {selections.goal === goal.id && (
+                      <motion.div
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        exit={{ scale: 0, rotate: 180 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                        className="absolute top-3 right-3 h-3 w-3 rounded-full gradient-primary"
+                        aria-hidden="true"
+                      />
+                    )}
+                  </AnimatePresence>
                 </CardContent>
               </Card>
             </Label>
@@ -235,9 +325,18 @@ export function GoalStep() {
                         {level.description}
                       </p>
                     </div>
-                    {selections.experienceLevel === level.id && (
-                      <div className="h-3 w-3 rounded-full gradient-primary" aria-hidden="true" />
-                    )}
+                    <AnimatePresence>
+                      {selections.experienceLevel === level.id && (
+                        <motion.div
+                          initial={{ scale: 0, rotate: -180 }}
+                          animate={{ scale: 1, rotate: 0 }}
+                          exit={{ scale: 0, rotate: 180 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                          className="h-3 w-3 rounded-full gradient-primary"
+                          aria-hidden="true"
+                        />
+                      )}
+                    </AnimatePresence>
                   </div>
                 </CardContent>
               </Card>

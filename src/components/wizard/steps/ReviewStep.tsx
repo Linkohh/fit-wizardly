@@ -1,4 +1,4 @@
-import { Check, AlertTriangle, Target, Dumbbell, Calendar, Clock, AlertCircle } from 'lucide-react';
+import { Check, AlertTriangle, Target, Dumbbell, Calendar, Clock, AlertCircle, User, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useWizardStore } from '@/stores/wizardStore';
@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 export function ReviewStep() {
   const { selections } = useWizardStore();
 
-  const getMuscleLabel = (id: string) => 
+  const getMuscleLabel = (id: string) =>
     MUSCLE_DATA.find(m => m.id === id)?.name || id;
 
   const getEquipmentLabel = (id: string) =>
@@ -35,12 +35,41 @@ export function ReviewStep() {
     advanced: 'Advanced',
   };
 
+  const hasPersonalInfo = selections.firstName || selections.lastName || selections.personalGoalNote;
+
   return (
     <div className="space-y-6 animate-slide-in">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground">Review Your Plan</h2>
         <p className="text-muted-foreground mt-1">Confirm your selections before generating</p>
       </div>
+
+      {/* Personal Info Banner (if provided) */}
+      {hasPersonalInfo && (
+        <Card className="border-primary/30 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-full bg-primary/20">
+                <User className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-foreground">
+                  {selections.firstName || selections.lastName
+                    ? `${selections.firstName} ${selections.lastName}`.trim()
+                    : 'Your Personal Plan'}
+                </h3>
+                <p className="text-sm text-muted-foreground">Personalized Workout Plan</p>
+              </div>
+            </div>
+            {selections.personalGoalNote && (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-background/50 border border-primary/10">
+                <Sparkles className="h-4 w-4 text-secondary mt-0.5 shrink-0" />
+                <p className="text-sm italic text-foreground/90">"{selections.personalGoalNote}"</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* Goal & Experience */}

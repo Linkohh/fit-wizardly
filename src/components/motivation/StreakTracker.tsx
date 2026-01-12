@@ -2,6 +2,7 @@ import { Flame, Trophy, Calendar } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useAchievementStore } from '@/stores/achievementStore';
+import { useCountUp } from '@/hooks/useCountUp';
 
 interface StreakTrackerProps {
   compact?: boolean;
@@ -11,6 +12,11 @@ interface StreakTrackerProps {
 export function StreakTracker({ compact = false, className }: StreakTrackerProps) {
   const { currentStreak, longestStreak, totalPlansGenerated } = useAchievementStore();
 
+  // Animate numbers with smooth count-up effect
+  const animatedCurrentStreak = useCountUp(currentStreak, 1000);
+  const animatedLongestStreak = useCountUp(longestStreak, 1200);
+  const animatedTotalPlans = useCountUp(totalPlansGenerated, 1400);
+
   if (compact) {
     return (
       <div className={cn('flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20', className)}>
@@ -19,7 +25,7 @@ export function StreakTracker({ compact = false, className }: StreakTrackerProps
           currentStreak > 0 ? 'text-orange-500 animate-pulse' : 'text-muted-foreground'
         )} />
         <span className="text-sm font-medium">
-          {currentStreak} day{currentStreak !== 1 ? 's' : ''}
+          {animatedCurrentStreak} day{animatedCurrentStreak !== 1 ? 's' : ''}
         </span>
       </div>
     );
@@ -43,7 +49,7 @@ export function StreakTracker({ compact = false, className }: StreakTrackerProps
               )} />
             </div>
             <div>
-              <div className="text-2xl font-bold text-foreground">{currentStreak}</div>
+              <div className="text-2xl font-bold text-foreground">{animatedCurrentStreak}</div>
               <div className="text-xs text-muted-foreground">Day Streak</div>
             </div>
           </div>
@@ -54,7 +60,7 @@ export function StreakTracker({ compact = false, className }: StreakTrackerProps
               <Trophy className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <div className="text-lg font-semibold text-foreground">{longestStreak}</div>
+              <div className="text-lg font-semibold text-foreground">{animatedLongestStreak}</div>
               <div className="text-xs text-muted-foreground">Best</div>
             </div>
           </div>
@@ -65,7 +71,7 @@ export function StreakTracker({ compact = false, className }: StreakTrackerProps
               <Calendar className="h-5 w-5 text-secondary" />
             </div>
             <div>
-              <div className="text-lg font-semibold text-foreground">{totalPlansGenerated}</div>
+              <div className="text-lg font-semibold text-foreground">{animatedTotalPlans}</div>
               <div className="text-xs text-muted-foreground">Total Plans</div>
             </div>
           </div>

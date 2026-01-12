@@ -35,6 +35,9 @@ interface WizardState {
   setStep: (step: WizardStep) => void;
   nextStep: () => void;
   prevStep: () => void;
+  setFirstName: (name: string) => void;
+  setLastName: (name: string) => void;
+  setPersonalGoalNote: (note: string) => void;
   setGoal: (goal: Goal) => void;
   setExperienceLevel: (level: ExperienceLevel) => void;
   setEquipment: (equipment: Equipment[]) => void;
@@ -52,6 +55,12 @@ interface WizardState {
 }
 
 const initialSelections: WizardSelections = {
+  // Personal Info
+  firstName: '',
+  lastName: '',
+  personalGoalNote: '',
+
+  // Training Config
   goal: 'hypertrophy',
   experienceLevel: 'intermediate',
   equipment: ['bodyweight'],
@@ -95,6 +104,18 @@ export const useWizardStore = create<WizardState>()(
           });
         }
       },
+
+      setFirstName: (firstName) => set((state) => ({
+        selections: { ...state.selections, firstName }
+      })),
+
+      setLastName: (lastName) => set((state) => ({
+        selections: { ...state.selections, lastName }
+      })),
+
+      setPersonalGoalNote: (personalGoalNote) => set((state) => ({
+        selections: { ...state.selections, personalGoalNote: personalGoalNote.slice(0, 60) } // Max 60 chars
+      })),
 
       setGoal: (goal) => set((state) => ({
         selections: {

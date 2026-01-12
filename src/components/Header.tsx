@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Dumbbell, Users, Menu, Sun, Moon, Monitor } from 'lucide-react';
+import { Users, Menu, Sun, Moon, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,8 @@ import { useThemeStore } from '@/stores/themeStore';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useState } from 'react';
+import { LayoutGroup, motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 export function Header() {
   const location = useLocation();
   const {
@@ -46,19 +48,51 @@ export function Header() {
     <div className="container flex h-16 items-center justify-between px-4">
       {/* Logo */}
       <Link to="/" className="flex items-center gap-3 touch-target group">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden transition-transform group-hover:scale-105">
+        <motion.div
+          className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden"
+          whileHover={{
+            scale: 1.1,
+            rotate: [0, -5, 5, 0],
+          }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 15 }}
+        >
           <img alt="FitWizard Logo" className="h-full w-full object-contain" src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png" />
-        </div>
+        </motion.div>
         <span className="text-3xl font-bold gradient-text">FitWizard</span>
       </Link>
 
       {/* Desktop Navigation */}
       <nav className="hidden md:flex items-center gap-1" role="navigation" aria-label="Main navigation">
-        {navItems.map(item => <Link key={item.path} to={item.path}>
-          <Button variant={isActive(item.path) ? 'default' : 'ghost'} className="touch-target">
-            {item.label}
-          </Button>
-        </Link>)}
+        <LayoutGroup>
+          {navItems.map(item => {
+            const active = isActive(item.path);
+            return (
+              <Link key={item.path} to={item.path} className="relative">
+                {active && (
+                  <motion.div
+                    layoutId="navbar-active"
+                    className="absolute inset-0 bg-primary/10 rounded-md"
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 30,
+                    }}
+                  />
+                )}
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "relative z-10 touch-target transition-colors",
+                    active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.label}
+                </Button>
+              </Link>
+            );
+          })}
+        </LayoutGroup>
       </nav>
 
       {/* Right Side Controls */}
@@ -67,7 +101,17 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="touch-target" aria-label="Toggle theme">
-              <ThemeIcon className="h-5 w-5" />
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={mode}
+                  initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
+                  animate={{ rotate: 0, opacity: 1, scale: 1 }}
+                  exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ThemeIcon className="h-5 w-5" />
+                </motion.div>
+              </AnimatePresence>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-36">
@@ -87,13 +131,32 @@ export function Header() {
         </DropdownMenu>
 
         {/* Trainer Mode Toggle */}
-        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/50">
-          <Users className={`h-4 w-4 ${isTrainerMode ? 'text-primary' : 'text-muted-foreground'}`} />
+        <motion.div
+          className={cn(
+            "flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-300",
+            isTrainerMode ? "bg-primary/20" : "bg-secondary/50"
+          )}
+          animate={{
+            boxShadow: isTrainerMode
+              ? "0 0 20px rgba(139, 92, 246, 0.4)"
+              : "0 0 0px rgba(139, 92, 246, 0)"
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.div
+            animate={{ rotate: isTrainerMode ? 360 : 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <Users className={cn(
+              "h-4 w-4 transition-colors duration-300",
+              isTrainerMode ? 'text-primary' : 'text-muted-foreground'
+            )} />
+          </motion.div>
           <Label htmlFor="trainer-mode" className="text-sm font-medium cursor-pointer">
             Trainer Mode
           </Label>
           <Switch id="trainer-mode" checked={isTrainerMode} onCheckedChange={toggleTrainerMode} aria-label="Toggle trainer mode" />
-        </div>
+        </motion.div>
       </div>
 
       {/* Mobile Menu */}
@@ -104,15 +167,47 @@ export function Header() {
           </Button>
         </SheetTrigger>
         <SheetContent side="right" className="w-72">
-          <nav className="flex flex-col gap-2 mt-8" role="navigation" aria-label="Mobile navigation">
-            {navItems.map(item => <Link key={item.path} to={item.path} onClick={() => setMobileOpen(false)}>
-              <Button variant={isActive(item.path) ? 'default' : 'ghost'} className="w-full justify-start touch-target">
-                {item.label}
-              </Button>
-            </Link>)}
+          <motion.nav
+            className="flex flex-col gap-2 mt-8"
+            role="navigation"
+            aria-label="Mobile navigation"
+            initial="hidden"
+            animate={mobileOpen ? "visible" : "hidden"}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.07,
+                  delayChildren: 0.1
+                }
+              }
+            }}
+          >
+            {navItems.map((item) => (
+              <motion.div
+                key={item.path}
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+                }}
+              >
+                <Link to={item.path} onClick={() => setMobileOpen(false)}>
+                  <Button variant={isActive(item.path) ? 'default' : 'ghost'} className="w-full justify-start touch-target">
+                    {item.label}
+                  </Button>
+                </Link>
+              </motion.div>
+            ))}
 
             {/* Mobile Theme Selection */}
-            <div className="flex flex-col gap-2 mt-4 p-3 rounded-lg bg-secondary/50">
+            <motion.div
+              className="flex flex-col gap-2 mt-4 p-3 rounded-lg bg-secondary/50"
+              variants={{
+                hidden: { opacity: 0, x: -20 },
+                visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+              }}
+            >
               <Label className="text-sm font-medium mb-1">Theme</Label>
               <div className="flex gap-1">
                 <Button variant={mode === 'light' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('light')} className="flex-1">
@@ -125,17 +220,29 @@ export function Header() {
                   <Monitor className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
+            </motion.div>
 
             {/* Mobile Trainer Mode */}
-            <div className="flex items-center gap-3 mt-2 p-3 rounded-lg bg-secondary/50">
-              <Users className={`h-4 w-4 ${isTrainerMode ? 'text-primary' : 'text-muted-foreground'}`} />
+            <motion.div
+              className={cn(
+                "flex items-center gap-3 mt-2 p-3 rounded-lg transition-colors duration-300",
+                isTrainerMode ? "bg-primary/20" : "bg-secondary/50"
+              )}
+              variants={{
+                hidden: { opacity: 0, x: -20 },
+                visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+              }}
+            >
+              <Users className={cn(
+                "h-4 w-4 transition-colors duration-300",
+                isTrainerMode ? 'text-primary' : 'text-muted-foreground'
+              )} />
               <Label htmlFor="trainer-mode-mobile" className="text-sm font-medium flex-1">
                 Trainer Mode
               </Label>
               <Switch id="trainer-mode-mobile" checked={isTrainerMode} onCheckedChange={toggleTrainerMode} aria-label="Toggle trainer mode" />
-            </div>
-          </nav>
+            </motion.div>
+          </motion.nav>
         </SheetContent>
       </Sheet>
     </div>

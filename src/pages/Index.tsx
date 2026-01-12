@@ -6,6 +6,8 @@ import { WelcomeMessage, StreakTracker, GoalVisualization, WelcomeHero, DailyQuo
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { TrainerDashboard } from '@/components/motivation/TrainerDashboard';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 
 const features = [
   { icon: Target, title: 'Smart Goal Setting', description: 'Choose strength, hypertrophy, or general fitness goals' },
@@ -18,6 +20,15 @@ export default function Index() {
   const { totalPlansGenerated } = useAchievementStore();
   const { isTrainerMode } = useTrainerStore();
   const hasActivity = totalPlansGenerated > 0;
+
+  // Refs for scroll-triggered animations
+  const statsRef = useRef(null);
+  const trainerRef = useRef(null);
+  const featuresRef = useRef(null);
+
+  const statsInView = useInView(statsRef, { once: true, margin: "-100px" });
+  const trainerInView = useInView(trainerRef, { once: true, margin: "-100px" });
+  const featuresInView = useInView(featuresRef, { once: true, margin: "-100px" });
 
   return (
     <main>
@@ -63,51 +74,134 @@ export default function Index() {
 
         {/* Stats Section */}
         {hasActivity && (
-          <section className="px-4 mb-20 animate-fade-in">
+          <motion.section
+            ref={statsRef}
+            initial={{ opacity: 0, y: 40 }}
+            animate={statsInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="px-4 mb-20"
+          >
             <div className="container max-w-4xl mx-auto">
-              <div className="grid md:grid-cols-2 gap-6">
-                <StreakTracker />
-                <GoalVisualization />
-              </div>
+              <motion.div
+                initial="hidden"
+                animate={statsInView ? "visible" : "hidden"}
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.15
+                    }
+                  }
+                }}
+                className="grid md:grid-cols-2 gap-6"
+              >
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+                  }}
+                >
+                  <StreakTracker />
+                </motion.div>
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+                  }}
+                >
+                  <GoalVisualization />
+                </motion.div>
+              </motion.div>
             </div>
-          </section>
+          </motion.section>
         )}
 
         {/* Trainer Dashboard */}
         {isTrainerMode && (
-          <section className="px-4 mb-20">
+          <motion.section
+            ref={trainerRef}
+            initial={{ opacity: 0, y: 40 }}
+            animate={trainerInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="px-4 mb-20"
+          >
             <div className="container max-w-4xl mx-auto">
               <TrainerDashboard />
             </div>
-          </section>
+          </motion.section>
         )}
 
         {/* Features */}
-        <section className="px-4 pb-12">
+        <motion.section
+          ref={featuresRef}
+          initial={{ opacity: 0 }}
+          animate={featuresInView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.4 }}
+          className="px-4 pb-12"
+        >
           <div className="container max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-foreground tracking-tight">How FitWizard Works</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-              {features.map((f, index) => (
-                <Card
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={featuresInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.5 }}
+              className="text-3xl md:text-4xl font-bold text-center mb-12 text-foreground tracking-tight"
+            >
+              How FitWizard Works
+            </motion.h2>
+            <motion.div
+              initial="hidden"
+              animate={featuresInView ? "visible" : "hidden"}
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1
+                  }
+                }
+              }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
+            >
+              {features.map((f) => (
+                <motion.div
                   key={f.title}
-                  variant="interactive"
-                  className="text-center group animate-fade-in bg-card/80 backdrop-blur-md border border-border hover:border-primary/30 hover:bg-card rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+                  }}
+                  whileHover={{
+                    scale: 1.03,
+                    rotateX: 5,
+                    rotateY: -5,
+                    z: 50
+                  }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  style={{ perspective: 1000, transformStyle: "preserve-3d" }}
                 >
-                  <CardContent className="p-6">
-                    <div className="mx-auto w-14 h-14 rounded-full gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow transition-all duration-300">
-                      <AnimatedIcon>
-                        <f.icon className="h-7 w-7 text-primary-foreground" />
-                      </AnimatedIcon>
-                    </div>
-                    <h3 className="font-semibold text-base mb-2 text-foreground group-hover:text-primary transition-colors">{f.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
-                  </CardContent>
-                </Card>
+                  <Card
+                    variant="interactive"
+                    className="text-center group bg-card/80 backdrop-blur-md border border-border hover:border-primary/30 hover:bg-card rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    <CardContent className="p-6">
+                      <motion.div
+                        className="mx-auto w-14 h-14 rounded-full gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow transition-all duration-300"
+                        whileHover={{ y: -4, scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                      >
+                        <AnimatedIcon>
+                          <f.icon className="h-7 w-7 text-primary-foreground" />
+                        </AnimatedIcon>
+                      </motion.div>
+                      <h3 className="font-semibold text-base mb-2 text-foreground group-hover:text-primary transition-colors">{f.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
       </div>
     </main>
   );

@@ -1,3 +1,4 @@
+import { AnimatePresence } from "framer-motion";
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -66,32 +67,35 @@ function AnimatedRoutes() {
   const location = useLocation();
 
   return (
-    <PageTransition key={location.pathname}>
-      <Routes location={location}>
-        <Route path="/" element={<Index />} />
-        <Route path="/wizard" element={<WizardPage />} />
-        <Route path="/plan" element={<PlanPage />} />
-        <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
-        <Route path="/exercises" element={<ExerciseCategories />} />
-        <Route path="/exercises/:categoryId" element={<ExerciseList />} />
-        <Route path="/exercises/:categoryId/:exerciseId" element={<ExerciseDetail />} />
-        <Route path="/clients" element={
-          <TrainerGuard>
-            <ClientsPage />
-          </TrainerGuard>
-        }
-        />
-        <Route path="/circles" element={<CirclesPage />} />
-        <Route path="/legal" element={<LegalPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </PageTransition>
+    <AnimatePresence mode="wait">
+      <PageTransition key={location.pathname}>
+        <Routes location={location}>
+          <Route path="/" element={<Index />} />
+          <Route path="/wizard" element={<WizardPage />} />
+          <Route path="/plan" element={<PlanPage />} />
+          <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
+          <Route path="/exercises" element={<ExerciseCategories />} />
+          <Route path="/exercises/:categoryId" element={<ExerciseList />} />
+          <Route path="/exercises/:categoryId/:exerciseId" element={<ExerciseDetail />} />
+          <Route path="/clients" element={
+            <TrainerGuard>
+              <ClientsPage />
+            </TrainerGuard>
+          }
+          />
+          <Route path="/circles" element={<CirclesPage />} />
+          <Route path="/legal" element={<LegalPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </PageTransition>
+    </AnimatePresence>
   );
 }
 
 import LegalPage from "./pages/Legal";
 import { Footer } from "@/components/Footer";
 import { ConsentModal } from "@/components/legal/ConsentModal";
+import { LivingBackground } from "@/components/ui/living-background";
 
 const App = () => {
   // Monitor network status and show notifications
@@ -106,7 +110,8 @@ const App = () => {
               <Toaster />
               <Sonner />
               <CommandPalette />
-              <div className="min-h-screen flex flex-col bg-background transition-colors duration-300">
+              <div className="min-h-screen flex flex-col bg-background transition-colors duration-300 relative overflow-hidden">
+                <LivingBackground />
                 <Header />
                 <ConsentModal />
                 <AnimatedRoutes />

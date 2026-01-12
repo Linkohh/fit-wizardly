@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FloatingElement } from "@/components/ui/page-transition";
+import { motion } from "framer-motion";
 
 export function WelcomeHero() {
     return (
@@ -12,10 +13,29 @@ export function WelcomeHero() {
 
             <div className="container max-w-5xl mx-auto text-center relative z-10">
                 <FloatingElement delay={0}>
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-premium border-primary/20 text-primary mb-8 animate-fade-in hover:shadow-glow transition-shadow cursor-default">
-                        <Zap className="h-4 w-4 fill-current animate-bounce" />
+                    <motion.div
+                        initial={{ scale: 0, rotate: -10, opacity: 0 }}
+                        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 200,
+                            damping: 15,
+                            delay: 0.2
+                        }}
+                        whileHover={{
+                            scale: 1.05,
+                            boxShadow: "0 0 20px rgba(139, 92, 246, 0.4)"
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-premium border-primary/20 text-primary mb-8 hover:shadow-glow transition-shadow cursor-default"
+                    >
+                        <motion.span
+                            animate={{ rotate: [0, -10, 10, -10, 0] }}
+                            transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
+                        >
+                            <Zap className="h-4 w-4 fill-current" />
+                        </motion.span>
                         <span className="text-sm font-bold tracking-wide uppercase">Ignite Your Fitness Journey</span>
-                    </div>
+                    </motion.div>
                 </FloatingElement>
 
                 <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:via-white dark:to-white/70 mb-6 drop-shadow-md tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
@@ -34,19 +54,55 @@ export function WelcomeHero() {
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
                     <Link to="/wizard">
-                        <Button size="xl" className="relative h-14 px-8 text-lg font-bold rounded-full bg-gradient-to-r from-primary to-secondary hover:shadow-glow hover:scale-105 transition-all duration-300 group overflow-hidden">
-                            <span className="relative z-10 flex items-center gap-2">
-                                Start Your Evolution
-                                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                            </span>
-                            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-                        </Button>
+                        <motion.div
+                            whileHover={{
+                                scale: 1.05,
+                                boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)"
+                            }}
+                            whileTap={{ scale: 0.97 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        >
+                            <Button size="xl" className="relative h-14 px-8 text-lg font-bold rounded-full bg-gradient-to-r from-primary to-secondary hover:shadow-glow transition-all duration-300 group overflow-hidden">
+                                <span className="relative z-10 flex items-center gap-2">
+                                    Start Your Evolution
+                                    <motion.span
+                                        className="inline-block"
+                                        whileHover={{ x: 4 }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                    >
+                                        <ArrowRight className="h-5 w-5" />
+                                    </motion.span>
+                                </span>
+                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                                {/* Shimmer effect */}
+                                <motion.div
+                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -skew-x-12"
+                                    initial={{ x: "-100%" }}
+                                    animate={{ x: "200%" }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        repeatDelay: 3,
+                                        ease: "easeInOut"
+                                    }}
+                                />
+                            </Button>
+                        </motion.div>
                     </Link>
 
                     <Link to="/plan">
-                        <Button variant="outline" size="xl" className="h-14 px-8 text-lg rounded-full border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300">
-                            View Current Plan
-                        </Button>
+                        <motion.div
+                            whileHover={{
+                                scale: 1.05,
+                                borderColor: "rgba(139, 92, 246, 0.5)"
+                            }}
+                            whileTap={{ scale: 0.97 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        >
+                            <Button variant="outline" size="xl" className="h-14 px-8 text-lg rounded-full border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300">
+                                View Current Plan
+                            </Button>
+                        </motion.div>
                     </Link>
                 </div>
 

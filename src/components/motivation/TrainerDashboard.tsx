@@ -2,6 +2,7 @@ import { Users, Award, TrendingUp, FileText, Star, Medal } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { cn } from '@/lib/utils';
+import { useCountUp } from '@/hooks/useCountUp';
 
 export type TrainerLevel = 'bronze' | 'silver' | 'gold' | 'platinum';
 
@@ -94,12 +95,19 @@ export function TrainerDashboard({ className }: TrainerDashboardProps) {
   const totalAssignments = assignments.length;
   const activeClients = new Set(assignments.map(a => a.clientId)).size;
   const templateUsage = templates.reduce((acc, t) => {
-    const uses = assignments.filter(a => 
+    const uses = assignments.filter(a =>
       // This is a simplified check - in real app, would need more logic
       a.planId === t.planSnapshot.id
     ).length;
     return acc + uses;
   }, 0);
+
+  // Animate stats with smooth count-up effect
+  const animatedTotalClients = useCountUp(clients.length, 1000);
+  const animatedActiveClients = useCountUp(activeClients, 1200);
+  const animatedTotalAssignments = useCountUp(totalAssignments, 1400);
+  const animatedTotalTemplates = useCountUp(templates.length, 1600);
+  const animatedTemplateUsage = useCountUp(templateUsage, 1800);
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -114,7 +122,7 @@ export function TrainerDashboard({ className }: TrainerDashboardProps) {
               <div>
                 <h3 className="text-2xl font-bold text-white">{level.name}</h3>
                 <p className="text-white/80">
-                  {clients.length} client{clients.length !== 1 ? 's' : ''} managed
+                  {animatedTotalClients} client{animatedTotalClients !== 1 ? 's' : ''} managed
                 </p>
               </div>
             </div>
@@ -140,7 +148,7 @@ export function TrainerDashboard({ className }: TrainerDashboardProps) {
         <Card variant="interactive">
           <CardContent className="p-4 text-center">
             <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
-            <div className="text-2xl font-bold text-foreground">{clients.length}</div>
+            <div className="text-2xl font-bold text-foreground">{animatedTotalClients}</div>
             <div className="text-xs text-muted-foreground">Total Clients</div>
           </CardContent>
         </Card>
@@ -148,7 +156,7 @@ export function TrainerDashboard({ className }: TrainerDashboardProps) {
         <Card variant="interactive">
           <CardContent className="p-4 text-center">
             <TrendingUp className="h-8 w-8 mx-auto mb-2 text-green-500" />
-            <div className="text-2xl font-bold text-foreground">{activeClients}</div>
+            <div className="text-2xl font-bold text-foreground">{animatedActiveClients}</div>
             <div className="text-xs text-muted-foreground">Active Clients</div>
           </CardContent>
         </Card>
@@ -156,7 +164,7 @@ export function TrainerDashboard({ className }: TrainerDashboardProps) {
         <Card variant="interactive">
           <CardContent className="p-4 text-center">
             <FileText className="h-8 w-8 mx-auto mb-2 text-secondary" />
-            <div className="text-2xl font-bold text-foreground">{totalAssignments}</div>
+            <div className="text-2xl font-bold text-foreground">{animatedTotalAssignments}</div>
             <div className="text-xs text-muted-foreground">Plans Assigned</div>
           </CardContent>
         </Card>
@@ -164,7 +172,7 @@ export function TrainerDashboard({ className }: TrainerDashboardProps) {
         <Card variant="interactive">
           <CardContent className="p-4 text-center">
             <Award className="h-8 w-8 mx-auto mb-2 text-amber-500" />
-            <div className="text-2xl font-bold text-foreground">{templates.length}</div>
+            <div className="text-2xl font-bold text-foreground">{animatedTotalTemplates}</div>
             <div className="text-xs text-muted-foreground">Templates Created</div>
           </CardContent>
         </Card>
@@ -181,10 +189,10 @@ export function TrainerDashboard({ className }: TrainerDashboardProps) {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              You've helped <span className="font-bold text-foreground">{activeClients}</span> client{activeClients !== 1 ? 's' : ''} with{' '}
-              <span className="font-bold text-foreground">{totalAssignments}</span> workout plan{totalAssignments !== 1 ? 's' : ''} this month!
+              You've helped <span className="font-bold text-foreground">{animatedActiveClients}</span> client{animatedActiveClients !== 1 ? 's' : ''} with{' '}
+              <span className="font-bold text-foreground">{animatedTotalAssignments}</span> workout plan{animatedTotalAssignments !== 1 ? 's' : ''} this month!
               {templates.length > 0 && (
-                <> Your templates have been used <span className="font-bold text-foreground">{templateUsage}</span> time{templateUsage !== 1 ? 's' : ''}.</>
+                <> Your templates have been used <span className="font-bold text-foreground">{animatedTemplateUsage}</span> time{animatedTemplateUsage !== 1 ? 's' : ''}.</>
               )}
             </p>
           </CardContent>

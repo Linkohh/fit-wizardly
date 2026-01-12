@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "framer-motion";
 import { Quote, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
@@ -12,7 +13,7 @@ const QUOTES = [
     "Discipline is doing what needs to be done, even if you don't want to do it.",
     "Sweat is just fat crying.",
     "The hard part isn't getting your body in shape. The hard part is getting your mind in shape.",
-    
+
     // Fitness & Physical Health
     "Take care of your body. It's the only place you have to live. — Jim Rohn",
     "The body achieves what the mind believes. — Napoleon Hill",
@@ -21,7 +22,7 @@ const QUOTES = [
     "Physical fitness is the first requisite of happiness. — Joseph Pilates",
     "The groundwork for all happiness is good health. — Leigh Hunt",
     "Movement is a medicine for creating change in a person's physical, emotional, and mental states. — Carol Welch",
-    
+
     // Mental Health & Mindfulness
     "Mental health is not a destination, but a process. It's about how you drive, not where you're going. — Noam Shpancer",
     "You don't have to control your thoughts. You just have to stop letting them control you. — Dan Millman",
@@ -31,7 +32,7 @@ const QUOTES = [
     "Be gentle with yourself, you're doing the best you can.",
     "Your mental health is a priority. Your happiness is essential. Your self-care is a necessity.",
     "Healing takes time, and asking for help is a courageous step. — Mariska Hargitay",
-    
+
     // Holistic Wellness
     "Wellness is the complete integration of body, mind, and spirit. — Greg Anderson",
     "Health is a state of complete harmony of the body, mind, and spirit. — B.K.S. Iyengar",
@@ -39,7 +40,7 @@ const QUOTES = [
     "Nurturing yourself is not selfish — it's essential to your survival and your well-being. — Renee Peterson Trudeau",
     "When you recover or discover something that nourishes your soul and brings joy, care enough about yourself to make room for it in your life. — Jean Shinoda Bolen",
     "Balance is not something you find, it's something you create. — Jana Kingsford",
-    
+
     // Self-Care & Self-Love
     "You yourself, as much as anybody in the entire universe, deserve your love and affection. — Buddha",
     "Rest and self-care are so important. When you take time to replenish your spirit, it allows you to serve others from the overflow. — Eleanor Brown",
@@ -47,7 +48,7 @@ const QUOTES = [
     "Self-care means giving yourself permission to pause. — Cecilia Tran",
     "Love yourself first and everything else falls into line. — Lucille Ball",
     "Put yourself at the top of your to-do list every single day.",
-    
+
     // Celebrity & Influencer Quotes
     "I really think a champion is defined not by their wins but by how they can recover when they fall. — Serena Williams",
     "Success is liking yourself, liking what you do, and liking how you do it. — Maya Angelou",
@@ -62,7 +63,7 @@ const QUOTES = [
     "Success isn't overnight. It's when every day you get a little better than the day before. — Dwayne Johnson",
     "Be humble. Be hungry. And always be the hardest worker in the room. — Dwayne Johnson",
     "The mind is the limit. As long as the mind can envision the fact that you can do something, you can do it. — Arnold Schwarzenegger",
-    
+
     // Inspirational & Motivational
     "You are allowed to be both a masterpiece and a work in progress simultaneously. — Sophia Bush",
     "Happiness is not something ready-made. It comes from your own actions. — Dalai Lama",
@@ -74,49 +75,293 @@ const QUOTES = [
     "Your body hears everything your mind says. Stay positive.",
     "Breathe. It's just a bad day, not a bad life.",
     "Be the energy you want to attract.",
+
+    // The Starting Line (Mindset & Beginnings)
+    "The weights don't care about your yesterday. They only ask what you can do today.",
+    "Your first step onto the mat is a conversation with your future self.",
+    "Don't wait for motivation to build the habit. Let the habit build the motivation.",
+    "The mirror reflects your starting point, not your finish line.",
+    "You aren't stepping into a gym; you're stepping into a workshop where you are both the sculptor and the stone.",
+    "The most important rep is the one you do when no one is watching.",
+    "Start before you feel ready. Readiness is a feeling that often arrives late to the party it threw.",
+    "Your comfort zone has no windows. Step outside to see the view.",
+    "The path from A to B is paved with the decision to leave A.",
+    "Don't fear being a beginner; fear staying one.",
+    "The clock ticks for everyone. Will you count the ticks or make them count?",
+    "Motivation is the guest. Discipline is the host. Make your home one where discipline resides.",
+    "You don't find willpower; you forge it, one heated moment of choice at a time.",
+    "The goal isn't to love the grind every day. It's to respect it enough to show up anyway.",
+    "Your body hears everything your mind says. Speak with action, not excuses.",
+    "The only \"right time\" is the time you decide to take control.",
+    "Anxiety is energy without direction. Movement is direction without apology.",
+    "You are not trapped by your body. You are in a dialogue with it. Today, choose to listen, then choose to lead.",
+    "The doorway to change is labeled \"Action,\" not \"Someday.\"",
+    "Burn the blueprint of who you were. Build the foundation of who you will be.",
+
+    // The Grind (Discipline & Consistency)
+    "Consistency is the language in which progress is written.",
+    "Show up on the day you don't want to. That's the day you're building mental muscle.",
+    "Excellence is not a single act but a habit. You are what you repeatedly do in the dark, quiet moments of choice.",
+    "The magic isn't in the 1st rep or the 100th. It's in the 43rd, when only your discipline is watching.",
+    "Discipline is choosing between what you want now and what you want most.",
+    "Rain, shine, or storm within—the schedule doesn't care. Your future self thanks you for not negotiating.",
+    "The compound interest of small, daily efforts yields a fortune of strength.",
+    "You don't build a wall by staring at the bricks. You build it by laying one, then another, then another.",
+    "Fatigue is the tax on improvement. Pay it willingly.",
+    "The only bad workout is the one that didn't happen.",
+    "Routines are the railings on the staircase to your goals. Hold onto them.",
+    "Discipline is the bridge between a goal set and a goal met.",
+    "Don't measure your journey against someone else's highlight reel. Measure it against your own yesterday.",
+    "The body achieves what the mind believes and the schedule protects.",
+    "Skip the excuse. It weighs nothing but costs everything.",
+    "Consistency is the quiet, boring superpower that outshouts talent every time.",
+    "You are one decision away from a different outcome. Make it.",
+    "The alarm clock is a daily referendum on your commitment. Vote for growth.",
+    "Motivation is fickle. A scheduled appointment with yourself is loyal.",
+    "The grind is where potential is polished into proof.",
+
+    // Strength & Resilience
+    "Strength isn't just what you can lift. It's what you can carry, overcome, and rise above.",
+    "The iron doesn't bend you; it reveals where you are already strong and where you can become stronger.",
+    "You are not breaking down. You are breaking open—making space for more strength to grow in.",
+    "The heaviest weight you'll ever lift is your own doubt. Get your mind under it first.",
+    "Resilience is forged in the fire of perceived failure. Stay in the fire.",
+    "A muscle only grows after it's been torn. See your struggles as the tear before the repair.",
+    "The obstacle is not in your way. It is the way.",
+    "Your limits are often just suggestions from an older version of yourself. Send a revision.",
+    "Pressure doesn't crush you; it reveals the diamond you're meant to be.",
+    "Be harder to kill in the gym, so life outside feels easier to live.",
+    "The point of struggle is not to stop you, but to show you that you can continue.",
+    "You don't get strong when things are easy. You get strong when you decide easy is not the goal.",
+    "The weight that challenges you is the weight that changes you. Thank it.",
+    "Tough times are just spotter sets for your soul—there to ensure you complete the lift.",
+    "Forge your spine in the gym, so you don't bend to the winds of life.",
+    "The callus is a testament. The soreness is a conversation. The strength is the answer.",
+    "You are the architect of your own resilience. Build daily.",
+    "The plateau is not a wall. It is a gathering place for your next leap.",
+    "Embrace the suck. It's the feeling of your comfort zone expanding.",
+    "You are stronger than the storm that seeks to quiet you.",
+
+    // Progress & The Journey
+    "Progress is not a straight line; it's a heartbeat—sometimes up, sometimes down, but always moving.",
+    "Don't just count the reps. Make the reps count. Quality is the currency of change.",
+    "The scale measures gravity's pull, not your grit, grace, or growth.",
+    "Look back only to see how far you've come, not to set up camp there.",
+    "The goal is not to conquer the mountain, but to become the person who can.",
+    "Small gains, stacked, become monumental over time. Celebrate the stacking.",
+    "You are not going on a journey. You are the journey. Every step is a part of you.",
+    "Mastery is falling in love with the boredom of doing the simple things perfectly, repeatedly.",
+    "The victory is not in the PR (Personal Record). It's in the thousand lifts that came before it.",
+    "Compare yourself to who you were, not to who someone else is.",
+    "The finish line is a mirage. True success is falling in love with the desert of the daily trek.",
+    "Progress whispers in the quiet improvements: an extra rep, a clearer mind, a tighter form.",
+    "You aren't losing weight; you are releasing what no longer serves you.",
+    "The journey from A to B is not about erasing A, but about honoring the distance traveled.",
+    "Every bead of sweat is a word in the story of your transformation. Keep writing.",
+    "Focus on the direction, not the perfection. A boat tacking against the wind still reaches shore.",
+    "Your speed doesn't matter. Your direction does. Are you facing B?",
+    "The goal is a destination, but the growth is in the navigation.",
+    "Measure your health in energy, not ounces. Measure your worth in effort, not inches.",
+    "You are a work in progress. And \"work\" is the most beautiful part.",
+
+    // Endurance & The Long Game
+    "Marathon or sprint, the principle is the same: the next step. Then the next.",
+    "Endurance is the art of knowing something good is waiting, even when your body screams to stop.",
+    "Pace yourself. This is a conversation with your limits, not a shouting match.",
+    "The second wind is not found; it is forged in the decision to keep going after the first wind is gone.",
+    "Life is an endurance sport. Train for it.",
+    "The wall is a teacher. It shows you where your mind ends and your spirit begins.",
+    "Breathe. In through the challenge, out through the perseverance.",
+    "It never gets easier. You just get stronger, and your definition of \"hard\" changes.",
+    "The last mile is run with the heart. Train your heart daily.",
+    "Sustainability is the secret. Can you see yourself doing this in a year? Start there.",
+    "Don't drain the tank. Learn to run on the fuel of purpose.",
+    "Rest is not the enemy of progress; it is the ally of longevity.",
+    "The oak tree does not grow in a day. It trusts the process of seasons. Be the oak.",
+    "Your greatest stamina will be built on days you thought you had none left.",
+    "The long game is won in the short, consistent choices that seem insignificant alone.",
+    "Fatigue is temporary. The pride of outlasting it is permanently etched in your character.",
+    "The heart is a muscle. Condition it for distance, not just for bursts.",
+    "Sometimes, moving forward means slowing down to a pace you can sustain forever.",
+    "You are not running out of energy. You are tapping into a deeper source.",
+    "The finish line will come. The question is, who will you be when you cross it?",
+
+    // Mind & Body Connection
+    "The mind quits a thousand times before the body does. Quiet the mind, the body will follow.",
+    "This is not a punishment for your body. It is a gift to your whole being.",
+    "Your sweat is your soul crying out in joy for being used as intended.",
+    "The gym is a moving meditation. Each rep is a mantra of self-creation.",
+    "Listen to the whisper of your body before it becomes a scream of injury.",
+    "Fuel your machine with respect, not restriction.",
+    "The body is the instrument, the mind is the musician. Practice harmony.",
+    "A calm mind is the ultimate core strength.",
+    "You are not a brain piloting a body. You are a single, brilliant system. Optimize the connection.",
+    "Flexibility of the body begins with flexibility of the mind.",
+    "Honor your hunger. It is not the enemy; it is intelligence.",
+    "The cool-down is as important as the workout. It's where the body integrates the lesson.",
+    "Your posture is the story you tell the world without words. Stand in your power.",
+    "Movement is medicine for a stagnant mind.",
+    "The breath is the anchor. In chaos, in effort, in rest—return to the breath.",
+    "Treat your body like someone you are responsible for loving. Because you are.",
+    "The tight muscle is often a sentinel for stress. Stretch it, thank it, release it.",
+    "Your energy flows where your attention goes. Direct it with purpose.",
+    "Rest is not idleness. It is active participation in your recovery.",
+    "The goal is not to conquer the body, but to befriend it and lead it to greatness.",
+
+    // Transformation & Becoming
+    "You are not changing your body. You are revealing the person who was inside you all along.",
+    "Transformation is the process of choosing your discomforts: the pain of discipline or the pain of regret.",
+    "The caterpillar doesn't know it's becoming a butterfly. It just follows the process. Trust your process.",
+    "You are the clay and the sculptor. Don't be afraid to get your hands dirty.",
+    "Evolution is not a single event but a series of daily revolutions.",
+    "Shed the old skin. It served its purpose. Now, grow.",
+    "You aren't leaving Point A behind. You're using it as the launching pad.",
+    "The person you will be is thanking you for the work you're doing today.",
+    "Metamorphosis requires a period of being unseen. You are in the chrysalis. Keep working.",
+    "Don't just build muscle. Build character, resilience, and proof of your own word.",
+    "The fire of effort burns away what you thought you were, leaving what you are.",
+    "You are upgrading your software (mind) and your hardware (body) simultaneously. Reboot with purpose.",
+    "Let your actions write a new biography for yourself, one rep at a time.",
+    "The old you is a chapter, not the book. Turn the page.",
+    "You don't \"get\" in shape. You grow into shape. Growth is slow, deliberate, and permanent.",
+    "Your reflection will catch up to your effort. Give it time.",
+    "This journey is not about adding something you lack. It's about removing everything you are not.",
+    "You are a verb, not a noun. You are becoming.",
+    "The goal is not a new body. It's a new relationship with the one you have.",
+    "You were given this life because you are strong enough to live it. Now prove it to yourself.",
+
+    // Community & Shared Energy
+    "The clang of weights is the sound of collective ambition. You are never alone in the pursuit.",
+    "A spotter isn't just there for the weight. They are there for your belief when it falters.",
+    "The energy you bring to the room lifts more than just your own spirits.",
+    "Cheer for others' victories. Their rising tide lifts all boats, including yours.",
+    "Your journey may be personal, but it doesn't have to be lonely.",
+    "A shared sweat creates a bond thicker than blood.",
+    "Be the reason someone feels welcomed, seen, and capable today.",
+    "The strongest communities are built on the foundation of mutual struggle and respect.",
+    "Pass on the kindness that was shown to you when you were new.",
+    "We train together to become stronger individuals, for a stronger whole.",
+
+    // The Deeper Why (Purpose)
+    "You are not training for a body. You are training for a life.",
+    "This is practice for everything else. The focus here becomes the focus there.",
+    "The confidence you earn in here is the currency you spend out there.",
+    "You are building a fortress of self-trust, brick by brick.",
+    "It's not about the abs. It's about the ability to carry your children, your groceries, your dreams without faltering.",
+    "You are investing in the only asset you are guaranteed to have for life: yourself.",
+    "This is your rebellion against mediocrity, against decline, against surrender.",
+    "You are proving to yourself that promises made can be promises kept.",
+    "The discipline here leaks into your finances, your relationships, your peace.",
+    "You are not just adding years to your life. You are adding life to your years.",
+    "This is about becoming a problem-solver, not a problem-avoider.",
+    "You are crafting your own antidote to helplessness.",
+    "Every lift is a declaration: \"I am not done yet.\"",
+    "You are preparing for adventures not yet planned, for challenges not yet seen.",
+    "This work is the down payment on a future of vitality.",
+
+    // Powerful One-Liners & Triggers
+    "The only easy day was yesterday.",
+    "Your potential is whispering. Time to shout back.",
+    "What if you didn't quit?",
+    "The pain of regret is heavier.",
+    "Become a question to which the answer is \"Yes.\"",
+    "Sweat is fear leaving the body.",
+    "Don't stop when you're tired. Stop when you're done.",
+    "The body obeys the mind. Command wisely.",
+    "Momentum is built by movement.",
+    "Be the storm.",
+    "Your will is your weapon. Keep it sharp.",
+    "Fall in love with the process.",
+    "The comeback is always stronger than the setback.",
+    "Feed your focus. Starve your distractions.",
+    "You are your own limit. Break yourself.",
+    "Today's effort is tomorrow's advantage.",
+    "Stay hungry. Stay humble. Stay hard.",
+    "The only person you are destined to become is the person you decide to be.",
+    "Push. Because you can.",
+    "Let your results do the talking.",
+    "Rise. Grind. Repeat.",
+    "Turn your can'ts into cans and your dreams into plans.",
+    "The harder the conflict, the more glorious the triumph.",
+    "Don't wish for it. Work for it.",
+    "Start where you are. Use what you have. Do what you can.",
+    "The secret of getting ahead is getting started.",
+    "Your energy introduces you before you even speak.",
+    "Make sweat your best accessory.",
+    "Don't count the days. Make the days count.",
+    "The only bad workout is the one you didn't do.",
+    "Strong mind. Stronger body.",
+    "Prove yourself to yourself.",
+    "Go the extra mile. It's never crowded.",
+    "Excuses don't burn calories.",
+    "Fit is not a destination. It is a way of life.",
+    "Create a version of yourself you would be proud to know.",
+    "You are one workout away from a better mood.",
+    "The grind is glamorous.",
+    "Wake up. Kick ass. Repeat.",
+    "Lift heavy. Live light.",
+    "Breathe. Believe. Become.",
+    "The fire within you is stronger than the fire around you.",
+    "What hurts today makes you stronger tomorrow.",
+    "Don't limit your challenges. Challenge your limits.",
+    "Sweat now, shine later.",
+    "Your health is an investment, not an expense.",
+    "The finish line is just the beginning of a new race.",
+    "Get comfortable being uncomfortable.",
+    "Dream big. Work bigger.",
+    "Hustle until your haters ask if you're hiring.",
+    "The only thing standing between you and your goal is the story you keep telling yourself.",
+    "Make it happen.",
+    "Shut up and squat.",
+    "Courage is fear that has said its prayers and decided to move forward anyway.",
+    "Be so good they can't ignore you.",
+    "The difference between try and triumph is a little \"umph.\"",
+    "You didn't come this far to only come this far.",
+    "The clock is ticking. Are you?",
+    "Don't let a bad day make you feel like you have a bad life.",
+    "Small steps still move you forward.",
+    "Your vibe attracts your tribe.",
+    "Keep going. The only way out is through.",
+    "Be stronger than your strongest excuse.",
+    "The only limit is the one you set yourself.",
+    "Do it for the person you were five years ago, who dreamed of who you are today.",
+    "Be a voice, not an echo.",
+    "Hustle in silence. Let success make the noise.",
+    "Pressure makes diamonds.",
+    "The view is worth the climb.",
+    "You are enough. You have enough. You do enough. Now go be more.",
+    "Rise up and attack the day.",
+    "Don't wait for opportunity. Create it.",
+    "The best project you'll ever work on is you.",
+    "Hardships often prepare ordinary people for an extraordinary destiny.",
+    "Focus on the step in front of you, not the whole staircase.",
+    "The pain you feel today will be the strength you feel tomorrow.",
+    "Do something today that your future self will thank you for.",
+    "It's a good day to have a good day.",
+    "Let your faith be bigger than your fear.",
+    "Stay close to anything that makes you glad you are alive.",
+    "The comeback is always greater than the setback.",
+    "Don't dream of winning. Train for it.",
+    "You are the author of your own story. Make it a bestseller.",
+    "The only way to achieve the impossible is to believe it is possible.",
+    "Go forth and conquer.",
 ];
 
 export function DailyQuote({ className }: { className?: string }) {
     const [quoteIndex, setQuoteIndex] = useState(0);
-    const [animationState, setAnimationState] = useState<'visible' | 'exiting' | 'entering'>('visible');
 
     useEffect(() => {
         // Start with a deterministic quote based on date
         const today = new Date();
         const startIndex = (today.getDate() + today.getMonth()) % QUOTES.length;
         setQuoteIndex(startIndex);
-    }, []);
 
-    useEffect(() => {
         const interval = setInterval(() => {
-            // Start exit animation
-            setAnimationState('exiting');
-            
-            setTimeout(() => {
-                // Change quote and start enter animation
-                setQuoteIndex((prev) => (prev + 1) % QUOTES.length);
-                setAnimationState('entering');
-                
-                setTimeout(() => {
-                    setAnimationState('visible');
-                }, 600);
-            }, 600);
+            setQuoteIndex((prev) => (prev + 1) % QUOTES.length);
         }, 12000);
 
         return () => clearInterval(interval);
     }, []);
-
-    const getAnimationClasses = () => {
-        switch (animationState) {
-            case 'exiting':
-                return 'opacity-0 scale-95 blur-sm -translate-y-4 rotate-1';
-            case 'entering':
-                return 'opacity-0 scale-105 blur-sm translate-y-4 -rotate-1';
-            case 'visible':
-            default:
-                return 'opacity-100 scale-100 blur-0 translate-y-0 rotate-0';
-        }
-    };
 
     return (
         <div className={cn("relative p-8 rounded-2xl bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-primary/20 overflow-hidden group hover:shadow-glow hover:border-primary/30 transition-all duration-500", className)}>
@@ -126,23 +371,29 @@ export function DailyQuote({ className }: { className?: string }) {
 
             <div className="relative z-10 flex flex-col items-center text-center">
                 <div className="mb-4 p-2 rounded-full bg-primary/10 text-primary">
-                    <Sparkles className={cn(
-                        "w-5 h-5 transition-all duration-300",
-                        animationState !== 'visible' ? "animate-spin" : "animate-pulse"
-                    )} />
+                    <Sparkles className="w-5 h-5 animate-pulse" />
                 </div>
-                <p 
-                    className={cn(
-                        "text-xl md:text-2xl font-medium italic text-foreground/90 leading-relaxed max-w-2xl transition-all duration-500 ease-out transform",
-                        getAnimationClasses()
-                    )}
-                >
-                    "{QUOTES[quoteIndex]}"
-                </p>
-                <div className={cn(
-                    "mt-4 h-1 rounded-full bg-gradient-to-r from-primary to-secondary transition-all duration-500",
-                    animationState !== 'visible' ? "w-0" : "w-12"
-                )} />
+
+                <div className="min-h-[100px] flex items-center justify-center">
+                    <AnimatePresence mode="wait">
+                        <motion.p
+                            key={quoteIndex}
+                            initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
+                            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                            exit={{ opacity: 0, y: -20, scale: 0.95, filter: "blur(10px)" }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
+                            className="text-xl md:text-2xl font-medium italic text-foreground/90 leading-relaxed max-w-2xl"
+                        >
+                            "{QUOTES[quoteIndex]}"
+                        </motion.p>
+                    </AnimatePresence>
+                </div>
+
+                <motion.div
+                    layoutId="quote-underline"
+                    className="mt-4 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary"
+                />
+
                 <p className="mt-2 text-sm text-muted-foreground font-medium uppercase tracking-wider">
                     Daily Motivation
                 </p>

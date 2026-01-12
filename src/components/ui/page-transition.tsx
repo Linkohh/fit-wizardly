@@ -1,4 +1,5 @@
-import { ReactNode, useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -8,44 +9,28 @@ interface PageTransitionProps {
 }
 
 export function PageTransition({ children, className }: PageTransitionProps) {
-  const location = useLocation();
-  const [isVisible, setIsVisible] = useState(false);
-  const [displayChildren, setDisplayChildren] = useState(children);
-
-  useEffect(() => {
-    setIsVisible(false);
-    const timeout = setTimeout(() => {
-      setDisplayChildren(children);
-      setIsVisible(true);
-    }, 150);
-
-    return () => clearTimeout(timeout);
-  }, [location.pathname, children]);
-
   return (
-    <div
-      className={cn(
-        "transition-all duration-400 ease-out",
-        isVisible 
-          ? "opacity-100 translate-y-0" 
-          : "opacity-0 translate-y-3",
-        className
-      )}
+    <motion.div
+      initial={{ opacity: 0, y: 10, filter: "blur(5px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      exit={{ opacity: 0, y: -10, filter: "blur(5px)" }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className={cn("w-full h-full", className)}
     >
-      {displayChildren}
-    </div>
+      {children}
+    </motion.div>
   );
 }
 
-export function AnimatedIcon({ 
-  children, 
-  className 
-}: { 
-  children: ReactNode; 
+export function AnimatedIcon({
+  children,
+  className
+}: {
+  children: ReactNode;
   className?: string;
 }) {
   return (
-    <span 
+    <span
       className={cn(
         "inline-flex icon-hover transition-all duration-200",
         className
@@ -56,23 +41,23 @@ export function AnimatedIcon({
   );
 }
 
-export function GradientBorder({ 
-  children, 
+export function GradientBorder({
+  children,
   className,
   animated = true,
-}: { 
-  children: ReactNode; 
+}: {
+  children: ReactNode;
   className?: string;
   animated?: boolean;
 }) {
   return (
-    <div 
+    <div
       className={cn(
         "relative p-[2px] rounded-xl overflow-hidden group",
         className
       )}
     >
-      <div 
+      <div
         className={cn(
           "absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300",
           animated && "animate-gradient"
@@ -89,17 +74,17 @@ export function GradientBorder({
   );
 }
 
-export function FloatingElement({ 
-  children, 
+export function FloatingElement({
+  children,
   className,
   delay = 0,
-}: { 
-  children: ReactNode; 
+}: {
+  children: ReactNode;
   className?: string;
   delay?: number;
 }) {
   return (
-    <div 
+    <div
       className={cn("animate-float", className)}
       style={{ animationDelay: `${delay}s` }}
     >
@@ -108,11 +93,11 @@ export function FloatingElement({
   );
 }
 
-export function GlowPulse({ 
-  children, 
-  className 
-}: { 
-  children: ReactNode; 
+export function GlowPulse({
+  children,
+  className
+}: {
+  children: ReactNode;
   className?: string;
 }) {
   return (

@@ -125,28 +125,62 @@ export default function PlanPage() {
 
   const exportPDF = () => {
     const doc = new jsPDF();
+    const selections = currentPlan.selections;
+
+    // Generate timestamp
+    const now = new Date();
+    const timestamp = now.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
 
     // Purple/Pink branded header
     doc.setFillColor(139, 92, 246); // Primary purple
-    doc.rect(0, 0, 220, 35, 'F');
+    doc.rect(0, 0, 220, 45, 'F');
 
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.text('FitWizard', 14, 20);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Your Personalized Workout Plan', 14, 28);
+
+    // Personalized title if name is provided
+    const userName = `${selections.firstName || ''} ${selections.lastName || ''}`.trim();
+    if (userName) {
+      doc.text(`${userName}'s Workout Plan`, 14, 18);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Powered by FitWizard', 14, 26);
+    } else {
+      doc.text('FitWizard', 14, 18);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Your Personalized Workout Plan', 14, 26);
+    }
+
+    // Timestamp in header
+    doc.setFontSize(10);
+    doc.text(`Generated: ${timestamp}`, 14, 38);
+
+    // Personal goal note (if provided)
+    let y = 55;
+    if (selections.personalGoalNote) {
+      doc.setTextColor(139, 92, 246);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bolditalic');
+      doc.text(`"${selections.personalGoalNote}"`, 14, y);
+      y += 12;
+    }
 
     // Plan details
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
-    doc.text(`Split: ${currentPlan.splitType.replace('_', ' ').toUpperCase()}`, 14, 45);
-    doc.text(`Days/Week: ${currentPlan.selections.daysPerWeek}`, 14, 52);
-    doc.text(`Session Duration: ${currentPlan.selections.sessionDuration} min`, 14, 59);
-    doc.text(`Goal: ${currentPlan.selections.goal.charAt(0).toUpperCase() + currentPlan.selections.goal.slice(1)}`, 14, 66);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Split: ${currentPlan.splitType.replace('_', ' ').toUpperCase()}`, 14, y);
+    doc.text(`Days/Week: ${selections.daysPerWeek}`, 14, y + 7);
+    doc.text(`Session Duration: ${selections.sessionDuration} min`, 14, y + 14);
+    doc.text(`Goal: ${selections.goal.charAt(0).toUpperCase() + selections.goal.slice(1)}`, 14, y + 21);
 
-    let y = 80;
+    y += 35;
     currentPlan.workoutDays.forEach((day) => {
       // Day header with pink accent
       doc.setFillColor(236, 72, 153); // Secondary pink
@@ -177,7 +211,12 @@ export default function PlanPage() {
     doc.setFont('helvetica', 'italic');
     doc.text("You've got this! Every rep counts. 💪", 14, 285);
 
-    doc.save('FitWizard_Plan.pdf');
+    // Generate filename with user's name if available
+    const filename = userName
+      ? `${userName.replace(/\s+/g, '_')}_FitWizard_Plan.pdf`
+      : 'FitWizard_Plan.pdf';
+
+    doc.save(filename);
   };
 
   return (
