@@ -9,6 +9,8 @@ import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { CommunityPulse } from '@/components/community/CommunityPulse';
+import { ExerciseOfTheDay } from './ExerciseOfTheDay';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ITEMS_PER_PAGE = 24;
@@ -68,9 +70,12 @@ export function ExercisesBrowser() {
     return (
         <div className="container mx-auto px-4 py-8 max-w-7xl animate-in fade-in duration-500">
             <div className="mb-8 space-y-4">
-                <h1 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60">
-                    Exercise Library
-                </h1>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-white/60">
+                        Exercise Library
+                    </h1>
+                    <CommunityPulse />
+                </div>
                 <p className="text-muted-foreground text-lg max-w-2xl">
                     Explore our comprehensive database of over 100 exercises. Filter by muscle, category, or difficulty to build your perfect workout.
                 </p>
@@ -86,10 +91,16 @@ export function ExercisesBrowser() {
                 </div>
             </div>
 
+            {/* Featured Daily Exercise */}
+            {!isFiltering && (
+                <ExerciseOfTheDay onSelect={setSelectedExercise} />
+            )}
+
             <ExerciseFilters
                 category={filters.category || 'all'}
                 muscle={filters.muscle || 'all'}
                 difficulty={filters.difficulty || 'all'}
+                equipment={filters.equipment || 'all'}
                 onFilterChange={handleFilterChange}
                 onClear={clearFilters}
             />
@@ -159,6 +170,7 @@ export function ExercisesBrowser() {
                 exercise={selectedExercise}
                 isOpen={!!selectedExercise}
                 onClose={() => setSelectedExercise(null)}
+                onSelectExercise={setSelectedExercise}
             />
         </div>
     );

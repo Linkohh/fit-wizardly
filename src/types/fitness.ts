@@ -158,6 +158,9 @@ export interface Exercise {
   contraindications: Constraint[];
   cues: string[]; // Key coaching cues
   videoUrl?: string;
+  videoThumbnailUrl?: string;
+  gifUrl?: string;
+  muscleDiagramUrl?: string;
   imageUrl?: string;
 
   // Rich Content Fields

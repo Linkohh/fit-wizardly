@@ -7,7 +7,7 @@ export interface ExerciseFilterOptions {
     search?: string;
     category?: ExerciseCategory | 'all';
     muscle?: MuscleGroup | 'all';
-    equipment?: Equipment[] | 'all'; // If array, match ANY
+    equipment?: Equipment | Equipment[] | 'all'; // If array, match ANY
     difficulty?: 'Beginner' | 'Intermediate' | 'Advanced' | 'all';
 }
 
@@ -26,7 +26,7 @@ export function filterExercises(options: ExerciseFilterOptions): Exercise[] {
     }
 
     if (options.equipment && options.equipment !== 'all') {
-        const requiredEq = options.equipment;
+        const requiredEq = Array.isArray(options.equipment) ? options.equipment : [options.equipment];
         results = results.filter(ex =>
             ex.equipment.some(eq => requiredEq.includes(eq))
         );
