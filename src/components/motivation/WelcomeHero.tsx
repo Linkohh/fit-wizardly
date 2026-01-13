@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FloatingElement } from "@/components/ui/page-transition";
 import { motion } from "framer-motion";
+import { InteractiveWord } from "./InteractiveWord";
 
 export function WelcomeHero() {
     return (
@@ -38,10 +39,14 @@ export function WelcomeHero() {
                     </motion.div>
                 </FloatingElement>
 
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:via-white dark:to-white/70 mb-6 drop-shadow-md tracking-tight animate-fade-in" style={{ animationDelay: '0.1s' }}>
-                    Unleash Your <br />
-                    <span className="gradient-text-animated filter drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]">
-                        Full Potential
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-br dark:from-white dark:via-white dark:to-white/70 mb-6 drop-shadow-md tracking-tight animate-fade-in flex flex-col items-center justify-center leading-tight" style={{ animationDelay: '0.1s' }}>
+                    <div className="flex items-center justify-center flex-wrap gap-2 md:gap-4 dark:text-white">
+                        <InteractiveWord word="Unleash" type="unleash" />
+                        <InteractiveWord word="Your" type="your" />
+                    </div>
+                    <span className="gradient-text-animated filter drop-shadow-[0_0_15px_rgba(139,92,246,0.5)] flex items-center justify-center gap-2 md:gap-4 mt-2">
+                        <InteractiveWord word="Full" type="full" className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary animate-gradient-x" />
+                        <InteractiveWord word="Potential" type="potential" className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary animate-gradient-x" />
                     </span>
                 </h1>
 
@@ -61,6 +66,7 @@ export function WelcomeHero() {
                             }}
                             whileTap={{ scale: 0.97 }}
                             transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            className="rounded-full"
                         >
                             <Button size="xl" className="relative h-14 px-8 text-lg font-bold rounded-full bg-gradient-to-r from-primary to-secondary hover:shadow-glow transition-all duration-300 group overflow-hidden">
                                 <span className="relative z-10 flex items-center gap-2">
@@ -98,6 +104,7 @@ export function WelcomeHero() {
                             }}
                             whileTap={{ scale: 0.97 }}
                             transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                            className="rounded-full"
                         >
                             <Button variant="outline" size="xl" className="h-14 px-8 text-lg rounded-full border-primary/20 hover:bg-primary/5 hover:border-primary/50 transition-all duration-300">
                                 View Current Plan

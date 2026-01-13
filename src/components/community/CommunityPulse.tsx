@@ -36,17 +36,18 @@ export function CommunityPulse() {
 
     return (
         <div className="flex items-center gap-4 text-xs font-medium text-muted-foreground bg-white/5 px-3 py-1.5 rounded-full border border-white/5 backdrop-blur-md">
-            <div className="flex items-center gap-1.5 text-emerald-400">
+            <div className="flex items-center gap-1.5">
                 <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span>{activeUsers} active now</span>
+                <span className="text-emerald-400 font-bold">{activeUsers}</span>
+                <span className="text-white/60">active now</span>
             </div>
 
             <div className="h-3 w-px bg-white/10" />
 
-            <div className="w-[180px] h-4 relative overflow-hidden">
+            <div className="w-[220px] h-5 relative overflow-hidden">
                 <AnimatePresence mode="wait">
                     {recentAction ? (
                         <motion.div
@@ -56,8 +57,8 @@ export function CommunityPulse() {
                             exit={{ y: -10, opacity: 0 }}
                             className="absolute inset-0 text-white/80 truncate flex items-center gap-1"
                         >
-                            <Activity className="w-3 h-3 text-primary" />
-                            {recentAction}
+                            <Activity className="w-3 h-3 text-primary shrink-0" />
+                            <span className="truncate">{recentAction}</span>
                         </motion.div>
                     ) : (
                         <motion.div
@@ -65,9 +66,9 @@ export function CommunityPulse() {
                             initial={{ y: 10, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: -10, opacity: 0 }}
-                            className="absolute inset-0 flex items-center gap-1"
+                            className="absolute inset-0 flex items-center gap-1 truncate text-white/80"
                         >
-                            Get moving with the community!
+                            <span className="truncate">Get moving with the community!</span>
                         </motion.div>
                     )}
                 </AnimatePresence>

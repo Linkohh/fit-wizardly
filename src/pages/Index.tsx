@@ -10,11 +10,13 @@ import { TrainerDashboard } from '@/components/motivation/TrainerDashboard';
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 
+import { SupernovaIcon } from '@/components/ui/SupernovaIcon';
+
 const features = [
-  { icon: Target, title: 'Smart Goal Setting', description: 'Choose strength, hypertrophy, or general fitness goals' },
-  { icon: Dumbbell, title: 'Equipment Matching', description: 'Plans tailored to your available equipment' },
-  { icon: FileText, title: 'PDF Export', description: 'Download and share your personalized plan' },
-  { icon: Users, title: 'Trainer Mode', description: 'Manage clients and assign customized plans' },
+  { icon: Target, title: 'Smart Goal Setting', description: 'Choose strength, hypertrophy, or general fitness goals', variant: 'strength' as const },
+  { icon: Dumbbell, title: 'Equipment Matching', description: 'Plans tailored to your available equipment', variant: 'achievement' as const },
+  { icon: FileText, title: 'PDF Export', description: 'Download and share your personalized plan', variant: 'magic' as const },
+  { icon: Users, title: 'Trainer Mode', description: 'Manage clients and assign customized plans', variant: 'cosmic' as const },
 ];
 
 export default function Index() {
@@ -189,12 +191,17 @@ export default function Index() {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <motion.div
-                              className="mx-auto w-14 h-14 rounded-full gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow transition-all duration-300 cursor-help"
+                              className="mx-auto w-14 h-14 rounded-full gradient-primary flex items-center justify-center mb-4 group-hover:shadow-glow transition-all duration-300 cursor-pointer overflow-visible relative"
                               whileHover={{ y: -4, scale: 1.1 }}
                               transition={{ type: "spring", stiffness: 400, damping: 15 }}
                             >
                               <AnimatedIcon>
-                                <f.icon className="h-7 w-7 text-primary-foreground" />
+                                <SupernovaIcon
+                                  icon={f.icon}
+                                  variant={f.variant}
+                                  className="text-primary-foreground w-full h-full"
+                                  size={28}
+                                />
                               </AnimatedIcon>
                             </motion.div>
                           </TooltipTrigger>
