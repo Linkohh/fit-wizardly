@@ -14,9 +14,7 @@ import WizardPage from "./pages/Wizard";
 import PlanPage from "./pages/Plan";
 import NotFound from "./pages/NotFound";
 import ClientsPage from "./pages/Clients";
-import ExerciseCategories from "./pages/exercises/ExerciseCategories";
-import ExerciseList from "./pages/exercises/ExerciseList";
-import ExerciseDetail from "./pages/exercises/ExerciseDetail";
+import { ExercisesBrowser } from "./components/exercises/ExercisesBrowser";
 import { TrainerGuard } from "./components/TrainerGuard";
 import { OnboardingGuard } from "./components/OnboardingGuard";
 import { WorkoutLogger } from "./components/logging/WorkoutLogger";
@@ -90,9 +88,7 @@ function AnimatedRoutes() {
             <Route path="/wizard" element={<WizardPage />} />
             <Route path="/plan" element={<PlanPage />} />
             <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
-            <Route path="/exercises" element={<ExerciseCategories />} />
-            <Route path="/exercises/:categoryId" element={<ExerciseList />} />
-            <Route path="/exercises/:categoryId/:exerciseId" element={<ExerciseDetail />} />
+            <Route path="/exercises" element={<ExercisesBrowser />} />
             <Route path="/clients" element={
               <TrainerGuard>
                 <ClientsPage />

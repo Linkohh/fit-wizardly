@@ -13,7 +13,31 @@ export type Equipment =
   | 'pullup_bar'
   | 'bench'
   | 'squat_rack'
-  | 'bodyweight';
+  | 'bodyweight'
+  | 'band'
+  | 'medicine_ball'
+  | 'foam_roller'
+  | 'ez_bar'
+  | 'sled'
+  | 'box'
+  | 'rope'
+  | 'landmine'
+  | 'plate'
+  | 'sandbag'
+  | 'other'
+  | 'mini_band'
+  | 'dumbbell'
+  | 'cable'
+  | 'machine'
+  | 'pull-up_bar'
+  | 'none'
+  | 'stability_ball'
+  | 'rings'
+  | 'ab_wheel'
+  | 'wall'
+  | 'tib_bar'
+  | 'floor'
+  | 'mat';
 
 export type MuscleGroup =
   | 'chest'
@@ -101,6 +125,24 @@ export interface WizardSelections {
   sessionDuration: number; // minutes
 }
 
+export type ExerciseCategory =
+  | 'strength'
+  | 'cardio'
+  | 'flexibility'
+  | 'plyometric'
+  | 'core'
+  | 'other'; // Simplified mapping from the granular JSON categories
+
+export interface ExerciseVariation {
+  name: string;
+  description: string;
+  type: 'regression' | 'progression' | 'alternative';
+}
+
+export interface MetabolicInfo {
+  met: number; // Metabolic Equivalent of Task (approximate)
+}
+
 export interface Exercise {
   id: string;
   name: string;
@@ -114,8 +156,18 @@ export interface Exercise {
   type?: ExerciseType;             // 'strength' vs 'plyometric' vs 'power'
 
   contraindications: Constraint[];
-  cues: string[];
+  cues: string[]; // Key coaching cues
   videoUrl?: string;
+  imageUrl?: string;
+
+  // Rich Content Fields
+  description?: string; // Detailed description
+  steps?: string[]; // Step-by-step instructions
+  variations?: ExerciseVariation[]; // Linked variations
+  metabolic?: MetabolicInfo; // Calories estimation data
+  difficulty?: 'Beginner' | 'Intermediate' | 'Advanced' | 'Elite' | 'All Levels';
+  category?: string; // e.g. "Upper Push", "Cardio" - derived from library
+  subcategory?: string;
 }
 
 export interface ExercisePrescription {
