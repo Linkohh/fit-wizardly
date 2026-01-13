@@ -1,0 +1,63 @@
+{
+    "app": {
+        "name": "FitWizard",
+        "tagline": "Dein KI-gestützter Trainingsbegleiter"
+    },
+    "nav": {
+        "home": "Startseite",
+        "wizard": "Assistent",
+        "plan": "Mein Plan",
+        "history": "Verlauf",
+        "clients": "Kunden"
+    },
+    "wizard": {
+        "title": "Erstelle deinen Trainingsplan",
+        "steps": {
+            "goal": "Trainingsziel",
+            "equipment": "Ausrüstung",
+            "anatomy": "Zielmuskeln",
+            "constraints": "Einschränkungen",
+            "schedule": "Zeitplan",
+            "review": "Überprüfung"
+        },
+        "navigation": {
+            "back": "Zurück",
+            "next": "Weiter",
+            "generate": "Plan erstellen"
+        },
+        "progress": "{{percent}}% abgeschlossen"
+    },
+    "plan": {
+        "title": "Dein Trainingsplan",
+        "export": "PDF exportieren",
+        "noplan": {
+            "title": "Noch kein Plan erstellt",
+            "description": "Erstelle deinen personalisierten Trainingsplan mit dem Assistenten.",
+            "cta": "Assistent starten"
+        },
+        "exercise": {
+            "sets": "{{count}} Sätze",
+            "reps": "{{range}} Wiederholungen",
+            "rest": "{{seconds}}s Pause",
+            "tips": "Tipps",
+            "swap": "Wechseln"
+        }
+    },
+    "goals": {
+        "strength": "Kraft",
+        "hypertrophy": "Muskelaufbau",
+        "general": "Allgemeine Fitness"
+    },
+    "experience": {
+        "beginner": "Anfänger",
+        "intermediate": "Fortgeschritten",
+        "advanced": "Experte"
+    },
+    "common": {
+        "loading": "Wird geladen...",
+        "error": "Etwas ist schiefgelaufen",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "confirm": "Bestätigen"
+    }
+}

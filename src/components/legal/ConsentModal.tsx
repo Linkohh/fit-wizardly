@@ -8,12 +8,16 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { ShieldAlert, PartyPopper } from "lucide-react";
+import { ShieldAlert, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { useAnalyticsStore } from "@/stores/analyticsStore";
 
 export function ConsentModal() {
     const [open, setOpen] = useState(false);
+    const [analyticsOptIn, setAnalyticsOptIn] = useState(true);
+    const { setConsent } = useAnalyticsStore();
 
     useEffect(() => {
         const hasConsented = localStorage.getItem("fitwizard_consent_v1");
@@ -26,6 +30,11 @@ export function ConsentModal() {
 
     const handleAgree = () => {
         localStorage.setItem("fitwizard_consent_v1", new Date().toISOString());
+        // Set analytics consent based on user choice
+        setConsent(analyticsOptIn);
+        if (analyticsOptIn) {
+            localStorage.setItem("fitwizard_analytics_consent", "true");
+        }
         setOpen(false);
     };
 
@@ -51,6 +60,26 @@ export function ConsentModal() {
                                 <li>My data is stored <strong>locally</strong> on this device.</li>
                             </ul>
                         </div>
+
+                        {/* Analytics Opt-In */}
+                        <div className="flex items-start gap-3 p-3 rounded-lg bg-secondary/10 border border-secondary/20 text-left">
+                            <Checkbox
+                                id="analytics-consent"
+                                checked={analyticsOptIn}
+                                onCheckedChange={(checked) => setAnalyticsOptIn(checked === true)}
+                                className="mt-0.5"
+                            />
+                            <div className="space-y-1">
+                                <Label htmlFor="analytics-consent" className="text-sm font-medium text-foreground flex items-center gap-2 cursor-pointer">
+                                    <BarChart3 className="h-4 w-4 text-secondary" />
+                                    Help improve FitWizard
+                                </Label>
+                                <p className="text-xs text-muted-foreground">
+                                    Share anonymous usage data to help us make the app better. No personal info is collected.
+                                </p>
+                            </div>
+                        </div>
+
                         <p className="text-xs text-muted-foreground">
                             By clicking "I Agree", you accept our{" "}
                             <Link to="/legal" className="text-primary hover:underline" onClick={(e) => e.stopPropagation()}>
@@ -72,3 +101,4 @@ export function ConsentModal() {
         </AlertDialog>
     );
 }
+

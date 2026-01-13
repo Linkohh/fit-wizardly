@@ -1,0 +1,63 @@
+{
+    "app": {
+        "name": "FitWizard",
+        "tagline": "Seu Companheiro de Treino com IA"
+    },
+    "nav": {
+        "home": "Início",
+        "wizard": "Assistente",
+        "plan": "Meu Plano",
+        "history": "Histórico",
+        "clients": "Clientes"
+    },
+    "wizard": {
+        "title": "Crie Seu Plano de Treino",
+        "steps": {
+            "goal": "Objetivo do Treino",
+            "equipment": "Equipamentos",
+            "anatomy": "Músculos Alvo",
+            "constraints": "Restrições",
+            "schedule": "Cronograma",
+            "review": "Revisão"
+        },
+        "navigation": {
+            "back": "Voltar",
+            "next": "Próximo",
+            "generate": "Gerar Plano"
+        },
+        "progress": "{{percent}}% completo"
+    },
+    "plan": {
+        "title": "Seu Plano de Treino",
+        "export": "Exportar PDF",
+        "noplan": {
+            "title": "Nenhum Plano Gerado Ainda",
+            "description": "Crie seu plano de treino personalizado usando o assistente.",
+            "cta": "Iniciar Assistente"
+        },
+        "exercise": {
+            "sets": "{{count}} séries",
+            "reps": "{{range}} repetições",
+            "rest": "{{seconds}}s descanso",
+            "tips": "Dicas",
+            "swap": "Trocar"
+        }
+    },
+    "goals": {
+        "strength": "Força",
+        "hypertrophy": "Hipertrofia",
+        "general": "Condicionamento Geral"
+    },
+    "experience": {
+        "beginner": "Iniciante",
+        "intermediate": "Intermediário",
+        "advanced": "Avançado"
+    },
+    "common": {
+        "loading": "Carregando...",
+        "error": "Algo deu errado",
+        "save": "Salvar",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar"
+    }
+}

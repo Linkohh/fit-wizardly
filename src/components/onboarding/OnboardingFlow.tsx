@@ -9,7 +9,8 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
+import { useConfetti } from '@/hooks/useConfetti';
 
 // Slide animation variants
 const slideVariants = {
@@ -38,6 +39,7 @@ const STEP_COMPONENTS: Record<OnboardingStep, React.ComponentType> = {
 
 export function OnboardingFlow() {
     const navigate = useNavigate();
+    const { fire: fireConfetti } = useConfetti();
     const {
         currentStep,
         nextStep,
@@ -55,19 +57,28 @@ export function OnboardingFlow() {
     const totalSteps = getTotalSteps();
     const progress = ((stepIndex) / totalSteps) * 100;
 
-    // Navigate home when complete
+    // Navigate home when complete (with delay for confetti)
     useEffect(() => {
         if (isComplete) {
-            navigate('/', { replace: true });
+            // Small delay to let confetti show before navigation
+            const timer = setTimeout(() => {
+                navigate('/', { replace: true });
+            }, 1500);
+            return () => clearTimeout(timer);
         }
     }, [isComplete, navigate]);
 
+    const handleComplete = useCallback(() => {
+        fireConfetti();
+        completeOnboarding();
+    }, [fireConfetti, completeOnboarding]);
+
     const handleNext = () => {
         if (currentStep === 'goals' && userData.role === 'user') {
-            // Users skip import step
-            completeOnboarding();
+            // Users skip import step - trigger celebration
+            handleComplete();
         } else if (currentStep === 'import') {
-            completeOnboarding();
+            handleComplete();
         } else {
             nextStep();
         }
