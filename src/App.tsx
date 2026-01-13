@@ -23,6 +23,7 @@ import OnboardingPage from "./pages/Onboarding";
 import { useAuthStore } from "./stores/authStore";
 import { CommandPalette } from "@/components/CommandPalette";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { RequireAuth } from "@/components/RequireAuth";
 
 const queryClient = new QueryClient();
 
@@ -86,16 +87,37 @@ function AnimatedRoutes() {
           <Routes location={location}>
             <Route path="/" element={<Index />} />
             <Route path="/wizard" element={<WizardPage />} />
-            <Route path="/plan" element={<PlanPage />} />
-            <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
-            <Route path="/exercises" element={<ExercisesBrowser />} />
+
+            {/* Protected Routes */}
+            <Route path="/plan" element={
+              <RequireAuth>
+                <PlanPage />
+              </RequireAuth>
+            } />
+            <Route path="/workout/:planId/:dayIndex" element={
+              <RequireAuth>
+                <WorkoutLogger />
+              </RequireAuth>
+            } />
+            <Route path="/exercises" element={
+              <RequireAuth>
+                <ExercisesBrowser />
+              </RequireAuth>
+            } />
             <Route path="/clients" element={
-              <TrainerGuard>
-                <ClientsPage />
-              </TrainerGuard>
+              <RequireAuth>
+                <TrainerGuard>
+                  <ClientsPage />
+                </TrainerGuard>
+              </RequireAuth>
             }
             />
-            <Route path="/circles" element={<CirclesPage />} />
+            <Route path="/circles" element={
+              <RequireAuth>
+                <CirclesPage />
+              </RequireAuth>
+            } />
+
             <Route path="/legal" element={<LegalPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
