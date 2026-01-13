@@ -146,7 +146,7 @@ BEGIN
     perform_count = exercise_stats.perform_count + CASE WHEN p_stat_type = 'perform' THEN 1 ELSE 0 END,
     favorite_count = exercise_stats.favorite_count + CASE WHEN p_stat_type = 'favorite' THEN 1 ELSE 0 END;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- Function to get trending exercises (last 7 days)
 CREATE OR REPLACE FUNCTION get_trending_exercises(p_limit INT DEFAULT 10)
@@ -171,7 +171,7 @@ BEGIN
   ORDER BY trend_score DESC
   LIMIT p_limit;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- Function to update user streak
 CREATE OR REPLACE FUNCTION update_user_streak(p_user_id UUID)
@@ -213,7 +213,7 @@ BEGIN
     WHERE user_id = p_user_id;
   END IF;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- ============================================
 -- Indexes for performance
@@ -243,7 +243,7 @@ BEGIN
 
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 CREATE TRIGGER on_exercise_interaction
   AFTER INSERT ON exercise_interactions

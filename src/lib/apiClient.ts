@@ -3,6 +3,8 @@
 
 import type { Plan } from '@/types/fitness';
 
+import { supabase } from './supabase';
+
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 // Feature flag for API usage
@@ -11,6 +13,14 @@ const USE_API = import.meta.env.VITE_USE_API === 'true' || import.meta.env.DEV;
 interface ApiResponse<T> {
     data?: T;
     error?: string;
+}
+
+// Helper to get auth headers
+async function getAuthHeaders(): Promise<HeadersInit> {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token
+        ? { 'Authorization': `Bearer ${session.access_token}` }
+        : {};
 }
 
 // Retry with exponential backoff
@@ -49,9 +59,13 @@ export async function savePlan(plan: Plan, userId?: string): Promise<ApiResponse
     }
 
     try {
+        const authHeaders = await getAuthHeaders();
         const response = await fetchWithRetry(`${API_BASE}/plans`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...authHeaders
+            },
             body: JSON.stringify({
                 ...plan,
                 userId,
@@ -77,8 +91,10 @@ export async function getPlan(id: string): Promise<ApiResponse<Plan>> {
     }
 
     try {
+        const authHeaders = await getAuthHeaders();
         const response = await fetchWithRetry(`${API_BASE}/plans/${id}`, {
             method: 'GET',
+            headers: { ...authHeaders }
         });
 
         if (!response.ok) {
@@ -103,7 +119,11 @@ export async function getPlans(userId?: string): Promise<ApiResponse<Plan[]>> {
             ? `${API_BASE}/plans?userId=${encodeURIComponent(userId)}`
             : `${API_BASE}/plans`;
 
-        const response = await fetchWithRetry(url, { method: 'GET' });
+        const authHeaders = await getAuthHeaders();
+        const response = await fetchWithRetry(url, {
+            method: 'GET',
+            headers: { ...authHeaders }
+        });
 
         if (!response.ok) {
             return { error: 'Failed to fetch plans' };
@@ -123,8 +143,10 @@ export async function deletePlanApi(id: string): Promise<ApiResponse<void>> {
     }
 
     try {
+        const authHeaders = await getAuthHeaders();
         const response = await fetchWithRetry(`${API_BASE}/plans/${id}`, {
             method: 'DELETE',
+            headers: { ...authHeaders }
         });
 
         if (!response.ok && response.status !== 204) {
