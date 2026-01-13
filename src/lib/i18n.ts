@@ -10,11 +10,28 @@ const resources = {
     es: { translation: es },
 };
 
+// Get initial language from localStorage or browser
+function getInitialLanguage(): string {
+    // Check localStorage first
+    const stored = localStorage.getItem('fitwizard-language');
+    if (stored && ['en', 'es'].includes(stored)) {
+        return stored;
+    }
+
+    // Browser language detection
+    const browserLang = navigator.language.split('-')[0];
+    if (['en', 'es'].includes(browserLang)) {
+        return browserLang;
+    }
+
+    return 'en'; // Default fallback
+}
+
 i18n
     .use(initReactI18next)
     .init({
         resources,
-        lng: 'en', // Default language
+        lng: getInitialLanguage(),
         fallbackLng: 'en',
         interpolation: {
             escapeValue: false, // React already handles XSS
@@ -33,11 +50,13 @@ export function getCurrentLanguage() {
 
 // Helper to change language
 export function changeLanguage(lang: 'en' | 'es') {
+    localStorage.setItem('fitwizard-language', lang);
     return i18n.changeLanguage(lang);
 }
 
-// Available languages
+// Available languages with flags
 export const AVAILABLE_LANGUAGES = [
-    { code: 'en', name: 'English' },
-    { code: 'es', name: 'Español' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
 ] as const;
+

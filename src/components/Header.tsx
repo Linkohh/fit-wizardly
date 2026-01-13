@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useState } from 'react';
 import { LayoutGroup, motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { LanguageSelector } from '@/components/LanguageSelector';
 export function Header() {
   const location = useLocation();
   const {
@@ -142,6 +143,9 @@ export function Header() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Language Selector */}
+        <LanguageSelector />
 
         {/* Trainer Mode Toggle */}
         <motion.div

@@ -48,6 +48,8 @@ interface WizardState {
   toggleConstraint: (constraint: Constraint) => void;
   setDaysPerWeek: (days: number) => void;
   setSessionDuration: (duration: number) => void;
+  setIsTrainer: (isTrainer: boolean) => void;
+  setCoachNotes: (notes: string) => void;
   setIsGenerating: (generating: boolean) => void;
   resetWizard: () => void;
   canAdvance: () => boolean;
@@ -59,6 +61,10 @@ const initialSelections: WizardSelections = {
   firstName: '',
   lastName: '',
   personalGoalNote: '',
+
+  // Trainer Mode
+  isTrainer: false,
+  coachNotes: '',
 
   // Training Config
   goal: 'hypertrophy',
@@ -175,6 +181,14 @@ export const useWizardStore = create<WizardState>()(
 
       setSessionDuration: (sessionDuration) => set((state) => ({
         selections: { ...state.selections, sessionDuration }
+      })),
+
+      setIsTrainer: (isTrainer) => set((state) => ({
+        selections: { ...state.selections, isTrainer }
+      })),
+
+      setCoachNotes: (coachNotes) => set((state) => ({
+        selections: { ...state.selections, coachNotes }
       })),
 
       setIsGenerating: (isGenerating) => set({ isGenerating }),

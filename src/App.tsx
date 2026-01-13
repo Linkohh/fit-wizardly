@@ -18,8 +18,10 @@ import ExerciseCategories from "./pages/exercises/ExerciseCategories";
 import ExerciseList from "./pages/exercises/ExerciseList";
 import ExerciseDetail from "./pages/exercises/ExerciseDetail";
 import { TrainerGuard } from "./components/TrainerGuard";
+import { OnboardingGuard } from "./components/OnboardingGuard";
 import { WorkoutLogger } from "./components/logging/WorkoutLogger";
 import CirclesPage from "./pages/Circles";
+import OnboardingPage from "./pages/Onboarding";
 import { useAuthStore } from "./stores/authStore";
 import { CommandPalette } from "@/components/CommandPalette";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
@@ -66,29 +68,44 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 function AnimatedRoutes() {
   const location = useLocation();
 
+  // Onboarding has its own layout (no header/footer)
+  if (location.pathname === '/onboarding') {
+    return (
+      <AnimatePresence mode="wait">
+        <PageTransition key={location.pathname}>
+          <Routes location={location}>
+            <Route path="/onboarding" element={<OnboardingPage />} />
+          </Routes>
+        </PageTransition>
+      </AnimatePresence>
+    );
+  }
+
   return (
-    <AnimatePresence mode="wait">
-      <PageTransition key={location.pathname}>
-        <Routes location={location}>
-          <Route path="/" element={<Index />} />
-          <Route path="/wizard" element={<WizardPage />} />
-          <Route path="/plan" element={<PlanPage />} />
-          <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
-          <Route path="/exercises" element={<ExerciseCategories />} />
-          <Route path="/exercises/:categoryId" element={<ExerciseList />} />
-          <Route path="/exercises/:categoryId/:exerciseId" element={<ExerciseDetail />} />
-          <Route path="/clients" element={
-            <TrainerGuard>
-              <ClientsPage />
-            </TrainerGuard>
-          }
-          />
-          <Route path="/circles" element={<CirclesPage />} />
-          <Route path="/legal" element={<LegalPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </PageTransition>
-    </AnimatePresence>
+    <OnboardingGuard>
+      <AnimatePresence mode="wait">
+        <PageTransition key={location.pathname}>
+          <Routes location={location}>
+            <Route path="/" element={<Index />} />
+            <Route path="/wizard" element={<WizardPage />} />
+            <Route path="/plan" element={<PlanPage />} />
+            <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
+            <Route path="/exercises" element={<ExerciseCategories />} />
+            <Route path="/exercises/:categoryId" element={<ExerciseList />} />
+            <Route path="/exercises/:categoryId/:exerciseId" element={<ExerciseDetail />} />
+            <Route path="/clients" element={
+              <TrainerGuard>
+                <ClientsPage />
+              </TrainerGuard>
+            }
+            />
+            <Route path="/circles" element={<CirclesPage />} />
+            <Route path="/legal" element={<LegalPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </PageTransition>
+      </AnimatePresence>
+    </OnboardingGuard>
   );
 }
 

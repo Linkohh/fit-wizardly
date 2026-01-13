@@ -98,7 +98,7 @@ const PHASE_INFO = {
 };
 
 export function GoalStep() {
-  const { selections, setGoal, setExperienceLevel, setFirstName, setLastName, setPersonalGoalNote } = useWizardStore();
+  const { selections, setGoal, setExperienceLevel, setFirstName, setLastName, setPersonalGoalNote, setIsTrainer, setCoachNotes } = useWizardStore();
 
   // React Hook Form integration with Zustand sync
   const { control, formState: { errors }, watch, setValue } = useWizardForm({
@@ -107,6 +107,8 @@ export function GoalStep() {
       firstName: selections.firstName || '',
       lastName: selections.lastName || '',
       personalGoalNote: selections.personalGoalNote || '',
+      isTrainer: selections.isTrainer || false,
+      coachNotes: selections.coachNotes || '',
       goal: selections.goal,
       experienceLevel: selections.experienceLevel,
     },
@@ -115,6 +117,8 @@ export function GoalStep() {
       if (values.firstName !== undefined) setFirstName(values.firstName);
       if (values.lastName !== undefined) setLastName(values.lastName);
       if (values.personalGoalNote !== undefined) setPersonalGoalNote(values.personalGoalNote);
+      if (values.isTrainer !== undefined) setIsTrainer(values.isTrainer);
+      if (values.coachNotes !== undefined) setCoachNotes(values.coachNotes);
       if (values.goal !== undefined) setGoal(values.goal);
       if (values.experienceLevel !== undefined) setExperienceLevel(values.experienceLevel);
     },
@@ -252,6 +256,92 @@ export function GoalStep() {
               <p className="text-xs text-muted-foreground">
                 This note will be included on your PDF plan as a motivational reminder
               </p>
+            </div>
+
+            {/* Trainer Mode Toggle - Progressive Disclosure */}
+            <div className="pt-4 border-t border-border/50">
+              <Controller
+                name="isTrainer"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="trainer-mode" className="text-sm font-medium flex items-center gap-2 cursor-pointer">
+                        <motion.span
+                          animate={{ rotate: field.value ? 360 : 0 }}
+                          transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                          className={cn(
+                            "inline-flex items-center justify-center w-6 h-6 rounded-full text-xs",
+                            field.value ? "bg-accent/20 text-accent" : "bg-muted text-muted-foreground"
+                          )}
+                        >
+                          🏋️
+                        </motion.span>
+                        I'm a Trainer/Coach
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        Enable to add private notes for your client
+                      </p>
+                    </div>
+                    <motion.button
+                      type="button"
+                      role="switch"
+                      id="trainer-mode"
+                      aria-checked={field.value}
+                      onClick={() => field.onChange(!field.value)}
+                      className={cn(
+                        "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+                        field.value ? "bg-accent" : "bg-input"
+                      )}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <motion.span
+                        className={cn(
+                          "pointer-events-none inline-block h-5 w-5 rounded-full bg-background shadow-lg ring-0"
+                        )}
+                        animate={{ x: field.value ? 20 : 0 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      />
+                    </motion.button>
+                  </div>
+                )}
+              />
+
+              {/* Coach Notes - Progressively Disclosed */}
+              <AnimatePresence>
+                {watch('isTrainer') && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-4 space-y-2">
+                      <Label htmlFor="coachNotes" className="text-sm font-medium flex items-center gap-2">
+                        📝 Coach Notes
+                        <span className="text-xs text-muted-foreground font-normal">(Private)</span>
+                      </Label>
+                      <Controller
+                        name="coachNotes"
+                        control={control}
+                        render={({ field }) => (
+                          <Textarea
+                            {...field}
+                            id="coachNotes"
+                            placeholder="Add private notes about this client's goals, limitations, preferences..."
+                            maxLength={500}
+                            className="resize-none bg-background/50 min-h-[100px]"
+                          />
+                        )}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        These notes are for your reference only and won't appear on the client's plan
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </CardContent>
         </Card>

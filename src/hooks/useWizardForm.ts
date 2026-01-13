@@ -107,6 +107,8 @@ export const goalStepSchema = z.object({
   firstName: z.string().min(2, 'Name must be at least 2 characters').optional().or(z.literal('')),
   lastName: z.string().min(2, 'Name must be at least 2 characters').optional().or(z.literal('')),
   personalGoalNote: z.string().max(60, 'Maximum 60 characters').optional().or(z.literal('')),
+  isTrainer: z.boolean().optional(),
+  coachNotes: z.string().max(500, 'Maximum 500 characters').optional().or(z.literal('')),
   goal: z.enum(['strength', 'hypertrophy', 'general']),
   experienceLevel: z.enum(['beginner', 'intermediate', 'advanced']),
 });

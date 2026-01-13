@@ -1,15 +1,32 @@
-import { Calendar, Clock } from 'lucide-react';
+import { Calendar, Clock, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
 import { useWizardStore } from '@/stores/wizardStore';
+import { useWizardForm, scheduleStepSchema } from '@/hooks/useWizardForm';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const DAYS_OPTIONS = [2, 3, 4, 5, 6];
-const DURATION_OPTIONS = [30, 45, 60, 75, 90];
+const DAYS_OPTIONS = [2, 3, 4, 5, 6] as const;
+const DURATION_OPTIONS = [30, 45, 60, 75, 90] as const;
 
 export function ScheduleStep() {
   const { selections, setDaysPerWeek, setSessionDuration } = useWizardStore();
+
+  // React Hook Form integration
+  const { watch, setValue, trigger } = useWizardForm({
+    schema: scheduleStepSchema,
+    defaultValues: {
+      daysPerWeek: selections.daysPerWeek,
+      sessionDuration: selections.sessionDuration,
+    },
+    onSync: (values) => {
+      if (values.daysPerWeek !== undefined) setDaysPerWeek(values.daysPerWeek);
+      if (values.sessionDuration !== undefined) setSessionDuration(values.sessionDuration);
+    },
+  });
+
+  const watchedDays = watch('daysPerWeek');
+  const watchedDuration = watch('sessionDuration');
 
   // Determine split type based on days
   const getSplitType = (days: number): string => {
@@ -18,36 +35,66 @@ export function ScheduleStep() {
     return 'Push/Pull/Legs';
   };
 
+  const handleDaysChange = (days: number) => {
+    setValue('daysPerWeek', days);
+    trigger('daysPerWeek');
+  };
+
+  const handleDurationChange = (duration: number) => {
+    setValue('sessionDuration', duration);
+    trigger('sessionDuration');
+  };
+
+  const handleReset = () => {
+    setValue('daysPerWeek', 3);
+    setValue('sessionDuration', 60);
+    trigger();
+  };
+
   return (
-    <div className="space-y-8 animate-slide-in">
+    <motion.div
+      className="space-y-8"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground">Set your schedule</h2>
         <p className="text-muted-foreground mt-1">How often and how long can you train?</p>
       </div>
 
-      {(selections.daysPerWeek !== 3 || selections.sessionDuration !== 60) && (
-        <div className="flex justify-start">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setDaysPerWeek(3);
-              setSessionDuration(60);
-            }}
-            className="touch-target border-primary/50 text-primary hover:bg-primary/10"
+      <AnimatePresence>
+        {(watchedDays !== 3 || watchedDuration !== 60) && (
+          <motion.div
+            className="flex justify-start"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
           >
-            Reset to Recommended
-          </Button>
-        </div>
-      )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              className="touch-target border-primary/50 text-primary hover:bg-primary/10"
+            >
+              Reset to Recommended
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Days per week */}
       <Card>
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
+            <motion.div
+              className="p-2 rounded-lg bg-primary/10"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <Calendar className="h-5 w-5 text-primary" />
-            </div>
+            </motion.div>
             <div>
               <h3 className="font-semibold text-foreground">Training Days per Week</h3>
               <p className="text-sm text-muted-foreground">Select between 2-6 days</p>
@@ -60,30 +107,55 @@ export function ScheduleStep() {
             aria-label="Days per week"
           >
             {DAYS_OPTIONS.map((days) => (
-              <button
+              <motion.button
                 key={days}
-                onClick={() => setDaysPerWeek(days)}
+                onClick={() => handleDaysChange(days)}
                 className={cn(
-                  "h-14 w-14 rounded-xl text-lg font-bold transition-all duration-200 touch-target",
+                  "h-14 w-14 rounded-xl text-lg font-bold transition-colors duration-200 touch-target relative",
                   "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
-                  selections.daysPerWeek === days
-                    ? "gradient-primary text-primary-foreground shadow-lg scale-110"
+                  watchedDays === days
+                    ? "gradient-primary text-primary-foreground shadow-lg"
                     : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                 )}
                 role="radio"
-                aria-checked={selections.daysPerWeek === days}
+                aria-checked={watchedDays === days}
                 aria-label={`${days} days per week`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                animate={{
+                  scale: watchedDays === days ? 1.1 : 1,
+                }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               >
                 {days}
-              </button>
+                <AnimatePresence>
+                  {watchedDays === days && (
+                    <motion.div
+                      className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full p-0.5"
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    >
+                      <Check className="h-3 w-3" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.button>
             ))}
           </div>
 
-          <div className="text-center p-3 rounded-lg bg-muted/50">
+          <motion.div
+            className="text-center p-3 rounded-lg bg-muted/50"
+            key={watchedDays}
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+          >
             <p className="text-sm text-muted-foreground">
-              Recommended split: <span className="font-semibold text-primary">{getSplitType(selections.daysPerWeek)}</span>
+              Recommended split: <span className="font-semibold text-primary">{getSplitType(watchedDays)}</span>
             </p>
-          </div>
+          </motion.div>
         </CardContent>
       </Card>
 
@@ -91,9 +163,13 @@ export function ScheduleStep() {
       <Card>
         <CardContent className="p-6 space-y-6">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-accent/10">
+            <motion.div
+              className="p-2 rounded-lg bg-accent/10"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <Clock className="h-5 w-5 text-accent" />
-            </div>
+            </motion.div>
             <div>
               <h3 className="font-semibold text-foreground">Session Duration</h3>
               <p className="text-sm text-muted-foreground">How long is each workout?</p>
@@ -107,35 +183,63 @@ export function ScheduleStep() {
               aria-label="Session duration"
             >
               {DURATION_OPTIONS.map((duration) => (
-                <button
+                <motion.button
                   key={duration}
-                  onClick={() => setSessionDuration(duration)}
+                  onClick={() => handleDurationChange(duration)}
                   className={cn(
-                    "px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 touch-target",
+                    "px-4 py-3 rounded-xl text-sm font-semibold transition-colors duration-200 touch-target relative",
                     "focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2",
-                    selections.sessionDuration === duration
+                    watchedDuration === duration
                       ? "gradient-accent text-accent-foreground shadow-lg"
                       : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                   )}
                   role="radio"
-                  aria-checked={selections.sessionDuration === duration}
+                  aria-checked={watchedDuration === duration}
                   aria-label={`${duration} minutes per session`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 >
                   {duration} min
-                </button>
+                  <AnimatePresence>
+                    {watchedDuration === duration && (
+                      <motion.div
+                        className="absolute -top-1 -right-1 bg-accent text-accent-foreground rounded-full p-0.5"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      >
+                        <Check className="h-3 w-3" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
               ))}
             </div>
           </div>
 
-          <div className="text-center p-3 rounded-lg bg-muted/50">
+          <motion.div
+            className="text-center p-3 rounded-lg bg-muted/50"
+            key={`${watchedDays}-${watchedDuration}`}
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+          >
             <p className="text-sm text-muted-foreground">
-              Weekly training time: <span className="font-semibold text-accent">
-                {(selections.daysPerWeek * selections.sessionDuration / 60).toFixed(1)} hours
-              </span>
+              Weekly training time: <motion.span
+                className="font-semibold text-accent"
+                key={watchedDays * watchedDuration}
+                initial={{ scale: 1.2 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              >
+                {(watchedDays * watchedDuration / 60).toFixed(1)} hours
+              </motion.span>
             </p>
-          </div>
+          </motion.div>
         </CardContent>
       </Card>
-    </div>
+    </motion.div>
   );
 }

@@ -86,6 +86,10 @@ export interface WizardSelections {
   lastName: string;
   personalGoalNote: string; // Max 60 characters - what the user wants to achieve
 
+  // Trainer Mode
+  isTrainer: boolean;
+  coachNotes: string; // Private notes for coach/trainer use
+
   // Training Config
   goal: Goal;
   optPhase?: OptPhase; // New field for NASM logic
