@@ -145,11 +145,13 @@ const App = () => {
               <Toaster />
               <Sonner />
               <CommandPalette />
-              <div className="min-h-screen flex flex-col bg-background transition-colors duration-300 relative overflow-hidden">
+              <div className="min-h-screen flex flex-col bg-background transition-colors duration-300 relative">
                 <LivingBackground />
                 <Header />
                 <ConsentModal />
-                <AnimatedRoutes />
+                <div className="flex-1 overflow-x-hidden">
+                  <AnimatedRoutes />
+                </div>
                 <Footer />
               </div>
             </AuthProvider>

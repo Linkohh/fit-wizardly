@@ -99,7 +99,7 @@ export function Header() {
               >
                 <img alt="FitWizard Logo" className="h-full w-full object-contain" src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png" />
               </motion.div>
-              <span className="text-3xl font-bold gradient-text">FitWizard</span>
+              <span className="text-3xl font-bold gradient-text hidden lg:inline">FitWizard</span>
             </Link>
           </TooltipTrigger>
           <TooltipContent side="bottom">
@@ -151,8 +151,9 @@ export function Header() {
             >
               <Button
                 variant="ghost"
+                size="sm"
                 className={cn(
-                  "relative z-10 touch-target transition-colors duration-200",
+                  "relative z-10 touch-target transition-colors duration-200 text-sm lg:text-base lg:px-4 lg:py-2",
                   active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -223,7 +224,7 @@ export function Header() {
               isTrainerMode ? 'text-primary' : 'text-muted-foreground'
             )} />
           </motion.div>
-          <Label htmlFor="trainer-mode" className="text-sm font-medium cursor-pointer">
+          <Label htmlFor="trainer-mode" className="text-sm font-medium cursor-pointer hidden lg:inline">
             Trainer Mode
           </Label>
           <Switch id="trainer-mode" checked={isTrainerMode} onCheckedChange={toggleTrainerMode} aria-label="Toggle trainer mode" />

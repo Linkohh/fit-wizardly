@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Dumbbell, Target, FileText, Users, Sparkles, Zap, Crown } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AnimatedIcon } from '@/components/ui/page-transition';
@@ -124,6 +124,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
 }
 
 export default function Index() {
+  const navigate = useNavigate();
   const { totalPlansGenerated } = useAchievementStore();
   const { isTrainerMode } = useTrainerStore();
   const hasActivity = totalPlansGenerated > 0;
@@ -325,17 +326,16 @@ export default function Index() {
               transition={{ duration: 0.5, delay: 0.6 }}
               className="mt-16 text-center"
             >
-              <Link to="/wizard">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary via-purple-500 to-secondary text-white font-bold text-lg rounded-full shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
-                >
-                  <Crown className="h-5 w-5" />
-                  Get Started Free
-                  <ArrowRight className="h-5 w-5" />
-                </motion.button>
-              </Link>
+              <motion.button
+                onClick={() => navigate('/wizard')}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary via-purple-500 to-secondary text-white font-bold text-lg rounded-full shadow-lg hover:shadow-xl hover:shadow-primary/25 transition-all duration-300 cursor-pointer"
+              >
+                <Crown className="h-5 w-5" />
+                Get Started Free
+                <ArrowRight className="h-5 w-5" />
+              </motion.button>
               <p className="mt-4 text-sm text-muted-foreground">
                 No credit card required • Start building your plan in seconds
               </p>
