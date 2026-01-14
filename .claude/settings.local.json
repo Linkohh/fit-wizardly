@@ -1,7 +1,13 @@
 {
+  "askBeforeRunningTool": false,
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)"
+      "Read(*)",
+      "Search(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Bash(*)",
+      "Bash(npm run dev:*)"
     ]
   }
 }

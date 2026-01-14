@@ -7,10 +7,31 @@ import { InteractiveWord } from "./InteractiveWord";
 
 export function WelcomeHero() {
     return (
-        <section className="relative pt-24 pb-16 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-background via-muted/50 to-transparent dark:from-[#140821] dark:via-[#1a0b2e] dark:to-transparent">
-            {/* Background Glows - Reduced Intensity (10-15% reduction) */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] -z-10 opacity-40 animate-pulse-glow pointer-events-none" />
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[100px] -z-10 opacity-30 pointer-events-none" />
+        <section className="relative pt-24 pb-16 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#F8F5FC] via-[#EDE4F5] to-[#F8F5FC] dark:from-[#2A0A3A] dark:via-[#3D1A4D] dark:to-[#2A0A3A]">
+            {/* Background Glows - Reduced Intensity to complement horizon line */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] -z-10 opacity-25 animate-pulse-glow pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px] -z-10 opacity-20 pointer-events-none" />
+
+            {/* Premium Layered Horizon Glow - 3D Depth Effect with Smooth Color Transitions */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
+                {/* Primary Layer - Main horizon at center */}
+                <div
+                    className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[30%]
+                               animate-horizon-glow"
+                />
+
+                {/* Secondary Layer - Slightly above for depth */}
+                <div
+                    className="absolute left-0 right-0 top-[45%] -translate-y-1/2 h-[22%]
+                               opacity-80 animate-horizon-glow-secondary"
+                />
+
+                {/* Tertiary Layer - Slightly below for grounding */}
+                <div
+                    className="absolute left-0 right-0 top-[55%] -translate-y-1/2 h-[18%]
+                               opacity-60 animate-horizon-glow-tertiary"
+                />
+            </div>
 
             <div className="container max-w-5xl mx-auto text-center relative z-10">
                 <FloatingElement delay={0}>

@@ -520,3 +520,119 @@
 .animate-error-in {
   animation: slide-down 0.2s ease-out;
 }
+
+/* Premium Horizon Glow - Smooth Color Cycling with @property */
+/* Cycles through: Aurora → Rose Gold → Golden Hour → Ethereal Silver */
+/* Uses CSS @property for smooth color interpolation (no snapping) */
+
+/* Define animatable color properties */
+@property --glow-color-primary {
+  syntax: '<color>';
+  initial-value: rgba(255, 105, 180, 0.25);
+  inherits: false;
+}
+
+@property --glow-color-secondary {
+  syntax: '<color>';
+  initial-value: rgba(168, 85, 247, 0.18);
+  inherits: false;
+}
+
+@property --glow-color-tertiary {
+  syntax: '<color>';
+  initial-value: rgba(6, 182, 212, 0.12);
+  inherits: false;
+}
+
+/* Primary layer - Full palette cycle (48s) */
+@keyframes horizon-color-smooth {
+  /* Aurora: Pink → Purple → Cyan */
+  0% { --glow-color-primary: rgba(255, 105, 180, 0.28); }
+  8% { --glow-color-primary: rgba(168, 85, 247, 0.30); }
+  16% { --glow-color-primary: rgba(6, 182, 212, 0.28); }
+
+  /* Rose Gold: Cyan → Pink → Rose Gold → Peach */
+  25% { --glow-color-primary: rgba(255, 105, 180, 0.28); }
+  33% { --glow-color-primary: rgba(232, 180, 184, 0.32); }
+  41% { --glow-color-primary: rgba(255, 218, 185, 0.30); }
+
+  /* Golden Hour: Peach → Pink → Amber → Warm White */
+  50% { --glow-color-primary: rgba(255, 105, 180, 0.28); }
+  58% { --glow-color-primary: rgba(255, 179, 71, 0.30); }
+  66% { --glow-color-primary: rgba(255, 248, 220, 0.25); }
+
+  /* Ethereal Silver: Warm → Pink → Lavender → Silver */
+  75% { --glow-color-primary: rgba(255, 105, 180, 0.28); }
+  83% { --glow-color-primary: rgba(196, 181, 253, 0.30); }
+  91% { --glow-color-primary: rgba(232, 232, 232, 0.25); }
+
+  /* Loop back smoothly */
+  100% { --glow-color-primary: rgba(255, 105, 180, 0.28); }
+}
+
+/* Secondary layer - Offset complementary colors */
+@keyframes horizon-color-smooth-secondary {
+  0% { --glow-color-secondary: rgba(168, 85, 247, 0.18); }
+  20% { --glow-color-secondary: rgba(6, 182, 212, 0.20); }
+  40% { --glow-color-secondary: rgba(232, 180, 184, 0.18); }
+  60% { --glow-color-secondary: rgba(255, 179, 71, 0.18); }
+  80% { --glow-color-secondary: rgba(196, 181, 253, 0.20); }
+  100% { --glow-color-secondary: rgba(168, 85, 247, 0.18); }
+}
+
+/* Tertiary layer - Accent colors */
+@keyframes horizon-color-smooth-tertiary {
+  0% { --glow-color-tertiary: rgba(6, 182, 212, 0.14); }
+  25% { --glow-color-tertiary: rgba(255, 218, 185, 0.12); }
+  50% { --glow-color-tertiary: rgba(196, 181, 253, 0.14); }
+  75% { --glow-color-tertiary: rgba(255, 179, 71, 0.12); }
+  100% { --glow-color-tertiary: rgba(6, 182, 212, 0.14); }
+}
+
+/* Breathing animation for subtle opacity pulse */
+@keyframes horizon-breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 1.2; }
+}
+
+/* Primary glow layer */
+.animate-horizon-glow {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--glow-color-primary) 50%,
+    transparent 100%
+  );
+  filter: blur(80px);
+  animation:
+    horizon-color-smooth 48s linear infinite,
+    horizon-breathe 12s ease-in-out infinite;
+}
+
+/* Secondary glow layer - offset timing */
+.animate-horizon-glow-secondary {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--glow-color-secondary) 50%,
+    transparent 100%
+  );
+  filter: blur(100px);
+  animation:
+    horizon-color-smooth-secondary 48s linear infinite,
+    horizon-breathe 12s ease-in-out infinite 3s;
+}
+
+/* Tertiary glow layer - different cycle time for organic feel */
+.animate-horizon-glow-tertiary {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--glow-color-tertiary) 50%,
+    transparent 100%
+  );
+  filter: blur(60px);
+  animation:
+    horizon-color-smooth-tertiary 36s linear infinite,
+    horizon-breathe 12s ease-in-out infinite 6s;
+}

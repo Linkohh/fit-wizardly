@@ -8,8 +8,8 @@ import { useThemeStore } from '@/stores/themeStore';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useState } from 'react';
-import { LayoutGroup, motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LanguageSelector } from '@/components/LanguageSelector';
 export function Header() {
@@ -24,6 +24,12 @@ export function Header() {
     getEffectiveTheme
   } = useThemeStore();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Refs for tracking nav item positions for the sliding indicator
+  const navRef = useRef<HTMLElement>(null);
+  const navItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
   const navItems = [{
     path: '/',
     label: 'Home'
@@ -46,6 +52,35 @@ export function Header() {
   const isActive = (path: string) => location.pathname === path;
   const effectiveTheme = getEffectiveTheme();
   const ThemeIcon = mode === 'system' ? Monitor : effectiveTheme === 'dark' ? Moon : Sun;
+
+  // Update indicator position when route changes
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeItem = navItemRefs.current.get(location.pathname);
+      const navElement = navRef.current;
+
+      if (activeItem && navElement) {
+        const navRect = navElement.getBoundingClientRect();
+        const itemRect = activeItem.getBoundingClientRect();
+
+        setIndicatorStyle({
+          left: itemRect.left - navRect.left,
+          width: itemRect.width,
+        });
+      }
+    };
+
+    // Small delay to ensure DOM is updated after route change
+    const timeoutId = setTimeout(updateIndicator, 10);
+
+    // Also update on resize
+    window.addEventListener('resize', updateIndicator);
+
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener('resize', updateIndicator);
+    };
+  }, [location.pathname, isTrainerMode]); // Re-run when trainer mode changes (adds/removes Clients tab)
   return <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
     <div className="container flex h-16 items-center justify-between px-4">
       {/* Logo */}
@@ -77,36 +112,55 @@ export function Header() {
       </TooltipProvider>
 
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center gap-1" role="navigation" aria-label="Main navigation">
-        <LayoutGroup>
-          {navItems.map(item => {
-            const active = isActive(item.path);
-            return (
-              <Link key={item.path} to={item.path} className="relative">
-                {active && (
-                  <motion.div
-                    layoutId="navbar-active"
-                    className="absolute inset-0 bg-primary/10 rounded-md"
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 30,
-                    }}
-                  />
+      <nav
+        ref={navRef}
+        className="hidden md:flex items-center gap-1 relative"
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        {/* Persistent sliding indicator - always mounted, animates position */}
+        <motion.div
+          className="absolute h-full bg-primary/10 rounded-md pointer-events-none"
+          initial={false}
+          animate={{
+            left: indicatorStyle.left,
+            width: indicatorStyle.width,
+            opacity: indicatorStyle.width > 0 ? 1 : 0,
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 350,
+            damping: 30,
+          }}
+        />
+
+        {navItems.map(item => {
+          const active = isActive(item.path);
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              ref={(el) => {
+                if (el) {
+                  navItemRefs.current.set(item.path, el);
+                } else {
+                  navItemRefs.current.delete(item.path);
+                }
+              }}
+              className="relative"
+            >
+              <Button
+                variant="ghost"
+                className={cn(
+                  "relative z-10 touch-target transition-colors duration-200",
+                  active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
                 )}
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "relative z-10 touch-target transition-colors",
-                    active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  {item.label}
-                </Button>
-              </Link>
-            );
-          })}
-        </LayoutGroup>
+              >
+                {item.label}
+              </Button>
+            </Link>
+          );
+        })}
       </nav>
 
       {/* Right Side Controls */}
