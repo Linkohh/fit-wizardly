@@ -5,7 +5,7 @@ import type { Plan } from '@/types/fitness';
 
 import { supabase } from './supabase';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 // Feature flag for API usage
 const USE_API = import.meta.env.VITE_USE_API === 'true' || import.meta.env.DEV;
