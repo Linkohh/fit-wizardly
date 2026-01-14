@@ -8,7 +8,47 @@
         "wizard": "Asistente",
         "plan": "Mi Plan",
         "history": "Historial",
-        "clients": "Clientes"
+        "exercises": "Ejercicios",
+        "circles": "Círculos",
+        "clients": "Clientes",
+        "create_plan": "Crear Plan",
+        "view_plan": "Ver Plan"
+    },
+    "hero": {
+        "badge": "Enciende Tu Viaje Fitness",
+        "unleash": "Libera",
+        "your": "Tu",
+        "full": "Máximo",
+        "potential": "Potencial",
+        "description": "Crea el plan de entrenamiento perfecto adaptado a tus objetivos.",
+        "intelligent": "Inteligente",
+        "personalized": "personalizado",
+        "effective": "innegablemente efectivo",
+        "start": "Comienza Tu Evolución",
+        "view_plan": "Ver Plan Actual"
+    },
+    "features": {
+        "badge": "Potentes Funcionalidades",
+        "title": "Cómo Funciona <1>FitWizard</1>",
+        "subtitle": "Todo lo que necesitas para crear el plan perfecto, en un solo lugar.",
+        "smart_goals": {
+            "title": "Definición de Objetivos",
+            "description": "Elige fuerza, hipertrofia o fitness general"
+        },
+        "equipment": {
+            "title": "Ajuste de Equipamiento",
+            "description": "Planes adaptados a tu equipamiento disponible"
+        },
+        "pdf_export": {
+            "title": "Exportar PDF",
+            "description": "Descarga y comparte tu plan personalizado"
+        },
+        "trainer_mode": {
+            "title": "Modo Entrenador",
+            "description": "Gestiona clientes y asigna planes personalizados"
+        },
+        "cta": "Empieza Gratis",
+        "no_credit_card": "Sin tarjeta de crédito • Crea tu plan en segundos"
     },
     "wizard": {
         "title": "Crea Tu Plan de Entrenamiento",

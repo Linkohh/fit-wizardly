@@ -5,6 +5,8 @@ import { FloatingElement } from "@/components/ui/page-transition";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { InteractiveWord } from "./InteractiveWord";
 import { useRef, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+
 
 // Floating orbs component
 function FloatingOrbs() {
@@ -101,6 +103,7 @@ function Particles() {
 
 // Animated badge component
 function AnimatedBadge() {
+    const { t } = useTranslation();
     return (
         <motion.div
             initial={{ scale: 0, rotate: -10, opacity: 0 }}
@@ -118,7 +121,7 @@ function AnimatedBadge() {
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border border-primary/30 backdrop-blur-sm text-primary mb-8 hover:border-primary/50 transition-all cursor-default group"
         >
             <motion.span
-                animate={{ 
+                animate={{
                     rotate: [0, -15, 15, -10, 10, 0],
                     scale: [1, 1.2, 1.2, 1.1, 1.1, 1]
                 }}
@@ -127,7 +130,7 @@ function AnimatedBadge() {
                 <Zap className="h-4 w-4 fill-current" />
             </motion.span>
             <span className="text-sm font-bold tracking-wide uppercase bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Ignite Your Fitness Journey
+                {t('hero.badge')}
             </span>
             <motion.span
                 animate={{ rotate: 360 }}
@@ -140,6 +143,7 @@ function AnimatedBadge() {
 }
 
 export function WelcomeHero() {
+    const { t, i18n } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
@@ -156,7 +160,7 @@ export function WelcomeHero() {
     };
 
     return (
-        <section 
+        <section
             ref={containerRef}
             onMouseMove={handleMouseMove}
             className="relative pt-24 pb-20 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#F8F5FC] via-[#EDE4F5] to-[#F0E8F8] dark:from-[#1a0a2e] dark:via-[#2D1548] dark:to-[#1a0a2e]"
@@ -167,7 +171,7 @@ export function WelcomeHero() {
 
             {/* Mesh gradient overlay */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.25),transparent)] pointer-events-none" />
-            
+
             {/* Premium Layered Horizon Glow - 3D Depth with Aurora Color Cycling */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
                 {/* Primary Layer - Main horizon with full 48s color cycle */}
@@ -180,7 +184,7 @@ export function WelcomeHero() {
                 <div className="absolute left-0 right-0 top-[55%] -translate-y-1/2 h-[18%] opacity-60 animate-horizon-glow-tertiary" />
             </div>
 
-            <motion.div 
+            <motion.div
                 style={{ rotateX, rotateY, transformPerspective: 1000 }}
                 className="container max-w-5xl mx-auto text-center relative z-10"
             >
@@ -188,30 +192,31 @@ export function WelcomeHero() {
                     <AnimatedBadge />
                 </FloatingElement>
 
-                <motion.h1 
+                <motion.h1
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground mb-6 tracking-tight flex flex-col items-center justify-center leading-tight"
                 >
-                    <motion.div 
+                    <motion.div
                         className="flex items-center justify-center flex-wrap gap-2 md:gap-4"
                         initial={{ opacity: 0, x: -50 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.6, delay: 0.3 }}
                     >
-                        <InteractiveWord word="Unleash" type="unleash" />
-                        <InteractiveWord word="Your" type="your" />
+
+                        <InteractiveWord word={t('hero.unleash')} type="unleash" />
+                        <InteractiveWord word={t('hero.your')} type="your" />
                     </motion.div>
-                    <motion.span 
+                    <motion.span
                         className="relative mt-2"
                         initial={{ opacity: 0, scale: 0.8 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.6, delay: 0.5 }}
                     >
                         <span className="flex items-center justify-center gap-2 md:gap-4 text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary">
-                            <InteractiveWord word="Full" type="full" className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary" />
-                            <InteractiveWord word="Potential" type="potential" className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary" />
+                            <InteractiveWord word={t('hero.full')} type="full" className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary" />
+                            <InteractiveWord word={t('hero.potential')} type="potential" className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary" />
                         </span>
                         {/* Glow effect behind text */}
                         <motion.div
@@ -222,28 +227,28 @@ export function WelcomeHero() {
                     </motion.span>
                 </motion.h1>
 
-                <motion.p 
+                <motion.p
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.6 }}
                     className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
                 >
-                    Craft the perfect workout plan tailored to your goals.
-                    <motion.span 
+                    {t('hero.description')}
+                    <motion.span
                         className="text-foreground font-semibold"
                         whileHover={{ color: "hsl(var(--primary))" }}
-                    > Intelligent</motion.span>,
-                    <motion.span 
+                    > {t('hero.intelligent')}</motion.span>,
+                    <motion.span
                         className="text-foreground font-semibold"
                         whileHover={{ color: "hsl(var(--primary))" }}
-                    > personalized</motion.span>, and
-                    <motion.span 
+                    > {t('hero.personalized')}</motion.span>, {i18n.language === 'es' ? 'e' : 'and'}
+                    <motion.span
                         className="text-foreground font-semibold"
                         whileHover={{ color: "hsl(var(--primary))" }}
-                    > undeniably effective</motion.span>.
+                    > {t('hero.effective')}</motion.span>.
                 </motion.p>
 
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.8 }}
@@ -261,7 +266,7 @@ export function WelcomeHero() {
                             <Button size="xl" className="relative h-14 px-8 text-lg font-bold rounded-full bg-gradient-to-r from-primary via-purple-500 to-secondary hover:shadow-2xl hover:shadow-primary/30 transition-all duration-500 group overflow-hidden border-0">
                                 <span className="relative z-10 flex items-center gap-2">
                                     <Flame className="h-5 w-5 group-hover:animate-pulse" />
-                                    Start Your Evolution
+                                    {t('hero.start')}
                                     <motion.span
                                         className="inline-block"
                                         animate={{ x: [0, 4, 0] }}
@@ -271,7 +276,7 @@ export function WelcomeHero() {
                                     </motion.span>
                                 </span>
                                 {/* Animated gradient overlay */}
-                                <motion.div 
+                                <motion.div
                                     className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0"
                                     animate={{ x: ["-100%", "200%"] }}
                                     transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
@@ -290,7 +295,7 @@ export function WelcomeHero() {
                             className="rounded-full"
                         >
                             <Button variant="outline" size="xl" className="h-14 px-8 text-lg rounded-full border-2 border-primary/30 hover:bg-primary/5 hover:border-primary/60 transition-all duration-300 backdrop-blur-sm">
-                                View Current Plan
+                                {t('hero.view_plan')}
                             </Button>
                         </motion.div>
                     </Link>
@@ -299,7 +304,7 @@ export function WelcomeHero() {
                 {/* Decorative floating elements */}
                 <div className="absolute top-16 left-8 hidden lg:block pointer-events-none">
                     <motion.div
-                        animate={{ 
+                        animate={{
                             y: [0, -15, 0],
                             rotate: [0, 10, 0]
                         }}
@@ -310,7 +315,7 @@ export function WelcomeHero() {
                 </div>
                 <div className="absolute top-32 right-12 hidden lg:block pointer-events-none">
                     <motion.div
-                        animate={{ 
+                        animate={{
                             y: [0, 15, 0],
                             rotate: [0, -15, 0]
                         }}
@@ -321,7 +326,7 @@ export function WelcomeHero() {
                 </div>
                 <div className="absolute bottom-24 left-16 hidden lg:block pointer-events-none">
                     <motion.div
-                        animate={{ 
+                        animate={{
                             y: [0, -10, 0],
                             x: [0, 5, 0],
                             scale: [1, 1.1, 1]
@@ -333,11 +338,11 @@ export function WelcomeHero() {
                 </div>
                 <div className="absolute bottom-16 right-20 hidden lg:block pointer-events-none">
                     <motion.div
-                        animate={{ 
+                        animate={{
                             y: [0, 12, 0],
                             rotate: [0, 360]
                         }}
-                        transition={{ 
+                        transition={{
                             y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
                             rotate: { duration: 20, repeat: Infinity, ease: "linear" }
                         }}

@@ -8,7 +8,47 @@
         "wizard": "Wizard",
         "plan": "My Plan",
         "history": "History",
-        "clients": "Clients"
+        "exercises": "Exercises",
+        "circles": "Circles",
+        "clients": "Clients",
+        "create_plan": "Create Plan",
+        "view_plan": "View Plan"
+    },
+    "hero": {
+        "badge": "Ignite Your Fitness Journey",
+        "unleash": "Unleash",
+        "your": "Your",
+        "full": "Full",
+        "potential": "Potential",
+        "description": "Craft the perfect workout plan tailored to your goals.",
+        "intelligent": "Intelligent",
+        "personalized": "personalized",
+        "effective": "undeniably effective",
+        "start": "Start Your Evolution",
+        "view_plan": "View Current Plan"
+    },
+    "features": {
+        "badge": "Powerful Features",
+        "title": "How <1>FitWizard</1> Works",
+        "subtitle": "Everything you need to create the perfect workout plan, all in one place.",
+        "smart_goals": {
+            "title": "Smart Goal Setting",
+            "description": "Choose strength, hypertrophy, or general fitness goals"
+        },
+        "equipment": {
+            "title": "Equipment Matching",
+            "description": "Plans tailored to your available equipment"
+        },
+        "pdf_export": {
+            "title": "PDF Export",
+            "description": "Download and share your personalized plan"
+        },
+        "trainer_mode": {
+            "title": "Trainer Mode",
+            "description": "Manage clients and assign customized plans"
+        },
+        "cta": "Get Started Free",
+        "no_credit_card": "No credit card required • Start building your plan in seconds"
     },
     "wizard": {
         "title": "Create Your Workout Plan",

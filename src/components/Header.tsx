@@ -12,6 +12,8 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { LanguageSelector } from '@/components/LanguageSelector';
+import { useTranslation } from 'react-i18next';
+
 export function Header() {
   const location = useLocation();
   const {
@@ -23,6 +25,7 @@ export function Header() {
     setMode,
     getEffectiveTheme
   } = useThemeStore();
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Refs for tracking nav item positions for the sliding indicator
@@ -30,24 +33,25 @@ export function Header() {
   const navItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
 
+  /* Navigation items with translations */
   const navItems = [{
     path: '/',
-    label: 'Home'
+    label: t('nav.home')
   }, {
     path: '/wizard',
-    label: 'Create Plan'
+    label: t('nav.create_plan')
   }, {
     path: '/plan',
-    label: 'View Plan'
+    label: t('nav.view_plan')
   }, {
     path: '/exercises',
-    label: 'Exercises'
+    label: t('nav.exercises')
   }, {
     path: '/circles',
-    label: 'Circles'
+    label: t('nav.circles')
   }, ...(isTrainerMode ? [{
     path: '/clients',
-    label: 'Clients'
+    label: t('nav.clients')
   }] : [])];
   const isActive = (path: string) => location.pathname === path;
   const effectiveTheme = getEffectiveTheme();
