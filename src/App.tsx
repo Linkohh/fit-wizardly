@@ -27,8 +27,10 @@ import { RequireAuth } from "@/components/RequireAuth";
 
 const queryClient = new QueryClient();
 
+// Auth initialization wrapper
 function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const { mode, getEffectiveTheme } = useThemeStore();
+  const mode = useThemeStore((state) => state.mode);
+  const getEffectiveTheme = useThemeStore((state) => state.getEffectiveTheme);
 
   useEffect(() => {
     const applyTheme = () => {
@@ -55,7 +57,7 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 // Auth initialization wrapper
 function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { initialize } = useAuthStore();
+  const initialize = useAuthStore((state) => state.initialize);
 
   useEffect(() => {
     initialize();

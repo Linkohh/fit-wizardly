@@ -4,12 +4,12 @@ import { Link } from "react-router-dom";
 import { FloatingElement } from "@/components/ui/page-transition";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { InteractiveWord } from "./InteractiveWord";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useCallback, memo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
+// --- Sub-Components (Memoized) ---
 
-// Floating orbs component
-function FloatingOrbs() {
+const FloatingOrbs = memo(function FloatingOrbs() {
     return (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {/* Large primary orb */}
@@ -60,21 +60,21 @@ function FloatingOrbs() {
             />
         </div>
     );
-}
+});
 
-// Particle effect component
-function Particles() {
-    const particles = Array.from({ length: 20 }, (_, i) => ({
-        id: i,
-        size: Math.random() * 4 + 2,
-        x: Math.random() * 100,
-        delay: Math.random() * 5,
-        duration: Math.random() * 10 + 10,
-    }));
+// Generate particles once, outside of render cycle
+const STATIC_PARTICLES = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    size: Math.random() * 4 + 2,
+    x: Math.random() * 100,
+    delay: Math.random() * 5,
+    duration: Math.random() * 10 + 10,
+}));
 
+const Particles = memo(function Particles() {
     return (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {particles.map((p) => (
+            {STATIC_PARTICLES.map((p) => (
                 <motion.div
                     key={p.id}
                     className="absolute rounded-full bg-primary/30 dark:bg-primary/40"
@@ -99,11 +99,11 @@ function Particles() {
             ))}
         </div>
     );
-}
+});
 
-// Animated badge component
-function AnimatedBadge() {
+const AnimatedBadge = memo(function AnimatedBadge() {
     const { t } = useTranslation();
+
     return (
         <motion.div
             initial={{ scale: 0, rotate: -10, opacity: 0 }}
@@ -140,24 +140,48 @@ function AnimatedBadge() {
             </motion.span>
         </motion.div>
     );
-}
+});
+
+// --- Main Component ---
 
 export function WelcomeHero() {
     const { t, i18n } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
+    const rectRef = useRef<DOMRect | null>(null);
+
+    // Motion values don't trigger re-renders
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
 
     const rotateX = useSpring(useTransform(mouseY, [-300, 300], [5, -5]), { stiffness: 100, damping: 30 });
     const rotateY = useSpring(useTransform(mouseX, [-300, 300], [-5, 5]), { stiffness: 100, damping: 30 });
 
-    const handleMouseMove = (e: React.MouseEvent) => {
-        const rect = containerRef.current?.getBoundingClientRect();
-        if (rect) {
+    // Cache the bounding rect to avoid layout thrashing on every mouse move
+    useEffect(() => {
+        const updateRect = () => {
+            if (containerRef.current) {
+                rectRef.current = containerRef.current.getBoundingClientRect();
+            }
+        };
+
+        updateRect();
+        window.addEventListener('resize', updateRect);
+        // Also update on scroll as the element position relative to viewport might change
+        window.addEventListener('scroll', updateRect);
+
+        return () => {
+            window.removeEventListener('resize', updateRect);
+            window.removeEventListener('scroll', updateRect);
+        };
+    }, []);
+
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        if (rectRef.current) {
+            const rect = rectRef.current;
             mouseX.set(e.clientX - rect.left - rect.width / 2);
             mouseY.set(e.clientY - rect.top - rect.height / 2);
         }
-    };
+    }, [mouseX, mouseY]);
 
     return (
         <section
@@ -204,7 +228,6 @@ export function WelcomeHero() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.6, delay: 0.3 }}
                     >
-
                         <InteractiveWord word={t('hero.unleash')} type="unleash" />
                         <InteractiveWord word={t('hero.your')} type="your" />
                     </motion.div>

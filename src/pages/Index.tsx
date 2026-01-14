@@ -1,129 +1,14 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Dumbbell, Target, FileText, Users, Sparkles, Zap, Crown } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { AnimatedIcon } from '@/components/ui/page-transition';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { WelcomeMessage, StreakTracker, GoalVisualization, WelcomeHero, DailyQuote } from '@/components/motivation';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { StreakTracker, GoalVisualization, WelcomeHero, DailyQuote } from '@/components/motivation';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { TrainerDashboard } from '@/components/motivation/TrainerDashboard';
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
-
-import { SupernovaIcon } from '@/components/ui/SupernovaIcon';
+import { useRef, useMemo } from 'react';
+import { FeatureCard } from '@/components/landing/FeatureCard';
 import { useTranslation, Trans } from 'react-i18next';
-
-
-const features = [
-  { icon: Target, title: 'Smart Goal Setting', description: 'Choose strength, hypertrophy, or general fitness goals', variant: 'strength' as const, gradient: 'from-orange-500 to-red-500' },
-  { icon: Dumbbell, title: 'Equipment Matching', description: 'Plans tailored to your available equipment', variant: 'achievement' as const, gradient: 'from-blue-500 to-cyan-500' },
-  { icon: FileText, title: 'PDF Export', description: 'Download and share your personalized plan', variant: 'magic' as const, gradient: 'from-purple-500 to-pink-500' },
-  { icon: Users, title: 'Trainer Mode', description: 'Manage clients and assign customized plans', variant: 'cosmic' as const, gradient: 'from-green-500 to-emerald-500' },
-];
-
-// Animated counter component
-function AnimatedNumber({ value, suffix = '' }: { value: number; suffix?: string }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  return (
-    <motion.span
-      ref={ref}
-      initial={{ opacity: 0 }}
-      animate={isInView ? { opacity: 1 } : {}}
-      className="tabular-nums"
-    >
-      {isInView ? (
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          {value}{suffix}
-        </motion.span>
-      ) : (
-        '0'
-      )}
-    </motion.span>
-  );
-}
-
-// Feature card with 3D hover effect
-function FeatureCard({ feature, index }: { feature: any; index: number }) {
-  return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 30 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-      }}
-      whileHover={{
-        y: -8,
-        transition: { type: "spring", stiffness: 400, damping: 25 }
-      }}
-      className="group"
-    >
-      <Card
-        variant="interactive"
-        className="relative text-center h-full bg-card/60 backdrop-blur-xl border border-border/50 hover:border-primary/40 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 overflow-hidden"
-      >
-        {/* Gradient overlay on hover */}
-        <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
-
-        {/* Glow effect */}
-        <motion.div
-          className={`absolute -inset-px bg-gradient-to-r ${feature.gradient} rounded-2xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`}
-          style={{ zIndex: -1 }}
-        />
-
-        <CardContent className="p-6 relative">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <motion.div
-                className={`mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:shadow-xl transition-all duration-500 cursor-pointer overflow-visible relative`}
-                whileHover={{
-                  scale: 1.1,
-                  rotate: [0, -5, 5, 0],
-                }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              >
-                <AnimatedIcon>
-                  <feature.icon className="h-7 w-7 text-white" />
-                </AnimatedIcon>
-
-                {/* Pulse ring */}
-                <motion.div
-                  className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.gradient}`}
-                  animate={{ scale: [1, 1.3], opacity: [0.4, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeOut" }}
-                />
-              </motion.div>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="max-w-xs">{feature.description}</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <h3 className="font-bold text-lg mb-2 text-foreground group-hover:text-primary transition-colors duration-300">
-            {feature.title}
-          </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {feature.description}
-          </p>
-
-          {/* Arrow indicator */}
-          <motion.div
-            className="mt-4 flex items-center justify-center gap-1 text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-            initial={{ x: -10 }}
-            whileHover={{ x: 0 }}
-          >
-            <span className="text-sm font-medium">Learn more</span>
-            <ArrowRight className="h-4 w-4" />
-          </motion.div>
-        </CardContent>
-      </Card>
-    </motion.div>
-  );
-}
 
 export default function Index() {
   const navigate = useNavigate();
@@ -132,12 +17,12 @@ export default function Index() {
   const { isTrainerMode } = useTrainerStore();
   const hasActivity = totalPlansGenerated > 0;
 
-  const features = [
+  const features = useMemo(() => [
     { icon: Target, title: t('features.smart_goals.title'), description: t('features.smart_goals.description'), variant: 'strength' as const, gradient: 'from-orange-500 to-red-500' },
     { icon: Dumbbell, title: t('features.equipment.title'), description: t('features.equipment.description'), variant: 'achievement' as const, gradient: 'from-blue-500 to-cyan-500' },
     { icon: FileText, title: t('features.pdf_export.title'), description: t('features.pdf_export.description'), variant: 'magic' as const, gradient: 'from-purple-500 to-pink-500' },
     { icon: Users, title: t('features.trainer_mode.title'), description: t('features.trainer_mode.description'), variant: 'cosmic' as const, gradient: 'from-green-500 to-emerald-500' },
-  ];
+  ], [t]);
 
   // Refs for scroll-triggered animations
   const statsRef = useRef(null);
@@ -176,23 +61,24 @@ export default function Index() {
 
         {/* Core bloom */}
         <motion.div
-          className="absolute inset-0 w-[100%] left-1/2 -translate-x-1/2
-            bg-[radial-gradient(ellipse_70%_35%_at_50%_50%,rgba(236,72,153,0.25)_0%,transparent_60%)]"
+          className="absolute inset-0 w-[100%] left-1/2 -translate-x-1/2"
+          style={{ background: 'radial-gradient(ellipse 70% 35% at 50% 50%, rgba(236,72,153,0.25) 0%, transparent 60%)' }}
           animate={{ opacity: [0.8, 1, 0.8], scale: [1, 1.05, 1] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         />
 
         {/* Bright horizon line */}
         <motion.div
-          className="absolute inset-0 w-[80%] h-full left-1/2 -translate-x-1/2
-            bg-[radial-gradient(ellipse_60%_3px_at_50%_50%,rgba(255,255,255,0.9)_0%,transparent_70%)]"
+          className="absolute inset-0 w-[80%] h-full left-1/2 -translate-x-1/2"
+          style={{ background: 'radial-gradient(ellipse 60% 3px at 50% 50%, rgba(255,255,255,0.9) 0%, transparent 70%)' }}
           animate={{ opacity: [0.7, 1, 0.7] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         />
 
         {/* Secondary glow */}
-        <div className="absolute inset-0 w-[120%] left-1/2 -translate-x-1/2
-          bg-[radial-gradient(ellipse_50%_25%_at_50%_50%,rgba(168,85,247,0.1)_0%,transparent_60%)]"
+        <div
+          className="absolute inset-0 w-[120%] left-1/2 -translate-x-1/2"
+          style={{ background: 'radial-gradient(ellipse 50% 25% at 50% 50%, rgba(168,85,247,0.1) 0%, transparent 60%)' }}
         />
       </section>
 
@@ -324,7 +210,7 @@ export default function Index() {
             >
               <TooltipProvider delayDuration={200}>
                 {features.map((f, i) => (
-                  <FeatureCard key={f.title} feature={f} index={i} />
+                  <FeatureCard key={i} feature={f} index={i} />
                 ))}
               </TooltipProvider>
             </motion.div>

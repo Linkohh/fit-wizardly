@@ -20,18 +20,20 @@ export default function WizardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const {
-    currentStep,
-    currentStepIndex,
-    setStep,
-    nextStep,
-    prevStep,
-    getStepValidation,
-    isGenerating,
-    setIsGenerating,
-    selections
-  } = useWizardStore();
-  const { setCurrentPlan, savePlanToHistory } = usePlanStore();
+
+  // Atomic selectors to prevent unnecessary re-renders
+  const currentStep = useWizardStore((state) => state.currentStep);
+  const currentStepIndex = useWizardStore((state) => state.currentStepIndex);
+  const setStep = useWizardStore((state) => state.setStep);
+  const nextStep = useWizardStore((state) => state.nextStep);
+  const prevStep = useWizardStore((state) => state.prevStep);
+  const getStepValidation = useWizardStore((state) => state.getStepValidation);
+  const isGenerating = useWizardStore((state) => state.isGenerating);
+  const setIsGenerating = useWizardStore((state) => state.setIsGenerating);
+  const selections = useWizardStore((state) => state.selections);
+
+  const setCurrentPlan = usePlanStore((state) => state.setCurrentPlan);
+  const savePlanToHistory = usePlanStore((state) => state.savePlanToHistory);
 
   // Ref for focus management
   const stepContainerRef = useRef<HTMLDivElement>(null);

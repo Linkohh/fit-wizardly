@@ -1,27 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 import { usePlanStore } from '@/stores/planStore';
-import { MUSCLE_DATA, type ExercisePrescription } from '@/types/fitness';
-import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, ChevronDown, ChevronUp, AlertTriangle, Lightbulb, ArrowLeftRight, Calculator, PlayCircle } from 'lucide-react';
+import { type ExercisePrescription } from '@/types/fitness';
+import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, Calculator } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { OneRepMaxCalculator } from '@/components/tools/OneRepMaxCalculator';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ExerciseSwapModal } from '@/components/plan/ExerciseSwapModal';
 import { WisdomBubble } from '@/components/wisdom/WisdomBubble';
 import { useWisdomStore } from '@/stores/wisdomStore';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { exportPlanToPDF } from '@/lib/pdfExport';
+import { PlanSkeleton } from '@/components/plan/PlanSkeleton';
+import { WorkoutDayCard } from '@/components/plan/WorkoutDayCard';
 
 export default function PlanPage() {
-  const navigate = useNavigate();
   const { currentPlan, swapExercise } = usePlanStore();
   const [redactSensitive, setRedactSensitive] = useState(true);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
@@ -53,59 +49,7 @@ export default function PlanPage() {
 
   // Show skeleton while loading
   if (isLoadingPlan && currentPlan) {
-    return (
-      <main className="container max-w-5xl mx-auto px-4 py-8 animate-fade-in">
-        {/* Header skeleton */}
-        <div className="flex items-center justify-between mb-6">
-          <Skeleton variant="shimmer" className="h-8 w-56 rounded-lg" />
-          <div className="flex gap-2">
-            <Skeleton variant="shimmer" className="h-10 w-32 rounded-xl" />
-            <Skeleton variant="shimmer" className="h-10 w-32 rounded-xl" />
-          </div>
-        </div>
-
-        {/* Summary skeleton */}
-        <Card className="mb-6">
-          <CardContent className="p-6 flex flex-wrap gap-6">
-            <Skeleton variant="shimmer" className="h-10 w-32 rounded-md" />
-            <Skeleton variant="shimmer" className="h-10 w-40 rounded-md" />
-            <Skeleton variant="shimmer" className="h-10 w-36 rounded-md" />
-          </CardContent>
-        </Card>
-
-        {/* Workout days skeleton */}
-        <div className="space-y-6">
-          {[1, 2, 3].map(dayIndex => (
-            <Card key={dayIndex}>
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <Skeleton variant="shimmer" className="h-6 w-32 rounded-md" />
-                  <Skeleton variant="shimmer" className="h-9 w-36 rounded-lg" />
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {[1, 2, 3, 4].map(exerciseIndex => (
-                  <div key={exerciseIndex} className="flex gap-4 p-3 rounded-lg border border-border/50">
-                    {/* Exercise details skeleton */}
-                    <div className="flex-1 space-y-2">
-                      <Skeleton variant="shimmer" className="h-5 w-40 rounded-md" />
-                      <Skeleton variant="shimmer" className="h-4 w-32 rounded-md" />
-                    </div>
-
-                    {/* Badges skeleton */}
-                    <div className="flex gap-2">
-                      <Skeleton variant="shimmer" className="h-6 w-16 rounded-full" />
-                      <Skeleton variant="shimmer" className="h-6 w-16 rounded-full" />
-                      <Skeleton variant="shimmer" className="h-6 w-16 rounded-full" />
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </main>
-    );
+    return <PlanSkeleton />;
   }
 
   if (!currentPlan) {
@@ -121,102 +65,8 @@ export default function PlanPage() {
     );
   }
 
-  const getMuscleLabel = (id: string) => MUSCLE_DATA.find(m => m.id === id)?.name || id;
-
-  const exportPDF = () => {
-    const doc = new jsPDF();
-    const selections = currentPlan.selections;
-
-    // Generate timestamp
-    const now = new Date();
-    const timestamp = now.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-
-    // Purple/Pink branded header
-    doc.setFillColor(139, 92, 246); // Primary purple
-    doc.rect(0, 0, 220, 45, 'F');
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-
-    // Personalized title if name is provided
-    const userName = `${selections.firstName || ''} ${selections.lastName || ''}`.trim();
-    if (userName) {
-      doc.text(`${userName}'s Workout Plan`, 14, 18);
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Powered by FitWizard', 14, 26);
-    } else {
-      doc.text('FitWizard', 14, 18);
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.text('Your Personalized Workout Plan', 14, 26);
-    }
-
-    // Timestamp in header
-    doc.setFontSize(10);
-    doc.text(`Generated: ${timestamp}`, 14, 38);
-
-    // Personal goal note (if provided)
-    let y = 55;
-    if (selections.personalGoalNote) {
-      doc.setTextColor(139, 92, 246);
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bolditalic');
-      doc.text(`"${selections.personalGoalNote}"`, 14, y);
-      y += 12;
-    }
-
-    // Plan details
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Split: ${currentPlan.splitType.replace('_', ' ').toUpperCase()}`, 14, y);
-    doc.text(`Days/Week: ${selections.daysPerWeek}`, 14, y + 7);
-    doc.text(`Session Duration: ${selections.sessionDuration} min`, 14, y + 14);
-    doc.text(`Goal: ${selections.goal.charAt(0).toUpperCase() + selections.goal.slice(1)}`, 14, y + 21);
-
-    y += 35;
-    currentPlan.workoutDays.forEach((day) => {
-      // Day header with pink accent
-      doc.setFillColor(236, 72, 153); // Secondary pink
-      doc.rect(14, y - 5, 182, 8, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
-      doc.text(day.name, 16, y);
-      y += 10;
-
-      doc.setTextColor(0, 0, 0);
-      const rows = day.exercises.map(e => [e.exercise.name, `${e.sets}`, e.reps, `${e.rir}`, `${e.restSeconds}s`]);
-      autoTable(doc, {
-        startY: y,
-        head: [['Exercise', 'Sets', 'Reps', 'RIR', 'Rest']],
-        body: rows,
-        margin: { left: 14 },
-        headStyles: { fillColor: [139, 92, 246] },
-        alternateRowStyles: { fillColor: [250, 245, 255] }
-      });
-      y = (doc as any).lastAutoTable.finalY + 15;
-      if (y > 260) { doc.addPage(); y = 20; }
-    });
-
-    // Motivational footer
-    doc.setFontSize(10);
-    doc.setTextColor(139, 92, 246);
-    doc.setFont('helvetica', 'italic');
-    doc.text("You've got this! Every rep counts. 💪", 14, 285);
-
-    // Generate filename with user's name if available
-    const filename = userName
-      ? `${userName.replace(/\s+/g, '_')}_FitWizard_Plan.pdf`
-      : 'FitWizard_Plan.pdf';
-
-    doc.save(filename);
+  const handleExportPDF = () => {
+    exportPlanToPDF(currentPlan);
   };
 
   return (
@@ -224,69 +74,69 @@ export default function PlanPage() {
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
         <h1 className="text-2xl font-bold gradient-text self-start sm:self-center">Your Workout Plan</h1>
 
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          {/* 1RM Calculator Modal */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2 w-full sm:w-auto border-dashed border-primary/40 hover:border-primary">
+                <Calculator className="h-4 w-4 text-primary" />
+                1RM Tools
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-md">
+              <OneRepMaxCalculator />
+            </DialogContent>
+          </Dialog>
 
-
-        {/* 1RM Calculator Modal */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline" className="gap-2 w-full sm:w-auto border-dashed border-primary/40 hover:border-primary">
-              <Calculator className="h-4 w-4 text-primary" />
-              1RM Tools
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-md">
-            <OneRepMaxCalculator />
-          </DialogContent>
-        </Dialog>
-
-        {/* PDF Export with Privacy Dialog */}
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="gradient" className="gap-2 w-full sm:w-auto">
-              <Download className="h-4 w-4" /> Export PDF
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-warning/10">
-                  <ShieldAlert className="h-5 w-5 text-warning" />
-                </div>
-                <AlertDialogTitle>Export Workout Plan</AlertDialogTitle>
-              </div>
-              <AlertDialogDescription className="space-y-4 pt-2">
-                <p>
-                  Your workout plan will be exported as a PDF file. Be mindful when sharing this document.
-                </p>
-
-                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
-                  <div className="flex flex-col gap-0.5">
-                    <Label htmlFor="redact-toggle" className="font-medium">Privacy Mode</Label>
-                    <span className="text-xs text-muted-foreground">
-                      Omit personal details from export
-                    </span>
+          {/* PDF Export with Privacy Dialog */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="gradient" className="gap-2 w-full sm:w-auto">
+                <Download className="h-4 w-4" /> Export PDF
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-full bg-warning/10">
+                    <ShieldAlert className="h-5 w-5 text-warning" />
                   </div>
-                  <Switch
-                    id="redact-toggle"
-                    checked={redactSensitive}
-                    onCheckedChange={setRedactSensitive}
-                  />
+                  <AlertDialogTitle>Export Workout Plan</AlertDialogTitle>
                 </div>
+                <AlertDialogDescription className="space-y-4 pt-2">
+                  <p>
+                    Your workout plan will be exported as a PDF file. Be mindful when sharing this document.
+                  </p>
 
-                <p className="text-xs text-muted-foreground border-l-2 border-warning/50 pl-3">
-                  <strong>Privacy Notice:</strong> PDFs may contain metadata. Avoid sharing workout plans containing personal health information publicly.
-                </p>
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={exportPDF} className="gradient-primary">
-                <Download className="h-4 w-4 mr-2" />
-                Download PDF
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+                    <div className="flex flex-col gap-0.5">
+                      <Label htmlFor="redact-toggle" className="font-medium">Privacy Mode</Label>
+                      <span className="text-xs text-muted-foreground">
+                        Omit personal details from export
+                      </span>
+                    </div>
+                    <Switch
+                      id="redact-toggle"
+                      checked={redactSensitive}
+                      onCheckedChange={setRedactSensitive}
+                    />
+                  </div>
+
+                  <p className="text-xs text-muted-foreground border-l-2 border-warning/50 pl-3">
+                    <strong>Privacy Notice:</strong> PDFs may contain metadata. Avoid sharing workout plans containing personal health information publicly.
+                  </p>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleExportPDF} className="gradient-primary">
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
       {/* Summary */}
@@ -301,128 +151,15 @@ export default function PlanPage() {
       {/* Workout Days */}
       <div className="space-y-6">
         {currentPlan.workoutDays.map((day) => (
-          <Card key={day.dayIndex} className="hover:shadow-lg transition-shadow hover:border-primary/30">
-            <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent rounded-t-lg">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-primary">{day.name}</CardTitle>
-                <Button
-                  variant="gradient"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => navigate(`/workout/${currentPlan.id}/${day.dayIndex}`)}
-                >
-                  <PlayCircle className="h-4 w-4" />
-                  Start Workout
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="divide-y">
-                {day.exercises.map((ex, i) => {
-                  const hasCues = ex.exercise.cues && ex.exercise.cues.length > 0;
-                  const hasContraindications = ex.exercise.contraindications && ex.exercise.contraindications.length > 0;
-                  const dayIdx = day.dayIndex;
-
-                  return (
-                    <Collapsible key={i} className="py-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <div className="flex items-start gap-2">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="font-medium">{ex.exercise.name}</p>
-
-                              {/* Contraindication warning badge */}
-                              {hasContraindications && (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <Badge variant="outline" className="text-warning border-warning/50 gap-1 px-1.5">
-                                        <AlertTriangle className="h-3 w-3" />
-                                      </Badge>
-                                    </TooltipTrigger>
-                                    <TooltipContent className="max-w-xs">
-                                      <p className="font-medium text-warning">Safety Note</p>
-                                      <p className="text-sm">
-                                        May not be suitable for: {ex.exercise.contraindications.map(c =>
-                                          c.replace(/_/g, ' ')
-                                        ).join(', ')}
-                                      </p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              )}
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              {ex.exercise.primaryMuscles.map(getMuscleLabel).join(', ')}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <Badge className="bg-primary/10 text-primary hover:bg-primary/20">{ex.sets} sets</Badge>
-                          <Badge className="bg-secondary/10 text-secondary hover:bg-secondary/20">{ex.reps} reps</Badge>
-                          <Badge variant="outline">RIR {ex.rir}</Badge>
-                          <Badge variant="outline">{ex.restSeconds}s rest</Badge>
-
-                          {/* Expand cues button */}
-                          {hasCues && (
-                            <CollapsibleTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-7 px-2 gap-1 text-muted-foreground hover:text-foreground">
-                                <Lightbulb className="h-3.5 w-3.5" />
-                                <span className="text-xs">Tips</span>
-                              </Button>
-                            </CollapsibleTrigger>
-                          )}
-
-                          {/* Swap exercise button */}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 px-2 gap-1 text-muted-foreground hover:text-foreground"
-                            onClick={() => {
-                              setSwapTarget({ dayIndex: dayIdx, exerciseIndex: i, exercise: ex });
-                              setSwapModalOpen(true);
-                            }}
-                          >
-                            <ArrowLeftRight className="h-3.5 w-3.5" />
-                            <span className="text-xs">Swap</span>
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Collapsible coaching cues */}
-                      <CollapsibleContent className="mt-2 space-y-2">
-                        <div className="pl-0 sm:pl-4 py-2 px-3 bg-muted/30 rounded-lg border-l-2 border-primary/30">
-                          <p className="text-xs font-medium text-primary mb-1 flex items-center gap-1">
-                            <Lightbulb className="h-3 w-3" />
-                            Coaching Cues
-                          </p>
-                          <ul className="text-sm text-muted-foreground space-y-1">
-                            {ex.exercise.cues?.map((cue, cueIndex) => (
-                              <li key={cueIndex} className="flex items-start gap-2">
-                                <span className="text-primary">•</span>
-                                <span>{cue}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-
-                        {/* Rationale for exercise selection */}
-                        {ex.rationale && (
-                          <div className="pl-0 sm:pl-4 py-2 px-3 bg-accent/10 rounded-lg border-l-2 border-accent/50">
-                            <p className="text-xs font-medium text-accent-foreground/80 mb-1">
-                              Why this exercise?
-                            </p>
-                            <p className="text-sm text-muted-foreground">{ex.rationale}</p>
-                          </div>
-                        )}
-                      </CollapsibleContent>
-                    </Collapsible>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+          <WorkoutDayCard
+            key={day.dayIndex}
+            day={day}
+            planId={currentPlan.id}
+            onSwap={(target) => {
+              setSwapTarget(target);
+              setSwapModalOpen(true);
+            }}
+          />
         ))}
       </div>
 
