@@ -15,10 +15,10 @@ export function ConstraintsStep() {
   const { watch, setValue, trigger } = useWizardForm({
     schema: constraintsStepSchema,
     defaultValues: {
-      constraints: selections.constraints,
+      constraints: selections.constraints as string[],
     },
     onSync: (values) => {
-      if (values.constraints !== undefined) setConstraints(values.constraints);
+      if (values.constraints !== undefined) setConstraints(values.constraints as Constraint[]);
     },
   });
 

@@ -16,10 +16,10 @@ export function EquipmentStep() {
   const { watch, setValue, formState: { errors }, trigger } = useWizardForm({
     schema: equipmentStepSchema,
     defaultValues: {
-      equipment: selections.equipment,
+      equipment: selections.equipment as string[],
     },
     onSync: (values) => {
-      if (values.equipment !== undefined) setEquipment(values.equipment);
+      if (values.equipment !== undefined) setEquipment(values.equipment as Equipment[]);
     },
   });
 

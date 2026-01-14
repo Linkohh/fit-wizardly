@@ -97,7 +97,7 @@ export function QuickActions({
             y: 0,
             transition: {
                 delay: i * 0.05,
-                type: 'spring',
+                type: 'spring' as const,
                 stiffness: 400,
                 damping: 25,
             },
