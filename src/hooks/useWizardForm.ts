@@ -114,10 +114,7 @@ export const goalStepSchema = z.object({
 });
 
 export const equipmentStepSchema = z.object({
-  equipment: z.array(z.enum([
-    'bodyweight', 'dumbbells', 'barbell', 'kettlebells', 'cables',
-    'machines', 'pullup_bar', 'bench', 'squat_rack', 'resistance_bands'
-  ])).min(1, 'Select at least one equipment option'),
+  equipment: z.array(z.string()).min(1, 'Select at least one equipment option'),
 });
 
 export const anatomyStepSchema = z.object({
@@ -130,10 +127,7 @@ export const anatomyStepSchema = z.object({
 });
 
 export const constraintsStepSchema = z.object({
-  constraints: z.array(z.enum([
-    'no_overhead', 'no_heavy_spinal_load', 'no_impact', 'no_rotation',
-    'shoulder_injury', 'back_injury', 'knee_injury', 'wrist_injury'
-  ])).default([]),
+  constraints: z.array(z.string()).default([]),
 });
 
 export const scheduleStepSchema = z.object({
