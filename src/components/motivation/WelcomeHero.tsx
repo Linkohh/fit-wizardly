@@ -168,18 +168,16 @@ export function WelcomeHero() {
             {/* Mesh gradient overlay */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.25),transparent)] pointer-events-none" />
             
-            {/* Premium Layered Horizon Glow */}
+            {/* Premium Layered Horizon Glow - 3D Depth with Aurora Color Cycling */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
-                <motion.div
-                    className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[40%] bg-gradient-to-r from-transparent via-primary/10 to-transparent"
-                    animate={{ opacity: [0.3, 0.6, 0.3] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.div
-                    className="absolute left-1/4 right-1/4 top-1/2 -translate-y-1/2 h-[25%] bg-gradient-to-r from-transparent via-secondary/15 to-transparent blur-xl"
-                    animate={{ opacity: [0.4, 0.8, 0.4], scale: [1, 1.1, 1] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                />
+                {/* Primary Layer - Main horizon with full 48s color cycle */}
+                <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[30%] animate-horizon-glow" />
+
+                {/* Secondary Layer - Above for depth */}
+                <div className="absolute left-0 right-0 top-[45%] -translate-y-1/2 h-[22%] opacity-80 animate-horizon-glow-secondary" />
+
+                {/* Tertiary Layer - Below for grounding */}
+                <div className="absolute left-0 right-0 top-[55%] -translate-y-1/2 h-[18%] opacity-60 animate-horizon-glow-tertiary" />
             </div>
 
             <motion.div 
