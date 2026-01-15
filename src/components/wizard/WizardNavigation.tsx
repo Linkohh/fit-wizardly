@@ -34,20 +34,19 @@ export function WizardNavigation({
         </p>
       )}
 
-      <div className="flex items-center justify-between gap-4">
-        <Button
-          variant="outline"
-          onClick={onBack}
-          disabled={!canGoBack}
-          className={cn(
-            "touch-target flex items-center gap-2",
-            !canGoBack && "invisible"
-          )}
-          aria-label={t('wizard.navigation.back')}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">{t('wizard.navigation.back')}</span>
-        </Button>
+      <div className={cn("flex items-center gap-4", canGoBack ? "justify-between" : "justify-end")}>
+        {canGoBack && (
+          <Button
+            variant="outline"
+            onClick={onBack}
+            disabled={!canGoBack}
+            className="touch-target flex items-center gap-2"
+            aria-label={t('wizard.navigation.back')}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">{t('wizard.navigation.back')}</span>
+          </Button>
+        )}
 
         {isLastStep ? (
           <Button

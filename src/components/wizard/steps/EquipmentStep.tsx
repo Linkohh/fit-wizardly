@@ -1,6 +1,17 @@
-import { Check } from 'lucide-react';
+import { Check, Trash2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useWizardStore } from '@/stores/wizardStore';
 import { EQUIPMENT_OPTIONS, EQUIPMENT_PRESETS } from '@/types/fitness';
 import type { Equipment } from '@/types/fitness';
@@ -9,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWizardForm, equipmentStepSchema } from '@/hooks/useWizardForm';
 import { FormError } from '@/components/ui/form-error';
 import { useTranslation } from 'react-i18next';
+import { useMemo } from 'react';
 
 export function EquipmentStep() {
   const { t } = useTranslation();
@@ -61,35 +73,48 @@ export function EquipmentStep() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
               >
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setValue('equipment', []);
-                    trigger('equipment');
-                  }}
-                  className="touch-target border-destructive/50 text-destructive hover:bg-destructive/10"
-                >
-                  {t('wizard.equipment.clear_all')}
-                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="touch-target border-destructive/50 text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {t('wizard.equipment.clear_all')}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('common.are_you_sure') || "Are you sure?"}</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        {t('wizard.equipment.clear_confirm') || "This will remove all selected equipment."}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('common.cancel') || "Cancel"}</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          setValue('equipment', []);
+                          trigger('equipment');
+                        }}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {t('common.clear') || "Clear"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </motion.div>
             )}
           </AnimatePresence>
           {EQUIPMENT_PRESETS.map((preset) => (
-            <Button
+            <PresetButton
               key={preset.name}
-              variant="outline"
-              size="sm"
-              onClick={() => applyPreset(preset.equipment)}
-              className={cn(
-                "touch-target",
-                JSON.stringify([...watchedEquipment].sort()) === JSON.stringify([...preset.equipment].sort())
-                  ? "border-primary bg-primary/10 text-primary"
-                  : ""
-              )}
-            >
-              {preset.name}
-            </Button>
+              preset={preset}
+              currentEquipment={watchedEquipment}
+              onApply={() => applyPreset(preset.equipment)}
+            />
           ))}
         </div>
       </div>
@@ -170,5 +195,26 @@ export function EquipmentStep() {
         </AnimatePresence>
       </p>
     </div>
+  );
+}
+
+// Memoized button to prevent re-calculating JSON on every parent render
+function PresetButton({ preset, currentEquipment, onApply }: { preset: { name: string, equipment: Equipment[] }, currentEquipment: string[], onApply: () => void }) {
+  const isActive = useMemo(() => {
+    return JSON.stringify([...currentEquipment].sort()) === JSON.stringify([...preset.equipment].sort());
+  }, [currentEquipment, preset.equipment]);
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={onApply}
+      className={cn(
+        "touch-target",
+        isActive ? "border-primary bg-primary/10 text-primary" : ""
+      )}
+    >
+      {preset.name}
+    </Button>
   );
 }

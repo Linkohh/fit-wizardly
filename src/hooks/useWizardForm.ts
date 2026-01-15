@@ -49,7 +49,7 @@ export function useWizardForm<T extends FieldValues>({
   schema,
   defaultValues,
   onSync,
-  mode = 'onBlur',
+  mode = 'onTouched',
 }: UseWizardFormOptions<T>): UseWizardFormReturn<T> {
   const form = useForm<T>({
     resolver: zodResolver(schema),

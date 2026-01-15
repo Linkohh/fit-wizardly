@@ -2,6 +2,19 @@ import { useEffect, useRef, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { RotateCcw } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from '@/components/ui/button';
 import { WizardStepper } from '@/components/wizard/WizardStepper';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
 import { WizardProgressBar } from '@/components/wizard/WizardProgressBar';
@@ -27,7 +40,9 @@ export default function WizardPage() {
   const currentStepIndex = useWizardStore((state) => state.currentStepIndex);
   const setStep = useWizardStore((state) => state.setStep);
   const nextStep = useWizardStore((state) => state.nextStep);
+  const nextStep = useWizardStore((state) => state.nextStep);
   const prevStep = useWizardStore((state) => state.prevStep);
+  const resetWizard = useWizardStore((state) => state.resetWizard);
   const getStepValidation = useWizardStore((state) => state.getStepValidation);
   const isGenerating = useWizardStore((state) => state.isGenerating);
   const setIsGenerating = useWizardStore((state) => state.setIsGenerating);
@@ -89,15 +104,49 @@ export default function WizardPage() {
     // Focus management
     const timer = setTimeout(() => {
       if (stepContainerRef.current) {
-        stepContainerRef.current.focus();
+        // Try to focus the step heading for better context
+        const heading = stepContainerRef.current.querySelector('h2');
+        if (heading) {
+          heading.tabIndex = -1;
+          heading.focus();
+        } else {
+          // Fallback to container
+          stepContainerRef.current.focus();
+        }
+
         // Announce step change for screen readers
         const announcement = `Step ${currentStepIndex + 1}: ${stepNames[currentStep as keyof typeof stepNames]}`;
         const liveRegion = document.getElementById('wizard-live-region');
         if (liveRegion) liveRegion.innerText = announcement;
       }
-    }, 100);
+    }, 150); // Slight increase to ensure render
     return () => clearTimeout(timer);
   }, [currentStep, currentStepIndex, stepNames]);
+
+  // Move validation up so useEffect can use it
+  const validation = getStepValidation(currentStep);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if focus is in an input field (allow native behavior)
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        if (validation.valid && !isGenerating) {
+          if (currentStep === 'review') handleGenerate();
+          else nextStep();
+        }
+      } else if (e.key === 'Escape') {
+        if (currentStepIndex > 0) prevStep();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentStep, currentStepIndex, validation.valid, isGenerating, nextStep, prevStep, selections]);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -148,7 +197,7 @@ export default function WizardPage() {
     }
   };
 
-  const validation = getStepValidation(currentStep);
+
 
   // Show loading skeleton until store is hydrated from localStorage
   if (!hydrated) {
@@ -177,18 +226,57 @@ export default function WizardPage() {
             {t('app.tagline')}
           </p>
         </div>
-        <span className="text-sm font-medium text-muted-foreground">
+      </div>
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block mr-2">
           {t('wizard.progress', { percent: Math.round(((currentStepIndex + 1) / 6) * 100) })}
         </span>
+
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-destructive h-8 px-2 lg:px-3"
+              aria-label={t('common.start_over') || "Start Over"}
+            >
+              <RotateCcw className="h-4 w-4 lg:mr-2" />
+              <span className="hidden lg:inline">{t('common.start_over') || "Start Over"}</span>
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('common.are_you_sure') || "Are you sure?"}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('wizard.reset_confirm') || "This will clear all your current selections and start from the beginning."}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t('common.cancel') || "Cancel"}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  resetWizard();
+                  toast({
+                    description: t('wizard.toast.reset') || "Wizard reset to start.",
+                  });
+                }}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {t('common.confirm_reset') || "Start Over"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
+    </div>
 
-      {/* Pass translated step labels implicitly via WizardStepper if we update it, or let it handle itself. For now just standard usage. */}
-      <WizardStepper currentStep={currentStep} currentStepIndex={currentStepIndex} onStepClick={setStep} />
+      {/* Pass translated step labels implicitly via WizardStepper if we update it, or let it handle itself. For now just standard usage. */ }
+  <WizardStepper currentStep={currentStep} currentStepIndex={currentStepIndex} onStepClick={setStep} />
 
-      {/* Animated Progress Bar */}
-      <WizardProgressBar currentStepIndex={currentStepIndex} className="mt-4" />
+  {/* Animated Progress Bar */ }
+  <WizardProgressBar currentStepIndex={currentStepIndex} className="mt-4" />
 
-      {/* Step Content with simple fade transition */}
+  {/* Step Content with simple fade transition */ }
       <div
         ref={stepContainerRef}
         tabIndex={-1}
@@ -219,6 +307,6 @@ export default function WizardPage() {
         onNext={nextStep}
         validationMessage={!validation.valid ? validation.message : undefined}
       />
-    </div>
+    </div >
   );
 }

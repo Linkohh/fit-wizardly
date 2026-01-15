@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import type { WizardStep } from '@/stores/wizardStore';
 
@@ -13,6 +14,8 @@ interface WizardStepperProps {
 
 export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: WizardStepperProps) {
   const { t } = useTranslation();
+  const ref = useRef(null);
+  const isInView = useInView(ref);
 
   const steps = useMemo(() => [
     { id: 'goal', label: t('wizard.steps.goal'), shortLabel: t('wizard.stepper.short_goal') },
@@ -25,6 +28,7 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
 
   return (
     <nav
+      ref={ref}
       className="w-full py-4 px-2"
       role="navigation"
       aria-label={t('wizard.stepper.progress_label')}
@@ -62,7 +66,7 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
                       isCurrent && "gradient-primary border-primary text-primary-foreground shadow-glow",
                       !isComplete && !isCurrent && "border-muted bg-background text-muted-foreground"
                     )}
-                    animate={isCurrent ? {
+                    animate={(isCurrent && isInView) ? {
                       boxShadow: [
                         '0 0 0 0 hsl(var(--primary) / 0.4)',
                         '0 0 20px 5px hsl(var(--primary) / 0.2)',
