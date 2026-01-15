@@ -1,11 +1,10 @@
 import { useEffect, useRef, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
 import { WizardStepper } from '@/components/wizard/WizardStepper';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
 import { WizardProgressBar } from '@/components/wizard/WizardProgressBar';
-import { MotivationalQuote } from '@/components/wizard/MotivationalQuote';
 import { GoalStep } from '@/components/wizard/steps/GoalStep';
 import { EquipmentStep } from '@/components/wizard/steps/EquipmentStep';
 import { AnatomyStep } from '@/components/wizard/steps/AnatomyStep';
@@ -17,22 +16,6 @@ import { usePlanStore } from '@/stores/planStore';
 import { generatePlan } from '@/lib/planGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { createFunnelTracker, trackWizardComplete, trackPlanGenerated } from '@/lib/analytics';
-
-// Animation variants for step transitions
-const stepVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 30 : -30,
-    opacity: 0,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => ({
-    x: direction < 0 ? 30 : -30,
-    opacity: 0,
-  }),
-};
 
 export default function WizardPage() {
   const { t } = useTranslation();
@@ -55,13 +38,24 @@ export default function WizardPage() {
 
   // Ref for focus management
   const stepContainerRef = useRef<HTMLDivElement>(null);
-
-  // Track navigation direction for animations
-  const [direction, setDirection] = useState(0);
   const prevStepIndexRef = useRef(currentStepIndex);
 
-  // Track if this is the first mount to skip initial animation
-  const isFirstMount = useRef(true);
+  // Hydration guard - wait for store to load from localStorage
+  const [hydrated, setHydrated] = useState(false);
+
+
+  useEffect(() => {
+    // Check if already hydrated
+    if (useWizardStore.persist.hasHydrated()) {
+      setHydrated(true);
+      return;
+    }
+    // Wait for hydration to complete
+    const unsub = useWizardStore.persist.onFinishHydration(() => {
+      setHydrated(true);
+    });
+    return unsub;
+  }, []);
 
   // Step names for screen reader announcements and analytics
   const stepNames = useMemo(() => ({
@@ -90,9 +84,6 @@ export default function WizardPage() {
     // Track enter to new step
     funnelTracker.enterStep(currentStep, currentStepIndex);
     prevStepRef.current = currentStep;
-
-    // Update direction for animations
-    setDirection(currentStepIndex > prevStepIndexRef.current ? 1 : -1);
     prevStepIndexRef.current = currentStepIndex;
 
     // Focus management
@@ -151,11 +142,27 @@ export default function WizardPage() {
       case 'constraints': return <ConstraintsStep />;
       case 'schedule': return <ScheduleStep />;
       case 'review': return <ReviewStep />;
-      default: return null;
+      default:
+        // Fallback to first step if state is invalid
+        return <GoalStep />;
     }
   };
 
   const validation = getStepValidation(currentStep);
+
+  // Show loading skeleton until store is hydrated from localStorage
+  if (!hydrated) {
+    return (
+      <div className="container max-w-4xl mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-muted rounded w-1/3" />
+          <div className="h-4 bg-muted rounded w-1/2" />
+          <div className="h-12 bg-muted rounded mt-6" />
+          <div className="h-64 bg-muted rounded-2xl mt-8" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8 pb-32">
@@ -181,29 +188,21 @@ export default function WizardPage() {
       {/* Animated Progress Bar */}
       <WizardProgressBar currentStepIndex={currentStepIndex} className="mt-4" />
 
-      {/* Step Content with Animations */}
+      {/* Step Content with simple fade transition */}
       <div
         ref={stepContainerRef}
         tabIndex={-1}
         className="mt-8 min-h-[400px] outline-none"
         aria-label={`Step ${currentStepIndex + 1}: ${stepNames[currentStep]}`}
       >
-        <AnimatePresence mode="wait" custom={direction}>
+        <AnimatePresence mode="popLayout">
           <motion.div
             key={currentStep}
-            custom={direction}
-            variants={stepVariants}
-            initial={isFirstMount.current ? false : "enter"}
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: 'spring', stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="glass-premium rounded-2xl p-6"
-            onAnimationComplete={() => {
-              isFirstMount.current = false;
-            }}
           >
             {renderStep()}
           </motion.div>

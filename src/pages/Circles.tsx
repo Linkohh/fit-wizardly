@@ -23,7 +23,12 @@ import { useState } from 'react';
 
 export default function CirclesPage() {
     const { user, profile, isLoading: authLoading, setShowAuthModal } = useAuthStore();
-    const { circles, currentCircle, isLoading, fetchUserCircles, setCurrentCircle } = useCircleStore();
+    // Use atomic selectors to prevent unnecessary re-renders
+    const circles = useCircleStore((state) => state.circles);
+    const currentCircle = useCircleStore((state) => state.currentCircle);
+    const isLoading = useCircleStore((state) => state.isLoading);
+    const fetchUserCircles = useCircleStore((state) => state.fetchUserCircles);
+    const setCurrentCircle = useCircleStore((state) => state.setCurrentCircle);
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showJoinModal, setShowJoinModal] = useState(false);
@@ -32,7 +37,7 @@ export default function CirclesPage() {
         if (user) {
             fetchUserCircles(user.id);
         }
-    }, [user, fetchUserCircles]);
+    }, [user]); // fetchUserCircles is a stable store action
 
     // Unauthenticated view
     if (!user && !authLoading) {

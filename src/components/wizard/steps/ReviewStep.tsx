@@ -85,12 +85,7 @@ export function ReviewStep() {
   const [showCoachNotes, setShowCoachNotes] = useState(false);
 
   return (
-    <motion.div
-      className="space-y-6"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
+    <div className="space-y-6">
       <motion.div
         className="text-center"
         variants={cardVariants}
@@ -456,6 +451,6 @@ export function ReviewStep() {
           <span>{t('wizard.review.ready_message')}</span>
         </motion.div>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

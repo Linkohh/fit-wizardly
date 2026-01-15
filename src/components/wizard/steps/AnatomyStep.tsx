@@ -5,7 +5,7 @@ export function AnatomyStep() {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-6 animate-slide-in">
+    <div className="space-y-6">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary inline-block">
           {t('wizard.anatomy.title')}

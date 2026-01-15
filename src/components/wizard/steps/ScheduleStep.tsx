@@ -54,12 +54,7 @@ export function ScheduleStep() {
   };
 
   return (
-    <motion.div
-      className="space-y-8"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: 'easeOut' }}
-    >
+    <div className="space-y-8">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground">{t('wizard.schedule.title')}</h2>
         <p className="text-muted-foreground mt-1">{t('wizard.schedule.subtitle')}</p>
@@ -242,6 +237,6 @@ export function ScheduleStep() {
           </motion.div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

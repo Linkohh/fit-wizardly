@@ -61,7 +61,7 @@ export function GoalStep() {
   const currentPhaseKey = selections.optPhase || getPhase(watchedGoal || selections.goal, watchedExperienceLevel || selections.experienceLevel);
 
   return (
-    <div className="space-y-8 animate-slide-in">
+    <div className="space-y-8">
       {/* Personal Info Section */}
       <div className="space-y-4">
         <div className="text-center">

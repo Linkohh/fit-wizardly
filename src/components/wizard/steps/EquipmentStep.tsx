@@ -44,7 +44,7 @@ export function EquipmentStep() {
   };
 
   return (
-    <div className="space-y-6 animate-slide-in">
+    <div className="space-y-6">
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground">{t('wizard.equipment.title')}</h2>
         <p className="text-muted-foreground mt-1">{t('wizard.equipment.subtitle')}</p>

@@ -67,11 +67,11 @@ export function useWizardForm<T extends FieldValues>({
     }
   }, [watch, onSync]);
 
-  // Auto-sync on valid changes (debounced via mode)
+  // Auto-sync on any value change (including setValue calls)
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {
-      // Only sync when there's a change event (not on mount)
-      if (type === 'change' && onSync) {
+      // Sync on any change - setValue doesn't emit 'change' type, so we check for any update
+      if (name && onSync) {
         // Validate before syncing
         const result = schema.safeParse(value);
         if (result.success) {

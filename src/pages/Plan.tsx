@@ -24,17 +24,12 @@ export default function PlanPage() {
   const [redactSensitive, setRedactSensitive] = useState(true);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; exerciseIndex: number; exercise: ExercisePrescription } | null>(null);
-  const [isLoadingPlan, setIsLoadingPlan] = useState(true);
+  // Sync loading state directly with store (no artificial delay)
+  const [isLoadingPlan, setIsLoadingPlan] = useState(!currentPlan);
   const { setContext } = useWisdomStore();
 
-  // Simulate loading state on mount
   useEffect(() => {
-    if (currentPlan) {
-      const timer = setTimeout(() => setIsLoadingPlan(false), 400);
-      return () => clearTimeout(timer);
-    } else {
-      setIsLoadingPlan(false);
-    }
+    setIsLoadingPlan(!currentPlan);
   }, [currentPlan]);
 
   // Set Wisdom AI context when plan changes
