@@ -1,8 +1,10 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 import { WizardStepper } from '@/components/wizard/WizardStepper';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
+import { WizardProgressBar } from '@/components/wizard/WizardProgressBar';
 import { MotivationalQuote } from '@/components/wizard/MotivationalQuote';
 import { GoalStep } from '@/components/wizard/steps/GoalStep';
 import { EquipmentStep } from '@/components/wizard/steps/EquipmentStep';
@@ -15,6 +17,22 @@ import { usePlanStore } from '@/stores/planStore';
 import { generatePlan } from '@/lib/planGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { createFunnelTracker, trackWizardComplete, trackPlanGenerated } from '@/lib/analytics';
+
+// Animation variants for step transitions
+const stepVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 30 : -30,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 30 : -30,
+    opacity: 0,
+  }),
+};
 
 export default function WizardPage() {
   const { t } = useTranslation();
@@ -37,6 +55,13 @@ export default function WizardPage() {
 
   // Ref for focus management
   const stepContainerRef = useRef<HTMLDivElement>(null);
+
+  // Track navigation direction for animations
+  const [direction, setDirection] = useState(0);
+  const prevStepIndexRef = useRef(currentStepIndex);
+
+  // Track if this is the first mount to skip initial animation
+  const isFirstMount = useRef(true);
 
   // Step names for screen reader announcements and analytics
   const stepNames = useMemo(() => ({
@@ -65,6 +90,10 @@ export default function WizardPage() {
     // Track enter to new step
     funnelTracker.enterStep(currentStep, currentStepIndex);
     prevStepRef.current = currentStep;
+
+    // Update direction for animations
+    setDirection(currentStepIndex > prevStepIndexRef.current ? 1 : -1);
+    prevStepIndexRef.current = currentStepIndex;
 
     // Focus management
     const timer = setTimeout(() => {
@@ -149,13 +178,36 @@ export default function WizardPage() {
       {/* Pass translated step labels implicitly via WizardStepper if we update it, or let it handle itself. For now just standard usage. */}
       <WizardStepper currentStep={currentStep} currentStepIndex={currentStepIndex} onStepClick={setStep} />
 
+      {/* Animated Progress Bar */}
+      <WizardProgressBar currentStepIndex={currentStepIndex} className="mt-4" />
+
+      {/* Step Content with Animations */}
       <div
         ref={stepContainerRef}
         tabIndex={-1}
         className="mt-8 min-h-[400px] outline-none"
         aria-label={`Step ${currentStepIndex + 1}: ${stepNames[currentStep]}`}
       >
-        {renderStep()}
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentStep}
+            custom={direction}
+            variants={stepVariants}
+            initial={isFirstMount.current ? false : "enter"}
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: 'spring', stiffness: 300, damping: 30 },
+              opacity: { duration: 0.2 },
+            }}
+            className="glass-premium rounded-2xl p-6"
+            onAnimationComplete={() => {
+              isFirstMount.current = false;
+            }}
+          >
+            {renderStep()}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       <WizardNavigation

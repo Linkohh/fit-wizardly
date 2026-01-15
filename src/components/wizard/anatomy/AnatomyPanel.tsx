@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { MuscleDiagram } from './MuscleDiagram';
 import { MuscleList } from './MuscleList';
 import { SelectedMusclesChips } from './SelectedMusclesChips';
+import { ExerciseSuggestions } from '@/components/wizard/ExerciseSuggestions';
 import { useWizardStore } from '@/stores/wizardStore';
 import { MUSCLE_DATA } from '@/types/fitness';
 import type { MuscleGroup } from '@/types/fitness';
@@ -143,6 +144,17 @@ export function AnatomyPanel() {
                     />
                 </div>
             </div>
+
+            {/* Real-time Exercise Suggestions */}
+            {watchedTargetMuscles.length > 0 && selections.equipment.length > 0 && (
+                <ExerciseSuggestions
+                    muscles={watchedTargetMuscles}
+                    equipment={selections.equipment}
+                    experienceLevel={selections.experienceLevel}
+                    className="mt-6"
+                />
+            )}
         </div>
     );
 }
+
