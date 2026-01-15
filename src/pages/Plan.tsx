@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePlanStore } from '@/stores/planStore';
 import { type ExercisePrescription } from '@/types/fitness';
-import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, Calculator } from 'lucide-react';
+import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, Calculator, Pencil } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { OneRepMaxCalculator } from '@/components/tools/OneRepMaxCalculator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -77,6 +77,14 @@ export default function PlanPage() {
         <h1 className="text-2xl font-bold gradient-text self-start sm:self-center">{t('plan.title')}</h1>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          {/* Edit Plan Button */}
+          <Link to="/wizard">
+            <Button variant="outline" className="gap-2 w-full sm:w-auto border-dashed border-primary/40 hover:border-primary">
+              <Pencil className="h-4 w-4 text-primary" />
+              Edit Selections
+            </Button>
+          </Link>
+
           {/* 1RM Calculator Modal */}
           <Dialog>
             <DialogTrigger asChild>

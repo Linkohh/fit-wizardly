@@ -6,6 +6,10 @@ import { MUSCLE_DATA, EQUIPMENT_OPTIONS, CONSTRAINT_OPTIONS } from '@/types/fitn
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { validatePlanBalance } from '@/lib/planValidation';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { useState, useMemo } from 'react';
 
 // Animation variants for staggered card reveals
 const containerVariants = {
@@ -77,6 +81,8 @@ export function ReviewStep() {
   };
 
   const hasPersonalInfo = selections.firstName || selections.lastName || selections.personalGoalNote;
+  const warnings = useMemo(() => validatePlanBalance(selections), [selections]);
+  const [showCoachNotes, setShowCoachNotes] = useState(false);
 
   return (
     <motion.div
@@ -92,6 +98,36 @@ export function ReviewStep() {
         <h2 className="text-2xl font-bold text-foreground">{t('wizard.review.title')}</h2>
         <p className="text-muted-foreground mt-1">{t('wizard.review.subtitle')}</p>
       </motion.div>
+
+      {/* Validation Warnings */}
+      {warnings.length > 0 && (
+        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-3">
+          {warnings.map((warning) => (
+            <motion.div key={warning.id} variants={cardVariants}>
+              <Card className={cn(
+                "border-l-4",
+                warning.type === 'warning' ? "border-l-destructive border-destructive/20 bg-destructive/5" : "border-l-blue-500 border-blue-500/20 bg-blue-500/5"
+              )}>
+                <CardContent className="p-4 flex gap-3">
+                  {warning.type === 'warning' ? (
+                    <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <h4 className={cn("font-medium", warning.type === 'warning' ? "text-destructive" : "text-blue-500")}>
+                      {warning.message}
+                    </h4>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {warning.context}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
 
       {/* Personal Info Banner (if provided) */}
       {hasPersonalInfo && (
@@ -339,6 +375,54 @@ export function ReviewStep() {
               <p className="text-sm text-muted-foreground mt-3">
                 {t('wizard.review.constraints_hint')}
               </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Coach Mode Panel */}
+      {selections.isTrainer && (
+        <motion.div variants={cardVariants}>
+          <Card className="border-neon-purple/30 bg-neon-purple/5">
+            <CardHeader className="pb-3 border-b border-neon-purple/10">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg text-neon-purple">
+                  <User className="h-5 w-5" />
+                  Coach Mode
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="coach-notes"
+                    checked={showCoachNotes}
+                    onCheckedChange={setShowCoachNotes}
+                  />
+                  <Label htmlFor="coach-notes" className="text-sm cursor-pointer">Show Notes</Label>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-4">
+              {showCoachNotes ? (
+                <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
+                  <div className="p-3 rounded bg-background/40 border border-neon-purple/20">
+                    <p className="text-sm font-semibold text-neon-purple mb-1">Periodization Note:</p>
+                    <p className="text-sm text-muted-foreground">
+                      User selected {selections.goal} with {selections.experienceLevel} experience.
+                      Recommend starting with 2 weeks of accumulation volume.
+                    </p>
+                  </div>
+                  <div className="p-3 rounded bg-background/40 border border-neon-purple/20">
+                    <p className="text-sm font-semibold text-neon-purple mb-1">Cues Focus:</p>
+                    <p className="text-sm text-muted-foreground">
+                      Emphasize tempo (3-0-1-0) for the first mesocycle to build control.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  Toggle "Show Notes" to view programming recommendations.
+                </p>
+              )}
             </CardContent>
           </Card>
         </motion.div>
