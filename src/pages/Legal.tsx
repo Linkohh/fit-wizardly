@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,23 +6,25 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ShieldAlert, Scale, Lock, FileText } from "lucide-react";
 
 export default function LegalPage() {
+    const { t } = useTranslation();
+
     return (
         <div className="container max-w-4xl mx-auto px-4 py-8 min-h-screen">
-            <h1 className="text-3xl font-bold mb-6 gradient-text">Legal & Compliance</h1>
+            <h1 className="text-3xl font-bold mb-6 gradient-text">{t('legal.page_title')}</h1>
 
             <Tabs defaultValue="disclaimer" className="w-full">
                 <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 h-auto">
                     <TabsTrigger value="disclaimer" className="py-3">
                         <ShieldAlert className="w-4 h-4 mr-2" />
-                        Medical Disclaimer
+                        {t('legal.tabs.medical')}
                     </TabsTrigger>
                     <TabsTrigger value="privacy" className="py-3">
                         <Lock className="w-4 h-4 mr-2" />
-                        Privacy Policy
+                        {t('legal.tabs.privacy')}
                     </TabsTrigger>
                     <TabsTrigger value="terms" className="py-3">
                         <Scale className="w-4 h-4 mr-2" />
-                        Terms of Service
+                        {t('legal.tabs.terms')}
                     </TabsTrigger>
                 </TabsList>
 
@@ -31,34 +34,27 @@ export default function LegalPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center text-destructive">
                                     <ShieldAlert className="w-6 h-6 mr-2" />
-                                    Medical Disclaimer
+                                    {t('legal.medical.title')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <Alert variant="destructive">
                                     <ShieldAlert className="h-4 w-4" />
-                                    <AlertTitle>Critical Warning</AlertTitle>
+                                    <AlertTitle>{t('legal.medical.warning_title')}</AlertTitle>
                                     <AlertDescription>
-                                        FitWizard is NOT a doctor. The generated workouts are for educational purposes only.
+                                        {t('legal.medical.warning_text')}
                                     </AlertDescription>
                                 </Alert>
 
                                 <div className="prose dark:prose-invert max-w-none">
                                     <p>
-                                        The content provided by FitWizard, including workout plans, nutritional suggestions, and chat responses,
-                                        is for <strong>educational and entertainment purposes only</strong> and is <strong>not intended as medical advice</strong>.
+                                        {t('legal.medical.content_p1')}
                                     </p>
                                     <p>
-                                        You should consult with a physician or other healthcare professional before starting this or any other fitness program
-                                        to determine if it is right for your needs. This is particularly true if you (or your family) have a history of high blood pressure or heart disease,
-                                        or if you have ever experienced chest pain when exercising or have experienced chest pain in the past month when not engaged in physical activity,
-                                        smoke, have high cholesterol, are obese, or have a bone or joint problem that could be made worse by a change in physical activity.
+                                        {t('legal.medical.content_p2')}
                                     </p>
                                     <p className="font-bold">
-                                        If you experience faintness, dizziness, pain, or shortness of breath at any time while exercising, you should stop immediately.
-                                    </p>
-                                    <p>
-                                        Do not rely on this application for medical diagnosis or treatment. The use of any information provided on this site is solely at your own risk.
+                                        {t('legal.medical.content_p3')}
                                     </p>
                                 </div>
                             </CardContent>
@@ -70,37 +66,27 @@ export default function LegalPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center text-primary">
                                     <Lock className="w-6 h-6 mr-2" />
-                                    Local-First Privacy Policy
+                                    {t('legal.privacy.title')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <Alert>
                                     <DatabaseIcon className="h-4 w-4" />
-                                    <AlertTitle>Your Data Stays Here</AlertTitle>
+                                    <AlertTitle>{t('legal.privacy.data_stays_title')}</AlertTitle>
                                     <AlertDescription>
-                                        We do not store your health data on our servers. It lives 100% on your device.
+                                        {t('legal.privacy.data_stays_text')}
                                     </AlertDescription>
                                 </Alert>
 
                                 <div className="prose dark:prose-invert max-w-none">
-                                    <h3>1. Data Storage</h3>
+                                    <h3>{t('legal.privacy.what_we_store')}</h3>
                                     <p>
-                                        FitWizard operates as a "Local-First" application. All personal health data, workout plans, preferences, and progress logs
-                                        are stored exclusively on your local device (specifically, in your browser's LocalStorage).
+                                        {t('legal.privacy.what_we_store_text')}
                                     </p>
 
-                                    <h3>2. Data Transmission</h3>
+                                    <h3>{t('legal.privacy.analytics')}</h3>
                                     <p>
-                                        We do not transmit, store, or sell your personal health data to any central server or third party.
-                                        The only data transmitted is anonymous usage analytics (if opted in) and efficient API calls to generate content,
-                                        which are stateless and do not retain your personal profile.
-                                    </p>
-
-                                    <h3>3. Data Loss Risk</h3>
-                                    <p>
-                                        <strong>Warning:</strong> Because data is stored locally, clearing your browser cache or uninstalling the browser
-                                        will result in the permanent loss of your workout plans and history. We recommend manually exporting your plans as PDF
-                                        if you wish to keep a backup.
+                                        {t('legal.privacy.analytics_text')}
                                     </p>
                                 </div>
                             </CardContent>
@@ -112,29 +98,19 @@ export default function LegalPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center">
                                     <FileText className="w-6 h-6 mr-2" />
-                                    Terms of Service
+                                    {t('legal.terms.title')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="prose dark:prose-invert max-w-none">
-                                    <h3>1. Acceptance of Terms</h3>
+                                    <h3>{t('legal.terms.acceptance')}</h3>
                                     <p>
-                                        By accessing or using FitWizard, you agree to be bound by these Terms. If you disagree with any part of the terms,
-                                        you may not access the service.
+                                        {t('legal.terms.acceptance_text')}
                                     </p>
 
-                                    <h3>2. "As-Is" Warranty</h3>
-                                    <p className="uppercase text-sm font-mono bg-muted p-4 rounded-md">
-                                        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
-                                        THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-                                        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-                                        TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-                                    </p>
-
-                                    <h3>3. User Responsibility</h3>
+                                    <h3>{t('legal.terms.use')}</h3>
                                     <p>
-                                        You are solely responsible for ensuring that any exercise or activity you perform is safe for your physical condition.
-                                        FitWizard assumes no liability for injuries occurring while performing exercises suggested by the application.
+                                        {t('legal.terms.use_text')}
                                     </p>
                                 </div>
                             </CardContent>
@@ -144,8 +120,8 @@ export default function LegalPage() {
             </Tabs>
 
             <div className="mt-12 text-center text-sm text-muted-foreground pb-8">
-                <p>© {new Date().getFullYear()} FitWizard. All rights reserved.</p>
-                <p>Generated plans are for educational purposes only.</p>
+                <p>© {new Date().getFullYear()} {t('legal.footer.copyright')}</p>
+                <p>{t('legal.footer.educational')}</p>
             </div>
         </div>
     );

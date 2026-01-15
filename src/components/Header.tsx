@@ -109,7 +109,7 @@ export function Header() {
             <TooltipContent side="bottom">
               <p className="flex items-center gap-1.5">
                 <span className="text-primary font-bold">✨</span>
-                Your path to peak fitness potential
+                {t('header.logo_tooltip')}
               </p>
             </TooltipContent>
           </Tooltip>
@@ -190,15 +190,15 @@ export function Header() {
             <DropdownMenuContent align="end" className="w-36">
               <DropdownMenuItem onClick={() => setMode('light')} className={mode === 'light' ? 'bg-accent' : ''}>
                 <Sun className="mr-2 h-4 w-4" />
-                Light
+                {t('header.theme.light')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setMode('dark')} className={mode === 'dark' ? 'bg-accent' : ''}>
                 <Moon className="mr-2 h-4 w-4" />
-                Dark
+                {t('header.theme.dark')}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setMode('system')} className={mode === 'system' ? 'bg-accent' : ''}>
                 <Monitor className="mr-2 h-4 w-4" />
-                System
+                {t('header.theme.system')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -229,7 +229,7 @@ export function Header() {
               )} />
             </motion.div>
             <Label htmlFor="trainer-mode" className="text-sm font-medium cursor-pointer hidden lg:inline">
-              Trainer Mode
+              {t('header.trainer_mode')}
             </Label>
             <Switch id="trainer-mode" checked={isTrainerMode} onCheckedChange={toggleTrainerMode} aria-label="Toggle trainer mode" />
           </motion.div>
@@ -284,7 +284,7 @@ export function Header() {
                   visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
                 }}
               >
-                <Label className="text-sm font-medium mb-1">Theme</Label>
+                <Label className="text-sm font-medium mb-1">{t('header.theme.label')}</Label>
                 <div className="flex gap-1">
                   <Button variant={mode === 'light' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('light')} className="flex-1">
                     <Sun className="h-4 w-4" />
@@ -314,7 +314,7 @@ export function Header() {
                   isTrainerMode ? 'text-primary' : 'text-muted-foreground'
                 )} />
                 <Label htmlFor="trainer-mode-mobile" className="text-sm font-medium flex-1">
-                  Trainer Mode
+                  {t('header.trainer_mode')}
                 </Label>
                 <Switch id="trainer-mode-mobile" checked={isTrainerMode} onCheckedChange={toggleTrainerMode} aria-label="Toggle trainer mode" />
               </motion.div>

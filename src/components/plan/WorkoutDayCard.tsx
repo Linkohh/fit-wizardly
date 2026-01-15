@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { PlayCircle, AlertTriangle, Lightbulb, ArrowLeftRight } from 'lucide-react';
 import type { GeneratedPlan, ExercisePrescription } from '@/types/fitness';
 import { MUSCLE_DATA } from '@/types/fitness';
+import { useTranslation } from 'react-i18next';
 
 interface WorkoutDayCardProps {
     day: GeneratedPlan['workoutDays'][0];
@@ -17,6 +18,7 @@ interface WorkoutDayCardProps {
 const getMuscleLabel = (id: string) => MUSCLE_DATA.find(m => m.id === id)?.name || id;
 
 export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     return (
@@ -31,7 +33,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                         onClick={() => navigate(`/workout/${planId}/${day.dayIndex}`)}
                     >
                         <PlayCircle className="h-4 w-4" />
-                        Start Workout
+                        {t('plan.workout_day.start_workout')}
                     </Button>
                 </div>
             </CardHeader>
@@ -59,9 +61,9 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                                                 </Badge>
                                                             </TooltipTrigger>
                                                             <TooltipContent className="max-w-xs">
-                                                                <p className="font-medium text-warning">Safety Note</p>
+                                                                <p className="font-medium text-warning">{t('plan.workout_day.safety_note')}</p>
                                                                 <p className="text-sm">
-                                                                    May not be suitable for: {ex.exercise.contraindications.map(c =>
+                                                                    {t('plan.workout_day.not_suitable_for')}: {ex.exercise.contraindications.map(c =>
                                                                         c.replace(/_/g, ' ')
                                                                     ).join(', ')}
                                                                 </p>
@@ -77,17 +79,17 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                     </div>
 
                                     <div className="flex items-center gap-2 flex-wrap">
-                                        <Badge className="bg-primary/10 text-primary hover:bg-primary/20">{ex.sets} sets</Badge>
-                                        <Badge className="bg-secondary/10 text-secondary hover:bg-secondary/20">{ex.reps} reps</Badge>
-                                        <Badge variant="outline">RIR {ex.rir}</Badge>
-                                        <Badge variant="outline">{ex.restSeconds}s rest</Badge>
+                                        <Badge className="bg-primary/10 text-primary hover:bg-primary/20">{t('plan.workout_day.sets', { count: ex.sets })}</Badge>
+                                        <Badge className="bg-secondary/10 text-secondary hover:bg-secondary/20">{t('plan.workout_day.reps', { range: ex.reps })}</Badge>
+                                        <Badge variant="outline">{t('plan.workout_day.rir', { count: ex.rir })}</Badge>
+                                        <Badge variant="outline">{t('plan.workout_day.rest', { seconds: ex.restSeconds })}</Badge>
 
                                         {/* Expand cues button */}
                                         {hasCues && (
                                             <CollapsibleTrigger asChild>
                                                 <Button variant="ghost" size="sm" className="h-7 px-2 gap-1 text-muted-foreground hover:text-foreground">
                                                     <Lightbulb className="h-3.5 w-3.5" />
-                                                    <span className="text-xs">Tips</span>
+                                                    <span className="text-xs">{t('plan.workout_day.tips')}</span>
                                                 </Button>
                                             </CollapsibleTrigger>
                                         )}
@@ -100,7 +102,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                             onClick={() => onSwap({ dayIndex: day.dayIndex, exerciseIndex: i, exercise: ex })}
                                         >
                                             <ArrowLeftRight className="h-3.5 w-3.5" />
-                                            <span className="text-xs">Swap</span>
+                                            <span className="text-xs">{t('plan.workout_day.swap')}</span>
                                         </Button>
                                     </div>
                                 </div>
@@ -110,7 +112,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                     <div className="pl-0 sm:pl-4 py-2 px-3 bg-muted/30 rounded-lg border-l-2 border-primary/30">
                                         <p className="text-xs font-medium text-primary mb-1 flex items-center gap-1">
                                             <Lightbulb className="h-3 w-3" />
-                                            Coaching Cues
+                                            {t('plan.workout_day.coaching_cues')}
                                         </p>
                                         <ul className="text-sm text-muted-foreground space-y-1">
                                             {ex.exercise.cues?.map((cue, cueIndex) => (
@@ -126,7 +128,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                     {ex.rationale && (
                                         <div className="pl-0 sm:pl-4 py-2 px-3 bg-accent/10 rounded-lg border-l-2 border-accent/50">
                                             <p className="text-xs font-medium text-accent-foreground/80 mb-1">
-                                                Why this exercise?
+                                                {t('plan.workout_day.why_exercise')}
                                             </p>
                                             <p className="text-sm text-muted-foreground">{ex.rationale}</p>
                                         </div>

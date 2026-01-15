@@ -26,8 +26,10 @@ import {
 import { usePlanStore } from '@/stores/planStore';
 import { useCircleStore } from '@/stores/circleStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useTranslation } from 'react-i18next';
 
 export function CommandPalette() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { currentPlan } = usePlanStore();
@@ -54,17 +56,17 @@ export function CommandPalette() {
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Type a command or search..." />
+      <CommandInput placeholder={t('commands.placeholder')} />
       <CommandList>
-        <CommandEmpty>No results found.</CommandEmpty>
+        <CommandEmpty>{t('commands.no_results')}</CommandEmpty>
 
         {/* Navigation Commands */}
-        <CommandGroup heading="Navigation">
+        <CommandGroup heading={t('commands.nav_heading')}>
           <CommandItem
             onSelect={() => handleCommand(() => navigate('/'))}
           >
             <Home className="mr-2 h-4 w-4" />
-            <span>Home</span>
+            <span>{t('commands.home')}</span>
             <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">⌘</span>H
             </kbd>
@@ -74,7 +76,7 @@ export function CommandPalette() {
             onSelect={() => handleCommand(() => navigate('/wizard'))}
           >
             <Wand2 className="mr-2 h-4 w-4" />
-            <span>Create New Plan</span>
+            <span>{t('commands.create_plan')}</span>
             <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">⌘</span>N
             </kbd>
@@ -84,7 +86,7 @@ export function CommandPalette() {
             onSelect={() => handleCommand(() => navigate('/circles'))}
           >
             <Users className="mr-2 h-4 w-4" />
-            <span>Circles</span>
+            <span>{t('commands.circles')}</span>
             <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">⌘</span>C
             </kbd>
@@ -94,7 +96,7 @@ export function CommandPalette() {
             onSelect={() => handleCommand(() => navigate('/exercises'))}
           >
             <Dumbbell className="mr-2 h-4 w-4" />
-            <span>Exercise Library</span>
+            <span>{t('commands.exercise_library')}</span>
             <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
               <span className="text-xs">⌘</span>E
             </kbd>
@@ -104,7 +106,7 @@ export function CommandPalette() {
             onSelect={() => handleCommand(() => navigate('/achievements'))}
           >
             <Trophy className="mr-2 h-4 w-4" />
-            <span>Achievements</span>
+            <span>{t('commands.achievements')}</span>
           </CommandItem>
         </CommandGroup>
 
@@ -113,12 +115,12 @@ export function CommandPalette() {
         {/* Current Plan Commands */}
         {currentPlan && (
           <>
-            <CommandGroup heading="Current Plan">
+            <CommandGroup heading={t('commands.plan_heading')}>
               <CommandItem
                 onSelect={() => handleCommand(() => navigate('/plan'))}
               >
                 <Calendar className="mr-2 h-4 w-4" />
-                <span>View Current Plan</span>
+                <span>{t('commands.view_plan')}</span>
                 <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
                   <span className="text-xs">⌘</span>P
                 </kbd>
@@ -128,7 +130,7 @@ export function CommandPalette() {
                 onSelect={() => handleCommand(() => navigate('/plan'))}
               >
                 <Target className="mr-2 h-4 w-4" />
-                <span>Start Today's Workout</span>
+                <span>{t('commands.start_workout')}</span>
               </CommandItem>
             </CommandGroup>
 
@@ -139,7 +141,7 @@ export function CommandPalette() {
         {/* Circles Commands */}
         {circles.length > 0 && (
           <>
-            <CommandGroup heading="Your Circles">
+            <CommandGroup heading={t('commands.circles_heading')}>
               {circles.slice(0, 3).map((circle) => (
                 <CommandItem
                   key={circle.id}
@@ -148,7 +150,7 @@ export function CommandPalette() {
                   <Users className="mr-2 h-4 w-4 text-primary" />
                   <span>{circle.name}</span>
                   <span className="ml-auto text-xs text-muted-foreground">
-                    {circle.member_count} members
+                    {t('commands.members', { count: circle.member_count })}
                   </span>
                 </CommandItem>
               ))}
@@ -159,21 +161,21 @@ export function CommandPalette() {
         )}
 
         {/* User Actions */}
-        <CommandGroup heading="Account">
+        <CommandGroup heading={t('commands.account_heading')}>
           {user ? (
             <>
               <CommandItem
                 onSelect={() => handleCommand(() => navigate('/profile'))}
               >
                 <User className="mr-2 h-4 w-4" />
-                <span>Profile</span>
+                <span>{t('commands.profile')}</span>
               </CommandItem>
 
               <CommandItem
                 onSelect={() => handleCommand(() => navigate('/settings'))}
               >
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>{t('commands.settings')}</span>
               </CommandItem>
 
               <CommandItem
@@ -181,7 +183,7 @@ export function CommandPalette() {
                 className="text-destructive"
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Sign Out</span>
+                <span>{t('commands.sign_out')}</span>
               </CommandItem>
             </>
           ) : (
@@ -189,7 +191,7 @@ export function CommandPalette() {
               onSelect={() => handleCommand(() => navigate('/auth'))}
             >
               <User className="mr-2 h-4 w-4" />
-              <span>Sign In</span>
+              <span>{t('commands.sign_in')}</span>
             </CommandItem>
           )}
         </CommandGroup>
@@ -197,19 +199,19 @@ export function CommandPalette() {
         <CommandSeparator />
 
         {/* Help & Resources */}
-        <CommandGroup heading="Help & Resources">
+        <CommandGroup heading={t('commands.help_heading')}>
           <CommandItem
             onSelect={() => handleCommand(() => window.open('https://docs.fitwizardly.com', '_blank'))}
           >
             <BookOpen className="mr-2 h-4 w-4" />
-            <span>Documentation</span>
+            <span>{t('commands.documentation')}</span>
           </CommandItem>
 
           <CommandItem
             onSelect={() => handleCommand(() => navigate('/exercises'))}
           >
             <Dumbbell className="mr-2 h-4 w-4" />
-            <span>Browse Exercises</span>
+            <span>{t('commands.browse_exercises')}</span>
           </CommandItem>
         </CommandGroup>
       </CommandList>

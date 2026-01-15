@@ -5,6 +5,7 @@ import { useWizardStore } from '@/stores/wizardStore';
 import { MUSCLE_DATA, EQUIPMENT_OPTIONS, CONSTRAINT_OPTIONS } from '@/types/fitness';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 // Animation variants for staggered card reveals
 const containerVariants = {
@@ -45,6 +46,7 @@ const badgeVariants = {
 };
 
 export function ReviewStep() {
+  const { t } = useTranslation();
   const { selections } = useWizardStore();
 
   const getMuscleLabel = (id: string) =>
@@ -57,21 +59,21 @@ export function ReviewStep() {
     CONSTRAINT_OPTIONS.find(c => c.id === id)?.name || id;
 
   const getSplitType = (days: number): string => {
-    if (days <= 3) return 'Full Body';
-    if (days === 4) return 'Upper/Lower';
-    return 'Push/Pull/Legs';
+    if (days <= 3) return t('wizard.schedule.split_full_body');
+    if (days === 4) return t('wizard.schedule.split_upper_lower');
+    return t('wizard.schedule.split_ppl');
   };
 
-  const goalLabels = {
-    strength: 'Strength',
-    hypertrophy: 'Muscle Growth',
-    general: 'General Fitness',
+  const goalLabels: Record<string, string> = {
+    strength: t('goals.strength'),
+    hypertrophy: t('goals.hypertrophy'),
+    general: t('goals.general'),
   };
 
-  const experienceLabels = {
-    beginner: 'Beginner',
-    intermediate: 'Intermediate',
-    advanced: 'Advanced',
+  const experienceLabels: Record<string, string> = {
+    beginner: t('experience.beginner'),
+    intermediate: t('experience.intermediate'),
+    advanced: t('experience.advanced'),
   };
 
   const hasPersonalInfo = selections.firstName || selections.lastName || selections.personalGoalNote;
@@ -87,8 +89,8 @@ export function ReviewStep() {
         className="text-center"
         variants={cardVariants}
       >
-        <h2 className="text-2xl font-bold text-foreground">Review Your Plan</h2>
-        <p className="text-muted-foreground mt-1">Confirm your selections before generating</p>
+        <h2 className="text-2xl font-bold text-foreground">{t('wizard.review.title')}</h2>
+        <p className="text-muted-foreground mt-1">{t('wizard.review.subtitle')}</p>
       </motion.div>
 
       {/* Personal Info Banner (if provided) */}
@@ -110,7 +112,7 @@ export function ReviewStep() {
                       ? `${selections.firstName} ${selections.lastName}`.trim()
                       : 'Your Personal Plan'}
                   </h3>
-                  <p className="text-sm text-muted-foreground">Personalized Workout Plan</p>
+                  <p className="text-sm text-muted-foreground">{t('wizard.review.personalized_plan')}</p>
                 </div>
               </div>
               {selections.personalGoalNote && (
@@ -144,12 +146,12 @@ export function ReviewStep() {
                 >
                   <Target className="h-5 w-5 text-primary" />
                 </motion.div>
-                Goal & Experience
+                {t('wizard.review.goal_experience')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Training Goal</span>
+                <span className="text-muted-foreground">{t('wizard.review.training_goal')}</span>
                 <motion.div variants={badgeVariants}>
                   <Badge variant="default" className="gradient-primary text-primary-foreground">
                     {goalLabels[selections.goal]}
@@ -157,7 +159,7 @@ export function ReviewStep() {
                 </motion.div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Experience</span>
+                <span className="text-muted-foreground">{t('wizard.review.experience')}</span>
                 <motion.div variants={badgeVariants}>
                   <Badge variant="secondary">
                     {experienceLabels[selections.experienceLevel]}
@@ -179,28 +181,28 @@ export function ReviewStep() {
                 >
                   <Calendar className="h-5 w-5 text-primary" />
                 </motion.div>
-                Schedule
+                {t('wizard.review.schedule')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Days per Week</span>
+                <span className="text-muted-foreground">{t('wizard.review.days_per_week')}</span>
                 <motion.div variants={badgeVariants}>
                   <Badge variant="default" className="gradient-primary text-primary-foreground">
-                    {selections.daysPerWeek} days
+                    {selections.daysPerWeek} {t('wizard.review.days')}
                   </Badge>
                 </motion.div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Session Length</span>
+                <span className="text-muted-foreground">{t('wizard.review.session_length')}</span>
                 <motion.div variants={badgeVariants}>
                   <Badge variant="secondary">
-                    {selections.sessionDuration} min
+                    {selections.sessionDuration} {t('wizard.review.min')}
                   </Badge>
                 </motion.div>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Split Type</span>
+                <span className="text-muted-foreground">{t('wizard.review.split_type')}</span>
                 <motion.div variants={badgeVariants}>
                   <Badge variant="outline">
                     {getSplitType(selections.daysPerWeek)}
@@ -222,7 +224,7 @@ export function ReviewStep() {
                 >
                   <Dumbbell className="h-5 w-5 text-primary" />
                 </motion.div>
-                Equipment ({selections.equipment.length})
+                {t('wizard.review.equipment')} ({selections.equipment.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -261,7 +263,7 @@ export function ReviewStep() {
                 >
                   <Target className="h-5 w-5 text-primary" />
                 </motion.div>
-                Target Muscles ({selections.targetMuscles.length})
+                {t('wizard.review.target_muscles')} ({selections.targetMuscles.length})
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -285,7 +287,7 @@ export function ReviewStep() {
                     </motion.div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground">No muscles selected</p>
+                  <p className="text-sm text-muted-foreground">{t('wizard.review.no_muscles')}</p>
                 )}
               </motion.div>
             </CardContent>
@@ -311,7 +313,7 @@ export function ReviewStep() {
                 >
                   <AlertTriangle className="h-5 w-5" />
                 </motion.div>
-                Constraints Applied
+                {t('wizard.review.constraints_applied')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -335,7 +337,7 @@ export function ReviewStep() {
                 ))}
               </motion.div>
               <p className="text-sm text-muted-foreground mt-3">
-                Exercises will be filtered to avoid these limitations
+                {t('wizard.review.constraints_hint')}
               </p>
             </CardContent>
           </Card>
@@ -367,10 +369,9 @@ export function ReviewStep() {
           >
             <Check className="h-5 w-5" />
           </motion.div>
-          <span>Ready to generate your personalized workout plan!</span>
+          <span>{t('wizard.review.ready_message')}</span>
         </motion.div>
       </motion.div>
     </motion.div>
   );
 }
-

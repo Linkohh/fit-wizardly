@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Filter, X, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface ExerciseFiltersProps {
     category: ExerciseCategory | 'all';
@@ -15,53 +16,54 @@ interface ExerciseFiltersProps {
 }
 
 export function ExerciseFilters({ category, muscle, difficulty, equipment, onFilterChange, onClear }: ExerciseFiltersProps) {
+    const { t } = useTranslation();
     return (
         <div className="space-y-4 mb-6">
             {/* Main Filters Row */}
             <div className="flex flex-wrap gap-3 items-center p-4 bg-black/20 backdrop-blur-sm rounded-xl border border-white/10 shadow-lg">
                 <div className="flex items-center gap-2 text-primary">
                     <Filter className="w-5 h-5" />
-                    <span className="font-semibold hidden sm:inline">Filters</span>
+                    <span className="font-semibold hidden sm:inline">{t('exercises.filters.title')}</span>
                 </div>
 
                 <Select value={category} onValueChange={(val) => onFilterChange('category', val)}>
                     <SelectTrigger className="w-[130px] bg-background/50 border-white/10 hover:border-primary/50 transition-colors">
-                        <SelectValue placeholder="Category" />
+                        <SelectValue placeholder={t('exercises.filters.category_placeholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Categories</SelectItem>
-                        <SelectItem value="strength">Strength</SelectItem>
-                        <SelectItem value="cardio">Cardio</SelectItem>
-                        <SelectItem value="flexibility">Flexibility</SelectItem>
-                        <SelectItem value="plyometric">Plyometric</SelectItem>
-                        <SelectItem value="core">Core</SelectItem>
+                        <SelectItem value="all">{t('exercises.filters.all_categories')}</SelectItem>
+                        <SelectItem value="strength">{t('exercises.filters.strength')}</SelectItem>
+                        <SelectItem value="cardio">{t('exercises.filters.cardio')}</SelectItem>
+                        <SelectItem value="flexibility">{t('exercises.filters.flexibility')}</SelectItem>
+                        <SelectItem value="plyometric">{t('exercises.filters.plyometric')}</SelectItem>
+                        <SelectItem value="core">{t('exercises.filters.core')}</SelectItem>
                     </SelectContent>
                 </Select>
 
                 <Select value={muscle} onValueChange={(val) => onFilterChange('muscle', val)}>
                     <SelectTrigger className="w-[130px] bg-background/50 border-white/10 hover:border-primary/50 transition-colors">
-                        <SelectValue placeholder="Muscle" />
+                        <SelectValue placeholder={t('exercises.filters.muscle_placeholder')} />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
-                        <SelectItem value="all">All Muscles</SelectItem>
-                        <SelectItem value="chest">Chest</SelectItem>
-                        <SelectItem value="back">Back</SelectItem>
-                        <SelectItem value="legs">Legs</SelectItem>
-                        <SelectItem value="arms">Arms</SelectItem>
-                        <SelectItem value="shoulders">Shoulders</SelectItem>
-                        <SelectItem value="core">Core</SelectItem>
+                        <SelectItem value="all">{t('exercises.filters.all_muscles')}</SelectItem>
+                        <SelectItem value="chest">{t('exercises.filters.chest')}</SelectItem>
+                        <SelectItem value="back">{t('exercises.filters.back')}</SelectItem>
+                        <SelectItem value="legs">{t('exercises.filters.legs')}</SelectItem>
+                        <SelectItem value="arms">{t('exercises.filters.arms')}</SelectItem>
+                        <SelectItem value="shoulders">{t('exercises.filters.shoulders')}</SelectItem>
+                        <SelectItem value="core">{t('exercises.filters.core')}</SelectItem>
                     </SelectContent>
                 </Select>
 
                 <Select value={difficulty} onValueChange={(val) => onFilterChange('difficulty', val)}>
                     <SelectTrigger className="w-[130px] bg-background/50 border-white/10 hover:border-primary/50 transition-colors">
-                        <SelectValue placeholder="Difficulty" />
+                        <SelectValue placeholder={t('exercises.filters.difficulty_placeholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="Beginner">Beginner</SelectItem>
-                        <SelectItem value="Intermediate">Intermediate</SelectItem>
-                        <SelectItem value="Advanced">Advanced</SelectItem>
+                        <SelectItem value="all">{t('exercises.filters.all_levels')}</SelectItem>
+                        <SelectItem value="Beginner">{t('exercises.filters.beginner')}</SelectItem>
+                        <SelectItem value="Intermediate">{t('exercises.filters.intermediate')}</SelectItem>
+                        <SelectItem value="Advanced">{t('exercises.filters.advanced')}</SelectItem>
                     </SelectContent>
                 </Select>
 
@@ -70,19 +72,19 @@ export function ExerciseFilters({ category, muscle, difficulty, equipment, onFil
                     onValueChange={(val) => onFilterChange('equipment', val)}
                 >
                     <SelectTrigger className="w-[130px] bg-background/50 border-white/10 hover:border-primary/50 transition-colors">
-                        <SelectValue placeholder="Equipment" />
+                        <SelectValue placeholder={t('exercises.filters.equipment_placeholder')} />
                     </SelectTrigger>
                     <SelectContent className="max-h-[300px]">
-                        <SelectItem value="all">All Equipment</SelectItem>
-                        <SelectItem value="bodyweight">Bodyweight</SelectItem>
-                        <SelectItem value="dumbbells">Dumbbells</SelectItem>
-                        <SelectItem value="barbell">Barbell</SelectItem>
-                        <SelectItem value="cables">Cables</SelectItem>
-                        <SelectItem value="machines">Machines</SelectItem>
-                        <SelectItem value="kettlebells">Kettlebells</SelectItem>
-                        <SelectItem value="band">Bands</SelectItem>
+                        <SelectItem value="all">{t('exercises.filters.all_equipment')}</SelectItem>
+                        <SelectItem value="bodyweight">{t('exercises.filters.bodyweight')}</SelectItem>
+                        <SelectItem value="dumbbells">{t('exercises.filters.dumbbells')}</SelectItem>
+                        <SelectItem value="barbell">{t('exercises.filters.barbell')}</SelectItem>
+                        <SelectItem value="cables">{t('exercises.filters.cables')}</SelectItem>
+                        <SelectItem value="machines">{t('exercises.filters.machines')}</SelectItem>
+                        <SelectItem value="kettlebells">{t('exercises.filters.kettlebells')}</SelectItem>
+                        <SelectItem value="band">{t('exercises.filters.bands')}</SelectItem>
                         {Array.isArray(equipment) && equipment.length > 1 && (
-                            <SelectItem value="custom" disabled>Custom/Multiple</SelectItem>
+                            <SelectItem value="custom" disabled>{t('exercises.filters.custom_multiple')}</SelectItem>
                         )}
                     </SelectContent>
                 </Select>
@@ -94,14 +96,14 @@ export function ExerciseFilters({ category, muscle, difficulty, equipment, onFil
                     className="ml-auto text-muted-foreground hover:text-white"
                 >
                     <X className="w-4 h-4 mr-1" />
-                    Clear
+                    {t('exercises.filters.clear')}
                 </Button>
             </div>
 
             {/* Quick Presets */}
             <div className="flex flex-wrap items-center gap-2 pl-1">
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mr-2 flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-yellow-500" /> Quick Sets:
+                    <Zap className="w-3 h-3 text-yellow-500" /> {t('exercises.filters.quick_sets')}
                 </span>
                 {EQUIPMENT_PRESETS.map((preset) => {
                     // Check if this preset matches current selection (simple logic: check name against some state? No, presets are complex)

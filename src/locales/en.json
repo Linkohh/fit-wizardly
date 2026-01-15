@@ -65,7 +65,102 @@
             "next": "Next",
             "generate": "Generate Plan"
         },
-        "progress": "{{percent}}% complete"
+        "progress": "{{percent}}% complete",
+        "toast": {
+            "success_title": "Plan Generated!",
+            "success_description": "Your personalized workout program is ready.",
+            "error_title": "Error",
+            "error_description": "Failed to generate plan. Please try again."
+        },
+        "goal": {
+            "personalize_badge": "Personalize Your Plan",
+            "lets_know_you": "Let's get to know you",
+            "name_on_plan": "Your name will appear on your personalized workout plan",
+            "first_name": "First Name",
+            "last_name": "Last Name",
+            "first_name_placeholder": "John",
+            "last_name_placeholder": "Doe",
+            "what_achieve": "What do you want to achieve?",
+            "goal_placeholder": "e.g., Build muscle for my wedding, Run a 5K, Feel more confident...",
+            "goal_note_hint": "This note will be included on your PDF plan as a motivational reminder",
+            "im_trainer": "I'm a Trainer/Coach",
+            "trainer_enable_notes": "Enable to add private notes for your client",
+            "coach_notes": "Coach Notes",
+            "private": "(Private)",
+            "coach_notes_placeholder": "Add private notes about this client's goals, limitations, preferences...",
+            "coach_notes_hint": "These notes are for your reference only and won't appear on the client's plan",
+            "training_goal_title": "What's your training goal?",
+            "training_goal_subtitle": "This helps us optimize your program structure",
+            "reset_recommended": "Reset to Recommended",
+            "experience_title": "Your experience level",
+            "experience_subtitle": "This determines training volume and complexity"
+        },
+        "schedule": {
+            "title": "Set your schedule",
+            "subtitle": "How often and how long can you train?",
+            "days_title": "Training Days per Week",
+            "days_subtitle": "Select between 2-6 days",
+            "recommended_split": "Recommended split:",
+            "duration_title": "Session Duration",
+            "duration_subtitle": "How long is each workout?",
+            "weekly_time": "Weekly training time:",
+            "hours": "hours",
+            "split_full_body": "Full Body",
+            "split_upper_lower": "Upper/Lower",
+            "split_ppl": "Push/Pull/Legs"
+        },
+        "review": {
+            "title": "Review Your Plan",
+            "subtitle": "Confirm your selections before generating",
+            "personalized_plan": "Personalized Workout Plan",
+            "goal_experience": "Goal & Experience",
+            "training_goal": "Training Goal",
+            "experience": "Experience",
+            "schedule": "Schedule",
+            "days_per_week": "Days per Week",
+            "session_length": "Session Length",
+            "split_type": "Split Type",
+            "equipment": "Equipment",
+            "target_muscles": "Target Muscles",
+            "no_muscles": "No muscles selected",
+            "constraints_applied": "Constraints Applied",
+            "constraints_hint": "Exercises will be filtered to avoid these limitations",
+            "ready_message": "Ready to generate your personalized workout plan!",
+            "days": "days",
+            "min": "min"
+        },
+        "anatomy": {
+            "title": "Select Target Muscles",
+            "subtitle": "Click on the diagram or list to choose the muscle groups you want to train."
+        },
+        "equipment": {
+            "title": "What equipment do you have?",
+            "subtitle": "Select all available equipment for exercise options",
+            "quick_presets": "Quick presets:",
+            "clear_all": "Clear All",
+            "count_one": "{{count}} equipment option selected",
+            "count_other": "{{count}} equipment options selected",
+            "selected": "(selected)"
+        },
+        "constraints": {
+            "title": "Any limitations or constraints?",
+            "subtitle": "Select any that apply - this is optional",
+            "clear_selections": "Clear selections",
+            "no_constraints": "No constraints selected - all exercises will be available",
+            "count_one": "{{count}} constraint will be applied to filter exercises",
+            "count_other": "{{count}} constraints will be applied to filter exercises",
+            "selected": "(selected)"
+        },
+        "stepper": {
+            "short_goal": "Goal",
+            "short_equip": "Equip",
+            "short_muscles": "Muscles",
+            "short_limits": "Limits",
+            "short_days": "Days",
+            "short_review": "Review",
+            "completed": "(completed)",
+            "current": "(current)"
+        }
     },
     "plan": {
         "title": "Your Workout Plan",
@@ -81,6 +176,42 @@
             "rest": "{{seconds}}s rest",
             "tips": "Tips",
             "swap": "Swap"
+        },
+        "tools": "1RM Tools",
+        "export_dialog": {
+            "title": "Export Workout Plan",
+            "description": "Your workout plan will be exported as a PDF file. Be mindful when sharing this document.",
+            "privacy_mode": "Privacy Mode",
+            "privacy_mode_hint": "Omit personal details from export",
+            "privacy_notice": "Privacy Notice:",
+            "privacy_notice_text": "PDFs may contain metadata. Avoid sharing workout plans containing personal health information publicly.",
+            "download": "Download PDF"
+        },
+        "summary": {
+            "days_week": "days/week",
+            "min_sessions": "min sessions",
+            "split_type": "split type"
+        },
+        "motivational_quote": "Consistency beats perfection. You've got this!",
+        "workout_day": {
+            "start_workout": "Start Workout",
+            "safety_note": "Safety Note",
+            "not_suitable_for": "May not be suitable for:",
+            "tips": "Tips",
+            "swap": "Swap",
+            "coaching_cues": "Coaching Cues",
+            "why_exercise": "Why this exercise?",
+            "sets": "{{count}} sets",
+            "reps": "{{count}} reps",
+            "rir": "RIR {{count}}",
+            "rest": "{{count}}s rest"
+        },
+        "exercise_swap": {
+            "title": "Swap Exercise",
+            "description": "Replace <1>{{name}}</1> with an alternative exercise",
+            "search_placeholder": "Search exercises...",
+            "no_matches": "No matching exercises found",
+            "swap_button": "Swap Exercise"
         }
     },
     "goals": {
@@ -99,5 +230,140 @@
         "save": "Save",
         "cancel": "Cancel",
         "confirm": "Confirm"
+    },
+    "exercises": {
+        "filters": {
+            "title": "Filters",
+            "category_placeholder": "Category",
+            "all_categories": "All Categories",
+            "strength": "Strength",
+            "cardio": "Cardio",
+            "flexibility": "Flexibility",
+            "plyometric": "Plyometric",
+            "core": "Core",
+            "muscle_placeholder": "Muscle",
+            "all_muscles": "All Muscles",
+            "chest": "Chest",
+            "back": "Back",
+            "legs": "Legs",
+            "arms": "Arms",
+            "shoulders": "Shoulders",
+            "difficulty_placeholder": "Difficulty",
+            "all_levels": "All Levels",
+            "beginner": "Beginner",
+            "intermediate": "Intermediate",
+            "advanced": "Advanced",
+            "equipment_placeholder": "Equipment",
+            "all_equipment": "All Equipment",
+            "bodyweight": "Bodyweight",
+            "dumbbells": "Dumbbells",
+            "barbell": "Barbell",
+            "cables": "Cables",
+            "machines": "Machines",
+            "kettlebells": "Kettlebells",
+            "bands": "Bands",
+            "custom_multiple": "Custom/Multiple",
+            "clear": "Clear",
+            "quick_sets": "Quick Sets:"
+        }
+    },
+    "commands": {
+        "placeholder": "Type a command or search...",
+        "no_results": "No results found.",
+        "nav_heading": "Navigation",
+        "home": "Home",
+        "create_plan": "Create New Plan",
+        "circles": "Circles",
+        "exercise_library": "Exercise Library",
+        "achievements": "Achievements",
+        "plan_heading": "Current Plan",
+        "view_plan": "View Current Plan",
+        "start_workout": "Start Today's Workout",
+        "circles_heading": "Your Circles",
+        "members": "{{count}} members",
+        "account_heading": "Account",
+        "profile": "Profile",
+        "settings": "Settings",
+        "sign_out": "Sign Out",
+        "sign_in": "Sign In",
+        "help_heading": "Help & Resources",
+        "documentation": "Documentation",
+        "browse_exercises": "Browse Exercises"
+    },
+    "header": {
+        "logo_tooltip": "Your path to peak fitness potential",
+        "theme": {
+            "light": "Light",
+            "dark": "Dark",
+            "system": "System",
+            "label": "Theme"
+        },
+        "trainer_mode": "Trainer Mode"
+    },
+    "footer": {
+        "copyright": "© {{year}} FitWizard. Built with",
+        "for_fitness": "for fitness enthusiasts.",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy",
+        "medical": "Medical Disclaimer"
+    },
+    "notfound": {
+        "title": "Looks Like You've Gone Off-Track",
+        "description": "This page doesn't exist, or maybe it's resting between sets. Let's get you back on your workout plan!",
+        "go_back": "Go Back",
+        "back_home": "Back to Home",
+        "popular": "Popular destinations:",
+        "create_plan": "Create Plan",
+        "exercise_library": "Exercise Library"
+    },
+    "error": {
+        "title": "Something went wrong",
+        "description": "We encountered an unexpected error. Please try refreshing the page.",
+        "details": "Error details",
+        "refresh": "Refresh Page",
+        "try_again": "Try Again"
+    },
+    "onboarding": {
+        "skip": "Skip for now",
+        "back": "Back",
+        "lets_go": "Let's Go!",
+        "complete": "Complete",
+        "next": "Next"
+    },
+    "legal": {
+        "page_title": "Legal & Compliance",
+        "tabs": {
+            "medical": "Medical Disclaimer",
+            "privacy": "Privacy Policy",
+            "terms": "Terms of Service"
+        },
+        "medical": {
+            "title": "Medical Disclaimer",
+            "warning_title": "Critical Warning",
+            "warning_text": "FitWizard is NOT a doctor. The generated workouts are for educational purposes only.",
+            "content_p1": "The content provided by FitWizard, including workout plans, nutritional suggestions, and chat responses, is for educational and entertainment purposes only and is not intended as medical advice.",
+            "content_p2": "Always consult a qualified healthcare professional before starting any new exercise program, especially if you have pre-existing health conditions, injuries, or concerns.",
+            "content_p3": "By using FitWizard, you acknowledge that you are responsible for your own health decisions and that the creators of this application are not liable for any injuries or health issues that may result from following generated workout plans."
+        },
+        "privacy": {
+            "title": "Local-First Privacy Policy",
+            "data_stays_title": "Your Data Stays Here",
+            "data_stays_text": "We do not store your health data on our servers. It lives 100% on your device.",
+            "what_we_store": "What We Store Locally",
+            "what_we_store_text": "Your workout preferences, generated plans, and any personal notes you add are stored in your browser's local storage. This data never leaves your device unless you explicitly export it.",
+            "analytics": "Analytics",
+            "analytics_text": "We use anonymous, privacy-respecting analytics to understand how the app is used. No personal health data is ever transmitted."
+        },
+        "terms": {
+            "title": "Terms of Service",
+            "acceptance": "Acceptance of Terms",
+            "acceptance_text": "By accessing and using FitWizard, you agree to be bound by these Terms of Service and all applicable laws and regulations.",
+            "use": "Use License",
+            "use_text": "Permission is granted to use FitWizard for personal, non-commercial purposes. This license does not include the right to modify, distribute, or create derivative works."
+        },
+        "footer": {
+            "copyright": "FitWizard. All rights reserved.",
+            "educational": "Generated plans are for educational purposes only."
+        }
     }
 }

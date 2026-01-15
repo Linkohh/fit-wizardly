@@ -31,8 +31,10 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTranslation } from 'react-i18next';
 
 export function WorkoutLogger() {
+    const { t } = useTranslation();
     const { planId, dayIndex } = useParams();
     const navigate = useNavigate();
 
@@ -83,8 +85,8 @@ export function WorkoutLogger() {
                 <Card>
                     <CardContent className="p-8 text-center">
                         <Dumbbell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                        <h2 className="text-xl font-semibold mb-2">Loading workout...</h2>
-                        <p className="text-muted-foreground">Getting your workout ready</p>
+                        <h2 className="text-xl font-semibold mb-2">{t('workout.loading')}</h2>
+                        <p className="text-muted-foreground">{t('workout.preparing')}</p>
                     </CardContent>
                 </Card>
             </div>
@@ -166,7 +168,7 @@ export function WorkoutLogger() {
                             onClick={() => setShowCancelDialog(true)}
                         >
                             <ArrowLeft className="h-4 w-4 mr-2" />
-                            Cancel
+                            {t('workout.cancel')}
                         </Button>
 
                         <div className="flex items-center gap-2 text-lg font-mono">
@@ -207,19 +209,19 @@ export function WorkoutLogger() {
                         <div className="flex items-center justify-between">
                             <div>
                                 <Badge variant="secondary" className="mb-2">
-                                    Exercise {currentExerciseIndex + 1} of {totalExercises}
+                                    {t('workout.exercise_count', { current: currentExerciseIndex + 1, total: totalExercises })}
                                 </Badge>
                                 <CardTitle className="text-xl">
                                     {prescription.exercise.name}
                                 </CardTitle>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                    {prescription.sets} sets × {prescription.reps} reps • Rest {prescription.restSeconds}s
+                                    {t('workout_day.sets', { count: prescription.sets })} × {t('workout_day.reps', { count: prescription.reps })} • {t('workout_day.rest', { count: prescription.restSeconds })}
                                 </p>
                             </div>
                             {currentExercise.skipped ? (
-                                <Badge className="bg-yellow-500">Skipped</Badge>
+                                <Badge className="bg-yellow-500">{t('workout.status_skipped')}</Badge>
                             ) : allSetsCompleted ? (
-                                <Badge className="bg-green-500">Complete</Badge>
+                                <Badge className="bg-green-500">{t('workout.status_complete')}</Badge>
                             ) : null}
                         </div>
                     </CardHeader>
@@ -228,7 +230,7 @@ export function WorkoutLogger() {
                         {currentExercise.skipped ? (
                             <div className="text-center py-8 text-muted-foreground">
                                 <X className="h-12 w-12 mx-auto mb-2 text-yellow-500" />
-                                <p>Exercise skipped</p>
+                                <p>{t('workout.skipped')}</p>
                             </div>
                         ) : (
                             currentExercise.sets.map((set, idx) => (
@@ -255,7 +257,7 @@ export function WorkoutLogger() {
                         disabled={currentExerciseIndex === 0}
                     >
                         <ChevronLeft className="h-4 w-4 mr-2" />
-                        Previous
+                        {t('workout.previous')}
                     </Button>
 
                     {!currentExercise.skipped && !allSetsCompleted && (
@@ -265,7 +267,7 @@ export function WorkoutLogger() {
                             onClick={handleSkipExercise}
                             className="text-muted-foreground"
                         >
-                            Skip Exercise
+                            {t('workout.skip_exercise')}
                         </Button>
                     )}
 
@@ -275,14 +277,14 @@ export function WorkoutLogger() {
                             onClick={() => handleFinishWorkout('just_right')}
                         >
                             <Trophy className="h-4 w-4 mr-2" />
-                            Finish Workout
+                            {t('workout.finish')}
                         </Button>
                     ) : (
                         <Button
                             onClick={handleNextExercise}
                             disabled={isLastExercise}
                         >
-                            Next
+                            {t('workout.next')}
                             <ChevronRight className="h-4 w-4 ml-2" />
                         </Button>
                     )}
@@ -295,14 +297,14 @@ export function WorkoutLogger() {
                             <div className="flex items-center gap-3">
                                 <Flame className="h-8 w-8 text-green-500" />
                                 <div className="flex-1">
-                                    <p className="font-semibold">All exercises complete!</p>
-                                    <p className="text-sm text-muted-foreground">Ready to finish your workout</p>
+                                    <p className="font-semibold">{t('workout.complete_title')}</p>
+                                    <p className="text-sm text-muted-foreground">{t('workout.complete_subtitle')}</p>
                                 </div>
                                 <Button
                                     className="gradient-primary text-white"
                                     onClick={() => handleFinishWorkout('just_right')}
                                 >
-                                    Finish
+                                    {t('workout.finish')}
                                 </Button>
                             </div>
                         </CardContent>
@@ -311,9 +313,9 @@ export function WorkoutLogger() {
 
                 {/* Notes */}
                 <div className="mt-6">
-                    <label className="text-sm font-medium mb-2 block">Workout Notes</label>
+                    <label className="text-sm font-medium mb-2 block">{t('workout.notes')}</label>
                     <Textarea
-                        placeholder="How did the workout feel? Any issues?"
+                        placeholder={t('workout.notes_placeholder')}
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         className="resize-none"
@@ -326,15 +328,15 @@ export function WorkoutLogger() {
             <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Cancel Workout?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('workout.cancel_dialog_title')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Your progress will be lost. Are you sure you want to cancel this workout?
+                            {t('workout.cancel_dialog_desc')}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Continue Workout</AlertDialogCancel>
+                        <AlertDialogCancel>{t('workout.cancel_dialog_continue')}</AlertDialogCancel>
                         <AlertDialogAction onClick={handleCancel} className="bg-destructive text-destructive-foreground">
-                            Cancel Workout
+                            {t('workout.cancel_dialog_confirm')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

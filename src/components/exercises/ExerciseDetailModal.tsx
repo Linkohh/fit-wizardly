@@ -14,6 +14,7 @@ import { getExerciseTheme } from '@/lib/exerciseTheme';
 import { cn } from '@/lib/utils';
 import { RelatedExercises } from './RelatedExercises';
 import { ExerciseBadges } from './ExerciseBadges';
+import { useTranslation } from 'react-i18next';
 
 interface ExerciseDetailModalProps {
     exercise: Exercise | null;
@@ -23,6 +24,7 @@ interface ExerciseDetailModalProps {
 }
 
 export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercise }: ExerciseDetailModalProps) {
+    const { t } = useTranslation();
     const { isFavorite, toggleFavorite } = usePreferencesStore();
     const haptics = useHaptics();
     const isMobile = useIsMobile();
@@ -105,7 +107,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                     <div className="space-y-6">
                         <div>
                             <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                                Muscles Targeted
+                                {t('exercises.detail.muscles_targeted')}
                             </h4>
                             <div className="flex flex-wrap gap-2">
                                 {exercise.primaryMuscles.map((m) => (
@@ -127,7 +129,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
 
                         <div>
                             <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                                Equipment
+                                {t('exercises.detail.equipment')}
                             </h4>
                             <div className="flex flex-wrap gap-2">
                                 {exercise.equipment.map((e) => (
@@ -145,14 +147,14 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                         {exercise.metabolic && (
                             <div className="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
                                 <div className="text-orange-400 text-xs font-bold uppercase mb-1">
-                                    Metabolic Impact
+                                    {t('exercises.detail.metabolic_impact')}
                                 </div>
                                 <div className="text-2xl font-bold text-orange-200">
                                     {exercise.metabolic.met}{' '}
                                     <span className="text-sm font-normal text-white/50">METs</span>
                                 </div>
                                 <p className="text-xs text-white/60 mt-1">
-                                    High calorie burn potential
+                                    {t('exercises.detail.high_burn')}
                                 </p>
                             </div>
                         )}
@@ -166,15 +168,15 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                     <div className="md:col-span-2">
                         <Tabs defaultValue="instructions" className="w-full">
                             <TabsList className="grid w-full grid-cols-3 bg-white/5">
-                                <TabsTrigger value="instructions">Instructions</TabsTrigger>
+                                <TabsTrigger value="instructions">{t('exercises.detail.instructions')}</TabsTrigger>
                                 <TabsTrigger
                                     value="variations"
                                     disabled={!exercise.variations?.length}
                                 >
-                                    Variations
+                                    {t('exercises.detail.variations')}
                                 </TabsTrigger>
-                                <TabsTrigger value="related">Related</TabsTrigger>
-                                <TabsTrigger value="history">History</TabsTrigger>
+                                <TabsTrigger value="related">{t('exercises.detail.related')}</TabsTrigger>
+                                <TabsTrigger value="history">{t('exercises.detail.history')}</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="instructions" className="mt-4 space-y-6">
@@ -187,7 +189,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                 {exercise.cues.length > 0 && (
                                     <div className="bg-blue-500/10 border-l-2 border-blue-500 p-4 rounded-r-lg">
                                         <h5 className="font-semibold text-blue-400 mb-2 flex items-center gap-2">
-                                            <Info className="w-4 h-4" /> Pro Cues
+                                            <Info className="w-4 h-4" /> {t('exercises.detail.pro_cues')}
                                         </h5>
                                         <ul className="list-disc list-inside space-y-1 text-sm text-blue-100/80">
                                             {exercise.cues.map((c) => (
@@ -200,7 +202,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                 {exercise.steps && exercise.steps.length > 0 && (
                                     <div className="space-y-4">
                                         <h4 className="font-semibold flex items-center gap-2 text-white/80">
-                                            <List className="w-4 h-4" /> Execution
+                                            <List className="w-4 h-4" /> {t('exercises.detail.execution')}
                                         </h4>
                                         <ol className="space-y-4 relative border-l border-white/10 ml-2 pl-6">
                                             {exercise.steps.map((step, i) => (
@@ -265,11 +267,10 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                 <div className="flex flex-col items-center justify-center py-12 text-center">
                                     <Clock className="w-12 h-12 text-muted-foreground/50 mb-4" />
                                     <h5 className="font-semibold text-white/80 mb-2">
-                                        No History Yet
+                                        {t('exercises.detail.no_history')}
                                     </h5>
                                     <p className="text-sm text-muted-foreground max-w-xs">
-                                        Complete this exercise in a workout to start tracking your
-                                        progress and personal records.
+                                        {t('exercises.detail.history_prompt')}
                                     </p>
                                 </div>
                             </TabsContent>

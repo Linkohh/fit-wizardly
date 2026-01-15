@@ -98,15 +98,15 @@ export default function WizardPage() {
       });
 
       toast({
-        title: "Plan Generated!",
-        description: "Your personalized workout program is ready.",
+        title: t('wizard.toast.success_title'),
+        description: t('wizard.toast.success_description'),
       });
       navigate('/plan');
     } catch (error) {
       console.error(error);
       toast({
-        title: "Error",
-        description: "Failed to generate plan. Please try again.",
+        title: t('wizard.toast.error_title'),
+        description: t('wizard.toast.error_description'),
         variant: "destructive"
       });
     } finally {
@@ -142,7 +142,7 @@ export default function WizardPage() {
           </p>
         </div>
         <span className="text-sm font-medium text-muted-foreground">
-          {Math.round(((currentStepIndex + 1) / 6) * 100)}% complete
+          {t('wizard.progress', { percent: Math.round(((currentStepIndex + 1) / 6) * 100) })}
         </span>
       </div>
 

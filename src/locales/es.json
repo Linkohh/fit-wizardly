@@ -65,7 +65,102 @@
             "next": "Siguiente",
             "generate": "Generar Plan"
         },
-        "progress": "{{percent}}% completado"
+        "progress": "{{percent}}% completado",
+        "toast": {
+            "success_title": "¡Plan Generado!",
+            "success_description": "Tu programa de entrenamiento personalizado está listo.",
+            "error_title": "Error",
+            "error_description": "No se pudo generar el plan. Por favor, inténtalo de nuevo."
+        },
+        "goal": {
+            "personalize_badge": "Personaliza Tu Plan",
+            "lets_know_you": "Vamos a conocerte",
+            "name_on_plan": "Tu nombre aparecerá en tu plan de entrenamiento personalizado",
+            "first_name": "Nombre",
+            "last_name": "Apellido",
+            "first_name_placeholder": "Juan",
+            "last_name_placeholder": "García",
+            "what_achieve": "¿Qué quieres lograr?",
+            "goal_placeholder": "ej., Ganar músculo para mi boda, Correr 5K, Sentirme más seguro...",
+            "goal_note_hint": "Esta nota se incluirá en tu plan PDF como recordatorio motivacional",
+            "im_trainer": "Soy Entrenador/Coach",
+            "trainer_enable_notes": "Habilitar para agregar notas privadas para tu cliente",
+            "coach_notes": "Notas del Coach",
+            "private": "(Privado)",
+            "coach_notes_placeholder": "Agregar notas privadas sobre los objetivos, limitaciones, preferencias del cliente...",
+            "coach_notes_hint": "Estas notas son solo para tu referencia y no aparecerán en el plan del cliente",
+            "training_goal_title": "¿Cuál es tu objetivo de entrenamiento?",
+            "training_goal_subtitle": "Esto nos ayuda a optimizar la estructura de tu programa",
+            "reset_recommended": "Restablecer a Recomendado",
+            "experience_title": "Tu nivel de experiencia",
+            "experience_subtitle": "Esto determina el volumen y complejidad del entrenamiento"
+        },
+        "schedule": {
+            "title": "Configura tu horario",
+            "subtitle": "¿Con qué frecuencia y por cuánto tiempo puedes entrenar?",
+            "days_title": "Días de Entrenamiento por Semana",
+            "days_subtitle": "Selecciona entre 2-6 días",
+            "recommended_split": "División recomendada:",
+            "duration_title": "Duración de la Sesión",
+            "duration_subtitle": "¿Cuánto dura cada entrenamiento?",
+            "weekly_time": "Tiempo de entrenamiento semanal:",
+            "hours": "horas",
+            "split_full_body": "Cuerpo Completo",
+            "split_upper_lower": "Superior/Inferior",
+            "split_ppl": "Empuje/Tirón/Piernas"
+        },
+        "review": {
+            "title": "Revisa Tu Plan",
+            "subtitle": "Confirma tus selecciones antes de generar",
+            "personalized_plan": "Plan de Entrenamiento Personalizado",
+            "goal_experience": "Objetivo y Experiencia",
+            "training_goal": "Objetivo de Entrenamiento",
+            "experience": "Experiencia",
+            "schedule": "Horario",
+            "days_per_week": "Días por Semana",
+            "session_length": "Duración de Sesión",
+            "split_type": "Tipo de División",
+            "equipment": "Equipamiento",
+            "target_muscles": "Músculos Objetivo",
+            "no_muscles": "No hay músculos seleccionados",
+            "constraints_applied": "Restricciones Aplicadas",
+            "constraints_hint": "Los ejercicios se filtrarán para evitar estas limitaciones",
+            "ready_message": "¡Listo para generar tu plan de entrenamiento personalizado!",
+            "days": "días",
+            "min": "min"
+        },
+        "anatomy": {
+            "title": "Selecciona los Músculos Objetivo",
+            "subtitle": "Haz clic en el diagrama o la lista para elegir los grupos musculares que deseas entrenar."
+        },
+        "equipment": {
+            "title": "¿Qué equipamiento tienes?",
+            "subtitle": "Selecciona todo el equipamiento disponible",
+            "quick_presets": "Preajustes rápidos:",
+            "clear_all": "Borrar Todo",
+            "count_one": "{{count}} opción seleccionada",
+            "count_other": "{{count}} opciones seleccionadas",
+            "selected": "(seleccionado)"
+        },
+        "constraints": {
+            "title": "¿Alguna limitación o restricción?",
+            "subtitle": "Selecciona las que apliquen - opcional",
+            "clear_selections": "Borrar selecciones",
+            "no_constraints": "Sin restricciones - todos los ejercicios disponibles",
+            "count_one": "Se aplicará {{count}} filtro",
+            "count_other": "Se aplicarán {{count}} filtros",
+            "selected": "(seleccionado)"
+        },
+        "stepper": {
+            "short_goal": "Objetivo",
+            "short_equip": "Equipo",
+            "short_muscles": "Músculos",
+            "short_limits": "Límites",
+            "short_days": "Días",
+            "short_review": "Revisar",
+            "completed": "(completado)",
+            "current": "(actual)"
+        }
     },
     "plan": {
         "title": "Tu Plan de Entrenamiento",
@@ -81,6 +176,42 @@
             "rest": "{{seconds}}s descanso",
             "tips": "Consejos",
             "swap": "Cambiar"
+        },
+        "tools": "Herramientas 1RM",
+        "export_dialog": {
+            "title": "Exportar Plan de Entrenamiento",
+            "description": "Tu plan de entrenamiento se exportará como archivo PDF. Ten cuidado al compartir este documento.",
+            "privacy_mode": "Modo Privacidad",
+            "privacy_mode_hint": "Omitir datos personales de la exportación",
+            "privacy_notice": "Aviso de Privacidad:",
+            "privacy_notice_text": "Los PDFs pueden contener metadatos. Evita compartir planes de entrenamiento con información de salud personal públicamente.",
+            "download": "Descargar PDF"
+        },
+        "summary": {
+            "days_week": "días/semana",
+            "min_sessions": "min sesiones",
+            "split_type": "tipo de división"
+        },
+        "motivational_quote": "La constancia supera la perfección. ¡Tú puedes!",
+        "workout_day": {
+            "start_workout": "Iniciar Entrenamiento",
+            "safety_note": "Nota de Seguridad",
+            "not_suitable_for": "Puede no ser apto para:",
+            "tips": "Consejos",
+            "swap": "Cambiar",
+            "coaching_cues": "Indicaciones",
+            "why_exercise": "¿Por qué este ejercicio?",
+            "sets": "{{count}} series",
+            "reps": "{{count}} reps",
+            "rir": "RIR {{count}}",
+            "rest": "{{count}}s descanso"
+        },
+        "exercise_swap": {
+            "title": "Cambiar Ejercicio",
+            "description": "Reemplazar <1>{{name}}</1> con una alternativa",
+            "search_placeholder": "Buscar ejercicios...",
+            "no_matches": "No se encontraron ejercicios",
+            "swap_button": "Cambiar Ejercicio"
         }
     },
     "goals": {
@@ -99,5 +230,190 @@
         "save": "Guardar",
         "cancel": "Cancelar",
         "confirm": "Confirmar"
+    },
+    "header": {
+        "logo_tooltip": "Tu camino hacia el máximo potencial fitness",
+        "theme": {
+            "light": "Claro",
+            "dark": "Oscuro",
+            "system": "Sistema",
+            "label": "Tema"
+        },
+        "trainer_mode": "Modo Entrenador"
+    },
+    "footer": {
+        "copyright": "© {{year}} FitWizard. Hecho con",
+        "for_fitness": "para entusiastas del fitness.",
+        "terms": "Términos de Servicio",
+        "privacy": "Política de Privacidad",
+        "medical": "Aviso Médico"
+    },
+    "exercises": {
+        "filters": {
+            "title": "Filtros",
+            "category_placeholder": "Categoría",
+            "all_categories": "Todas las Categorías",
+            "strength": "Fuerza",
+            "cardio": "Cardio",
+            "flexibility": "Flexibilidad",
+            "plyometric": "Pliométrico",
+            "core": "Core",
+            "muscle_placeholder": "Músculo",
+            "all_muscles": "Todos los Músculos",
+            "chest": "Pecho",
+            "back": "Espalda",
+            "legs": "Piernas",
+            "arms": "Brazos",
+            "shoulders": "Hombros",
+            "difficulty_placeholder": "Dificultad",
+            "all_levels": "Todos los Niveles",
+            "beginner": "Principiante",
+            "intermediate": "Intermedio",
+            "advanced": "Avanzado",
+            "equipment_placeholder": "Equipamiento",
+            "all_equipment": "Todo el Equipo",
+            "bodyweight": "Peso Corporal",
+            "dumbbells": "Mancuernas",
+            "barbell": "Barra",
+            "cables": "Cables",
+            "machines": "Máquinas",
+            "kettlebells": "Pesas Rusas",
+            "bands": "Bandas",
+            "custom_multiple": "Personalizado/Múltiple",
+            "clear": "Limpiar",
+            "quick_sets": "Sets Rápidos:"
+        },
+        "detail": {
+            "instructions": "Instrucciones",
+            "related": "Relacionado",
+            "history": "Historial",
+            "muscles_targeted": "Músculos Trabajados",
+            "equipment": "Equipamiento",
+            "metabolic_impact": "Impacto Metabólico",
+            "high_burn": "Alto potencial de quema calórica",
+            "pro_cues": "Consejos Pro",
+            "execution": "Ejecución",
+            "variations": "Variaciones",
+            "no_history": "Sin historial aún",
+            "history_prompt": "Completa este ejercicio para rastrear tu progreso."
+        }
+    },
+    "commands": {
+        "placeholder": "Escribe un comando o busca...",
+        "no_results": "Sin resultados.",
+        "nav_heading": "Navegación",
+        "home": "Inicio",
+        "create_plan": "Crear Nuevo Plan",
+        "circles": "Círculos",
+        "exercise_library": "Biblioteca de Ejercicios",
+        "achievements": "Logros",
+        "plan_heading": "Plan Actual",
+        "view_plan": "Ver Plan Actual",
+        "start_workout": "Iniciar Entrenamiento de Hoy",
+        "circles_heading": "Tus Círculos",
+        "members": "{{count}} miembros",
+        "account_heading": "Cuenta",
+        "profile": "Perfil",
+        "settings": "Ajustes",
+        "sign_out": "Cerrar Sesión",
+        "sign_in": "Iniciar Sesión",
+        "help_heading": "Ayuda y Recursos",
+        "documentation": "Documentación",
+        "browse_exercises": "Explorar Ejercicios"
+    },
+    "circles": {
+        "no_activity": "Sin actividad reciente",
+        "create_title": "Crear Círculo",
+        "start_own": "Crea tu propio círculo de responsabilidad",
+        "join_title": "Unirse a Círculo",
+        "name_placeholder": "Círculo de Corredores",
+        "desc_placeholder": "Entrenamos temprano, somos constantes y nos apoyamos mutuamente.",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar"
+    },
+    "consent": {
+        "medical": "Entiendo que esto <strong>no es consejo médico</strong>.",
+        "consult": "Consultaré a un médico antes de iniciar nuevos ejercicios.",
+        "local": "Mis datos se almacenan <strong>localmente</strong> en este dispositivo."
+    },
+    "workout": {
+        "loading": "Cargando entrenamiento...",
+        "preparing": "Preparando tu sesión",
+        "cancel": "Cancelar",
+        "cancel_dialog_title": "¿Cancelar Entrenamiento?",
+        "cancel_dialog_desc": "Tu progreso se perderá. ¿Estás seguro de que deseas cancelar este entrenamiento?",
+        "cancel_dialog_continue": "Continuar Entrenamiento",
+        "cancel_dialog_confirm": "Cancelar Entrenamiento",
+        "skipped": "Ejercicio saltado",
+        "finish": "Terminar",
+        "complete_title": "¡Entrenamiento Completado!",
+        "complete_subtitle": "Has terminado todos los ejercicios. ¡Gran trabajo!",
+        "exercise_count": "Ejercicio {{current}} de {{total}}",
+        "status_complete": "Completado",
+        "status_skipped": "Saltado",
+        "previous": "Anterior",
+        "next": "Siguiente",
+        "skip_exercise": "Saltar Ejercicio",
+        "notes": "Notas del Entrenamiento",
+        "notes_placeholder": "¿Cómo te sentiste? ¿Algún problema?"
+    },
+    "notfound": {
+        "title": "Parece que te has desviado del camino",
+        "description": "Esta página no existe, o quizás está descansando entre series. ¡Volvamos a tu plan de entrenamiento!",
+        "go_back": "Volver",
+        "back_home": "Volver al Inicio",
+        "popular": "Destinos populares:",
+        "create_plan": "Crear Plan",
+        "exercise_library": "Biblioteca de Ejercicios"
+    },
+    "error": {
+        "title": "Algo salió mal",
+        "description": "Encontramos un error inesperado. Por favor, intenta refrescar la página.",
+        "details": "Detalles del error",
+        "refresh": "Refrescar Página",
+        "try_again": "Intentar de Nuevo"
+    },
+    "onboarding": {
+        "skip": "Saltar por ahora",
+        "back": "Atrás",
+        "lets_go": "¡Vamos!",
+        "complete": "Completar",
+        "next": "Siguiente"
+    },
+    "legal": {
+        "page_title": "Legal y Cumplimiento",
+        "tabs": {
+            "medical": "Aviso Médico",
+            "privacy": "Política de Privacidad",
+            "terms": "Términos de Servicio"
+        },
+        "medical": {
+            "title": "Aviso Médico",
+            "warning_title": "Advertencia Importante",
+            "warning_text": "FitWizard NO es un médico. Los entrenamientos generados son solo para fines educativos.",
+            "content_p1": "El contenido proporcionado por FitWizard, incluyendo planes de entrenamiento, sugerencias nutricionales y respuestas del chat, es solo para fines educativos y de entretenimiento y no pretende ser consejo médico.",
+            "content_p2": "Siempre consulta a un profesional de la salud calificado antes de comenzar cualquier nuevo programa de ejercicios, especialmente si tienes condiciones de salud preexistentes, lesiones o preocupaciones.",
+            "content_p3": "Al usar FitWizard, reconoces que eres responsable de tus propias decisiones de salud y que los creadores de esta aplicación no son responsables de ninguna lesión o problema de salud que pueda resultar de seguir los planes de entrenamiento generados."
+        },
+        "privacy": {
+            "title": "Política de Privacidad Local-First",
+            "data_stays_title": "Tus Datos Se Quedan Aquí",
+            "data_stays_text": "No almacenamos tus datos de salud en nuestros servidores. Viven 100% en tu dispositivo.",
+            "what_we_store": "Lo Que Almacenamos Localmente",
+            "what_we_store_text": "Tus preferencias de entrenamiento, planes generados y cualquier nota personal que agregues se almacenan en el almacenamiento local de tu navegador. Estos datos nunca salen de tu dispositivo a menos que los exportes explícitamente.",
+            "analytics": "Analíticas",
+            "analytics_text": "Usamos analíticas anónimas y respetuosas con la privacidad para entender cómo se usa la aplicación. Nunca se transmiten datos personales de salud."
+        },
+        "terms": {
+            "title": "Términos de Servicio",
+            "acceptance": "Aceptación de Términos",
+            "acceptance_text": "Al acceder y usar FitWizard, aceptas estar sujeto a estos Términos de Servicio y todas las leyes y regulaciones aplicables.",
+            "use": "Licencia de Uso",
+            "use_text": "Se otorga permiso para usar FitWizard para fines personales y no comerciales. Esta licencia no incluye el derecho de modificar, distribuir o crear obras derivadas."
+        },
+        "footer": {
+            "copyright": "FitWizard. Todos los derechos reservados.",
+            "educational": "Los planes generados son solo para fines educativos."
+        }
     }
 }

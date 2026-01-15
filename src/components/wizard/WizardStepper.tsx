@@ -14,19 +14,19 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
   const { t } = useTranslation();
 
   const steps = useMemo(() => [
-    { id: 'goal', label: t('wizard.steps.goal'), shortLabel: 'Goal' },
-    { id: 'equipment', label: t('wizard.steps.equipment'), shortLabel: 'Equip' },
-    { id: 'anatomy', label: t('wizard.steps.anatomy'), shortLabel: 'Muscles' },
-    { id: 'constraints', label: t('wizard.steps.constraints'), shortLabel: 'Limits' },
-    { id: 'schedule', label: t('wizard.steps.schedule'), shortLabel: 'Days' },
-    { id: 'review', label: t('wizard.steps.review'), shortLabel: 'Review' },
+    { id: 'goal', label: t('wizard.steps.goal'), shortLabel: t('wizard.stepper.short_goal') },
+    { id: 'equipment', label: t('wizard.steps.equipment'), shortLabel: t('wizard.stepper.short_equip') },
+    { id: 'anatomy', label: t('wizard.steps.anatomy'), shortLabel: t('wizard.stepper.short_muscles') },
+    { id: 'constraints', label: t('wizard.steps.constraints'), shortLabel: t('wizard.stepper.short_limits') },
+    { id: 'schedule', label: t('wizard.steps.schedule'), shortLabel: t('wizard.stepper.short_days') },
+    { id: 'review', label: t('wizard.steps.review'), shortLabel: t('wizard.stepper.short_review') },
   ] as const, [t]);
 
   return (
     <nav
       className="w-full py-4 px-2"
       role="navigation"
-      aria-label="Wizard progress"
+      aria-label={t('wizard.stepper.progress_label')}
     >
       <ol className="flex items-center justify-between gap-2">
         {steps.map((step, index) => {
@@ -47,7 +47,7 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
                   isClickable && "cursor-pointer",
                   !isClickable && "cursor-default"
                 )}
-                aria-label={`${step.label}${isComplete ? ' (completed)' : isCurrent ? ' (current)' : ''}`}
+                aria-label={`${step.label}${isComplete ? ` (${t('wizard.stepper.completed')})` : isCurrent ? ` (${t('wizard.stepper.current')})` : ''}`}
                 aria-current={isCurrent ? 'step' : undefined}
               >
                 {/* Step indicator */}

@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useOnboardingStore, OnboardingStep } from '@/stores/onboardingStore';
 import { WelcomeStep } from './steps/WelcomeStep';
 import { RoleStep } from './steps/RoleStep';
@@ -38,6 +39,7 @@ const STEP_COMPONENTS: Record<OnboardingStep, React.ComponentType> = {
 };
 
 export function OnboardingFlow() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { fire: fireConfetti } = useConfetti();
     const {
@@ -120,7 +122,7 @@ export function OnboardingFlow() {
                     onClick={handleSkip}
                     className="text-muted-foreground hover:text-foreground"
                 >
-                    Skip for now
+                    {t('onboarding.skip')}
                 </Button>
             </motion.div>
 
@@ -166,7 +168,7 @@ export function OnboardingFlow() {
                                 className="gap-2"
                             >
                                 <ChevronLeft className="h-4 w-4" />
-                                Back
+                                {t('onboarding.back')}
                             </Button>
                         </motion.div>
                     )}
@@ -186,17 +188,17 @@ export function OnboardingFlow() {
                 >
                     {currentStep === 'goals' && userData.role === 'user' ? (
                         <>
-                            Let's Go!
+                            {t('onboarding.lets_go')}
                             <Sparkles className="h-4 w-4" />
                         </>
                     ) : currentStep === 'import' ? (
                         <>
-                            Complete
+                            {t('onboarding.complete')}
                             <Sparkles className="h-4 w-4" />
                         </>
                     ) : (
                         <>
-                            Next
+                            {t('onboarding.next')}
                             <ChevronRight className="h-4 w-4" />
                         </>
                     )}

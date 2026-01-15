@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { EXERCISE_DATABASE } from '@/data/exercises';
 import type { Exercise, ExercisePrescription } from '@/types/fitness';
 import { Search, ArrowRight, Check } from 'lucide-react';
+import { useTranslation, Trans } from 'react-i18next';
 
 interface ExerciseSwapModalProps {
     isOpen: boolean;
@@ -23,6 +24,7 @@ export function ExerciseSwapModal({
     onSwap,
     allowedEquipment,
 }: ExerciseSwapModalProps) {
+    const { t } = useTranslation();
     const [search, setSearch] = useState('');
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
@@ -75,10 +77,14 @@ export function ExerciseSwapModal({
             <DialogContent className="max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        Swap Exercise
+                        {t('plan.exercise_swap.title')}
                     </DialogTitle>
                     <DialogDescription>
-                        Replace <span className="font-medium text-foreground">{currentExercise.exercise.name}</span> with an alternative exercise
+                        <Trans
+                            i18nKey="plan.exercise_swap.description"
+                            values={{ name: currentExercise.exercise.name }}
+                            components={{ 1: <span className="font-medium text-foreground" /> }}
+                        />
                     </DialogDescription>
                 </DialogHeader>
 
@@ -87,7 +93,7 @@ export function ExerciseSwapModal({
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input
-                            placeholder="Search exercises..."
+                            placeholder={t('plan.exercise_swap.search_placeholder')}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="pl-9"
@@ -99,7 +105,7 @@ export function ExerciseSwapModal({
                         <div className="space-y-2">
                             {filteredExercises.length === 0 ? (
                                 <p className="text-center text-muted-foreground py-8">
-                                    No matching exercises found
+                                    {t('plan.exercise_swap.no_matches')}
                                 </p>
                             ) : (
                                 filteredExercises.map((ex) => (
@@ -107,8 +113,8 @@ export function ExerciseSwapModal({
                                         key={ex.id}
                                         onClick={() => setSelectedExercise(ex)}
                                         className={`w-full p-3 rounded-lg border text-left transition-all ${selectedExercise?.id === ex.id
-                                                ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                                                : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                                            ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                                            : 'border-border hover:border-primary/50 hover:bg-muted/30'
                                             }`}
                                     >
                                         <div className="flex items-center justify-between">
@@ -138,7 +144,7 @@ export function ExerciseSwapModal({
 
                 <DialogFooter>
                     <Button variant="outline" onClick={onClose}>
-                        Cancel
+                        {t('common.cancel')}
                     </Button>
                     <Button
                         variant="gradient"
@@ -147,7 +153,7 @@ export function ExerciseSwapModal({
                         className="gap-2"
                     >
                         <ArrowRight className="h-4 w-4" />
-                        Swap Exercise
+                        {t('plan.exercise_swap.swap_button')}
                     </Button>
                 </DialogFooter>
             </DialogContent>

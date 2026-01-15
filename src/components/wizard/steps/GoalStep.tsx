@@ -15,8 +15,10 @@ import { useWizardForm, goalStepSchema } from '@/hooks/useWizardForm';
 import { Controller } from 'react-hook-form';
 import { GOALS, EXPERIENCE_LEVELS } from '@/lib/wizardConstants';
 import { PhaseRecommendationCard } from '@/components/wizard/PhaseRecommendationCard';
+import { useTranslation } from 'react-i18next';
 
 export function GoalStep() {
+  const { t } = useTranslation();
   const { selections, setGoal, setExperienceLevel, setFirstName, setLastName, setPersonalGoalNote, setIsTrainer, setCoachNotes } = useWizardStore();
 
   // React Hook Form integration with Zustand sync
@@ -65,17 +67,17 @@ export function GoalStep() {
         <div className="text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary mb-4">
             <User className="h-4 w-4" />
-            <span className="text-sm font-medium">Personalize Your Plan</span>
+            <span className="text-sm font-medium">{t('wizard.goal.personalize_badge')}</span>
           </div>
-          <h2 className="text-2xl font-bold text-foreground">Let's get to know you</h2>
-          <p className="text-muted-foreground mt-1">Your name will appear on your personalized workout plan</p>
+          <h2 className="text-2xl font-bold text-foreground">{t('wizard.goal.lets_know_you')}</h2>
+          <p className="text-muted-foreground mt-1">{t('wizard.goal.name_on_plan')}</p>
         </div>
 
         <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-secondary/5">
           <CardContent className="p-6 space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-sm font-medium">First Name</Label>
+                <Label htmlFor="firstName" className="text-sm font-medium">{t('wizard.goal.first_name')}</Label>
                 <Controller
                   name="firstName"
                   control={control}
@@ -88,7 +90,7 @@ export function GoalStep() {
                         <Input
                           {...field}
                           id="firstName"
-                          placeholder="John"
+                          placeholder={t('wizard.goal.first_name_placeholder')}
                           aria-invalid={!!errors.firstName}
                           aria-describedby={errors.firstName ? "firstName-error" : undefined}
                           className={cn(
@@ -103,7 +105,7 @@ export function GoalStep() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-sm font-medium">Last Name</Label>
+                <Label htmlFor="lastName" className="text-sm font-medium">{t('wizard.goal.last_name')}</Label>
                 <Controller
                   name="lastName"
                   control={control}
@@ -116,7 +118,7 @@ export function GoalStep() {
                         <Input
                           {...field}
                           id="lastName"
-                          placeholder="Doe"
+                          placeholder={t('wizard.goal.last_name_placeholder')}
                           aria-invalid={!!errors.lastName}
                           aria-describedby={errors.lastName ? "lastName-error" : undefined}
                           className={cn(
@@ -136,7 +138,7 @@ export function GoalStep() {
               <div className="flex items-center justify-between">
                 <Label htmlFor="personalGoal" className="text-sm font-medium flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-secondary" />
-                  What do you want to achieve?
+                  {t('wizard.goal.what_achieve')}
                 </Label>
                 <AnimatePresence mode="popLayout">
                   <motion.span
@@ -165,14 +167,14 @@ export function GoalStep() {
                   <Textarea
                     {...field}
                     id="personalGoal"
-                    placeholder="e.g., Build muscle for my wedding, Run a 5K, Feel more confident..."
+                    placeholder={t('wizard.goal.goal_placeholder')}
                     maxLength={60}
                     className="resize-none bg-background/50 min-h-[80px]"
                   />
                 )}
               />
               <p className="text-xs text-muted-foreground">
-                This note will be included on your PDF plan as a motivational reminder
+                {t('wizard.goal.goal_note_hint')}
               </p>
             </div>
 
@@ -195,10 +197,10 @@ export function GoalStep() {
                         >
                           🏋️
                         </motion.span>
-                        I'm a Trainer/Coach
+                        {t('wizard.goal.im_trainer')}
                       </Label>
                       <p className="text-xs text-muted-foreground">
-                        Enable to add private notes for your client
+                        {t('wizard.goal.trainer_enable_notes')}
                       </p>
                     </div>
                     <motion.button
@@ -237,8 +239,8 @@ export function GoalStep() {
                   >
                     <div className="pt-4 space-y-2">
                       <Label htmlFor="coachNotes" className="text-sm font-medium flex items-center gap-2">
-                        📝 Coach Notes
-                        <span className="text-xs text-muted-foreground font-normal">(Private)</span>
+                        📝 {t('wizard.goal.coach_notes')}
+                        <span className="text-xs text-muted-foreground font-normal">{t('wizard.goal.private')}</span>
                       </Label>
                       <Controller
                         name="coachNotes"
@@ -247,14 +249,14 @@ export function GoalStep() {
                           <Textarea
                             {...field}
                             id="coachNotes"
-                            placeholder="Add private notes about this client's goals, limitations, preferences..."
+                            placeholder={t('wizard.goal.coach_notes_placeholder')}
                             maxLength={500}
                             className="resize-none bg-background/50 min-h-[100px]"
                           />
                         )}
                       />
                       <p className="text-xs text-muted-foreground">
-                        These notes are for your reference only and won't appear on the client's plan
+                        {t('wizard.goal.coach_notes_hint')}
                       </p>
                     </div>
                   </motion.div>
@@ -269,8 +271,8 @@ export function GoalStep() {
       <div className="space-y-4">
         {/* ... existing header code ... */}
         <div className="text-center relative">
-          <h2 className="text-2xl font-bold text-foreground">What's your training goal?</h2>
-          <p className="text-muted-foreground mt-1">This helps us optimize your program structure</p>
+          <h2 className="text-2xl font-bold text-foreground">{t('wizard.goal.training_goal_title')}</h2>
+          <p className="text-muted-foreground mt-1">{t('wizard.goal.training_goal_subtitle')}</p>
 
           {(watchedGoal !== 'hypertrophy' || watchedExperienceLevel !== 'intermediate') && (
             <Button
@@ -282,7 +284,7 @@ export function GoalStep() {
               }}
               className="absolute right-0 top-0 h-8 px-2 text-muted-foreground hover:text-primary hidden sm:flex"
             >
-              Reset to Recommended
+              {t('wizard.goal.reset_recommended')}
             </Button>
           )}
         </div>
@@ -299,7 +301,7 @@ export function GoalStep() {
               }}
               className="touch-target border-primary/50 text-primary hover:bg-primary/10"
             >
-              Reset to Recommended
+              {t('wizard.goal.reset_recommended')}
             </Button>
           </div>
         )}
@@ -374,8 +376,8 @@ export function GoalStep() {
       {/* Experience Level */}
       <div className="space-y-4">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-foreground">Your experience level</h2>
-          <p className="text-muted-foreground mt-1">This determines training volume and complexity</p>
+          <h2 className="text-xl font-semibold text-foreground">{t('wizard.goal.experience_title')}</h2>
+          <p className="text-muted-foreground mt-1">{t('wizard.goal.experience_subtitle')}</p>
         </div>
 
         <Controller

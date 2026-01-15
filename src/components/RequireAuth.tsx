@@ -1,6 +1,7 @@
 import { useAuthStore } from "@/stores/authStore";
 import { Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface RequireAuthProps {
     children: React.ReactNode;
@@ -12,6 +13,8 @@ export function RequireAuth({ children, strict = false }: RequireAuthProps) {
     const { session, isLoading, isConfigured, setShowAuthModal } = useAuthStore();
     const location = useLocation();
 
+    const { t } = useTranslation();
+
     useEffect(() => {
         // Only show auth modal if strict mode and user isn't logged in
         if (!isLoading && !session && isConfigured && strict) {
@@ -20,7 +23,7 @@ export function RequireAuth({ children, strict = false }: RequireAuthProps) {
     }, [isLoading, session, isConfigured, strict, setShowAuthModal]);
 
     if (isLoading) {
-        return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+        return <div className="min-h-screen flex items-center justify-center">{t('common.loading')}</div>;
     }
 
     // Allow access if Supabase isn't configured (local dev/demo mode)

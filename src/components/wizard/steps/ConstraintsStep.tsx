@@ -7,8 +7,10 @@ import type { Constraint } from '@/types/fitness';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWizardForm, constraintsStepSchema } from '@/hooks/useWizardForm';
+import { useTranslation } from 'react-i18next';
 
 export function ConstraintsStep() {
+  const { t } = useTranslation();
   const { selections, setConstraints } = useWizardStore();
 
   // React Hook Form integration with Zustand sync
@@ -38,8 +40,8 @@ export function ConstraintsStep() {
   return (
     <div className="space-y-6 animate-slide-in">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground">Any limitations or constraints?</h2>
-        <p className="text-muted-foreground mt-1">Select any that apply - this is optional</p>
+        <h2 className="text-2xl font-bold text-foreground">{t('wizard.constraints.title')}</h2>
+        <p className="text-muted-foreground mt-1">{t('wizard.constraints.subtitle')}</p>
       </div>
 
       <AnimatePresence>
@@ -59,7 +61,7 @@ export function ConstraintsStep() {
               }}
               className="touch-target border-destructive/50 text-destructive hover:bg-destructive/10"
             >
-              Clear selections
+              {t('wizard.constraints.clear_selections')}
             </Button>
           </motion.div>
         )}
@@ -80,7 +82,7 @@ export function ConstraintsStep() {
               onClick={() => toggleConstraint(item.id)}
               className="touch-target focus:outline-none focus-visible:ring-2 focus-visible:ring-warning focus-visible:ring-offset-2 rounded-lg text-left"
               aria-pressed={isSelected}
-              aria-label={`${item.name}${isSelected ? ' (selected)' : ''}`}
+              aria-label={`${item.name}${isSelected ? t('wizard.constraints.selected') : ''}`}
               whileTap={{ scale: 0.98 }}
             >
               <Card
@@ -138,8 +140,8 @@ export function ConstraintsStep() {
               transition={{ duration: 0.15 }}
             >
               {watchedConstraints.length === 0
-                ? "No constraints selected - all exercises will be available"
-                : `${watchedConstraints.length} constraint${watchedConstraints.length !== 1 ? 's' : ''} will be applied to filter exercises`
+                ? t('wizard.constraints.no_constraints')
+                : t('wizard.constraints.count', { count: watchedConstraints.length })
               }
             </motion.span>
           </AnimatePresence>

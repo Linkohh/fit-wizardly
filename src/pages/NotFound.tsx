@@ -1,8 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Home, ArrowLeft, Dumbbell } from 'lucide-react';
 
 export default function NotFound() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -24,10 +26,10 @@ export default function NotFound() {
         {/* Error message */}
         <div className="space-y-3 mb-10">
           <h2 className="text-3xl font-bold">
-            Looks Like You've Gone Off-Track
+            {t('notfound.title')}
           </h2>
           <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
-            This page doesn't exist, or maybe it's resting between sets. Let's get you back on your workout plan!
+            {t('notfound.description')}
           </p>
         </div>
 
@@ -40,12 +42,12 @@ export default function NotFound() {
             className="gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Go Back
+            {t('notfound.go_back')}
           </Button>
           <Link to="/">
             <Button variant="gradient" size="lg" className="gap-2 shadow-glow-pink w-full sm:w-auto">
               <Home className="h-4 w-4" />
-              Back to Home
+              {t('notfound.back_home')}
             </Button>
           </Link>
         </div>
@@ -53,22 +55,22 @@ export default function NotFound() {
         {/* Helpful links */}
         <div className="mt-12 pt-8 border-t border-border/50">
           <p className="text-sm text-muted-foreground mb-4">
-            Popular destinations:
+            {t('notfound.popular')}
           </p>
           <div className="flex flex-wrap gap-2 justify-center">
             <Link to="/wizard">
               <Button variant="ghost" size="sm">
-                Create Plan
+                {t('notfound.create_plan')}
               </Button>
             </Link>
             <Link to="/circles">
               <Button variant="ghost" size="sm">
-                Circles
+                {t('nav.circles')}
               </Button>
             </Link>
             <Link to="/exercises">
               <Button variant="ghost" size="sm">
-                Exercise Library
+                {t('notfound.exercise_library')}
               </Button>
             </Link>
           </div>

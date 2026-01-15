@@ -8,8 +8,10 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useWizardForm, equipmentStepSchema } from '@/hooks/useWizardForm';
 import { FormError } from '@/components/ui/form-error';
+import { useTranslation } from 'react-i18next';
 
 export function EquipmentStep() {
+  const { t } = useTranslation();
   const { selections, setEquipment } = useWizardStore();
 
   // React Hook Form integration with Zustand sync
@@ -44,13 +46,13 @@ export function EquipmentStep() {
   return (
     <div className="space-y-6 animate-slide-in">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground">What equipment do you have?</h2>
-        <p className="text-muted-foreground mt-1">Select all available equipment for exercise options</p>
+        <h2 className="text-2xl font-bold text-foreground">{t('wizard.equipment.title')}</h2>
+        <p className="text-muted-foreground mt-1">{t('wizard.equipment.subtitle')}</p>
       </div>
 
       {/* Presets and Clear */}
       <div className="space-y-2">
-        <p className="text-sm font-medium text-muted-foreground">Quick presets:</p>
+        <p className="text-sm font-medium text-muted-foreground">{t('wizard.equipment.quick_presets')}</p>
         <div className="flex flex-wrap gap-2">
           <AnimatePresence>
             {watchedEquipment.length > 0 && (
@@ -68,7 +70,7 @@ export function EquipmentStep() {
                   }}
                   className="touch-target border-destructive/50 text-destructive hover:bg-destructive/10"
                 >
-                  Clear All
+                  {t('wizard.equipment.clear_all')}
                 </Button>
               </motion.div>
             )}
@@ -108,7 +110,7 @@ export function EquipmentStep() {
               onClick={() => toggleEquipment(item.id)}
               className="touch-target focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg"
               aria-pressed={isSelected}
-              aria-label={`${item.name}${isSelected ? ' (selected)' : ''}`}
+              aria-label={`${item.name}${isSelected ? t('wizard.equipment.selected') : ''}`}
               whileTap={{ scale: 0.97 }}
             >
               <Card
@@ -163,10 +165,9 @@ export function EquipmentStep() {
             exit={{ y: 8, opacity: 0 }}
             transition={{ duration: 0.15 }}
           >
-            {watchedEquipment.length}
+            {t('wizard.equipment.count', { count: watchedEquipment.length })}
           </motion.span>
         </AnimatePresence>
-        {' '}equipment option{watchedEquipment.length !== 1 ? 's' : ''} selected
       </p>
     </div>
   );

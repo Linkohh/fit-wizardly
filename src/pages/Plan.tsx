@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePlanStore } from '@/stores/planStore';
@@ -18,6 +19,7 @@ import { PlanSkeleton } from '@/components/plan/PlanSkeleton';
 import { WorkoutDayCard } from '@/components/plan/WorkoutDayCard';
 
 export default function PlanPage() {
+  const { t } = useTranslation();
   const { currentPlan, swapExercise } = usePlanStore();
   const [redactSensitive, setRedactSensitive] = useState(true);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
@@ -58,9 +60,9 @@ export default function PlanPage() {
         <div className="mx-auto w-20 h-20 rounded-full gradient-primary flex items-center justify-center mb-6 shadow-glow animate-float">
           <Wand2 className="h-10 w-10 text-primary-foreground" />
         </div>
-        <h1 className="text-2xl font-bold mb-4">No Plan Generated Yet</h1>
-        <p className="text-muted-foreground mb-8">Create your personalized workout plan using the wizard.</p>
-        <Link to="/wizard"><Button variant="gradient" size="lg">Start Wizard</Button></Link>
+        <h1 className="text-2xl font-bold mb-4">{t('plan.noplan.title')}</h1>
+        <p className="text-muted-foreground mb-8">{t('plan.noplan.description')}</p>
+        <Link to="/wizard"><Button variant="gradient" size="lg">{t('plan.noplan.cta')}</Button></Link>
       </main>
     );
   }
@@ -72,7 +74,7 @@ export default function PlanPage() {
   return (
     <main className="container max-w-5xl mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
-        <h1 className="text-2xl font-bold gradient-text self-start sm:self-center">Your Workout Plan</h1>
+        <h1 className="text-2xl font-bold gradient-text self-start sm:self-center">{t('plan.title')}</h1>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           {/* 1RM Calculator Modal */}
@@ -80,7 +82,7 @@ export default function PlanPage() {
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2 w-full sm:w-auto border-dashed border-primary/40 hover:border-primary">
                 <Calculator className="h-4 w-4 text-primary" />
-                1RM Tools
+                {t('plan.tools')}
               </Button>
             </DialogTrigger>
             <DialogContent className="p-0 bg-transparent border-none shadow-none max-w-md">
@@ -92,7 +94,7 @@ export default function PlanPage() {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="gradient" className="gap-2 w-full sm:w-auto">
-                <Download className="h-4 w-4" /> Export PDF
+                <Download className="h-4 w-4" /> {t('plan.export')}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -101,18 +103,18 @@ export default function PlanPage() {
                   <div className="p-2 rounded-full bg-warning/10">
                     <ShieldAlert className="h-5 w-5 text-warning" />
                   </div>
-                  <AlertDialogTitle>Export Workout Plan</AlertDialogTitle>
+                  <AlertDialogTitle>{t('plan.export_dialog.title')}</AlertDialogTitle>
                 </div>
                 <AlertDialogDescription className="space-y-4 pt-2">
                   <p>
-                    Your workout plan will be exported as a PDF file. Be mindful when sharing this document.
+                    {t('plan.export_dialog.description')}
                   </p>
 
                   <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
                     <div className="flex flex-col gap-0.5">
-                      <Label htmlFor="redact-toggle" className="font-medium">Privacy Mode</Label>
+                      <Label htmlFor="redact-toggle" className="font-medium">{t('plan.export_dialog.privacy_mode')}</Label>
                       <span className="text-xs text-muted-foreground">
-                        Omit personal details from export
+                        {t('plan.export_dialog.privacy_mode_hint')}
                       </span>
                     </div>
                     <Switch
@@ -123,15 +125,15 @@ export default function PlanPage() {
                   </div>
 
                   <p className="text-xs text-muted-foreground border-l-2 border-warning/50 pl-3">
-                    <strong>Privacy Notice:</strong> PDFs may contain metadata. Avoid sharing workout plans containing personal health information publicly.
+                    <strong>{t('plan.export_dialog.privacy_notice')}</strong> {t('plan.export_dialog.privacy_notice_text')}
                   </p>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleExportPDF} className="gradient-primary">
                   <Download className="h-4 w-4 mr-2" />
-                  Download PDF
+                  {t('plan.export_dialog.download')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -142,8 +144,8 @@ export default function PlanPage() {
       {/* Summary */}
       <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
         <CardContent className="p-6 flex flex-wrap gap-6">
-          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Calendar className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.selections.daysPerWeek} days/week</span></div>
-          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Clock className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.selections.sessionDuration} min sessions</span></div>
+          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Calendar className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.selections.daysPerWeek} {t('plan.summary.days_week')}</span></div>
+          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Clock className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.selections.sessionDuration} {t('plan.summary.min_sessions')}</span></div>
           <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Target className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.splitType.replace('_', ' ')}</span></div>
         </CardContent>
       </Card>
@@ -165,7 +167,7 @@ export default function PlanPage() {
 
       {/* Motivational Footer */}
       <div className="mt-8 text-center py-6">
-        <p className="text-lg font-medium gradient-text">"Consistency beats perfection. You've got this!"</p>
+        <p className="text-lg font-medium gradient-text">"{t('plan.motivational_quote')}"</p>
       </div>
 
       {/* Exercise Swap Modal */}

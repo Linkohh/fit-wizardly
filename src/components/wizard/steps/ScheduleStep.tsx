@@ -5,11 +5,13 @@ import { useWizardStore } from '@/stores/wizardStore';
 import { useWizardForm, scheduleStepSchema } from '@/hooks/useWizardForm';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const DAYS_OPTIONS = [2, 3, 4, 5, 6] as const;
 const DURATION_OPTIONS = [30, 45, 60, 75, 90] as const;
 
 export function ScheduleStep() {
+  const { t } = useTranslation();
   const { selections, setDaysPerWeek, setSessionDuration } = useWizardStore();
 
   // React Hook Form integration
@@ -30,9 +32,9 @@ export function ScheduleStep() {
 
   // Determine split type based on days
   const getSplitType = (days: number): string => {
-    if (days <= 3) return 'Full Body';
-    if (days === 4) return 'Upper/Lower';
-    return 'Push/Pull/Legs';
+    if (days <= 3) return t('wizard.schedule.split_full_body');
+    if (days === 4) return t('wizard.schedule.split_upper_lower');
+    return t('wizard.schedule.split_ppl');
   };
 
   const handleDaysChange = (days: number) => {
@@ -59,8 +61,8 @@ export function ScheduleStep() {
       transition={{ duration: 0.4, ease: 'easeOut' }}
     >
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground">Set your schedule</h2>
-        <p className="text-muted-foreground mt-1">How often and how long can you train?</p>
+        <h2 className="text-2xl font-bold text-foreground">{t('wizard.schedule.title')}</h2>
+        <p className="text-muted-foreground mt-1">{t('wizard.schedule.subtitle')}</p>
       </div>
 
       <AnimatePresence>
@@ -78,7 +80,7 @@ export function ScheduleStep() {
               onClick={handleReset}
               className="touch-target border-primary/50 text-primary hover:bg-primary/10"
             >
-              Reset to Recommended
+              {t('wizard.goal.reset_recommended')}
             </Button>
           </motion.div>
         )}
@@ -96,8 +98,8 @@ export function ScheduleStep() {
               <Calendar className="h-5 w-5 text-primary" />
             </motion.div>
             <div>
-              <h3 className="font-semibold text-foreground">Training Days per Week</h3>
-              <p className="text-sm text-muted-foreground">Select between 2-6 days</p>
+              <h3 className="font-semibold text-foreground">{t('wizard.schedule.days_title')}</h3>
+              <p className="text-sm text-muted-foreground">{t('wizard.schedule.days_subtitle')}</p>
             </div>
           </div>
 
@@ -153,7 +155,7 @@ export function ScheduleStep() {
             transition={{ duration: 0.2 }}
           >
             <p className="text-sm text-muted-foreground">
-              Recommended split: <span className="font-semibold text-primary">{getSplitType(watchedDays)}</span>
+              {t('wizard.schedule.recommended_split')} <span className="font-semibold text-primary">{getSplitType(watchedDays)}</span>
             </p>
           </motion.div>
         </CardContent>
@@ -171,8 +173,8 @@ export function ScheduleStep() {
               <Clock className="h-5 w-5 text-accent" />
             </motion.div>
             <div>
-              <h3 className="font-semibold text-foreground">Session Duration</h3>
-              <p className="text-sm text-muted-foreground">How long is each workout?</p>
+              <h3 className="font-semibold text-foreground">{t('wizard.schedule.duration_title')}</h3>
+              <p className="text-sm text-muted-foreground">{t('wizard.schedule.duration_subtitle')}</p>
             </div>
           </div>
 
@@ -227,14 +229,14 @@ export function ScheduleStep() {
             transition={{ duration: 0.2 }}
           >
             <p className="text-sm text-muted-foreground">
-              Weekly training time: <motion.span
+              {t('wizard.schedule.weekly_time')} <motion.span
                 className="font-semibold text-accent"
                 key={watchedDays * watchedDuration}
                 initial={{ scale: 1.2 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
-                {(watchedDays * watchedDuration / 60).toFixed(1)} hours
+                {(watchedDays * watchedDuration / 60).toFixed(1)} {t('wizard.schedule.hours')}
               </motion.span>
             </p>
           </motion.div>
