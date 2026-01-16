@@ -621,6 +621,8 @@
     var(--glow-color-primary) 50%,
     transparent 100%
   );
+  background-size: 140% 100%;
+  background-position: center;
   filter: blur(80px);
   animation:
     horizon-color-smooth 48s linear infinite,
@@ -635,6 +637,8 @@
     var(--glow-color-secondary) 50%,
     transparent 100%
   );
+  background-size: 140% 100%;
+  background-position: center;
   filter: blur(100px);
   animation:
     horizon-color-smooth-secondary 48s linear infinite,
@@ -649,8 +653,25 @@
     var(--glow-color-tertiary) 50%,
     transparent 100%
   );
+  background-size: 140% 100%;
+  background-position: center;
   filter: blur(60px);
   animation:
     horizon-color-smooth-tertiary 36s linear infinite,
     horizon-breathe 12s ease-in-out infinite 6s;
+}
+
+.horizon-glow-wrapper {
+  mask-image: radial-gradient(
+    ellipse 80% 60% at 50% 50%,
+    black 0%,
+    black 60%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 80% 60% at 50% 50%,
+    black 0%,
+    black 60%,
+    transparent 100%
+  );
 }
