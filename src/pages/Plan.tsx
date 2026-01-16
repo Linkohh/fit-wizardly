@@ -73,7 +73,7 @@ export default function PlanPage() {
   }
 
   const handleExportPDF = () => {
-    exportPlanToPDF(currentPlan);
+    exportPlanToPDF(currentPlan, redactSensitive);
   };
 
   return (
