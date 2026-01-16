@@ -657,34 +657,16 @@
 
 /* Constrain horizon glow to center for a cleaner premium blend */
 .horizon-glow-mask {
-  mask-image:
-    radial-gradient(
-      ellipse 80% 55% at 50% 50%,
-      rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) 55%,
-      rgba(0, 0, 0, 0) 100%
-    ),
-    linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(0, 0, 0, 1) 18%,
-      rgba(0, 0, 0, 1) 82%,
-      rgba(0, 0, 0, 0) 100%
-    );
-  -webkit-mask-image:
-    radial-gradient(
-      ellipse 80% 55% at 50% 50%,
-      rgba(0, 0, 0, 1) 0%,
-      rgba(0, 0, 0, 1) 55%,
-      rgba(0, 0, 0, 0) 100%
-    ),
-    linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0) 0%,
-      rgba(0, 0, 0, 1) 18%,
-      rgba(0, 0, 0, 1) 82%,
-      rgba(0, 0, 0, 0) 100%
-    );
-  mask-composite: intersect;
-  -webkit-mask-composite: source-in;
+  mask-image: radial-gradient(
+    ellipse 85% 60% at 50% 50%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 85% 60% at 50% 50%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }
