@@ -40,7 +40,7 @@ export default function WizardPage() {
   const currentStepIndex = useWizardStore((state) => state.currentStepIndex);
   const setStep = useWizardStore((state) => state.setStep);
   const nextStep = useWizardStore((state) => state.nextStep);
-  const nextStep = useWizardStore((state) => state.nextStep);
+
   const prevStep = useWizardStore((state) => state.prevStep);
   const resetWizard = useWizardStore((state) => state.resetWizard);
   const getStepValidation = useWizardStore((state) => state.getStepValidation);
@@ -226,57 +226,64 @@ export default function WizardPage() {
             {t('app.tagline')}
           </p>
         </div>
-      </div>
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block mr-2">
-          {t('wizard.progress', { percent: Math.round(((currentStepIndex + 1) / 6) * 100) })}
-        </span>
 
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:text-destructive h-8 px-2 lg:px-3"
-              aria-label={t('common.start_over') || "Start Over"}
-            >
-              <RotateCcw className="h-4 w-4 lg:mr-2" />
-              <span className="hidden lg:inline">{t('common.start_over') || "Start Over"}</span>
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t('common.are_you_sure') || "Are you sure?"}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t('wizard.reset_confirm') || "This will clear all your current selections and start from the beginning."}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t('common.cancel') || "Cancel"}</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  resetWizard();
-                  toast({
-                    description: t('wizard.toast.reset') || "Wizard reset to start.",
-                  });
-                }}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block mr-2">
+            {t('wizard.progress', { percent: Math.round(((currentStepIndex + 1) / 6) * 100) })}
+          </span>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive h-8 px-2 lg:px-3"
+                aria-label="Start Over"
               >
-                {t('common.confirm_reset') || "Start Over"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                <RotateCcw className="h-4 w-4 lg:mr-2" />
+                <span className="hidden lg:inline">Start Over</span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="glass-premium border-white/10">
+              <AlertDialogHeader>
+                <div className="flex items-center gap-2">
+                  <RotateCcw className="h-5 w-5 text-destructive" />
+                  <AlertDialogTitle className="text-xl">Start Over?</AlertDialogTitle>
+                </div>
+                <AlertDialogDescription className="text-base text-muted-foreground pt-2">
+                  This will clear all your current selections (Goal, Equipment, Muscles) and return you to the beginning.
+                  <br /><br />
+                  Are you sure you want to continue?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="mt-4">
+                <AlertDialogCancel className="hover:bg-white/10">Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    resetWizard();
+                    toast({
+                      title: "Wizard Reset",
+                      description: "Ready for a fresh start! 🚀",
+                    });
+                  }}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-6 font-semibold"
+                >
+                  Yes, Start Over
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
-    </div>
 
-      {/* Pass translated step labels implicitly via WizardStepper if we update it, or let it handle itself. For now just standard usage. */ }
-  <WizardStepper currentStep={currentStep} currentStepIndex={currentStepIndex} onStepClick={setStep} />
 
-  {/* Animated Progress Bar */ }
-  <WizardProgressBar currentStepIndex={currentStepIndex} className="mt-4" />
+      {/* Pass translated step labels implicitly via WizardStepper if we update it, or let it handle itself. For now just standard usage. */}
+      <WizardStepper currentStep={currentStep} currentStepIndex={currentStepIndex} onStepClick={setStep} />
 
-  {/* Step Content with simple fade transition */ }
+      {/* Animated Progress Bar */}
+      <WizardProgressBar currentStepIndex={currentStepIndex} className="mt-4" />
+
+      {/* Step Content with simple fade transition */}
       <div
         ref={stepContainerRef}
         tabIndex={-1}
