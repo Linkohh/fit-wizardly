@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePlanStore } from '@/stores/planStore';
 import { type ExercisePrescription } from '@/types/fitness';
-import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, Calculator, Pencil } from 'lucide-react';
+import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, Calculator } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { OneRepMaxCalculator } from '@/components/tools/OneRepMaxCalculator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -17,10 +17,14 @@ import { useWisdomStore } from '@/stores/wisdomStore';
 import { exportPlanToPDF } from '@/lib/pdfExport';
 import { PlanSkeleton } from '@/components/plan/PlanSkeleton';
 import { WorkoutDayCard } from '@/components/plan/WorkoutDayCard';
+import { useWizardStore } from '@/stores/wizardStore';
+import { PlanNavigation } from '@/components/plan/PlanNavigation';
 
 export default function PlanPage() {
   const { t } = useTranslation();
-  const { currentPlan, swapExercise } = usePlanStore();
+  const navigate = useNavigate();
+  const { currentPlan, swapExercise, clearCurrentPlan } = usePlanStore();
+  const { resetWizard } = useWizardStore();
   const [redactSensitive, setRedactSensitive] = useState(true);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; exerciseIndex: number; exercise: ExercisePrescription } | null>(null);
@@ -43,6 +47,12 @@ export default function PlanPage() {
       });
     }
   }, [currentPlan, setContext]);
+
+  const handleStartOver = () => {
+    clearCurrentPlan();
+    resetWizard();
+    navigate('/wizard');
+  };
 
   // Show skeleton while loading
   if (isLoadingPlan && currentPlan) {
@@ -67,19 +77,11 @@ export default function PlanPage() {
   };
 
   return (
-    <main className="container max-w-5xl mx-auto px-4 py-8">
+    <main className="container max-w-5xl mx-auto px-4 py-8 pb-32">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
         <h1 className="text-2xl font-bold gradient-text self-start sm:self-center">{t('plan.title')}</h1>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-          {/* Edit Plan Button */}
-          <Link to="/wizard">
-            <Button variant="outline" className="gap-2 w-full sm:w-auto border-dashed border-primary/40 hover:border-primary">
-              <Pencil className="h-4 w-4 text-primary" />
-              Edit Selections
-            </Button>
-          </Link>
-
           {/* 1RM Calculator Modal */}
           <Dialog>
             <DialogTrigger asChild>
@@ -191,6 +193,9 @@ export default function PlanPage() {
 
       {/* Wisdom AI Floating Bubble */}
       <WisdomBubble />
+
+      {/* Navigation Footer */}
+      <PlanNavigation onStartOver={handleStartOver} />
     </main>
   );
 }
