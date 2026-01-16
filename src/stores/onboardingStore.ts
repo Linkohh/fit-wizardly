@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useTrainerStore } from '@/stores/trainerStore';
 
 // Onboarding steps in order
 export type OnboardingStep = 'welcome' | 'role' | 'goals' | 'import' | 'complete';
@@ -107,9 +108,12 @@ export const useOnboardingStore = create<OnboardingState>()(
                 userData: { ...state.userData, avatarEmoji }
             })),
 
-            setRole: (role) => set((state) => ({
-                userData: { ...state.userData, role }
-            })),
+            setRole: (role) => {
+                set((state) => ({
+                    userData: { ...state.userData, role }
+                }));
+                useTrainerStore.getState().setTrainerMode(role === 'coach');
+            },
 
             toggleGoal: (goal) => set((state) => {
                 const current = state.userData.interestedGoals;
