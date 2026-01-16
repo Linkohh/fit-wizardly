@@ -197,7 +197,7 @@ export function WelcomeHero() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.25),transparent)] pointer-events-none" />
 
             {/* Premium Layered Horizon Glow - 3D Depth with Aurora Color Cycling */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 horizon-glow-mask">
+            <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 horizon-glow-wrapper">
                 {/* Primary Layer - Main horizon with full 48s color cycle */}
                 <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[30%] w-[120%] animate-horizon-glow" />
 
