@@ -29,6 +29,25 @@ export function ScheduleStep() {
 
   const watchedDays = watch('daysPerWeek');
   const watchedDuration = watch('sessionDuration');
+  const weeklyHours = (watchedDays * watchedDuration) / 60;
+  const scheduleGoal = selections.goal === 'general' ? 'maintenance' : selections.goal;
+  const volumeRanges = {
+    maintenance: { min: 2, max: 4 },
+    strength: { min: 3, max: 5 },
+    hypertrophy: { min: 4, max: 6 },
+  } as const;
+  const volumeRange = volumeRanges[scheduleGoal];
+  const volumeHintKey =
+    weeklyHours < volumeRange.min
+      ? 'low'
+      : weeklyHours > volumeRange.max
+        ? 'high'
+        : 'target';
+  const volumeHint = t(`wizard.schedule.volume_hint.${scheduleGoal}.${volumeHintKey}`, {
+    hours: weeklyHours.toFixed(1),
+    min: volumeRange.min,
+    max: volumeRange.max,
+  });
 
   // Determine split type based on days
   const getSplitType = (days: number): string => {
@@ -231,9 +250,10 @@ export function ScheduleStep() {
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               >
-                {(watchedDays * watchedDuration / 60).toFixed(1)} {t('wizard.schedule.hours')}
+                {weeklyHours.toFixed(1)} {t('wizard.schedule.hours')}
               </motion.span>
             </p>
+            <p className="text-xs text-muted-foreground mt-2">{volumeHint}</p>
           </motion.div>
         </CardContent>
       </Card>

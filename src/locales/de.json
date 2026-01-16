@@ -88,6 +88,37 @@
                     "description": "Umfangreiche Trainingserfahrung (3+ Jahre)"
                 }
             }
+        },
+        "schedule": {
+            "title": "Trainingsplan festlegen",
+            "subtitle": "Wie oft und wie lange kannst du trainieren?",
+            "days_title": "Trainingstage pro Woche",
+            "days_subtitle": "Wähle zwischen 2-6 Tagen",
+            "recommended_split": "Empfohlene Aufteilung:",
+            "duration_title": "Sitzungsdauer",
+            "duration_subtitle": "Wie lange dauert jedes Training?",
+            "weekly_time": "Wöchentliche Trainingszeit:",
+            "hours": "Stunden",
+            "split_full_body": "Ganzkörper",
+            "split_upper_lower": "Ober-/Unterkörper",
+            "split_ppl": "Push/Pull/Legs",
+            "volume_hint": {
+                "maintenance": {
+                    "low": "Du liegst unter einem erhaltungsfreundlichen Umfang. Ziel sind etwa {{min}}-{{max}} Stunden/Woche.",
+                    "target": "Du liegst im Erhaltungsbereich mit etwa {{hours}} Stunden/Woche.",
+                    "high": "Du liegst über dem Erhaltungsumfang. {{min}}-{{max}} Stunden/Woche reichen meist aus."
+                },
+                "strength": {
+                    "low": "Für Kraft sind etwa {{min}}-{{max}} Stunden/Woche sinnvoll.",
+                    "target": "Guter Kraft-Umfang mit etwa {{hours}} Stunden/Woche.",
+                    "high": "Das ist ein hoher Kraft-Umfang; priorisiere Erholung, wenn du über {{max}} Stunden bleibst."
+                },
+                "hypertrophy": {
+                    "low": "Für Muskelaufbau peile etwa {{min}}-{{max}} Stunden/Woche an.",
+                    "target": "Du liegst im Muskelaufbau-Bereich mit etwa {{hours}} Stunden/Woche.",
+                    "high": "Das ist ein hoher Muskelaufbau-Umfang; achte auf ausreichende Erholung bei {{hours}} Stunden/Woche."
+                }
+            }
         }
     },
     "onboarding": {

@@ -90,6 +90,37 @@
                     "description": "Histórico significativo de treino (3+ anos)"
                 }
             }
+        },
+        "schedule": {
+            "title": "Defina seu cronograma",
+            "subtitle": "Com que frequência e por quanto tempo você pode treinar?",
+            "days_title": "Dias de treino por semana",
+            "days_subtitle": "Selecione entre 2-6 dias",
+            "recommended_split": "Divisão recomendada:",
+            "duration_title": "Duração da sessão",
+            "duration_subtitle": "Quanto tempo dura cada treino?",
+            "weekly_time": "Tempo de treino semanal:",
+            "hours": "horas",
+            "split_full_body": "Corpo Inteiro",
+            "split_upper_lower": "Superior/Inferior",
+            "split_ppl": "Empurrar/Puxar/Pernas",
+            "volume_hint": {
+                "maintenance": {
+                    "low": "Você está abaixo de um volume adequado para manutenção. Mire em cerca de {{min}}-{{max}} horas/semana.",
+                    "target": "Você está em uma faixa de manutenção com cerca de {{hours}} horas/semana.",
+                    "high": "Você está acima do volume de manutenção. {{min}}-{{max}} horas/semana geralmente bastam."
+                },
+                "strength": {
+                    "low": "Para força, considere cerca de {{min}}-{{max}} horas/semana.",
+                    "target": "Bom volume de força com cerca de {{hours}} horas/semana.",
+                    "high": "É um volume alto de força; priorize a recuperação se ficar acima de {{max}} horas."
+                },
+                "hypertrophy": {
+                    "low": "Para hipertrofia, mire em cerca de {{min}}-{{max}} horas/semana.",
+                    "target": "Você está em uma faixa de hipertrofia com cerca de {{hours}} horas/semana.",
+                    "high": "É um volume alto de hipertrofia; garanta recuperação para sustentar {{hours}} horas/semana."
+                }
+            }
         }
     },
     "onboarding": {

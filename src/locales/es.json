@@ -135,7 +135,24 @@
             "hours": "horas",
             "split_full_body": "Cuerpo Completo",
             "split_upper_lower": "Superior/Inferior",
-            "split_ppl": "Empuje/Tirón/Piernas"
+            "split_ppl": "Empuje/Tirón/Piernas",
+            "volume_hint": {
+                "maintenance": {
+                    "low": "Estás por debajo de un volumen adecuado para mantenimiento. Apunta a unas {{min}}-{{max}} horas/semana.",
+                    "target": "Estás en un rango de mantenimiento de aproximadamente {{hours}} horas/semana.",
+                    "high": "Estás por encima de un volumen de mantenimiento. {{min}}-{{max}} horas/semana suele ser suficiente."
+                },
+                "strength": {
+                    "low": "Para fuerza, considera unas {{min}}-{{max}} horas/semana.",
+                    "target": "Buen volumen de fuerza con aproximadamente {{hours}} horas/semana.",
+                    "high": "Es un volumen alto de fuerza; prioriza la recuperación si superas {{max}} horas."
+                },
+                "hypertrophy": {
+                    "low": "Para ganar músculo, apunta a unas {{min}}-{{max}} horas/semana.",
+                    "target": "Estás en un rango de hipertrofia con aproximadamente {{hours}} horas/semana.",
+                    "high": "Es un volumen alto de hipertrofia; asegúrate de que la recuperación acompañe {{hours}} horas/semana."
+                }
+            }
         },
         "review": {
             "title": "Revisa Tu Plan",
