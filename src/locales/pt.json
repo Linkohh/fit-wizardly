@@ -41,6 +41,13 @@
             "rest": "{{seconds}}s descanso",
             "tips": "Dicas",
             "swap": "Trocar"
+        },
+        "progression": {
+            "title": "Progressão de RIR",
+            "subtitle": "Metas semanais para orientar intensidade e recuperação.",
+            "week_label": "Semana {{week}}",
+            "rir_label": "RIR {{count}}",
+            "deload": "Deload"
         }
     },
     "goals": {

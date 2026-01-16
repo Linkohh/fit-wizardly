@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePlanStore } from '@/stores/planStore';
 import { type ExercisePrescription } from '@/types/fitness';
@@ -154,6 +155,36 @@ export default function PlanPage() {
           <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Target className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.splitType.replace('_', ' ')}</span></div>
         </CardContent>
       </Card>
+
+      {currentPlan.rirProgression.length > 0 && (
+        <Card className="mb-6">
+          <CardContent className="p-6 space-y-4">
+            <div className="space-y-1">
+              <h2 className="text-base font-semibold">{t('plan.progression.title')}</h2>
+              <p className="text-sm text-muted-foreground">{t('plan.progression.subtitle')}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {currentPlan.rirProgression.map((progression) => (
+                <Badge
+                  key={progression.week}
+                  variant={progression.isDeload ? 'secondary' : 'default'}
+                  className="flex items-center gap-1.5"
+                >
+                  <span>{t('plan.progression.week_label', { week: progression.week })}</span>
+                  <span>•</span>
+                  <span>{t('plan.progression.rir_label', { count: progression.targetRIR })}</span>
+                  {progression.isDeload && (
+                    <>
+                      <span>•</span>
+                      <span className="text-[10px] uppercase tracking-wide">{t('plan.progression.deload')}</span>
+                    </>
+                  )}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Workout Days */}
       <div className="space-y-6">

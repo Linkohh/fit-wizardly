@@ -24,6 +24,13 @@
             "rest": "{{seconds}}s Pause",
             "tips": "Tipps",
             "swap": "Wechseln"
+        },
+        "progression": {
+            "title": "RIR-Progression",
+            "subtitle": "Wöchentliche Ziele für Intensität und Erholung.",
+            "week_label": "Woche {{week}}",
+            "rir_label": "RIR {{count}}",
+            "deload": "Entlastung"
         }
     },
     "goals": {
