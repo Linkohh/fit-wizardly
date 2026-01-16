@@ -24,20 +24,17 @@ export type Equipment =
   | 'landmine'
   | 'plate'
   | 'sandbag'
-  | 'other'
   | 'mini_band'
-  | 'dumbbell'
-  | 'cable'
-  | 'machine'
-  | 'pull-up_bar'
-  | 'none'
   | 'stability_ball'
   | 'rings'
   | 'ab_wheel'
   | 'wall'
   | 'tib_bar'
   | 'floor'
-  | 'mat';
+  | 'mat'
+  | 'pole'
+  | 'stone'
+  | 'other';
 
 export type MuscleGroup =
   | 'chest'
@@ -398,6 +395,26 @@ export const EQUIPMENT_OPTIONS: { id: Equipment; name: string; icon: string }[] 
   { id: 'bench', name: 'Bench', icon: '🛋️' },
   { id: 'squat_rack', name: 'Squat Rack', icon: '🏗️' },
   { id: 'bodyweight', name: 'Bodyweight Only', icon: '🧘' },
+  { id: 'band', name: 'Resistance Band', icon: '🪢' },
+  { id: 'mini_band', name: 'Mini Band', icon: '🎽' },
+  { id: 'stability_ball', name: 'Stability Ball', icon: '⚽' },
+  { id: 'medicine_ball', name: 'Medicine Ball', icon: '🏐' },
+  { id: 'ab_wheel', name: 'Ab Wheel', icon: '🛞' },
+  { id: 'ez_bar', name: 'EZ Bar', icon: '🧱' },
+  { id: 'plate', name: 'Weight Plate', icon: '🪨' },
+  { id: 'landmine', name: 'Landmine', icon: '⚓' },
+  { id: 'sandbag', name: 'Sandbag', icon: '🧳' },
+  { id: 'sled', name: 'Sled', icon: '🛷' },
+  { id: 'box', name: 'Plyo Box', icon: '📦' },
+  { id: 'rope', name: 'Jump Rope', icon: '➰' },
+  { id: 'rings', name: 'Gymnastic Rings', icon: '⭕' },
+  { id: 'foam_roller', name: 'Foam Roller', icon: '🧽' },
+  { id: 'wall', name: 'Wall', icon: '🧱' },
+  { id: 'floor', name: 'Floor Space', icon: '🧹' },
+  { id: 'mat', name: 'Exercise Mat', icon: '🧘‍♀️' },
+  { id: 'pole', name: 'Pole', icon: '📍' },
+  { id: 'stone', name: 'Atlas Stone', icon: '🪨' },
+  { id: 'tib_bar', name: 'Tib Bar', icon: '🦵' },
 ];
 
 export const CONSTRAINT_OPTIONS: { id: Constraint; name: string; description: string }[] = [

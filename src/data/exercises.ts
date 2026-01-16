@@ -1725,7 +1725,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "abs"
     ],
     "equipment": [
-      "fictional_medicine_ball",
+      "medicine_ball",
       "bodyweight"
     ],
     "patterns": [
@@ -1786,7 +1786,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -1808,7 +1808,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -1829,7 +1829,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -1850,7 +1850,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "cable",
+      "cables",
       "band"
     ],
     "patterns": [],
@@ -1873,7 +1873,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -1915,7 +1915,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "secondaryMuscles": [],
     "equipment": [
       "barbell",
-      "kettlebell"
+      "kettlebells"
     ],
     "patterns": [],
     "contraindications": [],
@@ -1935,7 +1935,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -1956,7 +1956,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -1997,7 +1997,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "pull-up_bar"
+      "pullup_bar"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2019,7 +2019,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "secondaryMuscles": [],
     "equipment": [
       "barbell",
-      "rack"
+      "squat_rack"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2039,7 +2039,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "cable"
+      "cables"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2082,7 +2082,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "cable"
+      "cables"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2144,7 +2144,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "machine"
+      "machines"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2164,7 +2164,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "pull-up_bar"
+      "pullup_bar"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2205,7 +2205,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2247,7 +2247,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2267,7 +2267,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "dumbbell",
+      "dumbbells",
       "band"
     ],
     "patterns": [],
@@ -2375,7 +2375,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "bar",
+      "pullup_bar",
       "rings"
     ],
     "patterns": [],
@@ -2438,7 +2438,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2459,7 +2459,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2602,7 +2602,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "cable"
+      "cables"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2664,7 +2664,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "cable"
+      "cables"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2765,7 +2765,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "bar"
+      "pullup_bar"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2806,7 +2806,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "kettlebell"
+      "kettlebells"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2827,7 +2827,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2848,7 +2848,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2890,7 +2890,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "erg"
+      "machines"
     ],
     "patterns": [],
     "contraindications": [],
@@ -2910,7 +2910,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     ],
     "secondaryMuscles": [],
     "equipment": [
-      "none"
+      "bodyweight"
     ],
     "patterns": [],
     "contraindications": [],
