@@ -38,6 +38,40 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                 </div>
             </CardHeader>
             <CardContent>
+                {(day.warmUp?.length || day.coolDown?.length) && (
+                    <div className="mb-4 space-y-3">
+                        {day.warmUp?.length ? (
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    {t('plan.workout_day.warm_up', 'Warm-up')}
+                                </p>
+                                <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
+                                    {day.warmUp.map((item, index) => (
+                                        <li key={index} className="flex items-start gap-2">
+                                            <span className="text-primary">•</span>
+                                            <span>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ) : null}
+                        {day.coolDown?.length ? (
+                            <div>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                    {t('plan.workout_day.cool_down', 'Cool-down')}
+                                </p>
+                                <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
+                                    {day.coolDown.map((item, index) => (
+                                        <li key={index} className="flex items-start gap-2">
+                                            <span className="text-primary">•</span>
+                                            <span>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ) : null}
+                    </div>
+                )}
                 <div className="divide-y">
                     {day.exercises.map((ex, i) => {
                         const hasCues = ex.exercise.cues && ex.exercise.cues.length > 0;

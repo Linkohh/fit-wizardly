@@ -188,6 +188,8 @@ export interface WorkoutDay {
   focusTags: string[];
   exercises: ExercisePrescription[];
   estimatedDuration: number;
+  warmUp?: string[];
+  coolDown?: string[];
 }
 
 export interface WeeklyVolume {
@@ -211,6 +213,8 @@ export interface Plan {
   weeklyVolume: WeeklyVolume[];
   rirProgression: RIRProgression[];
   notes: string[];
+  warmUp?: string[];
+  coolDown?: string[];
 }
 
 export interface Client {

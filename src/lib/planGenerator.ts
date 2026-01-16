@@ -368,6 +368,69 @@ function getMusclesForDay(
   return [...new Set(relevantMuscles)].filter(m => targetMuscles.includes(m));
 }
 
+type WarmCoolSuggestion = {
+  text: string;
+  tags: string[];
+  muscles?: MuscleGroup[];
+  avoidConstraints?: Constraint[];
+};
+
+const WARM_UP_SUGGESTIONS: WarmCoolSuggestion[] = [
+  { text: '2-3 min easy cardio (walk, bike, or row)', tags: ['general'] },
+  { text: 'Diaphragmatic breathing + core brace (5 breaths)', tags: ['general'] },
+  { text: 'Arm circles x10/side', tags: ['upper', 'push', 'pull'], avoidConstraints: ['shoulder_injury', 'no_overhead'] },
+  { text: 'Scapular retractions x10', tags: ['upper', 'pull'] },
+  { text: 'Wall slides x8', tags: ['upper', 'push'], avoidConstraints: ['shoulder_injury', 'no_overhead'] },
+  { text: 'Cat-cow x6', tags: ['general', 'core'], avoidConstraints: ['back_injury'] },
+  { text: 'Glute bridges x10', tags: ['lower', 'hinge'], avoidConstraints: ['back_injury'] },
+  { text: 'Bodyweight squats x8', tags: ['lower', 'quads'], avoidConstraints: ['knee_injury'] },
+  { text: 'Leg swings x8/side', tags: ['lower'], avoidConstraints: ['knee_injury'] },
+  { text: 'Dead bug x6/side', tags: ['core'], avoidConstraints: ['back_injury'] },
+];
+
+const COOL_DOWN_SUGGESTIONS: WarmCoolSuggestion[] = [
+  { text: 'Slow nasal breathing 1-2 min', tags: ['general'] },
+  { text: 'Doorway chest stretch 20-30s/side', tags: ['upper', 'push'], avoidConstraints: ['shoulder_injury', 'no_overhead'] },
+  { text: 'Lat stretch on wall 20-30s/side', tags: ['upper', 'pull'], avoidConstraints: ['shoulder_injury', 'no_overhead'] },
+  { text: 'Child’s pose breathing 20-30s', tags: ['general', 'core'], avoidConstraints: ['back_injury', 'no_overhead'] },
+  { text: 'Figure-4 glute stretch 20-30s/side', tags: ['lower'], avoidConstraints: ['knee_injury'] },
+  { text: 'Hamstring stretch 20-30s/side', tags: ['lower'], avoidConstraints: ['back_injury'] },
+  { text: 'Calf stretch 20-30s/side', tags: ['lower'] },
+];
+
+function buildWarmCoolSuggestions(
+  suggestions: WarmCoolSuggestion[],
+  focusTags: string[],
+  dayMuscles: MuscleGroup[],
+  constraints: Constraint[],
+  maxItems: number
+): string[] {
+  const constraintSet = new Set(constraints);
+  const tagSet = new Set(focusTags);
+  if (dayMuscles.some(m => ['abs', 'obliques', 'lower_back'].includes(m))) {
+    tagSet.add('core');
+  }
+
+  const matches = suggestions.filter(suggestion => {
+    if (suggestion.avoidConstraints?.some(constraint => constraintSet.has(constraint))) {
+      return false;
+    }
+    if (suggestion.tags.includes('general')) {
+      return true;
+    }
+    if (suggestion.tags.some(tag => tagSet.has(tag))) {
+      return true;
+    }
+    if (suggestion.muscles?.some(muscle => dayMuscles.includes(muscle))) {
+      return true;
+    }
+    return false;
+  });
+
+  const unique = Array.from(new Set(matches.map(item => item.text)));
+  return unique.slice(0, maxItems);
+}
+
 // Main generator function - DETERMINISTIC
 export function generatePlan(selections: WizardSelections): Plan {
   const {
@@ -456,6 +519,20 @@ export function generatePlan(selections: WizardSelections): Plan {
 
     // Estimate duration (3 min per set average)
     const estimatedDuration = Math.round(totalSets * 3);
+    const warmUp = buildWarmCoolSuggestions(
+      WARM_UP_SUGGESTIONS,
+      dayStructure.focusTags,
+      dayMuscles,
+      constraints,
+      3
+    );
+    const coolDown = buildWarmCoolSuggestions(
+      COOL_DOWN_SUGGESTIONS,
+      dayStructure.focusTags,
+      dayMuscles,
+      constraints,
+      3
+    );
 
     return {
       dayIndex,
@@ -463,6 +540,8 @@ export function generatePlan(selections: WizardSelections): Plan {
       focusTags: dayStructure.focusTags,
       exercises,
       estimatedDuration,
+      warmUp: warmUp.length ? warmUp : undefined,
+      coolDown: coolDown.length ? coolDown : undefined,
     };
   });
 

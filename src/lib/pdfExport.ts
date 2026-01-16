@@ -75,6 +75,26 @@ export const exportPlanToPDF = (currentPlan: Plan, redactSensitive: boolean) => 
         doc.text(day.name, 16, y);
         y += 10;
 
+        const addSectionList = (title: string, items?: string[]) => {
+            if (!items || items.length === 0) return;
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.text(title, 14, y);
+            y += 6;
+            doc.setFont('helvetica', 'normal');
+            items.forEach(item => {
+                const lines = doc.splitTextToSize(`• ${item}`, 170);
+                doc.text(lines, 16, y);
+                y += lines.length * 5;
+            });
+            y += 4;
+            if (y > 260) { doc.addPage(); y = 20; }
+        };
+
+        addSectionList('Warm-up', day.warmUp);
+        addSectionList('Cool-down', day.coolDown);
+
         doc.setTextColor(0, 0, 0);
         const rows = day.exercises.map(e => [e.exercise.name, `${e.sets}`, e.reps, `${e.rir}`, `${e.restSeconds}s`]);
         autoTable(doc, {
