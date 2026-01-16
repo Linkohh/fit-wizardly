@@ -59,15 +59,15 @@ describe('Recommendation Engine', () => {
         const profile = {
             goal: 'strength' as const,
             experienceLevel: 'intermediate' as const,
-            equipment: ['dumbbell'] as Equipment[],
+            equipment: ['dumbbells'] as Equipment[],
             targetMuscles: ['chest', 'biceps'] as MuscleGroup[]
         };
 
         const recs = getRecommendedExercises(profile);
         expect(recs.length).toBeGreaterThan(0);
         recs.forEach(ex => {
-            // Should match dumbbell OR bodyweight
-            const hasEq = ex.equipment.includes('dumbbell') || ex.equipment.includes('bodyweight') || ex.equipment.includes('none' as any);
+            // Should match dumbbells OR bodyweight
+            const hasEq = ex.equipment.includes('dumbbells') || ex.equipment.includes('bodyweight');
             // Note: Logic allows bodyweight fallback, so this test is checking for that behavior
             expect(hasEq).toBe(true);
         });
