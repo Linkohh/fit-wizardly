@@ -220,6 +220,13 @@
             "min_sessions": "min sessions",
             "split_type": "split type"
         },
+        "progression": {
+            "title": "RIR progression",
+            "subtitle": "Weekly targets to guide intensity and recovery.",
+            "week_label": "Week {{week}}",
+            "rir_label": "RIR {{count}}",
+            "deload": "Deload"
+        },
         "motivational_quote": "Consistency beats perfection. You've got this!",
         "workout_day": {
             "start_workout": "Start Workout",

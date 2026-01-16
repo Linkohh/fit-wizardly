@@ -220,6 +220,13 @@
             "min_sessions": "min sesiones",
             "split_type": "tipo de división"
         },
+        "progression": {
+            "title": "Progresión de RIR",
+            "subtitle": "Objetivos semanales para guiar intensidad y recuperación.",
+            "week_label": "Semana {{week}}",
+            "rir_label": "RIR {{count}}",
+            "deload": "Descarga"
+        },
         "motivational_quote": "La constancia supera la perfección. ¡Tú puedes!",
         "workout_day": {
             "start_workout": "Iniciar Entrenamiento",
