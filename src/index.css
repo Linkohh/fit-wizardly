@@ -613,80 +613,94 @@
   50% { opacity: 1.2; }
 }
 
-/* Primary glow layer - Radial for natural fade */
+/* Primary glow layer - Tight horizontal, tall vertical */
 .animate-horizon-glow {
   background: radial-gradient(
-    ellipse 70% 50% at 50% 50%,
+    ellipse 35% 50% at 50% 50%,
     var(--glow-color-primary) 0%,
-    rgba(255, 255, 255, 0.1) 10%,
+    rgba(168, 85, 247, 0.2) 20%,
+    rgba(168, 85, 247, 0.08) 40%,
+    rgba(168, 85, 247, 0.02) 55%,
     transparent 70%
   );
-  background-size: 200% 200%;
+  background-size: 100% 100%;
   background-position: center;
-  filter: blur(40px);
-  opacity: 0.8;
+  filter: blur(25px);
+  opacity: 0.9;
   animation:
     horizon-color-smooth 48s linear infinite,
     horizon-breathe 8s ease-in-out infinite;
 }
 
-/* Secondary glow layer - Wider, softer */
+/* Secondary glow layer - Tight horizontal spread */
 .animate-horizon-glow-secondary {
   background: radial-gradient(
-    ellipse 60% 40% at 50% 50%,
+    ellipse 30% 45% at 50% 50%,
     var(--glow-color-secondary) 0%,
+    rgba(168, 85, 247, 0.15) 25%,
+    rgba(168, 85, 247, 0.05) 45%,
     transparent 65%
   );
-  background-size: 200% 200%;
+  background-size: 100% 100%;
   background-position: center;
-  filter: blur(60px);
-  opacity: 0.6;
+  filter: blur(30px);
+  opacity: 0.65;
   animation:
     horizon-color-smooth-secondary 48s linear infinite,
     horizon-breathe 10s ease-in-out infinite 2s;
 }
 
-/* Tertiary layer - Subtlest grounding */
+/* Tertiary layer - Subtle grounding */
 .animate-horizon-glow-tertiary {
   background: radial-gradient(
-    ellipse 50% 30% at 50% 50%,
+    ellipse 28% 40% at 50% 50%,
     var(--glow-color-tertiary) 0%,
-    transparent 60%
+    rgba(168, 85, 247, 0.1) 30%,
+    rgba(168, 85, 247, 0.03) 50%,
+    transparent 65%
   );
-  background-size: 200% 200%;
+  background-size: 100% 100%;
   background-position: center;
-  filter: blur(80px);
-  opacity: 0.4;
+  filter: blur(35px);
+  opacity: 0.5;
   animation:
     horizon-color-smooth-tertiary 36s linear infinite,
     horizon-breathe 12s ease-in-out infinite 4s;
 }
 
-/* Sharp Horizon Line with Electric Core */
+/* Sharp Horizon Line with Electric Core - Tight center focus */
 .horizon-line-sharp {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(168, 85, 247, 0) 20%,
-    rgba(168, 85, 247, 0.5) 35%,
+    transparent 20%,
+    rgba(168, 85, 247, 0.2) 30%,
+    rgba(168, 85, 247, 0.5) 40%,
     var(--glow-color-primary) 50%,
-    rgba(168, 85, 247, 0.5) 65%,
-    rgba(168, 85, 247, 0) 80%,
+    rgba(168, 85, 247, 0.5) 60%,
+    rgba(168, 85, 247, 0.2) 70%,
+    transparent 80%,
     transparent 100%
   );
   filter: blur(0.5px) brightness(1.5);
-  box-shadow: 0 0 15px var(--glow-color-primary);
+  box-shadow: 0 0 10px var(--glow-color-primary);
   animation: horizon-color-smooth 48s linear infinite;
 }
 
 .horizon-glow-wrapper {
-  /* Double masking for critical edge fade */
-  mask-image: 
-    linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
-  mask-composite: intersect;
-  -webkit-mask-image: 
-    linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
-  -webkit-mask-composite: source-in;
+  /* Ultra-tight horizontal mask - clean edge fade */
+  mask-image: radial-gradient(
+    ellipse 25% 100% at 50% 50%,
+    black 0%,
+    black 20%,
+    rgba(0, 0, 0, 0.1) 50%,
+    transparent 70%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 25% 100% at 50% 50%,
+    black 0%,
+    black 20%,
+    rgba(0, 0, 0, 0.1) 50%,
+    transparent 70%
+  );
 }

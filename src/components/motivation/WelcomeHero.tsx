@@ -202,13 +202,13 @@ export function WelcomeHero() {
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[1px] w-full horizon-line-sharp z-10" />
 
                 {/* Primary Layer - Main horizon with full 48s color cycle */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[35%] w-[140%] animate-horizon-glow mix-blend-screen" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[45%] w-[70%] animate-horizon-glow mix-blend-screen" />
 
                 {/* Secondary Layer - Above for depth */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-[42%] -translate-y-1/2 h-[28%] w-[135%] animate-horizon-glow-secondary mix-blend-screen" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-[42%] -translate-y-1/2 h-[35%] w-[65%] animate-horizon-glow-secondary mix-blend-screen" />
 
                 {/* Tertiary Layer - Below for grounding */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-[58%] -translate-y-1/2 h-[25%] w-[135%] animate-horizon-glow-tertiary mix-blend-screen" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-[58%] -translate-y-1/2 h-[32%] w-[65%] animate-horizon-glow-tertiary mix-blend-screen" />
             </div>
 
             <motion.div
