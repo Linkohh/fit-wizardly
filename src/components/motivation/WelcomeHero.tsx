@@ -199,13 +199,13 @@ export function WelcomeHero() {
             {/* Premium Layered Horizon Glow - 3D Depth with Aurora Color Cycling */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 horizon-glow-wrapper">
                 {/* Primary Layer - Main horizon with full 48s color cycle */}
-                <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[30%] animate-horizon-glow" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[30%] w-[120%] animate-horizon-glow" />
 
                 {/* Secondary Layer - Above for depth */}
-                <div className="absolute left-0 right-0 top-[45%] -translate-y-1/2 h-[22%] opacity-80 animate-horizon-glow-secondary" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-[45%] -translate-y-1/2 h-[22%] w-[115%] opacity-80 animate-horizon-glow-secondary" />
 
                 {/* Tertiary Layer - Below for grounding */}
-                <div className="absolute left-0 right-0 top-[55%] -translate-y-1/2 h-[18%] opacity-60 animate-horizon-glow-tertiary" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-[55%] -translate-y-1/2 h-[18%] w-[110%] opacity-60 animate-horizon-glow-tertiary" />
             </div>
 
             <motion.div
