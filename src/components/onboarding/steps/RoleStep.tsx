@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import { useOnboardingStore, UserRole } from '@/stores/onboardingStore';
 import { Card, CardContent } from '@/components/ui/card';
-import { User, Users, Check, Crown } from 'lucide-react';
+import { User, Check, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface RoleOption {
     id: UserRole;
@@ -12,34 +13,36 @@ interface RoleOption {
     features: string[];
 }
 
-const ROLE_OPTIONS: RoleOption[] = [
+const getRoleOptions = (t: (key: string) => string): RoleOption[] => [
     {
         id: 'user',
-        title: "I'm training myself",
-        description: 'Personal fitness journey',
+        title: t('onboarding.role.options.user.title'),
+        description: t('onboarding.role.options.user.description'),
         icon: <User className="h-8 w-8" />,
         features: [
-            'Personalized workout plans',
-            'Progress tracking',
-            'Exercise library access',
+            t('onboarding.role.options.user.features.personalized_plans'),
+            t('onboarding.role.options.user.features.progress_tracking'),
+            t('onboarding.role.options.user.features.exercise_library'),
         ],
     },
     {
         id: 'coach',
-        title: "I'm a Trainer/Coach",
-        description: 'Manage clients & programs',
+        title: t('onboarding.role.options.coach.title'),
+        description: t('onboarding.role.options.coach.description'),
         icon: <Crown className="h-8 w-8" />,
         features: [
-            'Everything in personal +',
-            'Client management',
-            'Bulk plan creation',
-            'Private coach notes',
+            t('onboarding.role.options.coach.features.everything_personal'),
+            t('onboarding.role.options.coach.features.client_management'),
+            t('onboarding.role.options.coach.features.bulk_creation'),
+            t('onboarding.role.options.coach.features.private_notes'),
         ],
     },
 ];
 
 export function RoleStep() {
     const { userData, setRole } = useOnboardingStore();
+    const { t } = useTranslation();
+    const roleOptions = getRoleOptions(t);
 
     return (
         <div className="space-y-8 text-center">
@@ -50,16 +53,16 @@ export function RoleStep() {
                 transition={{ delay: 0.1 }}
             >
                 <h1 className="text-3xl font-bold text-foreground">
-                    How will you use FitWizard?
+                    {t('onboarding.role.title')}
                 </h1>
                 <p className="text-muted-foreground mt-2 max-w-md mx-auto">
-                    Choose your path — you can always change this later in settings.
+                    {t('onboarding.role.description')}
                 </p>
             </motion.div>
 
             {/* Role cards */}
             <div className="grid gap-4 md:grid-cols-2">
-                {ROLE_OPTIONS.map((role, index) => {
+                {roleOptions.map((role, index) => {
                     const isSelected = userData.role === role.id;
 
                     return (
@@ -143,7 +146,7 @@ export function RoleStep() {
                                 {role.id === 'coach' && (
                                     <div className="absolute top-3 right-3">
                                         <span className="px-2 py-1 text-xs font-medium rounded-full bg-secondary/20 text-secondary">
-                                            Pro Features
+                                            {t('onboarding.role.pro_badge')}
                                         </span>
                                     </div>
                                 )}

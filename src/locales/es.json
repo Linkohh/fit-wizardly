@@ -93,7 +93,35 @@
             "training_goal_subtitle": "Esto nos ayuda a optimizar la estructura de tu programa",
             "reset_recommended": "Restablecer a Recomendado",
             "experience_title": "Tu nivel de experiencia",
-            "experience_subtitle": "Esto determina el volumen y complejidad del entrenamiento"
+            "experience_subtitle": "Esto determina el volumen y complejidad del entrenamiento",
+            "options": {
+                "strength": {
+                    "label": "Fuerza",
+                    "description": "Desarrolla fuerza máxima con cargas pesadas y pocas repeticiones"
+                },
+                "hypertrophy": {
+                    "label": "Crecimiento Muscular",
+                    "description": "Maximiza el tamaño muscular con cargas moderadas y mayor volumen"
+                },
+                "general": {
+                    "label": "Fitness General",
+                    "description": "Enfoque equilibrado para la salud y el acondicionamiento general"
+                }
+            },
+            "experience_levels": {
+                "beginner": {
+                    "label": "Principiante",
+                    "description": "Nuevo en el entrenamiento estructurado (0-1 año)"
+                },
+                "intermediate": {
+                    "label": "Intermedio",
+                    "description": "Experiencia de entrenamiento consistente (1-3 años)"
+                },
+                "advanced": {
+                    "label": "Avanzado",
+                    "description": "Antecedentes de entrenamiento significativos (3+ años)"
+                }
+            }
         },
         "schedule": {
             "title": "Configura tu horario",
@@ -378,7 +406,51 @@
         "back": "Atrás",
         "lets_go": "¡Vamos!",
         "complete": "Completar",
-        "next": "Siguiente"
+        "next": "Siguiente",
+        "role": {
+            "title": "¿Cómo usarás FitWizard?",
+            "description": "Elige tu camino — siempre puedes cambiarlo más tarde en configuración.",
+            "pro_badge": "Funciones Pro",
+            "options": {
+                "user": {
+                    "title": "Entreno por mi cuenta",
+                    "description": "Viaje personal de fitness",
+                    "features": {
+                        "personalized_plans": "Planes de entrenamiento personalizados",
+                        "progress_tracking": "Seguimiento de progreso",
+                        "exercise_library": "Acceso a la biblioteca de ejercicios"
+                    }
+                },
+                "coach": {
+                    "title": "Soy Entrenador/Coach",
+                    "description": "Gestiona clientes y programas",
+                    "features": {
+                        "everything_personal": "Todo lo personal +",
+                        "client_management": "Gestión de clientes",
+                        "bulk_creation": "Creación masiva de planes",
+                        "private_notes": "Notas privadas del coach"
+                    }
+                }
+            }
+        }
+    },
+    "validation": {
+        "frequency_low": {
+            "title": "Baja Frecuencia de Entrenamiento",
+            "context": "Para objetivos de {{goal}}, se recomiendan 3+ días/semana para un progreso óptimo."
+        },
+        "missing_legs": {
+            "title": "Sin Ejercicios de Piernas",
+            "context": "Omitir el tren inferior puede provocar desequilibrios musculares y menor gasto calórico."
+        },
+        "imbalance_push": {
+            "title": "Dominancia de Empuje",
+            "context": "Considera agregar ejercicios de espalda/bíceps para equilibrar tus movimientos de empuje."
+        },
+        "equip_strength": {
+            "title": "Resistencia Limitada",
+            "context": "Desarrollar fuerza máxima es más difícil solo con peso corporal. Considera agregar bandas o pesas si es posible."
+        }
     },
     "legal": {
         "page_title": "Legal y Cumplimiento",

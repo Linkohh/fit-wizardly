@@ -13,13 +13,15 @@ import { shakeVariants } from '@/lib/formAnimations';
 import { FormError } from '@/components/ui/form-error';
 import { useWizardForm, goalStepSchema } from '@/hooks/useWizardForm';
 import { Controller } from 'react-hook-form';
-import { GOALS, EXPERIENCE_LEVELS } from '@/lib/wizardConstants';
+import { getGoals, getExperienceLevels } from '@/lib/wizardConstants';
 import { PhaseRecommendationCard } from '@/components/wizard/PhaseRecommendationCard';
 import { useTranslation } from 'react-i18next';
 
 export function GoalStep() {
   const { t } = useTranslation();
   const { selections, setGoal, setExperienceLevel, setFirstName, setLastName, setPersonalGoalNote, setIsTrainer, setCoachNotes } = useWizardStore();
+  const goals = getGoals(t);
+  const experienceLevels = getExperienceLevels(t);
 
   // React Hook Form integration with Zustand sync
   const { control, formState: { errors }, watch, setValue } = useWizardForm({
@@ -315,7 +317,7 @@ export function GoalStep() {
               onValueChange={(value) => field.onChange(value as Goal)}
               className="grid gap-4 md:grid-cols-3"
             >
-              {GOALS.map((goal) => {
+              {goals.map((goal) => {
                  const Icon = goal.icon;
                  return (
                 <Label
@@ -389,7 +391,7 @@ export function GoalStep() {
               onValueChange={(value) => field.onChange(value as ExperienceLevel)}
               className="grid gap-3 md:grid-cols-3"
             >
-              {EXPERIENCE_LEVELS.map((level) => (
+              {experienceLevels.map((level) => (
                 <Label
                   key={level.id}
                   htmlFor={`exp-${level.id}`}
