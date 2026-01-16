@@ -26,6 +26,17 @@ describe('planGenerator', () => {
             });
         });
 
+        it('uses a stable plan id for identical selections', () => {
+            const planA = generatePlan(validSelections);
+            const planB = generatePlan(validSelections);
+            expect(planA.id).toBe(planB.id);
+        });
+
+        it('can append a timestamp when requested', () => {
+            const plan = generatePlan(validSelections, { appendTimestamp: true });
+            expect(plan.id).toMatch(/^plan_[a-f0-9]{64}_[0-9]{12}$/);
+        });
+
         it('selects correct split type based on days per week', () => {
             const threeDayPlan = generatePlan({ ...validSelections, daysPerWeek: 3 });
             expect(threeDayPlan.splitType).toBe('full_body');
