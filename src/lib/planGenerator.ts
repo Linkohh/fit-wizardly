@@ -16,6 +16,7 @@ import type {
   StabilityLevel
 } from '@/types/fitness';
 import { EXERCISE_DATABASE } from '@/data/exercises';
+import { sha256 } from '@/lib/hash';
 
 // Helper to determine NASM Phase (Duplicate of store logic for safety)
 function determineOptPhase(goal: string, experience: string): OptPhase {
@@ -432,7 +433,11 @@ function buildWarmCoolSuggestions(
 }
 
 // Main generator function - DETERMINISTIC
-export function generatePlan(selections: WizardSelections): Plan {
+type PlanIdOptions = {
+  appendTimestamp?: boolean;
+};
+
+export function generatePlan(selections: WizardSelections, options: PlanIdOptions = {}): Plan {
   const {
     goal,
     experienceLevel,
@@ -552,8 +557,12 @@ export function generatePlan(selections: WizardSelections): Plan {
     isWithinCap: (weeklyVolumeTracker[muscle] || 0) <= volumeCaps[muscle],
   }));
 
-  // Generate plan ID deterministically
-  const planId = `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  // Generate plan ID deterministically, with optional version suffix
+  const selectionsHash = sha256(JSON.stringify(selections));
+  const timestampSuffix = options.appendTimestamp
+    ? `_${new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 12)}`
+    : '';
+  const planId = `plan_${selectionsHash}${timestampSuffix}`;
 
   // Generate notes
   const notes: string[] = [
