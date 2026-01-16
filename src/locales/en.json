@@ -135,7 +135,24 @@
             "hours": "hours",
             "split_full_body": "Full Body",
             "split_upper_lower": "Upper/Lower",
-            "split_ppl": "Push/Pull/Legs"
+            "split_ppl": "Push/Pull/Legs",
+            "volume_hint": {
+                "maintenance": {
+                    "low": "You're below a maintenance-friendly volume. Aim for about {{min}}-{{max}} hours/week.",
+                    "target": "You're in a maintenance-friendly range at about {{hours}} hours/week.",
+                    "high": "You're above a maintenance-focused volume. {{min}}-{{max}} hours/week is usually enough."
+                },
+                "strength": {
+                    "low": "For strength, consider about {{min}}-{{max}} hours/week.",
+                    "target": "Solid strength volume at about {{hours}} hours/week.",
+                    "high": "That's a high strength volume; prioritize recovery if you stay above {{max}} hours."
+                },
+                "hypertrophy": {
+                    "low": "For muscle growth, aim for about {{min}}-{{max}} hours/week.",
+                    "target": "You're in a muscle-building range at about {{hours}} hours/week.",
+                    "high": "That's a high growth volume; make sure recovery supports {{hours}} hours/week."
+                }
+            }
         },
         "review": {
             "title": "Review Your Plan",
