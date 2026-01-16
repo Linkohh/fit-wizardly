@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Client, Assignment, Template, Plan } from '@/types/fitness';
+import { useWizardStore } from '@/stores/wizardStore';
 
 interface TrainerState {
   isTrainerMode: boolean;
@@ -42,14 +43,21 @@ export const useTrainerStore = create<TrainerState>()(
       assignments: [],
       templates: [],
 
-      toggleTrainerMode: () => set((state) => ({ 
-        isTrainerMode: !state.isTrainerMode,
-        selectedClientId: null,
-      })),
+      toggleTrainerMode: () => set((state) => {
+        const nextMode = !state.isTrainerMode;
+        useWizardStore.getState().setIsTrainer(nextMode);
+        return {
+          isTrainerMode: nextMode,
+          selectedClientId: null,
+        };
+      }),
 
-      setTrainerMode: (enabled) => set({ 
-        isTrainerMode: enabled,
-        selectedClientId: enabled ? get().selectedClientId : null,
+      setTrainerMode: (enabled) => set((state) => {
+        useWizardStore.getState().setIsTrainer(enabled);
+        return {
+          isTrainerMode: enabled,
+          selectedClientId: enabled ? state.selectedClientId : null,
+        };
       }),
 
       addClient: (displayName, notes) => {

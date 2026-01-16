@@ -193,12 +193,15 @@ export const useWizardStore = create<WizardState>()(
 
       setIsGenerating: (isGenerating) => set({ isGenerating }),
 
-      resetWizard: () => set({
+      resetWizard: () => set((state) => ({
         currentStep: 'goal',
         currentStepIndex: 0,
-        selections: initialSelections,
+        selections: {
+          ...initialSelections,
+          isTrainer: state.selections.isTrainer,
+        },
         isGenerating: false,
-      }),
+      })),
 
       canAdvance: () => {
         const { currentStep, getStepValidation } = get();

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { User, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -6,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useWizardStore } from '@/stores/wizardStore';
+import { useTrainerStore } from '@/stores/trainerStore';
 import type { Goal, ExperienceLevel } from '@/types/fitness';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,7 +21,8 @@ import { useTranslation } from 'react-i18next';
 
 export function GoalStep() {
   const { t } = useTranslation();
-  const { selections, setGoal, setExperienceLevel, setFirstName, setLastName, setPersonalGoalNote, setIsTrainer, setCoachNotes } = useWizardStore();
+  const { selections, setGoal, setExperienceLevel, setFirstName, setLastName, setPersonalGoalNote, setCoachNotes } = useWizardStore();
+  const { isTrainerMode, setTrainerMode } = useTrainerStore();
   const goals = getGoals(t);
   const experienceLevels = getExperienceLevels(t);
 
@@ -30,7 +33,7 @@ export function GoalStep() {
       firstName: selections.firstName || '',
       lastName: selections.lastName || '',
       personalGoalNote: selections.personalGoalNote || '',
-      isTrainer: selections.isTrainer || false,
+      isTrainer: isTrainerMode,
       coachNotes: selections.coachNotes || '',
       goal: selections.goal,
       experienceLevel: selections.experienceLevel,
@@ -40,12 +43,16 @@ export function GoalStep() {
       if (values.firstName !== undefined) setFirstName(values.firstName);
       if (values.lastName !== undefined) setLastName(values.lastName);
       if (values.personalGoalNote !== undefined) setPersonalGoalNote(values.personalGoalNote);
-      if (values.isTrainer !== undefined) setIsTrainer(values.isTrainer);
+      if (values.isTrainer !== undefined) setTrainerMode(values.isTrainer);
       if (values.coachNotes !== undefined) setCoachNotes(values.coachNotes);
       if (values.goal !== undefined) setGoal(values.goal);
       if (values.experienceLevel !== undefined) setExperienceLevel(values.experienceLevel);
     },
   });
+
+  useEffect(() => {
+    setValue('isTrainer', isTrainerMode);
+  }, [isTrainerMode, setValue]);
 
   // Watch values for reactive UI updates
   const watchedGoal = watch('goal');
