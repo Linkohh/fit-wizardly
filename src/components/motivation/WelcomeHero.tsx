@@ -198,14 +198,17 @@ export function WelcomeHero() {
 
             {/* Premium Layered Horizon Glow - 3D Depth with Aurora Color Cycling */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 horizon-glow-wrapper">
+                {/* Sharp Horizon Line with Electric Core - 1px High Definition */}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[1px] w-full horizon-line-sharp z-10" />
+
                 {/* Primary Layer - Main horizon with full 48s color cycle */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[30%] w-[120%] animate-horizon-glow" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[35%] w-[140%] animate-horizon-glow mix-blend-screen" />
 
                 {/* Secondary Layer - Above for depth */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-[45%] -translate-y-1/2 h-[22%] w-[115%] opacity-80 animate-horizon-glow-secondary" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-[42%] -translate-y-1/2 h-[28%] w-[135%] animate-horizon-glow-secondary mix-blend-screen" />
 
                 {/* Tertiary Layer - Below for grounding */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-[55%] -translate-y-1/2 h-[18%] w-[110%] opacity-60 animate-horizon-glow-tertiary" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-[58%] -translate-y-1/2 h-[25%] w-[135%] animate-horizon-glow-tertiary mix-blend-screen" />
             </div>
 
             <motion.div

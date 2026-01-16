@@ -613,65 +613,80 @@
   50% { opacity: 1.2; }
 }
 
-/* Primary glow layer */
+/* Primary glow layer - Radial for natural fade */
 .animate-horizon-glow {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    var(--glow-color-primary) 50%,
-    transparent 100%
+  background: radial-gradient(
+    ellipse 70% 50% at 50% 50%,
+    var(--glow-color-primary) 0%,
+    rgba(255, 255, 255, 0.1) 10%,
+    transparent 70%
   );
-  background-size: 140% 100%;
+  background-size: 200% 200%;
   background-position: center;
-  filter: blur(80px);
+  filter: blur(40px);
+  opacity: 0.8;
   animation:
     horizon-color-smooth 48s linear infinite,
-    horizon-breathe 12s ease-in-out infinite;
+    horizon-breathe 8s ease-in-out infinite;
 }
 
-/* Secondary glow layer - offset timing */
+/* Secondary glow layer - Wider, softer */
 .animate-horizon-glow-secondary {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    var(--glow-color-secondary) 50%,
-    transparent 100%
+  background: radial-gradient(
+    ellipse 60% 40% at 50% 50%,
+    var(--glow-color-secondary) 0%,
+    transparent 65%
   );
-  background-size: 140% 100%;
-  background-position: center;
-  filter: blur(100px);
-  animation:
-    horizon-color-smooth-secondary 48s linear infinite,
-    horizon-breathe 12s ease-in-out infinite 3s;
-}
-
-/* Tertiary glow layer - different cycle time for organic feel */
-.animate-horizon-glow-tertiary {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    var(--glow-color-tertiary) 50%,
-    transparent 100%
-  );
-  background-size: 140% 100%;
+  background-size: 200% 200%;
   background-position: center;
   filter: blur(60px);
+  opacity: 0.6;
+  animation:
+    horizon-color-smooth-secondary 48s linear infinite,
+    horizon-breathe 10s ease-in-out infinite 2s;
+}
+
+/* Tertiary layer - Subtlest grounding */
+.animate-horizon-glow-tertiary {
+  background: radial-gradient(
+    ellipse 50% 30% at 50% 50%,
+    var(--glow-color-tertiary) 0%,
+    transparent 60%
+  );
+  background-size: 200% 200%;
+  background-position: center;
+  filter: blur(80px);
+  opacity: 0.4;
   animation:
     horizon-color-smooth-tertiary 36s linear infinite,
-    horizon-breathe 12s ease-in-out infinite 6s;
+    horizon-breathe 12s ease-in-out infinite 4s;
+}
+
+/* Sharp Horizon Line with Electric Core */
+.horizon-line-sharp {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0) 20%,
+    rgba(168, 85, 247, 0.5) 35%,
+    var(--glow-color-primary) 50%,
+    rgba(168, 85, 247, 0.5) 65%,
+    rgba(168, 85, 247, 0) 80%,
+    transparent 100%
+  );
+  filter: blur(0.5px) brightness(1.5);
+  box-shadow: 0 0 15px var(--glow-color-primary);
+  animation: horizon-color-smooth 48s linear infinite;
 }
 
 .horizon-glow-wrapper {
-  mask-image: radial-gradient(
-    ellipse 80% 60% at 50% 50%,
-    black 0%,
-    black 60%,
-    transparent 100%
-  );
-  -webkit-mask-image: radial-gradient(
-    ellipse 80% 60% at 50% 50%,
-    black 0%,
-    black 60%,
-    transparent 100%
-  );
+  /* Double masking for critical edge fade */
+  mask-image: 
+    linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+  mask-composite: intersect;
+  -webkit-mask-image: 
+    linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+  -webkit-mask-composite: source-in;
 }
