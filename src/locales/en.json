@@ -263,7 +263,12 @@
             "description": "Replace <1>{{name}}</1> with an alternative exercise",
             "search_placeholder": "Search exercises...",
             "no_matches": "No matching exercises found",
-            "swap_button": "Swap Exercise"
+            "swap_button": "Swap Exercise",
+            "variation_headings": {
+                "regression": "Easier Options",
+                "progression": "Harder Options",
+                "alternative": "Alternatives"
+            }
         }
     },
     "goals": {

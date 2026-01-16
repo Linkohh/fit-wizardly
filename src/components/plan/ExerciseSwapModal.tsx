@@ -28,6 +28,61 @@ export function ExerciseSwapModal({
     const [search, setSearch] = useState('');
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
+    const exerciseLookup = useMemo(() => {
+        const lookup = new Map<string, Exercise>();
+        EXERCISE_DATABASE.forEach((exercise) => {
+            lookup.set(exercise.id.toLowerCase(), exercise);
+            lookup.set(exercise.name.toLowerCase(), exercise);
+        });
+        return lookup;
+    }, []);
+
+    const variationIdOverrides: Record<string, string> = {};
+
+    const resolveVariationExercise = (variationName: string) => {
+        const normalizedName = variationName.toLowerCase();
+        const overrideId = variationIdOverrides[normalizedName];
+        if (overrideId) {
+            return exerciseLookup.get(overrideId.toLowerCase()) ?? null;
+        }
+        return exerciseLookup.get(normalizedName) ?? null;
+    };
+
+    const variationGroups = useMemo(() => {
+        const groups = {
+            regression: [] as { name: string; description: string; exercise: Exercise | null }[],
+            progression: [] as { name: string; description: string; exercise: Exercise | null }[],
+            alternative: [] as { name: string; description: string; exercise: Exercise | null }[],
+        };
+
+        const variations = currentExercise.exercise.variations ?? [];
+        const searchLower = search.trim().toLowerCase();
+
+        variations.forEach((variation) => {
+            if (searchLower) {
+                const matchesSearch =
+                    variation.name.toLowerCase().includes(searchLower) ||
+                    variation.description.toLowerCase().includes(searchLower);
+                if (!matchesSearch) return;
+            }
+            groups[variation.type].push({
+                name: variation.name,
+                description: variation.description,
+                exercise: resolveVariationExercise(variation.name),
+            });
+        });
+
+        return groups;
+    }, [currentExercise.exercise.variations, search, exerciseLookup]);
+
+    const variationResultCount = useMemo(
+        () =>
+            variationGroups.regression.length +
+            variationGroups.progression.length +
+            variationGroups.alternative.length,
+        [variationGroups]
+    );
+
     // Filter exercises by same movement pattern and available equipment
     const filteredExercises = useMemo(() => {
         const currentPatterns = currentExercise.exercise.patterns;
@@ -102,8 +157,52 @@ export function ExerciseSwapModal({
 
                     {/* Exercise List */}
                     <ScrollArea className="h-64 pr-4">
-                        <div className="space-y-2">
-                            {filteredExercises.length === 0 ? (
+                        <div className="space-y-4">
+                            {(['regression', 'progression', 'alternative'] as const).map((type) => {
+                                const items = variationGroups[type];
+                                if (items.length === 0) return null;
+                                const headingKey = `plan.exercise_swap.variation_headings.${type}`;
+                                return (
+                                    <div key={type} className="space-y-2">
+                                        <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                                            {t(headingKey)}
+                                        </p>
+                                        <div className="space-y-2">
+                                            {items.map((variation) => {
+                                                const isSelected =
+                                                    variation.exercise?.id === selectedExercise?.id;
+                                                return (
+                                                    <button
+                                                        key={variation.name}
+                                                        onClick={() =>
+                                                            variation.exercise && setSelectedExercise(variation.exercise)
+                                                        }
+                                                        disabled={!variation.exercise}
+                                                        className={`w-full p-3 rounded-lg border text-left transition-all ${isSelected
+                                                            ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
+                                                            : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                                                            } ${variation.exercise ? '' : 'opacity-60 cursor-not-allowed'
+                                                            }`}
+                                                    >
+                                                        <div className="flex items-center justify-between">
+                                                            <div>
+                                                                <p className="font-medium">{variation.name}</p>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    {variation.description}
+                                                                </p>
+                                                            </div>
+                                                            {isSelected && (
+                                                                <Check className="h-5 w-5 text-primary" />
+                                                            )}
+                                                        </div>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                            {filteredExercises.length === 0 && variationResultCount === 0 ? (
                                 <p className="text-center text-muted-foreground py-8">
                                     {t('plan.exercise_swap.no_matches')}
                                 </p>
