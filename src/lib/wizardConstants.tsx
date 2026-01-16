@@ -1,42 +1,43 @@
 import { TrendingUp, Target, Activity } from 'lucide-react';
+import type { TFunction } from 'i18next';
 import type { Goal, ExperienceLevel } from '@/types/fitness';
 
-export const GOALS: { id: Goal; label: string; description: string; icon: any }[] = [
+export const getGoals = (t: TFunction): { id: Goal; label: string; description: string; icon: any }[] => [
   {
     id: 'strength',
-    label: 'Strength',
-    description: 'Build maximum strength with heavy loads and lower reps',
+    label: t('wizard.goal.options.strength.label'),
+    description: t('wizard.goal.options.strength.description'),
     icon: TrendingUp,
   },
   {
     id: 'hypertrophy',
-    label: 'Muscle Growth',
-    description: 'Maximize muscle size with moderate loads and higher volume',
+    label: t('wizard.goal.options.hypertrophy.label'),
+    description: t('wizard.goal.options.hypertrophy.description'),
     icon: Target,
   },
   {
     id: 'general',
-    label: 'General Fitness',
-    description: 'Balanced approach for overall health and conditioning',
+    label: t('wizard.goal.options.general.label'),
+    description: t('wizard.goal.options.general.description'),
     icon: Activity,
   },
 ];
 
-export const EXPERIENCE_LEVELS: { id: ExperienceLevel; label: string; description: string }[] = [
+export const getExperienceLevels = (t: TFunction): { id: ExperienceLevel; label: string; description: string }[] => [
   {
     id: 'beginner',
-    label: 'Beginner',
-    description: 'New to structured training (0-1 year)',
+    label: t('wizard.goal.experience_levels.beginner.label'),
+    description: t('wizard.goal.experience_levels.beginner.description'),
   },
   {
     id: 'intermediate',
-    label: 'Intermediate',
-    description: 'Consistent training experience (1-3 years)',
+    label: t('wizard.goal.experience_levels.intermediate.label'),
+    description: t('wizard.goal.experience_levels.intermediate.description'),
   },
   {
     id: 'advanced',
-    label: 'Advanced',
-    description: 'Significant training background (3+ years)',
+    label: t('wizard.goal.experience_levels.advanced.label'),
+    description: t('wizard.goal.experience_levels.advanced.description'),
   },
 ];
 

@@ -93,7 +93,35 @@
             "training_goal_subtitle": "This helps us optimize your program structure",
             "reset_recommended": "Reset to Recommended",
             "experience_title": "Your experience level",
-            "experience_subtitle": "This determines training volume and complexity"
+            "experience_subtitle": "This determines training volume and complexity",
+            "options": {
+                "strength": {
+                    "label": "Strength",
+                    "description": "Build maximum strength with heavy loads and lower reps"
+                },
+                "hypertrophy": {
+                    "label": "Muscle Growth",
+                    "description": "Maximize muscle size with moderate loads and higher volume"
+                },
+                "general": {
+                    "label": "General Fitness",
+                    "description": "Balanced approach for overall health and conditioning"
+                }
+            },
+            "experience_levels": {
+                "beginner": {
+                    "label": "Beginner",
+                    "description": "New to structured training (0-1 year)"
+                },
+                "intermediate": {
+                    "label": "Intermediate",
+                    "description": "Consistent training experience (1-3 years)"
+                },
+                "advanced": {
+                    "label": "Advanced",
+                    "description": "Significant training background (3+ years)"
+                }
+            }
         },
         "schedule": {
             "title": "Set your schedule",
@@ -328,7 +356,51 @@
         "back": "Back",
         "lets_go": "Let's Go!",
         "complete": "Complete",
-        "next": "Next"
+        "next": "Next",
+        "role": {
+            "title": "How will you use FitWizard?",
+            "description": "Choose your path — you can always change this later in settings.",
+            "pro_badge": "Pro Features",
+            "options": {
+                "user": {
+                    "title": "I'm training myself",
+                    "description": "Personal fitness journey",
+                    "features": {
+                        "personalized_plans": "Personalized workout plans",
+                        "progress_tracking": "Progress tracking",
+                        "exercise_library": "Exercise library access"
+                    }
+                },
+                "coach": {
+                    "title": "I'm a Trainer/Coach",
+                    "description": "Manage clients & programs",
+                    "features": {
+                        "everything_personal": "Everything in personal +",
+                        "client_management": "Client management",
+                        "bulk_creation": "Bulk plan creation",
+                        "private_notes": "Private coach notes"
+                    }
+                }
+            }
+        }
+    },
+    "validation": {
+        "frequency_low": {
+            "title": "Low Training Frequency",
+            "context": "For {{goal}} goals, 3+ days/week is recommended for optimal progress."
+        },
+        "missing_legs": {
+            "title": "No Leg Exercises",
+            "context": "Skipping lower body can lead to muscular imbalances and reduced caloric burn."
+        },
+        "imbalance_push": {
+            "title": "Push Dominant",
+            "context": "Consider adding back/bicep exercises to balance your pressing movements."
+        },
+        "equip_strength": {
+            "title": "Limited Resistance",
+            "context": "Building max strength is harder with bodyweight only. Consider adding bands or weights if possible."
+        }
     },
     "legal": {
         "page_title": "Legal & Compliance",

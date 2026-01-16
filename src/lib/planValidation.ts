@@ -1,3 +1,4 @@
+import i18n from '@/lib/i18n';
 import type { WizardSelections } from '@/types/fitness';
 
 export type ValidationWarning = {
@@ -16,8 +17,8 @@ export function validatePlanBalance(selections: WizardSelections): ValidationWar
         warnings.push({
             id: 'frequency_low',
             type: 'warning',
-            message: 'Low Training Frequency',
-            context: `For ${goal} goals, 3+ days/week is recommended for optimal progress.`,
+            message: i18n.t('validation.frequency_low.title'),
+            context: i18n.t('validation.frequency_low.context', { goal }),
         });
     }
 
@@ -27,8 +28,8 @@ export function validatePlanBalance(selections: WizardSelections): ValidationWar
         warnings.push({
             id: 'missing_legs',
             type: 'warning',
-            message: 'No Leg Exercises',
-            context: 'Skipping lower body can lead to muscular imbalances and reduced caloric burn.',
+            message: i18n.t('validation.missing_legs.title'),
+            context: i18n.t('validation.missing_legs.context'),
         });
     }
 
@@ -39,8 +40,8 @@ export function validatePlanBalance(selections: WizardSelections): ValidationWar
         warnings.push({
             id: 'imbalance_push',
             type: 'info',
-            message: 'Push Dominant',
-            context: 'Consider adding back/bicep exercises to balance your pressing movements.',
+            message: i18n.t('validation.imbalance_push.title'),
+            context: i18n.t('validation.imbalance_push.context'),
         });
     }
 
@@ -50,8 +51,8 @@ export function validatePlanBalance(selections: WizardSelections): ValidationWar
         warnings.push({
             id: 'equip_strength',
             type: 'info',
-            message: 'Limited Resistance',
-            context: 'Building max strength is harder with bodyweight only. Consider adding bands or weights if possible.',
+            message: i18n.t('validation.equip_strength.title'),
+            context: i18n.t('validation.equip_strength.context'),
         });
     }
 

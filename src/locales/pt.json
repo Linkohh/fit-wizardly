@@ -53,6 +53,84 @@
         "intermediate": "Intermediário",
         "advanced": "Avançado"
     },
+    "wizard": {
+        "goal": {
+            "options": {
+                "strength": {
+                    "label": "Força",
+                    "description": "Desenvolva força máxima com cargas pesadas e menos repetições"
+                },
+                "hypertrophy": {
+                    "label": "Crescimento Muscular",
+                    "description": "Maximize o tamanho muscular com cargas moderadas e maior volume"
+                },
+                "general": {
+                    "label": "Condicionamento Geral",
+                    "description": "Abordagem equilibrada para saúde e condicionamento geral"
+                }
+            },
+            "experience_levels": {
+                "beginner": {
+                    "label": "Iniciante",
+                    "description": "Novo em treinamento estruturado (0-1 ano)"
+                },
+                "intermediate": {
+                    "label": "Intermediário",
+                    "description": "Experiência de treino consistente (1-3 anos)"
+                },
+                "advanced": {
+                    "label": "Avançado",
+                    "description": "Histórico significativo de treino (3+ anos)"
+                }
+            }
+        }
+    },
+    "onboarding": {
+        "role": {
+            "title": "Como você vai usar o FitWizard?",
+            "description": "Escolha seu caminho — você sempre pode mudar isso depois nas configurações.",
+            "pro_badge": "Recursos Pro",
+            "options": {
+                "user": {
+                    "title": "Estou treinando sozinho",
+                    "description": "Jornada fitness pessoal",
+                    "features": {
+                        "personalized_plans": "Planos de treino personalizados",
+                        "progress_tracking": "Acompanhamento de progresso",
+                        "exercise_library": "Acesso à biblioteca de exercícios"
+                    }
+                },
+                "coach": {
+                    "title": "Sou Treinador/Coach",
+                    "description": "Gerencie clientes e programas",
+                    "features": {
+                        "everything_personal": "Tudo do pessoal +",
+                        "client_management": "Gestão de clientes",
+                        "bulk_creation": "Criação em massa de planos",
+                        "private_notes": "Notas privadas do coach"
+                    }
+                }
+            }
+        }
+    },
+    "validation": {
+        "frequency_low": {
+            "title": "Baixa Frequência de Treino",
+            "context": "Para objetivos de {{goal}}, recomenda-se 3+ dias/semana para progresso ideal."
+        },
+        "missing_legs": {
+            "title": "Sem Exercícios de Pernas",
+            "context": "Ignorar o treino de pernas pode causar desequilíbrios musculares e menor gasto calórico."
+        },
+        "imbalance_push": {
+            "title": "Predominância de Empurrar",
+            "context": "Considere adicionar exercícios de costas/bíceps para equilibrar seus movimentos de empurrar."
+        },
+        "equip_strength": {
+            "title": "Resistência Limitada",
+            "context": "Construir força máxima é mais difícil apenas com peso corporal. Considere adicionar bandas ou pesos se possível."
+        }
+    },
     "common": {
         "loading": "Carregando...",
         "error": "Algo deu errado",

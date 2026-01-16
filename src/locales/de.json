@@ -10,23 +10,6 @@
         "history": "Verlauf",
         "clients": "Kunden"
     },
-    "wizard": {
-        "title": "Erstelle deinen Trainingsplan",
-        "steps": {
-            "goal": "Trainingsziel",
-            "equipment": "Ausrüstung",
-            "anatomy": "Zielmuskeln",
-            "constraints": "Einschränkungen",
-            "schedule": "Zeitplan",
-            "review": "Überprüfung"
-        },
-        "navigation": {
-            "back": "Zurück",
-            "next": "Weiter",
-            "generate": "Plan erstellen"
-        },
-        "progress": "{{percent}}% abgeschlossen"
-    },
     "plan": {
         "title": "Dein Trainingsplan",
         "export": "PDF exportieren",
@@ -52,6 +35,99 @@
         "beginner": "Anfänger",
         "intermediate": "Fortgeschritten",
         "advanced": "Experte"
+    },
+    "wizard": {
+        "title": "Erstelle deinen Trainingsplan",
+        "steps": {
+            "goal": "Trainingsziel",
+            "equipment": "Ausrüstung",
+            "anatomy": "Zielmuskeln",
+            "constraints": "Einschränkungen",
+            "schedule": "Zeitplan",
+            "review": "Überprüfung"
+        },
+        "navigation": {
+            "back": "Zurück",
+            "next": "Weiter",
+            "generate": "Plan erstellen"
+        },
+        "progress": "{{percent}}% abgeschlossen",
+        "goal": {
+            "options": {
+                "strength": {
+                    "label": "Kraft",
+                    "description": "Baue maximale Kraft mit schweren Gewichten und weniger Wiederholungen auf"
+                },
+                "hypertrophy": {
+                    "label": "Muskelaufbau",
+                    "description": "Maximiere Muskelwachstum mit moderaten Gewichten und höherem Volumen"
+                },
+                "general": {
+                    "label": "Allgemeine Fitness",
+                    "description": "Ausgewogener Ansatz für Gesundheit und Kondition"
+                }
+            },
+            "experience_levels": {
+                "beginner": {
+                    "label": "Anfänger",
+                    "description": "Neu im strukturierten Training (0-1 Jahr)"
+                },
+                "intermediate": {
+                    "label": "Fortgeschritten",
+                    "description": "Konstante Trainingserfahrung (1-3 Jahre)"
+                },
+                "advanced": {
+                    "label": "Experte",
+                    "description": "Umfangreiche Trainingserfahrung (3+ Jahre)"
+                }
+            }
+        }
+    },
+    "onboarding": {
+        "role": {
+            "title": "Wie wirst du FitWizard nutzen?",
+            "description": "Wähle deinen Weg — du kannst das später in den Einstellungen ändern.",
+            "pro_badge": "Pro-Funktionen",
+            "options": {
+                "user": {
+                    "title": "Ich trainiere für mich",
+                    "description": "Persönliche Fitnessreise",
+                    "features": {
+                        "personalized_plans": "Personalisierte Trainingspläne",
+                        "progress_tracking": "Fortschrittsverfolgung",
+                        "exercise_library": "Zugang zur Übungsbibliothek"
+                    }
+                },
+                "coach": {
+                    "title": "Ich bin Trainer/Coach",
+                    "description": "Kunden und Programme verwalten",
+                    "features": {
+                        "everything_personal": "Alles aus Persönlich +",
+                        "client_management": "Kundenverwaltung",
+                        "bulk_creation": "Massenhafte Planerstellung",
+                        "private_notes": "Private Coach-Notizen"
+                    }
+                }
+            }
+        }
+    },
+    "validation": {
+        "frequency_low": {
+            "title": "Geringe Trainingsfrequenz",
+            "context": "Für {{goal}}-Ziele werden 3+ Tage/Woche für optimalen Fortschritt empfohlen."
+        },
+        "missing_legs": {
+            "title": "Keine Beinübungen",
+            "context": "Das Auslassen des Unterkörpers kann zu muskulären Dysbalancen und geringerem Kalorienverbrauch führen."
+        },
+        "imbalance_push": {
+            "title": "Push-dominant",
+            "context": "Erwäge Rücken-/Bizeps-Übungen, um deine Druckbewegungen auszugleichen."
+        },
+        "equip_strength": {
+            "title": "Begrenzter Widerstand",
+            "context": "Maximale Kraft aufzubauen ist nur mit Körpergewicht schwieriger. Erwäge Bänder oder Gewichte, wenn möglich."
+        }
     },
     "common": {
         "loading": "Wird geladen...",
