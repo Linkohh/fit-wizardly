@@ -1519,7 +1519,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "id": "single_leg_squat",
     "name": "Single-Leg Squat",
     "primaryMuscles": [
-      "elemental_quads",
+      "quads",
       "glutes"
     ],
     "secondaryMuscles": [
@@ -2921,6 +2921,160 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "category": "flexibility",
     "difficulty": "Beginner",
     "type": "strength"
+  },
+  {
+    "id": "russian_twist",
+    "name": "Russian Twist",
+    "primaryMuscles": ["obliques", "abs"],
+    "secondaryMuscles": ["hip_flexors", "upper_back", "lower_back"],
+    "equipment": ["bodyweight"],
+    "patterns": ["rotation"],
+    "contraindications": ["back_injury", "neck_injury", "pregnancy"],
+    "cues": [
+      "V-shape torso",
+      "Twist from core",
+      "Follow hands with eyes",
+      "Straight spine"
+    ],
+    "description": "The Russian twist is a great exercise to build core and shoulder strength. Athletes use it for rotational movement, which can be seen in sports. Though it seems easy, it takes a lot of effort and stability.",
+    "steps": [
+      "Root into your sit bones as you lift your feet from the floor, keeping your knees bent.",
+      "Elongate and straighten your spine at a 45-degree angle from the floor, creating a V shape with your torso and thighs.",
+      "Reach your arms straight out in front, interlacing your fingers or clasping your hands together.",
+      "Use your abdominals to twist to the right, then back to center, and then to the left."
+    ],
+    "variations": [
+      {
+        "name": "Weighted Twist",
+        "description": "Hold a weight (dumbbell/medicine ball) at chest level while twisting.",
+        "type": "progression"
+      },
+      {
+        "name": "Leg-cross Twists",
+        "description": "Cross one calf over the other as you twist to that side.",
+        "type": "alternative"
+      },
+      {
+        "name": "Punch Twists",
+        "description": "Punch across your body instead of just twisting clasped hands.",
+        "type": "alternative"
+      },
+      {
+        "name": "Decline Twists",
+        "description": "Perform the movement on a decline bench.",
+        "type": "progression"
+      }
+    ],
+    "category": "core",
+    "difficulty": "Intermediate"
+  },
+  {
+    "id": "side_plank",
+    "name": "Side Plank",
+    "primaryMuscles": ["obliques", "abs"],
+    "secondaryMuscles": ["side_deltoid", "front_deltoid"],
+    "equipment": ["bodyweight", "mat"],
+    "patterns": ["isolation"],
+    "contraindications": ["shoulder_injury"],
+    "cues": [
+      "Straight line head to feet",
+      "Hips lifted high",
+      "Elbow under shoulder"
+    ],
+    "description": "A static hold that builds lateral core stability and shoulder strength.",
+    "steps": [
+      "Lie on your left side with your feet stacked or with one foot in front of the other.",
+      "Place your left forearm on the floor and lift your hips off the ground.",
+      "Keep your hips lifted to form a straight line from the feet to the head.",
+      "Hold this position for time."
+    ],
+    "variations": [
+      {
+        "name": "Knee Side Plank",
+        "description": "Perform with bottom knee on the ground.",
+        "type": "regression"
+      },
+      {
+        "name": "Side Plank Dips",
+        "description": "Lower and lift hips while in position.",
+        "type": "progression"
+      }
+    ],
+    "category": "core",
+    "difficulty": "Beginner"
+  },
+  {
+    "id": "heel_touches",
+    "name": "Heel Touches",
+    "primaryMuscles": ["obliques", "abs"],
+    "secondaryMuscles": [],
+    "equipment": ["bodyweight", "mat"],
+    "patterns": ["isolation"],
+    "contraindications": ["neck_injury"],
+    "cues": [
+      "Head/shoulders slightly up",
+      "Reach for heels",
+      "Squeeze side abs"
+    ],
+    "description": "A lying core exercise that targets the obliques through lateral flexion.",
+    "steps": [
+      "Lie on your back with knees bent and feet on the floor near hips.",
+      "Lift head and upper body slightly.",
+      "Reach right arm forward toward right toes.",
+      "Return to center and reach left arm to left toes."
+    ],
+    "variations": [],
+    "category": "core",
+    "difficulty": "Beginner"
+  },
+  {
+    "id": "plank_twists",
+    "name": "Forearm Plank Twists",
+    "primaryMuscles": ["abs", "obliques"],
+    "secondaryMuscles": ["side_deltoid", "front_deltoid"],
+    "equipment": ["bodyweight", "mat"],
+    "patterns": ["rotation"],
+    "contraindications": ["back_injury"],
+    "cues": [
+      "Maintain plank form",
+      "Rotate hips side to side",
+      "Control the tap"
+    ],
+    "description": "Dynamic plank variation adding rotation to target the obliques.",
+    "steps": [
+      "Start in a forearm plank position.",
+      "Rotate and drop your hips over to the right side.",
+      "Gently tap the floor with your hip before returning to center.",
+      "Repeat on the left side."
+    ],
+    "variations": [],
+    "category": "core",
+    "difficulty": "Intermediate"
+  },
+  {
+    "id": "bird_dog",
+    "name": "Bird Dog",
+    "primaryMuscles": ["lower_back", "glutes", "abs"],
+    "secondaryMuscles": ["front_deltoid", "lower_back"],
+    "equipment": ["bodyweight", "mat"],
+    "patterns": ["isolation"],
+    "contraindications": [],
+    "cues": [
+      "Tabletop position",
+      "Opposite arm/leg extend",
+      "Flat back",
+      "Squeeze glute"
+    ],
+    "description": "A stability exercise that strengthens the core, lower back, and improves balance.",
+    "steps": [
+      "Begin from a tabletop position.",
+      "Engage your core as you extend your left arm and right leg.",
+      "Hold for a few seconds, keeping shoulders and hips square.",
+      "Return to start and switch sides."
+    ],
+    "variations": [],
+    "category": "core",
+    "difficulty": "Beginner"
   }
 ];
 

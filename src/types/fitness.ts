@@ -79,7 +79,10 @@ export type Constraint =
   | 'shoulder_injury'
   | 'knee_injury'
   | 'back_injury'
-  | 'wrist_injury';
+  | 'wrist_injury'
+  | 'neck_injury'
+  | 'pregnancy'
+  | 'balance_issues';
 
 // NASM OPT Model Types
 export type OptLevel = 1 | 2 | 3;
@@ -431,6 +434,9 @@ export const CONSTRAINT_OPTIONS: { id: Constraint; name: string; description: st
   { id: 'knee_injury', name: 'Knee Limitation', description: 'Reduce knee stress' },
   { id: 'back_injury', name: 'Back Limitation', description: 'Reduce spinal stress' },
   { id: 'wrist_injury', name: 'Wrist Limitation', description: 'Reduce wrist loading' },
+  { id: 'neck_injury', name: 'Neck Limitation', description: 'Avoid neck strain' },
+  { id: 'pregnancy', name: 'Pregnancy', description: 'Avoid specific movements' },
+  { id: 'balance_issues', name: 'Balance Issues', description: 'Avoid unstable movements' },
 ];
 
 export const EQUIPMENT_PRESETS: { name: string; equipment: Equipment[] }[] = [
