@@ -615,12 +615,14 @@
 
 /* Primary glow layer */
 .animate-horizon-glow {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    var(--glow-color-primary) 50%,
-    transparent 100%
-  );
+  background:
+    radial-gradient(
+      ellipse 70% 25% at 50% 50%,
+      var(--glow-color-primary) 0%,
+      transparent 70%
+    );
+  background-size: 140% 100%;
+  background-position: center;
   filter: blur(80px);
   animation:
     horizon-color-smooth 48s linear infinite,
@@ -629,13 +631,15 @@
 
 /* Secondary glow layer - offset timing */
 .animate-horizon-glow-secondary {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    var(--glow-color-secondary) 50%,
-    transparent 100%
-  );
-  filter: blur(100px);
+  background:
+    radial-gradient(
+      ellipse 65% 22% at 50% 50%,
+      var(--glow-color-secondary) 0%,
+      transparent 70%
+    );
+  background-size: 140% 100%;
+  background-position: center;
+  filter: blur(80px);
   animation:
     horizon-color-smooth-secondary 48s linear infinite,
     horizon-breathe 12s ease-in-out infinite 3s;
@@ -643,14 +647,50 @@
 
 /* Tertiary glow layer - different cycle time for organic feel */
 .animate-horizon-glow-tertiary {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    var(--glow-color-tertiary) 50%,
-    transparent 100%
-  );
+  background:
+    radial-gradient(
+      ellipse 60% 20% at 50% 50%,
+      var(--glow-color-tertiary) 0%,
+      transparent 70%
+    );
+  background-size: 140% 100%;
+  background-position: center;
   filter: blur(60px);
   animation:
     horizon-color-smooth-tertiary 36s linear infinite,
     horizon-breathe 12s ease-in-out infinite 6s;
+}
+
+/* Constrain horizon glow to center for a cleaner premium blend */
+.horizon-glow-mask {
+  mask-image:
+    radial-gradient(
+      ellipse 80% 55% at 50% 50%,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 55%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 1) 28%,
+      rgba(0, 0, 0, 1) 72%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  -webkit-mask-image:
+    radial-gradient(
+      ellipse 80% 55% at 50% 50%,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(0, 0, 0, 1) 55%,
+      rgba(0, 0, 0, 0) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 1) 28%,
+      rgba(0, 0, 0, 1) 72%,
+      rgba(0, 0, 0, 0) 100%
+    );
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
 }
