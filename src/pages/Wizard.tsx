@@ -2,18 +2,6 @@ import { useEffect, useRef, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { RotateCcw } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
 import { WizardStepper } from '@/components/wizard/WizardStepper';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
@@ -231,48 +219,6 @@ export default function WizardPage() {
           <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block mr-2">
             {t('wizard.progress', { percent: Math.round(((currentStepIndex + 1) / 6) * 100) })}
           </span>
-
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-destructive h-8 px-2 lg:px-3"
-                aria-label="Start Over"
-              >
-                <RotateCcw className="h-4 w-4 lg:mr-2" />
-                <span className="hidden lg:inline">Start Over</span>
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="glass-static border-white/10">
-              <AlertDialogHeader>
-                <div className="flex items-center gap-2">
-                  <RotateCcw className="h-5 w-5 text-destructive" />
-                  <AlertDialogTitle className="text-xl">Start Over?</AlertDialogTitle>
-                </div>
-                <AlertDialogDescription className="text-base text-muted-foreground pt-2">
-                  This will clear all your current selections (Goal, Equipment, Muscles) and return you to the beginning.
-                  <br /><br />
-                  Are you sure you want to continue?
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter className="mt-4">
-                <AlertDialogCancel className="hover:bg-white/10">Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    resetWizard();
-                    toast({
-                      title: "Wizard Reset",
-                      description: "Ready for a fresh start! 🚀",
-                    });
-                  }}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-6 font-semibold"
-                >
-                  Yes, Start Over
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </div>
       </div>
 
@@ -307,11 +253,12 @@ export default function WizardPage() {
       <WizardNavigation
         onGenerate={handleGenerate}
         canGoBack={currentStepIndex > 0}
-        canGoForward={validation.valid} // used for Next button disabled state
+        canGoForward={validation.valid}
         isLastStep={currentStep === 'review'}
         isGenerating={isGenerating}
         onBack={prevStep}
         onNext={nextStep}
+        onStartOver={resetWizard}
         validationMessage={!validation.valid ? validation.message : undefined}
       />
     </div >
