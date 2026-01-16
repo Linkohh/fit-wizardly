@@ -244,7 +244,7 @@ export default function WizardPage() {
                 <span className="hidden lg:inline">Start Over</span>
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="glass-premium border-white/10">
+            <AlertDialogContent className="glass-static border-white/10">
               <AlertDialogHeader>
                 <div className="flex items-center gap-2">
                   <RotateCcw className="h-5 w-5 text-destructive" />
