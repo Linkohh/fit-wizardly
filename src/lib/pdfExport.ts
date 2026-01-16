@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Plan } from '@/types/fitness';
 
-export const exportPlanToPDF = (currentPlan: Plan) => {
+export const exportPlanToPDF = (currentPlan: Plan, redactSensitive: boolean) => {
     const doc = new jsPDF();
     const selections = currentPlan.selections;
 
@@ -23,8 +23,13 @@ export const exportPlanToPDF = (currentPlan: Plan) => {
     doc.setFont('helvetica', 'bold');
 
     // Personalized title if name is provided
-    const userName = `${selections.firstName || ''} ${selections.lastName || ''}`.trim();
-    if (userName) {
+    const userName = redactSensitive ? '' : `${selections.firstName || ''} ${selections.lastName || ''}`.trim();
+    if (redactSensitive) {
+        doc.text('FitWizard Workout Plan', 14, 18);
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Workout Plan Export', 14, 26);
+    } else if (userName) {
         doc.text(`${userName}'s Workout Plan`, 14, 18);
         doc.setFontSize(12);
         doc.setFont('helvetica', 'normal');
@@ -42,7 +47,7 @@ export const exportPlanToPDF = (currentPlan: Plan) => {
 
     // Personal goal note (if provided)
     let y = 55;
-    if (selections.personalGoalNote) {
+    if (!redactSensitive && selections.personalGoalNote) {
         doc.setTextColor(139, 92, 246);
         doc.setFontSize(11);
         doc.setFont('helvetica', 'bolditalic');
@@ -92,7 +97,7 @@ export const exportPlanToPDF = (currentPlan: Plan) => {
     doc.text("You've got this! Every rep counts. 💪", 14, 285);
 
     // Generate filename with user's name if available
-    const filename = userName
+    const filename = userName && !redactSensitive
         ? `${userName.replace(/\s+/g, '_')}_FitWizard_Plan.pdf`
         : 'FitWizard_Plan.pdf';
 
