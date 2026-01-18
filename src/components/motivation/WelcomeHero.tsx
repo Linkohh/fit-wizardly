@@ -199,7 +199,7 @@ export function WelcomeHero() {
             {/* Premium Layered Horizon Glow - 3D Depth with Aurora Color Cycling */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 horizon-glow-wrapper">
                 {/* Sharp Horizon Line with Electric Core - 1px High Definition */}
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-[1px] w-full horizon-line-sharp z-10" />
+                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[1px] w-[60%] horizon-line-sharp z-10" />
 
                 {/* Primary Layer - Main horizon with full 48s color cycle */}
                 <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[45%] w-[70%] animate-horizon-glow mix-blend-screen" />
