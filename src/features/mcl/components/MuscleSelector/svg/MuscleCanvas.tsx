@@ -13,6 +13,7 @@ interface MuscleCanvasProps {
   disabledMuscles?: string[];
   colorByGroup: boolean;
   accentColor: string;
+  animateHighlights?: boolean;
   onMuscleHover: (muscle: Muscle | null, event?: React.MouseEvent) => void;
   onMuscleClick: (muscle: Muscle) => void;
   customViewBox?: string;
@@ -26,6 +27,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   disabledMuscles = [],
   colorByGroup,
   accentColor,
+  animateHighlights = false,
   onMuscleHover,
   onMuscleClick,
   customViewBox,
@@ -168,7 +170,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
 
         {/* Muscle paths */}
         <g className="muscles">
-          {sortedMuscles.map((muscle) => (
+          {sortedMuscles.map((muscle, index) => (
             <MusclePath
               key={`${muscle.id}-${view}`}
               muscle={muscle}
@@ -179,6 +181,8 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
               highlight={highlightMap.get(muscle.id)}
               colorByGroup={colorByGroup}
               accentColor={accentColor}
+              animateHighlights={animateHighlights}
+              highlightIndex={highlightMap.has(muscle.id) ? Array.from(highlightMap.keys()).indexOf(muscle.id) : index}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
               onClick={onMuscleClick}

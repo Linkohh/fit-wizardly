@@ -907,6 +907,21 @@
   animation: muscle-pulse 2.5s ease-in-out infinite;
 }
 
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .muscle-pulse {
+    animation: none;
+  }
+
+  .animate-muscle-glow,
+  .animate-bio-breathe,
+  .animate-horizon-glow,
+  .animate-horizon-glow-secondary,
+  .animate-horizon-glow-tertiary {
+    animation: none;
+  }
+}
+
 /* =====================================================
    BODY OUTLINE STYLES
    ===================================================== */

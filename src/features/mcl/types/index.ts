@@ -61,6 +61,7 @@ export interface MuscleSelectorProps {
   showSideView?: boolean;
 
   // Feature toggles
+  showHeader?: boolean;   // Show/hide the entire header bar (view switcher, search, controls)
   showSearch?: boolean;
   showLegend?: boolean;
   showInfoPanel?: boolean;
@@ -82,6 +83,7 @@ export interface MuscleSelectorProps {
   // Integration props (Phase 3 enhancement)
   highlightedMuscles?: MuscleHighlight[];  // External fatigue/recovery data
   disabledMuscles?: string[];              // Muscles that can't be selected (injured, etc.)
+  animateHighlights?: boolean;             // Enable pulse animation for highlighted muscles
 
   // Sizing
   width?: number | string;

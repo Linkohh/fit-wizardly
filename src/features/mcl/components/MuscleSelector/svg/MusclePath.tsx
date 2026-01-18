@@ -12,6 +12,8 @@ interface MusclePathProps {
   highlight?: MuscleHighlight;
   colorByGroup: boolean;
   accentColor: string;
+  animateHighlights?: boolean;
+  highlightIndex?: number;
   onMouseEnter: (muscle: Muscle, event: React.MouseEvent) => void;
   onMouseLeave: () => void;
   onClick: (muscle: Muscle) => void;
@@ -34,6 +36,8 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   highlight,
   colorByGroup,
   accentColor,
+  animateHighlights = false,
+  highlightIndex = 0,
   onMouseEnter,
   onMouseLeave,
   onClick,
@@ -116,10 +120,28 @@ export const MusclePath: React.FC<MusclePathProps> = ({
     }
   }, [muscle, onClick, isDisabled]);
 
+  // Determine if this muscle should have the pulse animation
+  const shouldPulse = useMemo(() => {
+    if (isDisabled) return false;
+    if (isSelected) return true;
+    if (animateHighlights && highlight && highlight.intensity > 50) return true;
+    return false;
+  }, [isDisabled, isSelected, animateHighlights, highlight]);
+
+  // Calculate animation delay for staggered effect
+  const animationDelay = useMemo(() => {
+    if (!shouldPulse || !animateHighlights) return undefined;
+    return `${highlightIndex * 0.15}s`;
+  }, [shouldPulse, animateHighlights, highlightIndex]);
+
   return (
     <motion.path
       d={pathData}
-      className={`muscle-path ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${isSelected && !isDisabled ? 'muscle-pulse' : ''}`}
+      className={`muscle-path ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${shouldPulse ? 'muscle-pulse' : ''}`}
+      style={{
+        transformOrigin: 'center',
+        ...(animationDelay ? { animationDelay } : {}),
+      }}
       fill={fillColor}
       stroke={isSelected || isHovered ? glowColor : 'transparent'}
       strokeWidth={isSelected ? 1.5 : isHovered ? 1 : 0}
@@ -137,9 +159,6 @@ export const MusclePath: React.FC<MusclePathProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={handleClick}
-      style={{
-        transformOrigin: 'center',
-      }}
       role="button"
       aria-label={`${muscle.name}${isDisabled ? ' (disabled)' : ''}${highlight ? ` - ${highlight.label || highlight.type}` : ''}`}
       aria-pressed={isSelected}

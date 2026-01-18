@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Moon, Sun, Palette, Undo2, Redo2 } from 'lucide-react';
 import { MuscleSelectorProps, ViewType, Muscle, TooltipState, InfoPanelState } from '../../types';
@@ -19,6 +19,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   multiSelect = true,
   defaultView = 'front',
   showSideView = true,
+  showHeader = true,
   showSearch = true,
   showLegend = true,
   showInfoPanel = true,
@@ -33,6 +34,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   onPresetApply,
   highlightedMuscles,
   disabledMuscles,
+  animateHighlights = false,
   width = '100%',
   height = '100%',
   className = '',
@@ -46,6 +48,11 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
   // View state
   const [currentView, setCurrentView] = useState<ViewType>(defaultView);
+
+  // Sync view when defaultView prop changes (for controlled usage)
+  useEffect(() => {
+    setCurrentView(defaultView);
+  }, [defaultView]);
 
   // Color mode
   const [colorByGroup, setColorByGroup] = useState(initialColorByGroup);
@@ -174,88 +181,90 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header / Controls */}
-        <div className="flex items-center justify-between p-4 border-b border-white/10 overflow-hidden">
-          <div className="flex items-center gap-4">
-            {/* View Switcher */}
-            <ViewSwitcher
-              currentView={currentView}
-              showSideView={showSideView}
-              onViewChange={handleViewChange}
-            />
+        {showHeader && (
+          <div className="flex items-center justify-between p-4 border-b border-white/10 overflow-hidden">
+            <div className="flex items-center gap-4">
+              {/* View Switcher */}
+              <ViewSwitcher
+                currentView={currentView}
+                showSideView={showSideView}
+                onViewChange={handleViewChange}
+              />
 
-            {/* Search */}
-            {showSearch && (
-              <div className="hidden md:block w-32 lg:w-64 transition-all duration-300">
-                <SearchBar
-                  onMuscleSelect={handleSearchSelect}
-                  onMuscleHover={(m) => setHoveredMuscle(m?.id || null)}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Undo/Redo */}
-            <div className="flex items-center gap-2 border-l border-white/10 pl-2 ml-2">
-              <button
-                onClick={undo}
-                disabled={!canUndo}
-                className={`
-                  p-2 rounded-lg transition-colors
-                  ${canUndo
-                    ? 'bg-white/5 text-white hover:bg-white/10'
-                    : 'bg-white/5 text-white/20 cursor-not-allowed'
-                  }
-                `}
-                title="Undo (Ctrl+Z)"
-              >
-                <Undo2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={redo}
-                disabled={!canRedo}
-                className={`
-                  p-2 rounded-lg transition-colors
-                  ${canRedo
-                    ? 'bg-white/5 text-white hover:bg-white/10'
-                    : 'bg-white/5 text-white/20 cursor-not-allowed'
-                  }
-                `}
-                title="Redo (Ctrl+Shift+Z)"
-              >
-                <Redo2 className="w-4 h-4" />
-              </button>
+              {/* Search */}
+              {showSearch && (
+                <div className="hidden md:block w-32 lg:w-64 transition-all duration-300">
+                  <SearchBar
+                    onMuscleSelect={handleSearchSelect}
+                    onMuscleHover={(m) => setHoveredMuscle(m?.id || null)}
+                  />
+                </div>
+              )}
             </div>
 
-            {/* Color mode toggle */}
-            <button
-              onClick={() => setColorByGroup(!colorByGroup)}
-              className={`
-                p-2 rounded-lg transition-colors
-                ${colorByGroup
-                  ? 'bg-primary/20 text-primary-300 ring-1 ring-primary/50'
-                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
-                }
-              `}
-              title={colorByGroup ? 'Disable color by group' : 'Enable color by group'}
-            >
-              <Palette className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* Undo/Redo */}
+              <div className="flex items-center gap-2 border-l border-white/10 pl-2 ml-2">
+                <button
+                  onClick={undo}
+                  disabled={!canUndo}
+                  className={`
+                    p-2 rounded-lg transition-colors
+                    ${canUndo
+                      ? 'bg-white/5 text-white hover:bg-white/10'
+                      : 'bg-white/5 text-white/20 cursor-not-allowed'
+                    }
+                  `}
+                  title="Undo (Ctrl+Z)"
+                >
+                  <Undo2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={redo}
+                  disabled={!canRedo}
+                  className={`
+                    p-2 rounded-lg transition-colors
+                    ${canRedo
+                      ? 'bg-white/5 text-white hover:bg-white/10'
+                      : 'bg-white/5 text-white/20 cursor-not-allowed'
+                    }
+                  `}
+                  title="Redo (Ctrl+Shift+Z)"
+                >
+                  <Redo2 className="w-4 h-4" />
+                </button>
+              </div>
 
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
-              title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {resolvedTheme === 'dark' ? (
-                <Sun className="w-4 h-4" />
-              ) : (
-                <Moon className="w-4 h-4" />
-              )}
-            </button>
+              {/* Color mode toggle */}
+              <button
+                onClick={() => setColorByGroup(!colorByGroup)}
+                className={`
+                  p-2 rounded-lg transition-colors
+                  ${colorByGroup
+                    ? 'bg-primary/20 text-primary-300 ring-1 ring-primary/50'
+                    : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+                  }
+                `}
+                title={colorByGroup ? 'Disable color by group' : 'Enable color by group'}
+              >
+                <Palette className="w-4 h-4" />
+              </button>
+
+              {/* Theme toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+                title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {resolvedTheme === 'dark' ? (
+                  <Sun className="w-4 h-4" />
+                ) : (
+                  <Moon className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Legend */}
         {showLegend && (
@@ -280,6 +289,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 disabledMuscles={disabledMuscles}
                 colorByGroup={colorByGroup}
                 accentColor={accentColor}
+                animateHighlights={animateHighlights}
                 onMuscleHover={handleMuscleHover}
                 onMuscleClick={handleMuscleClick}
                 customViewBox={customViewBox}
