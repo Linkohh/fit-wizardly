@@ -704,3 +704,292 @@
     transparent 70%
   );
 }
+
+/* =====================================================
+   MCL: MUSCLE SELECTOR COMPONENT LIBRARY STYLES
+   Merged from: MCL/src/index.css
+   ===================================================== */
+
+:root {
+  /* Premium gradient colors for muscle groups */
+  --color-chest: #EF4444;
+  --color-chest-glow: rgba(239, 68, 68, 0.5);
+  --color-back: #F97316;
+  --color-back-glow: rgba(249, 115, 22, 0.5);
+  --color-shoulders: #EAB308;
+  --color-shoulders-glow: rgba(234, 179, 8, 0.5);
+  --color-arms: #22C55E;
+  --color-arms-glow: rgba(34, 197, 94, 0.5);
+  --color-core: #3B82F6;
+  --color-core-glow: rgba(59, 130, 246, 0.5);
+  --color-legs: #8B5CF6;
+  --color-legs-glow: rgba(139, 92, 246, 0.5);
+  --color-glutes: #EC4899;
+  --color-glutes-glow: rgba(236, 72, 153, 0.5);
+  --color-calves: #06B6D4;
+  --color-calves-glow: rgba(6, 182, 212, 0.5);
+
+  /* Glassmorphism tokens - Light mode */
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-bg-stronger: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-border-subtle: rgba(0, 0, 0, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  --glass-blur: 20px;
+
+  /* Ambient effects */
+  --ambient-glow: rgba(59, 130, 246, 0.06);
+  --body-base-fill: #E5E7EB;
+  --body-outline-stroke: #9CA3AF;
+}
+
+.dark {
+  /* Dark mode glassmorphism */
+  --glass-bg: rgba(15, 18, 25, 0.8);
+  --glass-bg-stronger: rgba(15, 18, 25, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-subtle: rgba(255, 255, 255, 0.04);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  
+  /* Ambient effects */
+  --ambient-glow: rgba(59, 130, 246, 0.08);
+  --body-base-fill: #374151;
+  --body-outline-stroke: #6B7280;
+}
+
+/* =====================================================
+   GLASSMORPHISM UTILITY CLASSES
+   ===================================================== */
+
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-panel-stronger {
+  background: var(--glass-bg-stronger);
+  backdrop-filter: blur(calc(var(--glass-blur) * 1.5));
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * 1.5));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: 12px;
+  box-shadow: 
+    var(--glass-shadow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* =====================================================
+   MUSCLE SVG STYLES
+   ===================================================== */
+
+.muscle-path {
+  cursor: pointer;
+  transition: all 0.2s ease-out;
+}
+
+.muscle-path:hover {
+  filter: brightness(1.15);
+}
+
+/* Premium glow effect for selected muscles */
+.muscle-selected {
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+/* Premium pulse animation for selected muscles */
+@keyframes muscle-pulse {
+  0%, 100% { 
+    opacity: 1;
+    filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 16px currentColor);
+  }
+  50% { 
+    opacity: 0.9;
+    filter: drop-shadow(0 0 12px currentColor) drop-shadow(0 0 24px currentColor);
+  }
+}
+
+.muscle-pulse {
+  animation: muscle-pulse 2.5s ease-in-out infinite;
+}
+
+/* =====================================================
+   BODY OUTLINE STYLES
+   ===================================================== */
+
+.body-outline {
+  stroke: var(--body-outline-stroke);
+  opacity: 0.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dark .body-outline {
+  stroke: #9CA3AF;
+  opacity: 0.4;
+}
+
+/* Ambient body glow */
+.body-ambient-glow {
+  fill: url(#ambientGlow);
+  opacity: 0.5;
+}
+
+/* =====================================================
+   LOADING ANIMATIONS
+   ===================================================== */
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* =====================================================
+   PREMIUM BUTTON STYLES
+   ===================================================== */
+
+.btn-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-subtle);
+  transition: all 0.2s ease;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--glass-border);
+  transform: translateY(-1px);
+}
+
+.dark .btn-glass:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* =====================================================
+   PREMIUM CHIP/BADGE STYLES
+   ===================================================== */
+
+.chip-premium {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* =====================================================
+   VIEW SWITCHER STYLES
+   ===================================================== */
+
+.view-switcher-container {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border-subtle);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.view-switcher-indicator {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(139, 92, 246, 0.9) 100%);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* =====================================================
+   STAGGERED ANIMATION UTILITIES
+   ===================================================== */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out forwards;
+}
+
+/* Staggered children animation */
+.stagger-children > * {
+  opacity: 0;
+  animation: fade-in-up 0.3s ease-out forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* =====================================================
+   PREMIUM SHADOWS
+   ===================================================== */
+
+.shadow-premium {
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-premium-lg {
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.dark .shadow-premium {
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2),
+    0 20px 25px -5px rgba(0, 0, 0, 0.4),
+    0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* =====================================================
+   GRADIENT TEXT UTILITY
+   ===================================================== */
+
+.text-gradient-premium {
+  background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}

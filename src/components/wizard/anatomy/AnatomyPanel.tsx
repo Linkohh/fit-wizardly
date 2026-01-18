@@ -1,20 +1,13 @@
-import { useState, useCallback } from 'react';
-import { RotateCcw, Layers, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { MuscleDiagram } from './MuscleDiagram';
-import { MuscleList } from './MuscleList';
-import { SelectedMusclesChips } from './SelectedMusclesChips';
+import { useCallback, useMemo } from 'react';
 import { ExerciseSuggestions } from '@/components/wizard/ExerciseSuggestions';
 import { useWizardStore } from '@/stores/wizardStore';
-import { MUSCLE_DATA } from '@/types/fitness';
-import type { MuscleGroup } from '@/types/fitness';
 import { useWizardForm, anatomyStepSchema } from '@/hooks/useWizardForm';
 import { FormError } from '@/components/ui/form-error';
+import { MuscleSelector } from '@/features/mcl';
+import { mapLegacyToMcl, mapMclToLegacy } from '@/lib/muscleMapping';
 
 export function AnatomyPanel() {
     const { selections, setTargetMuscles } = useWizardStore();
-    const [view, setView] = useState<'front' | 'back'>('front');
-    const [hoveredMuscle, setHoveredMuscle] = useState<MuscleGroup | null>(null);
 
     // React Hook Form integration with Zustand sync
     const { watch, setValue, formState: { errors }, trigger } = useWizardForm({
@@ -30,119 +23,42 @@ export function AnatomyPanel() {
     // Watch target muscles for reactive updates
     const watchedTargetMuscles = watch('targetMuscles') || [];
 
-    // Filter muscles for the list based on current view
-    const currentMuscles = MUSCLE_DATA
-        .filter(m => m.view === view)
-        .sort((a, b) => a.displayOrder - b.displayOrder);
+    // Map Legacy Groups to MCL IDs for visualization
+    const selectedMclIds = useMemo(() => mapLegacyToMcl(watchedTargetMuscles), [watchedTargetMuscles]);
 
-    // Performance measurement wrapper with dev logging
-    const handleToggle = useCallback((muscleId: MuscleGroup) => {
-        const current = watchedTargetMuscles;
-        const newMuscles = current.includes(muscleId)
-            ? current.filter((m) => m !== muscleId)
-            : [...current, muscleId];
+    // Handle selection from MCL
+    const handleSelectionChange = useCallback((newMclIds: string[]) => {
+        // Map back to legacy groups
+        const newGroups = mapMclToLegacy(newMclIds);
 
-        if (import.meta.env.DEV) {
-            const start = performance.now();
-            setValue('targetMuscles', newMuscles);
-            trigger('targetMuscles');
-            requestAnimationFrame(() => {
-                const end = performance.now();
-                const duration = end - start;
-                console.log(`[Anatomy] Selection toggle: ${muscleId} in ${duration.toFixed(2)}ms`);
-                if (duration > 300) {
-                    console.warn(`[Performance] Selection exceeded 300ms threshold!`);
-                }
-            });
-        } else {
-            setValue('targetMuscles', newMuscles);
-            trigger('targetMuscles');
-        }
-    }, [watchedTargetMuscles, setValue, trigger]);
-
-    const handleClear = useCallback(() => {
-        setValue('targetMuscles', []);
+        setValue('targetMuscles', newGroups, { shouldValidate: true, shouldDirty: true });
+        // Trigger validation immediately
         trigger('targetMuscles');
-    }, [setValue, trigger]);
 
-    const toggleView = useCallback(() => setView(v => v === 'front' ? 'back' : 'front'), []);
-
-    const handleHover = useCallback((muscleId: MuscleGroup | null) => {
-        setHoveredMuscle(muscleId);
-    }, []);
+        // Update store directly for immediate feedback if needed (optional, handled by onSync usually)
+        setTargetMuscles(newGroups);
+    }, [setValue, setTargetMuscles, trigger]);
 
     return (
         <div className="w-full space-y-6">
-            {/* Selected Muscles Chips */}
-            <SelectedMusclesChips
-                selectedMuscles={watchedTargetMuscles}
-                onRemove={handleToggle}
-                onClearAll={handleClear}
-            />
-
-            {/* Validation error */}
-            <FormError error={errors.targetMuscles?.message} />
-
-            {/* View Toggle Header */}
-            <div className="flex items-center justify-center">
-                <div className="inline-flex items-center gap-2 p-1 bg-muted/30 rounded-xl border border-border/50 backdrop-blur-sm">
-                    <Button
-                        variant={view === 'front' ? 'default' : 'ghost'}
-                        size="sm"
-                        onClick={() => setView('front')}
-                        className="gap-2 min-w-[100px] transition-all"
-                    >
-                        <Eye className="w-4 h-4" />
-                        Front
-                    </Button>
-                    <Button
-                        variant={view === 'back' ? 'default' : 'ghost'}
-                        size="sm"
-                        onClick={() => setView('back')}
-                        className="gap-2 min-w-[100px] transition-all"
-                    >
-                        <RotateCcw className="w-4 h-4" />
-                        Back
-                    </Button>
-                </div>
+            <div className="flex flex-col space-y-2">
+                {/* Validation error */}
+                <FormError error={errors.targetMuscles?.message} />
             </div>
 
-            {/* Main Grid - Diagram + List */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-                {/* Visual Diagram */}
-                <div className="flex justify-center">
-                    <div className="w-full max-w-sm">
-                        <MuscleDiagram
-                            view={view}
-                            selectedMuscles={watchedTargetMuscles}
-                            onToggle={handleToggle}
-                            hoveredMuscle={hoveredMuscle}
-                            onHover={handleHover}
-                        />
-                    </div>
-                </div>
-
-                {/* Selection List */}
-                <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <Layers className="w-4 h-4" />
-                        <span className="text-sm font-medium uppercase tracking-wider">
-                            {view === 'front' ? 'Front' : 'Back'} Muscles
-                        </span>
-                        {hoveredMuscle && (
-                            <span className="ml-auto text-xs text-primary font-medium animate-in fade-in-0">
-                                Previewing: {hoveredMuscle.replace('_', ' ')}
-                            </span>
-                        )}
-                    </div>
-                    <MuscleList
-                        muscles={currentMuscles}
-                        selectedMuscles={watchedTargetMuscles}
-                        onToggle={handleToggle}
-                        hoveredMuscle={hoveredMuscle}
-                        onHover={handleHover}
-                    />
-                </div>
+            {/* MCL Integration */}
+            <div className="w-full min-h-[600px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/20 backdrop-blur-sm">
+                <MuscleSelector
+                    selectedMuscles={selectedMclIds}
+                    onSelectionChange={handleSelectionChange}
+                    showPresets={true}
+                    showInfoPanel={true}
+                    showSelectionSidebar={true}
+                    showLegend={false} // Cleaner look
+                    theme="dark"
+                    height="600px"
+                    className="w-full"
+                />
             </div>
 
             {/* Real-time Exercise Suggestions */}

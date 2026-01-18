@@ -1,12 +1,13 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, ChevronRight, Trophy, Flame } from 'lucide-react';
-import { Exercise } from '@/types/fitness';
+import { Exercise, MuscleGroup } from '@/types/fitness';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { MusclePulseDiagram } from './MusclePulseDiagram';
 import { getExerciseOfTheDay } from '@/lib/smart-recommendations';
+import { MuscleSelector, MuscleHighlight } from '@/features/mcl';
+import { getMclIdsForLegacyGroup } from '@/lib/muscleMapping';
 import { EXERCISE_DATABASE } from '@/data/exercises';
 import { cn } from '@/lib/utils';
 import { getExerciseTheme, getThemeForCategory } from '@/lib/exerciseTheme';
@@ -21,6 +22,36 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
     const theme = useMemo(() => {
         if (!exercise) return getThemeForCategory('default');
         return getExerciseTheme(exercise);
+    }, [exercise]);
+
+    // Map muscles to MCL highlights
+    const highlights = useMemo(() => {
+        if (!exercise) return [];
+        const items: MuscleHighlight[] = [];
+
+        // Primary muscles - high intensity focus
+        exercise.primaryMuscles.forEach(group => {
+            getMclIdsForLegacyGroup(group).forEach(id => {
+                items.push({ muscleId: id, type: 'focus', intensity: 100 });
+            });
+        });
+
+        // Secondary muscles - lower intensity
+        exercise.secondaryMuscles.forEach(group => {
+            getMclIdsForLegacyGroup(group).forEach(id => {
+                items.push({ muscleId: id, type: 'focus', intensity: 50 });
+            });
+        });
+
+        return items;
+    }, [exercise]);
+
+    // Simple heuristic for default view
+    const defaultView = useMemo(() => {
+        if (!exercise) return 'front';
+        const backGroups: MuscleGroup[] = ['lats', 'traps', 'glutes', 'hamstrings', 'lower_back', 'calves', 'triceps', 'rear_deltoid', 'upper_back'];
+        const hasBackMuscle = exercise.primaryMuscles.some(m => backGroups.includes(m));
+        return hasBackMuscle ? 'back' : 'front';
     }, [exercise]);
 
     if (!exercise) return null;
@@ -101,12 +132,20 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
                     {/* Visual Section */}
                     <div className="relative h-48 md:h-auto min-h-[220px] overflow-hidden bg-black/20 flex items-center justify-center">
                         {/* Muscle Diagram Background */}
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-full max-w-[240px] opacity-30 md:opacity-100 md:scale-110 md:translate-x-4 transition-transform duration-700 group-hover:scale-125">
-                            <MusclePulseDiagram
-                                primaryMuscles={exercise.primaryMuscles}
-                                secondaryMuscles={exercise.secondaryMuscles}
-                                intensity="medium"
-                                className="w-full h-full pointer-events-none"
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-full max-w-[240px] opacity-60 md:opacity-80 md:scale-110 md:translate-x-4 transition-transform duration-700 group-hover:scale-125 h-[120%]">
+                            <MuscleSelector
+                                defaultView={defaultView}
+                                highlightedMuscles={highlights}
+                                showSideView={false}
+                                showSearch={false}
+                                showLegend={false}
+                                showInfoPanel={false}
+                                showSelectionSidebar={false}
+                                showPresets={false}
+                                theme="dark"
+                                width="100%"
+                                height="100%"
+                                className="bg-transparent"
                             />
                         </div>
 
