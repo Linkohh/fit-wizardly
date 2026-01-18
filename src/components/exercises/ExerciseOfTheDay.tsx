@@ -49,9 +49,57 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
     // Simple heuristic for default view
     const defaultView = useMemo(() => {
         if (!exercise) return 'front';
-        const backGroups: MuscleGroup[] = ['lats', 'traps', 'glutes', 'hamstrings', 'lower_back', 'calves', 'triceps', 'rear_deltoid', 'upper_back'];
+
+        const frontGroups: MuscleGroup[] = ['chest', 'abs', 'obliques', 'quads', 'biceps', 'front_deltoid', 'forearms'];
+        const backGroups: MuscleGroup[] = ['lats', 'traps', 'glutes', 'hamstrings', 'lower_back', 'calves', 'rear_deltoid', 'upper_back'];
+
+        // Check primary muscles
+        const hasFrontMuscle = exercise.primaryMuscles.some(m => frontGroups.includes(m));
         const hasBackMuscle = exercise.primaryMuscles.some(m => backGroups.includes(m));
-        return hasBackMuscle ? 'back' : 'front';
+
+        if (hasFrontMuscle && !hasBackMuscle) return 'front';
+        if (!hasFrontMuscle && hasBackMuscle) return 'back';
+
+        // If mixed, prioritize Front for chest/abs/quads
+        if (hasFrontMuscle && hasBackMuscle) {
+            if (exercise.primaryMuscles.includes('chest') ||
+                exercise.primaryMuscles.includes('abs') ||
+                exercise.primaryMuscles.includes('quads')) return 'front';
+            return 'back';
+        }
+
+        // Default relative to id logic or fallback
+        return 'front';
+    }, [exercise]);
+
+    // Smart Zoom Heuristic
+    const smartZoomViewBox = useMemo(() => {
+        if (!exercise) return undefined;
+
+        const upperBodyMuscles: MuscleGroup[] = [
+            'chest', 'abs', 'obliques', 'biceps', 'triceps', 'forearms',
+            'front_deltoid', 'rear_deltoid', 'traps', 'lats', 'upper_back', 'lower_back', 'neck'
+        ];
+
+        const lowerBodyMuscles: MuscleGroup[] = [
+            'quads', 'hamstrings', 'glutes', 'calves', 'adductors'
+        ];
+
+        const hasUpperBody = exercise.primaryMuscles.some(m => upperBodyMuscles.includes(m));
+        const hasLowerBody = exercise.primaryMuscles.some(m => lowerBodyMuscles.includes(m));
+
+        // If explicitly upper body only, zoom in on top half
+        if (hasUpperBody && !hasLowerBody) {
+            return "0 0 200 220"; // Top half
+        }
+
+        // If explicitly lower body only, zoom in on bottom half
+        if (!hasUpperBody && hasLowerBody) {
+            return "0 220 200 220"; // Bottom half
+        }
+
+        // Full body default
+        return undefined;
     }, [exercise]);
 
     if (!exercise) return null;
@@ -144,7 +192,8 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
                                 showPresets={false}
                                 theme="dark"
                                 width="100%"
-                                height="100%"
+                                height="400px"
+                                customViewBox={smartZoomViewBox}
                                 className="bg-transparent"
                             />
                         </div>

@@ -3,12 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Info, Trash2 } from 'lucide-react';
 import { Muscle } from '../../../types';
 import { getMuscleGroupColor, getMuscleGroupName } from '../../../data/muscleGroups';
+import PresetSelector from './PresetSelector';
 
 interface SelectionSidebarProps {
   selectedMuscles: Muscle[];
   onRemoveMuscle: (muscleId: string) => void;
   onClearAll: () => void;
   onViewInfo: (muscle: Muscle) => void;
+  onPresetSelect?: (muscleIds: string[], presetId: string) => void;
+  currentSelectionIds?: string[];
 }
 
 export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
@@ -16,6 +19,8 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
   onRemoveMuscle,
   onClearAll,
   onViewInfo,
+  onPresetSelect,
+  currentSelectionIds = [],
 }) => {
   // Group selected muscles by muscle group
   const groupedMuscles = selectedMuscles.reduce(
@@ -30,33 +35,47 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
   );
 
   return (
-    <div className="h-full flex flex-col glass-panel-stronger border-l border-white/10 dark:border-white/5">
+    <div className="h-full flex flex-col bg-[#0f0518]/90 backdrop-blur-xl border-l border-white/10 shadow-2xl relative z-20">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+      <div className="p-4 border-b border-white/10 space-y-3">
+        {/* Title Row */}
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-gray-900 dark:text-white">
+          <h3 className="font-semibold text-white">
             Selected Muscles
           </h3>
-          <span className="px-2 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm rounded-full">
+          <span className="px-2 py-0.5 bg-primary/20 text-primary-300 text-sm rounded-full">
             {selectedMuscles.length}
           </span>
         </div>
-        {selectedMuscles.length > 0 && (
-          <button
-            onClick={onClearAll}
-            className="flex items-center gap-1 mt-2 text-sm text-gray-500 hover:text-red-500 transition-colors"
-          >
-            <Trash2 className="w-3 h-3" />
-            Clear all
-          </button>
-        )}
+
+        {/* Actions Row */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            {onPresetSelect && (
+              <PresetSelector
+                onPresetSelect={onPresetSelect}
+                currentSelection={currentSelectionIds}
+              />
+            )}
+          </div>
+
+          {selectedMuscles.length > 0 && (
+            <button
+              onClick={onClearAll}
+              className="p-2 text-white/50 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/5"
+              title="Clear all"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Selected muscles list */}
       <div className="flex-1 overflow-y-auto p-4">
         {selectedMuscles.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-gray-400 dark:text-gray-500 text-sm">
+            <p className="text-white/40 text-sm">
               Click on muscles to select them
             </p>
           </div>

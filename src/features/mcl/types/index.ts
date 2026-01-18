@@ -87,6 +87,7 @@ export interface MuscleSelectorProps {
   width?: number | string;
   height?: number | string;
   className?: string;
+  customViewBox?: string; // Optional override for viewBox (e.g., "0 0 200 220" for upper body)
 }
 
 // Tooltip position and state

@@ -47,7 +47,7 @@ export function AnatomyPanel() {
             </div>
 
             {/* MCL Integration */}
-            <div className="w-full min-h-[600px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/20 backdrop-blur-sm">
+            <div className="w-full min-h-[600px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-gradient-to-br from-[#1a103c]/80 to-[#2d1b4e]/40 backdrop-blur-md">
                 <MuscleSelector
                     selectedMuscles={selectedMclIds}
                     onSelectionChange={handleSelectionChange}
@@ -57,7 +57,7 @@ export function AnatomyPanel() {
                     showLegend={false} // Cleaner look
                     theme="dark"
                     height="600px"
-                    className="w-full"
+                    className="w-full bg-transparent"
                 />
             </div>
 

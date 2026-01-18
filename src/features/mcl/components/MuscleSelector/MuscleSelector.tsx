@@ -12,7 +12,6 @@ import InfoPanel from './ui/InfoPanel';
 import SelectionSidebar from './ui/SelectionSidebar';
 import Legend from './ui/Legend';
 import SearchBar from './ui/SearchBar';
-import PresetSelector from './ui/PresetSelector';
 
 export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   selectedMuscles: controlledSelection,
@@ -37,6 +36,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   width = '100%',
   height = '100%',
   className = '',
+  customViewBox,
 }) => {
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
@@ -168,13 +168,13 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative flex bg-white dark:bg-gray-950 ${className}`}
+      className={`relative flex bg-transparent ${className}`}
       style={{ width, height }}
     >
       {/* Main content area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header / Controls */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between p-4 border-b border-white/10 overflow-hidden">
           <div className="flex items-center gap-4">
             {/* View Switcher */}
             <ViewSwitcher
@@ -185,7 +185,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
             {/* Search */}
             {showSearch && (
-              <div className="w-64">
+              <div className="hidden md:block w-32 lg:w-64 transition-all duration-300">
                 <SearchBar
                   onMuscleSelect={handleSearchSelect}
                   onMuscleHover={(m) => setHoveredMuscle(m?.id || null)}
@@ -195,25 +195,16 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Preset Selector */}
-            <PresetSelector
-              onPresetSelect={(muscleIds, presetId) => {
-                setSelection(muscleIds);
-                onPresetApply?.(presetId, muscleIds);
-              }}
-              currentSelection={selectedIds}
-            />
-
             {/* Undo/Redo */}
-            <div className="flex items-center border-l border-gray-200 dark:border-gray-700 pl-2 ml-2">
+            <div className="flex items-center gap-2 border-l border-white/10 pl-2 ml-2">
               <button
                 onClick={undo}
                 disabled={!canUndo}
                 className={`
                   p-2 rounded-lg transition-colors
                   ${canUndo
-                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                    : 'bg-gray-50 dark:bg-gray-900 text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                    ? 'bg-white/5 text-white hover:bg-white/10'
+                    : 'bg-white/5 text-white/20 cursor-not-allowed'
                   }
                 `}
                 title="Undo (Ctrl+Z)"
@@ -226,8 +217,8 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 className={`
                   p-2 rounded-lg transition-colors
                   ${canRedo
-                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                    : 'bg-gray-50 dark:bg-gray-900 text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                    ? 'bg-white/5 text-white hover:bg-white/10'
+                    : 'bg-white/5 text-white/20 cursor-not-allowed'
                   }
                 `}
                 title="Redo (Ctrl+Shift+Z)"
@@ -242,8 +233,8 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
               className={`
                 p-2 rounded-lg transition-colors
                 ${colorByGroup
-                  ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+                  ? 'bg-primary/20 text-primary-300 ring-1 ring-primary/50'
+                  : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
                 }
               `}
               title={colorByGroup ? 'Disable color by group' : 'Enable color by group'}
@@ -254,7 +245,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+              className="p-2 rounded-lg bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
               title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
               {resolvedTheme === 'dark' ? (
@@ -291,6 +282,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 accentColor={accentColor}
                 onMuscleHover={handleMuscleHover}
                 onMuscleClick={handleMuscleClick}
+                customViewBox={customViewBox}
               />
             </div>
           </motion.div>
@@ -313,6 +305,11 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
             onRemoveMuscle={handleRemoveMuscle}
             onClearAll={clearSelection}
             onViewInfo={handleViewMuscleInfo}
+            onPresetSelect={(muscleIds, presetId) => {
+              setSelection(muscleIds);
+              onPresetApply?.(presetId, muscleIds);
+            }}
+            currentSelectionIds={selectedIds}
           />
         </div>
       )}

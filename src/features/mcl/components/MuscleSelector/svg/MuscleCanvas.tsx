@@ -15,6 +15,7 @@ interface MuscleCanvasProps {
   accentColor: string;
   onMuscleHover: (muscle: Muscle | null, event?: React.MouseEvent) => void;
   onMuscleClick: (muscle: Muscle) => void;
+  customViewBox?: string;
 }
 
 export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
@@ -27,6 +28,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   accentColor,
   onMuscleHover,
   onMuscleClick,
+  customViewBox,
 }) => {
   // Get muscles for current view
   const visibleMuscles = useMemo(() => getMusclesByView(view), [view]);
@@ -89,7 +91,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
     <AnimatePresence mode="wait">
       <motion.svg
         key={view}
-        viewBox="0 0 200 440"
+        viewBox={customViewBox || "0 0 200 440"}
         className="w-full h-full"
         initial={{ opacity: 0, x: view === 'front' ? -20 : 20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -158,7 +160,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
           rx="90"
           ry="180"
           fill="url(#ambientGlow)"
-          className="pointer-events-none"
+          className="pointer-events-none animate-bio-breathe"
         />
 
         {/* Background body outline */}
