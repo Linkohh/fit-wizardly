@@ -2098,10 +2098,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "id": "incline_bench",
     "name": "Incline Bench Press",
     "primaryMuscles": [
-      "abs",
+      "chest",
       "front_deltoid"
     ],
-    "secondaryMuscles": [],
+    "secondaryMuscles": [
+      "triceps"
+    ],
     "equipment": [
       "barbell",
       "bench"

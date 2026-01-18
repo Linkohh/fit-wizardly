@@ -1,16 +1,18 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, ChevronRight, Trophy, Flame } from 'lucide-react';
-import { Exercise } from '@/types/fitness';
+import { ChevronRight, Trophy, Flame, Zap } from 'lucide-react';
+import { Exercise, MuscleGroup } from '@/types/fitness';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { MusclePulseDiagram } from './MusclePulseDiagram';
 import { getExerciseOfTheDay } from '@/lib/smart-recommendations';
+import { MuscleSelector, MuscleHighlight, ViewType } from '@/features/mcl';
+import { getMclIdsForLegacyGroup } from '@/lib/muscleMapping';
 import { EXERCISE_DATABASE } from '@/data/exercises';
 import { cn } from '@/lib/utils';
 import { getExerciseTheme, getThemeForCategory } from '@/lib/exerciseTheme';
 import { format } from 'date-fns';
+import { MiniViewToggle } from './MiniViewToggle';
 
 interface ExerciseOfTheDayProps {
     onSelect: (exercise: Exercise) => void;
@@ -21,6 +23,90 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
     const theme = useMemo(() => {
         if (!exercise) return getThemeForCategory('default');
         return getExerciseTheme(exercise);
+    }, [exercise]);
+
+    // Map muscles to MCL highlights
+    const highlights = useMemo(() => {
+        if (!exercise) return [];
+        const items: MuscleHighlight[] = [];
+
+        // Primary muscles - high intensity focus
+        exercise.primaryMuscles.forEach(group => {
+            getMclIdsForLegacyGroup(group).forEach(id => {
+                items.push({ muscleId: id, type: 'focus', intensity: 100 });
+            });
+        });
+
+        // Secondary muscles - lower intensity
+        exercise.secondaryMuscles.forEach(group => {
+            getMclIdsForLegacyGroup(group).forEach(id => {
+                items.push({ muscleId: id, type: 'focus', intensity: 50 });
+            });
+        });
+
+        return items;
+    }, [exercise]);
+
+    // Simple heuristic for default view
+    const defaultView = useMemo((): ViewType => {
+        if (!exercise) return 'front';
+
+        const frontGroups: MuscleGroup[] = ['chest', 'abs', 'obliques', 'quads', 'biceps', 'front_deltoid', 'forearms'];
+        const backGroups: MuscleGroup[] = ['lats', 'traps', 'glutes', 'hamstrings', 'lower_back', 'calves', 'rear_deltoid', 'upper_back'];
+
+        // Check primary muscles
+        const hasFrontMuscle = exercise.primaryMuscles.some(m => frontGroups.includes(m));
+        const hasBackMuscle = exercise.primaryMuscles.some(m => backGroups.includes(m));
+
+        if (hasFrontMuscle && !hasBackMuscle) return 'front';
+        if (!hasFrontMuscle && hasBackMuscle) return 'back';
+
+        // If mixed, prioritize Front for chest/abs/quads
+        if (hasFrontMuscle && hasBackMuscle) {
+            if (exercise.primaryMuscles.includes('chest') ||
+                exercise.primaryMuscles.includes('abs') ||
+                exercise.primaryMuscles.includes('quads')) return 'front';
+            return 'back';
+        }
+
+        // Default relative to id logic or fallback
+        return 'front';
+    }, [exercise]);
+
+    // View state for anatomy toggle (initialized with smart default)
+    const [currentView, setCurrentView] = useState<ViewType>(defaultView);
+
+    // Calculate total muscle count for badge
+    const muscleCount = highlights.length;
+
+    // Smart Zoom Heuristic
+    const smartZoomViewBox = useMemo(() => {
+        if (!exercise) return undefined;
+
+        const upperBodyMuscles: MuscleGroup[] = [
+            'chest', 'abs', 'obliques', 'biceps', 'triceps', 'forearms',
+            'front_deltoid', 'rear_deltoid', 'traps', 'lats', 'upper_back', 'lower_back', 'neck'
+        ];
+
+        const lowerBodyMuscles: MuscleGroup[] = [
+            'quads', 'hamstrings', 'glutes', 'calves', 'adductors'
+        ];
+
+        const hasUpperBody = exercise.primaryMuscles.some(m => upperBodyMuscles.includes(m));
+        const hasLowerBody = exercise.primaryMuscles.some(m => lowerBodyMuscles.includes(m));
+
+        // If explicitly upper body only, zoom in on top half
+        if (hasUpperBody && !hasLowerBody) {
+            return "0 0 200 220"; // Top half
+        }
+
+        // If explicitly lower body only, zoom in on bottom half
+        if (!hasUpperBody && hasLowerBody) {
+            return "0 220 200 220"; // Bottom half
+        }
+
+        // Full body default
+        return undefined;
     }, [exercise]);
 
     if (!exercise) return null;
@@ -99,25 +185,74 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
                     </div>
 
                     {/* Visual Section */}
-                    <div className="relative h-48 md:h-auto min-h-[220px] overflow-hidden bg-black/20 flex items-center justify-center">
-                        {/* Muscle Diagram Background */}
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-full max-w-[240px] opacity-30 md:opacity-100 md:scale-110 md:translate-x-4 transition-transform duration-700 group-hover:scale-125">
-                            <MusclePulseDiagram
-                                primaryMuscles={exercise.primaryMuscles}
-                                secondaryMuscles={exercise.secondaryMuscles}
-                                intensity="medium"
-                                className="w-full h-full pointer-events-none"
+                    <div className="relative h-48 md:h-auto min-h-[220px] overflow-hidden flex items-center justify-center">
+                        {/* Themed Glow Halo */}
+                        <div
+                            className="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700"
+                            style={{
+                                background: `radial-gradient(ellipse 80% 60% at 50% 50%, ${theme.glow} 0%, transparent 70%)`
+                            }}
+                        />
+
+                        {/* Muscles Engaged Badge */}
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.8, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
+                            className="absolute top-4 right-4 z-20"
+                        >
+                            <div className={cn(
+                                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium",
+                                "bg-black/40 backdrop-blur-md border border-white/10",
+                                "shadow-lg"
+                            )}
+                            style={{
+                                boxShadow: `0 0 20px ${theme.glow}, 0 4px 12px rgba(0,0,0,0.3)`
+                            }}
+                            >
+                                <Zap className="w-3 h-3 text-purple-400" />
+                                <span className="text-white/90">{muscleCount} muscles</span>
+                            </div>
+                        </motion.div>
+
+                        {/* Muscle Diagram */}
+                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-full max-w-[260px] opacity-90 md:scale-115 md:translate-x-2 transition-transform duration-700 group-hover:scale-125 h-[120%]">
+                            <MuscleSelector
+                                defaultView={currentView}
+                                highlightedMuscles={highlights}
+                                animateHighlights={true}
+                                showHeader={false}
+                                showSideView={false}
+                                showSearch={false}
+                                showLegend={false}
+                                showInfoPanel={false}
+                                showSelectionSidebar={false}
+                                showPresets={false}
+                                theme="dark"
+                                width="100%"
+                                height="100%"
+                                customViewBox={smartZoomViewBox}
+                                className="bg-transparent"
                             />
                         </div>
 
                         {/* Image overlay if available, fading in */}
                         {exercise.imageUrl && (
-                            <div className="absolute inset-0 mix-blend-overlay opacity-30 group-hover:opacity-10 transition-opacity duration-500">
+                            <div className="absolute inset-0 mix-blend-overlay opacity-20 group-hover:opacity-10 transition-opacity duration-500">
                                 <img src={exercise.imageUrl} alt={exercise.name} className="w-full h-full object-cover grayscale" />
                             </div>
                         )}
 
-                        <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-background/50 md:to-transparent" />
+                        {/* Mini View Toggle */}
+                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+                            <MiniViewToggle
+                                currentView={currentView}
+                                onViewChange={setCurrentView}
+                            />
+                        </div>
+
+                        {/* Gradient fade to content */}
+                        <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-background/60 md:to-background/40 pointer-events-none" />
                     </div>
                 </CardContent>
             </Card>

@@ -53,13 +53,36 @@ export default {
           purple: "#BC13FE",
           cyan: "#00FFFF",
         },
+        // MCL Muscle Colors
+        muscle: {
+          chest: '#EF4444',
+          back: '#F97316',
+          shoulders: '#EAB308',
+          arms: '#22C55E',
+          core: '#3B82F6',
+          legs: '#8B5CF6',
+          glutes: '#EC4899',
+          calves: '#06B6D4',
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        'inner-lg': 'inset 0 2px 4px 0 rgb(0 0 0 / 0.1)',
+        'glow': '0 0 20px rgba(239, 68, 68, 0.3)',
+      },
       keyframes: {
+        "pulse-subtle": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.8" },
+        },
+        "glow": {
+          "0%": { filter: "drop-shadow(0 0 2px currentColor)" },
+          "100%": { filter: "drop-shadow(0 0 8px currentColor)" },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -133,6 +156,8 @@ export default {
         "checkmark": "checkmark 0.6s ease-out forwards",
         "icon-bounce": "icon-bounce 0.4s ease-in-out",
         "card-lift": "card-lift 0.3s ease-out forwards",
+        "pulse-subtle": "pulse-subtle 2s ease-in-out infinite",
+        "glow": "glow 1.5s ease-in-out infinite alternate",
       },
     },
   },

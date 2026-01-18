@@ -14,6 +14,7 @@ import WizardPage from "./pages/Wizard";
 import PlanPage from "./pages/Plan";
 import NotFound from "./pages/NotFound";
 import ClientsPage from "./pages/Clients";
+import MCLIntegrationTest from "./pages/MCLIntegrationTest";
 import { ExercisesBrowser } from "./components/exercises/ExercisesBrowser";
 import { TrainerGuard } from "./components/TrainerGuard";
 import { OnboardingGuard } from "./components/OnboardingGuard";
@@ -119,6 +120,8 @@ function AnimatedRoutes() {
                 <CirclesPage />
               </RequireAuth>
             } />
+
+            <Route path="/mcl" element={<MCLIntegrationTest />} />
 
             <Route path="/legal" element={<LegalPage />} />
             <Route path="*" element={<NotFound />} />
