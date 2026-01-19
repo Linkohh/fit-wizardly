@@ -38,7 +38,7 @@ export function CircleCard({ circle, isSelected, onClick }: CircleCardProps) {
 
                 {/* Member avatars */}
                 <div className="flex -space-x-2">
-                    {circle.members.slice(0, 5).map((member, idx) => (
+                    {circle.members.slice(0, 5).map((member) => (
                         <div
                             key={member.id}
                             className={cn(

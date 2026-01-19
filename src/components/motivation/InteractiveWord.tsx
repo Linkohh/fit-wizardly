@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Sparkles, Zap, Flame, MoveUp } from 'lucide-react';
+import { Sparkles, Flame } from 'lucide-react';
 
 type AnimationType = 'unleash' | 'your' | 'full' | 'potential' | 'default';
 
@@ -12,7 +12,7 @@ interface InteractiveWordProps {
     delay?: number;
 }
 
-export function InteractiveWord({ word, type = 'default', className, delay = 0 }: InteractiveWordProps) {
+export function InteractiveWord({ word, type = 'default', className }: InteractiveWordProps) {
     const [isPlaying, setIsPlaying] = useState(false);
 
     const handleClick = () => {

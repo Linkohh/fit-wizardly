@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { AnimatedIcon } from '@/components/ui/page-transition';
 import { ArrowRight } from 'lucide-react';
 
-export function FeatureCard({ feature, index }: { feature: any; index: number }) {
+export function FeatureCard({ feature }: { feature: any }) {
     return (
         <motion.div
             variants={{

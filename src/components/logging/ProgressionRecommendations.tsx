@@ -8,7 +8,6 @@ import {
     Minus,
     ArrowRight,
     CheckCircle2,
-    AlertCircle,
     Sparkles,
     RefreshCw,
 } from 'lucide-react';
@@ -31,7 +30,7 @@ export function ProgressionRecommendations({ onApply }: ProgressionRecommendatio
 
     const recommendations = getProgressionRecommendations();
 
-    const getActionIcon = (action: ProgressionAction) => {
+    const _getActionIcon = (action: ProgressionAction) => {
         switch (action) {
             case 'increase': return TrendingUp;
             case 'decrease': return TrendingDown;
@@ -41,7 +40,7 @@ export function ProgressionRecommendations({ onApply }: ProgressionRecommendatio
         }
     };
 
-    const getActionColor = (action: ProgressionAction) => {
+    const _getActionColor = (action: ProgressionAction) => {
         switch (action) {
             case 'increase': return 'text-green-600 bg-green-500/10 border-green-500/30';
             case 'decrease': return 'text-red-600 bg-red-500/10 border-red-500/30';
@@ -51,7 +50,7 @@ export function ProgressionRecommendations({ onApply }: ProgressionRecommendatio
         }
     };
 
-    const getConfidenceBadge = (confidence: 'high' | 'medium' | 'low') => {
+    const _getConfidenceBadge = (confidence: 'high' | 'medium' | 'low') => {
         switch (confidence) {
             case 'high': return { label: 'High Confidence', className: 'bg-green-500/20 text-green-700' };
             case 'medium': return { label: 'Medium', className: 'bg-yellow-500/20 text-yellow-700' };

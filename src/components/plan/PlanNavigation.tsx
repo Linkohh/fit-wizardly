@@ -1,5 +1,4 @@
 import { Pencil, RotateCcw } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -20,7 +19,6 @@ interface PlanNavigationProps {
 }
 
 export function PlanNavigation({ onStartOver }: PlanNavigationProps) {
-    const { t } = useTranslation();
     const navigate = useNavigate();
     const { toast } = useToast();
 

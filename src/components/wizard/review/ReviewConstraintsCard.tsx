@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { WizardSelections, CONSTRAINT_OPTIONS } from '@/types/fitness';
-import { motion } from 'framer-motion';
 
 interface ReviewConstraintsCardProps {
     selections: WizardSelections;

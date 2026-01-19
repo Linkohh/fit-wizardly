@@ -1,6 +1,5 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, X, Sparkles } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import { useWisdomStore } from '@/stores/wisdomStore';
 import { WisdomChat } from './WisdomChat';
 import { cn } from '@/lib/utils';
