@@ -38,6 +38,7 @@ export interface MealRecommendation {
     category: MacroGoal;
     tags: string[];
     isWorkoutMeal: boolean;
+    imageUrl?: string;
 }
 
 export interface UserNutritionProfile {

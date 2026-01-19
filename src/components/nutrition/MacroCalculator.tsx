@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { MoveRight, Calculator, Check, Scale, Ruler, Activity, Target } from "lucide-react";
-import { UserNutritionProfile, MacroTargets, MacroGoal } from "@/types/nutrition";
+import { useState, useEffect } from "react";
+import { MoveRight, Calculator, Scale, Ruler, Activity, Target } from "lucide-react";
+import { UserNutritionProfile, MacroTargets } from "@/types/nutrition";
 import { cn } from "@/lib/utils";
 
 interface MacroCalculatorProps {

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Scan, Plus, Search, X } from "lucide-react";
 import { MealEntry, MacroTargets } from "@/types/nutrition";
-import { cn } from "@/lib/utils";
 
 interface FoodLoggerProps {
     onLogMeal: (meal: MealEntry) => void;
