@@ -3,12 +3,35 @@ import { MoveRight, Calculator, Scale, Ruler, Activity, Target } from "lucide-re
 import { UserNutritionProfile, MacroTargets } from "@/types/nutrition";
 import { cn } from "@/lib/utils";
 
+type WeightUnit = 'kg' | 'lbs';
+type HeightUnit = 'cm' | 'ft';
+
 interface MacroCalculatorProps {
     onSave: (targets: MacroTargets, profile: UserNutritionProfile) => void;
     initialProfile?: UserNutritionProfile | null;
 }
 
+// Conversion helpers
+const kgToLbs = (kg: number) => Math.round(kg * 2.20462 * 10) / 10;
+const lbsToKg = (lbs: number) => Math.round(lbs / 2.20462 * 10) / 10;
+const cmToFeetInches = (cm: number) => {
+    const totalInches = cm / 2.54;
+    const feet = Math.floor(totalInches / 12);
+    const inches = Math.round(totalInches % 12);
+    return { feet, inches };
+};
+const feetInchesToCm = (feet: number, inches: number) => Math.round((feet * 12 + inches) * 2.54);
+
 export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps) {
+    const [weightUnit, setWeightUnit] = useState<WeightUnit>('kg');
+    const [heightUnit, setHeightUnit] = useState<HeightUnit>('cm');
+    
+    // Display values (in current unit)
+    const [displayWeight, setDisplayWeight] = useState(initialProfile?.weight || 70);
+    const [displayHeightCm, setDisplayHeightCm] = useState(initialProfile?.height || 175);
+    const [displayFeet, setDisplayFeet] = useState(5);
+    const [displayInches, setDisplayInches] = useState(9);
+
     const [profile, setProfile] = useState<UserNutritionProfile>({
         weight: initialProfile?.weight || 70,
         height: initialProfile?.height || 175,
@@ -21,6 +44,17 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
 
     const [result, setResult] = useState<MacroTargets | null>(null);
 
+    // Initialize display values from initial profile
+    useEffect(() => {
+        if (initialProfile) {
+            setDisplayWeight(initialProfile.weight);
+            setDisplayHeightCm(initialProfile.height);
+            const { feet, inches } = cmToFeetInches(initialProfile.height);
+            setDisplayFeet(feet);
+            setDisplayInches(inches);
+        }
+    }, [initialProfile]);
+
     // Recalculate on mount if profile exists
     useEffect(() => {
         if (initialProfile) {
@@ -32,8 +66,57 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
         calculateMacros();
     }, [profile]);
 
+    // Handle unit changes
+    const handleWeightUnitChange = (newUnit: WeightUnit) => {
+        if (newUnit === weightUnit) return;
+        
+        if (newUnit === 'lbs') {
+            setDisplayWeight(kgToLbs(profile.weight));
+        } else {
+            setDisplayWeight(profile.weight);
+        }
+        setWeightUnit(newUnit);
+    };
+
+    const handleHeightUnitChange = (newUnit: HeightUnit) => {
+        if (newUnit === heightUnit) return;
+        
+        if (newUnit === 'ft') {
+            const { feet, inches } = cmToFeetInches(profile.height);
+            setDisplayFeet(feet);
+            setDisplayInches(inches);
+        } else {
+            setDisplayHeightCm(profile.height);
+        }
+        setHeightUnit(newUnit);
+    };
+
+    // Handle input changes
+    const handleWeightChange = (value: number) => {
+        setDisplayWeight(value);
+        const weightInKg = weightUnit === 'lbs' ? lbsToKg(value) : value;
+        setProfile({ ...profile, weight: weightInKg });
+    };
+
+    const handleHeightCmChange = (value: number) => {
+        setDisplayHeightCm(value);
+        setProfile({ ...profile, height: value });
+    };
+
+    const handleFeetChange = (feet: number) => {
+        setDisplayFeet(feet);
+        const cm = feetInchesToCm(feet, displayInches);
+        setProfile({ ...profile, height: cm });
+    };
+
+    const handleInchesChange = (inches: number) => {
+        setDisplayInches(inches);
+        const cm = feetInchesToCm(displayFeet, inches);
+        setProfile({ ...profile, height: cm });
+    };
+
     const calculateMacros = () => {
-        // Mifflin-St Jeor Equation
+        // Mifflin-St Jeor Equation (uses kg and cm internally)
         let bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age;
         bmr += profile.gender === 'male' ? 5 : -161;
 
@@ -100,24 +183,97 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                 {/* INPUTS */}
                 <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
+                        {/* Weight with unit toggle */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium flex items-center gap-2"><Scale className="w-4 h-4 text-primary" /> Weight (kg)</label>
-                            <input
-                                type="number"
-                                value={profile.weight}
-                                onChange={(e) => setProfile({ ...profile, weight: Number(e.target.value) })}
-                                className="w-full bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all"
-                            />
+                            <label className="text-sm font-medium flex items-center gap-2">
+                                <Scale className="w-4 h-4 text-primary" /> Weight
+                            </label>
+                            <div className="flex gap-2">
+                                <input
+                                    type="number"
+                                    value={displayWeight}
+                                    onChange={(e) => handleWeightChange(Number(e.target.value))}
+                                    className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all"
+                                />
+                                <div className="flex rounded-xl overflow-hidden border border-white/10">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleWeightUnitChange('kg')}
+                                        className={cn(
+                                            "px-3 py-2 text-xs font-medium transition-all",
+                                            weightUnit === 'kg' 
+                                                ? "bg-primary text-primary-foreground" 
+                                                : "bg-background/50 text-muted-foreground hover:bg-white/5"
+                                        )}
+                                    >
+                                        kg
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleWeightUnitChange('lbs')}
+                                        className={cn(
+                                            "px-3 py-2 text-xs font-medium transition-all",
+                                            weightUnit === 'lbs' 
+                                                ? "bg-primary text-primary-foreground" 
+                                                : "bg-background/50 text-muted-foreground hover:bg-white/5"
+                                        )}
+                                    >
+                                        lbs
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+
+                        {/* Height with unit toggle */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium flex items-center gap-2"><Ruler className="w-4 h-4 text-primary" /> Height (cm)</label>
-                            <input
-                                type="number"
-                                value={profile.height}
-                                onChange={(e) => setProfile({ ...profile, height: Number(e.target.value) })}
-                                className="w-full bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all"
-                            />
+                            <label className="text-sm font-medium flex items-center gap-2">
+                                <Ruler className="w-4 h-4 text-primary" /> Height
+                            </label>
+                            {heightUnit === 'cm' ? (
+                                <div className="flex gap-2">
+                                    <input
+                                        type="number"
+                                        value={displayHeightCm}
+                                        onChange={(e) => handleHeightCmChange(Number(e.target.value))}
+                                        className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all"
+                                    />
+                                    <UnitToggle
+                                        unit={heightUnit}
+                                        options={['cm', 'ft']}
+                                        onChange={(u) => handleHeightUnitChange(u as HeightUnit)}
+                                    />
+                                </div>
+                            ) : (
+                                <div className="flex gap-2">
+                                    <div className="flex gap-1 flex-1">
+                                        <input
+                                            type="number"
+                                            value={displayFeet}
+                                            onChange={(e) => handleFeetChange(Number(e.target.value))}
+                                            className="w-14 bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all text-center"
+                                            min={0}
+                                            max={8}
+                                        />
+                                        <span className="flex items-center text-muted-foreground text-sm">ft</span>
+                                        <input
+                                            type="number"
+                                            value={displayInches}
+                                            onChange={(e) => handleInchesChange(Number(e.target.value))}
+                                            className="w-14 bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all text-center"
+                                            min={0}
+                                            max={11}
+                                        />
+                                        <span className="flex items-center text-muted-foreground text-sm">in</span>
+                                    </div>
+                                    <UnitToggle
+                                        unit={heightUnit}
+                                        options={['cm', 'ft']}
+                                        onChange={(u) => handleHeightUnitChange(u as HeightUnit)}
+                                    />
+                                </div>
+                            )}
                         </div>
+
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Age</label>
                             <input
@@ -131,7 +287,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                             <label className="text-sm font-medium">Gender</label>
                             <select
                                 value={profile.gender}
-                                onChange={(e) => setProfile({ ...profile, gender: e.target.value as any })}
+                                onChange={(e) => setProfile({ ...profile, gender: e.target.value as 'male' | 'female' })}
                                 className="w-full bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all appearance-none"
                             >
                                 <option value="male">Male</option>
@@ -144,7 +300,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                         <label className="text-sm font-medium flex items-center gap-2"><Activity className="w-4 h-4 text-primary" /> Activity Level</label>
                         <select
                             value={profile.activityLevel}
-                            onChange={(e) => setProfile({ ...profile, activityLevel: e.target.value as any })}
+                            onChange={(e) => setProfile({ ...profile, activityLevel: e.target.value as UserNutritionProfile['activityLevel'] })}
                             className="w-full bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all"
                         >
                             {activityOptions.map(opt => (
@@ -161,8 +317,8 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                     key={g}
                                     onClick={() => setProfile({ ...profile, goal: g })}
                                     className={cn(
-                                        "p-3 rounded-xl border border-white/5 transition-all capitalization",
-                                        profile.goal === g ? "bg-primary text-white shadow-glow" : "bg-background/30 hover:bg-white/5"
+                                        "p-3 rounded-xl border border-white/5 transition-all capitalize",
+                                        profile.goal === g ? "bg-primary text-primary-foreground shadow-glow" : "bg-background/30 hover:bg-white/5"
                                     )}
                                 >
                                     {g}
@@ -178,7 +334,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
 
                     <div className="text-center space-y-1 relative z-10 transition-all">
                         <span className="text-muted-foreground text-sm uppercase tracking-wider">Daily Target</span>
-                        <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-white to-white/70">
+                        <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/70">
                             {result?.calories.toLocaleString()}
                         </div>
                         <span className="text-sm text-muted-foreground">kcal / day</span>
@@ -192,7 +348,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
 
                     <button
                         onClick={() => result && onSave(result, profile)}
-                        className="w-full mt-4 bg-white text-black font-semibold py-4 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-white/10"
+                        className="w-full mt-4 bg-primary text-primary-foreground font-semibold py-4 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg"
                     >
                         {initialProfile ? "Update Targets" : "Start Tracking"} <MoveRight className="w-4 h-4" />
                     </button>
@@ -202,11 +358,33 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
     );
 }
 
+function UnitToggle({ unit, options, onChange }: { unit: string; options: string[]; onChange: (unit: string) => void }) {
+    return (
+        <div className="flex rounded-xl overflow-hidden border border-white/10 shrink-0">
+            {options.map((opt) => (
+                <button
+                    key={opt}
+                    type="button"
+                    onClick={() => onChange(opt)}
+                    className={cn(
+                        "px-3 py-2 text-xs font-medium transition-all",
+                        unit === opt 
+                            ? "bg-primary text-primary-foreground" 
+                            : "bg-background/50 text-muted-foreground hover:bg-white/5"
+                    )}
+                >
+                    {opt}
+                </button>
+            ))}
+        </div>
+    );
+}
+
 function MacroCard({ label, amount, unit, color }: { label: string, amount: number, unit: string, color: string }) {
     return (
         <div className="bg-black/20 rounded-xl p-3 text-center border border-white/5 hover:bg-black/30 transition-colors">
             <div className={cn("text-xs font-semibold uppercase tracking-wider mb-1", color)}>{label}</div>
-            <div className="text-xl font-bold text-white mb-0.5">{amount}<span className="text-xs font-normal text-muted-foreground ml-0.5">{unit}</span></div>
+            <div className="text-xl font-bold text-foreground mb-0.5">{amount}<span className="text-xs font-normal text-muted-foreground ml-0.5">{unit}</span></div>
         </div>
     )
 }
