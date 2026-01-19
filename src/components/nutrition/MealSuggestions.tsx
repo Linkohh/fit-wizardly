@@ -1,12 +1,13 @@
-import { Utensils, Flame, Coffee, Moon, Sun } from "lucide-react";
+import { Utensils, Flame, Coffee, Moon, Sun, Star } from "lucide-react";
 import { MealRecommendation, MacroGoal } from "@/types/nutrition";
+import { useNutritionStore } from "@/stores/nutritionStore";
 
 interface MealSuggestionsProps {
     goal: MacroGoal;
     isWorkoutDay: boolean;
 }
 
-// PREMIUM MOCK DATA with Images
+// PREMIUM MOCK DATA with Images (Fallback)
 const SAMPLE_MEALS: MealRecommendation[] = [
     {
         id: '1', name: 'Power Quinoa Bowl', calories: 550, protein: 45, carbs: 50, fats: 15, category: 'maintain', tags: ['High Protein', 'Lunch'], isWorkoutMeal: true,
@@ -35,6 +36,7 @@ const SAMPLE_MEALS: MealRecommendation[] = [
 ];
 
 export function MealSuggestions({ goal, isWorkoutDay }: MealSuggestionsProps) {
+    const { favorites } = useNutritionStore();
 
     // Time of Day Logic
     const hour = new Date().getHours();
@@ -46,12 +48,34 @@ export function MealSuggestions({ goal, isWorkoutDay }: MealSuggestionsProps) {
     else if (hour < 17) { timeContext = 'Snack'; contextIcon = <Utensils className="w-4 h-4" />; }
     else { timeContext = 'Dinner'; contextIcon = <Moon className="w-4 h-4" />; }
 
-    const filteredMeals = SAMPLE_MEALS.filter(meal => {
-        // 1. Goal Match (or general/maintain)
-        const goalMatch = meal.category === goal || meal.category === 'maintain';
-        return goalMatch;
+    // 1. Process Favorites into Suggestions
+    const favoriteSuggestions: MealRecommendation[] = favorites.map(fav => ({
+        id: `fav-${fav.id}`,
+        name: fav.name,
+        calories: fav.calories,
+        protein: fav.protein,
+        carbs: fav.carbs,
+        fats: fav.fats,
+        category: 'maintain', // Generic
+        tags: ['Favorite'],
+        isWorkoutMeal: false,
+        imageUrl: fav.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=2670&auto=format&fit=crop" // Generic food fallback
+    }));
+
+    const allMeals = [...favoriteSuggestions, ...SAMPLE_MEALS];
+
+    const filteredMeals = allMeals.filter(meal => {
+        // Show Favorites always, process others by goal
+        if (meal.tags.includes('Favorite')) return true;
+        return meal.category === goal || meal.category === 'maintain';
     }).sort((a, b) => {
-        // Sort logic: Context match first, then workout match
+        // Priority: Context -> Favorite -> Workout
+        const aFav = a.tags.includes('Favorite');
+        const bFav = b.tags.includes('Favorite');
+
+        if (aFav && !bFav) return -1;
+        if (!aFav && bFav) return 1;
+
         const aContext = a.tags.includes(timeContext);
         const bContext = b.tags.includes(timeContext);
         if (aContext && !bContext) return -1;
@@ -90,7 +114,8 @@ export function MealSuggestions({ goal, isWorkoutDay }: MealSuggestionsProps) {
 
                             <div className="flex flex-wrap gap-1.5">
                                 {meal.tags.map(tag => (
-                                    <span key={tag} className={`text-[10px] px-2 py-1 rounded-full border ${tag === timeContext ? 'bg-primary/20 border-primary/30 text-primary-foreground' : 'bg-white/5 border-white/5 text-muted-foreground'}`}>
+                                    <span key={tag} className={cn("text-[10px] px-2 py-1 rounded-full border flex items-center gap-1", tag === 'Favorite' ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-400" : tag === timeContext ? 'bg-primary/20 border-primary/30 text-primary-foreground' : 'bg-white/5 border-white/5 text-muted-foreground')}>
+                                        {tag === 'Favorite' && <Star className="w-3 h-3 fill-current" />}
                                         {tag}
                                     </span>
                                 ))}

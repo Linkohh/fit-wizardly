@@ -4,26 +4,39 @@ import { HydrationTracker } from "@/components/nutrition/HydrationTracker";
 import { MealSuggestions } from "@/components/nutrition/MealSuggestions";
 import { FoodLogger } from "@/components/nutrition/FoodLogger";
 import { MacroTargets, UserNutritionProfile, MealEntry, DailyNutritionLog } from "@/types/nutrition";
-import { Sparkles, ArrowLeft } from "lucide-react";
+import { Sparkles, ArrowLeft, Trash2, UtensilsCrossed, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useNutritionStore } from "@/stores/nutritionStore";
+import { ProgressRing } from "@/components/ui/ProgressRing";
+import { format, addDays, subDays, isSameDay, parseISO } from "date-fns";
 
 export default function NutritionPage() {
     // Store Integration
-    const { profile, targets, dailyLog, setProfile, updateHydration, logMeal, checkNewDay } = useNutritionStore();
+    const { profile, targets, getCurrentLog, selectedDate, changeDate, setProfile, updateHydration, logMeal, removeMeal } = useNutritionStore();
     const [isEditingCalculator, setIsEditingCalculator] = useState(false);
 
-    // Check for day rollover on mount
-    useEffect(() => {
-        checkNewDay();
-    }, [checkNewDay]);
+    // Get the log for the currently selected date
+    const dailyLog = getCurrentLog();
 
     // Handler Wrappers
     const handleSaveProfile = (newTargets: MacroTargets, newProfile: UserNutritionProfile) => {
         setProfile(newProfile, newTargets);
         setIsEditingCalculator(false);
     };
+
+    const handleRemoveMeal = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        removeMeal(id);
+    };
+
+    const navigateDate = (direction: 'prev' | 'next') => {
+        const current = parseISO(selectedDate);
+        const newDate = direction === 'prev' ? subDays(current, 1) : addDays(current, 1);
+        changeDate(newDate.toISOString().split('T')[0]);
+    };
+
+    const isToday = selectedDate === new Date().toISOString().split('T')[0];
 
     // Calculate current daily totals
     const currentTotals = dailyLog.meals.reduce((acc, meal) => ({
@@ -49,6 +62,20 @@ export default function NutritionPage() {
                         Fuel your performance with precision. Track macros, hydration, and get personalized meal recommendations based on your goal.
                     </p>
                 </div>
+
+                {/* Date Navigation */}
+                <div className="flex items-center bg-white/5 rounded-xl p-1 border border-white/10 self-start md:self-center">
+                    <button onClick={() => navigateDate('prev')} className="p-2 hover:bg-white/10 rounded-lg text-muted-foreground hover:text-white transition-colors">
+                        <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <div className="flex items-center gap-2 px-4 py-2 min-w-[140px] justify-center font-medium">
+                        <CalendarIcon className="w-4 h-4 text-primary" />
+                        <span>{isToday ? 'Today' : format(parseISO(selectedDate), 'MMM d, yyyy')}</span>
+                    </div>
+                    <button onClick={() => navigateDate('next')} className="p-2 hover:bg-white/10 rounded-lg text-muted-foreground hover:text-white transition-colors">
+                        <ChevronRight className="w-5 h-5" />
+                    </button>
+                </div>
             </div>
 
             {!targets || isEditingCalculator ? (
@@ -70,14 +97,47 @@ export default function NutritionPage() {
 
                     {/* Left Column: Tracker & Hydration */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Daily Progress Summary */}
+                        {/* Daily Progress Summary - "Quick Wins" Update: Showing Remaining */}
                         <div className="glass-card p-6 rounded-3xl">
-                            <h3 className="font-semibold text-lg mb-4">Daily Progress</h3>
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="font-semibold text-lg">Daily Targets</h3>
+                                <span className="text-xs bg-white/5 px-2 py-1 rounded-full text-muted-foreground">
+                                    {dailyLog.meals.length} meals logged
+                                </span>
+                            </div>
+
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <ProgressRing label="Calories" current={currentTotals.calories} target={targets.calories} color="text-white" />
-                                <ProgressRing label="Protein" current={currentTotals.protein} target={targets.protein} color="text-blue-400" unit="g" />
-                                <ProgressRing label="Carbs" current={currentTotals.carbs} target={targets.carbs} color="text-green-400" unit="g" />
-                                <ProgressRing label="Fats" current={currentTotals.fats} target={targets.fats} color="text-yellow-400" unit="g" />
+                                <ProgressRing
+                                    label="Calories"
+                                    current={currentTotals.calories}
+                                    target={targets.calories}
+                                    color="text-white"
+                                    showRemaining={true}
+                                />
+                                <ProgressRing
+                                    label="Protein"
+                                    current={currentTotals.protein}
+                                    target={targets.protein}
+                                    color="text-blue-400"
+                                    unit="g"
+                                    showRemaining={true}
+                                />
+                                <ProgressRing
+                                    label="Carbs"
+                                    current={currentTotals.carbs}
+                                    target={targets.carbs}
+                                    color="text-green-400"
+                                    unit="g"
+                                    showRemaining={true}
+                                />
+                                <ProgressRing
+                                    label="Fats"
+                                    current={currentTotals.fats}
+                                    target={targets.fats}
+                                    color="text-yellow-400"
+                                    unit="g"
+                                    showRemaining={true}
+                                />
                             </div>
                         </div>
 
@@ -93,22 +153,50 @@ export default function NutritionPage() {
                             />
                         </div>
 
-                        {/* Recent Meals List */}
-                        <div className="glass-card p-6 rounded-3xl">
-                            <h3 className="font-semibold text-lg mb-4">Today's Log</h3>
+                        {/* Recent Meals List - "Quick Wins" Update: Deletion & Empty State */}
+                        <div className="glass-card p-6 rounded-3xl min-h-[300px]">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="font-semibold text-lg">Today's Log</h3>
+                            </div>
+
                             {dailyLog.meals.length === 0 ? (
-                                <p className="text-muted-foreground text-sm italic py-4 text-center">No meals logged yet today.</p>
+                                <div className="flex flex-col items-center justify-center h-48 text-muted-foreground space-y-4 animate-in fade-in zoom-in duration-500">
+                                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center">
+                                        <UtensilsCrossed className="w-8 h-8 opacity-50" />
+                                    </div>
+                                    <div className="text-center">
+                                        <p className="font-medium text-white/80">Your plate is empty!</p>
+                                        <p className="text-sm">Log your first meal to start hitting your goals.</p>
+                                    </div>
+                                </div>
                             ) : (
                                 <div className="space-y-3">
-                                    {dailyLog.meals.map((meal, idx) => (
-                                        <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 animate-in slide-in-from-left-4 duration-300" style={{ animationDelay: `${idx * 100}ms` }}>
-                                            <div>
-                                                <div className="font-medium text-sm">{meal.name}</div>
-                                                <div className="text-xs text-muted-foreground capitalize">{meal.mealType} • {new Date(meal.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                    {dailyLog.meals.map((meal) => (
+                                        <div key={meal.id} className="group flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all animate-in slide-in-from-left-4 duration-300">
+                                            <div className="flex-1">
+                                                <div className="font-medium text-sm text-white group-hover:text-primary transition-colors">{meal.name}</div>
+                                                <div className="text-xs text-muted-foreground capitalize flex gap-2">
+                                                    <span>{meal.mealType}</span>
+                                                    <span>•</span>
+                                                    <span>{new Date(meal.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                                </div>
                                             </div>
-                                            <div className="text-right">
-                                                <div className="font-bold text-sm">{meal.calories} kcal</div>
-                                                <div className="text-xs text-blue-400">{meal.protein}P • {meal.carbs}C • {meal.fats}F</div>
+                                            <div className="flex items-center gap-4">
+                                                <div className="text-right">
+                                                    <div className="font-bold text-sm">{meal.calories} kcal</div>
+                                                    <div className="text-[10px] text-muted-foreground space-x-1">
+                                                        <span className="text-blue-400">{meal.protein}p</span>
+                                                        <span className="text-green-400">{meal.carbs}c</span>
+                                                        <span className="text-yellow-400">{meal.fats}f</span>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => handleRemoveMeal(meal.id, e)}
+                                                    className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                                                    title="Remove meal"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
                                             </div>
                                         </div>
                                     ))}
@@ -133,8 +221,13 @@ export default function NutritionPage() {
                                     {profile?.goal}
                                 </div>
                                 <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between"><span>Calories</span> <span>{targets.calories}</span></div>
-                                    <div className="w-full bg-white/10 h-1 rounded-full"><div className="bg-white h-full rounded-full" style={{ width: '100%' }} /></div>
+                                    <div className="flex justify-between"><span>Calories Remaining</span> <span>{Math.max(0, targets.calories - currentTotals.calories)}</span></div>
+                                    <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+                                        <div
+                                            className="bg-primary h-full rounded-full transition-all duration-1000"
+                                            style={{ width: `${Math.min(100, (currentTotals.calories / targets.calories) * 100)}%` }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -149,36 +242,4 @@ export default function NutritionPage() {
             )}
         </div>
     );
-}
-
-function ProgressRing({ label, current, target, color, unit = "" }: { label: string, current: number, target: number, color: string, unit?: string }) {
-    const percentage = Math.min(100, (current / target) * 100);
-    const radius = 36;
-    const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (percentage / 100) * circumference;
-
-    return (
-        <div className="flex flex-col items-center justify-center p-2">
-            <div className="relative w-24 h-24 mb-2">
-                <svg className="transform -rotate-90 w-24 h-24">
-                    <circle cx="48" cy="48" r={radius} stroke="currentColor" strokeWidth="8" fill="transparent" className="text-white/5" />
-                    <circle
-                        cx="48" cy="48" r={radius}
-                        stroke="currentColor" strokeWidth="8"
-                        fill="transparent"
-                        strokeDasharray={circumference}
-                        strokeDashoffset={offset}
-                        strokeLinecap="round"
-                        className={cn("transition-all duration-1000 ease-out", color)}
-                    />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-lg font-bold">{current}</span>
-                    <span className="text-[10px] text-muted-foreground uppercase">{unit}</span>
-                </div>
-            </div>
-            <span className="text-xs font-medium text-muted-foreground">{label}</span>
-            <span className="text-[10px] text-white/50">/ {target}{unit}</span>
-        </div>
-    )
 }

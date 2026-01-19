@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Minus, Droplets, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNutritionStore } from "@/stores/nutritionStore";
 
-interface HydrationTrackerProps {
-    currentAmount: number; // ml
-    targetAmount: number; // ml
-    onUpdate: (amount: number) => void;
-}
+export function HydrationTracker() {
+    const { dailyLog, updateHydration, profile } = useNutritionStore();
 
-export function HydrationTracker({ currentAmount, targetAmount, onUpdate }: HydrationTrackerProps) {
-    const percentage = Math.min(100, (currentAmount / targetAmount) * 100);
-    const [isAdding, setIsAdding] = useState(false);
+    const currentAmount = dailyLog?.water || 0;
+    const targetAmount = profile?.dailyWaterGoal || 2500;
+
+    const percentage = Math.min(100, Math.round((currentAmount / targetAmount) * 100));
     const [showConfetti, setShowConfetti] = useState(false);
+    const [isAdding, setIsAdding] = useState(false);
 
-    // Check for goal completion
     useEffect(() => {
-        if (currentAmount >= targetAmount && currentAmount > 0 && percentage >= 100) {
+        if (currentAmount >= targetAmount && currentAmount > 0 && percentage >= 100 && !showConfetti) {
             triggerCelebration();
         }
     }, [currentAmount, targetAmount]);
@@ -27,7 +26,7 @@ export function HydrationTracker({ currentAmount, targetAmount, onUpdate }: Hydr
 
     const handleUpdate = (amount: number) => {
         setIsAdding(true);
-        onUpdate(currentAmount + amount);
+        updateHydration(Math.max(0, currentAmount + amount));
         setTimeout(() => setIsAdding(false), 300);
     };
 
@@ -37,21 +36,23 @@ export function HydrationTracker({ currentAmount, targetAmount, onUpdate }: Hydr
             {/* Confetti Overlay */}
             {showConfetti && (
                 <div className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center">
-                    <div className="absolute inset-0 animate-confetti-fall bg-gradient-to-b from-blue-400/20 to-transparent" />
-                    <div className="animate-bounce text-4xl">🎉</div>
+                    <div className="absolute inset-0 animate-pulse bg-blue-500/20" />
+                    <div className="animate-bounce text-6xl">🎉</div>
                 </div>
             )}
 
             {/* Background Liquid Effect */}
             <div
-                className="absolute bottom-0 left-0 right-0 bg-blue-500/20 transition-all duration-1000 ease-in-out blur-3xl"
+                className="absolute bottom-0 left-0 right-0 bg-blue-500/10 transition-all duration-1000 ease-in-out blur-3xl pointer-events-none"
                 style={{ height: `${percentage}%` }}
             />
 
             <div className="w-full flex justify-between items-start z-10">
                 <div>
-                    <h3 className="font-semibold text-lg flex items-center gap-2"><Droplets className="w-5 h-5 text-blue-400" /> Hydration</h3>
-                    <p className="text-sm text-muted-foreground">Daily Goal: {targetAmount}ml</p>
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                        <Droplets className="w-5 h-5 text-blue-400" /> Hydration
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Goal: {targetAmount}ml</p>
                 </div>
                 <div className="text-right">
                     <div className="text-3xl font-bold text-blue-100">{currentAmount} <span className="text-sm font-normal text-muted-foreground">ml</span></div>
@@ -62,15 +63,16 @@ export function HydrationTracker({ currentAmount, targetAmount, onUpdate }: Hydr
             </div>
 
             {/* Center Visual */}
-            <div className="relative z-10 my-8">
-                <div className={cn("w-40 h-40 rounded-full border-4 flex items-center justify-center relative bg-black/20 backdrop-blur-sm transition-colors", percentage >= 100 ? "border-green-500/50 shadow-glow" : "border-white/10")}>
-                    <div className="absolute inset-0 rounded-full overflow-hidden">
-                        <div
-                            className={cn("absolute bottom-0 left-0 right-0 transition-all duration-700 ease-out", percentage >= 100 ? "bg-gradient-to-t from-green-500 to-green-400" : "bg-gradient-to-t from-blue-600 to-blue-400")}
-                            style={{ height: `${percentage}%`, opacity: 0.8 }}
-                        />
-                    </div>
-                    <div className="z-20 text-center">
+            <div className="relative z-10 my-6">
+                <div className={cn("w-40 h-40 rounded-full border-4 flex items-center justify-center relative bg-black/20 backdrop-blur-sm transition-colors overflow-hidden", percentage >= 100 ? "border-green-500/50 shadow-glow" : "border-white/10")}>
+
+                    {/* Liquid Fill */}
+                    <div
+                        className={cn("absolute bottom-0 left-0 right-0 transition-all duration-700 ease-out", percentage >= 100 ? "bg-gradient-to-t from-green-500 to-green-400" : "bg-gradient-to-t from-blue-600 to-blue-400")}
+                        style={{ height: `${percentage}%`, opacity: 0.8 }}
+                    />
+
+                    <div className="z-20 text-center relative">
                         {percentage >= 100 ? (
                             <PartyPopper className="w-8 h-8 text-white mx-auto mb-1 animate-bounce" />
                         ) : (
