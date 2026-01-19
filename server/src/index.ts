@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 import { z } from 'zod';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -24,12 +25,52 @@ const PORT = process.env.PORT || 3001;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 
+// CORS configuration - specify allowed origins
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || [
+    'http://localhost:8080',
+    'http://localhost:5173',
+    'http://localhost:3000',
+];
+
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     console.warn('⚠️ Server missing Supabase credentials. Authentication will fail.');
 }
 
+// Rate limiting configuration
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    message: { error: 'Too many requests, please try again later' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
+// Stricter rate limit for auth-related endpoints
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // Limit each IP to 20 auth requests per windowMs
+    message: { error: 'Too many authentication attempts, please try again later' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        if (ALLOWED_ORIGINS.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+app.use(limiter);
 app.use(express.json());
 
 // Type definition for authenticated request
@@ -77,25 +118,81 @@ const requireAuth = async (req: AuthRequest, res: express.Response, next: expres
 // ============================================================================
 // INPUT VALIDATION SCHEMAS
 // ============================================================================
+
+// Schema for exercise sets
+const ExerciseSetSchema = z.object({
+    reps: z.number().int().min(0).max(1000),
+    weight: z.number().min(0).max(10000).optional(),
+    rir: z.number().int().min(0).max(10).optional(),
+    completed: z.boolean().optional(),
+}).strict();
+
+// Schema for exercises in a workout
+const WorkoutExerciseSchema = z.object({
+    exerciseId: z.string().min(1).max(100),
+    name: z.string().min(1).max(200),
+    sets: z.array(ExerciseSetSchema).max(20),
+    notes: z.string().max(1000).optional(),
+    muscleGroup: z.string().max(50).optional(),
+}).strict();
+
+// Schema for workout days
+const WorkoutDaySchema = z.object({
+    name: z.string().min(1).max(100),
+    exercises: z.array(WorkoutExerciseSchema).max(50),
+    notes: z.string().max(2000).optional(),
+    dayIndex: z.number().int().min(0).max(6).optional(),
+}).strict();
+
+// Schema for weekly volume tracking
+const WeeklyVolumeSchema = z.object({
+    muscleGroup: z.string().min(1).max(50),
+    sets: z.number().int().min(0).max(100),
+    targetSets: z.number().int().min(0).max(100).optional(),
+}).strict();
+
+// Schema for RIR progression
+const RirProgressionSchema = z.object({
+    week: z.number().int().min(1).max(52),
+    targetRir: z.number().int().min(0).max(10),
+}).strict();
+
+// Schema for plan notes
+const PlanNoteSchema = z.object({
+    id: z.string().max(100).optional(),
+    content: z.string().max(5000),
+    createdAt: z.string().datetime().optional(),
+}).strict();
+
+// Schema for plan selections (wizard choices)
+const SelectionsSchema = z.object({
+    goal: z.string().max(50).optional(),
+    experienceLevel: z.string().max(50).optional(),
+    equipment: z.array(z.string().max(50)).max(20).optional(),
+    daysPerWeek: z.number().int().min(1).max(7).optional(),
+    sessionDuration: z.number().int().min(15).max(240).optional(),
+    muscleTargets: z.record(z.number().min(0).max(100)).optional(),
+}).passthrough(); // Allow additional fields for flexibility
+
 const CreatePlanSchema = z.object({
     id: z.string().uuid().optional(), // Client might generate ID
-    selections: z.record(z.any()), // Refine if possible
-    splitType: z.string().min(1),
-    workoutDays: z.array(z.any()),
-    weeklyVolume: z.array(z.any()).default([]),
-    rirProgression: z.array(z.any()).default([]),
-    notes: z.array(z.any()).default([]),
+    selections: SelectionsSchema,
+    splitType: z.string().min(1).max(50),
+    workoutDays: z.array(WorkoutDaySchema).min(1).max(7),
+    weeklyVolume: z.array(WeeklyVolumeSchema).max(50).default([]),
+    rirProgression: z.array(RirProgressionSchema).max(52).default([]),
+    notes: z.array(PlanNoteSchema).max(100).default([]),
     userId: z.string().uuid().optional() // Optional in body, forced from token
 });
 
 const UpdatePlanSchema = z.object({
-    workoutDays: z.array(z.any()).optional(),
-    notes: z.array(z.any()).optional()
+    workoutDays: z.array(WorkoutDaySchema).min(1).max(7).optional(),
+    notes: z.array(PlanNoteSchema).max(100).optional()
 });
 
 // Request logging
 app.use((req, _res, next) => {
-    const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const requestId = `req_${crypto.randomUUID()}`;
     // @ts-ignore
     req.id = requestId;
     console.log(`[${requestId}] ${req.method} ${req.path}`);

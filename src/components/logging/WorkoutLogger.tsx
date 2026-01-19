@@ -11,7 +11,6 @@ import {
     Dumbbell,
     ChevronRight,
     ChevronLeft,
-    Check,
     X,
     Trophy,
     Flame,
@@ -20,7 +19,6 @@ import { usePlanStore } from '@/stores/planStore';
 import { SetLogger } from './SetLogger';
 import { WorkoutSummary } from './WorkoutSummary';
 import type { PerceivedDifficulty, SetLog } from '@/types/fitness';
-import { cn } from '@/lib/utils';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -32,6 +30,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from 'react-i18next';
+import { useWorkoutTimer } from '@/hooks/useWorkoutTimer';
 
 export function WorkoutLogger() {
     const { t } = useTranslation();
@@ -50,7 +49,6 @@ export function WorkoutLogger() {
     } = usePlanStore();
 
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
-    const [elapsedTime, setElapsedTime] = useState(0);
     const [showCancelDialog, setShowCancelDialog] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
     const [completedLog, setCompletedLog] = useState<ReturnType<typeof completeWorkout>>(null);
@@ -59,25 +57,18 @@ export function WorkoutLogger() {
     const plan = planId ? getPlanById(planId) : null;
     const dayIndexNum = parseInt(dayIndex ?? '0', 10);
 
+    // Use the extracted timer hook
+    const { formattedTime } = useWorkoutTimer({
+        startTime: activeWorkout?.startedAt ?? null,
+        isActive: !!activeWorkout,
+    });
+
     // Start workout on mount
     useEffect(() => {
         if (planId && !activeWorkout) {
             startWorkout(planId, dayIndexNum);
         }
     }, [planId, dayIndexNum, activeWorkout, startWorkout]);
-
-    // Timer
-    useEffect(() => {
-        if (!activeWorkout) return;
-
-        const interval = setInterval(() => {
-            const start = new Date(activeWorkout.startedAt).getTime();
-            const now = Date.now();
-            setElapsedTime(Math.floor((now - start) / 1000));
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [activeWorkout]);
 
     if (!plan || !activeWorkout) {
         return (
@@ -101,12 +92,6 @@ export function WorkoutLogger() {
     const completedExercises = activeWorkout.exercises.filter(
         e => e.skipped || e.sets.every(s => s.completed)
     ).length;
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
 
     const handleSetComplete = (setLog: SetLog) => {
         logSet(currentExerciseIndex, setLog);
@@ -173,7 +158,7 @@ export function WorkoutLogger() {
 
                         <div className="flex items-center gap-2 text-lg font-mono">
                             <Timer className="h-5 w-5 text-primary" />
-                            <span className="font-semibold">{formatTime(elapsedTime)}</span>
+                            <span className="font-semibold">{formattedTime}</span>
                         </div>
 
                         <Badge variant="outline" className="font-semibold">

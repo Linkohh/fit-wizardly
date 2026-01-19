@@ -10,7 +10,9 @@
       "Bash(npm run dev:*)",
       "Bash(find:*)",
       "Bash(timeout /t 5)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(wc:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

@@ -45,6 +45,9 @@ export function Header() {
   }, {
     path: '/circles',
     label: t('nav.circles')
+  }, {
+    path: '/nutrition',
+    label: 'Nutrition'
   }, ...(isTrainerMode ? [{
     path: '/clients',
     label: t('nav.clients')

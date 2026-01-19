@@ -67,6 +67,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+import NutritionPage from "./pages/Nutrition";
+
 function AnimatedRoutes() {
   const location = useLocation();
 
@@ -100,6 +102,11 @@ function AnimatedRoutes() {
             <Route path="/workout/:planId/:dayIndex" element={
               <RequireAuth>
                 <WorkoutLogger />
+              </RequireAuth>
+            } />
+            <Route path="/nutrition" element={
+              <RequireAuth>
+                <NutritionPage />
               </RequireAuth>
             } />
             <Route path="/exercises" element={

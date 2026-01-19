@@ -1,11 +1,12 @@
 /**
  * Auth Store
- * 
+ *
  * Manages user authentication state with Supabase.
  * Handles sign in, sign out, and profile management.
  */
 
 import { create } from 'zustand';
+import { toast } from 'sonner';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Profile } from '@/types/supabase';
 import type { User, Session } from '@supabase/supabase-js';
@@ -47,20 +48,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         try {
             // Get current session
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+            if (sessionError) {
+                console.error('Session error:', sessionError);
+                set({ isLoading: false });
+                return;
+            }
 
             if (session?.user) {
-                // Fetch user profile
-                const { data: profile } = await supabase
+                // Fetch user profile - use maybeSingle to handle missing profile gracefully
+                const { data: profile, error: profileError } = await supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', session.user.id)
-                    .single();
+                    .maybeSingle();
+
+                if (profileError) {
+                    console.error('Profile fetch error:', profileError);
+                    // Continue without profile rather than failing
+                }
 
                 set({
                     user: session.user,
                     session,
-                    profile,
+                    profile: profile || null,
                     isLoading: false,
                 });
             } else {
@@ -69,51 +81,67 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
             // Listen for auth changes
             supabase.auth.onAuthStateChange(async (event, session) => {
-                if (event === 'SIGNED_IN' && session?.user) {
-                    // Fetch or create profile
-                    let { data: profile } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', session.user.id)
-                        .single();
-
-                    if (!profile) {
-                        // Create new profile
-                        const newProfile = {
-                            id: session.user.id,
-                            display_name: session.user.email?.split('@')[0] || 'User',
-                            username: null,
-                            avatar_url: null,
-                            experience_level: null,
-                            primary_goal: null,
-                            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                        };
-
-                        const { data } = await supabase
+                try {
+                    if (event === 'SIGNED_IN' && session?.user) {
+                        // Fetch or create profile
+                        const { data: existingProfile, error: fetchError } = await supabase
                             .from('profiles')
-                            .insert(newProfile)
-                            .select()
-                            .single();
+                            .select('*')
+                            .eq('id', session.user.id)
+                            .maybeSingle();
 
-                        profile = data;
+                        let profile = existingProfile;
+
+                        if (fetchError) {
+                            console.error('Profile fetch error on sign in:', fetchError);
+                        }
+
+                        if (!profile) {
+                            // Create new profile
+                            const newProfile = {
+                                id: session.user.id,
+                                display_name: session.user.email?.split('@')[0] || 'User',
+                                username: null,
+                                avatar_url: null,
+                                experience_level: null,
+                                primary_goal: null,
+                                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                            };
+
+                            const { data: createdProfile, error: createError } = await supabase
+                                .from('profiles')
+                                .insert(newProfile)
+                                .select()
+                                .single();
+
+                            if (createError) {
+                                console.error('Profile creation error:', createError);
+                                toast.error('Failed to create profile');
+                            } else {
+                                profile = createdProfile;
+                            }
+                        }
+
+                        set({
+                            user: session.user,
+                            session,
+                            profile,
+                            showAuthModal: false,
+                        });
+                    } else if (event === 'SIGNED_OUT') {
+                        set({
+                            user: null,
+                            session: null,
+                            profile: null,
+                        });
                     }
-
-                    set({
-                        user: session.user,
-                        session,
-                        profile,
-                        showAuthModal: false,
-                    });
-                } else if (event === 'SIGNED_OUT') {
-                    set({
-                        user: null,
-                        session: null,
-                        profile: null,
-                    });
+                } catch (error) {
+                    console.error('Auth state change error:', error);
                 }
             });
         } catch (error) {
             console.error('Auth initialization error:', error);
+            toast.error('Failed to initialize authentication');
             set({ isLoading: false });
         }
     },
@@ -138,7 +166,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     signOut: async () => {
         if (!isSupabaseConfigured()) return;
 
-        await supabase.auth.signOut();
+        try {
+            const { error } = await supabase.auth.signOut();
+            if (error) {
+                console.error('Sign out error:', error);
+                toast.error('Failed to sign out');
+            }
+        } catch (error) {
+            console.error('Sign out error:', error);
+            toast.error('Failed to sign out');
+        }
+
+        // Clear state regardless of API result to ensure user can log out
         set({
             user: null,
             session: null,

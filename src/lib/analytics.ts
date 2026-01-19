@@ -80,7 +80,7 @@ function getSessionId(): string {
     const key = 'fitwizard_session_id';
     let sessionId = sessionStorage.getItem(key);
     if (!sessionId) {
-        sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        sessionId = `session_${crypto.randomUUID()}`;
         sessionStorage.setItem(key, sessionId);
     }
     return sessionId;

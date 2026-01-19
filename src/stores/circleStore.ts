@@ -69,9 +69,11 @@ interface CircleState {
 
 function generateRandomCode(length: number = 8): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude confusing chars
+    const randomValues = new Uint32Array(length);
+    crypto.getRandomValues(randomValues);
     let result = '';
     for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
+        result += chars.charAt(randomValues[i] % chars.length);
     }
     return result;
 }

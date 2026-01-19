@@ -10,8 +10,8 @@ export interface AnalyticsEvent {
     sessionId: string;
 }
 
-// Generate unique IDs
-const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+// Generate unique IDs using cryptographically secure random values
+const generateId = () => crypto.randomUUID();
 
 interface AnalyticsState {
     // Consent

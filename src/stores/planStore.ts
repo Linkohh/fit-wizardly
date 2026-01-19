@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { toast } from 'sonner';
 import type {
   Plan,
   Exercise,
@@ -20,6 +21,26 @@ import {
   detectPersonalRecords,
   calculateTotalVolume,
 } from '@/lib/progressionEngine';
+
+// Helper for generating unique IDs
+const generateUniqueId = () => `log_${crypto.randomUUID()}`;
+
+// Helper for async operations with error handling
+const handleAsyncOperation = async <T>(
+  operation: Promise<T>,
+  onSuccess?: (result: T) => void,
+  errorMessage = 'Operation failed'
+): Promise<T | null> => {
+  try {
+    const result = await operation;
+    if (onSuccess) onSuccess(result);
+    return result;
+  } catch (error) {
+    console.error(errorMessage, error);
+    toast.error(errorMessage);
+    return null;
+  }
+};
 
 // ============================================
 // ACTIVE WORKOUT STATE
@@ -111,7 +132,12 @@ export const usePlanStore = create<PlanState>()(
         set((state) => ({
           planHistory: [plan, ...state.planHistory.filter(p => p.id !== plan.id)].slice(0, 20)
         }));
-        savePlan(plan).catch(err => console.error('Failed to save plan to backend', err));
+        // Save to backend with error handling
+        handleAsyncOperation(
+          savePlan(plan),
+          undefined,
+          'Failed to save plan. Changes saved locally.'
+        );
       },
 
       deletePlanFromHistory: (planId) => {
@@ -121,7 +147,12 @@ export const usePlanStore = create<PlanState>()(
           // Also clean up workout logs for this plan
           workoutLogs: state.workoutLogs.filter(log => log.planId !== planId),
         }));
-        deletePlanApi(planId).catch(err => console.error('Failed to delete plan from backend', err));
+        // Delete from backend with error handling
+        handleAsyncOperation(
+          deletePlanApi(planId),
+          undefined,
+          'Failed to delete plan from server. Removed locally.'
+        );
       },
 
       getPlanById: (planId) => {
@@ -131,9 +162,16 @@ export const usePlanStore = create<PlanState>()(
       },
 
       syncWithBackend: async () => {
-        const result = await getPlans();
-        if (result.data) {
-          set({ planHistory: result.data });
+        try {
+          const result = await getPlans();
+          if (result.data) {
+            set({ planHistory: result.data });
+          } else if (result.error) {
+            toast.error('Failed to sync with server');
+          }
+        } catch (error) {
+          console.error('Sync failed:', error);
+          toast.error('Failed to connect to server');
         }
       },
 
@@ -153,7 +191,12 @@ export const usePlanStore = create<PlanState>()(
           });
 
           const updatedPlan = { ...state.currentPlan, workoutDays: newWorkoutDays };
-          savePlan(updatedPlan).catch(console.error);
+          // Save with error handling
+          handleAsyncOperation(
+            savePlan(updatedPlan),
+            undefined,
+            'Failed to save exercise changes'
+          );
 
           return { currentPlan: updatedPlan };
         });
@@ -175,7 +218,12 @@ export const usePlanStore = create<PlanState>()(
           });
 
           const updatedPlan = { ...state.currentPlan, workoutDays: newWorkoutDays };
-          savePlan(updatedPlan).catch(console.error);
+          // Save with error handling
+          handleAsyncOperation(
+            savePlan(updatedPlan),
+            undefined,
+            'Failed to save exercise swap'
+          );
 
           return { currentPlan: updatedPlan };
         });
@@ -269,7 +317,7 @@ export const usePlanStore = create<PlanState>()(
       },
 
       completeWorkout: (perceivedDifficulty, notes) => {
-        const { activeWorkout, workoutLogs, preferredWeightUnit } = get();
+        const { activeWorkout, workoutLogs } = get();
         if (!activeWorkout) return null;
 
         const completedAt = new Date();
@@ -277,14 +325,19 @@ export const usePlanStore = create<PlanState>()(
           (completedAt.getTime() - new Date(activeWorkout.startedAt).getTime()) / 60000
         );
 
-        // Calculate total volume
+        // Calculate total volume with error handling
         let totalVolume = 0;
-        for (const exercise of activeWorkout.exercises) {
-          totalVolume += calculateTotalVolume(exercise.sets);
+        try {
+          for (const exercise of activeWorkout.exercises) {
+            totalVolume += calculateTotalVolume(exercise.sets);
+          }
+        } catch (error) {
+          console.error('Error calculating volume:', error);
+          // Continue with 0 volume rather than failing
         }
 
         const workoutLog: WorkoutLog = {
-          id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          id: generateUniqueId(),
           planId: activeWorkout.planId,
           dayIndex: activeWorkout.dayIndex,
           dayName: activeWorkout.dayName,
@@ -297,8 +350,14 @@ export const usePlanStore = create<PlanState>()(
           totalVolume,
         };
 
-        // Detect personal records
-        const newPRs = detectPersonalRecords(workoutLog, workoutLogs);
+        // Detect personal records with error handling
+        let newPRs: PersonalRecord[] = [];
+        try {
+          newPRs = detectPersonalRecords(workoutLog, workoutLogs);
+        } catch (error) {
+          console.error('Error detecting PRs:', error);
+          // Continue without PR detection
+        }
 
         set((state) => ({
           workoutLogs: [workoutLog, ...state.workoutLogs].slice(0, 100), // Keep last 100 logs
@@ -373,7 +432,12 @@ export const usePlanStore = create<PlanState>()(
           }));
 
           const updatedPlan = { ...state.currentPlan, workoutDays: newWorkoutDays };
-          savePlan(updatedPlan).catch(console.error);
+          // Save with error handling
+          handleAsyncOperation(
+            savePlan(updatedPlan),
+            () => toast.success('Progression recommendations applied'),
+            'Failed to save progression recommendations'
+          );
 
           return { currentPlan: updatedPlan };
         });

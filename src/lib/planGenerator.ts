@@ -17,22 +17,7 @@ import type {
 } from '@/types/fitness';
 import { EXERCISE_DATABASE } from '@/data/exercises';
 import { sha256 } from '@/lib/hash';
-
-// Helper to determine NASM Phase (Duplicate of store logic for safety)
-function determineOptPhase(goal: string, experience: string): OptPhase {
-  if (experience === 'beginner') return 'stabilization_endurance';
-  if (experience === 'intermediate') {
-    if (goal === 'strength') return 'strength_endurance';
-    if (goal === 'hypertrophy') return 'muscular_development';
-    return 'stabilization_endurance';
-  }
-  if (experience === 'advanced') {
-    if (goal === 'strength') return 'maximal_strength';
-    if (goal === 'hypertrophy') return 'muscular_development';
-    return 'power';
-  }
-  return 'stabilization_endurance';
-}
+import { determineOptPhase } from '@/lib/phaseMapper';
 
 // NASM Phase Variables
 function getPhaseVariables(phase: OptPhase) {

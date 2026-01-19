@@ -107,7 +107,7 @@ class OfflineQueue {
         const queue = this.getQueue();
         queue.push({
             ...operation,
-            id: `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            id: `op_${crypto.randomUUID()}`,
             timestamp: Date.now(),
         });
         localStorageWithFallback.setItem(this.STORAGE_KEY, JSON.stringify(queue));

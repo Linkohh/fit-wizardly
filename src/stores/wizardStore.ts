@@ -1,25 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Goal, ExperienceLevel, Equipment, MuscleGroup, Constraint, WizardSelections, OptPhase } from '@/types/fitness';
-
-// Helper to determine NASM Phase
-function determineOptPhase(goal: Goal, experience: ExperienceLevel): OptPhase {
-  if (experience === 'beginner') return 'stabilization_endurance';
-
-  if (experience === 'intermediate') {
-    if (goal === 'strength') return 'strength_endurance'; // Phase 2
-    if (goal === 'hypertrophy') return 'muscular_development'; // Phase 3
-    return 'stabilization_endurance'; // Phase 1 (General fallback)
-  }
-
-  if (experience === 'advanced') {
-    if (goal === 'strength') return 'maximal_strength'; // Phase 4
-    if (goal === 'hypertrophy') return 'muscular_development'; // Phase 3
-    return 'power'; // Phase 5 (General/Performance)
-  }
-
-  return 'stabilization_endurance';
-}
+import type { Goal, ExperienceLevel, Equipment, MuscleGroup, Constraint, WizardSelections } from '@/types/fitness';
+import { determineOptPhase } from '@/lib/phaseMapper';
 
 export type WizardStep = 'goal' | 'equipment' | 'anatomy' | 'constraints' | 'schedule' | 'review';
 
