@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Activity } from 'lucide-react';
+import { Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function CommunityPulse() {

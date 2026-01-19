@@ -2,7 +2,6 @@ import { User, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { useTranslation } from 'react-i18next';
 import { WizardSelections } from '@/types/fitness';
 import { useState } from 'react';
 
@@ -11,7 +10,6 @@ interface ReviewCoachCardProps {
 }
 
 export function ReviewCoachCard({ selections }: ReviewCoachCardProps) {
-    const { t } = useTranslation();
     const [showCoachNotes, setShowCoachNotes] = useState(false);
 
     if (!selections.isTrainer) return null;

@@ -14,7 +14,7 @@ import {
     AlertCircle,
 } from 'lucide-react';
 import { usePlanStore } from '@/stores/planStore';
-import type { WeeklySummary, MuscleGroup } from '@/types/fitness';
+import type { MuscleGroup } from '@/types/fitness';
 import { cn } from '@/lib/utils';
 
 interface WeeklyProgressReviewProps {
@@ -23,7 +23,7 @@ interface WeeklyProgressReviewProps {
 
 export function WeeklyProgressReview({ planId }: WeeklyProgressReviewProps) {
     const [selectedWeek, setSelectedWeek] = useState(1);
-    const { getWeeklySummary, currentPlan, preferredWeightUnit } = usePlanStore();
+    const { getWeeklySummary, preferredWeightUnit } = usePlanStore();
 
     const summary = getWeeklySummary(planId, selectedWeek);
 

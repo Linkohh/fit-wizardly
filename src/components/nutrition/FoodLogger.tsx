@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Scan, Plus, Search, X, Loader2, Apple, Star, ChefHat, Heart, Utensils } from "lucide-react";
 import { MealEntry, MacroTargets } from "@/types/nutrition";

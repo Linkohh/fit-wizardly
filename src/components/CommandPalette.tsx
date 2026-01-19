@@ -14,7 +14,6 @@ import {
   Users,
   Dumbbell,
   User,
-  BarChart3,
   BookOpen,
   Settings,
   LogOut,

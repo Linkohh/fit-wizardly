@@ -200,7 +200,7 @@ export function WorkoutLogger() {
                                     {prescription.exercise.name}
                                 </CardTitle>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                    {t('workout_day.sets', { count: prescription.sets })} × {t('workout_day.reps', { count: prescription.reps })} • {t('workout_day.rest', { count: prescription.restSeconds })}
+                                    {t('workout_day.sets', { count: prescription.sets })} × {prescription.reps} reps • {prescription.restSeconds}s rest
                                 </p>
                             </div>
                             {currentExercise.skipped ? (

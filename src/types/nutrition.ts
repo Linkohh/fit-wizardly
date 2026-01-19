@@ -26,6 +26,8 @@ export interface MealEntry {
     fats: number;
     mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'pre_workout' | 'post_workout';
     timestamp: Date;
+    imageUrl?: string;
+    tags?: string[];
 }
 
 export interface MealRecommendation {
@@ -38,6 +40,7 @@ export interface MealRecommendation {
     category: MacroGoal;
     tags: string[];
     isWorkoutMeal: boolean;
+    imageUrl?: string;
 }
 
 export interface UserNutritionProfile {
