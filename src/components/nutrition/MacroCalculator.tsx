@@ -237,11 +237,28 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                         onChange={(e) => handleHeightCmChange(Number(e.target.value))}
                                         className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all"
                                     />
-                                    <UnitToggle
-                                        unit={heightUnit}
-                                        options={['cm', 'ft']}
-                                        onChange={(u) => handleHeightUnitChange(u as HeightUnit)}
-                                    />
+                                    <div className="flex rounded-xl overflow-hidden border border-white/10 bg-background/30 p-1 gap-1 h-11 items-center">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleHeightUnitChange('cm')}
+                                            className={cn(
+                                                "h-9 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center",
+                                                "bg-primary text-primary-foreground shadow-sm"
+                                            )}
+                                        >
+                                            cm
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleHeightUnitChange('ft')}
+                                            className={cn(
+                                                "h-9 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center",
+                                                "text-muted-foreground hover:bg-white/5"
+                                            )}
+                                        >
+                                            ft
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="flex gap-2">
@@ -265,11 +282,28 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                             placeholder="in"
                                         />
                                     </div>
-                                    <UnitToggle
-                                        unit={heightUnit}
-                                        options={['cm', 'ft']}
-                                        onChange={(u) => handleHeightUnitChange(u as HeightUnit)}
-                                    />
+                                    <div className="flex rounded-xl overflow-hidden border border-white/10 bg-background/30 p-1 gap-1 h-11 items-center">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleHeightUnitChange('cm')}
+                                            className={cn(
+                                                "h-9 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center",
+                                                "text-muted-foreground hover:bg-white/5"
+                                            )}
+                                        >
+                                            cm
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleHeightUnitChange('ft')}
+                                            className={cn(
+                                                "h-9 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center",
+                                                "bg-primary text-primary-foreground shadow-sm"
+                                            )}
+                                        >
+                                            ft
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -358,27 +392,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
     );
 }
 
-function UnitToggle({ unit, options, onChange }: { unit: string; options: string[]; onChange: (unit: string) => void }) {
-    return (
-        <div className="flex rounded-xl overflow-hidden border border-white/10 bg-background/30 p-1 gap-1 h-11 items-center shrink-0">
-            {options.map((opt) => (
-                <button
-                    key={opt}
-                    type="button"
-                    onClick={() => onChange(opt)}
-                    className={cn(
-                        "h-9 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center",
-                        unit === opt
-                            ? "bg-primary text-primary-foreground shadow-sm"
-                            : "text-muted-foreground hover:bg-white/5"
-                    )}
-                >
-                    {opt}
-                </button>
-            ))}
-        </div>
-    );
-}
+
 
 function MacroCard({ label, amount, unit, color }: { label: string, amount: number, unit: string, color: string }) {
     return (
