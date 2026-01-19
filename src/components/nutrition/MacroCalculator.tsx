@@ -25,7 +25,7 @@ const feetInchesToCm = (feet: number, inches: number) => Math.round((feet * 12 +
 export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps) {
     const [weightUnit, setWeightUnit] = useState<WeightUnit>('kg');
     const [heightUnit, setHeightUnit] = useState<HeightUnit>('cm');
-    
+
     // Display values (in current unit)
     const [displayWeight, setDisplayWeight] = useState(initialProfile?.weight || 70);
     const [displayHeightCm, setDisplayHeightCm] = useState(initialProfile?.height || 175);
@@ -69,7 +69,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
     // Handle unit changes
     const handleWeightUnitChange = (newUnit: WeightUnit) => {
         if (newUnit === weightUnit) return;
-        
+
         if (newUnit === 'lbs') {
             setDisplayWeight(kgToLbs(profile.weight));
         } else {
@@ -80,7 +80,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
 
     const handleHeightUnitChange = (newUnit: HeightUnit) => {
         if (newUnit === heightUnit) return;
-        
+
         if (newUnit === 'ft') {
             const { feet, inches } = cmToFeetInches(profile.height);
             setDisplayFeet(feet);
@@ -200,9 +200,9 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                         type="button"
                                         onClick={() => handleWeightUnitChange('kg')}
                                         className={cn(
-                                            "px-3 py-2 text-xs font-medium transition-all",
-                                            weightUnit === 'kg' 
-                                                ? "bg-primary text-primary-foreground" 
+                                            "px-2 py-2 text-xs font-medium transition-all",
+                                            weightUnit === 'kg'
+                                                ? "bg-primary text-primary-foreground"
                                                 : "bg-background/50 text-muted-foreground hover:bg-white/5"
                                         )}
                                     >
@@ -212,9 +212,9 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                         type="button"
                                         onClick={() => handleWeightUnitChange('lbs')}
                                         className={cn(
-                                            "px-3 py-2 text-xs font-medium transition-all",
-                                            weightUnit === 'lbs' 
-                                                ? "bg-primary text-primary-foreground" 
+                                            "px-2 py-2 text-xs font-medium transition-all",
+                                            weightUnit === 'lbs'
+                                                ? "bg-primary text-primary-foreground"
                                                 : "bg-background/50 text-muted-foreground hover:bg-white/5"
                                         )}
                                     >
@@ -245,25 +245,25 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                 </div>
                             ) : (
                                 <div className="flex gap-2">
-                                    <div className="flex gap-1 flex-1">
+                                    <div className="flex gap-1 flex-1 min-w-0">
                                         <input
                                             type="number"
                                             value={displayFeet}
                                             onChange={(e) => handleFeetChange(Number(e.target.value))}
-                                            className="w-14 bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all text-center"
+                                            className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl p-2 focus:ring-2 ring-primary/50 outline-none transition-all text-center"
                                             min={0}
                                             max={8}
+                                            placeholder="ft"
                                         />
-                                        <span className="flex items-center text-muted-foreground text-sm">ft</span>
                                         <input
                                             type="number"
                                             value={displayInches}
                                             onChange={(e) => handleInchesChange(Number(e.target.value))}
-                                            className="w-14 bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all text-center"
+                                            className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl p-2 focus:ring-2 ring-primary/50 outline-none transition-all text-center"
                                             min={0}
                                             max={11}
+                                            placeholder="in"
                                         />
-                                        <span className="flex items-center text-muted-foreground text-sm">in</span>
                                     </div>
                                     <UnitToggle
                                         unit={heightUnit}
@@ -368,8 +368,8 @@ function UnitToggle({ unit, options, onChange }: { unit: string; options: string
                     onClick={() => onChange(opt)}
                     className={cn(
                         "px-3 py-2 text-xs font-medium transition-all",
-                        unit === opt 
-                            ? "bg-primary text-primary-foreground" 
+                        unit === opt
+                            ? "bg-primary text-primary-foreground"
                             : "bg-background/50 text-muted-foreground hover:bg-white/5"
                     )}
                 >
