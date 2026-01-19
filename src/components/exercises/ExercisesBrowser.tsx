@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { EXERCISE_DATABASE } from '@/data/exercises';
 import { filterExercises, ExerciseFilterOptions, getRecommendedExercises } from '@/lib/exercise-utils';
 import { useWizardStore } from '@/stores/wizardStore';
 import { Exercise } from '@/types/fitness';
@@ -11,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { CommunityPulse } from '@/components/community/CommunityPulse';
 import { ExerciseOfTheDay } from './ExerciseOfTheDay';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
 const ITEMS_PER_PAGE = 24;
 

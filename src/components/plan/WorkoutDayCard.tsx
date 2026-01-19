@@ -5,12 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PlayCircle, AlertTriangle, Lightbulb, ArrowLeftRight } from 'lucide-react';
-import type { GeneratedPlan, ExercisePrescription } from '@/types/fitness';
+import type { Plan, ExercisePrescription, Constraint } from '@/types/fitness';
 import { MUSCLE_DATA } from '@/types/fitness';
 import { useTranslation } from 'react-i18next';
 
 interface WorkoutDayCardProps {
-    day: GeneratedPlan['workoutDays'][0];
+    day: Plan['workoutDays'][0];
     planId: string;
     onSwap: (target: { dayIndex: number; exerciseIndex: number; exercise: ExercisePrescription }) => void;
 }
@@ -46,7 +46,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                     {t('plan.workout_day.warm_up', 'Warm-up')}
                                 </p>
                                 <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
-                                    {day.warmUp.map((item, index) => (
+                                    {day.warmUp.map((item: string, index: number) => (
                                         <li key={index} className="flex items-start gap-2">
                                             <span className="text-primary">•</span>
                                             <span>{item}</span>
@@ -61,7 +61,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                     {t('plan.workout_day.cool_down', 'Cool-down')}
                                 </p>
                                 <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
-                                    {day.coolDown.map((item, index) => (
+                                    {day.coolDown.map((item: string, index: number) => (
                                         <li key={index} className="flex items-start gap-2">
                                             <span className="text-primary">•</span>
                                             <span>{item}</span>
@@ -73,7 +73,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                     </div>
                 )}
                 <div className="divide-y">
-                    {day.exercises.map((ex, i) => {
+                    {day.exercises.map((ex: ExercisePrescription, i: number) => {
                         const hasCues = ex.exercise.cues && ex.exercise.cues.length > 0;
                         const hasContraindications = ex.exercise.contraindications && ex.exercise.contraindications.length > 0;
 
@@ -97,7 +97,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                                             <TooltipContent className="max-w-xs">
                                                                 <p className="font-medium text-warning">{t('plan.workout_day.safety_note')}</p>
                                                                 <p className="text-sm">
-                                                                    {t('plan.workout_day.not_suitable_for')}: {ex.exercise.contraindications.map(c =>
+                                                                    {t('plan.workout_day.not_suitable_for')}: {ex.exercise.contraindications.map((c: Constraint) =>
                                                                         c.replace(/_/g, ' ')
                                                                     ).join(', ')}
                                                                 </p>
@@ -149,7 +149,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                             {t('plan.workout_day.coaching_cues')}
                                         </p>
                                         <ul className="text-sm text-muted-foreground space-y-1">
-                                            {ex.exercise.cues?.map((cue, cueIndex) => (
+                                            {ex.exercise.cues?.map((cue: string, cueIndex: number) => (
                                                 <li key={cueIndex} className="flex items-start gap-2">
                                                     <span className="text-primary">•</span>
                                                     <span>{cue}</span>

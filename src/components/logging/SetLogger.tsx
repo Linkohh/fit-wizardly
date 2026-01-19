@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { Check, X, ChevronUp, ChevronDown } from 'lucide-react';
+import { Check, ChevronUp, ChevronDown } from 'lucide-react';
 import type { SetLog, WeightUnit } from '@/types/fitness';
 import { cn } from '@/lib/utils';
 

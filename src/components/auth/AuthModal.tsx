@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Mail, Loader2, CheckCircle2, Sparkles } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
-import { cn } from '@/lib/utils';
+
 
 export function AuthModal() {
     const { showAuthModal, setShowAuthModal, signInWithEmail, isConfigured } = useAuthStore();

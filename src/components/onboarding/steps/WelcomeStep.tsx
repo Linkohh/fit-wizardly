@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useOnboardingStore, AVATAR_OPTIONS, AvatarEmoji } from '@/stores/onboardingStore';
+import { useOnboardingStore, AVATAR_OPTIONS } from '@/stores/onboardingStore';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';

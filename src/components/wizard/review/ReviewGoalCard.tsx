@@ -2,7 +2,6 @@ import { Target, Pencil } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { WizardSelections } from '@/types/fitness';
 

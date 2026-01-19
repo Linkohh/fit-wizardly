@@ -8,7 +8,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Heart, FolderPlus, GitCompare, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import {
     Tooltip,
     TooltipContent,

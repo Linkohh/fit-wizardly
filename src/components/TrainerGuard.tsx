@@ -1,4 +1,3 @@
-import { Navigate } from "react-router-dom";
 import { useTrainerStore } from "@/stores/trainerStore";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
