@@ -193,17 +193,17 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                     type="number"
                                     value={displayWeight}
                                     onChange={(e) => handleWeightChange(Number(e.target.value))}
-                                    className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all"
+                                    className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl px-3 focus:ring-2 ring-primary/50 outline-none transition-all font-medium text-base h-11"
                                 />
-                                <div className="flex rounded-xl overflow-hidden border border-white/10">
+                                <div className="flex rounded-xl overflow-hidden border border-white/10 bg-background/30 p-1 gap-1 h-11 items-center">
                                     <button
                                         type="button"
                                         onClick={() => handleWeightUnitChange('kg')}
                                         className={cn(
-                                            "px-2 py-2 text-xs font-medium transition-all",
+                                            "h-9 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center",
                                             weightUnit === 'kg'
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-background/50 text-muted-foreground hover:bg-white/5"
+                                                ? "bg-primary text-primary-foreground shadow-sm"
+                                                : "text-muted-foreground hover:bg-white/5"
                                         )}
                                     >
                                         kg
@@ -212,10 +212,10 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                         type="button"
                                         onClick={() => handleWeightUnitChange('lbs')}
                                         className={cn(
-                                            "px-2 py-2 text-xs font-medium transition-all",
+                                            "h-9 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center",
                                             weightUnit === 'lbs'
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-background/50 text-muted-foreground hover:bg-white/5"
+                                                ? "bg-primary text-primary-foreground shadow-sm"
+                                                : "text-muted-foreground hover:bg-white/5"
                                         )}
                                     >
                                         lbs
@@ -262,25 +262,51 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                 </div>
                             ) : (
                                 <div className="flex gap-2">
-                                    <div className="flex gap-1 flex-1 min-w-0">
-                                        <input
-                                            type="number"
-                                            value={displayFeet}
-                                            onChange={(e) => handleFeetChange(Number(e.target.value))}
-                                            className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl p-2 focus:ring-2 ring-primary/50 outline-none transition-all text-center"
-                                            min={0}
-                                            max={8}
-                                            placeholder="ft"
-                                        />
-                                        <input
-                                            type="number"
-                                            value={displayInches}
-                                            onChange={(e) => handleInchesChange(Number(e.target.value))}
-                                            className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl p-2 focus:ring-2 ring-primary/50 outline-none transition-all text-center"
-                                            min={0}
-                                            max={11}
-                                        />
-                                        <span className="flex items-center text-muted-foreground text-sm">in</span>
+                                    <div className="flex gap-2 flex-1 min-w-0">
+                                        <div className="relative flex-1 min-w-0">
+                                            <input
+                                                type="number"
+                                                value={displayFeet}
+                                                onChange={(e) => handleFeetChange(Number(e.target.value))}
+                                                className="w-full h-11 bg-background/50 border border-white/10 rounded-xl text-center focus:ring-2 ring-primary/50 outline-none transition-all font-medium text-base px-1"
+                                                min={0}
+                                                max={8}
+                                                placeholder="ft"
+                                            />
+                                        </div>
+                                        <div className="relative flex-1 min-w-0">
+                                            <input
+                                                type="number"
+                                                value={displayInches}
+                                                onChange={(e) => handleInchesChange(Number(e.target.value))}
+                                                className="w-full h-11 bg-background/50 border border-white/10 rounded-xl text-center focus:ring-2 ring-primary/50 outline-none transition-all font-medium text-base px-1"
+                                                min={0}
+                                                max={11}
+                                                placeholder="in"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex rounded-xl overflow-hidden border border-white/10 bg-background/30 p-1 gap-1 h-11 items-center">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleHeightUnitChange('cm')}
+                                            className={cn(
+                                                "h-9 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center",
+                                                "text-muted-foreground hover:bg-white/5"
+                                            )}
+                                        >
+                                            cm
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleHeightUnitChange('ft')}
+                                            className={cn(
+                                                "h-9 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center",
+                                                "bg-primary text-primary-foreground shadow-sm"
+                                            )}
+                                        >
+                                            ft
+                                        </button>
                                     </div>
                                 </div>
                             )}
@@ -370,27 +396,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
     );
 }
 
-function UnitToggle({ unit, options, onChange }: { unit: string; options: string[]; onChange: (unit: string) => void }) {
-    return (
-        <div className="flex rounded-xl overflow-hidden border border-white/10 shrink-0">
-            {options.map((opt) => (
-                <button
-                    key={opt}
-                    type="button"
-                    onClick={() => onChange(opt)}
-                    className={cn(
-                        "px-3 py-2 text-xs font-medium transition-all",
-                        unit === opt
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-background/50 text-muted-foreground hover:bg-white/5"
-                    )}
-                >
-                    {opt}
-                </button>
-            ))}
-        </div>
-    );
-}
+
 
 function MacroCard({ label, amount, unit, color }: { label: string, amount: number, unit: string, color: string }) {
     return (
