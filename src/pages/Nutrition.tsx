@@ -47,7 +47,7 @@ export default function NutritionPage() {
     }), { calories: 0, protein: 0, carbs: 0, fats: 0 });
 
     return (
-        <div className="container mx-auto px-4 py-8 space-y-8 max-w-7xl animate-in fade-in duration-500">
+        <div className="container-full py-8 space-y-8 animate-in fade-in duration-500">
 
             {/* Header Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

@@ -89,7 +89,7 @@ export default function Index() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none opacity-50 dark:opacity-30" />
 
         {/* Quote sits comfortably inside the dark background */}
-        <div className="container max-w-4xl mx-auto px-4 mb-20 pt-12 sm:pt-16 md:pt-20 relative">
+        <div className="container-content mb-20 pt-12 sm:pt-16 md:pt-20 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -107,9 +107,9 @@ export default function Index() {
             initial={{ opacity: 0, y: 40 }}
             animate={statsInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="px-4 mb-20"
+            className="px-responsive mb-20"
           >
-            <div className="container max-w-4xl mx-auto">
+            <div className="container-content">
               <motion.div
                 initial="hidden"
                 animate={statsInView ? "visible" : "hidden"}
@@ -152,9 +152,9 @@ export default function Index() {
             initial={{ opacity: 0, y: 40 }}
             animate={trainerInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="px-4 mb-20"
+            className="px-responsive mb-20"
           >
-            <div className="container max-w-4xl mx-auto">
+            <div className="container-content">
               <TrainerDashboard />
             </div>
           </motion.section>
@@ -166,9 +166,9 @@ export default function Index() {
           initial={{ opacity: 0 }}
           animate={featuresInView ? { opacity: 1 } : {}}
           transition={{ duration: 0.4 }}
-          className="px-4 pb-12"
+          className="px-responsive pb-12"
         >
-          <div className="container max-w-6xl mx-auto">
+          <div className="container-wide">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={featuresInView ? { opacity: 1, y: 0 } : {}}
@@ -185,7 +185,7 @@ export default function Index() {
                 <span className="text-sm font-semibold">{t('features.badge')}</span>
               </motion.div>
 
-              <h2 className="text-3xl md:text-5xl font-black text-foreground tracking-tight mb-4">
+              <h2 className="text-fluid-4xl md:text-fluid-5xl font-black text-foreground tracking-tight mb-4">
                 <Trans i18nKey="features.title" components={{ 1: <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary" /> }} />
               </h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">

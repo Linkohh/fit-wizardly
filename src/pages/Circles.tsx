@@ -42,7 +42,7 @@ export default function CirclesPage() {
     // Unauthenticated view
     if (!user && !authLoading) {
         return (
-            <main className="container max-w-4xl mx-auto px-4 py-12">
+            <main className="container-content py-12">
                 <AuthModal />
 
                 <div className="text-center mb-12">
@@ -112,7 +112,7 @@ export default function CirclesPage() {
     // Loading state
     if (authLoading || isLoading) {
         return (
-            <main className="container max-w-5xl mx-auto px-4 py-8 animate-fade-in">
+            <main className="container-wide py-8 animate-fade-in">
                 {/* Page header skeleton */}
                 <div className="mb-8 space-y-2">
                     <Skeleton variant="shimmer" className="h-9 w-48 rounded-lg" />
@@ -169,7 +169,7 @@ export default function CirclesPage() {
 
     // Authenticated view
     return (
-        <main className="container max-w-5xl mx-auto px-4 py-8">
+        <main className="container-wide py-8">
             <AuthModal />
             <CreateCircleModal
                 isOpen={showCreateModal}

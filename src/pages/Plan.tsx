@@ -62,7 +62,7 @@ export default function PlanPage() {
 
   if (!currentPlan) {
     return (
-      <main className="container max-w-4xl mx-auto px-4 py-20 text-center">
+      <main className="container-content py-20 text-center">
         <div className="mx-auto w-20 h-20 rounded-full gradient-primary flex items-center justify-center mb-6 shadow-glow animate-float">
           <Wand2 className="h-10 w-10 text-primary-foreground" />
         </div>
@@ -78,7 +78,7 @@ export default function PlanPage() {
   };
 
   return (
-    <main className="container max-w-5xl mx-auto px-4 py-8 pb-32">
+    <main className="container-wide py-8 pb-32">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
         <h1 className="text-2xl font-bold gradient-text self-start sm:self-center">{t('plan.title')}</h1>
 

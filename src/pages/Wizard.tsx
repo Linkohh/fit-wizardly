@@ -190,7 +190,7 @@ export default function WizardPage() {
   // Show loading skeleton until store is hydrated from localStorage
   if (!hydrated) {
     return (
-      <div className="container max-w-4xl mx-auto px-4 py-8">
+      <div className="container-content py-8">
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-muted rounded w-1/3" />
           <div className="h-4 bg-muted rounded w-1/2" />
@@ -202,7 +202,7 @@ export default function WizardPage() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto px-4 py-8 pb-32">
+    <div className="container-content py-8 pb-32">
       <div id="wizard-live-region" className="sr-only" aria-live="polite"></div>
 
       <div className="flex justify-between items-center mb-8">
