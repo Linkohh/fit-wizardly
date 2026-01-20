@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Users, Menu, Sun, Moon, Monitor } from 'lucide-react';
+import { Users, Sun, Moon, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn, debounce } from '@/lib/utils';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
+import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
 
 export function Header() {
   const location = useLocation();
@@ -241,11 +242,30 @@ export function Header() {
         {/* Mobile Menu */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" className="touch-target" aria-label="Open menu">
-              <Menu className="h-6 w-6" />
-            </Button>
+            <motion.div
+              whileTap={{ scale: 0.92 }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                className="touch-target"
+                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileOpen}
+              >
+                <AnimatedMenuIcon isOpen={mobileOpen} size={24} strokeWidth={2} />
+              </Button>
+            </motion.div>
           </SheetTrigger>
-          <SheetContent side="right" className="w-72">
+          <SheetContent
+            side="right"
+            className="w-72"
+            glassEffect
+            enableGestures
+            showDragHandle
+            onGestureClose={() => setMobileOpen(false)}
+          >
             <motion.nav
               className="flex flex-col gap-2 mt-8"
               role="navigation"
@@ -257,65 +277,115 @@ export function Header() {
                 visible: {
                   opacity: 1,
                   transition: {
-                    staggerChildren: 0.07,
-                    delayChildren: 0.1
+                    staggerChildren: 0.06,
+                    delayChildren: 0.12
                   }
                 }
               }}
             >
-              {navItems.map((item) => (
-                <motion.div
-                  key={item.path}
-                  variants={{
-                    hidden: { opacity: 0, x: -20 },
-                    visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-                  }}
-                >
-                  <Link to={item.path} onClick={() => setMobileOpen(false)}>
-                    <Button variant={isActive(item.path) ? 'default' : 'ghost'} className="w-full justify-start touch-target">
-                      {item.label}
-                    </Button>
-                  </Link>
-                </motion.div>
-              ))}
+              {navItems.map((item) => {
+                const active = isActive(item.path);
+                return (
+                  <motion.div
+                    key={item.path}
+                    variants={{
+                      hidden: { opacity: 0, x: -24, scale: 0.96, filter: "blur(4px)" },
+                      visible: {
+                        opacity: 1,
+                        x: 0,
+                        scale: 1,
+                        filter: "blur(0px)",
+                        transition: { type: "spring", stiffness: 400, damping: 28 }
+                      }
+                    }}
+                    whileTap={{ scale: 0.97, x: -4 }}
+                    whileHover={{ x: 4 }}
+                    className="relative"
+                  >
+                    {/* Active indicator bar */}
+                    {active && (
+                      <motion.div
+                        layoutId="mobile-nav-indicator"
+                        className="nav-indicator absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full"
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    )}
+                    <Link to={item.path} onClick={() => setMobileOpen(false)}>
+                      <Button
+                        variant={active ? 'default' : 'ghost'}
+                        className={cn(
+                          "w-full justify-start touch-target menu-item-interactive pl-4",
+                          active && "bg-primary/10 text-primary font-medium"
+                        )}
+                      >
+                        {item.label}
+                      </Button>
+                    </Link>
+                  </motion.div>
+                );
+              })}
 
               {/* Mobile Theme Selection */}
               <motion.div
-                className="flex flex-col gap-2 mt-4 p-3 rounded-lg bg-secondary/50"
+                className="flex flex-col gap-2 mt-4 p-3 rounded-lg bg-secondary/50 backdrop-blur-sm"
                 variants={{
-                  hidden: { opacity: 0, x: -20 },
-                  visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+                  hidden: { opacity: 0, x: -24, scale: 0.96, filter: "blur(4px)" },
+                  visible: {
+                    opacity: 1,
+                    x: 0,
+                    scale: 1,
+                    filter: "blur(0px)",
+                    transition: { type: "spring", stiffness: 400, damping: 28 }
+                  }
                 }}
               >
                 <Label className="text-sm font-medium mb-1">{t('header.theme.label')}</Label>
                 <div className="flex gap-1">
-                  <Button variant={mode === 'light' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('light')} className="flex-1">
-                    <Sun className="h-4 w-4" />
-                  </Button>
-                  <Button variant={mode === 'dark' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('dark')} className="flex-1">
-                    <Moon className="h-4 w-4" />
-                  </Button>
-                  <Button variant={mode === 'system' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('system')} className="flex-1">
-                    <Monitor className="h-4 w-4" />
-                  </Button>
+                  <motion.div whileTap={{ scale: 0.95 }} className="flex-1">
+                    <Button variant={mode === 'light' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('light')} className="w-full">
+                      <Sun className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
+                  <motion.div whileTap={{ scale: 0.95 }} className="flex-1">
+                    <Button variant={mode === 'dark' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('dark')} className="w-full">
+                      <Moon className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
+                  <motion.div whileTap={{ scale: 0.95 }} className="flex-1">
+                    <Button variant={mode === 'system' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('system')} className="w-full">
+                      <Monitor className="h-4 w-4" />
+                    </Button>
+                  </motion.div>
                 </div>
               </motion.div>
 
               {/* Mobile Trainer Mode */}
               <motion.div
                 className={cn(
-                  "flex items-center gap-3 mt-2 p-3 rounded-lg transition-colors duration-300",
+                  "flex items-center gap-3 mt-2 p-3 rounded-lg transition-colors duration-300 backdrop-blur-sm",
                   isTrainerMode ? "bg-primary/20" : "bg-secondary/50"
                 )}
                 variants={{
-                  hidden: { opacity: 0, x: -20 },
-                  visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+                  hidden: { opacity: 0, x: -24, scale: 0.96, filter: "blur(4px)" },
+                  visible: {
+                    opacity: 1,
+                    x: 0,
+                    scale: 1,
+                    filter: "blur(0px)",
+                    transition: { type: "spring", stiffness: 400, damping: 28 }
+                  }
                 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <Users className={cn(
-                  "h-4 w-4 transition-colors duration-300",
-                  isTrainerMode ? 'text-primary' : 'text-muted-foreground'
-                )} />
+                <motion.div
+                  animate={{ rotate: isTrainerMode ? 360 : 0 }}
+                  transition={{ duration: 0.5, ease: "easeOut" }}
+                >
+                  <Users className={cn(
+                    "h-4 w-4 transition-colors duration-300",
+                    isTrainerMode ? 'text-primary' : 'text-muted-foreground'
+                  )} />
+                </motion.div>
                 <Label htmlFor="trainer-mode-mobile" className="text-sm font-medium flex-1">
                   {t('header.trainer_mode')}
                 </Label>

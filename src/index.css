@@ -889,3 +889,126 @@ body {
       rgba(0, 0, 0, 0.1) 50%,
       transparent 70%);
 }
+
+/* =====================================================
+   PREMIUM MOBILE NAVIGATION
+   Apple/Google-inspired sheet and menu animations
+   ===================================================== */
+
+/* Mobile Menu Premium Glass Effect */
+.sheet-glass {
+  background: hsl(var(--card) / 0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-left: 1px solid hsl(var(--border) / 0.4);
+  box-shadow:
+    -8px 0 32px -8px hsl(var(--primary) / 0.15),
+    inset 1px 0 0 hsl(var(--primary-foreground) / 0.05);
+}
+
+.dark .sheet-glass {
+  background: hsl(var(--card) / 0.78);
+  border-left: 1px solid hsl(var(--primary) / 0.2);
+  box-shadow:
+    -8px 0 32px -8px hsl(0 0% 0% / 0.5),
+    -4px 0 16px -4px hsl(var(--primary) / 0.1),
+    inset 1px 0 0 hsl(var(--primary) / 0.1);
+}
+
+/* Premium Backdrop with Animated Blur */
+.backdrop-premium {
+  background: linear-gradient(
+    90deg,
+    hsl(0 0% 0% / 0.2) 0%,
+    hsl(0 0% 0% / 0.5) 100%
+  );
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.dark .backdrop-premium {
+  background: linear-gradient(
+    90deg,
+    hsl(270 50% 5% / 0.3) 0%,
+    hsl(270 50% 3% / 0.7) 100%
+  );
+}
+
+/* Menu Item Interactive States */
+.menu-item-interactive {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-item-interactive::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary) / 0) 0%,
+    hsl(var(--primary) / 0.1) 50%,
+    hsl(var(--primary) / 0) 100%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+
+.menu-item-interactive:hover::before {
+  transform: translateX(100%);
+}
+
+.menu-item-interactive:active {
+  transform: scale(0.98);
+  background: hsl(var(--primary) / 0.08);
+}
+
+/* Active Navigation Indicator */
+.nav-indicator {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--secondary)) 100%
+  );
+  box-shadow:
+    0 0 8px hsl(var(--primary) / 0.5),
+    0 0 16px hsl(var(--secondary) / 0.3);
+}
+
+/* Drag Handle Indicator */
+.drag-handle {
+  background: hsl(var(--muted-foreground) / 0.3);
+  transition: all 0.2s ease;
+}
+
+.drag-handle:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+  transform: scaleX(1.1);
+}
+
+/* Sheet Content Inner Glow */
+.sheet-inner-glow {
+  box-shadow: inset 0 0 60px -20px hsl(var(--primary) / 0.05);
+}
+
+.dark .sheet-inner-glow {
+  box-shadow: inset 0 0 80px -20px hsl(var(--primary) / 0.08);
+}
+
+/* Reduced Motion Support for Mobile Nav */
+@media (prefers-reduced-motion: reduce) {
+  .sheet-glass,
+  .backdrop-premium,
+  .menu-item-interactive,
+  .menu-item-interactive::before,
+  .drag-handle {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .menu-item-interactive::before {
+    display: none;
+  }
+}

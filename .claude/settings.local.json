@@ -14,7 +14,8 @@
       "Bash(wc:*)",
       "Bash(npx tsc:*)",
       "Bash(xargs basename:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(findstr:*)"
     ]
   }
 }

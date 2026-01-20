@@ -105,13 +105,13 @@ export function OnboardingFlow() {
             </div>
 
             {/* Progress indicator */}
-            <div className="absolute top-6 left-1/2 -translate-x-1/2">
+            <div className="absolute top-6 left-6 z-20">
                 <OnboardingProgress progress={progress} currentStep={stepIndex + 1} totalSteps={totalSteps} />
             </div>
 
             {/* Skip button */}
             <motion.div
-                className="absolute top-6 right-6"
+                className="absolute top-6 right-6 z-20"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}

@@ -140,6 +140,31 @@ export default {
           "0%": { transform: "translateY(0) scale(1)", boxShadow: "0 4px 6px -1px hsl(var(--primary) / 0.1)" },
           "100%": { transform: "translateY(-4px) scale(1.02)", boxShadow: "0 20px 25px -5px hsl(var(--primary) / 0.2), 0 8px 10px -6px hsl(var(--secondary) / 0.15)" },
         },
+        // Premium Mobile Navigation Animations
+        "sheet-slide-in": {
+          "0%": { transform: "translateX(100%) scale(0.96)", opacity: "0" },
+          "100%": { transform: "translateX(0) scale(1)", opacity: "1" },
+        },
+        "sheet-slide-out": {
+          "0%": { transform: "translateX(0) scale(1)", opacity: "1" },
+          "100%": { transform: "translateX(100%) scale(0.98)", opacity: "0" },
+        },
+        "backdrop-blur-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "backdrop-blur-out": {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
+        "menu-item-slide": {
+          "0%": { transform: "translateX(-24px) scale(0.96)", opacity: "0", filter: "blur(4px)" },
+          "100%": { transform: "translateX(0) scale(1)", opacity: "1", filter: "blur(0px)" },
+        },
+        "menu-item-exit": {
+          "0%": { transform: "translateX(0) scale(1)", opacity: "1" },
+          "100%": { transform: "translateX(24px) scale(0.96)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -158,6 +183,13 @@ export default {
         "card-lift": "card-lift 0.3s ease-out forwards",
         "pulse-subtle": "pulse-subtle 2s ease-in-out infinite",
         "glow": "glow 1.5s ease-in-out infinite alternate",
+        // Premium Mobile Navigation
+        "sheet-slide-in": "sheet-slide-in 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards",
+        "sheet-slide-out": "sheet-slide-out 0.25s cubic-bezier(0.32, 0, 0.67, 0) forwards",
+        "backdrop-blur-in": "backdrop-blur-in 0.3s ease-out forwards",
+        "backdrop-blur-out": "backdrop-blur-out 0.2s ease-in forwards",
+        "menu-item-slide": "menu-item-slide 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards",
+        "menu-item-exit": "menu-item-exit 0.15s ease-in forwards",
       },
     },
   },
