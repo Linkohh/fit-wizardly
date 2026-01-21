@@ -28,6 +28,8 @@ interface AuthState {
     // UI state
     showAuthModal: boolean;
     setShowAuthModal: (show: boolean) => void;
+    redirectUrl: string | null;
+    setRedirectUrl: (url: string | null) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -38,6 +40,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     isLoading: true,
     isConfigured: isSupabaseConfigured(),
     showAuthModal: false,
+    redirectUrl: null,
 
     // Initialize auth state
     initialize: async () => {
@@ -152,10 +155,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             return { error: new Error('Supabase not configured') };
         }
 
+        const { redirectUrl } = get();
         const { error } = await supabase.auth.signInWithOtp({
             email,
             options: {
-                emailRedirectTo: window.location.origin,
+                emailRedirectTo: redirectUrl || window.location.origin,
             },
         });
 
@@ -208,4 +212,5 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // UI
     setShowAuthModal: (show) => set({ showAuthModal: show }),
+    setRedirectUrl: (url) => set({ redirectUrl: url }),
 }));

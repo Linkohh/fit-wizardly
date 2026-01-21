@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { useThemeStore } from "@/stores/themeStore";
 import { PageTransition } from "@/components/ui/page-transition";
@@ -13,6 +13,7 @@ import Index from "./pages/Index";
 import WizardPage from "./pages/Wizard";
 import PlanPage from "./pages/Plan";
 import NotFound from "./pages/NotFound";
+import { useToast } from "@/components/ui/use-toast";
 import ClientsPage from "./pages/Clients";
 import MCLIntegrationTest from "./pages/MCLIntegrationTest";
 import { ExercisesBrowser } from "./components/exercises/ExercisesBrowser";
@@ -140,9 +141,7 @@ function AnimatedRoutes() {
 
             {/* Circle Portal with nested routes */}
             <Route path="/circles/join/:inviteCode" element={
-              <RequireAuth>
-                <JoinCircleHandler />
-              </RequireAuth>
+              <JoinCircleHandler />
             } />
             <Route path="/circles/:circleId" element={
               <RequireAuth>
@@ -176,6 +175,20 @@ import { LivingBackground } from "@/components/ui/living-background";
 const App = () => {
   // Monitor network status and show notifications
   useNetworkStatus();
+
+  // Handle post-login redirects for invites
+  const { user, isLoading } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      const pendingInvite = sessionStorage.getItem('pendingInviteCode');
+      if (pendingInvite) {
+        sessionStorage.removeItem('pendingInviteCode');
+        navigate(`/circles/join/${pendingInvite}`);
+      }
+    }
+  }, [user, isLoading, navigate]);
 
   return (
     <ErrorBoundary>

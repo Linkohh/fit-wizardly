@@ -41,8 +41,9 @@ export function JoinCircleHandler() {
             }
 
             if (!user) {
-                // Store invite code and show auth modal
+                // Store invite code and show auth modal with redirect
                 sessionStorage.setItem('pendingInviteCode', inviteCode);
+                useAuthStore.getState().setRedirectUrl(window.location.href);
                 setShowAuthModal(true);
                 return;
             }
