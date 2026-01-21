@@ -1,6 +1,6 @@
 import { Exercise } from '@/types/fitness';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { useRef, useMemo, useState, useCallback } from 'react';
+import { useRef, useMemo, useState, useCallback, forwardRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dumbbell, Flame, Activity, Heart, TrendingUp } from 'lucide-react';
@@ -17,7 +17,7 @@ interface ExerciseCardProps {
     index?: number; // For staggered animations
 }
 
-export function ExerciseCard({ exercise, onClick, index = 0 }: ExerciseCardProps) {
+export const ExerciseCard = forwardRef<HTMLDivElement, ExerciseCardProps>(({ exercise, onClick, index = 0 }, ref) => {
     const cardRef = useRef<HTMLDivElement>(null);
     const isInView = useInView(cardRef, { once: true, margin: '-50px' });
     const prefersReducedMotion = useReducedMotion();
@@ -214,4 +214,5 @@ export function ExerciseCard({ exercise, onClick, index = 0 }: ExerciseCardProps
             </Card>
         </motion.div>
     );
-}
+});
+ExerciseCard.displayName = 'ExerciseCard';
