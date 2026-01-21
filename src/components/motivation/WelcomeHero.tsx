@@ -116,9 +116,8 @@ const AnimatedBadge = memo(function AnimatedBadge() {
             }}
             whileHover={{
                 scale: 1.05,
-                boxShadow: "0 0 30px rgba(139, 92, 246, 0.5)"
             }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border border-primary/30 backdrop-blur-sm text-primary mb-8 hover:border-primary/50 transition-all cursor-default group"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-primary/10 via-secondary/10 to-accent/10 border border-primary/30 backdrop-blur-sm text-primary mb-8 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] transition-all duration-300 cursor-default group"
         >
             <motion.span
                 animate={{
@@ -261,16 +260,13 @@ export function WelcomeHero() {
                 >
                     {t('hero.description')}
                     <motion.span
-                        className="text-foreground font-semibold"
-                        whileHover={{ color: "hsl(var(--primary))" }}
+                        className="text-foreground font-semibold hover:text-primary transition-colors duration-300"
                     > {t('hero.intelligent')}</motion.span>,
                     <motion.span
-                        className="text-foreground font-semibold"
-                        whileHover={{ color: "hsl(var(--primary))" }}
+                        className="text-foreground font-semibold hover:text-primary transition-colors duration-300"
                     > {t('hero.personalized')}</motion.span>, {i18n.language === 'es' ? 'e' : 'and'}
                     <motion.span
-                        className="text-foreground font-semibold"
-                        whileHover={{ color: "hsl(var(--primary))" }}
+                        className="text-foreground font-semibold hover:text-primary transition-colors duration-300"
                     > {t('hero.effective')}</motion.span>.
                 </motion.p>
 

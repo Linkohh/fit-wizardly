@@ -75,7 +75,7 @@ function AnimatedRoutes() {
   // Onboarding has its own layout (no header/footer)
   if (location.pathname === '/onboarding') {
     return (
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         <PageTransition key={location.pathname}>
           <Routes location={location}>
             <Route path="/onboarding" element={<OnboardingPage />} />
@@ -87,7 +87,7 @@ function AnimatedRoutes() {
 
   return (
     <OnboardingGuard>
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         <PageTransition key={location.pathname}>
           <Routes location={location}>
             <Route path="/" element={<Index />} />
