@@ -78,6 +78,14 @@ interface CircleState {
 
     // Utilities
     generateInviteCode: () => string;
+    getLeaderboard: (timeframe?: 'week' | 'month' | 'all-time') => Array<{
+        userId: string;
+        displayName: string;
+        avatarUrl?: string | null;
+        workouts: number;
+        volume: number;
+        lastActive: Date;
+    }>;
 }
 
 // ============================================
@@ -665,4 +673,63 @@ export const useCircleStore = create<CircleState>((set, get) => ({
     // ========================================
 
     generateInviteCode: () => generateRandomCode(),
+
+    // ========================================
+    // LEADERBOARD ACTIONS (Computed from Activities)
+    // ========================================
+
+    getLeaderboard: (timeframe: 'week' | 'month' | 'all-time' = 'week') => {
+        const activities = get().activities;
+        const members = get().currentCircle?.members || [];
+        const now = new Date();
+
+        // precise start of week (Sunday)
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        const filteredActivities = activities.filter(a => {
+            if (a.activity_type !== 'workout_logged') return false;
+            const date = new Date(a.created_at);
+
+            if (timeframe === 'week') return date >= startOfWeek;
+            if (timeframe === 'month') return date >= startOfMonth;
+            return true;
+        });
+
+        // Map userId -> stats
+        const userStats = new Map<string, { workouts: number, volume: number, lastActive: Date }>();
+
+        // Initialize all members with 0
+        members.forEach(m => {
+            userStats.set(m.user_id, { workouts: 0, volume: 0, lastActive: new Date(0) });
+        });
+
+        filteredActivities.forEach(a => {
+            const stats = userStats.get(a.user_id) || { workouts: 0, volume: 0, lastActive: new Date(0) };
+            const payload = a.payload as any;
+
+            stats.workouts += 1;
+            stats.volume += payload?.totalVolume || 0;
+            const activityDate = new Date(a.created_at);
+            if (activityDate > stats.lastActive) stats.lastActive = activityDate;
+
+            userStats.set(a.user_id, stats);
+        });
+
+        // Convert to array and sort
+        return Array.from(userStats.entries())
+            .map(([userId, stats]) => {
+                const member = members.find(m => m.user_id === userId);
+                return {
+                    userId,
+                    displayName: member?.profile?.display_name || 'Unknown Member',
+                    avatarUrl: member?.profile?.avatar_url,
+                    ...stats
+                };
+            })
+            .sort((a, b) => b.workouts - a.workouts || b.volume - a.volume);
+    }
 }));

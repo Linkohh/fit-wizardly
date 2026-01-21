@@ -9,3 +9,4 @@ export { CircleLeaderboardTab } from './CircleLeaderboardTab';
 export { CircleChallengesTab } from './CircleChallengesTab';
 export { CircleMembersTab } from './CircleMembersTab';
 export { CircleSettingsTab } from './CircleSettingsTab';
+export { CircleDashboardTab } from './CircleDashboardTab';

@@ -1,44 +1,19 @@
-/**
- * Circle Leaderboard Tab
- *
- * Weekly/monthly leaderboard showing member rankings.
- * Shows member standings based on workout activity.
- */
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, Calendar, TrendingUp, Info } from 'lucide-react';
-import { useCircle } from '../CircleContext';
-import { useAuthStore } from '@/stores/authStore';
-import { LeaderboardCard } from '../leaderboard/LeaderboardCard';
+import { Trophy, Medal, Dumbbell, TrendingUp, Calendar, Info } from 'lucide-react';
+import { useCircleStore } from '@/stores/circleStore';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-type Period = 'week' | 'month' | 'all';
-
 export function CircleLeaderboardTab() {
-    const { circle } = useCircle();
-    const { user } = useAuthStore();
-    const [period, setPeriod] = useState<Period>('week');
+    const { getLeaderboard } = useCircleStore();
+    const [period, setPeriod] = useState<'week' | 'month' | 'all-time'>('week');
 
-    // Generate mock leaderboard data from members
-    // TODO: Replace with actual aggregated workout stats when workout integration is complete
-    const leaderboardData = circle.members
-        .map((member) => ({
-            profile: member.profile,
-            userId: member.user_id,
-            stats: {
-                // Placeholder stats - will be calculated from actual workouts
-                workouts: Math.floor(Math.random() * 7) + 1,
-                volume: Math.floor(Math.random() * 50000) + 5000,
-                streak: Math.floor(Math.random() * 14),
-            },
-        }))
-        .sort((a, b) => b.stats.workouts - a.stats.workouts || b.stats.volume - a.stats.volume);
+    const leaderboardData = getLeaderboard(period);
 
     return (
         <div className="space-y-6">
-            {/* Period selector */}
             <Card>
                 <CardHeader className="pb-3">
                     <div className="flex items-center justify-between flex-wrap gap-4">
@@ -48,63 +23,94 @@ export function CircleLeaderboardTab() {
                                 Leaderboard
                             </CardTitle>
                             <CardDescription>
-                                See who's crushing it this {period}
+                                See who's crushing it this {period === 'all-time' ? 'time' : period}
                             </CardDescription>
                         </div>
 
-                        <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)}>
-                            <TabsList>
-                                <TabsTrigger value="week" className="gap-1.5">
-                                    <Calendar className="h-4 w-4" />
-                                    Week
-                                </TabsTrigger>
-                                <TabsTrigger value="month" className="gap-1.5">
-                                    <Calendar className="h-4 w-4" />
-                                    Month
-                                </TabsTrigger>
-                                <TabsTrigger value="all" className="gap-1.5">
-                                    <TrendingUp className="h-4 w-4" />
-                                    All Time
-                                </TabsTrigger>
+                        <Tabs value={period} onValueChange={(v) => setPeriod(v as any)} className="w-[300px]">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="week">Weekly</TabsTrigger>
+                                <TabsTrigger value="month">Monthly</TabsTrigger>
+                                <TabsTrigger value="all-time">All Time</TabsTrigger>
                             </TabsList>
                         </Tabs>
                     </div>
                 </CardHeader>
             </Card>
 
-            {/* Info alert */}
+            <div className="grid gap-4">
+                {leaderboardData.length === 0 ? (
+                    <Card className="border-dashed">
+                        <CardContent className="py-12 text-center text-muted-foreground">
+                            <Trophy className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                            <p>No enough data to show leaderboard yet.</p>
+                            <p className="text-sm">Start logging workouts!</p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    leaderboardData.map((user, index) => (
+                        <Card key={user.userId} className={`
+                            transition-all hover:shadow-md
+                            ${index === 0 ? 'border-yellow-500/50 bg-yellow-500/5' : ''}
+                            ${index === 1 ? 'border-slate-400/50 bg-slate-400/5' : ''}
+                            ${index === 2 ? 'border-orange-500/50 bg-orange-500/5' : ''}
+                        `}>
+                            <CardContent className="flex items-center gap-4 p-4">
+                                <div className={`
+                                    flex h-8 w-8 items-center justify-center rounded-full font-bold
+                                    ${index === 0 ? 'bg-yellow-500 text-white' : ''}
+                                    ${index === 1 ? 'bg-slate-400 text-white' : ''}
+                                    ${index === 2 ? 'bg-orange-500 text-white' : ''}
+                                    ${index > 2 ? 'bg-muted text-muted-foreground' : ''}
+                                `}>
+                                    {index + 1}
+                                </div>
+
+                                <Avatar className="h-10 w-10 border-2 border-background">
+                                    <AvatarImage src={user.avatarUrl || undefined} />
+                                    <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
+                                </Avatar>
+
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold truncate">
+                                            {user.displayName}
+                                        </p>
+                                        {index === 0 && <Medal className="h-4 w-4 text-yellow-500" />}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground flex items-center gap-1">
+                                        Last active: {user.lastActive.getTime() === 0 ? 'Never' : user.lastActive.toLocaleDateString()}
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 text-right">
+                                    <div>
+                                        <div className="text-lg font-bold flex items-center justify-end gap-1">
+                                            {user.workouts}
+                                            <Dumbbell className="h-3 w-3 text-muted-foreground" />
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">Workouts</p>
+                                    </div>
+                                    <div className="hidden sm:block">
+                                        <div className="text-lg font-bold flex items-center justify-end gap-1">
+                                            {(user.volume / 1000).toFixed(1)}k
+                                            <TrendingUp className="h-3 w-3 text-muted-foreground" />
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">Volume</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))
+                )}
+            </div>
+
             <Alert>
                 <Info className="h-4 w-4" />
                 <AlertDescription>
-                    Leaderboard stats will update automatically as circle members complete workouts.
-                    Currently showing placeholder data.
+                    Leaderboard stats update automatically as circle members log workouts.
                 </AlertDescription>
             </Alert>
-
-            {/* Leaderboard */}
-            <Card>
-                <CardContent className="p-4 space-y-3">
-                    {leaderboardData.length === 0 ? (
-                        <div className="text-center py-12">
-                            <Trophy className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-                            <h3 className="text-lg font-medium mb-2">No Data Yet</h3>
-                            <p className="text-muted-foreground max-w-sm mx-auto">
-                                Complete workouts to appear on the leaderboard.
-                            </p>
-                        </div>
-                    ) : (
-                        leaderboardData.map((entry, index) => (
-                            <LeaderboardCard
-                                key={entry.userId}
-                                rank={index + 1}
-                                profile={entry.profile}
-                                stats={entry.stats}
-                                isCurrentUser={entry.userId === user?.id}
-                            />
-                        ))
-                    )}
-                </CardContent>
-            </Card>
         </div>
     );
 }

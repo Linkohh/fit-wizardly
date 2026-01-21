@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { useThemeStore } from "@/stores/themeStore";
 import { PageTransition } from "@/components/ui/page-transition";
@@ -23,11 +23,12 @@ import CirclesPage from "./pages/Circles";
 import { CircleLayout } from "./components/circles/CircleLayout";
 import { JoinCircleHandler } from "./components/circles/JoinCircleHandler";
 import {
-    CircleFeedTab,
-    CircleLeaderboardTab,
-    CircleChallengesTab,
-    CircleMembersTab,
-    CircleSettingsTab,
+  CircleFeedTab,
+  CircleLeaderboardTab,
+  CircleChallengesTab,
+  CircleMembersTab,
+  CircleSettingsTab,
+  CircleDashboardTab,
 } from "./components/circles/tabs";
 import OnboardingPage from "./pages/Onboarding";
 import { useAuthStore } from "./stores/authStore";
@@ -148,7 +149,7 @@ function AnimatedRoutes() {
                 <CircleLayout />
               </RequireAuth>
             }>
-              <Route index element={<Navigate to="feed" replace />} />
+              <Route index element={<CircleDashboardTab />} />
               <Route path="feed" element={<CircleFeedTab />} />
               <Route path="leaderboard" element={<CircleLeaderboardTab />} />
               <Route path="challenges" element={<CircleChallengesTab />} />
