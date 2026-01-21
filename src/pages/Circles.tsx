@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,25 +10,22 @@ import {
     LogIn,
     UserPlus,
     ArrowRight,
-    Settings,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useCircleStore } from '@/stores/circleStore';
 import { CircleCard } from '@/components/circles/CircleCard';
-import { CircleFeed } from '@/components/circles/CircleFeed';
 import { CreateCircleModal } from '@/components/circles/CreateCircleModal';
 import { JoinCircleModal } from '@/components/circles/JoinCircleModal';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { useState } from 'react';
 
 export default function CirclesPage() {
+    const navigate = useNavigate();
     const { user, profile, isLoading: authLoading, setShowAuthModal } = useAuthStore();
     // Use atomic selectors to prevent unnecessary re-renders
     const circles = useCircleStore((state) => state.circles);
-    const currentCircle = useCircleStore((state) => state.currentCircle);
     const isLoading = useCircleStore((state) => state.isLoading);
     const fetchUserCircles = useCircleStore((state) => state.fetchUserCircles);
-    const setCurrentCircle = useCircleStore((state) => state.setCurrentCircle);
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showJoinModal, setShowJoinModal] = useState(false);
@@ -38,6 +35,11 @@ export default function CirclesPage() {
             fetchUserCircles(user.id);
         }
     }, [user]); // fetchUserCircles is a stable store action
+
+    // Navigate to circle portal
+    const handleCircleClick = (circleId: string) => {
+        navigate(`/circles/${circleId}/feed`);
+    };
 
     // Unauthenticated view
     if (!user && !authLoading) {
@@ -223,34 +225,14 @@ export default function CirclesPage() {
                     </div>
                 </Card>
             ) : (
-                <div className="grid lg:grid-cols-3 gap-6">
-                    {/* Circle list */}
-                    <div className="lg:col-span-1 space-y-4">
-                        <h2 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                            My Circles
-                        </h2>
-                        {circles.map((circle) => (
-                            <CircleCard
-                                key={circle.id}
-                                circle={circle}
-                                isSelected={currentCircle?.id === circle.id}
-                                onClick={() => setCurrentCircle(circle.id)}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Activity feed */}
-                    <div className="lg:col-span-2">
-                        {currentCircle ? (
-                            <CircleFeed circle={currentCircle} />
-                        ) : (
-                            <Card className="p-8 text-center">
-                                <p className="text-muted-foreground">
-                                    Select a circle to see its activity feed
-                                </p>
-                            </Card>
-                        )}
-                    </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {circles.map((circle) => (
+                        <CircleCard
+                            key={circle.id}
+                            circle={circle}
+                            onClick={() => handleCircleClick(circle.id)}
+                        />
+                    ))}
                 </div>
             )}
         </main>

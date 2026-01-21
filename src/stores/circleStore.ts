@@ -14,6 +14,9 @@ import type {
     CircleChallenge,
     CircleWithMembers,
     ActivityWithProfile,
+    ActivityReaction,
+    ActivityCommentWithProfile,
+    ReactionType,
     Profile,
 } from '@/types/supabase';
 
@@ -27,6 +30,8 @@ interface CircleState {
     currentCircle: CircleWithMembers | null;
     activities: ActivityWithProfile[];
     challenges: CircleChallenge[];
+    reactions: Map<string, ActivityReaction[]>; // activityId -> reactions
+    comments: Map<string, ActivityCommentWithProfile[]>; // activityId -> comments
 
     // Loading states
     isLoading: boolean;
@@ -34,6 +39,7 @@ interface CircleState {
 
     // Actions - Circles
     fetchUserCircles: (userId: string) => Promise<void>;
+    fetchCircleById: (circleId: string) => Promise<CircleWithMembers | null>;
     createCircle: (name: string, description?: string) => Promise<{ circle: Circle | null; error: Error | null }>;
     joinCircle: (inviteCode: string) => Promise<{ error: Error | null }>;
     leaveCircle: (circleId: string) => Promise<void>;
@@ -47,6 +53,17 @@ interface CircleState {
         payload: Record<string, any>
     ) => Promise<void>;
     subscribeToActivities: (circleId: string) => () => void;
+
+    // Actions - Reactions
+    fetchReactions: (activityIds: string[]) => Promise<void>;
+    addReaction: (activityId: string, reactionType: ReactionType) => Promise<void>;
+    removeReaction: (activityId: string, reactionType: ReactionType) => Promise<void>;
+    getUserReaction: (activityId: string, userId: string) => ReactionType | null;
+
+    // Actions - Comments
+    fetchComments: (activityId: string) => Promise<void>;
+    addComment: (activityId: string, content: string) => Promise<void>;
+    deleteComment: (commentId: string) => Promise<void>;
 
     // Actions - Challenges
     fetchChallenges: (circleId: string) => Promise<void>;
@@ -88,6 +105,8 @@ export const useCircleStore = create<CircleState>((set, get) => ({
     currentCircle: null,
     activities: [],
     challenges: [],
+    reactions: new Map(),
+    comments: new Map(),
     isLoading: false,
     isLoadingActivities: false,
 
@@ -136,6 +155,41 @@ export const useCircleStore = create<CircleState>((set, get) => ({
         } catch (error) {
             console.error('Error fetching circles:', error);
             set({ isLoading: false });
+        }
+    },
+
+    fetchCircleById: async (circleId) => {
+        if (!isSupabaseConfigured()) return null;
+
+        try {
+            // Fetch circle with member details
+            const { data: circle, error } = await supabase
+                .from('circles')
+                .select(`
+                    *,
+                    circle_members (
+                        *,
+                        profile:profiles (*)
+                    )
+                `)
+                .eq('id', circleId)
+                .single();
+
+            if (error || !circle) {
+                console.error('Error fetching circle:', error);
+                return null;
+            }
+
+            const circleWithMembers: CircleWithMembers = {
+                ...circle,
+                members: circle.circle_members || [],
+                member_count: circle.circle_members?.length || 0,
+            };
+
+            return circleWithMembers;
+        } catch (error) {
+            console.error('Error fetching circle by ID:', error);
+            return null;
         }
     },
 
@@ -357,6 +411,207 @@ export const useCircleStore = create<CircleState>((set, get) => ({
         return () => {
             supabase.removeChannel(channel);
         };
+    },
+
+    // ========================================
+    // REACTION ACTIONS
+    // ========================================
+
+    fetchReactions: async (activityIds) => {
+        if (!isSupabaseConfigured() || activityIds.length === 0) return;
+
+        const { data } = await supabase
+            .from('activity_reactions')
+            .select('*')
+            .in('activity_id', activityIds);
+
+        if (data) {
+            const reactionsMap = new Map<string, ActivityReaction[]>();
+            data.forEach((reaction) => {
+                const existing = reactionsMap.get(reaction.activity_id) || [];
+                existing.push(reaction as ActivityReaction);
+                reactionsMap.set(reaction.activity_id, existing);
+            });
+            set({ reactions: reactionsMap });
+        }
+    },
+
+    addReaction: async (activityId, reactionType) => {
+        if (!isSupabaseConfigured()) return;
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Optimistic update
+        const currentReactions = get().reactions;
+        const activityReactions = currentReactions.get(activityId) || [];
+        const newReaction: ActivityReaction = {
+            id: crypto.randomUUID(),
+            activity_id: activityId,
+            user_id: user.id,
+            reaction_type: reactionType,
+            created_at: new Date().toISOString(),
+        };
+
+        // Remove any existing reaction from this user first
+        const filteredReactions = activityReactions.filter(
+            r => r.user_id !== user.id
+        );
+        filteredReactions.push(newReaction);
+
+        const updatedReactions = new Map(currentReactions);
+        updatedReactions.set(activityId, filteredReactions);
+        set({ reactions: updatedReactions });
+
+        // Remove existing reaction if any
+        await supabase
+            .from('activity_reactions')
+            .delete()
+            .eq('activity_id', activityId)
+            .eq('user_id', user.id);
+
+        // Insert new reaction
+        const { error } = await supabase
+            .from('activity_reactions')
+            .insert({
+                activity_id: activityId,
+                user_id: user.id,
+                reaction_type: reactionType,
+            });
+
+        if (error) {
+            // Revert optimistic update on error
+            console.error('Error adding reaction:', error);
+            set({ reactions: currentReactions });
+        }
+    },
+
+    removeReaction: async (activityId, reactionType) => {
+        if (!isSupabaseConfigured()) return;
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Optimistic update
+        const currentReactions = get().reactions;
+        const activityReactions = currentReactions.get(activityId) || [];
+        const filteredReactions = activityReactions.filter(
+            r => !(r.user_id === user.id && r.reaction_type === reactionType)
+        );
+
+        const updatedReactions = new Map(currentReactions);
+        updatedReactions.set(activityId, filteredReactions);
+        set({ reactions: updatedReactions });
+
+        const { error } = await supabase
+            .from('activity_reactions')
+            .delete()
+            .eq('activity_id', activityId)
+            .eq('user_id', user.id)
+            .eq('reaction_type', reactionType);
+
+        if (error) {
+            // Revert optimistic update on error
+            console.error('Error removing reaction:', error);
+            set({ reactions: currentReactions });
+        }
+    },
+
+    getUserReaction: (activityId, userId) => {
+        const reactions = get().reactions.get(activityId) || [];
+        const userReaction = reactions.find(r => r.user_id === userId);
+        return userReaction?.reaction_type as ReactionType || null;
+    },
+
+    // ========================================
+    // COMMENT ACTIONS
+    // ========================================
+
+    fetchComments: async (activityId) => {
+        if (!isSupabaseConfigured()) return;
+
+        const { data } = await supabase
+            .from('activity_comments')
+            .select(`
+                *,
+                profile:profiles (*)
+            `)
+            .eq('activity_id', activityId)
+            .order('created_at', { ascending: true });
+
+        if (data) {
+            const currentComments = get().comments;
+            const updatedComments = new Map(currentComments);
+            updatedComments.set(activityId, data as ActivityCommentWithProfile[]);
+            set({ comments: updatedComments });
+        }
+    },
+
+    addComment: async (activityId, content) => {
+        if (!isSupabaseConfigured()) return;
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+            .from('activity_comments')
+            .insert({
+                activity_id: activityId,
+                user_id: user.id,
+                content,
+            })
+            .select(`
+                *,
+                profile:profiles (*)
+            `)
+            .single();
+
+        if (error) {
+            console.error('Error adding comment:', error);
+            return;
+        }
+
+        if (data) {
+            const currentComments = get().comments;
+            const activityComments = currentComments.get(activityId) || [];
+            const updatedComments = new Map(currentComments);
+            updatedComments.set(activityId, [...activityComments, data as ActivityCommentWithProfile]);
+            set({ comments: updatedComments });
+        }
+    },
+
+    deleteComment: async (commentId) => {
+        if (!isSupabaseConfigured()) return;
+
+        // Find the comment to get its activity_id
+        let activityId: string | null = null;
+        const currentComments = get().comments;
+
+        currentComments.forEach((comments, aId) => {
+            if (comments.some(c => c.id === commentId)) {
+                activityId = aId;
+            }
+        });
+
+        if (!activityId) return;
+
+        // Optimistic update
+        const activityComments = currentComments.get(activityId) || [];
+        const filteredComments = activityComments.filter(c => c.id !== commentId);
+        const updatedComments = new Map(currentComments);
+        updatedComments.set(activityId, filteredComments);
+        set({ comments: updatedComments });
+
+        const { error } = await supabase
+            .from('activity_comments')
+            .delete()
+            .eq('id', commentId);
+
+        if (error) {
+            // Revert optimistic update on error
+            console.error('Error deleting comment:', error);
+            set({ comments: currentComments });
+        }
     },
 
     // ========================================

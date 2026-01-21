@@ -5,26 +5,39 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
     Activity,
-    Dumbbell,
-    Trophy,
-    Flame,
-    UserPlus,
     Copy,
     Check,
     RefreshCw,
 } from 'lucide-react';
 import { useCircleStore } from '@/stores/circleStore';
-import type { CircleWithMembers, ActivityWithProfile } from '@/types/supabase';
+import { useAuthStore } from '@/stores/authStore';
+import type { CircleWithMembers, ReactionType } from '@/types/supabase';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { ActivityItem } from './feed/ActivityItem';
 
 interface CircleFeedProps {
     circle: CircleWithMembers;
 }
 
 export function CircleFeed({ circle }: CircleFeedProps) {
-    const { activities, isLoadingActivities, fetchActivities, subscribeToActivities } = useCircleStore();
+    const { user } = useAuthStore();
+    const {
+        activities,
+        isLoadingActivities,
+        fetchActivities,
+        subscribeToActivities,
+        reactions,
+        comments,
+        fetchReactions,
+        fetchComments,
+        addReaction,
+        removeReaction,
+        addComment,
+        deleteComment,
+        getUserReaction,
+    } = useCircleStore();
     const [copied, setCopied] = useState(false);
     const { toast } = useToast();
 
@@ -32,6 +45,9 @@ export function CircleFeed({ circle }: CircleFeedProps) {
     const { isRefreshing, pullDistance, isPulling } = usePullToRefresh({
         onRefresh: async () => {
             await fetchActivities(circle.id);
+            if (activities.length > 0) {
+                await fetchReactions(activities.map(a => a.id));
+            }
             toast({
                 title: 'Feed refreshed',
                 description: 'Latest activities loaded',
@@ -47,6 +63,37 @@ export function CircleFeed({ circle }: CircleFeedProps) {
         return unsubscribe;
     }, [circle.id, fetchActivities, subscribeToActivities]);
 
+    // Fetch reactions when activities change
+    useEffect(() => {
+        if (activities.length > 0) {
+            fetchReactions(activities.map(a => a.id));
+        }
+    }, [activities.length]);
+
+    // Handlers for social interactions
+    const handleReact = async (activityId: string, reactionType: ReactionType) => {
+        await addReaction(activityId, reactionType);
+    };
+
+    const handleRemoveReaction = async (activityId: string, reactionType: ReactionType) => {
+        await removeReaction(activityId, reactionType);
+    };
+
+    const handleAddComment = async (activityId: string, content: string) => {
+        await addComment(activityId, content);
+    };
+
+    const handleDeleteComment = async (commentId: string) => {
+        await deleteComment(commentId);
+    };
+
+    // Fetch comments for an activity when needed
+    const handleFetchComments = async (activityId: string) => {
+        if (!comments.has(activityId)) {
+            await fetchComments(activityId);
+        }
+    };
+
     const copyInviteCode = () => {
         if (circle.invite_code) {
             navigator.clipboard.writeText(circle.invite_code);
@@ -57,61 +104,6 @@ export function CircleFeed({ circle }: CircleFeedProps) {
             });
             setTimeout(() => setCopied(false), 2000);
         }
-    };
-
-    const getActivityIcon = (type: string) => {
-        switch (type) {
-            case 'workout_logged': return Dumbbell;
-            case 'pr_set': return Trophy;
-            case 'streak': return Flame;
-            case 'member_joined': return UserPlus;
-            default: return Activity;
-        }
-    };
-
-    const getActivityColor = (type: string) => {
-        switch (type) {
-            case 'workout_logged': return 'text-primary bg-primary/10';
-            case 'pr_set': return 'text-yellow-500 bg-yellow-500/10';
-            case 'streak': return 'text-orange-500 bg-orange-500/10';
-            case 'member_joined': return 'text-green-500 bg-green-500/10';
-            default: return 'text-muted-foreground bg-muted';
-        }
-    };
-
-    const formatActivityMessage = (activity: ActivityWithProfile) => {
-        const name = activity.profile?.display_name || 'Someone';
-        const payload = activity.payload as Record<string, any> || {};
-
-        switch (activity.activity_type) {
-            case 'workout_logged':
-                return `${name} completed "${payload.workoutName}" (${payload.duration} min)`;
-            case 'pr_set':
-                return `${name} hit a new PR on ${payload.exerciseName}! 🎉`;
-            case 'streak':
-                return `${name} is on a ${payload.streakDays}-day streak! 🔥`;
-            case 'member_joined':
-                return `${payload.memberName || name} joined the circle!`;
-            case 'challenge_created':
-                return `${name} started a new challenge: ${payload.title}`;
-            default:
-                return `${name} did something awesome`;
-        }
-    };
-
-    const formatTimeAgo = (dateStr: string) => {
-        const date = new Date(dateStr);
-        const now = new Date();
-        const diffMs = now.getTime() - date.getTime();
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMs / 3600000);
-        const diffDays = Math.floor(diffMs / 86400000);
-
-        if (diffMins < 1) return 'Just now';
-        if (diffMins < 60) return `${diffMins}m ago`;
-        if (diffHours < 24) return `${diffHours}h ago`;
-        if (diffDays < 7) return `${diffDays}d ago`;
-        return date.toLocaleDateString();
     };
 
     return (
@@ -194,21 +186,22 @@ export function CircleFeed({ circle }: CircleFeedProps) {
                     ) : (
                         <div className="divide-y">
                             {activities.map((activity) => {
-                                const Icon = getActivityIcon(activity.activity_type);
-                                const colorClass = getActivityColor(activity.activity_type);
+                                const activityReactions = reactions.get(activity.id) || [];
+                                const activityComments = comments.get(activity.id) || [];
+                                const userReaction = user ? getUserReaction(activity.id, user.id) : null;
 
                                 return (
-                                    <div key={activity.id} className="p-4 flex gap-3 hover:bg-muted/30 transition-colors">
-                                        <div className={cn('p-2 rounded-full flex-shrink-0', colorClass)}>
-                                            <Icon className="h-4 w-4" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm">{formatActivityMessage(activity)}</p>
-                                            <p className="text-xs text-muted-foreground mt-1">
-                                                {formatTimeAgo(activity.created_at)}
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <ActivityItem
+                                        key={activity.id}
+                                        activity={activity}
+                                        reactions={activityReactions}
+                                        comments={activityComments}
+                                        userReaction={userReaction}
+                                        onReact={handleReact}
+                                        onRemoveReaction={handleRemoveReaction}
+                                        onAddComment={handleAddComment}
+                                        onDeleteComment={handleDeleteComment}
+                                    />
                                 );
                             })}
                         </div>

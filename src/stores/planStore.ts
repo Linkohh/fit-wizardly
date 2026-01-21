@@ -21,6 +21,10 @@ import {
   detectPersonalRecords,
   calculateTotalVolume,
 } from '@/lib/progressionEngine';
+import {
+  postWorkoutToCircles,
+  postPRToCircles,
+} from '@/lib/circleActivity';
 
 // Helper for generating unique IDs
 const generateUniqueId = () => `log_${crypto.randomUUID()}`;
@@ -364,6 +368,26 @@ export const usePlanStore = create<PlanState>()(
           activeWorkout: null,
           personalRecords: [...newPRs, ...state.personalRecords].slice(0, 50),
         }));
+
+        // Post workout to user's circles (fire-and-forget)
+        postWorkoutToCircles({
+          workoutName: workoutLog.dayName,
+          duration: workoutLog.duration,
+          exerciseCount: workoutLog.exercises.length,
+          totalVolume: workoutLog.totalVolume,
+        }).catch(err => console.error('Failed to post workout to circles:', err));
+
+        // Post any new PRs to circles
+        if (newPRs.length > 0) {
+          for (const pr of newPRs) {
+            postPRToCircles({
+              exerciseName: pr.exerciseName,
+              oldValue: pr.previousValue || 0,
+              newValue: pr.value,
+              prType: pr.type as 'weight' | 'reps' | 'volume',
+            }).catch(err => console.error('Failed to post PR to circles:', err));
+          }
+        }
 
         return workoutLog;
       },

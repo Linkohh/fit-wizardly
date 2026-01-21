@@ -428,6 +428,80 @@ export interface StreakPayload {
     streakDays: number;
 }
 
+// ============================================
+// Social Features Types (Phase 2)
+// ============================================
+
+// Reaction types
+export type ReactionType = 'like' | 'fire' | 'muscle' | 'clap';
+
+export interface ActivityReaction {
+    id: string;
+    activity_id: string;
+    user_id: string;
+    reaction_type: ReactionType;
+    created_at: string;
+}
+
+export interface ActivityComment {
+    id: string;
+    activity_id: string;
+    user_id: string;
+    content: string;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface ActivityCommentWithProfile extends ActivityComment {
+    profile: Profile;
+}
+
+export interface CirclePost {
+    id: string;
+    circle_id: string;
+    user_id: string;
+    content: string;
+    image_url: string | null;
+    post_type: 'text' | 'image' | 'milestone';
+    created_at: string;
+    updated_at: string;
+}
+
+export interface CirclePostWithProfile extends CirclePost {
+    profile: Profile;
+}
+
+export interface ChallengeParticipant {
+    id: string;
+    challenge_id: string;
+    user_id: string;
+    score: number;
+    last_updated: string;
+    joined_at: string;
+}
+
+export interface ChallengeParticipantWithProfile extends ChallengeParticipant {
+    profile: Profile;
+}
+
+// Extended activity type with social interactions
+export interface ActivityWithInteractions extends ActivityWithProfile {
+    reactions: ActivityReaction[];
+    comments: ActivityCommentWithProfile[];
+    reaction_count: number;
+    comment_count: number;
+    user_reaction?: ReactionType | null;
+}
+
+// Extended challenge type with participants
+export interface ChallengeWithParticipants extends CircleChallenge {
+    participants: ChallengeParticipantWithProfile[];
+    user_progress?: ChallengeParticipant;
+    status?: 'upcoming' | 'active' | 'completed';
+    goal_value?: number;
+    unit?: string;
+}
+
 // Exercise convenience types
 export type ExerciseInteraction = Database['public']['Tables']['exercise_interactions']['Row'];
 export type UserExercisePreferences = Database['public']['Tables']['user_exercise_preferences']['Row'];
