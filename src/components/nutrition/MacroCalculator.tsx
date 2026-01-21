@@ -193,7 +193,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                     type="number"
                                     value={displayWeight}
                                     onChange={(e) => handleWeightChange(Number(e.target.value))}
-                                    className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl px-3 focus:ring-2 ring-primary/50 outline-none transition-all font-medium text-base h-11"
+                                    className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl px-3 focus:ring-2 ring-primary/50 outline-none transition-all font-medium text-base h-11 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                                 <div className="flex rounded-xl overflow-hidden border border-white/10 bg-background/30 p-1 gap-1 h-11 items-center">
                                     <button
@@ -235,7 +235,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                         type="number"
                                         value={displayHeightCm}
                                         onChange={(e) => handleHeightCmChange(Number(e.target.value))}
-                                        className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all"
+                                        className="flex-1 min-w-0 bg-background/50 border border-white/10 rounded-xl p-3 focus:ring-2 ring-primary/50 outline-none transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     />
                                     <div className="flex rounded-xl overflow-hidden border border-white/10 bg-background/30 p-1 gap-1 h-11 items-center">
                                         <button
@@ -268,7 +268,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                                 type="number"
                                                 value={displayFeet}
                                                 onChange={(e) => handleFeetChange(Number(e.target.value))}
-                                                className="w-full h-11 bg-background/50 border border-white/10 rounded-xl text-center focus:ring-2 ring-primary/50 outline-none transition-all font-medium text-base px-1"
+                                                className="w-full h-11 bg-background/50 border border-white/10 rounded-xl text-center focus:ring-2 ring-primary/50 outline-none transition-all font-medium text-base px-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                 min={0}
                                                 max={8}
                                                 placeholder="ft"
@@ -279,7 +279,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                                                 type="number"
                                                 value={displayInches}
                                                 onChange={(e) => handleInchesChange(Number(e.target.value))}
-                                                className="w-full h-11 bg-background/50 border border-white/10 rounded-xl text-center focus:ring-2 ring-primary/50 outline-none transition-all font-medium text-base px-1"
+                                                className="w-full h-11 bg-background/50 border border-white/10 rounded-xl text-center focus:ring-2 ring-primary/50 outline-none transition-all font-medium text-base px-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                                 min={0}
                                                 max={11}
                                                 placeholder="in"
