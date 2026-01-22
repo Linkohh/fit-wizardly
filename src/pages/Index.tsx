@@ -83,7 +83,7 @@ export default function Index() {
       </section>
 
       {/* Zone 2: Middle Content - Feature Cards & Motivation */}
-      <div className="bg-gradient-to-b from-background via-purple-50/20 to-background dark:from-[#0F0518] dark:via-[#0a0210] dark:to-[#05010a] pb-32 pt-8 sm:pt-12 relative z-20 w-full -mt-12 sm:-mt-16 md:-mt-20 transition-colors duration-500">
+      <div className="bg-gradient-to-b from-background/80 via-purple-50/10 to-background/70 dark:from-[#0F0518]/80 dark:via-[#0a0210]/60 dark:to-[#05010a]/70 pb-32 pt-8 sm:pt-12 relative z-20 w-full -mt-12 sm:-mt-16 md:-mt-20 transition-colors duration-500">
 
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none opacity-50 dark:opacity-30" />

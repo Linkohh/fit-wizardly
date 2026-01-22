@@ -186,7 +186,7 @@ export function WelcomeHero() {
         <section
             ref={containerRef}
             onMouseMove={handleMouseMove}
-            className="relative pt-24 pb-20 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#F8F5FC] via-[#EDE4F5] to-[#F0E8F8] dark:from-[#1a0a2e] dark:via-[#2D1548] dark:to-[#1a0a2e]"
+            className="relative pt-24 pb-20 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#F8F5FC]/90 via-[#EDE4F5]/80 to-[#F0E8F8]/70 dark:from-[#1a0a2e]/85 dark:via-[#2D1548]/75 dark:to-[#1a0a2e]/60"
         >
             {/* Animated Background Elements */}
             <FloatingOrbs />

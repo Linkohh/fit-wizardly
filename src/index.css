@@ -504,6 +504,191 @@ body {
 }
 
 /* =====================================================
+   LIQUID BLOB BACKGROUND ANIMATIONS
+   Polyrhythmic timing ensures blobs never sync up.
+   Each blob: translate drift + opacity ghost + hue-rotate color shift
+   ===================================================== */
+
+@keyframes blob-drift-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+  }
+  33% {
+    transform: translate(15vw, -10vh) scale(1.1);
+    filter: hue-rotate(20deg);
+  }
+  55% {
+    opacity: 0.3;
+  }
+  66% {
+    transform: translate(-10vw, 15vh) scale(0.95);
+    filter: hue-rotate(45deg);
+  }
+  80% {
+    opacity: 0;
+    filter: hue-rotate(60deg);
+  }
+}
+
+@keyframes blob-drift-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+    filter: hue-rotate(0deg);
+  }
+  15% {
+    opacity: 0.6;
+  }
+  30% {
+    transform: translate(-12vw, 8vh) scale(1.15);
+    filter: hue-rotate(15deg);
+  }
+  50% {
+    opacity: 1;
+  }
+  65% {
+    transform: translate(8vw, -12vh) scale(0.9);
+    filter: hue-rotate(40deg);
+  }
+  85% {
+    opacity: 0.3;
+    filter: hue-rotate(55deg);
+  }
+}
+
+@keyframes blob-drift-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+    filter: hue-rotate(0deg);
+  }
+  25% {
+    transform: translate(18vw, 5vh) scale(1.05);
+    opacity: 0;
+    filter: hue-rotate(10deg);
+  }
+  45% {
+    opacity: 0.9;
+  }
+  60% {
+    transform: translate(-5vw, -18vh) scale(1.1);
+    filter: hue-rotate(35deg);
+  }
+  80% {
+    opacity: 0.3;
+    filter: hue-rotate(50deg);
+  }
+}
+
+@keyframes blob-drift-4 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.3;
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    opacity: 0.8;
+    filter: hue-rotate(12deg);
+  }
+  40% {
+    transform: translate(-15vw, 12vh) scale(0.95);
+    filter: hue-rotate(25deg);
+  }
+  60% {
+    opacity: 0;
+  }
+  75% {
+    transform: translate(10vw, -8vh) scale(1.08);
+    filter: hue-rotate(45deg);
+  }
+  90% {
+    opacity: 1;
+    filter: hue-rotate(60deg);
+  }
+}
+
+@keyframes blob-drift-5 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.7;
+    filter: hue-rotate(0deg);
+  }
+  18% {
+    opacity: 0;
+  }
+  35% {
+    transform: translate(10vw, -15vh) scale(1.12);
+    opacity: 0.9;
+    filter: hue-rotate(20deg);
+  }
+  55% {
+    filter: hue-rotate(40deg);
+  }
+  70% {
+    transform: translate(-12vw, 6vh) scale(0.92);
+    opacity: 0.4;
+    filter: hue-rotate(50deg);
+  }
+  88% {
+    opacity: 1;
+    filter: hue-rotate(60deg);
+  }
+}
+
+@keyframes blob-drift-6 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+    filter: hue-rotate(0deg);
+  }
+  12% {
+    opacity: 0.7;
+  }
+  28% {
+    transform: translate(-8vw, -10vh) scale(1.06);
+    filter: hue-rotate(18deg);
+  }
+  45% {
+    opacity: 1;
+    filter: hue-rotate(30deg);
+  }
+  62% {
+    transform: translate(14vw, 8vh) scale(0.94);
+    opacity: 0.2;
+    filter: hue-rotate(48deg);
+  }
+  82% {
+    opacity: 0.6;
+    filter: hue-rotate(60deg);
+  }
+}
+
+/* Animation classes with polyrhythmic prime-adjacent durations */
+.animate-blob-drift-1 {
+  animation: blob-drift-1 25s ease-in-out infinite;
+}
+.animate-blob-drift-2 {
+  animation: blob-drift-2 28s ease-in-out infinite;
+}
+.animate-blob-drift-3 {
+  animation: blob-drift-3 29s ease-in-out infinite;
+}
+.animate-blob-drift-4 {
+  animation: blob-drift-4 31s ease-in-out infinite;
+}
+.animate-blob-drift-5 {
+  animation: blob-drift-5 32s ease-in-out infinite;
+}
+.animate-blob-drift-6 {
+  animation: blob-drift-6 37s ease-in-out infinite;
+}
+
+/* =====================================================
    BODY OUTLINE STYLES
    ===================================================== */
 
@@ -938,5 +1123,18 @@ body {
 
   .menu-item-interactive::before {
     display: none;
+  }
+
+  /* Freeze liquid blob background to static color wash */
+  .animate-blob-drift-1,
+  .animate-blob-drift-2,
+  .animate-blob-drift-3,
+  .animate-blob-drift-4,
+  .animate-blob-drift-5,
+  .animate-blob-drift-6 {
+    animation: none !important;
+    opacity: 0.4 !important;
+    filter: none !important;
+    transform: none !important;
   }
 }

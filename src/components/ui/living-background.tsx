@@ -1,70 +1,93 @@
-
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useThemeStore } from "@/stores/themeStore";
 
+const BLOBS = [
+  {
+    // Purple — matches primary
+    color: "rgba(150, 110, 225, 0.8)",
+    size: "55vmax",
+    position: { top: "-15%", left: "-10%" },
+    animationClass: "animate-blob-drift-1",
+  },
+  {
+    // Blue/Cyan — matches accent
+    color: "rgba(130, 190, 255, 0.8)",
+    size: "50vmax",
+    position: { bottom: "-10%", right: "-15%" },
+    animationClass: "animate-blob-drift-2",
+  },
+  {
+    // Pink — matches secondary
+    color: "rgba(230, 147, 218, 0.8)",
+    size: "45vmax",
+    position: { top: "30%", left: "5%" },
+    animationClass: "animate-blob-drift-3",
+  },
+  {
+    // Purple Rose — deep variant
+    color: "rgba(180, 80, 160, 0.75)",
+    size: "40vmax",
+    position: { top: "10%", right: "5%" },
+    animationClass: "animate-blob-drift-4",
+  },
+  {
+    // Rose Pink — vibrant variant
+    color: "rgba(255, 100, 160, 0.75)",
+    size: "48vmax",
+    position: { bottom: "5%", left: "20%" },
+    animationClass: "animate-blob-drift-5",
+  },
+  {
+    // Indigo — balancing cool tone
+    color: "rgba(90, 100, 240, 0.75)",
+    size: "42vmax",
+    position: { top: "50%", left: "45%" },
+    animationClass: "animate-blob-drift-6",
+  },
+] as const;
+
 export function LivingBackground() {
-    const { getEffectiveTheme } = useThemeStore();
-    const [mounted, setMounted] = useState(false);
-    const theme = getEffectiveTheme();
+  const { getEffectiveTheme } = useThemeStore();
+  const [mounted, setMounted] = useState(false);
+  const theme = getEffectiveTheme();
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-    if (!mounted) return null;
+  if (!mounted) return null;
 
-    const isDark = theme === "dark";
+  const isDark = theme === "dark";
 
-    return (
-        <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
-            {/* Primary Ambient Blob */}
-            <motion.div
-                animate={{
-                    x: [0, 100, -50, 0],
-                    y: [0, -50, 100, 0],
-                    scale: [1, 1.2, 0.9, 1],
-                }}
-                transition={{
-                    duration: 20,
-                    repeat: Infinity,
-                    ease: "linear",
-                }}
-                className={`absolute top-[-20%] left-[-10%] w-[70vw] h-[70vw] rounded-full blur-[100px] opacity-20 mixed-blend-screen
-          ${isDark ? "bg-primary/30" : "bg-primary/20"}`}
-            />
-
-            {/* Secondary Ambient Blob (Accent) */}
-            <motion.div
-                animate={{
-                    x: [0, -70, 30, 0],
-                    y: [0, 60, -40, 0],
-                    scale: [1, 1.1, 0.9, 1],
-                }}
-                transition={{
-                    duration: 25,
-                    repeat: Infinity,
-                    ease: "linear",
-                    delay: 2,
-                }}
-                className={`absolute bottom-[-10%] right-[-10%] w-[60vw] h-[60vw] rounded-full blur-[120px] opacity-20 mixed-blend-screen
-          ${isDark ? "bg-secondary/30" : "bg-secondary/20"}`}
-            />
-
-            {/* Third Blob (Roaming) */}
-            <motion.div
-                animate={{
-                    x: [0, 150, -100, 0],
-                    y: [0, -100, 50, 0],
-                }}
-                transition={{
-                    duration: 30,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                }}
-                className={`absolute top-[40%] left-[30%] w-[40vw] h-[40vw] rounded-full blur-[90px] opacity-10 mixed-blend-overlay
-          ${isDark ? "bg-accent/20" : "bg-accent/15"}`}
-            />
-        </div>
-    );
+  return (
+    <div
+      className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none"
+      aria-hidden="true"
+    >
+      {/* Container-level blur: overlapping blobs blend into liquid */}
+      <div
+        className="absolute inset-0"
+        style={{
+          filter: "blur(80px)",
+          mixBlendMode: isDark ? "screen" : "normal",
+          opacity: isDark ? 0.5 : 0.35,
+          willChange: "filter",
+        }}
+      >
+        {BLOBS.map((blob, index) => (
+          <div
+            key={index}
+            className={`absolute rounded-full ${blob.animationClass}`}
+            style={{
+              width: blob.size,
+              height: blob.size,
+              backgroundColor: blob.color,
+              ...blob.position,
+              willChange: "transform, opacity, filter",
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }

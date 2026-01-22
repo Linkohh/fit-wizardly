@@ -199,7 +199,7 @@ const App = () => {
               <Toaster />
               <Sonner />
               <CommandPalette />
-              <div className="min-h-screen flex flex-col bg-background transition-colors duration-300 relative">
+              <div className="min-h-screen flex flex-col transition-colors duration-300 relative">
                 <LivingBackground />
                 <Header />
                 <ConsentModal />

@@ -15,7 +15,16 @@
       "Bash(npx tsc:*)",
       "Bash(xargs basename:*)",
       "Bash(timeout:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(npx vite build:*)",
+      "Bash(npx vite --port 8080)",
+      "Bash(ping:*)",
+      "Bash(netstat:*)",
+      "Bash(tasklist:*)",
+      "Bash(wmic process:*)",
+      "Bash(wmic process where \"ProcessId=13488\" get Name,ProcessId,CommandLine)",
+      "Bash(taskkill //F //PID 99452)",
+      "Bash(taskkill //F //PID 13488)"
     ]
   }
 }
