@@ -664,230 +664,158 @@ body {
 }
 
 /* Premium Horizon Glow - Smooth Color Cycling with @property */
-/* Cycles through: Aurora → Rose Gold → Golden Hour → Ethereal Silver */
+/* Cycles through: Electric Violet → Neon Cyan → Hot Pink → Golden Amber */
 /* Uses CSS @property for smooth color interpolation (no snapping) */
 
 /* Define animatable color properties */
 @property --glow-color-primary {
   syntax: '<color>';
-  initial-value: rgba(255, 105, 180, 0.25);
+  initial-value: rgba(168, 85, 247, 0.5);
   inherits: false;
 }
 
 @property --glow-color-secondary {
   syntax: '<color>';
-  initial-value: rgba(168, 85, 247, 0.18);
+  initial-value: rgba(6, 182, 212, 0.4);
   inherits: false;
 }
 
 @property --glow-color-tertiary {
   syntax: '<color>';
-  initial-value: rgba(6, 182, 212, 0.12);
+  initial-value: rgba(236, 72, 153, 0.3);
   inherits: false;
 }
 
-/* Primary layer - Full palette cycle (48s) */
+/* Primary layer - High Saturation Cycle (48s) */
 @keyframes horizon-color-smooth {
 
-  /* Aurora: Pink → Purple → Cyan */
-  0% {
-    --glow-color-primary: rgba(255, 105, 180, 0.28);
+  /* Phase 1: Electric Violet (Deep & Royal) */
+  0%, 100% {
+    --glow-color-primary: rgba(147, 51, 234, 0.6); /* Purple-600 */
   }
 
-  8% {
-    --glow-color-primary: rgba(168, 85, 247, 0.30);
-  }
-
-  16% {
-    --glow-color-primary: rgba(6, 182, 212, 0.28);
-  }
-
-  /* Rose Gold: Cyan → Pink → Rose Gold → Peach */
+  /* Phase 2: Neon Cyan (Bright & Energetic) */
   25% {
-    --glow-color-primary: rgba(255, 105, 180, 0.28);
+    --glow-color-primary: rgba(6, 182, 212, 0.6); /* Cyan-500 */
   }
 
-  33% {
-    --glow-color-primary: rgba(232, 180, 184, 0.32);
-  }
-
-  41% {
-    --glow-color-primary: rgba(255, 218, 185, 0.30);
-  }
-
-  /* Golden Hour: Peach → Pink → Amber → Warm White */
+  /* Phase 3: Hot Pink (Vibrant & Warm) */
   50% {
-    --glow-color-primary: rgba(255, 105, 180, 0.28);
+    --glow-color-primary: rgba(236, 72, 153, 0.6); /* Pink-500 */
   }
 
-  58% {
-    --glow-color-primary: rgba(255, 179, 71, 0.30);
-  }
-
-  66% {
-    --glow-color-primary: rgba(255, 248, 220, 0.25);
-  }
-
-  /* Ethereal Silver: Warm → Pink → Lavender → Silver */
+  /* Phase 4: Golden Amber (Rich & Luxurious Contrast) */
   75% {
-    --glow-color-primary: rgba(255, 105, 180, 0.28);
-  }
-
-  83% {
-    --glow-color-primary: rgba(196, 181, 253, 0.30);
-  }
-
-  91% {
-    --glow-color-primary: rgba(232, 232, 232, 0.25);
-  }
-
-  /* Loop back smoothly */
-  100% {
-    --glow-color-primary: rgba(255, 105, 180, 0.28);
+    --glow-color-primary: rgba(245, 158, 11, 0.55); /* Amber-500 */
   }
 }
 
-/* Secondary layer - Offset complementary colors */
+/* Secondary layer - Complementary Offsets */
 @keyframes horizon-color-smooth-secondary {
-  0% {
-    --glow-color-secondary: rgba(168, 85, 247, 0.18);
+  0%, 100% {
+    --glow-color-secondary: rgba(6, 182, 212, 0.4); /* Cyan start */
   }
-
-  20% {
-    --glow-color-secondary: rgba(6, 182, 212, 0.20);
+  33% {
+    --glow-color-secondary: rgba(236, 72, 153, 0.45); /* Pink mid */
   }
-
-  40% {
-    --glow-color-secondary: rgba(232, 180, 184, 0.18);
-  }
-
-  60% {
-    --glow-color-secondary: rgba(255, 179, 71, 0.18);
-  }
-
-  80% {
-    --glow-color-secondary: rgba(196, 181, 253, 0.20);
-  }
-
-  100% {
-    --glow-color-secondary: rgba(168, 85, 247, 0.18);
+  66% {
+    --glow-color-secondary: rgba(147, 51, 234, 0.4); /* Purple end */
   }
 }
 
-/* Tertiary layer - Accent colors */
+/* Tertiary layer - Deep Foundation */
 @keyframes horizon-color-smooth-tertiary {
-  0% {
-    --glow-color-tertiary: rgba(6, 182, 212, 0.14);
+  0%, 100% {
+    --glow-color-tertiary: rgba(236, 72, 153, 0.3);
   }
-
-  25% {
-    --glow-color-tertiary: rgba(255, 218, 185, 0.12);
-  }
-
   50% {
-    --glow-color-tertiary: rgba(196, 181, 253, 0.14);
-  }
-
-  75% {
-    --glow-color-tertiary: rgba(255, 179, 71, 0.12);
-  }
-
-  100% {
-    --glow-color-tertiary: rgba(6, 182, 212, 0.14);
+    --glow-color-tertiary: rgba(6, 182, 212, 0.3);
   }
 }
 
-/* Breathing animation for subtle opacity pulse */
+/* Breathing animation - More dynamic range */
 @keyframes horizon-breathe {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 1.2;
-  }
+  0%, 100% { opacity: 0.8; transform: scaleX(1); }
+  50% { opacity: 1.0; transform: scaleX(1.05); }
 }
 
-/* Primary glow layer - Tight horizontal, tall vertical */
+/* Primary glow layer - Intense Core */
 .animate-horizon-glow {
-  background: radial-gradient(ellipse 35% 50% at 50% 50%,
+  background: radial-gradient(ellipse 40% 50% at 50% 50%,
       var(--glow-color-primary) 0%,
-      rgba(168, 85, 247, 0.2) 20%,
-      rgba(168, 85, 247, 0.08) 40%,
-      rgba(168, 85, 247, 0.02) 55%,
+      rgba(168, 85, 247, 0.4) 25%,
+      rgba(168, 85, 247, 0.1) 45%,
       transparent 70%);
   background-size: 100% 100%;
   background-position: center;
-  filter: blur(25px);
-  opacity: 0.9;
+  filter: blur(28px);
+  opacity: 1; /* Max opacity for visibility */
+  will-change: background, opacity, transform;
   animation:
-    horizon-color-smooth 48s linear infinite,
+    horizon-color-smooth 24s linear infinite, /* Faster cycle for fluidity */
     horizon-breathe 8s ease-in-out infinite;
 }
 
-/* Secondary glow layer - Tight horizontal spread */
+/* Secondary glow layer - Wide Spread */
 .animate-horizon-glow-secondary {
-  background: radial-gradient(ellipse 30% 45% at 50% 50%,
+  background: radial-gradient(ellipse 45% 45% at 50% 50%,
       var(--glow-color-secondary) 0%,
-      rgba(168, 85, 247, 0.15) 25%,
-      rgba(168, 85, 247, 0.05) 45%,
+      rgba(6, 182, 212, 0.2) 30%,
       transparent 65%);
   background-size: 100% 100%;
   background-position: center;
-  filter: blur(30px);
-  opacity: 0.65;
+  filter: blur(40px);
+  opacity: 0.8;
+  will-change: background;
   animation:
-    horizon-color-smooth-secondary 48s linear infinite,
-    horizon-breathe 10s ease-in-out infinite 2s;
+    horizon-color-smooth-secondary 32s linear infinite,
+    horizon-breathe 10s ease-in-out infinite reverse;
 }
 
-/* Tertiary layer - Subtle grounding */
+/* Tertiary layer - Ambient Fill */
 .animate-horizon-glow-tertiary {
-  background: radial-gradient(ellipse 28% 40% at 50% 50%,
+  background: radial-gradient(ellipse 50% 40% at 50% 50%,
       var(--glow-color-tertiary) 0%,
-      rgba(168, 85, 247, 0.1) 30%,
-      rgba(168, 85, 247, 0.03) 50%,
-      transparent 65%);
+      rgba(236, 72, 153, 0.15) 40%,
+      transparent 70%);
   background-size: 100% 100%;
   background-position: center;
-  filter: blur(35px);
-  opacity: 0.5;
+  filter: blur(50px);
+  opacity: 0.6;
+  will-change: background;
   animation:
-    horizon-color-smooth-tertiary 36s linear infinite,
-    horizon-breathe 12s ease-in-out infinite 4s;
+    horizon-color-smooth-tertiary 40s linear infinite;
 }
 
-/* Sharp Horizon Line with Electric Core - Tight center focus */
+/* Sharp Horizon Line with Electric Core - White Hot Center */
 .horizon-line-sharp {
   background: linear-gradient(90deg,
       transparent 0%,
-      transparent 20%,
-      rgba(168, 85, 247, 0.2) 30%,
-      rgba(168, 85, 247, 0.5) 40%,
-      var(--glow-color-primary) 50%,
-      rgba(168, 85, 247, 0.5) 60%,
-      rgba(168, 85, 247, 0.2) 70%,
-      transparent 80%,
+      rgba(var(--glow-color-primary), 0) 10%,
+      rgba(255, 255, 255, 0.8) 40%,
+      #ffffff 50%,
+      rgba(255, 255, 255, 0.8) 60%,
+      rgba(var(--glow-color-primary), 0) 90%,
       transparent 100%);
-  filter: blur(0.5px) brightness(1.5);
-  box-shadow: 0 0 8px var(--glow-color-primary);
-  animation: horizon-color-smooth 48s linear infinite;
+  height: 2px; /* Slightly thicker */
+  filter: blur(0.5px) drop-shadow(0 0 4px white);
+  opacity: 0.9;
+  z-index: 20;
 }
 
 .horizon-glow-wrapper {
-  /* Ultra-tight horizontal mask - clean edge fade */
-  mask-image: radial-gradient(ellipse 25% 100% at 50% 50%,
+  /* WIDER MASK - 80% Width for true horizon feel */
+  mask-image: radial-gradient(ellipse 80% 100% at 50% 50%,
       black 0%,
-      black 20%,
-      rgba(0, 0, 0, 0.1) 50%,
-      transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 25% 100% at 50% 50%,
+      black 40%,
+      rgba(0, 0, 0, 0.2) 70%,
+      transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 100% at 50% 50%,
       black 0%,
-      black 20%,
-      rgba(0, 0, 0, 0.1) 50%,
-      transparent 70%);
+      black 40%,
+      rgba(0, 0, 0, 0.2) 70%,
+      transparent 85%);
+  mix-blend-mode: normal; /* Handle blending on children */
 }
 
 /* =====================================================
