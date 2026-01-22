@@ -70,7 +70,7 @@ export function LivingBackground() {
         style={{
           filter: "blur(80px)",
           mixBlendMode: isDark ? "screen" : "normal",
-          opacity: isDark ? 0.5 : 0.35,
+          opacity: isDark ? 0.5 : 0.55,
           willChange: "filter",
         }}
       >
