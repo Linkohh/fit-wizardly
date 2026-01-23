@@ -42,18 +42,26 @@ export function CircleLayout() {
     // Fetch circle data
     const fetchCircle = useCallback(async () => {
         if (!circleId) {
+            console.log('debug: no circleId');
             setError('No circle ID provided');
             setIsLoading(false);
             return;
         }
+
+        console.log('debug: fetchCircle starting', { circleId, userId: user?.id });
+
+        // Temporarily allow fetch even if user is not fully loaded to see error
+        // But we need user for RLS usually.
 
         setIsLoading(true);
         setError(null);
 
         try {
             const data = await fetchCircleById(circleId);
+            console.log('debug: fetchCircle result', { data });
 
             if (!data) {
+                console.error('debug: circle not found or RLS error');
                 setError('Circle not found');
                 setIsLoading(false);
                 return;
@@ -61,6 +69,8 @@ export function CircleLayout() {
 
             // Check membership
             const memberCheck = data.members.some(m => m.user_id === user?.id);
+            console.log('debug: memberCheck', { memberCheck, members: data.members, userId: user?.id });
+
             if (!memberCheck) {
                 setError('You are not a member of this circle');
                 setIsLoading(false);
@@ -149,6 +159,13 @@ export function CircleLayout() {
                     <p className="text-muted-foreground mb-6">
                         This circle may have been deleted or you may not have access.
                     </p>
+                    <div className="bg-muted p-4 rounded-md mb-6 text-xs text-left font-mono">
+                        <p><strong>Debug Info:</strong></p>
+                        <p>User: {user ? user.email : 'Not Signed In'}</p>
+                        <p>User ID: {user ? user.id : 'null'}</p>
+                        <p>Circle ID: {circleId}</p>
+                        <p>Error: {error}</p>
+                    </div>
                     <Button asChild>
                         <Link to="/circles">
                             <ArrowLeft className="h-4 w-4 mr-2" />

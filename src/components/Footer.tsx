@@ -20,6 +20,9 @@ export function Footer() {
                     <Link to="/legal" className="hover:text-foreground transition-colors">
                         {t('footer.terms')}
                     </Link>
+                    <Link to="/guide" className="hover:text-foreground transition-colors font-medium text-primary">
+                        How to Use
+                    </Link>
                     <Link to="/legal" className="hover:text-foreground transition-colors">
                         {t('footer.privacy')}
                     </Link>

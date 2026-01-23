@@ -79,6 +79,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 import NutritionPage from "./pages/Nutrition";
+import UserGuide from "./pages/UserGuide";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -133,32 +134,36 @@ function AnimatedRoutes() {
               </RequireAuth>
             }
             />
-            <Route path="/circles" element={
-              <RequireAuth>
-                <CirclesPage />
-              </RequireAuth>
-            } />
+            {/* Circles Portal Routes */}
+            <Route path="/circles">
+              <Route index element={
+                <RequireAuth>
+                  <CirclesPage />
+                </RequireAuth>
+              } />
 
-            {/* Circle Portal with nested routes */}
-            <Route path="/circles/join/:inviteCode" element={
-              <JoinCircleHandler />
-            } />
-            <Route path="/circles/:circleId" element={
-              <RequireAuth>
-                <CircleLayout />
-              </RequireAuth>
-            }>
-              <Route index element={<CircleDashboardTab />} />
-              <Route path="feed" element={<CircleFeedTab />} />
-              <Route path="leaderboard" element={<CircleLeaderboardTab />} />
-              <Route path="challenges" element={<CircleChallengesTab />} />
-              <Route path="members" element={<CircleMembersTab />} />
-              <Route path="settings" element={<CircleSettingsTab />} />
+              <Route path="join/:inviteCode" element={
+                <JoinCircleHandler />
+              } />
+
+              <Route path=":circleId" element={
+                <RequireAuth strict>
+                  <CircleLayout />
+                </RequireAuth>
+              }>
+                <Route index element={<CircleDashboardTab />} />
+                <Route path="feed" element={<CircleFeedTab />} />
+                <Route path="leaderboard" element={<CircleLeaderboardTab />} />
+                <Route path="challenges" element={<CircleChallengesTab />} />
+                <Route path="members" element={<CircleMembersTab />} />
+                <Route path="settings" element={<CircleSettingsTab />} />
+              </Route>
             </Route>
 
             <Route path="/mcl" element={<MCLIntegrationTest />} />
 
             <Route path="/legal" element={<LegalPage />} />
+            <Route path="/guide" element={<UserGuide />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </PageTransition>
