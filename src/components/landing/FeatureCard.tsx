@@ -37,7 +37,7 @@ export function FeatureCard({ feature }: { feature: any }) {
                                 className={`mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:shadow-xl transition-all duration-500 cursor-pointer overflow-visible relative`}
                                 whileHover={{
                                     scale: 1.1,
-                                    rotate: [0, -5, 5, 0],
+                                    rotate: 0,
                                 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 15 }}
                             >

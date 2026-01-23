@@ -13,7 +13,6 @@ import Index from "./pages/Index";
 import WizardPage from "./pages/Wizard";
 import PlanPage from "./pages/Plan";
 import NotFound from "./pages/NotFound";
-import { useToast } from "@/components/ui/use-toast";
 import ClientsPage from "./pages/Clients";
 import MCLIntegrationTest from "./pages/MCLIntegrationTest";
 import { ExercisesBrowser } from "./components/exercises/ExercisesBrowser";

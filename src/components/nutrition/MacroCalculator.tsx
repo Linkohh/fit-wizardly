@@ -385,8 +385,13 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                     </div>
 
                     <button
-                        onClick={() => result && onSave(result, profile)}
-                        className="w-full mt-4 bg-primary text-primary-foreground font-semibold py-4 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg"
+                        onClick={() => {
+                            alert('Button clicked! Result: ' + JSON.stringify(result));
+                            if (result) {
+                                onSave(result, profile);
+                            }
+                        }}
+                        className="relative z-20 w-full mt-4 bg-primary text-primary-foreground font-semibold py-4 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg"
                     >
                         {initialProfile ? "Update Targets" : "Start Tracking"} <MoveRight className="w-4 h-4" />
                     </button>

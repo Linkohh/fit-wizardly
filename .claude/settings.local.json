@@ -24,7 +24,8 @@
       "Bash(wmic process:*)",
       "Bash(wmic process where \"ProcessId=13488\" get Name,ProcessId,CommandLine)",
       "Bash(taskkill //F //PID 99452)",
-      "Bash(taskkill //F //PID 13488)"
+      "Bash(taskkill //F //PID 13488)",
+      "Bash(npm run dev)"
     ]
   }
 }

@@ -1,6 +1,7 @@
 import { Utensils, Flame, Coffee, Moon, Sun, Star } from "lucide-react";
 import { MealRecommendation, MacroGoal } from "@/types/nutrition";
 import { useNutritionStore } from "@/stores/nutritionStore";
+import { cn } from "@/lib/utils";
 
 interface MealSuggestionsProps {
     goal: MacroGoal;
