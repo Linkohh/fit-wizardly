@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Plan } from '@/types/fitness';
 
-export const exportPlanToPDF = (currentPlan: Plan, redactSensitive: boolean) => {
+export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean): jsPDF => {
     const doc = new jsPDF();
     const selections = currentPlan.selections;
 
@@ -15,106 +15,200 @@ export const exportPlanToPDF = (currentPlan: Plan, redactSensitive: boolean) => 
     });
 
     // Purple/Pink branded header
-    doc.setFillColor(139, 92, 246); // Primary purple
-    doc.rect(0, 0, 220, 45, 'F');
+    // --- PREMIUM DESIGN CONSTANTS ---
+    const COLORS = {
+        primary: [139, 92, 246] as [number, number, number], // Violet 500
+        secondary: [236, 72, 153] as [number, number, number], // Pink 500
+        dark: [15, 23, 42] as [number, number, number], // Slate 900 (Darker)
+        surface: [248, 250, 252] as [number, number, number], // Slate 50
+        card: [255, 255, 255] as [number, number, number], // White
+        text: {
+            heading: [15, 23, 42] as [number, number, number],
+            body: [51, 65, 85] as [number, number, number],
+            light: [100, 116, 139] as [number, number, number],
+            accent: [139, 92, 246] as [number, number, number]
+        }
+    };
 
+    // Helper: Draw decorative sport lines
+    const drawSportAccents = (yPos: number) => {
+        doc.setDrawColor(...COLORS.secondary);
+        doc.setLineWidth(1);
+        doc.line(0, yPos, 40, yPos);
+        doc.setDrawColor(...COLORS.primary);
+        doc.line(40, yPos, 80, yPos);
+    };
+
+    // --- COVER PAGE ---
+    // Full dark background
+    doc.setFillColor(...COLORS.dark);
+    doc.rect(0, 0, 220, 300, 'F');
+
+    // Dynamic "Slash" background graphic
+    doc.setFillColor(30, 41, 59); // Slate 800
+    doc.triangle(0, 300, 220, 200, 220, 300, 'F');
+
+    // Logo / Brand
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
+    doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
+    doc.text('FITWIZARD', 20, 30);
+    drawSportAccents(35);
 
-    // Personalized title if name is provided
-    const userName = redactSensitive ? '' : `${selections.firstName || ''} ${selections.lastName || ''}`.trim();
-    if (redactSensitive) {
-        doc.text('FitWizard Workout Plan', 14, 18);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Workout Plan Export', 14, 26);
-    } else if (userName) {
-        doc.text(`${userName}'s Workout Plan`, 14, 18);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Powered by FitWizard', 14, 26);
-    } else {
-        doc.text('FitWizard', 14, 18);
-        doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Your Personalized Workout Plan', 14, 26);
-    }
+    // Main Title
+    doc.setFontSize(50);
+    doc.setFont('helvetica', 'bold');
+    doc.text('TRAINING', 20, 100);
+    doc.setTextColor(...COLORS.secondary);
+    doc.text('PROGRAM', 20, 120);
 
-    // Timestamp in header
-    doc.setFontSize(10);
-    doc.text(`Generated: ${timestamp}`, 14, 38);
+    // User & Goal
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    const userName = redactSensitive ? 'ATHLETE' : `${selections.firstName || ''} ${selections.lastName || ''}`.trim();
+    doc.text(userName.toUpperCase() || 'ATHLETE', 20, 160);
 
-    // Personal goal note (if provided)
-    let y = 55;
-    if (!redactSensitive && selections.personalGoalNote) {
-        doc.setTextColor(139, 92, 246);
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bolditalic');
-        doc.text(`"${selections.personalGoalNote}"`, 14, y);
-        y += 12;
-    }
-
-    // Plan details
-    doc.setTextColor(0, 0, 0);
     doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`Split: ${currentPlan.splitType.replace('_', ' ').toUpperCase()}`, 14, y);
-    doc.text(`Days/Week: ${selections.daysPerWeek}`, 14, y + 7);
-    doc.text(`Session Duration: ${selections.sessionDuration} min`, 14, y + 14);
-    doc.text(`Goal: ${selections.goal.charAt(0).toUpperCase() + selections.goal.slice(1)}`, 14, y + 21);
+    doc.setTextColor(148, 163, 184); // Slate 400
+    doc.text(`${currentPlan.splitType.replace('_', ' ').toUpperCase()} • ${selections.goal.toUpperCase()}`, 20, 170);
 
-    y += 35;
-    currentPlan.workoutDays.forEach((day) => {
-        // Day header with pink accent
-        doc.setFillColor(236, 72, 153); // Secondary pink
-        doc.rect(14, y - 5, 182, 8, 'F');
+    // Footer Info
+    doc.setFontSize(10);
+    doc.text(`Generated on ${timestamp}`, 20, 270);
+    doc.text(`${selections.daysPerWeek} Days / Week • ${selections.sessionDuration} Mins`, 20, 276);
+
+    // --- CONTENT PAGES ---
+    doc.addPage();
+    let y = 20;
+
+    // Header per page
+    const addHeader = () => {
+        doc.setFillColor(...COLORS.dark);
+        doc.rect(0, 0, 220, 15, 'F');
+        doc.setFontSize(8);
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        doc.text(day.name, 16, y);
-        y += 10;
+        doc.text('FITWIZARD TRAINING SYSTEMS', 10, 10);
+        doc.text(userName.toUpperCase(), 190, 10, { align: 'right' });
+    };
 
-        const addSectionList = (title: string, items?: string[]) => {
-            if (!items || items.length === 0) return;
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(11);
-            doc.setFont('helvetica', 'bold');
-            doc.text(title, 14, y);
-            y += 6;
-            doc.setFont('helvetica', 'normal');
-            items.forEach(item => {
-                const lines = doc.splitTextToSize(`• ${item}`, 170);
-                doc.text(lines, 16, y);
-                y += lines.length * 5;
-            });
-            y += 4;
-            if (y > 260) { doc.addPage(); y = 20; }
-        };
+    addHeader();
+    y = 30;
 
-        addSectionList('Warm-up', day.warmUp);
-        addSectionList('Cool-down', day.coolDown);
+    // Personal Note
+    if (!redactSensitive && selections.personalGoalNote) {
+        doc.setTextColor(...COLORS.text.body);
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`"${selections.personalGoalNote}"`, 105, y, { align: 'center' });
+        y += 15;
+    }
 
-        doc.setTextColor(0, 0, 0);
-        const rows = day.exercises.map(e => [e.exercise.name, `${e.sets}`, e.reps, `${e.rir}`, `${e.restSeconds}s`]);
+    // --- WORKOUT DAYS LOOP ---
+    currentPlan.workoutDays.forEach((day, index) => {
+        // Check for space
+        if (y > 220) {
+            doc.addPage();
+            addHeader();
+            y = 30;
+        }
+
+        // Card Container
+
+        // Day Title Bar
+        doc.setFillColor(...COLORS.surface);
+        doc.roundedRect(10, y, 190, 12, 1, 1, 'F');
+        doc.setDrawColor(...COLORS.primary);
+        doc.setLineWidth(0.5);
+        doc.line(10, y, 10, y + 12); // Left accent border
+
+        doc.setFontSize(10);
+        doc.setTextColor(...COLORS.text.heading);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`DAY ${index + 1}: ${day.name.toUpperCase()}`, 15, y + 8);
+
+        // Tags
+        if (day.focusTags && day.focusTags.length > 0) {
+            doc.setFontSize(8);
+            doc.setTextColor(...COLORS.text.light);
+            doc.text(day.focusTags.join(' • ').toUpperCase(), 195, y + 8, { align: 'right' });
+        }
+
+        y += 18;
+
+        // Warmup (Subtle)
+        if (day.warmUp && day.warmUp.length > 0) {
+            doc.setFontSize(8);
+            doc.setTextColor(...COLORS.text.light);
+            doc.text(`WARM UP: ${day.warmUp.join(', ')}`, 15, y);
+            y += 8;
+        }
+
+        // Exercise Table
+        const rows = day.exercises.map(e => {
+            const rirLabel = e.rir === 0 ? 'FAILURE' : `${e.rir} RIR`;
+            return [
+                e.exercise.name,
+                `${e.sets}`,
+                e.reps,
+                rirLabel,
+                `${e.restSeconds}s`
+            ];
+        });
+
         autoTable(doc, {
             startY: y,
-            head: [['Exercise', 'Sets', 'Reps', 'RIR', 'Rest']],
+            head: [['EXERCISE', 'SETS', 'REPS', 'INTENSITY', 'REST']],
             body: rows,
-            margin: { left: 14 },
-            headStyles: { fillColor: [139, 92, 246] },
-            alternateRowStyles: { fillColor: [250, 245, 255] }
+            theme: 'plain', // Cleaner look, we will add borders manually if needed or rely on row colors
+            styles: {
+                font: 'helvetica',
+                fontSize: 9,
+                textColor: COLORS.text.body,
+                cellPadding: 4,
+            },
+            headStyles: {
+                fillColor: [255, 255, 255],
+                textColor: COLORS.primary,
+                fontSize: 8,
+                fontStyle: 'bold',
+                halign: 'left',
+                lineWidth: 0 // No border
+            },
+            columnStyles: {
+                0: { fontStyle: 'bold', cellWidth: 'auto' },
+                1: { halign: 'center', cellWidth: 15 },
+                2: { halign: 'center', cellWidth: 20 },
+                3: { halign: 'center', cellWidth: 20, fontStyle: 'bold', textColor: COLORS.secondary }, // Pink Intensity
+                4: { halign: 'center', cellWidth: 15 }
+            },
+            alternateRowStyles: {
+                fillColor: COLORS.surface
+            },
+            margin: { left: 10, right: 10 }
         });
-        // @ts-ignore - lastAutoTable exists on jsPDF instance when plugin is loaded
-        y = doc.lastAutoTable.finalY + 15;
-        if (y > 260) { doc.addPage(); y = 20; }
+
+        // @ts-ignore
+        y = doc.lastAutoTable.finalY + 10;
+
+        // Cooldown
+        if (day.coolDown && day.coolDown.length > 0) {
+            doc.setFontSize(8);
+            doc.setTextColor(...COLORS.text.light);
+            doc.text(`COOL DOWN: ${day.coolDown.join(', ')}`, 15, y);
+            y += 8;
+        }
+
+        y += 10; // Spacing between days
     });
 
-    // Motivational footer
-    doc.setFontSize(10);
-    doc.setTextColor(139, 92, 246);
-    doc.setFont('helvetica', 'italic');
-    doc.text("You've got this! Every rep counts. 💪", 14, 285);
+    return doc;
+};
+
+export const exportPlanToPDF = (currentPlan: Plan, redactSensitive: boolean) => {
+    const doc = generatePlanDocument(currentPlan, redactSensitive);
+    const selections = currentPlan.selections;
+    const userName = redactSensitive ? '' : `${selections.firstName || ''} ${selections.lastName || ''}`.trim();
 
     // Generate filename with user's name if available
     const filename = userName && !redactSensitive
