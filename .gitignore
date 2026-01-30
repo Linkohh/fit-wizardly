@@ -25,3 +25,6 @@ dist-ssr
 
 # Temporary files
 tmpclaude*
+
+# System files
+nul

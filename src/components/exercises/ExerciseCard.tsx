@@ -190,8 +190,8 @@ export const ExerciseCard = forwardRef<HTMLDivElement, ExerciseCardProps>(({ exe
                             exerciseId={exercise.id}
                             exerciseName={exercise.name}
                             isVisible={isHovered}
-                            onAddToWorkout={() => console.log('Add to workout', exercise.name)}
-                            onCompare={() => console.log('Compare', exercise.name)}
+                            onAddToWorkout={() => { }}
+                            onCompare={() => { }}
                         />
                     </div>
 

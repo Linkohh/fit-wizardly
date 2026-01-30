@@ -43,6 +43,72 @@
         "intermediate": "Fortgeschritten",
         "advanced": "Experte"
     },
+    "features": {
+        "badge": "Leistungsstarke Funktionen",
+        "title": "So funktioniert <1>FitWizard</1>",
+        "subtitle": "Alles was du brauchst, um den perfekten Trainingsplan zu erstellen, an einem Ort.",
+        "smart_goals": {
+            "title": "Intelligente Zielsetzung",
+            "description": "Wähle Kraft, Muskelaufbau oder allgemeine Fitnessziele",
+            "detail": {
+                "benefits": [
+                    "Wissenschaftlich fundierte Periodisierung für dein spezifisches Ziel",
+                    "Automatische Anpassung von Volumen und Intensität mit deinem Fortschritt",
+                    "Wähle zwischen Kraft, Muskelaufbau oder allgemeiner Fitness"
+                ],
+                "how_it_works": "Nenne uns dein Ziel und unser Algorithmus erstellt ein Programm nach bewährten Trainingsprinzipien. Willst du Kraft? Wir programmieren weniger Wiederholungen mit höherer Intensität. Auf Muskelwachstum aus? Optimales Volumen mit eingebauter progressiver Überlastung. Lieber allgemeine Fitness? Ein ausgewogener Ansatz, der alle Bereiche abdeckt.",
+                "example": "Für Muskelaufbau programmieren wir 10-20 Sätze pro Muskelgruppe pro Woche, mit Wiederholungsbereichen von 8-12 und strategischer RIR-Progression (Wiederholungen in Reserve), um den Muskelreiz zu maximieren und gleichzeitig die Ermüdung zu steuern."
+            }
+        },
+        "equipment": {
+            "title": "Ausrüstungsabgleich",
+            "description": "Pläne angepasst an deine verfügbare Ausrüstung",
+            "detail": {
+                "benefits": [
+                    "Keine nutzlosen Übungen — jede Bewegung passt zu dem, was du hast",
+                    "Wechsle nahtlos zwischen Heim- und Gym-Training",
+                    "Intelligente Alternativen, wenn Ausrüstung nicht verfügbar ist"
+                ],
+                "how_it_works": "Wähle deine verfügbare Ausrüstung — vom voll ausgestatteten Fitnessstudio bis zu nur einem Paar Kurzhanteln — und wir filtern unsere umfangreiche Übungsbibliothek, um nur Bewegungen anzuzeigen, die du tatsächlich ausführen kannst. Auf Reisen? Aktualisiere deine Ausrüstung und erhalte eine sofortige Programmanpassung.",
+                "example": "Trainierst du zu Hause nur mit Kurzhanteln? Wir ersetzen Langhantel-Bankdrücken durch Kurzhantel-Drücken und Beinpresse durch Goblet-Kniebeugen und Ausfallschritte — gleiche Muskelgruppen, andere Werkzeuge."
+            }
+        },
+        "pdf_export": {
+            "title": "PDF-Export",
+            "description": "Lade deinen personalisierten Plan herunter und teile ihn",
+            "detail": {
+                "benefits": [
+                    "Nimm dein Training überall mit — kein Internet erforderlich",
+                    "Druckfreundliches Format perfekt für Gym-Sessions",
+                    "Teile deinen Plan mit Trainingspartnern oder Coaches"
+                ],
+                "how_it_works": "Ein Klick erzeugt ein schön formatiertes PDF mit deinem kompletten Trainingsplan, inklusive Übungen, Sätze, Wiederholungen, Pausenzeiten und Coaching-Hinweise. Perfekt für Offline-Training oder eine physische Kopie im Fitnessstudio.",
+                "example": "Gehst du in ein Fitnessstudio ohne Handyempfang? Exportiere deinen Plan vorher und habe jedes Detail griffbereit, vom Aufwärmen bis zum Cool-down."
+            }
+        },
+        "trainer_mode": {
+            "title": "Trainer-Modus",
+            "description": "Verwalte Kunden und weise individuelle Pläne zu",
+            "detail": {
+                "benefits": [
+                    "Verwalte mehrere Kunden von einem einzigen Dashboard",
+                    "Erstelle und weise individuelle Pläne in Minuten zu",
+                    "Verfolge den Kundenfortschritt und die Trainingseinhaltung"
+                ],
+                "how_it_works": "Wechsle in den Trainer-Modus, um das Coach-Dashboard freizuschalten. Füge Kunden hinzu, erstelle personalisierte Pläne basierend auf ihren individuellen Zielen und Ausrüstung, und überwache ihre Trainingsabschlüsse. Füge private Notizen hinzu, die nur du sehen kannst.",
+                "example": "10 Kunden verwalten? Erstelle einzigartige Programme für jeden basierend auf ihren Zielen — Kraft für Alex, Muskelaufbau für Sam, allgemeine Fitness für Jordan — alles von einer intuitiven Oberfläche."
+            }
+        },
+        "modal": {
+            "benefits_title": "Hauptvorteile",
+            "how_it_works_title": "So funktioniert's",
+            "example_title": "Beispiel",
+            "try_it": "Jetzt ausprobieren",
+            "close": "Schließen"
+        },
+        "cta": "Kostenlos starten",
+        "no_credit_card": "Keine Kreditkarte erforderlich • Erstelle deinen Plan in Sekunden"
+    },
     "wizard": {
         "title": "Erstelle deinen Trainingsplan",
         "steps": {

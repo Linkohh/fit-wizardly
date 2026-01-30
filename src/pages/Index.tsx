@@ -1,13 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Dumbbell, Target, FileText, Users, Sparkles, Zap, Crown } from 'lucide-react';
+import { ArrowRight, Dumbbell, Target, FileText, Users, Zap, Crown } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { StreakTracker, GoalVisualization, WelcomeHero, DailyQuote } from '@/components/motivation';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { TrainerDashboard } from '@/components/motivation/TrainerDashboard';
 import { motion, useInView } from 'framer-motion';
-import { useRef, useMemo } from 'react';
-import { FeatureCard } from '@/components/landing/FeatureCard';
+import { useRef, useMemo, useState } from 'react';
+import { FeatureCard, type FeatureCardFeature } from '@/components/landing/FeatureCard';
+import { FeatureDetailModal, type Feature } from '@/components/landing/FeatureDetailModal';
 import { useTranslation, Trans } from 'react-i18next';
 
 export default function Index() {
@@ -17,11 +18,13 @@ export default function Index() {
   const { isTrainerMode } = useTrainerStore();
   const hasActivity = totalPlansGenerated > 0;
 
-  const features = useMemo(() => [
-    { icon: Target, title: t('features.smart_goals.title'), description: t('features.smart_goals.description'), variant: 'strength' as const, gradient: 'from-orange-500 to-red-500' },
-    { icon: Dumbbell, title: t('features.equipment.title'), description: t('features.equipment.description'), variant: 'achievement' as const, gradient: 'from-blue-500 to-cyan-500' },
-    { icon: FileText, title: t('features.pdf_export.title'), description: t('features.pdf_export.description'), variant: 'magic' as const, gradient: 'from-purple-500 to-pink-500' },
-    { icon: Users, title: t('features.trainer_mode.title'), description: t('features.trainer_mode.description'), variant: 'cosmic' as const, gradient: 'from-green-500 to-emerald-500' },
+  const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
+
+  const features: FeatureCardFeature[] = useMemo(() => [
+    { key: 'smart_goals', icon: Target, title: t('features.smart_goals.title'), description: t('features.smart_goals.description'), variant: 'strength' as const, gradient: 'from-orange-500 to-red-500' },
+    { key: 'equipment', icon: Dumbbell, title: t('features.equipment.title'), description: t('features.equipment.description'), variant: 'achievement' as const, gradient: 'from-blue-500 to-cyan-500' },
+    { key: 'pdf_export', icon: FileText, title: t('features.pdf_export.title'), description: t('features.pdf_export.description'), variant: 'magic' as const, gradient: 'from-purple-500 to-pink-500' },
+    { key: 'trainer_mode', icon: Users, title: t('features.trainer_mode.title'), description: t('features.trainer_mode.description'), variant: 'cosmic' as const, gradient: 'from-green-500 to-emerald-500' },
   ], [t]);
 
   // Refs for scroll-triggered animations
@@ -209,11 +212,22 @@ export default function Index() {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
             >
               <TooltipProvider delayDuration={200}>
-                {features.map((f, i) => (
-                  <FeatureCard key={i} feature={f} index={i} />
+                {features.map((f) => (
+                  <FeatureCard
+                    key={f.key}
+                    feature={f}
+                    onClick={() => setSelectedFeature(f)}
+                  />
                 ))}
               </TooltipProvider>
             </motion.div>
+
+            {/* Feature Detail Modal */}
+            <FeatureDetailModal
+              feature={selectedFeature}
+              isOpen={!!selectedFeature}
+              onClose={() => setSelectedFeature(null)}
+            />
 
             {/* CTA after features */}
             <motion.div

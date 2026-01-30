@@ -33,19 +33,62 @@
         "subtitle": "Everything you need to create the perfect workout plan, all in one place.",
         "smart_goals": {
             "title": "Smart Goal Setting",
-            "description": "Choose strength, hypertrophy, or general fitness goals"
+            "description": "Choose strength, hypertrophy, or general fitness goals",
+            "detail": {
+                "benefits": [
+                    "Science-backed periodization tailored to your specific goal",
+                    "Automatic volume and intensity adjustment as you progress",
+                    "Choose from strength, hypertrophy, or general fitness tracks"
+                ],
+                "how_it_works": "Tell us your goal, and our algorithm builds a program using proven training principles. Want strength? We program lower reps with higher intensity. Chasing muscle growth? Optimal volume with progressive overload built in. Prefer general fitness? A balanced approach that covers all your bases.",
+                "example": "For hypertrophy, we program 10-20 sets per muscle group per week, with rep ranges of 8-12 and strategic RIR (Reps in Reserve) progression to maximize muscle stimulus while managing fatigue."
+            }
         },
         "equipment": {
             "title": "Equipment Matching",
-            "description": "Plans tailored to your available equipment"
+            "description": "Plans tailored to your available equipment",
+            "detail": {
+                "benefits": [
+                    "No wasted exercises — every movement matches what you have",
+                    "Seamlessly switch between home and gym workouts",
+                    "Smart alternatives suggested when equipment isn't available"
+                ],
+                "how_it_works": "Select your available equipment — from a full commercial gym to just a pair of dumbbells — and we filter our extensive exercise library to only show movements you can actually perform. Traveling? Update your equipment and get an instant program adjustment.",
+                "example": "Training at home with dumbbells only? We'll swap barbell bench press for dumbbell press, and leg press for goblet squats and lunges — same muscle groups, different tools."
+            }
         },
         "pdf_export": {
             "title": "PDF Export",
-            "description": "Download and share your personalized plan"
+            "description": "Download and share your personalized plan",
+            "detail": {
+                "benefits": [
+                    "Take your workout anywhere — no internet required",
+                    "Print-friendly format perfect for gym sessions",
+                    "Share your plan with workout partners or coaches"
+                ],
+                "how_it_works": "One click generates a beautifully formatted PDF with your complete workout plan, including exercises, sets, reps, rest periods, and coaching cues. Perfect for offline training or keeping a physical copy at your gym.",
+                "example": "Heading to a gym with no phone signal? Export your plan before you go and have every detail at your fingertips, from warm-up to cooldown."
+            }
         },
         "trainer_mode": {
             "title": "Trainer Mode",
-            "description": "Manage clients and assign customized plans"
+            "description": "Manage clients and assign customized plans",
+            "detail": {
+                "benefits": [
+                    "Manage multiple clients from a single dashboard",
+                    "Create and assign customized plans in minutes",
+                    "Track client progress and workout adherence over time"
+                ],
+                "how_it_works": "Switch to Trainer Mode to unlock the coach dashboard. Add clients, generate personalized plans based on their individual goals and equipment, and monitor their workout completion. Add private notes only you can see.",
+                "example": "Managing 10 clients? Create unique programs for each based on their goals — strength for Alex, hypertrophy for Sam, general fitness for Jordan — all from one intuitive interface."
+            }
+        },
+        "modal": {
+            "benefits_title": "Key Benefits",
+            "how_it_works_title": "How It Works",
+            "example_title": "Example",
+            "try_it": "Try It Now",
+            "close": "Close"
         },
         "cta": "Get Started Free",
         "no_credit_card": "No credit card required • Start building your plan in seconds"

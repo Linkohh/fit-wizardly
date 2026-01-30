@@ -33,19 +33,62 @@
         "subtitle": "Todo lo que necesitas para crear el plan perfecto, en un solo lugar.",
         "smart_goals": {
             "title": "Definición de Objetivos",
-            "description": "Elige fuerza, hipertrofia o fitness general"
+            "description": "Elige fuerza, hipertrofia o fitness general",
+            "detail": {
+                "benefits": [
+                    "Periodización basada en la ciencia adaptada a tu objetivo específico",
+                    "Ajuste automático de volumen e intensidad a medida que progresas",
+                    "Elige entre fuerza, hipertrofia o fitness general"
+                ],
+                "how_it_works": "Dinos tu objetivo y nuestro algoritmo construye un programa usando principios de entrenamiento probados. ¿Quieres fuerza? Programamos menos repeticiones con mayor intensidad. ¿Buscas crecimiento muscular? Volumen óptimo con sobrecarga progresiva incluida. ¿Prefieres fitness general? Un enfoque equilibrado que cubre todas las bases.",
+                "example": "Para hipertrofia, programamos 10-20 series por grupo muscular por semana, con rangos de repeticiones de 8-12 y progresión estratégica de RIR (Repeticiones en Reserva) para maximizar el estímulo muscular mientras gestionamos la fatiga."
+            }
         },
         "equipment": {
             "title": "Ajuste de Equipamiento",
-            "description": "Planes adaptados a tu equipamiento disponible"
+            "description": "Planes adaptados a tu equipamiento disponible",
+            "detail": {
+                "benefits": [
+                    "Sin ejercicios inútiles — cada movimiento coincide con lo que tienes",
+                    "Cambia entre entrenamientos en casa y gimnasio sin problemas",
+                    "Alternativas inteligentes sugeridas cuando el equipo no está disponible"
+                ],
+                "how_it_works": "Selecciona tu equipamiento disponible — desde un gimnasio comercial completo hasta solo un par de mancuernas — y filtramos nuestra extensa biblioteca de ejercicios para mostrar solo movimientos que realmente puedes realizar. ¿De viaje? Actualiza tu equipo y obtén un ajuste instantáneo del programa.",
+                "example": "¿Entrenando en casa solo con mancuernas? Cambiaremos el press de banca con barra por press con mancuernas, y la prensa de piernas por sentadillas goblet y zancadas — mismos grupos musculares, diferentes herramientas."
+            }
         },
         "pdf_export": {
             "title": "Exportar PDF",
-            "description": "Descarga y comparte tu plan personalizado"
+            "description": "Descarga y comparte tu plan personalizado",
+            "detail": {
+                "benefits": [
+                    "Lleva tu entrenamiento a cualquier lugar — sin internet necesario",
+                    "Formato listo para imprimir perfecto para sesiones de gimnasio",
+                    "Comparte tu plan con compañeros de entrenamiento o entrenadores"
+                ],
+                "how_it_works": "Un clic genera un PDF bellamente formateado con tu plan de entrenamiento completo, incluyendo ejercicios, series, repeticiones, periodos de descanso e indicaciones de coaching. Perfecto para entrenar sin conexión o tener una copia física en tu gimnasio.",
+                "example": "¿Vas a un gimnasio sin señal de teléfono? Exporta tu plan antes de ir y ten cada detalle a tu alcance, desde el calentamiento hasta la vuelta a la calma."
+            }
         },
         "trainer_mode": {
             "title": "Modo Entrenador",
-            "description": "Gestiona clientes y asigna planes personalizados"
+            "description": "Gestiona clientes y asigna planes personalizados",
+            "detail": {
+                "benefits": [
+                    "Gestiona múltiples clientes desde un solo panel de control",
+                    "Crea y asigna planes personalizados en minutos",
+                    "Rastrea el progreso del cliente y la adherencia al entrenamiento"
+                ],
+                "how_it_works": "Cambia al Modo Entrenador para desbloquear el panel de control del coach. Agrega clientes, genera planes personalizados basados en sus objetivos individuales y equipamiento, y monitorea la finalización de sus entrenamientos. Agrega notas privadas que solo tú puedes ver.",
+                "example": "¿Gestionando 10 clientes? Crea programas únicos para cada uno basados en sus objetivos — fuerza para Alex, hipertrofia para Sam, fitness general para Jordan — todo desde una interfaz intuitiva."
+            }
+        },
+        "modal": {
+            "benefits_title": "Beneficios Clave",
+            "how_it_works_title": "Cómo Funciona",
+            "example_title": "Ejemplo",
+            "try_it": "Pruébalo Ahora",
+            "close": "Cerrar"
         },
         "cta": "Empieza Gratis",
         "no_credit_card": "Sin tarjeta de crédito • Crea tu plan en segundos"

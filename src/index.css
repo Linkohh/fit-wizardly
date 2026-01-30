@@ -119,6 +119,36 @@
 }
 
 /* =====================================================
+   CUSTOM SCROLLBAR STYLES
+   Premium thin scrollbar with glassmorphism feel
+   ===================================================== */
+
+/* Webkit (Chrome, Safari, Edge) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+/* =====================================================
    FLUID TYPOGRAPHY SYSTEM
    Scales smoothly from 320px to 1280px viewport
    ===================================================== */

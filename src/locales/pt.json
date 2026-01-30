@@ -60,6 +60,72 @@
         "intermediate": "Intermediário",
         "advanced": "Avançado"
     },
+    "features": {
+        "badge": "Recursos Poderosos",
+        "title": "Como o <1>FitWizard</1> Funciona",
+        "subtitle": "Tudo que você precisa para criar o plano de treino perfeito, em um só lugar.",
+        "smart_goals": {
+            "title": "Definição Inteligente de Metas",
+            "description": "Escolha força, hipertrofia ou condicionamento geral",
+            "detail": {
+                "benefits": [
+                    "Periodização baseada em ciência adaptada ao seu objetivo específico",
+                    "Ajuste automático de volume e intensidade conforme você progride",
+                    "Escolha entre força, hipertrofia ou condicionamento geral"
+                ],
+                "how_it_works": "Diga-nos seu objetivo e nosso algoritmo constrói um programa usando princípios de treino comprovados. Quer força? Programamos menos repetições com maior intensidade. Busca crescimento muscular? Volume ótimo com sobrecarga progressiva embutida. Prefere condicionamento geral? Uma abordagem equilibrada que cobre todas as bases.",
+                "example": "Para hipertrofia, programamos 10-20 séries por grupo muscular por semana, com faixas de repetições de 8-12 e progressão estratégica de RIR (Repetições em Reserva) para maximizar o estímulo muscular enquanto gerenciamos a fadiga."
+            }
+        },
+        "equipment": {
+            "title": "Correspondência de Equipamentos",
+            "description": "Planos adaptados aos seus equipamentos disponíveis",
+            "detail": {
+                "benefits": [
+                    "Sem exercícios inúteis — cada movimento corresponde ao que você tem",
+                    "Alterne perfeitamente entre treinos em casa e na academia",
+                    "Alternativas inteligentes sugeridas quando equipamento não está disponível"
+                ],
+                "how_it_works": "Selecione seus equipamentos disponíveis — de uma academia completa a apenas um par de halteres — e filtramos nossa extensa biblioteca de exercícios para mostrar apenas movimentos que você realmente pode executar. Viajando? Atualize seus equipamentos e receba um ajuste instantâneo do programa.",
+                "example": "Treinando em casa só com halteres? Trocaremos supino com barra por supino com halteres, e leg press por agachamento goblet e afundos — mesmos grupos musculares, ferramentas diferentes."
+            }
+        },
+        "pdf_export": {
+            "title": "Exportar PDF",
+            "description": "Baixe e compartilhe seu plano personalizado",
+            "detail": {
+                "benefits": [
+                    "Leve seu treino para qualquer lugar — sem internet necessária",
+                    "Formato pronto para impressão perfeito para sessões na academia",
+                    "Compartilhe seu plano com parceiros de treino ou treinadores"
+                ],
+                "how_it_works": "Um clique gera um PDF lindamente formatado com seu plano de treino completo, incluindo exercícios, séries, repetições, períodos de descanso e dicas de coaching. Perfeito para treinar offline ou manter uma cópia física na academia.",
+                "example": "Indo para uma academia sem sinal de celular? Exporte seu plano antes de ir e tenha cada detalhe ao seu alcance, do aquecimento ao desaquecimento."
+            }
+        },
+        "trainer_mode": {
+            "title": "Modo Treinador",
+            "description": "Gerencie clientes e atribua planos personalizados",
+            "detail": {
+                "benefits": [
+                    "Gerencie múltiplos clientes de um único painel",
+                    "Crie e atribua planos personalizados em minutos",
+                    "Acompanhe o progresso do cliente e a aderência ao treino"
+                ],
+                "how_it_works": "Mude para o Modo Treinador para desbloquear o painel do coach. Adicione clientes, gere planos personalizados baseados em seus objetivos individuais e equipamentos, e monitore a conclusão de seus treinos. Adicione notas privadas que só você pode ver.",
+                "example": "Gerenciando 10 clientes? Crie programas únicos para cada um baseados em seus objetivos — força para Alex, hipertrofia para Sam, condicionamento geral para Jordan — tudo de uma interface intuitiva."
+            }
+        },
+        "modal": {
+            "benefits_title": "Principais Benefícios",
+            "how_it_works_title": "Como Funciona",
+            "example_title": "Exemplo",
+            "try_it": "Experimente Agora",
+            "close": "Fechar"
+        },
+        "cta": "Comece Grátis",
+        "no_credit_card": "Sem cartão de crédito • Crie seu plano em segundos"
+    },
     "wizard": {
         "goal": {
             "options": {

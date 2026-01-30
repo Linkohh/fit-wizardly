@@ -237,7 +237,7 @@ export function WorkoutSummary({ log, plan, onClose }: WorkoutSummaryProps) {
                         className="flex-1"
                         onClick={() => {
                             // TODO: Implement share functionality
-                            console.log('Share workout');
+
                         }}
                     >
                         <Share2 className="h-4 w-4 mr-2" />
