@@ -109,6 +109,7 @@
   .touch-safe {
     position: relative;
   }
+
   .touch-safe::after {
     content: '';
     position: absolute;
@@ -153,64 +154,139 @@
    Scales smoothly from 320px to 1280px viewport
    ===================================================== */
 :root {
-  --text-fluid-xs: clamp(0.625rem, 0.58rem + 0.19vw, 0.75rem);   /* 10px → 12px */
-  --text-fluid-sm: clamp(0.75rem, 0.7rem + 0.21vw, 0.875rem);    /* 12px → 14px */
-  --text-fluid-base: clamp(0.875rem, 0.83rem + 0.19vw, 1rem);    /* 14px → 16px */
-  --text-fluid-lg: clamp(1rem, 0.92rem + 0.35vw, 1.125rem);      /* 16px → 18px */
-  --text-fluid-xl: clamp(1.125rem, 1rem + 0.52vw, 1.25rem);      /* 18px → 20px */
-  --text-fluid-2xl: clamp(1.25rem, 1.08rem + 0.73vw, 1.5rem);    /* 20px → 24px */
-  --text-fluid-3xl: clamp(1.5rem, 1.17rem + 1.39vw, 1.875rem);   /* 24px → 30px */
-  --text-fluid-4xl: clamp(1.875rem, 1.33rem + 2.26vw, 2.25rem);  /* 30px → 36px */
-  --text-fluid-5xl: clamp(2.25rem, 1.5rem + 3.13vw, 3rem);       /* 36px → 48px */
+  --text-fluid-xs: clamp(0.625rem, 0.58rem + 0.19vw, 0.75rem);
+  /* 10px → 12px */
+  --text-fluid-sm: clamp(0.75rem, 0.7rem + 0.21vw, 0.875rem);
+  /* 12px → 14px */
+  --text-fluid-base: clamp(0.875rem, 0.83rem + 0.19vw, 1rem);
+  /* 14px → 16px */
+  --text-fluid-lg: clamp(1rem, 0.92rem + 0.35vw, 1.125rem);
+  /* 16px → 18px */
+  --text-fluid-xl: clamp(1.125rem, 1rem + 0.52vw, 1.25rem);
+  /* 18px → 20px */
+  --text-fluid-2xl: clamp(1.25rem, 1.08rem + 0.73vw, 1.5rem);
+  /* 20px → 24px */
+  --text-fluid-3xl: clamp(1.5rem, 1.17rem + 1.39vw, 1.875rem);
+  /* 24px → 30px */
+  --text-fluid-4xl: clamp(1.875rem, 1.33rem + 2.26vw, 2.25rem);
+  /* 30px → 36px */
+  --text-fluid-5xl: clamp(2.25rem, 1.5rem + 3.13vw, 3rem);
+  /* 36px → 48px */
 }
 
 @layer utilities {
+
   /* Fluid Typography Classes */
-  .text-fluid-xs { font-size: var(--text-fluid-xs); }
-  .text-fluid-sm { font-size: var(--text-fluid-sm); }
-  .text-fluid-base { font-size: var(--text-fluid-base); }
-  .text-fluid-lg { font-size: var(--text-fluid-lg); }
-  .text-fluid-xl { font-size: var(--text-fluid-xl); }
-  .text-fluid-2xl { font-size: var(--text-fluid-2xl); }
-  .text-fluid-3xl { font-size: var(--text-fluid-3xl); }
-  .text-fluid-4xl { font-size: var(--text-fluid-4xl); }
-  .text-fluid-5xl { font-size: var(--text-fluid-5xl); }
+  .text-fluid-xs {
+    font-size: var(--text-fluid-xs);
+  }
+
+  .text-fluid-sm {
+    font-size: var(--text-fluid-sm);
+  }
+
+  .text-fluid-base {
+    font-size: var(--text-fluid-base);
+  }
+
+  .text-fluid-lg {
+    font-size: var(--text-fluid-lg);
+  }
+
+  .text-fluid-xl {
+    font-size: var(--text-fluid-xl);
+  }
+
+  .text-fluid-2xl {
+    font-size: var(--text-fluid-2xl);
+  }
+
+  .text-fluid-3xl {
+    font-size: var(--text-fluid-3xl);
+  }
+
+  .text-fluid-4xl {
+    font-size: var(--text-fluid-4xl);
+  }
+
+  .text-fluid-5xl {
+    font-size: var(--text-fluid-5xl);
+  }
 
   /* Responsive Padding */
-  .px-responsive { @apply px-4 sm:px-6 lg:px-8; }
-  .py-responsive { @apply py-6 sm:py-8 lg:py-12; }
-  .p-responsive { @apply p-4 sm:p-6 lg:p-8; }
+  .px-responsive {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .py-responsive {
+    @apply py-6 sm:py-8 lg:py-12;
+  }
+
+  .p-responsive {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
 
   /* Responsive Gaps */
-  .gap-responsive { @apply gap-4 sm:gap-6 lg:gap-8; }
-  .gap-responsive-sm { @apply gap-2 sm:gap-3 lg:gap-4; }
+  .gap-responsive {
+    @apply gap-4 sm:gap-6 lg:gap-8;
+  }
+
+  .gap-responsive-sm {
+    @apply gap-2 sm:gap-3 lg:gap-4;
+  }
 
   /* Container Variants - Semantic naming for consistency */
-  .container-narrow { @apply container max-w-2xl mx-auto px-4 sm:px-6; }
-  .container-content { @apply container max-w-4xl mx-auto px-4 sm:px-6; }
-  .container-wide { @apply container max-w-6xl mx-auto px-4 sm:px-6; }
-  .container-full { @apply container max-w-7xl mx-auto px-4 sm:px-6; }
+  .container-narrow {
+    @apply container max-w-2xl mx-auto px-4 sm:px-6;
+  }
+
+  .container-content {
+    @apply container max-w-4xl mx-auto px-4 sm:px-6;
+  }
+
+  .container-wide {
+    @apply container max-w-6xl mx-auto px-4 sm:px-6;
+  }
+
+  .container-full {
+    @apply container max-w-7xl mx-auto px-4 sm:px-6;
+  }
 
   /* Safe Area Utilities for Notched Devices (iPhone X+, etc.) */
-  .safe-area-top { padding-top: env(safe-area-inset-top, 0); }
-  .safe-area-bottom { padding-bottom: env(safe-area-inset-bottom, 0); }
-  .safe-area-left { padding-left: env(safe-area-inset-left, 0); }
-  .safe-area-right { padding-right: env(safe-area-inset-right, 0); }
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left, 0);
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right, 0);
+  }
+
   .safe-area-x {
     padding-left: env(safe-area-inset-left, 0);
     padding-right: env(safe-area-inset-right, 0);
   }
+
   .safe-area-y {
     padding-top: env(safe-area-inset-top, 0);
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
+
   .safe-area-all {
     padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
   }
 }
 
 /* PWA/Mobile optimizations */
-html, body {
+html,
+body {
   overflow-x: hidden;
   max-width: 100vw;
 }
@@ -540,25 +616,32 @@ body {
    ===================================================== */
 
 @keyframes blob-drift-1 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.8;
     filter: hue-rotate(0deg);
   }
+
   20% {
     opacity: 1;
   }
+
   33% {
     transform: translate(15vw, -10vh) scale(1.1);
     filter: hue-rotate(20deg);
   }
+
   55% {
     opacity: 0.3;
   }
+
   66% {
     transform: translate(-10vw, 15vh) scale(0.95);
     filter: hue-rotate(45deg);
   }
+
   80% {
     opacity: 0;
     filter: hue-rotate(60deg);
@@ -566,25 +649,32 @@ body {
 }
 
 @keyframes blob-drift-2 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0;
     filter: hue-rotate(0deg);
   }
+
   15% {
     opacity: 0.6;
   }
+
   30% {
     transform: translate(-12vw, 8vh) scale(1.15);
     filter: hue-rotate(15deg);
   }
+
   50% {
     opacity: 1;
   }
+
   65% {
     transform: translate(8vw, -12vh) scale(0.9);
     filter: hue-rotate(40deg);
   }
+
   85% {
     opacity: 0.3;
     filter: hue-rotate(55deg);
@@ -592,23 +682,29 @@ body {
 }
 
 @keyframes blob-drift-3 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.5;
     filter: hue-rotate(0deg);
   }
+
   25% {
     transform: translate(18vw, 5vh) scale(1.05);
     opacity: 0;
     filter: hue-rotate(10deg);
   }
+
   45% {
     opacity: 0.9;
   }
+
   60% {
     transform: translate(-5vw, -18vh) scale(1.1);
     filter: hue-rotate(35deg);
   }
+
   80% {
     opacity: 0.3;
     filter: hue-rotate(50deg);
@@ -616,26 +712,33 @@ body {
 }
 
 @keyframes blob-drift-4 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.3;
     filter: hue-rotate(0deg);
   }
+
   20% {
     opacity: 0.8;
     filter: hue-rotate(12deg);
   }
+
   40% {
     transform: translate(-15vw, 12vh) scale(0.95);
     filter: hue-rotate(25deg);
   }
+
   60% {
     opacity: 0;
   }
+
   75% {
     transform: translate(10vw, -8vh) scale(1.08);
     filter: hue-rotate(45deg);
   }
+
   90% {
     opacity: 1;
     filter: hue-rotate(60deg);
@@ -643,27 +746,34 @@ body {
 }
 
 @keyframes blob-drift-5 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0.7;
     filter: hue-rotate(0deg);
   }
+
   18% {
     opacity: 0;
   }
+
   35% {
     transform: translate(10vw, -15vh) scale(1.12);
     opacity: 0.9;
     filter: hue-rotate(20deg);
   }
+
   55% {
     filter: hue-rotate(40deg);
   }
+
   70% {
     transform: translate(-12vw, 6vh) scale(0.92);
     opacity: 0.4;
     filter: hue-rotate(50deg);
   }
+
   88% {
     opacity: 1;
     filter: hue-rotate(60deg);
@@ -671,27 +781,34 @@ body {
 }
 
 @keyframes blob-drift-6 {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0, 0) scale(1);
     opacity: 0;
     filter: hue-rotate(0deg);
   }
+
   12% {
     opacity: 0.7;
   }
+
   28% {
     transform: translate(-8vw, -10vh) scale(1.06);
     filter: hue-rotate(18deg);
   }
+
   45% {
     opacity: 1;
     filter: hue-rotate(30deg);
   }
+
   62% {
     transform: translate(14vw, 8vh) scale(0.94);
     opacity: 0.2;
     filter: hue-rotate(48deg);
   }
+
   82% {
     opacity: 0.6;
     filter: hue-rotate(60deg);
@@ -702,18 +819,23 @@ body {
 .animate-blob-drift-1 {
   animation: blob-drift-1 25s ease-in-out infinite;
 }
+
 .animate-blob-drift-2 {
   animation: blob-drift-2 28s ease-in-out infinite;
 }
+
 .animate-blob-drift-3 {
   animation: blob-drift-3 29s ease-in-out infinite;
 }
+
 .animate-blob-drift-4 {
   animation: blob-drift-4 31s ease-in-out infinite;
 }
+
 .animate-blob-drift-5 {
   animation: blob-drift-5 32s ease-in-out infinite;
 }
+
 .animate-blob-drift-6 {
   animation: blob-drift-6 37s ease-in-out infinite;
 }
@@ -905,44 +1027,59 @@ body {
 @keyframes horizon-color-smooth {
 
   /* Phase 1: Electric Violet (Deep & Royal) */
-  0%, 100% {
-    --glow-color-primary: rgba(147, 51, 234, 0.6); /* Purple-600 */
+  0%,
+  100% {
+    --glow-color-primary: rgba(147, 51, 234, 0.6);
+    /* Purple-600 */
   }
 
   /* Phase 2: Neon Cyan (Bright & Energetic) */
   25% {
-    --glow-color-primary: rgba(6, 182, 212, 0.6); /* Cyan-500 */
+    --glow-color-primary: rgba(6, 182, 212, 0.6);
+    /* Cyan-500 */
   }
 
   /* Phase 3: Hot Pink (Vibrant & Warm) */
   50% {
-    --glow-color-primary: rgba(236, 72, 153, 0.6); /* Pink-500 */
+    --glow-color-primary: rgba(236, 72, 153, 0.6);
+    /* Pink-500 */
   }
 
   /* Phase 4: Golden Amber (Rich & Luxurious Contrast) */
   75% {
-    --glow-color-primary: rgba(245, 158, 11, 0.55); /* Amber-500 */
+    --glow-color-primary: rgba(245, 158, 11, 0.55);
+    /* Amber-500 */
   }
 }
 
 /* Secondary layer - Complementary Offsets */
 @keyframes horizon-color-smooth-secondary {
-  0%, 100% {
-    --glow-color-secondary: rgba(6, 182, 212, 0.4); /* Cyan start */
+
+  0%,
+  100% {
+    --glow-color-secondary: rgba(6, 182, 212, 0.4);
+    /* Cyan start */
   }
+
   33% {
-    --glow-color-secondary: rgba(236, 72, 153, 0.45); /* Pink mid */
+    --glow-color-secondary: rgba(236, 72, 153, 0.45);
+    /* Pink mid */
   }
+
   66% {
-    --glow-color-secondary: rgba(147, 51, 234, 0.4); /* Purple end */
+    --glow-color-secondary: rgba(147, 51, 234, 0.4);
+    /* Purple end */
   }
 }
 
 /* Tertiary layer - Deep Foundation */
 @keyframes horizon-color-smooth-tertiary {
-  0%, 100% {
+
+  0%,
+  100% {
     --glow-color-tertiary: rgba(236, 72, 153, 0.3);
   }
+
   50% {
     --glow-color-tertiary: rgba(6, 182, 212, 0.3);
   }
@@ -950,8 +1087,17 @@ body {
 
 /* Breathing animation - More dynamic range */
 @keyframes horizon-breathe {
-  0%, 100% { opacity: 0.8; transform: scaleX(1); }
-  50% { opacity: 1.0; transform: scaleX(1.05); }
+
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scaleX(1);
+  }
+
+  50% {
+    opacity: 1.0;
+    transform: scaleX(1.05);
+  }
 }
 
 /* Primary glow layer - Intense Core */
@@ -964,10 +1110,12 @@ body {
   background-size: 100% 100%;
   background-position: center;
   filter: blur(28px);
-  opacity: 1; /* Max opacity for visibility */
+  opacity: 1;
+  /* Max opacity for visibility */
   will-change: background, opacity, transform;
   animation:
-    horizon-color-smooth 24s linear infinite, /* Faster cycle for fluidity */
+    horizon-color-smooth 24s linear infinite,
+    /* Faster cycle for fluidity */
     horizon-breathe 8s ease-in-out infinite;
 }
 
@@ -1012,7 +1160,8 @@ body {
       rgba(255, 255, 255, 0.8) 60%,
       rgba(var(--glow-color-primary), 0) 90%,
       transparent 100%);
-  height: 2px; /* Slightly thicker */
+  height: 2px;
+  /* Slightly thicker */
   filter: blur(0.5px) drop-shadow(0 0 4px white);
   opacity: 0.9;
   z-index: 20;
@@ -1030,7 +1179,8 @@ body {
       black 40%,
       rgba(0, 0, 0, 0.2) 70%,
       transparent 85%);
-  mix-blend-mode: normal; /* Handle blending on children */
+  mix-blend-mode: normal;
+  /* Handle blending on children */
 }
 
 /* =====================================================
@@ -1060,21 +1210,17 @@ body {
 
 /* Premium Backdrop with Animated Blur */
 .backdrop-premium {
-  background: linear-gradient(
-    90deg,
-    hsl(0 0% 0% / 0.2) 0%,
-    hsl(0 0% 0% / 0.5) 100%
-  );
+  background: linear-gradient(90deg,
+      hsl(0 0% 0% / 0.2) 0%,
+      hsl(0 0% 0% / 0.5) 100%);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
 .dark .backdrop-premium {
-  background: linear-gradient(
-    90deg,
-    hsl(270 50% 5% / 0.3) 0%,
-    hsl(270 50% 3% / 0.7) 100%
-  );
+  background: linear-gradient(90deg,
+      hsl(270 50% 5% / 0.3) 0%,
+      hsl(270 50% 3% / 0.7) 100%);
 }
 
 /* Menu Item Interactive States */
@@ -1088,12 +1234,10 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    90deg,
-    hsl(var(--primary) / 0) 0%,
-    hsl(var(--primary) / 0.1) 50%,
-    hsl(var(--primary) / 0) 100%
-  );
+  background: linear-gradient(90deg,
+      hsl(var(--primary) / 0) 0%,
+      hsl(var(--primary) / 0.1) 50%,
+      hsl(var(--primary) / 0) 100%);
   transform: translateX(-100%);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
@@ -1110,11 +1254,9 @@ body {
 
 /* Active Navigation Indicator */
 .nav-indicator {
-  background: linear-gradient(
-    180deg,
-    hsl(var(--primary)) 0%,
-    hsl(var(--secondary)) 100%
-  );
+  background: linear-gradient(180deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 100%);
   box-shadow:
     0 0 8px hsl(var(--primary) / 0.5),
     0 0 16px hsl(var(--secondary) / 0.3);
@@ -1142,6 +1284,7 @@ body {
 
 /* Reduced Motion Support for Mobile Nav */
 @media (prefers-reduced-motion: reduce) {
+
   .sheet-glass,
   .backdrop-premium,
   .menu-item-interactive,

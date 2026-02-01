@@ -7,8 +7,8 @@ export function Footer() {
     const year = new Date().getFullYear();
 
     return (
-        <footer className="w-full border-t border-border bg-background/50 backdrop-blur py-6 mt-auto safe-area-bottom">
-            <div className="container flex flex-col md:flex-row items-center justify-between gap-4 px-4 text-sm text-muted-foreground">
+        <footer className="w-full border-t border-border bg-background/50 backdrop-blur min-h-9 flex items-center mt-auto safe-area-bottom">
+            <div className="container w-full flex flex-col md:flex-row items-center justify-between gap-4 px-4 text-sm text-muted-foreground">
 
                 <div className="flex items-center gap-1">
                     <span>{t('footer.copyright', { year })}</span>
