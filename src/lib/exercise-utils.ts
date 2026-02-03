@@ -131,3 +131,46 @@ export function getRecommendedExercises(userProfile: WizardData): Exercise[] {
         .map(item => item.ex)
         .slice(0, 12); // Top 12 recommendations
 }
+
+// --- Category/Exercise Lookup ---
+
+export interface ExerciseCategoryInfo {
+    id: string;
+    name: string;
+    title: string;
+    description?: string;
+    iconKey?: string;
+    subcategories?: { id: string; name: string }[];
+}
+
+// Get all unique categories from the exercise database
+export function getAllCategories(): ExerciseCategoryInfo[] {
+    const categories = new Set<ExerciseCategory>();
+    EXERCISE_DATABASE.forEach(ex => {
+        if (ex.category) categories.add(ex.category);
+    });
+    
+    return Array.from(categories).map(cat => ({
+        id: cat,
+        name: cat.charAt(0).toUpperCase() + cat.slice(1),
+        title: cat.charAt(0).toUpperCase() + cat.slice(1),
+        description: `${cat} exercises`,
+        iconKey: cat,
+    }));
+}
+
+// Get a category by ID
+export function getCategoryById(id: string): ExerciseCategoryInfo | undefined {
+    const categories = getAllCategories();
+    return categories.find(cat => cat.id === id);
+}
+
+// Get a single exercise by ID
+export function getExerciseById(id: string): Exercise | undefined {
+    return EXERCISE_DATABASE.find(ex => ex.id === id);
+}
+
+// Get exercises by category
+export function getExercisesByCategory(categoryId: string): Exercise[] {
+    return EXERCISE_DATABASE.filter(ex => ex.category === categoryId as ExerciseCategory);
+}

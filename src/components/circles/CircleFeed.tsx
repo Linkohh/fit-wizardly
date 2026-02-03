@@ -88,7 +88,7 @@ export function CircleFeed({ circle }: CircleFeedProps) {
     };
 
     // Fetch comments for an activity when needed
-    const handleFetchComments = async (activityId: string) => {
+    const _handleFetchComments = async (activityId: string) => {
         if (!comments.has(activityId)) {
             await fetchComments(activityId);
         }

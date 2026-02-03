@@ -5,8 +5,7 @@
  */
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { Crown, Medal, Trophy, Flame } from 'lucide-react';
+import { Crown, Medal, Flame } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/types/supabase';
 

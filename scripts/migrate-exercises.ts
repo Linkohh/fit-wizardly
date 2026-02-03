@@ -131,7 +131,7 @@ async function migrate() {
                 name: jsonEx.name,
                 primaryMuscles: mappedPrimary,
                 secondaryMuscles: [], // Info missing in JSON array for most part
-                equipment: (jsonEx.equipment || []).map((e: string) => e.toLowerCase().replace(' ', '_')).filter((e: any) => true), // approximate
+                equipment: (jsonEx.equipment || []).map((eq: string) => eq.toLowerCase().replace(' ', '_')).filter((_: unknown) => true), // approximate
                 patterns: [], // Unknown from JSON
                 contraindications: [],
                 cues: [],

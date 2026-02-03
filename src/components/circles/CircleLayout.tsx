@@ -24,7 +24,7 @@ import type { CircleWithMembers } from '@/types/supabase';
 
 export function CircleLayout() {
     const { circleId } = useParams<{ circleId: string }>();
-    const navigate = useNavigate();
+    const _navigate = useNavigate();
     const { toast } = useToast();
     const { user } = useAuthStore();
     const { fetchCircleById, subscribeToActivities } = useCircleStore();

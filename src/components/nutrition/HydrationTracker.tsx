@@ -4,8 +4,9 @@ import { cn } from "@/lib/utils";
 import { useNutritionStore } from "@/stores/nutritionStore";
 
 export function HydrationTracker() {
-    const { dailyLog, updateHydration, profile } = useNutritionStore();
+    const { getCurrentLog, updateHydration, profile } = useNutritionStore();
 
+    const dailyLog = getCurrentLog();
     const currentAmount = dailyLog?.water || 0;
     const targetAmount = profile?.dailyWaterGoal || 2500;
 
@@ -17,7 +18,7 @@ export function HydrationTracker() {
         if (currentAmount >= targetAmount && currentAmount > 0 && percentage >= 100 && !showConfetti) {
             triggerCelebration();
         }
-    }, [currentAmount, targetAmount]);
+    }, [currentAmount, targetAmount, percentage, showConfetti]);
 
     const triggerCelebration = () => {
         setShowConfetti(true);

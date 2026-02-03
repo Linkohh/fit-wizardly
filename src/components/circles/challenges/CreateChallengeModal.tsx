@@ -27,7 +27,7 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Loader2, Target } from 'lucide-react';
-import { format, addDays, addWeeks } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useCircleStore } from '@/stores/circleStore';
 import { useToast } from '@/components/ui/use-toast';
