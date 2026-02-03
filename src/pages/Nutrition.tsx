@@ -8,7 +8,7 @@ import { NutritionLearn } from "@/components/nutrition/NutritionLearn";
 import { SmartRemaining } from "@/components/nutrition/SmartRemaining";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MacroTargets, UserNutritionProfile } from "@/types/nutrition";
-import { Sparkles, ArrowLeft, Trash2, UtensilsCrossed, ChevronLeft, ChevronRight, Calendar as CalendarIcon, LayoutDashboard, BarChart3, BookOpen } from "lucide-react";
+import { Sparkles, ArrowLeft, Trash2, UtensilsCrossed, ChevronLeft, ChevronRight, Calendar as CalendarIcon, LayoutDashboard, BarChart3, BookOpen, Settings2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useNutritionStore } from "@/stores/nutritionStore";
 import { ProgressRing } from "@/components/ui/ProgressRing";
@@ -65,6 +65,15 @@ export default function NutritionPage() {
                     <p className="text-muted-foreground mt-2 max-w-2xl">
                         Fuel your performance with precision. Track macros, hydration, and get personalized meal recommendations based on your goal.
                     </p>
+                    {targets && !isEditingCalculator && (
+                        <button
+                            onClick={() => setIsEditingCalculator(true)}
+                            className="inline-flex items-center gap-2 px-4 py-2 mt-3 text-sm font-medium rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-muted-foreground hover:text-white"
+                        >
+                            <Settings2 className="w-4 h-4" />
+                            Edit Goals
+                        </button>
+                    )}
                 </div>
 
                 {/* Date Navigation */}
@@ -221,27 +230,19 @@ export default function NutritionPage() {
 
                             {/* Right Column: Calculator & Suggestions */}
                             <div className="space-y-6">
-                                {/* Mini Calculator (Edit Mode) */}
-                                <div className="group relative">
-                                    <button
-                                        onClick={() => setIsEditingCalculator(true)}
-                                        className="absolute top-4 right-4 text-xs text-muted-foreground hover:text-white z-10 underline"
-                                    >
-                                        Edit Targets
-                                    </button>
-                                    <div className="glass-card p-6 rounded-3xl opacity-80 hover:opacity-100 transition-opacity">
-                                        <div className="text-sm text-muted-foreground uppercase tracking-wider mb-1">Current Goal</div>
-                                        <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary capitalize mb-4">
-                                            {profile?.goal}
-                                        </div>
-                                        <div className="space-y-2 text-sm">
-                                            <div className="flex justify-between"><span>Calories Remaining</span> <span>{Math.max(0, targets.calories - currentTotals.calories)}</span></div>
-                                            <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
-                                                <div
-                                                    className="bg-primary h-full rounded-full transition-all duration-1000"
-                                                    style={{ width: `${Math.min(100, (currentTotals.calories / targets.calories) * 100)}%` }}
-                                                />
-                                            </div>
+                                {/* Current Goal Summary */}
+                                <div className="glass-card p-6 rounded-3xl">
+                                    <div className="text-sm text-muted-foreground uppercase tracking-wider mb-1">Current Goal</div>
+                                    <div className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary capitalize mb-4">
+                                        {profile?.goal}
+                                    </div>
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between"><span>Calories Remaining</span> <span>{Math.max(0, targets.calories - currentTotals.calories)}</span></div>
+                                        <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+                                            <div
+                                                className="bg-primary h-full rounded-full transition-all duration-1000"
+                                                style={{ width: `${Math.min(100, (currentTotals.calories / targets.calories) * 100)}%` }}
+                                            />
                                         </div>
                                     </div>
                                 </div>
