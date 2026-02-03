@@ -131,7 +131,7 @@ function getWorkoutDayStructure(splitType: SplitType, daysPerWeek: number): { na
         { name: 'Upper B', focusTags: ['upper', 'push', 'pull'] },
         { name: 'Lower B', focusTags: ['lower', 'quads', 'hinge'] },
       ].slice(0, daysPerWeek);
-    case 'push_pull_legs':
+    case 'push_pull_legs': {
       const pplDays = [
         { name: 'Push', focusTags: ['push', 'chest', 'shoulders', 'triceps'] },
         { name: 'Pull', focusTags: ['pull', 'back', 'biceps'] },
@@ -139,6 +139,7 @@ function getWorkoutDayStructure(splitType: SplitType, daysPerWeek: number): { na
       ];
       const extendedPplDays = [...pplDays, ...pplDays.map(d => ({ ...d, name: `${d.name} 2` }))];
       return extendedPplDays.slice(0, daysPerWeek);
+    }
   }
 }
 
@@ -232,7 +233,7 @@ function selectExercisesForMuscle(
 
     // Standard rationale
     const isCompound = !exercise.patterns.includes('isolation');
-    let rationale = isCompound
+    const rationale = isCompound
       ? `Primary compound movement for ${phase.replace('_', ' ')}.`
       : `Isolation assistance for ${muscle.replace('_', ' ')}.`;
 
@@ -545,7 +546,7 @@ export function generatePlan(selections: WizardSelections, options: PlanIdOption
   // Generate plan ID deterministically, with optional version suffix
   const selectionsHash = sha256(JSON.stringify(selections));
   const timestampSuffix = options.appendTimestamp
-    ? `_${new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 12)}`
+    ? `_${new Date().toISOString().replace(/[-.TZ]/g, '').replace(/:/g, '').slice(0, 12)}`
     : '';
   const planId = `plan_${selectionsHash}${timestampSuffix}`;
 

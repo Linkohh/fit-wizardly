@@ -2,23 +2,28 @@
 import { describe, it, expect, vi } from 'vitest';
 import { generatePlanDocument } from './pdfExport';
 import { Plan } from '@/types/fitness';
-import { jsPDF } from 'jspdf';
-
 // Mock jsPDF
 vi.mock('jspdf', () => {
+    class JsPDFMock {
+        setFillColor = vi.fn();
+        rect = vi.fn();
+        roundedRect = vi.fn();
+        setTextColor = vi.fn();
+        setDrawColor = vi.fn();
+        setLineWidth = vi.fn();
+        line = vi.fn();
+        setFontSize = vi.fn();
+        setFont = vi.fn();
+        text = vi.fn();
+        splitTextToSize = vi.fn((text) => [text]); // simple mock
+        addPage = vi.fn();
+        save = vi.fn();
+        lastAutoTable = { finalY: 100 };
+    }
+
     return {
-        default: class {
-            setFillColor = vi.fn();
-            rect = vi.fn();
-            setTextColor = vi.fn();
-            setFontSize = vi.fn();
-            setFont = vi.fn();
-            text = vi.fn();
-            splitTextToSize = vi.fn((text) => [text]); // simple mock
-            addPage = vi.fn();
-            save = vi.fn();
-            lastAutoTable = { finalY: 100 };
-        }
+        jsPDF: JsPDFMock,
+        default: { jsPDF: JsPDFMock },
     };
 });
 

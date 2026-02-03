@@ -44,7 +44,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Theme
-  const { resolvedTheme, toggleTheme } = useTheme(themeProp);
+  const { resolvedTheme, toggleTheme, themeClassName } = useTheme(themeProp);
 
   // View state
   const [currentView, setCurrentView] = useState<ViewType>(defaultView);
@@ -175,7 +175,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative flex bg-transparent ${className}`}
+      className={`relative flex bg-transparent ${themeClassName} ${className}`}
       style={{ width, height }}
     >
       {/* Main content area */}

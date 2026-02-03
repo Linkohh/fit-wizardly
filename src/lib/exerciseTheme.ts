@@ -203,7 +203,9 @@ export function getExerciseCardClasses(exercise: Exercise): {
     const theme = getExerciseTheme(exercise);
 
     return {
-        glowClass: `hover:shadow-[0_0_20px_${theme.glow}]`,
+        // Use a CSS variable to avoid invalid Tailwind output from dynamic arbitrary values.
+        // Consumer can set `--exercise-glow` via inline styles when using this class.
+        glowClass: 'hover:shadow-[0_0_20px_var(--exercise-glow)]',
         gradientClass: `bg-gradient-to-br ${theme.gradient}`,
         iconClass: theme.icon,
     };

@@ -28,15 +28,10 @@ export const useTheme = (initialMode: ThemeMode = 'system') => {
     }
   }, [mode]);
 
-  // Apply theme to document
-  useEffect(() => {
-    const root = document.documentElement;
-    if (resolvedTheme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-  }, [resolvedTheme]);
+  // IMPORTANT:
+  // Do not mutate `document.documentElement` here.
+  // The main app owns the global theme class; this hook is for MCL-local theming only.
+  const themeClassName = resolvedTheme === 'dark' ? 'dark' : '';
 
   const setTheme = useCallback((newMode: ThemeMode) => {
     setMode(newMode);
@@ -53,6 +48,7 @@ export const useTheme = (initialMode: ThemeMode = 'system') => {
   return {
     mode,
     resolvedTheme,
+    themeClassName,
     setTheme,
     toggleTheme,
     isDark: resolvedTheme === 'dark',

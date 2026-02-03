@@ -1320,8 +1320,8 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "difficulty": "Intermediate"
   },
   {
-    "id": "russian_twist",
-    "name": "Russian Twist",
+    "id": "russian_twist_basic",
+    "name": "Russian Twist (Basic)",
     "primaryMuscles": [
       "obliques"
     ],
@@ -1799,8 +1799,8 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "type": "strength"
   },
   {
-    "id": "bird_dog",
-    "name": "Bird Dog",
+    "id": "bird_dog_basic",
+    "name": "Bird Dog (Basic)",
     "primaryMuscles": [
       "lower_back",
       "abs",

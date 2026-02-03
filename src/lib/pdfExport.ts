@@ -1,4 +1,4 @@
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Plan } from '@/types/fitness';
 
@@ -46,7 +46,29 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
 
     // Dynamic "Slash" background graphic
     doc.setFillColor(30, 41, 59); // Slate 800
-    doc.triangle(0, 300, 220, 200, 220, 300, 'F');
+    const anyDoc = doc as jsPDF & {
+        triangle?: (x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, style?: string) => unknown;
+        lines?: (...args: unknown[]) => unknown;
+    };
+    if (typeof anyDoc.triangle === 'function') {
+        anyDoc.triangle(0, 300, 220, 200, 220, 300, 'F');
+    } else if (typeof anyDoc.lines === 'function') {
+        anyDoc.lines(
+            [
+                [220 - 0, 200 - 300],
+                [220 - 220, 300 - 200],
+                [0 - 220, 300 - 300],
+            ],
+            0,
+            300,
+            [1, 1],
+            'F',
+            true
+        );
+    } else {
+        // Fallback for environments where polygon APIs aren't available
+        doc.rect(0, 240, 220, 60, 'F');
+    }
 
     // Logo / Brand
     doc.setTextColor(255, 255, 255);
@@ -188,8 +210,12 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
             margin: { left: 10, right: 10 }
         });
 
-        // @ts-ignore
-        y = doc.lastAutoTable.finalY + 10;
+        const lastAutoTable = (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable;
+        if (lastAutoTable && typeof lastAutoTable.finalY === 'number') {
+            y = lastAutoTable.finalY + 10;
+        } else {
+            y += 10;
+        }
 
         // Cooldown
         if (day.coolDown && day.coolDown.length > 0) {

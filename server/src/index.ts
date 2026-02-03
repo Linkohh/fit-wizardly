@@ -1,19 +1,16 @@
 import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import { z } from 'zod';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { PlanPayloadSchema } from './schemas/plan.js';
 import {
-    createPlan,
-    getPlanById,
-    getPlansByUserId,
-    getAllPlans,
-    updatePlan,
-    deletePlan,
-    type DbPlan
-} from './db.js';
+    upsertPlanForUser as upsertPlanForUserSupabase,
+    listPlansForUser as listPlansForUserSupabase,
+    getPlanForUser as getPlanForUserSupabase,
+    deletePlanForUser as deletePlanForUserSupabase,
+} from './supabasePlansRepo.js';
 
 // Load environment variables from root
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -46,13 +43,7 @@ const limiter = rateLimit({
 });
 
 // Stricter rate limit for auth-related endpoints
-const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20, // Limit each IP to 20 auth requests per windowMs
-    message: { error: 'Too many authentication attempts, please try again later' },
-    standardHeaders: true,
-    legacyHeaders: false,
-});
+// const authLimiter = rateLimit({ ... }); // Reserved for future /auth endpoints
 
 // Middleware
 app.use(cors({
@@ -79,18 +70,24 @@ interface AuthRequest extends express.Request {
         id: string;
         email?: string;
     };
+    authToken?: string;
 }
 
 // ============================================================================
 // AUTHENTICATION MIDDLEWARE
 // ============================================================================
 const requireAuth = async (req: AuthRequest, res: express.Response, next: express.NextFunction) => {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        return res.status(500).json({ error: 'Server missing Supabase credentials' });
+    }
+
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'Missing or invalid Authorization header' });
     }
 
     const token = authHeader.split(' ')[1];
+    req.authToken = token;
 
     try {
         // Verify token with Supabase Auth API
@@ -119,82 +116,10 @@ const requireAuth = async (req: AuthRequest, res: express.Response, next: expres
 // INPUT VALIDATION SCHEMAS
 // ============================================================================
 
-// Schema for exercise sets
-const ExerciseSetSchema = z.object({
-    reps: z.number().int().min(0).max(1000),
-    weight: z.number().min(0).max(10000).optional(),
-    rir: z.number().int().min(0).max(10).optional(),
-    completed: z.boolean().optional(),
-}).strict();
-
-// Schema for exercises in a workout
-const WorkoutExerciseSchema = z.object({
-    exerciseId: z.string().min(1).max(100),
-    name: z.string().min(1).max(200),
-    sets: z.array(ExerciseSetSchema).max(20),
-    notes: z.string().max(1000).optional(),
-    muscleGroup: z.string().max(50).optional(),
-}).strict();
-
-// Schema for workout days
-const WorkoutDaySchema = z.object({
-    name: z.string().min(1).max(100),
-    exercises: z.array(WorkoutExerciseSchema).max(50),
-    notes: z.string().max(2000).optional(),
-    dayIndex: z.number().int().min(0).max(6).optional(),
-}).strict();
-
-// Schema for weekly volume tracking
-const WeeklyVolumeSchema = z.object({
-    muscleGroup: z.string().min(1).max(50),
-    sets: z.number().int().min(0).max(100),
-    targetSets: z.number().int().min(0).max(100).optional(),
-}).strict();
-
-// Schema for RIR progression
-const RirProgressionSchema = z.object({
-    week: z.number().int().min(1).max(52),
-    targetRir: z.number().int().min(0).max(10),
-}).strict();
-
-// Schema for plan notes
-const PlanNoteSchema = z.object({
-    id: z.string().max(100).optional(),
-    content: z.string().max(5000),
-    createdAt: z.string().datetime().optional(),
-}).strict();
-
-// Schema for plan selections (wizard choices)
-const SelectionsSchema = z.object({
-    goal: z.string().max(50).optional(),
-    experienceLevel: z.string().max(50).optional(),
-    equipment: z.array(z.string().max(50)).max(20).optional(),
-    daysPerWeek: z.number().int().min(1).max(7).optional(),
-    sessionDuration: z.number().int().min(15).max(240).optional(),
-    muscleTargets: z.record(z.number().min(0).max(100)).optional(),
-}).passthrough(); // Allow additional fields for flexibility
-
-const CreatePlanSchema = z.object({
-    id: z.string().uuid().optional(), // Client might generate ID
-    selections: SelectionsSchema,
-    splitType: z.string().min(1).max(50),
-    workoutDays: z.array(WorkoutDaySchema).min(1).max(7),
-    weeklyVolume: z.array(WeeklyVolumeSchema).max(50).default([]),
-    rirProgression: z.array(RirProgressionSchema).max(52).default([]),
-    notes: z.array(PlanNoteSchema).max(100).default([]),
-    userId: z.string().uuid().optional() // Optional in body, forced from token
-});
-
-const UpdatePlanSchema = z.object({
-    workoutDays: z.array(WorkoutDaySchema).min(1).max(7).optional(),
-    notes: z.array(PlanNoteSchema).max(100).optional()
-});
-
 // Request logging
 app.use((req, _res, next) => {
     const requestId = `req_${crypto.randomUUID()}`;
-    // @ts-ignore
-    req.id = requestId;
+    (req as express.Request & { id: string }).id = requestId;
     console.log(`[${requestId}] ${req.method} ${req.path}`);
     next();
 });
@@ -208,10 +133,10 @@ app.get('/health', (_req, res) => {
 // PLANS API
 // ============================================================================
 
-// Create plan
+// Create/Upsert plan
 app.post('/plans', requireAuth, async (req: AuthRequest, res) => {
     try {
-        const validation = CreatePlanSchema.safeParse(req.body);
+        const validation = PlanPayloadSchema.safeParse(req.body);
 
         if (!validation.success) {
             return res.status(400).json({ error: 'Invalid input', details: validation.error.format() });
@@ -219,27 +144,28 @@ app.post('/plans', requireAuth, async (req: AuthRequest, res) => {
 
         const data = validation.data;
         const userId = req.user!.id; // Guaranteed by requireAuth
+        const userToken = req.authToken!;
 
         // Enforce user ownership
         if (data.userId && data.userId !== userId) {
             return res.status(403).json({ error: 'Cannot create plan for another user' });
         }
 
-        const dbPlan: Omit<DbPlan, 'updated_at'> = {
-            id: data.id || crypto.randomUUID(),
-            user_id: userId,
-            created_at: new Date().toISOString(),
-            selections: JSON.stringify(data.selections),
-            split_type: data.splitType,
-            workout_days: JSON.stringify(data.workoutDays),
-            weekly_volume: JSON.stringify(data.weeklyVolume),
-            rir_progression: JSON.stringify(data.rirProgression),
-            notes: JSON.stringify(data.notes),
-            schema_version: 1,
-        };
+        const now = new Date().toISOString();
+        const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, ...planPayload } = data;
+        const storedPlan = { ...planPayload, createdAt: data.createdAt || now };
 
-        const created = await createPlan(dbPlan);
-        res.status(201).json(parsePlan(created));
+	        const upserted = await upsertPlanForUserSupabase({
+	            supabaseUrl: SUPABASE_URL!,
+	            supabaseAnonKey: SUPABASE_ANON_KEY!,
+	            userToken,
+	            userId,
+	            planId: data.id,
+	            plan: storedPlan,
+            schemaVersion: data.schemaVersion,
+        });
+
+        res.status(201).json(upserted);
     } catch (error) {
         console.error('Error creating plan:', error);
         res.status(500).json({ error: 'Failed to create plan' });
@@ -250,6 +176,7 @@ app.post('/plans', requireAuth, async (req: AuthRequest, res) => {
 app.get('/plans', requireAuth, (req: AuthRequest, res) => {
     try {
         const userId = req.user!.id;
+        const userToken = req.authToken!;
         const requestedUserId = req.query.userId as string | undefined;
 
         // Only allow listing own plans
@@ -257,8 +184,17 @@ app.get('/plans', requireAuth, (req: AuthRequest, res) => {
             return res.status(403).json({ error: 'Unauthorized to view these plans' });
         }
 
-        const plans = getPlansByUserId(userId);
-        res.json(plans.map(parsePlan));
+        listPlansForUserSupabase({
+            supabaseUrl: SUPABASE_URL!,
+            supabaseAnonKey: SUPABASE_ANON_KEY!,
+            userToken,
+            limit: 20,
+        })
+            .then((plans) => res.json(plans))
+            .catch((error) => {
+                console.error('Error fetching plans:', error);
+                res.status(500).json({ error: 'Failed to fetch plans' });
+            });
     } catch (error) {
         console.error('Error fetching plans:', error);
         res.status(500).json({ error: 'Failed to fetch plans' });
@@ -268,17 +204,20 @@ app.get('/plans', requireAuth, (req: AuthRequest, res) => {
 // Get plan by ID
 app.get('/plans/:id', requireAuth, (req: AuthRequest, res) => {
     try {
-        const plan = getPlanById(req.params.id);
-        if (!plan) {
-            return res.status(404).json({ error: 'Plan not found' });
-        }
-
-        // Authorization check
-        if (plan.user_id && plan.user_id !== req.user!.id) {
-            return res.status(403).json({ error: 'Unauthorized' });
-        }
-
-        res.json(parsePlan(plan));
+        getPlanForUserSupabase({
+            supabaseUrl: SUPABASE_URL!,
+            supabaseAnonKey: SUPABASE_ANON_KEY!,
+            userToken: req.authToken!,
+            planId: req.params.id,
+        })
+            .then((plan) => {
+                if (!plan) return res.status(404).json({ error: 'Plan not found' });
+                res.json(plan);
+            })
+            .catch((error) => {
+                console.error('Error fetching plan:', error);
+                res.status(500).json({ error: 'Failed to fetch plan' });
+            });
     } catch (error) {
         console.error('Error fetching plan:', error);
         res.status(500).json({ error: 'Failed to fetch plan' });
@@ -288,24 +227,52 @@ app.get('/plans/:id', requireAuth, (req: AuthRequest, res) => {
 // Update plan
 app.patch('/plans/:id', requireAuth, async (req: AuthRequest, res) => {
     try {
-        // First check existence and ownership
-        const plan = getPlanById(req.params.id);
-        if (!plan) return res.status(404).json({ error: 'Plan not found' });
-        if (plan.user_id !== req.user!.id) return res.status(403).json({ error: 'Unauthorized' });
+        // Accept partial updates by validating a partial payload
+        const UpdateSchema = PlanPayloadSchema.pick({
+            selections: true,
+            splitType: true,
+            workoutDays: true,
+            weeklyVolume: true,
+            rirProgression: true,
+            notes: true,
+            schemaVersion: true,
+        }).partial();
 
-        const validation = UpdatePlanSchema.safeParse(req.body);
+        const validation = UpdateSchema.safeParse(req.body);
         if (!validation.success) {
             return res.status(400).json({ error: 'Invalid input', details: validation.error.format() });
         }
 
-        const { workoutDays, notes } = validation.data;
-        const updates: Partial<DbPlan> = {};
+        const data = validation.data;
 
-        if (workoutDays) updates.workout_days = JSON.stringify(workoutDays);
-        if (notes) updates.notes = JSON.stringify(notes);
+        const existing = await getPlanForUserSupabase({
+            supabaseUrl: SUPABASE_URL!,
+            supabaseAnonKey: SUPABASE_ANON_KEY!,
+            userToken: req.authToken!,
+            planId: req.params.id,
+        });
+        if (!existing) return res.status(404).json({ error: 'Plan not found' });
 
-        const updated = await updatePlan(req.params.id, updates);
-        res.json(parsePlan(updated!));
+        const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, ...existingPayload } = existing as any;
+        const now = new Date().toISOString();
+        const merged = {
+            ...existingPayload,
+            ...data,
+            id: req.params.id,
+            createdAt: (existing as any).createdAt || now,
+        };
+
+        const updated = await upsertPlanForUserSupabase({
+            supabaseUrl: SUPABASE_URL!,
+            supabaseAnonKey: SUPABASE_ANON_KEY!,
+            userToken: req.authToken!,
+            userId: req.user!.id,
+            planId: req.params.id,
+            plan: merged,
+            schemaVersion: data.schemaVersion ?? (existing as any).schemaVersion ?? 1,
+        });
+
+        res.json(updated);
     } catch (error) {
         console.error('Error updating plan:', error);
         res.status(500).json({ error: 'Failed to update plan' });
@@ -315,34 +282,19 @@ app.patch('/plans/:id', requireAuth, async (req: AuthRequest, res) => {
 // Delete plan
 app.delete('/plans/:id', requireAuth, async (req: AuthRequest, res) => {
     try {
-        const plan = getPlanById(req.params.id);
-        if (!plan) return res.status(404).json({ error: 'Plan not found' });
-        if (plan.user_id !== req.user!.id) return res.status(403).json({ error: 'Unauthorized' });
-
-        const deleted = await deletePlan(req.params.id);
+        const deleted = await deletePlanForUserSupabase({
+            supabaseUrl: SUPABASE_URL!,
+            supabaseAnonKey: SUPABASE_ANON_KEY!,
+            userToken: req.authToken!,
+            planId: req.params.id,
+        });
+        if (!deleted) return res.status(404).json({ error: 'Plan not found' });
         res.status(204).send();
     } catch (error) {
         console.error('Error deleting plan:', error);
         res.status(500).json({ error: 'Failed to delete plan' });
     }
 });
-
-// Helper to parse DB plan to API format
-function parsePlan(dbPlan: DbPlan) {
-    return {
-        id: dbPlan.id,
-        userId: dbPlan.user_id,
-        createdAt: dbPlan.created_at,
-        updatedAt: dbPlan.updated_at,
-        selections: JSON.parse(dbPlan.selections),
-        splitType: dbPlan.split_type,
-        workoutDays: JSON.parse(dbPlan.workout_days),
-        weeklyVolume: JSON.parse(dbPlan.weekly_volume),
-        rirProgression: JSON.parse(dbPlan.rir_progression),
-        notes: JSON.parse(dbPlan.notes),
-        schemaVersion: dbPlan.schema_version,
-    };
-}
 
 // Start server
 app.listen(PORT, () => {
