@@ -21,10 +21,10 @@ import { useCircle } from "../CircleContext";
 import { useCircleStore } from "@/stores/circleStore";
 import { useAuthStore } from "@/stores/authStore";
 import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
+
 
 export function CircleDashboardTab() {
-    const { circle, isMember } = useCircle();
+    const { circle, isMember: _isMember } = useCircle();
     const { user } = useAuthStore();
     const { challenges } = useCircleStore();
 
@@ -37,7 +37,7 @@ export function CircleDashboardTab() {
     // Calculate generic stats (placeholder for now until we have aggregated stats)
     const memberCount = circle.member_count || 0;
     // Mock check for "am I active this week?"
-    const isActiveThisWeek = true;
+    const _isActiveThisWeek = true;
 
     return (
         <div className="space-y-6 animate-fade-in">

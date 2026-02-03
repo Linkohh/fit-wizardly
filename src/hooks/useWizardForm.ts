@@ -51,8 +51,10 @@ export function useWizardForm<T extends FieldValues>({
   onSync,
   mode = 'onTouched',
 }: UseWizardFormOptions<T>): UseWizardFormReturn<T> {
+  // Using type assertion to work around Zod v4 + react-hook-form resolver type mismatch
   const form = useForm<T>({
-    resolver: zodResolver(schema),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(schema as any) as any,
     defaultValues,
     mode,
   });

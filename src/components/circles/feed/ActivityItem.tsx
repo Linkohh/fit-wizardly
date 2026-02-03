@@ -99,7 +99,7 @@ export function ActivityItem({
     showComments: initialShowComments = false,
 }: ActivityItemProps) {
     const [showComments, setShowComments] = useState(initialShowComments);
-    const [isLoadingComments, setIsLoadingComments] = useState(false);
+    const [isLoadingComments] = useState(false);
 
     const Icon = ACTIVITY_ICONS[activity.activity_type] || Activity;
     const colorClass = ACTIVITY_COLORS[activity.activity_type] || 'text-muted-foreground bg-muted';

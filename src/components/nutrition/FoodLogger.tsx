@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Scan, Plus, Search, X, Loader2, Apple, Star, ChefHat, Heart, Utensils } from "lucide-react";
+import { Plus, Search, X, Loader2, Star, ChefHat, Heart } from "lucide-react";
 import { MealEntry, MacroTargets } from "@/types/nutrition";
 import { cn } from "@/lib/utils";
 import { searchProducts, OFFFoodProduct } from "@/lib/openFoodFacts";
@@ -11,7 +11,7 @@ interface FoodLoggerProps {
     dayTotal: MacroTargets;
 }
 
-export function FoodLogger({ onLogMeal, dayTotal }: FoodLoggerProps) {
+export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) {
     const { addCustomFood, customFoods, favorites, toggleFavorite } = useNutritionStore();
     const [mode, setMode] = useState<'view' | 'logging'>('view');
     const [activeTab, setActiveTab] = useState<'search' | 'favorites' | 'custom'>('search');

@@ -8,7 +8,7 @@
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Target, Plus, Trophy, Clock, CheckCircle } from 'lucide-react';
 import { useCircle } from '../CircleContext';
 import { useCircleStore } from '@/stores/circleStore';

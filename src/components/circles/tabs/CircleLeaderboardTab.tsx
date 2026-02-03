@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Trophy, Medal, Dumbbell, TrendingUp, Calendar, Info } from 'lucide-react';
+import { Trophy, Medal, Dumbbell, TrendingUp, Info } from 'lucide-react';
 import { useCircleStore } from '@/stores/circleStore';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 

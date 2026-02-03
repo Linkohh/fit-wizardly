@@ -84,7 +84,7 @@ const SheetContent = React.forwardRef<
   showDragHandle = false,
   ...props
 }, ref) => {
-  const contentRef = React.useRef<HTMLDivElement>(null);
+  const _contentRef = React.useRef<HTMLDivElement>(null);
   const [dragOffset, setDragOffset] = React.useState(0);
   const [isDragging, setIsDragging] = React.useState(false);
   const startXRef = React.useRef(0);
