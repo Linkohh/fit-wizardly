@@ -168,10 +168,14 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                 <div className="space-y-2">
                                     {searchResults.map((product) => (
                                         <div key={product.code} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all group">
-                                            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleAddProduct(product)}>
+                                            <button
+                                                type="button"
+                                                className="flex-1 min-w-0 cursor-pointer text-left"
+                                                onClick={() => handleAddProduct(product)}
+                                            >
                                                 <div className="font-medium truncate text-sm text-white group-hover:text-primary">{product.product_name}</div>
                                                 <div className="text-xs text-muted-foreground">{Math.round(product.nutriments["energy-kcal_100g"] || 0)} kcal / 100g</div>
-                                            </div>
+                                            </button>
                                             <button
                                                 onClick={() => {
                                                     toggleFavorite({
@@ -208,10 +212,14 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                 )}
                                 {favorites.map((food) => (
                                     <div key={food.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-primary/30 transition-all">
-                                        <div className="cursor-pointer flex-1" onClick={() => handleLogSavedItem(food)}>
+                                        <button
+                                            type="button"
+                                            className="cursor-pointer flex-1 text-left"
+                                            onClick={() => handleLogSavedItem(food)}
+                                        >
                                             <div className="font-medium text-sm">{food.name}</div>
                                             <div className="text-xs text-muted-foreground">{food.calories} kcal • {food.protein}P {food.carbs}C {food.fats}F</div>
-                                        </div>
+                                        </button>
                                         <button onClick={() => toggleFavorite(food)} className="p-2 text-yellow-400 hover:text-muted-foreground">
                                             <Star className="w-4 h-4 fill-current" />
                                         </button>
@@ -289,10 +297,15 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                             <div className="text-xs text-muted-foreground uppercase mb-2">My Custom Foods</div>
                                             <div className="space-y-2 max-h-[150px] overflow-y-auto">
                                                 {customFoods.map(food => (
-                                                    <div key={food.id} onClick={() => handleLogSavedItem(food)} className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 cursor-pointer text-sm">
+                                                    <button
+                                                        key={food.id}
+                                                        type="button"
+                                                        onClick={() => handleLogSavedItem(food)}
+                                                        className="flex w-full items-center justify-between p-2 rounded-lg hover:bg-white/5 cursor-pointer text-sm text-left"
+                                                    >
                                                         <span>{food.name}</span>
                                                         <span className="text-muted-foreground text-xs">{food.calories} kcal</span>
-                                                    </div>
+                                                    </button>
                                                 ))}
                                             </div>
                                         </div>

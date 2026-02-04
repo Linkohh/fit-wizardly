@@ -32,10 +32,17 @@ export interface CardProps
     VariantProps<typeof cardVariants> {}
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, variant, ...props }, ref) => (
+  (
+    { className, variant, onClick, ['data-click-feedback']: clickFeedbackOverride, ...props },
+    ref,
+  ) => (
     <div
       ref={ref}
       className={cn(cardVariants({ variant, className }))}
+      data-click-feedback={
+        clickFeedbackOverride ?? (typeof onClick === 'function' ? 'on' : undefined)
+      }
+      onClick={onClick}
       {...props}
     />
   )

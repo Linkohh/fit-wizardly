@@ -36,6 +36,7 @@ import { CommandPalette } from "@/components/CommandPalette";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { RequireAuth } from "@/components/RequireAuth";
 import { usePlanStore } from "@/stores/planStore";
+import { useGlobalClickFeedback } from "@/hooks/useGlobalClickFeedback";
 
 const queryClient = new QueryClient();
 
@@ -180,6 +181,7 @@ import { LivingBackground } from "@/components/ui/living-background";
 const App = () => {
   // Monitor network status and show notifications
   useNetworkStatus();
+  useGlobalClickFeedback();
 
   // Handle post-login redirects for invites
   const { user, isLoading } = useAuthStore();

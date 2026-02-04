@@ -9,6 +9,7 @@
 export interface ExerciseSettings {
     haptics: boolean;
     sounds: boolean;
+    soundsExplicitlySet?: boolean;
     reducedMotion?: boolean;
 }
 

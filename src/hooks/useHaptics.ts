@@ -13,6 +13,7 @@
  */
 
 import { useCallback } from 'react';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { usePreferencesStore } from './useUserPreferences';
 
 // Haptic pattern types
@@ -24,6 +25,15 @@ export type HapticPattern =
     | 'error'
     | 'selection'
     | 'notification';
+
+type NativeHapticsPlugin = {
+    impact: (options: { style: string }) => Promise<void>;
+    notification: (options: { type: string }) => Promise<void>;
+    vibrate: (options?: { duration?: number }) => Promise<void>;
+};
+
+const NativeHaptics = registerPlugin<NativeHapticsPlugin>('Haptics');
+let nativeHapticsUnavailable = false;
 
 // Pattern definitions (duration in ms or pattern array)
 const HAPTIC_PATTERNS: Record<HapticPattern, number | number[]> = {
@@ -56,7 +66,62 @@ export const HAPTIC_ACTIONS = {
  * Check if the device supports haptic feedback
  */
 export function supportsHaptics(): boolean {
-    return 'vibrate' in navigator;
+    return 'vibrate' in navigator || Capacitor.isNativePlatform();
+}
+
+function getNativeImpactStyle(pattern: HapticPattern): string | null {
+    switch (pattern) {
+        case 'light':
+        case 'selection':
+            return 'LIGHT';
+        case 'medium':
+            return 'MEDIUM';
+        case 'heavy':
+            return 'HEAVY';
+        case 'success':
+        case 'error':
+        case 'notification':
+            return null;
+    }
+}
+
+function getNativeNotificationType(pattern: HapticPattern): string | null {
+    switch (pattern) {
+        case 'success':
+            return 'SUCCESS';
+        case 'notification':
+            return 'WARNING';
+        case 'error':
+            return 'ERROR';
+        case 'light':
+        case 'medium':
+        case 'heavy':
+        case 'selection':
+            return null;
+    }
+}
+
+function isNotImplementedPluginError(error: unknown): boolean {
+    if (typeof error === 'string') {
+        return /not implemented|plugin|unavailable/i.test(error);
+    }
+    if (error instanceof Error) {
+        return /not implemented|plugin|unavailable/i.test(error.message);
+    }
+    return false;
+}
+
+function tryNativeHaptics(action: () => Promise<void>): boolean {
+    if (!Capacitor.isNativePlatform()) return false;
+    if (nativeHapticsUnavailable) return false;
+
+    action().catch((error) => {
+        if (isNotImplementedPluginError(error)) {
+            nativeHapticsUnavailable = true;
+        }
+    });
+
+    return true;
 }
 
 /**
@@ -68,14 +133,33 @@ export function triggerHaptic(
 ): boolean {
     if (!supportsHaptics()) return false;
 
-    try {
-        const vibrationPattern =
-            typeof pattern === 'string' ? HAPTIC_PATTERNS[pattern] : pattern;
+    const resolvedPattern =
+        typeof pattern === 'string' ? HAPTIC_PATTERNS[pattern] : pattern;
 
-        navigator.vibrate(vibrationPattern);
+    if (typeof pattern === 'string') {
+        const impactStyle = getNativeImpactStyle(pattern);
+        if (impactStyle) {
+            return tryNativeHaptics(() => NativeHaptics.impact({ style: impactStyle }));
+        }
+
+        const notificationType = getNativeNotificationType(pattern);
+        if (notificationType) {
+            return tryNativeHaptics(() =>
+                NativeHaptics.notification({ type: notificationType })
+            );
+        }
+    } else if (typeof resolvedPattern === 'number') {
+        if (tryNativeHaptics(() => NativeHaptics.vibrate({ duration: resolvedPattern }))) {
+            return true;
+        }
+    }
+
+    if (!('vibrate' in navigator)) return false;
+
+    try {
+        navigator.vibrate(resolvedPattern);
         return true;
-    } catch (error) {
-        console.warn('Haptic feedback failed:', error);
+    } catch {
         return false;
     }
 }
@@ -85,7 +169,9 @@ export function triggerHaptic(
  */
 export function stopHaptic(): void {
     if (supportsHaptics()) {
-        navigator.vibrate(0);
+        if ('vibrate' in navigator) {
+            navigator.vibrate(0);
+        }
     }
 }
 

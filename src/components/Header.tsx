@@ -6,14 +6,21 @@ import { Label } from '@/components/ui/label';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn, debounce } from '@/lib/utils';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
 import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
+import { usePreferencesStore } from '@/hooks/useUserPreferences';
 
 export function Header() {
   const location = useLocation();
@@ -22,6 +29,11 @@ export function Header() {
   const mode = useThemeStore((state) => state.mode);
   const setMode = useThemeStore((state) => state.setMode);
   const getEffectiveTheme = useThemeStore((state) => state.getEffectiveTheme);
+
+  // FIXED: Split selectors to prevent unnecessary re-renders that were causing infinite loops
+  const settings = usePreferencesStore((state) => state.settings);
+  const updateSettings = usePreferencesStore((state) => state.updateSettings);
+
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -86,38 +98,27 @@ export function Header() {
       clearTimeout(timeoutId);
       window.removeEventListener('resize', handleResize);
     };
-  }, [location.pathname, isTrainerMode]); // Re-run when trainer mode changes (adds/removes Clients tab)
+  }, [location.pathname, isTrainerMode]);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <TooltipProvider delayDuration={300}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link to="/" className="flex items-center gap-3 touch-target group">
-                <motion.div
-                  className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden"
-                  whileHover={{
-                    scale: 1.1,
-                    rotate: 0,
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                >
-                  <img alt="FitWizard Logo" className="h-full w-full object-contain" src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png" />
-                </motion.div>
-                <span className="text-3xl font-bold gradient-text hidden lg:inline">FitWizard</span>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              <p className="flex items-center gap-1.5">
-                <span className="text-primary font-bold">✨</span>
-                {t('header.logo_tooltip')}
-              </p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        {/* NOTE: Tooltip removed here to prevent potential interference/looping with Link logic */}
+        <Link to="/" className="flex items-center gap-3 touch-target group">
+          <motion.div
+            className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden"
+            whileHover={{
+              scale: 1.1,
+              rotate: 0,
+            }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+          >
+            <img alt="FitWizard Logo" className="h-full w-full object-contain" src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png" />
+          </motion.div>
+          <span className="text-3xl font-bold gradient-text hidden lg:inline">FitWizard</span>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav
@@ -191,7 +192,7 @@ export function Header() {
                 </AnimatePresence>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => setMode('light')} className={mode === 'light' ? 'bg-accent' : ''}>
                 <Sun className="mr-2 h-4 w-4" />
                 {t('header.theme.light')}
@@ -204,6 +205,27 @@ export function Header() {
                 <Monitor className="mr-2 h-4 w-4" />
                 {t('header.theme.system')}
               </DropdownMenuItem>
+
+              <DropdownMenuSeparator />
+
+              <DropdownMenuCheckboxItem
+                checked={settings.sounds !== false}
+                onCheckedChange={(checked) =>
+                  updateSettings({
+                    sounds: checked === true,
+                    soundsExplicitlySet: true,
+                  })
+                }
+              >
+                Click sounds
+              </DropdownMenuCheckboxItem>
+
+              <DropdownMenuCheckboxItem
+                checked={settings.haptics !== false}
+                onCheckedChange={(checked) => updateSettings({ haptics: checked === true })}
+              >
+                Haptics
+              </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
