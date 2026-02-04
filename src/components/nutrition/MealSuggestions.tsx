@@ -94,7 +94,7 @@ export function MealSuggestions({ goal, isWorkoutDay }: MealSuggestionsProps) {
                 {isWorkoutDay && <span className="text-xs font-medium px-2 py-1 bg-orange-500/20 text-orange-400 rounded-full flex items-center gap-1"><Flame className="w-3 h-3" /> Workout Day</span>}
             </div>
 
-            <div className="flex gap-4 overflow-x-auto pb-4 px-1 snap-x scrollbar-hide">
+            <div className="flex gap-4 overflow-x-auto pb-4 px-1 snap-x scrollbar-purple">
                 {filteredMeals.map(meal => (
                     <div key={meal.id} className="min-w-[280px] snap-center glass-card hover:translate-y-[-4px] transition-all rounded-3xl overflow-hidden group border border-white/5 cursor-pointer">
                         {/* Image Header */}

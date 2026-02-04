@@ -150,6 +150,48 @@
 }
 
 /* =====================================================
+   HORIZONTAL SCROLLBAR - Purple Gradient Theme
+   Beautiful scrollbar for horizontal scroll containers
+   ===================================================== */
+
+/* Webkit (Chrome, Safari, Edge) */
+.scrollbar-purple::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.scrollbar-purple::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+  margin: 0 8px;
+}
+
+.scrollbar-purple::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, 
+    hsl(270 90% 65% / 0.6), 
+    hsl(330 90% 65% / 0.6)
+  );
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  transition: all 0.3s ease;
+}
+
+.scrollbar-purple::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, 
+    hsl(270 90% 65% / 0.9), 
+    hsl(330 90% 65% / 0.9)
+  );
+  background-clip: padding-box;
+}
+
+/* Firefox */
+.scrollbar-purple {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(270 90% 65% / 0.5) rgba(255, 255, 255, 0.05);
+}
+
+/* =====================================================
    FLUID TYPOGRAPHY SYSTEM
    Scales smoothly from 320px to 1280px viewport
    ===================================================== */
