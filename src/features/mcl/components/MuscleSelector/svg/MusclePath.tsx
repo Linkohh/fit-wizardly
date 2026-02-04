@@ -44,8 +44,6 @@ export const MusclePath: React.FC<MusclePathProps> = ({
 }) => {
   const pathData = muscle.paths[view];
 
-  if (!pathData) return null;
-
   const groupColor = getMuscleGroupColor(muscle.group);
 
   // Determine the fill color based on state (with gradient support for selected/hovered)
@@ -133,6 +131,8 @@ export const MusclePath: React.FC<MusclePathProps> = ({
     if (!shouldPulse || !animateHighlights) return undefined;
     return `${highlightIndex * 0.15}s`;
   }, [shouldPulse, animateHighlights, highlightIndex]);
+
+  if (!pathData) return null;
 
   return (
     <motion.path

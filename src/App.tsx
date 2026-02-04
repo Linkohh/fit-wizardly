@@ -35,6 +35,7 @@ import { useAuthStore } from "./stores/authStore";
 import { CommandPalette } from "@/components/CommandPalette";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { RequireAuth } from "@/components/RequireAuth";
+import { usePlanStore } from "@/stores/planStore";
 
 const queryClient = new QueryClient();
 
@@ -182,6 +183,7 @@ const App = () => {
 
   // Handle post-login redirects for invites
   const { user, isLoading } = useAuthStore();
+  const syncWithBackend = usePlanStore((state) => state.syncWithBackend);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -193,6 +195,12 @@ const App = () => {
       }
     }
   }, [user, isLoading, navigate]);
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      syncWithBackend(user.id);
+    }
+  }, [user, isLoading, syncWithBackend]);
 
   return (
     <ErrorBoundary>

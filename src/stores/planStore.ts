@@ -14,7 +14,8 @@ import type {
   WeightUnit,
   PerceivedDifficulty,
 } from '@/types/fitness';
-import { savePlan, deletePlanApi, getPlans } from '@/lib/apiClient';
+import { deletePlanRemote, getPlansRemote, isPlansRemoteEnabled, savePlanRemote } from '@/lib/plans/plansClient';
+import { useAuthStore } from '@/stores/authStore';
 import {
   analyzePerformance,
   generateWeeklySummary,
@@ -82,7 +83,7 @@ interface PlanState {
   savePlanToHistory: (plan: Plan) => void;
   deletePlanFromHistory: (planId: string) => void;
   getPlanById: (planId: string) => Plan | undefined;
-  syncWithBackend: () => Promise<void>;
+  syncWithBackend: (userId?: string) => Promise<void>;
   updateExercisePrescription: (
     dayIndex: number,
     exerciseIndex: number,
@@ -136,10 +137,18 @@ export const usePlanStore = create<PlanState>()(
         set((state) => ({
           planHistory: [plan, ...state.planHistory.filter(p => p.id !== plan.id)].slice(0, 20)
         }));
+        const userId = useAuthStore.getState().user?.id;
+        if (!userId || !isPlansRemoteEnabled()) return;
+
         // Save to backend with error handling
         handleAsyncOperation(
-          savePlan(plan),
-          undefined,
+          savePlanRemote(plan, userId),
+          (savedPlan) => {
+            set((state) => ({
+              planHistory: [savedPlan, ...state.planHistory.filter((p) => p.id !== savedPlan.id)].slice(0, 20),
+              currentPlan: state.currentPlan?.id === savedPlan.id ? savedPlan : state.currentPlan,
+            }));
+          },
           'Failed to save plan. Changes saved locally.'
         );
       },
@@ -151,12 +160,11 @@ export const usePlanStore = create<PlanState>()(
           // Also clean up workout logs for this plan
           workoutLogs: state.workoutLogs.filter(log => log.planId !== planId),
         }));
+        const userId = useAuthStore.getState().user?.id;
+        if (!userId || !isPlansRemoteEnabled()) return;
+
         // Delete from backend with error handling
-        handleAsyncOperation(
-          deletePlanApi(planId),
-          undefined,
-          'Failed to delete plan from server. Removed locally.'
-        );
+        handleAsyncOperation(deletePlanRemote(planId), undefined, 'Failed to delete plan from server. Removed locally.');
       },
 
       getPlanById: (planId) => {
@@ -165,17 +173,41 @@ export const usePlanStore = create<PlanState>()(
         return planHistory.find(p => p.id === planId);
       },
 
-      syncWithBackend: async () => {
+      syncWithBackend: async (userId?: string) => {
+        if (!userId || !isPlansRemoteEnabled()) return;
+        if (!useAuthStore.getState().user) return;
+
         try {
-          const result = await getPlans();
-          if (result.data) {
-            set({ planHistory: result.data });
-          } else if (result.error) {
-            toast.error('Failed to sync with server');
+          const remotePlans = await getPlansRemote(userId);
+          const remoteIds = new Set(remotePlans.map((p) => p.id));
+
+          const localPlans = get().planHistory;
+          const candidates = localPlans.filter((localPlan) => !remoteIds.has(localPlan.id));
+
+          if (candidates.length > 0) {
+            const results = await Promise.allSettled(
+              candidates.map((localPlan) => savePlanRemote(localPlan, userId))
+            );
+            const failedCount = results.filter((r) => r.status === 'rejected').length;
+            if (failedCount > 0) {
+              toast.error(`Failed to migrate ${failedCount} plan(s) to your account`);
+            }
           }
+
+          const refreshedPlans = candidates.length > 0 ? await getPlansRemote(userId) : remotePlans;
+          if (refreshedPlans.length === 0) return;
+
+          set((state) => ({
+            planHistory: [
+              ...refreshedPlans,
+              ...state.planHistory.filter(
+                (localPlan) => !refreshedPlans.some((serverPlan) => serverPlan.id === localPlan.id)
+              ),
+            ].slice(0, 20),
+          }));
         } catch (error) {
           console.error('Sync failed:', error);
-          toast.error('Failed to connect to server');
+          toast.error('Failed to sync plans');
         }
       },
 
@@ -195,12 +227,19 @@ export const usePlanStore = create<PlanState>()(
           });
 
           const updatedPlan = { ...state.currentPlan, workoutDays: newWorkoutDays };
-          // Save with error handling
-          handleAsyncOperation(
-            savePlan(updatedPlan),
-            undefined,
-            'Failed to save exercise changes'
-          );
+          const userId = useAuthStore.getState().user?.id;
+          if (userId && isPlansRemoteEnabled()) {
+            handleAsyncOperation(
+              savePlanRemote(updatedPlan, userId),
+              (savedPlan) => {
+                set((s) => ({
+                  currentPlan: savedPlan,
+                  planHistory: [savedPlan, ...s.planHistory.filter((p) => p.id !== savedPlan.id)].slice(0, 20),
+                }));
+              },
+              'Failed to save exercise changes'
+            );
+          }
 
           return { currentPlan: updatedPlan };
         });
@@ -222,12 +261,19 @@ export const usePlanStore = create<PlanState>()(
           });
 
           const updatedPlan = { ...state.currentPlan, workoutDays: newWorkoutDays };
-          // Save with error handling
-          handleAsyncOperation(
-            savePlan(updatedPlan),
-            undefined,
-            'Failed to save exercise swap'
-          );
+          const userId = useAuthStore.getState().user?.id;
+          if (userId && isPlansRemoteEnabled()) {
+            handleAsyncOperation(
+              savePlanRemote(updatedPlan, userId),
+              (savedPlan) => {
+                set((s) => ({
+                  currentPlan: savedPlan,
+                  planHistory: [savedPlan, ...s.planHistory.filter((p) => p.id !== savedPlan.id)].slice(0, 20),
+                }));
+              },
+              'Failed to save exercise swap'
+            );
+          }
 
           return { currentPlan: updatedPlan };
         });
@@ -456,12 +502,22 @@ export const usePlanStore = create<PlanState>()(
           }));
 
           const updatedPlan = { ...state.currentPlan, workoutDays: newWorkoutDays };
-          // Save with error handling
-          handleAsyncOperation(
-            savePlan(updatedPlan),
-            () => toast.success('Progression recommendations applied'),
-            'Failed to save progression recommendations'
-          );
+          const userId = useAuthStore.getState().user?.id;
+          if (userId && isPlansRemoteEnabled()) {
+            handleAsyncOperation(
+              savePlanRemote(updatedPlan, userId),
+              (savedPlan) => {
+                set((s) => ({
+                  currentPlan: savedPlan,
+                  planHistory: [savedPlan, ...s.planHistory.filter((p) => p.id !== savedPlan.id)].slice(0, 20),
+                }));
+                toast.success('Progression recommendations applied');
+              },
+              'Failed to save progression recommendations'
+            );
+          } else {
+            toast.success('Progression recommendations applied');
+          }
 
           return { currentPlan: updatedPlan };
         });

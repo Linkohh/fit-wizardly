@@ -36,6 +36,37 @@ npm i
 npm run dev
 ```
 
+## Backend (Express API)
+
+This repo also contains a lightweight Express API in `server/` that powers the `/plans` and `/health` endpoints during development (Vite proxies these paths to `http://localhost:3001`).
+
+Plans can be persisted either:
+- **Directly to Supabase (A2)** – recommended, no custom backend required
+- **Via the Express API (A1)** – thin layer that forwards writes to Supabase with RLS enforced
+
+Before using plan sync, apply the Supabase migration in `supabase/migrations/004_plans_schema.sql` to your project.
+
+In separate terminals:
+
+```sh
+# Install backend deps
+npm --prefix server install
+
+# Start backend (port 3001)
+npm run server:dev
+
+# Start frontend (port 8080)
+npm run dev
+```
+
+The server verifies `Authorization: Bearer <token>` using Supabase and expects:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- optional: `VITE_PLANS_PROVIDER` (`auto|supabase|api`)
+- optional: `VITE_USE_API=true` (only needed if you want the frontend to call the API outside dev)
+- optional: `ALLOWED_ORIGINS` (comma-separated)
+
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).

@@ -5,9 +5,11 @@ import { useWizardForm, anatomyStepSchema } from '@/hooks/useWizardForm';
 import { FormError } from '@/components/ui/form-error';
 import { MuscleSelector } from '@/features/mcl';
 import { mapLegacyToMcl, mapMclToLegacy } from '@/lib/muscleMapping';
+import { useThemeStore } from '@/stores/themeStore';
 
 export function AnatomyPanel() {
     const { selections, setTargetMuscles } = useWizardStore();
+    const themeMode = useThemeStore((state) => state.mode);
 
     // React Hook Form integration with Zustand sync
     const { watch, setValue, formState: { errors }, trigger } = useWizardForm({
@@ -55,7 +57,7 @@ export function AnatomyPanel() {
                     showInfoPanel={true}
                     showSelectionSidebar={true}
                     showLegend={false} // Cleaner look
-                    theme="dark"
+                    theme={themeMode}
                     height="600px"
                     className="w-full bg-transparent"
                 />
@@ -73,4 +75,3 @@ export function AnatomyPanel() {
         </div>
     );
 }
-

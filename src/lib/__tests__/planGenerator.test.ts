@@ -84,18 +84,20 @@ describe('planGenerator', () => {
             });
         });
 
-        it('generates rep ranges based on goal', () => {
+        it('generates rep ranges based on OPT phase', () => {
             const strengthPlan = generatePlan({ ...validSelections, goal: 'strength' });
             strengthPlan.workoutDays.forEach(day => {
                 day.exercises.forEach(ex => {
-                    expect(ex.reps).toMatch(/3-6/);
+                    // Intermediate + strength -> Phase 2 (Strength Endurance)
+                    expect(ex.reps).toMatch(/8-12/);
                 });
             });
 
             const hypertrophyPlan = generatePlan({ ...validSelections, goal: 'hypertrophy' });
             hypertrophyPlan.workoutDays.forEach(day => {
                 day.exercises.forEach(ex => {
-                    expect(ex.reps).toMatch(/8-12/);
+                    // Intermediate + hypertrophy -> Phase 3 (Muscular Development)
+                    expect(ex.reps).toMatch(/6-12/);
                 });
             });
         });

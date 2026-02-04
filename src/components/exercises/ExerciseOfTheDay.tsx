@@ -13,12 +13,14 @@ import { cn } from '@/lib/utils';
 import { getExerciseTheme, getThemeForCategory } from '@/lib/exerciseTheme';
 import { format } from 'date-fns';
 import { MiniViewToggle } from './MiniViewToggle';
+import { useThemeStore } from '@/stores/themeStore';
 
 interface ExerciseOfTheDayProps {
     onSelect: (exercise: Exercise) => void;
 }
 
 export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
+    const themeMode = useThemeStore((state) => state.mode);
     const exercise = useMemo(() => getExerciseOfTheDay(EXERCISE_DATABASE), []);
     const theme = useMemo(() => {
         if (!exercise) return getThemeForCategory('default');
@@ -228,7 +230,7 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
                                 showInfoPanel={false}
                                 showSelectionSidebar={false}
                                 showPresets={false}
-                                theme="dark"
+                                theme={themeMode}
                                 width="100%"
                                 height="100%"
                                 customViewBox={smartZoomViewBox}
