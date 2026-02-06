@@ -29,6 +29,7 @@ export function RelatedExercises({ currentExercise, onSelect }: RelatedExercises
                     return (
                         <div
                             key={exercise.id}
+                            data-click-feedback="on"
                             className="group relative flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all cursor-pointer overflow-hidden"
                             onClick={() => onSelect(exercise)}
                         >

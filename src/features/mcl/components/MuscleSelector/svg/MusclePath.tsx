@@ -13,6 +13,7 @@ interface MusclePathProps {
   colorByGroup: boolean;
   accentColor: string;
   animateHighlights?: boolean;
+  hoverIntensity?: 'default' | 'strong';
   highlightIndex?: number;
   onMouseEnter: (muscle: Muscle, event: React.MouseEvent) => void;
   onMouseLeave: () => void;
@@ -37,6 +38,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   colorByGroup,
   accentColor,
   animateHighlights = false,
+  hoverIntensity = 'default',
   highlightIndex = 0,
   onMouseEnter,
   onMouseLeave,
@@ -77,10 +79,10 @@ export const MusclePath: React.FC<MusclePathProps> = ({
       return Math.max(0.5, Math.min(1, baseOpacity * 0.5 + 0.5));
     }
     if (isSelected) return 1;
-    if (isHovered) return 0.95;
+    if (isHovered) return hoverIntensity === 'strong' ? 1 : 0.95;
     // Improved unselected visibility
-    return 0.25;
-  }, [isSelected, isHovered, isDisabled, highlight]);
+    return hoverIntensity === 'strong' ? 0.2 : 0.25;
+  }, [isSelected, isHovered, isDisabled, highlight, hoverIntensity]);
 
   // Enhanced multi-layer glow effect for premium appearance
   const glowFilter = useMemo(() => {
@@ -97,11 +99,14 @@ export const MusclePath: React.FC<MusclePathProps> = ({
     }
 
     if (isHovered) {
+      if (hoverIntensity === 'strong') {
+        return `drop-shadow(0 0 9px ${glowColor}) drop-shadow(0 0 18px ${glowColor}90) drop-shadow(0 0 30px ${glowColor}60)`;
+      }
       return `drop-shadow(0 0 6px ${glowColor}) drop-shadow(0 0 12px ${glowColor}60)`;
     }
 
     return 'none';
-  }, [isSelected, isHovered, isDisabled, highlight, glowColor]);
+  }, [isSelected, isHovered, isDisabled, highlight, glowColor, hoverIntensity]);
 
   const handleMouseEnter = useCallback(
     (e: React.MouseEvent) => {
@@ -144,11 +149,11 @@ export const MusclePath: React.FC<MusclePathProps> = ({
       }}
       fill={fillColor}
       stroke={isSelected || isHovered ? glowColor : 'transparent'}
-      strokeWidth={isSelected ? 1.5 : isHovered ? 1 : 0}
+      strokeWidth={isSelected ? 1.5 : isHovered ? (hoverIntensity === 'strong' ? 2.25 : 1) : 0}
       initial={{ opacity: 0.25 }}
       animate={{
         opacity,
-        scale: isHovered && !isDisabled ? 1.03 : isSelected ? 1.01 : 1,
+        scale: isHovered && !isDisabled ? (hoverIntensity === 'strong' ? 1.07 : 1.03) : isSelected ? 1.01 : 1,
         filter: glowFilter,
       }}
       transition={{

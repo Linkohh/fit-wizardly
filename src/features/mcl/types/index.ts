@@ -64,10 +64,12 @@ export interface MuscleSelectorProps {
   showHeader?: boolean;   // Show/hide the entire header bar (view switcher, search, controls)
   showSearch?: boolean;
   showLegend?: boolean;
+  showTooltip?: boolean;
   showInfoPanel?: boolean;
   showSelectionSidebar?: boolean;
   colorByGroup?: boolean;
   showPresets?: boolean;  // Phase 1 enhancement
+  hoverIntensity?: 'default' | 'strong';
 
   // Theming
   theme?: 'light' | 'dark' | 'system';

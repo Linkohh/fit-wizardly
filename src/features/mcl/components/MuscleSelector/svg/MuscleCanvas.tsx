@@ -14,6 +14,7 @@ interface MuscleCanvasProps {
   colorByGroup: boolean;
   accentColor: string;
   animateHighlights?: boolean;
+  hoverIntensity?: 'default' | 'strong';
   onMuscleHover: (muscle: Muscle | null, event?: React.MouseEvent) => void;
   onMuscleClick: (muscle: Muscle) => void;
   customViewBox?: string;
@@ -28,6 +29,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   colorByGroup,
   accentColor,
   animateHighlights = false,
+  hoverIntensity = 'default',
   onMuscleHover,
   onMuscleClick,
   customViewBox,
@@ -182,6 +184,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
               colorByGroup={colorByGroup}
               accentColor={accentColor}
               animateHighlights={animateHighlights}
+              hoverIntensity={hoverIntensity}
               highlightIndex={highlightMap.has(muscle.id) ? Array.from(highlightMap.keys()).indexOf(muscle.id) : index}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}

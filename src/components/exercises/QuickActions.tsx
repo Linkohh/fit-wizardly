@@ -200,6 +200,7 @@ export function QuickActions({
                                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    data-click-feedback="off"
                                     className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 min-w-[180px] bg-black/90 backdrop-blur-xl border border-white/10 rounded-lg p-2 shadow-xl"
                                     onClick={(e) => e.stopPropagation()}
                                 >

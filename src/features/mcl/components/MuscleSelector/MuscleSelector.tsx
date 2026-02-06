@@ -22,11 +22,13 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   showHeader = true,
   showSearch = true,
   showLegend = true,
+  showTooltip = true,
   showInfoPanel = true,
   showSelectionSidebar = true,
   colorByGroup: initialColorByGroup = true,
   theme: themeProp = 'system',
   accentColor = '#EF4444',
+  hoverIntensity = 'default',
   onMuscleHover,
   onMuscleClick,
   onInfoRequest,
@@ -290,6 +292,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 colorByGroup={colorByGroup}
                 accentColor={accentColor}
                 animateHighlights={animateHighlights}
+                hoverIntensity={hoverIntensity}
                 onMuscleHover={handleMuscleHover}
                 onMuscleClick={handleMuscleClick}
                 customViewBox={customViewBox}
@@ -298,12 +301,14 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
           </motion.div>
 
           {/* Tooltip */}
-          <MuscleTooltip
-            muscle={tooltip.muscle}
-            position={{ x: tooltip.x, y: tooltip.y }}
-            visible={tooltip.visible}
-            containerRef={containerRef as React.RefObject<HTMLDivElement>}
-          />
+          {showTooltip && (
+            <MuscleTooltip
+              muscle={tooltip.muscle}
+              position={{ x: tooltip.x, y: tooltip.y }}
+              visible={tooltip.visible}
+              containerRef={containerRef as React.RefObject<HTMLDivElement>}
+            />
+          )}
         </div>
       </div>
 

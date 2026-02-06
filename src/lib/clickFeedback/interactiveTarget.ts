@@ -6,6 +6,10 @@ const INTERACTIVE_SELECTOR = [
   'button',
   'a[href]',
   'summary',
+  'input:not([type="hidden"])',
+  'select',
+  'textarea',
+  '[contenteditable="true"]',
   'input[type="button"]',
   'input[type="submit"]',
   'input[type="reset"]',
@@ -22,6 +26,12 @@ const INTERACTIVE_SELECTOR = [
   '[role="checkbox"]',
   '[role="radio"]',
 ].join(',');
+
+interface ReactPropsLike {
+  onClick?: unknown;
+  onMouseDown?: unknown;
+  onPointerDown?: unknown;
+}
 
 function asElement(target: EventTarget | null): Element | null {
   if (!target) return null;
@@ -57,6 +67,44 @@ function isDisabled(element: Element): boolean {
   return false;
 }
 
+function getReactProps(element: Element): ReactPropsLike | null {
+  const ownKeys = Object.getOwnPropertyNames(element);
+
+  for (const key of ownKeys) {
+    if (!key.startsWith('__reactProps$')) continue;
+    const value = (element as Record<string, unknown>)[key];
+    if (value && typeof value === 'object') {
+      return value as ReactPropsLike;
+    }
+  }
+
+  return null;
+}
+
+function hasReactClickHandler(props: ReactPropsLike | null): boolean {
+  if (!props) return false;
+
+  return (
+    typeof props.onClick === 'function' ||
+    typeof props.onMouseDown === 'function' ||
+    typeof props.onPointerDown === 'function'
+  );
+}
+
+function getReactClickableTarget(element: Element): Element | null {
+  let current: Element | null = element;
+
+  while (current) {
+    const props = getReactProps(current);
+    if (hasReactClickHandler(props)) {
+      return isDisabled(current) ? null : current;
+    }
+    current = current.parentElement;
+  }
+
+  return null;
+}
+
 /**
  * Finds the closest element that should trigger click feedback (sound/haptics).
  *
@@ -78,8 +126,7 @@ export function getClickFeedbackTarget(target: EventTarget | null): Element | nu
   }
 
   const interactive = element.closest(INTERACTIVE_SELECTOR);
-  if (!interactive) return null;
+  if (interactive && !isDisabled(interactive)) return interactive;
 
-  return isDisabled(interactive) ? null : interactive;
+  return getReactClickableTarget(element);
 }
-

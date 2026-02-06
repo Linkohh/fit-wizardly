@@ -365,6 +365,20 @@
             "custom_multiple": "Custom/Multiple",
             "clear": "Clear",
             "quick_sets": "Quick Sets:"
+        },
+        "detail": {
+            "instructions": "Instructions",
+            "related": "Related",
+            "history": "History",
+            "muscles_targeted": "Muscles Targeted",
+            "equipment": "Equipment",
+            "metabolic_impact": "Metabolic Impact",
+            "high_burn": "High calorie burn potential",
+            "pro_cues": "Pro Cues",
+            "execution": "Execution",
+            "variations": "Variations",
+            "no_history": "No history yet",
+            "history_prompt": "Complete this exercise to track your progress over time."
         }
     },
     "commands": {

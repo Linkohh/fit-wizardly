@@ -323,6 +323,7 @@ export function FeatureDetailModal({ feature, isOpen, onClose }: FeatureDetailMo
             initial="hidden"
             animate="visible"
             exit="exit"
+            data-click-feedback="on"
             className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
             onClick={onClose}
             aria-hidden="true"

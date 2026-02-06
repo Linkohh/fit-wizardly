@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronRight, Trophy, Flame, Zap } from 'lucide-react';
-import { Exercise, MuscleGroup } from '@/types/fitness';
+import { Exercise, MuscleGroup as LegacyMuscleGroup } from '@/types/fitness';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { getExerciseOfTheDay } from '@/lib/smart-recommendations';
-import { MuscleSelector, MuscleHighlight, ViewType } from '@/features/mcl';
+import { MuscleSelector, MuscleHighlight, ViewType, Muscle, MuscleGroup as MclMuscleGroup, getMuscleGroupColor, getMuscleGroupName } from '@/features/mcl';
 import { getMclIdsForLegacyGroup } from '@/lib/muscleMapping';
 import { EXERCISE_DATABASE } from '@/data/exercises';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,46 @@ interface ExerciseOfTheDayProps {
     onSelect: (exercise: Exercise) => void;
 }
 
+interface AnatomyFocusState {
+    origin: string;
+    scale: number;
+}
+
+const BASE_ANATOMY_FOCUS: AnatomyFocusState = {
+    origin: '50% 52%',
+    scale: 1.16,
+};
+
+const GROUP_FOCUS_PROFILE: Record<MclMuscleGroup, { y: number; scale: number }> = {
+    chest: { y: 31, scale: 1.34 },
+    back: { y: 32, scale: 1.34 },
+    shoulders: { y: 26, scale: 1.4 },
+    arms: { y: 40, scale: 1.33 },
+    core: { y: 50, scale: 1.3 },
+    glutes: { y: 61, scale: 1.28 },
+    legs: { y: 73, scale: 1.34 },
+    calves: { y: 83, scale: 1.38 },
+};
+
+function getDirectionalX(muscleId: string): number {
+    if (muscleId.includes('left')) return 36;
+    if (muscleId.includes('right')) return 64;
+    return 50;
+}
+
+function resolveAnatomyFocus(view: ViewType, muscle: Muscle | null): AnatomyFocusState {
+    if (!muscle) return BASE_ANATOMY_FOCUS;
+
+    const profile = GROUP_FOCUS_PROFILE[muscle.group];
+    const directionalX = getDirectionalX(muscle.id);
+    const viewOffsetY = view === 'back' ? 1 : 0;
+
+    return {
+        origin: `${directionalX}% ${profile.y + viewOffsetY}%`,
+        scale: profile.scale,
+    };
+}
+
 export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
     const themeMode = useThemeStore((state) => state.mode);
     const exercise = useMemo(() => getExerciseOfTheDay(EXERCISE_DATABASE), []);
@@ -26,6 +66,7 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
         if (!exercise) return getThemeForCategory('default');
         return getExerciseTheme(exercise);
     }, [exercise]);
+    const reduceMotion = useReducedMotion();
 
     // Map muscles to MCL highlights
     const highlights = useMemo(() => {
@@ -53,8 +94,8 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
     const defaultView = useMemo((): ViewType => {
         if (!exercise) return 'front';
 
-        const frontGroups: MuscleGroup[] = ['chest', 'abs', 'obliques', 'quads', 'biceps', 'front_deltoid', 'forearms'];
-        const backGroups: MuscleGroup[] = ['lats', 'traps', 'glutes', 'hamstrings', 'lower_back', 'calves', 'rear_deltoid', 'upper_back'];
+        const frontGroups: LegacyMuscleGroup[] = ['chest', 'abs', 'obliques', 'quads', 'biceps', 'front_deltoid', 'forearms'];
+        const backGroups: LegacyMuscleGroup[] = ['lats', 'traps', 'glutes', 'hamstrings', 'lower_back', 'calves', 'rear_deltoid', 'upper_back'];
 
         // Check primary muscles
         const hasFrontMuscle = exercise.primaryMuscles.some(m => frontGroups.includes(m));
@@ -77,39 +118,14 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
 
     // View state for anatomy toggle (initialized with smart default)
     const [currentView, setCurrentView] = useState<ViewType>(defaultView);
+    const [hoveredMuscle, setHoveredMuscle] = useState<Muscle | null>(null);
 
     // Calculate total muscle count for badge
     const muscleCount = highlights.length;
-
-    // Smart Zoom Heuristic
-    const smartZoomViewBox = useMemo(() => {
-        if (!exercise) return undefined;
-
-        const upperBodyMuscles: MuscleGroup[] = [
-            'chest', 'abs', 'obliques', 'biceps', 'triceps', 'forearms',
-            'front_deltoid', 'rear_deltoid', 'traps', 'lats', 'upper_back', 'lower_back', 'neck'
-        ];
-
-        const lowerBodyMuscles: MuscleGroup[] = [
-            'quads', 'hamstrings', 'glutes', 'calves', 'adductors'
-        ];
-
-        const hasUpperBody = exercise.primaryMuscles.some(m => upperBodyMuscles.includes(m));
-        const hasLowerBody = exercise.primaryMuscles.some(m => lowerBodyMuscles.includes(m));
-
-        // If explicitly upper body only, zoom in on top half
-        if (hasUpperBody && !hasLowerBody) {
-            return "0 0 200 220"; // Top half
-        }
-
-        // If explicitly lower body only, zoom in on bottom half
-        if (!hasUpperBody && hasLowerBody) {
-            return "0 220 200 220"; // Bottom half
-        }
-
-        // Full body default
-        return undefined;
-    }, [exercise]);
+    const anatomyFocus = useMemo(
+        () => resolveAnatomyFocus(currentView, hoveredMuscle),
+        [currentView, hoveredMuscle]
+    );
 
     if (!exercise) return null;
 
@@ -187,7 +203,7 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
                     </div>
 
                     {/* Visual Section */}
-                    <div className="relative h-48 md:h-auto min-h-[220px] overflow-hidden flex items-center justify-center">
+                    <div className="relative min-h-[240px] overflow-hidden px-4 py-5 md:min-h-[420px]">
                         {/* Themed Glow Halo */}
                         <div
                             className="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700"
@@ -218,29 +234,81 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
                         </motion.div>
 
                         {/* Muscle Diagram */}
-                        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-full max-w-[260px] opacity-90 md:scale-115 md:translate-x-2 transition-transform duration-700 group-hover:scale-125 h-[120%]">
-                            <MuscleSelector
-                                defaultView={currentView}
-                                highlightedMuscles={highlights}
-                                animateHighlights={true}
-                                showHeader={false}
-                                showSideView={false}
-                                showSearch={false}
-                                showLegend={false}
-                                showInfoPanel={false}
-                                showSelectionSidebar={false}
-                                showPresets={false}
-                                theme={themeMode}
-                                width="100%"
-                                height="100%"
-                                customViewBox={smartZoomViewBox}
-                                className="bg-transparent"
-                            />
+                        <div
+                            className="absolute inset-x-4 top-2 bottom-14 md:bottom-18 z-10 flex items-end justify-center"
+                            onMouseLeave={() => setHoveredMuscle(null)}
+                        >
+                            <div className="relative h-full w-full max-w-[370px]">
+                                <motion.div
+                                    className="h-full w-full will-change-transform"
+                                    style={{ transformOrigin: anatomyFocus.origin }}
+                                    animate={{ scale: anatomyFocus.scale }}
+                                    transition={
+                                        reduceMotion
+                                            ? { duration: 0 }
+                                            : { type: 'spring', stiffness: 250, damping: 28, mass: 0.55 }
+                                    }
+                                >
+                                    <MuscleSelector
+                                        defaultView={currentView}
+                                        highlightedMuscles={highlights}
+                                        animateHighlights={true}
+                                        hoverIntensity="strong"
+                                        showHeader={false}
+                                        showSideView={false}
+                                        showSearch={false}
+                                        showLegend={false}
+                                        showTooltip={false}
+                                        showInfoPanel={false}
+                                        showSelectionSidebar={false}
+                                        showPresets={false}
+                                        theme={themeMode}
+                                        width="100%"
+                                        height="100%"
+                                        onMuscleHover={(muscle) => {
+                                            setHoveredMuscle(muscle);
+                                        }}
+                                        className="bg-transparent"
+                                    />
+                                </motion.div>
+                            </div>
                         </div>
+
+                        {/* Fixed hover indicator (non-intrusive) */}
+                        <AnimatePresence>
+                            {hoveredMuscle && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                                    transition={{ duration: 0.16, ease: 'easeOut' }}
+                                    className="pointer-events-none absolute left-4 top-4 z-20 max-w-[min(70%,280px)] rounded-2xl border border-white/20 bg-black/55 px-3 py-2.5 backdrop-blur-md shadow-xl shadow-black/35"
+                                >
+                                    <div className="mb-0.5 flex items-center gap-2">
+                                        <span
+                                            className="h-2.5 w-2.5 rounded-full"
+                                            style={{ backgroundColor: getMuscleGroupColor(hoveredMuscle.group) }}
+                                        />
+                                        <span className="text-[10px] font-semibold uppercase tracking-[0.13em] text-white/65">
+                                            {getMuscleGroupName(hoveredMuscle.group)}
+                                        </span>
+                                    </div>
+                                    <p className="truncate text-[15px] font-semibold leading-tight text-white">
+                                        {hoveredMuscle.name}
+                                    </p>
+                                    <p className="truncate text-xs italic leading-tight text-white/65">
+                                        {hoveredMuscle.scientificName}
+                                    </p>
+                                    <p className="mt-0.5 text-[11px] font-medium text-white/45">
+                                        Click for details
+                                    </p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
                         {/* Image overlay if available, fading in */}
                         {exercise.imageUrl && (
-                            <div className="absolute inset-0 mix-blend-overlay opacity-20 group-hover:opacity-10 transition-opacity duration-500">
+                            <div className="pointer-events-none absolute inset-0 mix-blend-overlay opacity-20 group-hover:opacity-10 transition-opacity duration-500">
                                 <img src={exercise.imageUrl} alt={exercise.name} className="w-full h-full object-cover grayscale" />
                             </div>
                         )}

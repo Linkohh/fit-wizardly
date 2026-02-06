@@ -20,10 +20,29 @@ const badgeVariants = cva(
   },
 );
 
-export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
+export interface BadgeProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof badgeVariants> {
+  'data-click-feedback'?: 'on' | 'off';
+}
 
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+function Badge({
+  className,
+  variant,
+  onClick,
+  ['data-click-feedback']: clickFeedbackOverride,
+  ...props
+}: BadgeProps) {
+  return (
+    <div
+      className={cn(badgeVariants({ variant }), className)}
+      data-click-feedback={
+        clickFeedbackOverride ?? (typeof onClick === 'function' ? 'on' : undefined)
+      }
+      onClick={onClick}
+      {...props}
+    />
+  );
 }
 
 export { Badge, badgeVariants };

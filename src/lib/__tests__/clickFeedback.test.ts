@@ -14,6 +14,18 @@ describe('clickFeedback', () => {
             expect(getClickFeedbackTarget(document.getElementById('linkChild'))?.id).toBe('link');
         });
 
+        it('matches text-entry form controls', () => {
+            document.body.innerHTML = `
+                <input id="searchInput" type="text" />
+                <textarea id="notes"><span id="notesChild">Notes</span></textarea>
+                <select id="picker"><option>One</option></select>
+            `;
+
+            expect(getClickFeedbackTarget(document.getElementById('searchInput'))?.id).toBe('searchInput');
+            expect(getClickFeedbackTarget(document.getElementById('notes'))?.id).toBe('notes');
+            expect(getClickFeedbackTarget(document.getElementById('picker'))?.id).toBe('picker');
+        });
+
         it('returns null for non-interactive elements by default', () => {
             document.body.innerHTML = `<div id="box"><span id="child">Hi</span></div>`;
             expect(getClickFeedbackTarget(document.getElementById('child'))).toBeNull();
@@ -42,6 +54,57 @@ describe('clickFeedback', () => {
             expect(getClickFeedbackTarget(document.getElementById('nestedBtn'))).toBeNull();
             expect(getClickFeedbackTarget(document.getElementById('innerOnChild'))?.id).toBe('innerOn');
         });
+
+        it('matches react click handlers on custom pointer targets', () => {
+            document.body.innerHTML = `
+                <div id="custom" class="cursor-pointer"><span id="customChild">Custom</span></div>
+            `;
+
+            const custom = document.getElementById('custom');
+            expect(custom).not.toBeNull();
+            Object.defineProperty(custom as Element, '__reactProps$test', {
+                configurable: true,
+                value: {
+                    onClick: () => undefined,
+                },
+            });
+
+            expect(getClickFeedbackTarget(document.getElementById('customChild'))?.id).toBe('custom');
+        });
+
+        it('matches react click handlers without extra affordance', () => {
+            document.body.innerHTML = `
+                <div id="custom"><span id="customChild">Custom</span></div>
+            `;
+
+            const custom = document.getElementById('custom');
+            expect(custom).not.toBeNull();
+            Object.defineProperty(custom as Element, '__reactProps$test', {
+                configurable: true,
+                value: {
+                    onClick: () => undefined,
+                },
+            });
+
+            expect(getClickFeedbackTarget(document.getElementById('customChild'))?.id).toBe('custom');
+        });
+
+        it('allows opt-out overrides for react click handlers', () => {
+            document.body.innerHTML = `
+                <div id="custom" data-click-feedback="off"><span id="customChild">Custom</span></div>
+            `;
+
+            const custom = document.getElementById('custom');
+            expect(custom).not.toBeNull();
+            Object.defineProperty(custom as Element, '__reactProps$test', {
+                configurable: true,
+                value: {
+                    onClick: () => undefined,
+                },
+            });
+
+            expect(getClickFeedbackTarget(document.getElementById('customChild'))).toBeNull();
+        });
     });
 
     describe('playRetroClickSound', () => {
@@ -50,4 +113,3 @@ describe('clickFeedback', () => {
         });
     });
 });
-

@@ -79,6 +79,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
+                            data-click-feedback="on"
                             className="fixed inset-0 z-40"
                             onClick={() => setIsOpen(false)}
                         />

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useCallback } from 'react';
 import { filterExercises, ExerciseFilterOptions, getRecommendedExercises } from '@/lib/exercise-utils';
 import { useWizardStore } from '@/stores/wizardStore';
 import { Exercise } from '@/types/fitness';
@@ -7,7 +7,7 @@ import { ExerciseFilters } from './ExerciseFilters';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, Sparkles } from 'lucide-react';
 import { CommunityPulse } from '@/components/community/CommunityPulse';
 import { ExerciseOfTheDay } from './ExerciseOfTheDay';
 import { AnimatePresence } from 'framer-motion';
@@ -32,6 +32,7 @@ export function ExercisesBrowser() {
         }
         return [];
     }, [selections, hasWizardData]);
+    const recommendedForRail = useMemo(() => recommendedExercises.slice(0, 10), [recommendedExercises]);
 
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
     const [page, setPage] = useState(1);
@@ -45,7 +46,12 @@ export function ExercisesBrowser() {
         return filteredExercises.slice(0, page * ITEMS_PER_PAGE);
     }, [filteredExercises, page]);
 
-    const isFiltering = filters.category !== 'all' || filters.muscle !== 'all' || filters.difficulty !== 'all' || filters.search !== '';
+    const isFiltering =
+        filters.category !== 'all'
+        || filters.muscle !== 'all'
+        || filters.difficulty !== 'all'
+        || filters.equipment !== 'all'
+        || filters.search.trim() !== '';
 
     const handleFilterChange = (key: string, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
@@ -64,6 +70,23 @@ export function ExercisesBrowser() {
     };
 
     const hasMore = displayedExercises.length < filteredExercises.length;
+    const railRef = useRef<HTMLDivElement>(null);
+
+    const scrollRail = useCallback((direction: 'left' | 'right') => {
+        const rail = railRef.current;
+        if (!rail) return;
+
+        const firstCard = rail.querySelector('.snap-start') as HTMLElement | null;
+        const computed = window.getComputedStyle(rail);
+        const gap = Number.parseFloat(computed.gap || computed.columnGap || '16') || 16;
+        const cardWidth = firstCard?.offsetWidth || 336;
+        const delta = cardWidth + gap;
+
+        rail.scrollBy({
+            left: direction === 'right' ? delta : -delta,
+            behavior: 'smooth',
+        });
+    }, []);
 
     return (
         <div className="container-full py-8 animate-in fade-in duration-500">
@@ -79,7 +102,7 @@ export function ExercisesBrowser() {
                 </p>
 
                 <div className="relative max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
                         placeholder="Search exercises (e.g., 'Bench Press', 'Chest')..."
                         className="pl-9 bg-black/20 border-white/10 focus:border-primary/50 transition-all font-medium"
@@ -104,23 +127,69 @@ export function ExercisesBrowser() {
             />
 
             {/* Recommendations Section */}
-            {!isFiltering && hasWizardData && recommendedExercises.length > 0 && (
-                <div className="mb-12">
-                    <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-white">
-                        <span className="bg-primary/20 p-1 rounded-md text-primary text-sm">★</span>
-                        Recommended for You
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {recommendedExercises.map((exercise) => (
-                            <ExerciseCard
-                                key={`rec-${exercise.id}`}
-                                exercise={exercise}
-                                onClick={setSelectedExercise}
-                            />
-                        ))}
+            {!isFiltering && hasWizardData && recommendedForRail.length > 0 && (
+                <section className="mb-12 rounded-3xl border border-white/10 bg-gradient-to-br from-primary/10 via-black/20 to-transparent p-5 md:p-6">
+                    <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                        <div className="space-y-1">
+                            <h2 className="flex items-center gap-2 text-2xl font-bold text-white">
+                                <span className="inline-flex items-center justify-center rounded-lg border border-primary/30 bg-primary/20 p-1.5 text-primary">
+                                    <Sparkles className="h-4 w-4" />
+                                </span>
+                                Recommended for You
+                            </h2>
+                            <p className="text-sm text-white/65">
+                                Personalized picks based on your goals, target muscles, and available equipment.
+                            </p>
+                        </div>
+
+                        <div className="hidden items-center gap-2 lg:flex">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-9 w-9 border-white/20 bg-black/25 text-white/80 hover:bg-black/40 hover:text-white"
+                                onClick={() => scrollRail('left')}
+                                aria-label="Scroll recommended exercises left"
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-9 w-9 border-white/20 bg-black/25 text-white/80 hover:bg-black/40 hover:text-white"
+                                onClick={() => scrollRail('right')}
+                                aria-label="Scroll recommended exercises right"
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
                     </div>
-                    <div className="mt-8 border-t border-white/10" />
-                </div>
+
+                    <div
+                        className="relative overflow-hidden"
+                        aria-label="Recommended exercises carousel"
+                    >
+                        <div
+                            ref={railRef}
+                            data-testid="recommended-rail-track"
+                            className="scrollbar-purple flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-3 pr-4"
+                        >
+                            {recommendedForRail.map((exercise, index) => (
+                                <ExerciseCard
+                                    key={`rec-${exercise.id}`}
+                                    exercise={exercise}
+                                    onClick={setSelectedExercise}
+                                    index={index}
+                                    variant="recommended"
+                                />
+                            ))}
+                        </div>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-24 bg-gradient-to-l from-background to-transparent md:block" />
+                    </div>
+
+                    <div className="mt-5 border-t border-white/10 pt-3 text-[11px] uppercase tracking-[0.14em] text-white/45">
+                        Scroll to explore your tailored shortlist
+                    </div>
+                </section>
             )}
 
             <div className="mb-4 text-sm text-muted-foreground flex justify-between items-end">
@@ -140,11 +209,13 @@ export function ExercisesBrowser() {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     <AnimatePresence mode="popLayout">
-                        {displayedExercises.map((exercise) => (
+                        {displayedExercises.map((exercise, index) => (
                             <ExerciseCard
                                 key={exercise.id}
                                 exercise={exercise}
                                 onClick={setSelectedExercise}
+                                index={index}
+                                variant="library"
                             />
                         ))}
                     </AnimatePresence>
