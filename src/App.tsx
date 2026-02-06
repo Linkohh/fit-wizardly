@@ -255,7 +255,7 @@ const App = () => {
               <Toaster />
               <Sonner />
               <CommandPalette />
-              <div className="min-h-screen flex flex-col transition-colors duration-300 relative">
+              <div className="min-h-screen flex flex-col transition-colors duration-300 relative pt-16">
                 <LivingBackground />
                 <Header />
                 <ConsentModal />

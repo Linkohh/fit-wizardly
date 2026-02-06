@@ -101,7 +101,7 @@ export function Header() {
   }, [location.pathname, isTrainerMode]);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         {/* NOTE: Tooltip removed here to prevent potential interference/looping with Link logic */}
