@@ -12,6 +12,24 @@ type MuscleGroup =
 
 type ExerciseCategory = 'strength' | 'cardio' | 'flexibility' | 'plyometric' | 'core' | 'other';
 
+type ExistingExercise = {
+    id: string;
+    name: string;
+    description?: string;
+    steps?: string[];
+    variations?: unknown[];
+    difficulty?: string;
+    primaryMuscles: MuscleGroup[];
+} & Record<string, unknown>;
+
+type JsonExercise = {
+    id: string;
+    category: string;
+    description?: string;
+    difficulty?: string;
+    primaryMuscles?: string[];
+} & Record<string, unknown>;
+
 // --- Load Data ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,7 +37,9 @@ const __dirname = path.dirname(__filename);
 const jsonPath = path.resolve(__dirname, '../src/data/exerciseLibrary.json');
 const tsPath = path.resolve(__dirname, '../src/data/exercises.ts');
 
-const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+const jsonData = JSON.parse(fs.readFileSync(jsonPath, 'utf-8')) as {
+    exercises?: JsonExercise[];
+};
 
 // We need to read the TS file and extract the array.
 // Since we can't easily import TS in this environment without setup,
@@ -71,10 +91,10 @@ async function migrate() {
     const tsFileUrl = 'file://' + tsPath.replace(/\\/g, '/');
     console.log(`Importing from ${tsFileUrl}`);
 
-    let existingExercises = [];
+    let existingExercises: ExistingExercise[] = [];
     try {
         const mod = await import(tsFileUrl);
-        existingExercises = mod.EXERCISE_DATABASE || [];
+        existingExercises = (mod as { EXERCISE_DATABASE?: ExistingExercise[] }).EXERCISE_DATABASE || [];
         console.log(`Loaded ${existingExercises.length} existing TS exercises.`);
     } catch (e) {
         console.error("Failed to import exercises.ts directly. Make sure to run with npx tsx.", e);
@@ -85,7 +105,7 @@ async function migrate() {
     const mergedExercises = new Map();
 
     // 1. Load TS Exercises (High Priority for Pattern/Muscle accuracy)
-    existingExercises.forEach((ex: any) => {
+    existingExercises.forEach((ex) => {
         mergedExercises.set(ex.id, {
             ...ex,
             // Ensure default fields if missing
@@ -105,7 +125,7 @@ async function migrate() {
     const jsonExercises = jsonData.exercises || [];
     console.log(`Loaded ${jsonExercises.length} JSON exercises.`);
 
-    jsonExercises.forEach((jsonEx: any) => {
+    jsonExercises.forEach((jsonEx) => {
         // Normalize ID
         const id = jsonEx.id.replace(/-/g, '_').toLowerCase(); // Bench-Press -> bench_press
 

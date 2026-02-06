@@ -4,7 +4,7 @@ import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { PlanPayloadSchema } from './schemas/plan.js';
+import { PlanPayloadSchema, type PlanPayload } from './schemas/plan.js';
 import {
     upsertPlanForUser as upsertPlanForUserSupabase,
     listPlansForUser as listPlansForUserSupabase,
@@ -253,13 +253,14 @@ app.patch('/plans/:id', requireAuth, async (req: AuthRequest, res) => {
         });
         if (!existing) return res.status(404).json({ error: 'Plan not found' });
 
-        const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, ...existingPayload } = existing as any;
+        const existingPlan = existing as unknown as Partial<PlanPayload>;
+        const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, ...existingPayload } = existingPlan;
         const now = new Date().toISOString();
         const merged = {
             ...existingPayload,
             ...data,
             id: req.params.id,
-            createdAt: (existing as any).createdAt || now,
+            createdAt: existingPlan.createdAt || now,
         };
 
         const updated = await upsertPlanForUserSupabase({
@@ -269,7 +270,7 @@ app.patch('/plans/:id', requireAuth, async (req: AuthRequest, res) => {
             userId: req.user!.id,
             planId: req.params.id,
             plan: merged,
-            schemaVersion: data.schemaVersion ?? (existing as any).schemaVersion ?? 1,
+            schemaVersion: data.schemaVersion ?? existingPlan.schemaVersion ?? 1,
         });
 
         res.json(updated);

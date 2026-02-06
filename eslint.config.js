@@ -30,4 +30,12 @@ export default tseslint.config(
       "@typescript-eslint/no-require-imports": "off",
     },
   },
+  {
+    // shadcn/ui and Radix wrappers often export helpers/hooks alongside components;
+    // this rule is about Fast Refresh ergonomics (dev-only), not runtime correctness.
+    files: ["src/components/ui/**/*.{ts,tsx}"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
 );

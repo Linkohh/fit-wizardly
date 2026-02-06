@@ -34,7 +34,7 @@ export default function CirclesPage() {
         if (user) {
             fetchUserCircles(user.id);
         }
-    }, [user]); // fetchUserCircles is a stable store action
+    }, [fetchUserCircles, user]); // fetchUserCircles is a stable store action
 
     // Navigate to circle portal
     const handleCircleClick = (circleId: string) => {

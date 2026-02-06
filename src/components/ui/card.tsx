@@ -29,7 +29,9 @@ const cardVariants = cva(
 
 export interface CardProps
   extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardVariants> {}
+    VariantProps<typeof cardVariants> {
+  'data-click-feedback'?: 'on' | 'off';
+}
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   (

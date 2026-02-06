@@ -426,12 +426,12 @@ export const usePlanStore = create<PlanState>()(
         // Post any new PRs to circles
         if (newPRs.length > 0) {
           for (const pr of newPRs) {
-            postPRToCircles({
-              exerciseName: pr.exerciseName,
-              oldValue: pr.previousValue || 0,
-              newValue: pr.value,
-              prType: pr.type as 'weight' | 'reps' | 'volume',
-            }).catch(err => console.error('Failed to post PR to circles:', err));
+              postPRToCircles({
+                exerciseName: pr.exerciseName,
+                oldValue: pr.previousValue || 0,
+              newValue: pr.newValue,
+                prType: pr.type as 'weight' | 'reps' | 'volume',
+              }).catch(err => console.error('Failed to post PR to circles:', err));
           }
         }
 

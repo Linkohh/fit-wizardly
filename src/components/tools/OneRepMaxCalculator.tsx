@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Calculator, Dumbbell, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,7 @@ export function OneRepMaxCalculator() {
     const [reps, setReps] = useState<string>('');
     const [oneRepMax, setOneRepMax] = useState<number | null>(null);
 
-    const calculateMax = () => {
+    const calculateMax = useCallback(() => {
         const w = parseFloat(weight);
         const r = parseFloat(reps);
 
@@ -24,7 +24,7 @@ export function OneRepMaxCalculator() {
         // We'll use Epley as a balanced standard for general pop
         const epley = w * (1 + r / 30);
         setOneRepMax(Math.round(epley));
-    };
+    }, [reps, weight]);
 
     // Auto-calculate when inputs change if valid
     useEffect(() => {
@@ -33,7 +33,7 @@ export function OneRepMaxCalculator() {
         } else {
             setOneRepMax(null);
         }
-    }, [weight, reps]);
+    }, [calculateMax, reps, weight]);
 
     const percentages = [100, 95, 90, 85, 80, 75, 70, 65, 60, 50];
 

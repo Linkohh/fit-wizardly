@@ -138,9 +138,9 @@ export interface ExerciseCategoryInfo {
     id: string;
     name: string;
     title: string;
-    description?: string;
-    iconKey?: string;
-    subcategories?: { id: string; name: string }[];
+    description: string;
+    iconKey: string;
+    subcategories?: { id: string; title: string; exerciseIds: string[] }[];
 }
 
 // Get all unique categories from the exercise database

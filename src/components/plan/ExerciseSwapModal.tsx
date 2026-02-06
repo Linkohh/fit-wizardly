@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,8 @@ interface ExerciseSwapModalProps {
     onSwap: (newExercise: Exercise) => void;
     allowedEquipment?: string[];
 }
+
+const VARIATION_ID_OVERRIDES: Record<string, string> = {};
 
 export function ExerciseSwapModal({
     isOpen,
@@ -37,16 +39,14 @@ export function ExerciseSwapModal({
         return lookup;
     }, []);
 
-    const variationIdOverrides: Record<string, string> = {};
-
-    const resolveVariationExercise = (variationName: string) => {
+    const resolveVariationExercise = useCallback((variationName: string) => {
         const normalizedName = variationName.toLowerCase();
-        const overrideId = variationIdOverrides[normalizedName];
+        const overrideId = VARIATION_ID_OVERRIDES[normalizedName];
         if (overrideId) {
             return exerciseLookup.get(overrideId.toLowerCase()) ?? null;
         }
         return exerciseLookup.get(normalizedName) ?? null;
-    };
+    }, [exerciseLookup]);
 
     const variationGroups = useMemo(() => {
         const groups = {
@@ -73,7 +73,7 @@ export function ExerciseSwapModal({
         });
 
         return groups;
-    }, [currentExercise.exercise.variations, search, exerciseLookup]);
+    }, [currentExercise.exercise.variations, resolveVariationExercise, search]);
 
     const variationResultCount = useMemo(
         () =>

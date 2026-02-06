@@ -18,6 +18,7 @@ import type {
     ActivityCommentWithProfile,
     ReactionType,
     Profile,
+    Json,
 } from '@/types/supabase';
 
 // ============================================
@@ -50,7 +51,7 @@ interface CircleState {
     postActivity: (
         circleId: string,
         activityType: string,
-        payload: Record<string, any>
+        payload: Json
     ) => Promise<void>;
     subscribeToActivities: (circleId: string) => () => void;
 
@@ -103,6 +104,10 @@ function generateRandomCode(length: number = 8): string {
     return result;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 // ============================================
 // STORE IMPLEMENTATION
 // ============================================
@@ -139,7 +144,14 @@ export const useCircleStore = create<CircleState>((set, get) => ({
                 return;
             }
 
-            const circleIds = memberships.map(m => m.circle_id);
+            const circleIds = memberships
+                .map((m) => m.circle_id)
+                .filter((id): id is string => typeof id === 'string');
+
+            if (circleIds.length === 0) {
+                set({ circles: [], isLoading: false });
+                return;
+            }
 
             // Fetch circles with member details
             const { data: circles } = await supabase
@@ -283,7 +295,8 @@ export const useCircleStore = create<CircleState>((set, get) => ({
             .select('*', { count: 'exact', head: true })
             .eq('circle_id', circle.id);
 
-        if (count && count >= circle.max_members) {
+        const maxMembers = circle.max_members;
+        if (typeof maxMembers === 'number' && typeof count === 'number' && count >= maxMembers) {
             return { error: new Error('Circle is full') };
         }
 
@@ -690,29 +703,42 @@ export const useCircleStore = create<CircleState>((set, get) => ({
 
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        const filteredActivities = activities.filter(a => {
-            if (a.activity_type !== 'workout_logged') return false;
-            const date = new Date(a.created_at);
+        type WorkoutLoggedActivity = ActivityWithProfile & { created_at: string; user_id: string };
 
-            if (timeframe === 'week') return date >= startOfWeek;
-            if (timeframe === 'month') return date >= startOfMonth;
-            return true;
-        });
+        const filteredActivities = activities.filter(
+            (activity): activity is WorkoutLoggedActivity => {
+                if (activity.activity_type !== 'workout_logged') return false;
+                if (typeof activity.created_at !== 'string') return false;
+                if (typeof activity.user_id !== 'string') return false;
+
+                const date = new Date(activity.created_at);
+                if (Number.isNaN(date.getTime())) return false;
+
+                if (timeframe === 'week') return date >= startOfWeek;
+                if (timeframe === 'month') return date >= startOfMonth;
+                return true;
+            }
+        );
 
         // Map userId -> stats
         const userStats = new Map<string, { workouts: number, volume: number, lastActive: Date }>();
 
         // Initialize all members with 0
         members.forEach(m => {
+            if (typeof m.user_id !== 'string') return;
             userStats.set(m.user_id, { workouts: 0, volume: 0, lastActive: new Date(0) });
         });
 
         filteredActivities.forEach(a => {
             const stats = userStats.get(a.user_id) || { workouts: 0, volume: 0, lastActive: new Date(0) };
-            const payload = a.payload as any;
+            const payload = a.payload;
+            const totalVolume =
+                isRecord(payload) && typeof payload.totalVolume === 'number'
+                    ? payload.totalVolume
+                    : 0;
 
             stats.workouts += 1;
-            stats.volume += payload?.totalVolume || 0;
+            stats.volume += totalVolume;
             const activityDate = new Date(a.created_at);
             if (activityDate > stats.lastActive) stats.lastActive = activityDate;
 

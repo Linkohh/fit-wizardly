@@ -7,7 +7,7 @@ describe('validatePlanBalance', () => {
         firstName: '', lastName: '', personalGoalNote: 'test',
         isTrainer: false, coachNotes: '',
         goal: 'general', experienceLevel: 'intermediate',
-        equipment: ['dumbbells'], targetMuscles: ['chest', 'back', 'quads'],
+        equipment: ['dumbbells'], targetMuscles: ['chest', 'upper_back', 'quads'],
         constraints: [], daysPerWeek: 3, sessionDuration: 60, optPhase: 'stabilization_endurance'
     };
 
@@ -27,7 +27,7 @@ describe('validatePlanBalance', () => {
     });
 
     it('warns on push without pull', () => {
-        const warnings = validatePlanBalance({ ...baseSelections, targetMuscles: ['chest', 'shoulders'] });
+        const warnings = validatePlanBalance({ ...baseSelections, targetMuscles: ['chest', 'front_deltoid'] });
         expect(warnings.some(w => w.id === 'imbalance_push')).toBe(true);
     });
 

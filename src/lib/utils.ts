@@ -5,13 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function debounce<T extends (...args: any[]) => void>(func: T, wait: number): (...args: Parameters<T>) => void {
+export function debounce<TArgs extends unknown[]>(
+  func: (...args: TArgs) => void,
+  wait: number
+): (...args: TArgs) => void {
   let timeout: ReturnType<typeof setTimeout> | null = null;
-  return function (...args: Parameters<T>) {
+  return function (...args: TArgs) {
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => {
       func(...args);
     }, wait);
   };
 }
-

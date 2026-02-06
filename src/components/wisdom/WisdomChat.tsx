@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type ElementRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,7 +19,7 @@ import ReactMarkdown from 'react-markdown';
 
 export function WisdomChat() {
     const [input, setInput] = useState('');
-    const scrollRef = useRef<HTMLDivElement>(null);
+    const scrollRef = useRef<ElementRef<typeof ScrollArea>>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const {
@@ -96,7 +96,7 @@ export function WisdomChat() {
             </CardHeader>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4" ref={scrollRef as any}>
+            <ScrollArea className="flex-1 p-4" ref={scrollRef}>
                 {conversationHistory.length === 0 ? (
                     <div className="text-center py-8">
                         <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">

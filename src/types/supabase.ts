@@ -88,9 +88,12 @@ export type Database = {
                     created_by: string | null
                     description: string | null
                     end_date: string
+                    goal_value: number | null
                     id: string
                     start_date: string
+                    status: string | null
                     title: string
+                    unit: string | null
                     winner_id: string | null
                 }
                 Insert: {
@@ -100,9 +103,12 @@ export type Database = {
                     created_by?: string | null
                     description?: string | null
                     end_date: string
+                    goal_value?: number | null
                     id?: string
                     start_date: string
+                    status?: string | null
                     title: string
+                    unit?: string | null
                     winner_id?: string | null
                 }
                 Update: {
@@ -112,9 +118,12 @@ export type Database = {
                     created_by?: string | null
                     description?: string | null
                     end_date?: string
+                    goal_value?: number | null
                     id?: string
                     start_date?: string
+                    status?: string | null
                     title?: string
+                    unit?: string | null
                     winner_id?: string | null
                 }
                 Relationships: [
@@ -281,12 +290,332 @@ export type Database = {
                 }
                 Relationships: []
             }
+            activity_reactions: {
+                Row: {
+                    id: string
+                    activity_id: string
+                    user_id: string
+                    reaction_type: string
+                    created_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    activity_id: string
+                    user_id: string
+                    reaction_type?: string
+                    created_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    activity_id?: string
+                    user_id?: string
+                    reaction_type?: string
+                    created_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "activity_reactions_activity_id_fkey"
+                        columns: ["activity_id"]
+                        isOneToOne: false
+                        referencedRelation: "circle_activities"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "activity_reactions_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
+            activity_comments: {
+                Row: {
+                    id: string
+                    activity_id: string
+                    user_id: string
+                    content: string
+                    created_at: string | null
+                    updated_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    activity_id: string
+                    user_id: string
+                    content: string
+                    created_at?: string | null
+                    updated_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    activity_id?: string
+                    user_id?: string
+                    content?: string
+                    created_at?: string | null
+                    updated_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "activity_comments_activity_id_fkey"
+                        columns: ["activity_id"]
+                        isOneToOne: false
+                        referencedRelation: "circle_activities"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "activity_comments_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
+            circle_posts: {
+                Row: {
+                    id: string
+                    circle_id: string
+                    user_id: string
+                    content: string
+                    image_url: string | null
+                    post_type: string
+                    created_at: string | null
+                    updated_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    circle_id: string
+                    user_id: string
+                    content: string
+                    image_url?: string | null
+                    post_type?: string
+                    created_at?: string | null
+                    updated_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    circle_id?: string
+                    user_id?: string
+                    content?: string
+                    image_url?: string | null
+                    post_type?: string
+                    created_at?: string | null
+                    updated_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "circle_posts_circle_id_fkey"
+                        columns: ["circle_id"]
+                        isOneToOne: false
+                        referencedRelation: "circles"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "circle_posts_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
+            challenge_participants: {
+                Row: {
+                    id: string
+                    challenge_id: string
+                    user_id: string
+                    score: number | null
+                    last_updated: string | null
+                    joined_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    challenge_id: string
+                    user_id: string
+                    score?: number | null
+                    last_updated?: string | null
+                    joined_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    challenge_id?: string
+                    user_id?: string
+                    score?: number | null
+                    last_updated?: string | null
+                    joined_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "challenge_participants_challenge_id_fkey"
+                        columns: ["challenge_id"]
+                        isOneToOne: false
+                        referencedRelation: "circle_challenges"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "challenge_participants_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
+            exercise_interactions: {
+                Row: {
+                    id: string
+                    user_id: string | null
+                    exercise_id: string
+                    interaction_type: string
+                    created_at: string | null
+                    metadata: Json | null
+                }
+                Insert: {
+                    id?: string
+                    user_id?: string | null
+                    exercise_id: string
+                    interaction_type: string
+                    created_at?: string | null
+                    metadata?: Json | null
+                }
+                Update: {
+                    id?: string
+                    user_id?: string | null
+                    exercise_id?: string
+                    interaction_type?: string
+                    created_at?: string | null
+                    metadata?: Json | null
+                }
+                Relationships: []
+            }
+            user_exercise_preferences: {
+                Row: {
+                    user_id: string
+                    favorites: string[] | null
+                    collections: Json | null
+                    filter_presets: Json | null
+                    settings: Json | null
+                    recently_viewed: string[] | null
+                    updated_at: string | null
+                }
+                Insert: {
+                    user_id: string
+                    favorites?: string[] | null
+                    collections?: Json | null
+                    filter_presets?: Json | null
+                    settings?: Json | null
+                    recently_viewed?: string[] | null
+                    updated_at?: string | null
+                }
+                Update: {
+                    user_id?: string
+                    favorites?: string[] | null
+                    collections?: Json | null
+                    filter_presets?: Json | null
+                    settings?: Json | null
+                    recently_viewed?: string[] | null
+                    updated_at?: string | null
+                }
+                Relationships: []
+            }
+            exercise_stats: {
+                Row: {
+                    id: string
+                    exercise_id: string
+                    stat_date: string
+                    view_count: number | null
+                    perform_count: number | null
+                    favorite_count: number | null
+                }
+                Insert: {
+                    id?: string
+                    exercise_id: string
+                    stat_date?: string
+                    view_count?: number | null
+                    perform_count?: number | null
+                    favorite_count?: number | null
+                }
+                Update: {
+                    id?: string
+                    exercise_id?: string
+                    stat_date?: string
+                    view_count?: number | null
+                    perform_count?: number | null
+                    favorite_count?: number | null
+                }
+                Relationships: []
+            }
+            user_streaks: {
+                Row: {
+                    user_id: string
+                    current_streak: number | null
+                    longest_streak: number | null
+                    last_activity_date: string | null
+                    streak_started_at: string | null
+                    updated_at: string | null
+                }
+                Insert: {
+                    user_id: string
+                    current_streak?: number | null
+                    longest_streak?: number | null
+                    last_activity_date?: string | null
+                    streak_started_at?: string | null
+                    updated_at?: string | null
+                }
+                Update: {
+                    user_id?: string
+                    current_streak?: number | null
+                    longest_streak?: number | null
+                    last_activity_date?: string | null
+                    streak_started_at?: string | null
+                    updated_at?: string | null
+                }
+                Relationships: []
+            }
+            exercise_badges: {
+                Row: {
+                    id: string
+                    user_id: string | null
+                    badge_type: string
+                    badge_name: string
+                    earned_at: string | null
+                    metadata: Json | null
+                }
+                Insert: {
+                    id?: string
+                    user_id?: string | null
+                    badge_type: string
+                    badge_name: string
+                    earned_at?: string | null
+                    metadata?: Json | null
+                }
+                Update: {
+                    id?: string
+                    user_id?: string | null
+                    badge_type?: string
+                    badge_name?: string
+                    earned_at?: string | null
+                    metadata?: Json | null
+                }
+                Relationships: []
+            }
         }
         Views: {
             [_ in never]: never
         }
         Functions: {
-            [_ in never]: never
+            get_trending_exercises: {
+                Args: {
+                    p_limit?: number
+                }
+                Returns: {
+                    exercise_id: string
+                    total_views: number
+                    total_performs: number
+                    total_favorites: number
+                    trend_score: number
+                }[]
+            }
         }
         Enums: {
             [_ in never]: never
@@ -429,7 +758,7 @@ export type CircleChallenge = Database['public']['Tables']['circle_challenges'][
 
 // Extended types with joins
 export interface CircleWithMembers extends Circle {
-    members: (CircleMember & { profile: Profile })[];
+    members: (CircleMember & { profile: Profile | null })[];
     member_count: number;
 }
 
@@ -525,9 +854,6 @@ export interface ActivityWithInteractions extends ActivityWithProfile {
 export interface ChallengeWithParticipants extends CircleChallenge {
     participants: ChallengeParticipantWithProfile[];
     user_progress?: ChallengeParticipant;
-    status?: 'upcoming' | 'active' | 'completed';
-    goal_value?: number;
-    unit?: string;
 }
 
 // Exercise convenience types

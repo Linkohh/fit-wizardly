@@ -17,6 +17,7 @@ import { useAuthStore } from '@/stores/authStore';
 import type {
     ExerciseSettings,
     ExerciseCollection,
+    Json,
     UserExercisePreferences,
 } from '@/types/supabase';
 
@@ -24,7 +25,7 @@ import type {
 interface QueuedAction {
     id: string;
     type: 'favorite' | 'unfavorite' | 'collection' | 'settings' | 'recently_viewed';
-    payload: any;
+    payload: unknown;
     timestamp: number;
 }
 
@@ -33,7 +34,7 @@ interface PreferencesState {
     // Data
     favorites: string[];
     collections: Record<string, ExerciseCollection>;
-    filterPresets: Record<string, any>;
+    filterPresets: Record<string, unknown>;
     settings: ExerciseSettings;
     recentlyViewed: string[];
 
@@ -77,7 +78,7 @@ interface PreferencesState {
 const generateId = () => crypto.randomUUID();
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === 'object' && value !== null;
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 // Create the store with persistence
@@ -251,14 +252,18 @@ export const usePreferencesStore = create<PreferencesState>()(
                 set({ isSyncing: true });
 
                 try {
+                    const collectionsJson = collections as unknown as Json;
+                    const filterPresetsJson = filterPresets as unknown as Json;
+                    const settingsJson = settings as unknown as Json;
+
                     const { error } = await supabase
                         .from('user_exercise_preferences')
                         .upsert({
                             user_id: user.id,
                             favorites,
-                            collections,
-                            filter_presets: filterPresets,
-                            settings,
+                            collections: collectionsJson,
+                            filter_presets: filterPresetsJson,
+                            settings: settingsJson,
                             recently_viewed: recentlyViewed,
                             updated_at: new Date().toISOString(),
                         });
@@ -313,8 +318,12 @@ export const usePreferencesStore = create<PreferencesState>()(
 
                         set({
                             favorites: data.favorites || [],
-                            collections: (data.collections as Record<string, ExerciseCollection>) || {},
-                            filterPresets: data.filter_presets || {},
+                            collections: isRecord(data.collections)
+                                ? ((data.collections as unknown) as Record<string, ExerciseCollection>)
+                                : {},
+                            filterPresets: isRecord(data.filter_presets)
+                                ? (data.filter_presets as Record<string, unknown>)
+                                : {},
                             settings: migratedSettings,
                             recentlyViewed: data.recently_viewed || [],
                             lastSyncedAt: data.updated_at,
@@ -378,8 +387,37 @@ export const usePreferencesStore = create<PreferencesState>()(
  * Hook for using user preferences with automatic cloud sync
  */
 export function useUserPreferences() {
-    const store = usePreferencesStore();
     const { user } = useAuthStore();
+    const favorites = usePreferencesStore((state) => state.favorites);
+    const collections = usePreferencesStore((state) => state.collections);
+    const settings = usePreferencesStore((state) => state.settings);
+    const recentlyViewed = usePreferencesStore((state) => state.recentlyViewed);
+
+    const isSyncing = usePreferencesStore((state) => state.isSyncing);
+    const lastSyncedAt = usePreferencesStore((state) => state.lastSyncedAt);
+    const offlineQueueLength = usePreferencesStore((state) => state.offlineQueue.length);
+
+    const isFavorite = usePreferencesStore((state) => state.isFavorite);
+    const addFavorite = usePreferencesStore((state) => state.addFavorite);
+    const removeFavorite = usePreferencesStore((state) => state.removeFavorite);
+    const toggleFavoriteStore = usePreferencesStore((state) => state.toggleFavorite);
+
+    const createCollection = usePreferencesStore((state) => state.createCollection);
+    const deleteCollection = usePreferencesStore((state) => state.deleteCollection);
+    const renameCollection = usePreferencesStore((state) => state.renameCollection);
+    const addToCollectionStore = usePreferencesStore((state) => state.addToCollection);
+    const removeFromCollection = usePreferencesStore((state) => state.removeFromCollection);
+    const getCollection = usePreferencesStore((state) => state.getCollection);
+
+    const updateSettings = usePreferencesStore((state) => state.updateSettings);
+
+    const addRecentlyViewed = usePreferencesStore((state) => state.addRecentlyViewed);
+    const getRecentlyViewed = usePreferencesStore((state) => state.getRecentlyViewed);
+
+    const syncToCloud = usePreferencesStore((state) => state.syncToCloud);
+    const loadFromCloud = usePreferencesStore((state) => state.loadFromCloud);
+    const processOfflineQueue = usePreferencesStore((state) => state.processOfflineQueue);
+
     const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const hasLoadedRef = useRef(false);
 
@@ -387,11 +425,11 @@ export function useUserPreferences() {
     useEffect(() => {
         if (user && !hasLoadedRef.current) {
             hasLoadedRef.current = true;
-            store.loadFromCloud();
+            loadFromCloud();
         } else if (!user) {
             hasLoadedRef.current = false;
         }
-    }, [user, store.loadFromCloud]);
+    }, [user, loadFromCloud]);
 
     // Debounced sync when preferences change
     useEffect(() => {
@@ -404,8 +442,8 @@ export function useUserPreferences() {
 
         // Sync after 2 seconds of no changes
         syncTimeoutRef.current = setTimeout(() => {
-            if (store.offlineQueue.length > 0) {
-                store.syncToCloud();
+            if (offlineQueueLength > 0) {
+                syncToCloud();
             }
         }, 2000);
 
@@ -414,71 +452,71 @@ export function useUserPreferences() {
                 clearTimeout(syncTimeoutRef.current);
             }
         };
-    }, [user, store.offlineQueue.length, store.syncToCloud]);
+    }, [user, offlineQueueLength, syncToCloud]);
 
     // Process offline queue when coming back online
     useEffect(() => {
         const handleOnline = () => {
-            if (user && store.offlineQueue.length > 0) {
-                store.processOfflineQueue();
+            if (user && offlineQueueLength > 0) {
+                processOfflineQueue();
             }
         };
 
         window.addEventListener('online', handleOnline);
         return () => window.removeEventListener('online', handleOnline);
-    }, [user, store.offlineQueue.length, store.processOfflineQueue]);
+    }, [user, offlineQueueLength, processOfflineQueue]);
 
     // Wrapper functions with cloud awareness
     const toggleFavorite = useCallback(
         (exerciseId: string) => {
-            store.toggleFavorite(exerciseId);
+            toggleFavoriteStore(exerciseId);
         },
-        [store.toggleFavorite]
+        [toggleFavoriteStore]
     );
 
     const addToCollection = useCallback(
         (collectionId: string, exerciseId: string) => {
-            store.addToCollection(collectionId, exerciseId);
+            addToCollectionStore(collectionId, exerciseId);
         },
-        [store.addToCollection]
+        [addToCollectionStore]
     );
 
     return {
         // Data
-        favorites: store.favorites,
-        collections: store.collections,
-        settings: store.settings,
-        recentlyViewed: store.recentlyViewed,
+        favorites,
+        collections,
+        settings,
+        recentlyViewed,
 
         // State
-        isSyncing: store.isSyncing,
-        lastSyncedAt: store.lastSyncedAt,
+        isSyncing,
+        lastSyncedAt,
         isAuthenticated: !!user,
 
         // Favorites
         toggleFavorite,
-        isFavorite: store.isFavorite,
-        addFavorite: store.addFavorite,
-        removeFavorite: store.removeFavorite,
+        isFavorite,
+        addFavorite,
+        removeFavorite,
 
         // Collections
-        createCollection: store.createCollection,
-        deleteCollection: store.deleteCollection,
-        renameCollection: store.renameCollection,
+        createCollection,
+        deleteCollection,
+        renameCollection,
         addToCollection,
-        removeFromCollection: store.removeFromCollection,
-        getCollection: store.getCollection,
+        removeFromCollection,
+        getCollection,
 
         // Settings
-        updateSettings: store.updateSettings,
+        updateSettings,
 
         // Recently viewed
-        addRecentlyViewed: store.addRecentlyViewed,
-        getRecentlyViewed: store.getRecentlyViewed,
+        addRecentlyViewed,
+        getRecentlyViewed,
 
         // Manual sync
-        syncToCloud: store.syncToCloud,
-        loadFromCloud: store.loadFromCloud,
+        syncToCloud,
+        loadFromCloud,
     };
 }
 

@@ -7,6 +7,8 @@ import { MuscleSelector } from '@/features/mcl';
 import { mapLegacyToMcl, mapMclToLegacy } from '@/lib/muscleMapping';
 import { useThemeStore } from '@/stores/themeStore';
 
+const EMPTY_TARGET_MUSCLES: string[] = [];
+
 export function AnatomyPanel() {
     const { selections, setTargetMuscles } = useWizardStore();
     const themeMode = useThemeStore((state) => state.mode);
@@ -23,7 +25,7 @@ export function AnatomyPanel() {
     });
 
     // Watch target muscles for reactive updates
-    const watchedTargetMuscles = watch('targetMuscles') || [];
+    const watchedTargetMuscles = watch('targetMuscles') ?? EMPTY_TARGET_MUSCLES;
 
     // Map Legacy Groups to MCL IDs for visualization
     const selectedMclIds = useMemo(() => mapLegacyToMcl(watchedTargetMuscles), [watchedTargetMuscles]);

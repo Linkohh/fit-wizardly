@@ -109,9 +109,9 @@ export function clearMetrics() {
 /**
  * Benchmark plan generation with given inputs
  */
-export function benchmarkPlanGeneration(
-    generateFn: (inputs: any) => any,
-    testInputs: any[],
+export function benchmarkPlanGeneration<TInput, TOutput>(
+    generateFn: (inputs: TInput) => TOutput,
+    testInputs: TInput[],
     iterations: number = 10
 ) {
     const results: number[] = [];

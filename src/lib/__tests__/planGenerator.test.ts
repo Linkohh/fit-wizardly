@@ -4,6 +4,11 @@ import type { WizardSelections } from '@/types/fitness';
 
 describe('planGenerator', () => {
     const validSelections: WizardSelections = {
+        firstName: 'Test',
+        lastName: 'User',
+        personalGoalNote: '',
+        isTrainer: false,
+        coachNotes: '',
         goal: 'hypertrophy',
         experienceLevel: 'intermediate',
         equipment: ['barbell', 'dumbbells', 'bench', 'squat_rack'],
@@ -111,7 +116,10 @@ describe('planGenerator', () => {
         });
 
         it('requires goal', () => {
-            const result = validateWizardInputs({ ...validSelections, goal: '' as any });
+            const result = validateWizardInputs({
+                ...validSelections,
+                goal: '' as unknown as WizardSelections['goal'],
+            });
             expect(result.valid).toBe(false);
             expect(result.errors).toContain('Please select a training goal');
         });

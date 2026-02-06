@@ -52,9 +52,20 @@ const ACTIVITY_COLORS: Record<string, string> = {
     member_joined: 'text-green-500 bg-green-500/10',
 };
 
+type ActivityPayload = {
+    workoutName?: string;
+    duration?: number;
+    exerciseName?: string;
+    streakDays?: number;
+    memberName?: string;
+    title?: string;
+    exerciseCount?: number;
+    totalVolume?: number;
+} & Record<string, unknown>;
+
 function formatActivityMessage(activity: ActivityWithProfile): string {
     const name = activity.profile?.display_name || 'Someone';
-    const payload = (activity.payload as Record<string, any>) || {};
+    const payload = (activity.payload ?? {}) as ActivityPayload;
 
     switch (activity.activity_type) {
         case 'workout_logged':
@@ -103,6 +114,7 @@ export function ActivityItem({
 
     const Icon = ACTIVITY_ICONS[activity.activity_type] || Activity;
     const colorClass = ACTIVITY_COLORS[activity.activity_type] || 'text-muted-foreground bg-muted';
+    const payload = (activity.payload ?? {}) as ActivityPayload;
 
     const handleReact = async (reactionType: ReactionType) => {
         if (onReact) {
@@ -159,14 +171,14 @@ export function ActivityItem({
                     {activity.activity_type === 'workout_logged' && activity.payload && (
                         <div className="mt-2 p-2 bg-muted/50 rounded-lg text-xs text-muted-foreground">
                             <div className="flex gap-4">
-                                {(activity.payload as any).exerciseCount && (
+                                {payload.exerciseCount && (
                                     <span>
-                                        {(activity.payload as any).exerciseCount} exercises
+                                        {payload.exerciseCount} exercises
                                     </span>
                                 )}
-                                {(activity.payload as any).totalVolume && (
+                                {payload.totalVolume && (
                                     <span>
-                                        {((activity.payload as any).totalVolume / 1000).toFixed(1)}k lbs
+                                        {(payload.totalVolume / 1000).toFixed(1)}k lbs
                                     </span>
                                 )}
                             </div>

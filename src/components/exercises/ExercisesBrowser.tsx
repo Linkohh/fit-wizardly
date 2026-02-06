@@ -26,7 +26,6 @@ export function ExercisesBrowser() {
     const { selections } = useWizardStore();
     const hasWizardData = selections.targetMuscles.length > 0 || selections.equipment.length > 0;
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const recommendedExercises = useMemo(() => {
         if (hasWizardData) {
             return getRecommendedExercises(selections);

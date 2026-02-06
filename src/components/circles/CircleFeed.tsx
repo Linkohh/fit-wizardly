@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -40,6 +40,7 @@ export function CircleFeed({ circle }: CircleFeedProps) {
     } = useCircleStore();
     const [copied, setCopied] = useState(false);
     const { toast } = useToast();
+    const activitiesRef = useRef(activities);
 
     // Pull-to-refresh functionality
     const { isRefreshing, pullDistance, isPulling } = usePullToRefresh({
@@ -63,12 +64,17 @@ export function CircleFeed({ circle }: CircleFeedProps) {
         return unsubscribe;
     }, [circle.id, fetchActivities, subscribeToActivities]);
 
+    useEffect(() => {
+        activitiesRef.current = activities;
+    }, [activities]);
+
     // Fetch reactions when activities change
     useEffect(() => {
-        if (activities.length > 0) {
-            fetchReactions(activities.map(a => a.id));
+        const currentActivities = activitiesRef.current;
+        if (currentActivities.length > 0) {
+            fetchReactions(currentActivities.map((a) => a.id));
         }
-    }, [activities.length]);
+    }, [activities.length, fetchReactions]);
 
     // Handlers for social interactions
     const handleReact = async (activityId: string, reactionType: ReactionType) => {

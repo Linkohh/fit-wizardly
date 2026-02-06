@@ -14,13 +14,15 @@ import { useCallback, useEffect, useRef } from 'react';
 import { create } from 'zustand';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
-import type { InteractionType, TrendingExercise, UserStreak, ExerciseBadge } from '@/types/supabase';
+import type { InteractionType, TrendingExercise, UserStreak, ExerciseBadge, Json } from '@/types/supabase';
+
+type InteractionMetadata = Record<string, Json>;
 
 // Pending interaction to be synced
 interface PendingInteraction {
     exerciseId: string;
     type: InteractionType;
-    metadata?: Record<string, any>;
+    metadata?: InteractionMetadata;
     timestamp: number;
 }
 
@@ -41,7 +43,7 @@ interface InteractionState {
 
     // Actions
     trackView: (exerciseId: string) => void;
-    trackPerform: (exerciseId: string, metadata?: Record<string, any>) => void;
+    trackPerform: (exerciseId: string, metadata?: InteractionMetadata) => void;
     trackAddToWorkout: (exerciseId: string) => void;
 
     // Sync
@@ -212,9 +214,21 @@ export const useInteractionStore = create<InteractionState>((set, get) => ({
  * Hook for tracking exercise interactions
  */
 export function useExerciseInteraction() {
-    const store = useInteractionStore();
     const { user } = useAuthStore();
     const flushIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    const flushInteractions = useInteractionStore((state) => state.flushInteractions);
+    const fetchTrending = useInteractionStore((state) => state.fetchTrending);
+    const fetchUserStats = useInteractionStore((state) => state.fetchUserStats);
+    const trackViewStore = useInteractionStore((state) => state.trackView);
+    const trackPerformStore = useInteractionStore((state) => state.trackPerform);
+    const trackAddToWorkout = useInteractionStore((state) => state.trackAddToWorkout);
+
+    const viewedExercises = useInteractionStore((state) => state.viewedExercises);
+    const performedExercises = useInteractionStore((state) => state.performedExercises);
+    const trendingExercises = useInteractionStore((state) => state.trendingExercises);
+    const streak = useInteractionStore((state) => state.streak);
+    const badges = useInteractionStore((state) => state.badges);
 
     // Set up periodic flushing of interactions
     useEffect(() => {
@@ -222,12 +236,12 @@ export function useExerciseInteraction() {
 
         // Flush every 30 seconds
         flushIntervalRef.current = setInterval(() => {
-            store.flushInteractions();
+            flushInteractions();
         }, 30000);
 
         // Flush on page unload
         const handleUnload = () => {
-            store.flushInteractions();
+            flushInteractions();
         };
         window.addEventListener('beforeunload', handleUnload);
 
@@ -237,96 +251,96 @@ export function useExerciseInteraction() {
             }
             window.removeEventListener('beforeunload', handleUnload);
             // Flush remaining on cleanup
-            store.flushInteractions();
+            flushInteractions();
         };
-    }, [user, store.flushInteractions]);
+    }, [user, flushInteractions]);
 
     // Fetch trending and user stats on mount
     useEffect(() => {
-        store.fetchTrending();
+        fetchTrending();
         if (user) {
-            store.fetchUserStats();
+            fetchUserStats();
         }
-    }, [user, store.fetchTrending, store.fetchUserStats]);
+    }, [user, fetchTrending, fetchUserStats]);
 
     // Track exercise view with debounce
     const trackView = useCallback(
         (exerciseId: string) => {
-            store.trackView(exerciseId);
+            trackViewStore(exerciseId);
         },
-        [store.trackView]
+        [trackViewStore]
     );
 
     // Track exercise performance
     const trackPerform = useCallback(
         (exerciseId: string, metadata?: { sets?: number; reps?: number; weight?: number }) => {
-            store.trackPerform(exerciseId, metadata);
+            trackPerformStore(exerciseId, metadata);
         },
-        [store.trackPerform]
+        [trackPerformStore]
     );
 
     // Check if exercise is trending
     const isTrending = useCallback(
         (exerciseId: string): boolean => {
-            return store.trendingExercises.some(
+            return trendingExercises.some(
                 (t) => t.exercise_id === exerciseId && t.trend_score > 50
             );
         },
-        [store.trendingExercises]
+        [trendingExercises]
     );
 
     // Get trending score for exercise
     const getTrendingScore = useCallback(
         (exerciseId: string): number => {
-            const trending = store.trendingExercises.find((t) => t.exercise_id === exerciseId);
+            const trending = trendingExercises.find((t) => t.exercise_id === exerciseId);
             return trending?.trend_score || 0;
         },
-        [store.trendingExercises]
+        [trendingExercises]
     );
 
     // Get exercise view count (from trending data)
     const getViewCount = useCallback(
         (exerciseId: string): number => {
-            const trending = store.trendingExercises.find((t) => t.exercise_id === exerciseId);
+            const trending = trendingExercises.find((t) => t.exercise_id === exerciseId);
             return Number(trending?.total_views || 0);
         },
-        [store.trendingExercises]
+        [trendingExercises]
     );
 
     // Get exercise perform count (from trending data)
     const getPerformCount = useCallback(
         (exerciseId: string): number => {
-            const trending = store.trendingExercises.find((t) => t.exercise_id === exerciseId);
+            const trending = trendingExercises.find((t) => t.exercise_id === exerciseId);
             return Number(trending?.total_performs || 0);
         },
-        [store.trendingExercises]
+        [trendingExercises]
     );
 
     return {
         // Tracking
         trackView,
         trackPerform,
-        trackAddToWorkout: store.trackAddToWorkout,
+        trackAddToWorkout,
 
         // Session data
-        viewedExercises: store.viewedExercises,
-        performedExercises: store.performedExercises,
+        viewedExercises,
+        performedExercises,
 
         // Trending
-        trendingExercises: store.trendingExercises,
+        trendingExercises,
         isTrending,
         getTrendingScore,
         getViewCount,
         getPerformCount,
-        refreshTrending: store.fetchTrending,
+        refreshTrending: fetchTrending,
 
         // User stats
-        streak: store.streak,
-        badges: store.badges,
-        refreshUserStats: store.fetchUserStats,
+        streak,
+        badges,
+        refreshUserStats: fetchUserStats,
 
         // Manual flush
-        flushInteractions: store.flushInteractions,
+        flushInteractions,
     };
 }
 

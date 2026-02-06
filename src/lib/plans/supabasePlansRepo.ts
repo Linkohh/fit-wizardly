@@ -21,14 +21,13 @@ function rowToPlan(row: PlansRow): Plan {
   const planPayload = row.plan;
   const plan = normalizePlanDates(planPayload, row.created_at);
 
-  // Attach helpful metadata (extra properties are fine at runtime).
   return {
-    ...(plan as object),
+    ...plan,
     id: row.id,
     userId: row.user_id,
     updatedAt: row.updated_at,
     schemaVersion: row.schema_version,
-  } as Plan;
+  };
 }
 
 function planToRow(plan: Plan, userId: string): Omit<PlansRow, 'created_at' | 'updated_at'> {
@@ -110,4 +109,3 @@ export async function deletePlanSupabase(id: string): Promise<void> {
 
   if (error) throw new Error(error.message);
 }
-

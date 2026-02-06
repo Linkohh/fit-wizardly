@@ -12,6 +12,7 @@ import type {
     WisdomResponse,
     WisdomContext,
     OptPhase,
+    Plan,
 } from '@/types/fitness';
 import { generateWisdomResponse } from '@/lib/wisdomTemplates';
 
@@ -45,7 +46,7 @@ interface WisdomState {
     isOpen: boolean;
 
     // Actions - Conversation
-    askQuestion: (question: string, planContext?: any) => Promise<WisdomResponse>;
+    askQuestion: (question: string, planContext?: Plan) => Promise<WisdomResponse>;
     addMessage: (message: WisdomMessage) => void;
     clearConversation: () => void;
 

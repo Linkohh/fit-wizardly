@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -114,29 +114,7 @@ export default function WizardPage() {
   // Move validation up so useEffect can use it
   const validation = getStepValidation(currentStep);
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if focus is in an input field (allow native behavior)
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
-        return;
-      }
-
-      if (e.key === 'Enter') {
-        if (validation.valid && !isGenerating) {
-          if (currentStep === 'review') handleGenerate();
-          else nextStep();
-        }
-      } else if (e.key === 'Escape') {
-        if (currentStepIndex > 0) prevStep();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentStep, currentStepIndex, validation.valid, isGenerating, nextStep, prevStep, selections]);
-
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     setIsGenerating(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -169,7 +147,29 @@ export default function WizardPage() {
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [navigate, savePlanToHistory, selections, setCurrentPlan, setIsGenerating, t, toast]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore if focus is in an input field (allow native behavior)
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
+        return;
+      }
+
+      if (e.key === 'Enter') {
+        if (validation.valid && !isGenerating) {
+          if (currentStep === 'review') handleGenerate();
+          else nextStep();
+        }
+      } else if (e.key === 'Escape') {
+        if (currentStepIndex > 0) prevStep();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentStep, currentStepIndex, handleGenerate, isGenerating, nextStep, prevStep, validation.valid]);
 
   const renderStep = () => {
     switch (currentStep) {

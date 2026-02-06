@@ -6,11 +6,19 @@ import { Trophy, Medal, Dumbbell, TrendingUp, Info } from 'lucide-react';
 import { useCircleStore } from '@/stores/circleStore';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
+type LeaderboardPeriod = 'week' | 'month' | 'all-time';
+
 export function CircleLeaderboardTab() {
     const { getLeaderboard } = useCircleStore();
-    const [period, setPeriod] = useState<'week' | 'month' | 'all-time'>('week');
+    const [period, setPeriod] = useState<LeaderboardPeriod>('week');
 
     const leaderboardData = getLeaderboard(period);
+
+    const handlePeriodChange = (value: string) => {
+        if (value === 'week' || value === 'month' || value === 'all-time') {
+            setPeriod(value);
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -27,7 +35,7 @@ export function CircleLeaderboardTab() {
                             </CardDescription>
                         </div>
 
-                        <Tabs value={period} onValueChange={(v) => setPeriod(v as any)} className="w-[300px]">
+                        <Tabs value={period} onValueChange={handlePeriodChange} className="w-[300px]">
                             <TabsList className="grid w-full grid-cols-3">
                                 <TabsTrigger value="week">Weekly</TabsTrigger>
                                 <TabsTrigger value="month">Monthly</TabsTrigger>

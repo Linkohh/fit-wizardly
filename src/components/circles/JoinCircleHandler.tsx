@@ -5,7 +5,7 @@
  * Automatically joins the user to the circle and redirects to the portal.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,12 +21,46 @@ export function JoinCircleHandler() {
     const navigate = useNavigate();
     const { toast } = useToast();
     const { user, isLoading: authLoading, setShowAuthModal } = useAuthStore();
-    const { joinCircle, circles, fetchUserCircles } = useCircleStore();
+    const joinCircle = useCircleStore((state) => state.joinCircle);
+    const fetchUserCircles = useCircleStore((state) => state.fetchUserCircles);
 
     const [status, setStatus] = useState<JoinStatus>('loading');
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [joinedCircleId, setJoinedCircleId] = useState<string | null>(null);
     const [circleName, setCircleName] = useState<string>('');
+
+    // Enhanced join that returns more details
+    const joinCircleWithDetails = useCallback(
+        async (
+            code: string
+        ): Promise<{
+            error: Error | null;
+            circleId?: string;
+            circleName?: string;
+        }> => {
+            const result = await joinCircle(code);
+
+            if (result.error) {
+                return { error: result.error };
+            }
+
+            // Refetch circles to get the newly joined circle
+            if (user) {
+                await fetchUserCircles(user.id);
+                const circle = useCircleStore.getState().circles.find(
+                    (c) => c.invite_code === code.toUpperCase()
+                );
+                return {
+                    error: null,
+                    circleId: circle?.id,
+                    circleName: circle?.name,
+                };
+            }
+
+            return { error: null };
+        },
+        [fetchUserCircles, joinCircle, user]
+    );
 
     useEffect(() => {
         async function handleJoin() {
@@ -50,7 +84,9 @@ export function JoinCircleHandler() {
 
             // Check if already a member of a circle with this invite code
             await fetchUserCircles(user.id);
-            const existingCircle = circles.find(c => c.invite_code === inviteCode.toUpperCase());
+            const existingCircle = useCircleStore
+                .getState()
+                .circles.find((c) => c.invite_code === inviteCode.toUpperCase());
 
             if (existingCircle) {
                 setStatus('already_member');
@@ -66,7 +102,9 @@ export function JoinCircleHandler() {
                 if (error.message.includes('Already a member')) {
                     // Refetch to get the circle ID
                     await fetchUserCircles(user.id);
-                    const circle = circles.find(c => c.invite_code === inviteCode.toUpperCase());
+                    const circle = useCircleStore
+                        .getState()
+                        .circles.find((c) => c.invite_code === inviteCode.toUpperCase());
                     if (circle) {
                         setStatus('already_member');
                         setCircleName(circle.name);
@@ -97,35 +135,16 @@ export function JoinCircleHandler() {
         }
 
         handleJoin();
-    }, [inviteCode, user, authLoading]);
-
-    // Enhanced join that returns more details
-    async function joinCircleWithDetails(code: string): Promise<{
-        error: Error | null;
-        circleId?: string;
-        circleName?: string;
-    }> {
-        const result = await joinCircle(code);
-
-        if (result.error) {
-            return { error: result.error };
-        }
-
-        // Refetch circles to get the newly joined circle
-        if (user) {
-            await fetchUserCircles(user.id);
-            const circle = useCircleStore.getState().circles.find(
-                c => c.invite_code === code.toUpperCase()
-            );
-            return {
-                error: null,
-                circleId: circle?.id,
-                circleName: circle?.name,
-            };
-        }
-
-        return { error: null };
-    }
+    }, [
+        authLoading,
+        fetchUserCircles,
+        inviteCode,
+        joinCircleWithDetails,
+        navigate,
+        setShowAuthModal,
+        toast,
+        user,
+    ]);
 
     // Loading state
     if (status === 'loading' || authLoading) {

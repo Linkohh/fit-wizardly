@@ -1,8 +1,8 @@
-import { TrendingUp, Target, Activity } from 'lucide-react';
+import { TrendingUp, Target, Activity, type LucideIcon } from 'lucide-react';
 import type { TFunction } from 'i18next';
 import type { Goal, ExperienceLevel } from '@/types/fitness';
 
-export const getGoals = (t: TFunction): { id: Goal; label: string; description: string; icon: any }[] => [
+export const getGoals = (t: TFunction): { id: Goal; label: string; description: string; icon: LucideIcon }[] => [
   {
     id: 'strength',
     label: t('wizard.goal.options.strength.label'),

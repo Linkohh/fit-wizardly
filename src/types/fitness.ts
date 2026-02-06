@@ -169,7 +169,7 @@ export interface Exercise {
   variations?: ExerciseVariation[]; // Linked variations
   metabolic?: MetabolicInfo; // Calories estimation data
   difficulty?: 'Beginner' | 'Intermediate' | 'Advanced' | 'Elite' | 'All Levels';
-  category?: string; // e.g. "Upper Push", "Cardio" - derived from library
+  category?: ExerciseCategory;
   subcategory?: string;
 }
 
@@ -218,6 +218,10 @@ export interface Plan {
   notes: string[];
   warmUp?: string[];
   coolDown?: string[];
+  // Persistence metadata (optional; populated by remote/local storage layers)
+  schemaVersion?: number;
+  updatedAt?: string;
+  userId?: string;
 }
 
 export interface Client {

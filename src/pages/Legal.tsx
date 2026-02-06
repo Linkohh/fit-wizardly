@@ -1,3 +1,4 @@
+import type { SVGProps } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -127,7 +128,7 @@ export default function LegalPage() {
     );
 }
 
-function DatabaseIcon(props: any) {
+function DatabaseIcon(props: SVGProps<SVGSVGElement>) {
     return (
         <svg
             {...props}

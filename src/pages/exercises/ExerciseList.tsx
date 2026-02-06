@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, Search, Dumbbell, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Exercise } from '@/types/exercises';
+import type { Exercise } from '@/types/fitness';
 
 export default function ExerciseList() {
     const { categoryId } = useParams();

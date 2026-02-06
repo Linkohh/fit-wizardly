@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MoveRight, Calculator, Scale, Ruler, Activity, Target } from "lucide-react";
 import { UserNutritionProfile, MacroTargets } from "@/types/nutrition";
 import { cn } from "@/lib/utils";
@@ -44,6 +44,48 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
 
     const [result, setResult] = useState<MacroTargets | null>(null);
 
+    const calculateMacros = useCallback(() => {
+        // Mifflin-St Jeor Equation (uses kg and cm internally)
+        let bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age;
+        bmr += profile.gender === 'male' ? 5 : -161;
+
+        // Activity Multipliers
+        const multipliers = {
+            sedentary: 1.2,
+            light: 1.375,
+            moderate: 1.55,
+            active: 1.725,
+            very_active: 1.9,
+        };
+
+        const tdee = bmr * multipliers[profile.activityLevel];
+
+        // Goal Adjustments
+        let targetCalories = tdee;
+        if (profile.goal === 'bulk') targetCalories += 400;
+        if (profile.goal === 'cut') targetCalories -= 500;
+
+        // Macro Split (Simplified High Protein)
+        // Protein: 2g per kg bodyweight
+        const protein = Math.round(profile.weight * 2.2);
+        const proteinCals = protein * 4;
+
+        // Fats: 0.8g per kg bodyweight
+        const fats = Math.round(profile.weight * 0.9);
+        const fatCals = fats * 9;
+
+        // Carbs: Remaining
+        const remainingCals = targetCalories - proteinCals - fatCals;
+        const carbs = Math.max(0, Math.round(remainingCals / 4));
+
+        setResult({
+            calories: Math.round(targetCalories),
+            protein,
+            carbs,
+            fats,
+        });
+    }, [profile]);
+
     // Initialize display values from initial profile
     useEffect(() => {
         if (initialProfile) {
@@ -55,16 +97,9 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
         }
     }, [initialProfile]);
 
-    // Recalculate on mount if profile exists
-    useEffect(() => {
-        if (initialProfile) {
-            calculateMacros();
-        }
-    }, []);
-
     useEffect(() => {
         calculateMacros();
-    }, [profile]);
+    }, [calculateMacros]);
 
     // Handle unit changes
     const handleWeightUnitChange = (newUnit: WeightUnit) => {
@@ -113,48 +148,6 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
         setDisplayInches(inches);
         const cm = feetInchesToCm(displayFeet, inches);
         setProfile({ ...profile, height: cm });
-    };
-
-    const calculateMacros = () => {
-        // Mifflin-St Jeor Equation (uses kg and cm internally)
-        let bmr = 10 * profile.weight + 6.25 * profile.height - 5 * profile.age;
-        bmr += profile.gender === 'male' ? 5 : -161;
-
-        // Activity Multipliers
-        const multipliers = {
-            sedentary: 1.2,
-            light: 1.375,
-            moderate: 1.55,
-            active: 1.725,
-            very_active: 1.9,
-        };
-
-        const tdee = bmr * multipliers[profile.activityLevel];
-
-        // Goal Adjustments
-        let targetCalories = tdee;
-        if (profile.goal === 'bulk') targetCalories += 400;
-        if (profile.goal === 'cut') targetCalories -= 500;
-
-        // Macro Split (Simplified High Protein)
-        // Protein: 2g per kg bodyweight
-        const protein = Math.round(profile.weight * 2.2);
-        const proteinCals = protein * 4;
-
-        // Fats: 0.8g per kg bodyweight
-        const fats = Math.round(profile.weight * 0.9);
-        const fatCals = fats * 9;
-
-        // Carbs: Remaining
-        const remainingCals = targetCalories - proteinCals - fatCals;
-        const carbs = Math.max(0, Math.round(remainingCals / 4));
-
-        setResult({
-            calories: Math.round(targetCalories),
-            protein,
-            carbs,
-            fats,
-        });
     };
 
     const activityOptions = [

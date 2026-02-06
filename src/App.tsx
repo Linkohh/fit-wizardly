@@ -1,5 +1,5 @@
 import { AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,34 +9,80 @@ import { Header } from "@/components/Header";
 import { useThemeStore } from "@/stores/themeStore";
 import { PageTransition } from "@/components/ui/page-transition";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import Index from "./pages/Index";
-import WizardPage from "./pages/Wizard";
-import PlanPage from "./pages/Plan";
-import NotFound from "./pages/NotFound";
-import ClientsPage from "./pages/Clients";
-import MCLIntegrationTest from "./pages/MCLIntegrationTest";
-import { ExercisesBrowser } from "./components/exercises/ExercisesBrowser";
 import { TrainerGuard } from "./components/TrainerGuard";
 import { OnboardingGuard } from "./components/OnboardingGuard";
-import { WorkoutLogger } from "./components/logging/WorkoutLogger";
-import CirclesPage from "./pages/Circles";
-import { CircleLayout } from "./components/circles/CircleLayout";
-import { JoinCircleHandler } from "./components/circles/JoinCircleHandler";
-import {
-  CircleFeedTab,
-  CircleLeaderboardTab,
-  CircleChallengesTab,
-  CircleMembersTab,
-  CircleSettingsTab,
-  CircleDashboardTab,
-} from "./components/circles/tabs";
-import OnboardingPage from "./pages/Onboarding";
 import { useAuthStore } from "./stores/authStore";
 import { CommandPalette } from "@/components/CommandPalette";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { RequireAuth } from "@/components/RequireAuth";
 import { usePlanStore } from "@/stores/planStore";
 import { useGlobalClickFeedback } from "@/hooks/useGlobalClickFeedback";
+import { Footer } from "@/components/Footer";
+import { ConsentModal } from "@/components/legal/ConsentModal";
+import { LivingBackground } from "@/components/ui/living-background";
+
+const Index = lazy(() => import("./pages/Index"));
+const WizardPage = lazy(() => import("./pages/Wizard"));
+const PlanPage = lazy(() => import("./pages/Plan"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ClientsPage = lazy(() => import("./pages/Clients"));
+const MCLIntegrationTest = lazy(() => import("./pages/MCLIntegrationTest"));
+const OnboardingPage = lazy(() => import("./pages/Onboarding"));
+const NutritionPage = lazy(() => import("./pages/Nutrition"));
+const CirclesPage = lazy(() => import("./pages/Circles"));
+const UserGuide = lazy(() => import("./pages/UserGuide"));
+const LegalPage = lazy(() => import("./pages/Legal"));
+
+const ExercisesBrowser = lazy(() =>
+  import("./components/exercises/ExercisesBrowser").then((module) => ({
+    default: module.ExercisesBrowser,
+  }))
+);
+const WorkoutLogger = lazy(() =>
+  import("./components/logging/WorkoutLogger").then((module) => ({
+    default: module.WorkoutLogger,
+  }))
+);
+const CircleLayout = lazy(() =>
+  import("./components/circles/CircleLayout").then((module) => ({
+    default: module.CircleLayout,
+  }))
+);
+const JoinCircleHandler = lazy(() =>
+  import("./components/circles/JoinCircleHandler").then((module) => ({
+    default: module.JoinCircleHandler,
+  }))
+);
+const CircleFeedTab = lazy(() =>
+  import("./components/circles/tabs").then((module) => ({
+    default: module.CircleFeedTab,
+  }))
+);
+const CircleLeaderboardTab = lazy(() =>
+  import("./components/circles/tabs").then((module) => ({
+    default: module.CircleLeaderboardTab,
+  }))
+);
+const CircleChallengesTab = lazy(() =>
+  import("./components/circles/tabs").then((module) => ({
+    default: module.CircleChallengesTab,
+  }))
+);
+const CircleMembersTab = lazy(() =>
+  import("./components/circles/tabs").then((module) => ({
+    default: module.CircleMembersTab,
+  }))
+);
+const CircleSettingsTab = lazy(() =>
+  import("./components/circles/tabs").then((module) => ({
+    default: module.CircleSettingsTab,
+  }))
+);
+const CircleDashboardTab = lazy(() =>
+  import("./components/circles/tabs").then((module) => ({
+    default: module.CircleDashboardTab,
+  }))
+);
 
 const queryClient = new QueryClient();
 
@@ -79,9 +125,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-import NutritionPage from "./pages/Nutrition";
-import UserGuide from "./pages/UserGuide";
-
 function AnimatedRoutes() {
   const location = useLocation();
 
@@ -90,9 +133,11 @@ function AnimatedRoutes() {
     return (
       <AnimatePresence mode="wait" initial={false}>
         <PageTransition key={location.pathname}>
-          <Routes location={location}>
-            <Route path="/onboarding" element={<OnboardingPage />} />
-          </Routes>
+          <Suspense fallback={null}>
+            <Routes location={location}>
+              <Route path="/onboarding" element={<OnboardingPage />} />
+            </Routes>
+          </Suspense>
         </PageTransition>
       </AnimatePresence>
     );
@@ -102,81 +147,78 @@ function AnimatedRoutes() {
     <OnboardingGuard>
       <AnimatePresence mode="wait" initial={false}>
         <PageTransition key={location.pathname}>
-          <Routes location={location}>
-            <Route path="/" element={<Index />} />
-            <Route path="/wizard" element={<WizardPage />} />
+          <Suspense fallback={null}>
+            <Routes location={location}>
+              <Route path="/" element={<Index />} />
+              <Route path="/wizard" element={<WizardPage />} />
 
-            {/* Protected Routes */}
-            <Route path="/plan" element={
-              <RequireAuth>
-                <PlanPage />
-              </RequireAuth>
-            } />
-            <Route path="/workout/:planId/:dayIndex" element={
-              <RequireAuth>
-                <WorkoutLogger />
-              </RequireAuth>
-            } />
-            <Route path="/nutrition" element={
-              <RequireAuth>
-                <NutritionPage />
-              </RequireAuth>
-            } />
-            <Route path="/exercises" element={
-              <RequireAuth>
-                <ExercisesBrowser />
-              </RequireAuth>
-            } />
-            <Route path="/clients" element={
-              <RequireAuth>
-                <TrainerGuard>
-                  <ClientsPage />
-                </TrainerGuard>
-              </RequireAuth>
-            }
-            />
-            {/* Circles Portal Routes */}
-            <Route path="/circles">
-              <Route index element={
+              {/* Protected Routes */}
+              <Route path="/plan" element={
                 <RequireAuth>
-                  <CirclesPage />
+                  <PlanPage />
                 </RequireAuth>
               } />
-
-              <Route path="join/:inviteCode" element={
-                <JoinCircleHandler />
-              } />
-
-              <Route path=":circleId" element={
-                <RequireAuth strict>
-                  <CircleLayout />
+              <Route path="/workout/:planId/:dayIndex" element={
+                <RequireAuth>
+                  <WorkoutLogger />
                 </RequireAuth>
-              }>
-                <Route index element={<CircleDashboardTab />} />
-                <Route path="feed" element={<CircleFeedTab />} />
-                <Route path="leaderboard" element={<CircleLeaderboardTab />} />
-                <Route path="challenges" element={<CircleChallengesTab />} />
-                <Route path="members" element={<CircleMembersTab />} />
-                <Route path="settings" element={<CircleSettingsTab />} />
+              } />
+              <Route path="/nutrition" element={
+                <RequireAuth>
+                  <NutritionPage />
+                </RequireAuth>
+              } />
+              <Route path="/exercises" element={
+                <RequireAuth>
+                  <ExercisesBrowser />
+                </RequireAuth>
+              } />
+              <Route path="/clients" element={
+                <RequireAuth>
+                  <TrainerGuard>
+                    <ClientsPage />
+                  </TrainerGuard>
+                </RequireAuth>
+              }
+              />
+              {/* Circles Portal Routes */}
+              <Route path="/circles">
+                <Route index element={
+                  <RequireAuth>
+                    <CirclesPage />
+                  </RequireAuth>
+                } />
+
+                <Route path="join/:inviteCode" element={
+                  <JoinCircleHandler />
+                } />
+
+                <Route path=":circleId" element={
+                  <RequireAuth strict>
+                    <CircleLayout />
+                  </RequireAuth>
+                }>
+                  <Route index element={<CircleDashboardTab />} />
+                  <Route path="feed" element={<CircleFeedTab />} />
+                  <Route path="leaderboard" element={<CircleLeaderboardTab />} />
+                  <Route path="challenges" element={<CircleChallengesTab />} />
+                  <Route path="members" element={<CircleMembersTab />} />
+                  <Route path="settings" element={<CircleSettingsTab />} />
+                </Route>
               </Route>
-            </Route>
 
-            <Route path="/mcl" element={<MCLIntegrationTest />} />
+              <Route path="/mcl" element={<MCLIntegrationTest />} />
 
-            <Route path="/legal" element={<LegalPage />} />
-            <Route path="/guide" element={<UserGuide />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              <Route path="/legal" element={<LegalPage />} />
+              <Route path="/guide" element={<UserGuide />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </PageTransition>
       </AnimatePresence>
     </OnboardingGuard>
   );
 }
-
-import LegalPage from "./pages/Legal";
-import { Footer } from "@/components/Footer";
-import { ConsentModal } from "@/components/legal/ConsentModal";
-import { LivingBackground } from "@/components/ui/living-background";
 
 const App = () => {
   // Monitor network status and show notifications

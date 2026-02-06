@@ -104,7 +104,7 @@ export function VolumeChart({ planId, height = 200 }: VolumeChartProps) {
                                                 {formatVolume(payload[0].value as number)} {preferredWeightUnit}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
-                                                {(payload[0].payload as any).workouts} workouts
+                                                {(payload[0].payload as { workouts?: number }).workouts} workouts
                                             </p>
                                         </div>
                                     );
