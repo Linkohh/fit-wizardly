@@ -235,6 +235,22 @@
             "context": "Construir força máxima é mais difícil apenas com peso corporal. Considere adicionar bandas ou pesos se possível."
         }
     },
+    "exercises": {
+        "detail": {
+            "muscles_targeted": "Músculos Alvo",
+            "equipment": "Equipamento",
+            "metabolic_impact": "Impacto Metabólico",
+            "high_burn": "Alto potencial de queima calórica",
+            "instructions": "Instruções",
+            "variations": "Variações",
+            "related": "Relacionados",
+            "history": "Histórico",
+            "pro_cues": "Dicas Pro",
+            "execution": "Execução Passo a Passo",
+            "no_history": "Sem Histórico Ainda",
+            "history_prompt": "Complete este exercício em um treino para começar a acompanhar seu histórico e progresso."
+        }
+    },
     "common": {
         "loading": "Carregando...",
         "error": "Algo deu errado",

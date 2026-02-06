@@ -1,10 +1,8 @@
 import { Exercise } from '@/types/fitness';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useRef, useMemo, useState, useCallback, forwardRef } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dumbbell, Flame, Activity, Heart, TrendingUp } from 'lucide-react';
-import QuickActions from './QuickActions';
+import { Dumbbell, Flame, Heart, TrendingUp, ChevronRight } from 'lucide-react';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { useExerciseInteraction } from '@/hooks/useExerciseInteraction';
 import { useHaptics } from '@/hooks/useHaptics';
@@ -14,7 +12,7 @@ import { cn } from '@/lib/utils';
 interface ExerciseCardProps {
     exercise: Exercise;
     onClick: (exercise: Exercise) => void;
-    index?: number; // For staggered animations
+    index?: number;
 }
 
 export const ExerciseCard = forwardRef<HTMLDivElement, ExerciseCardProps>(({ exercise, onClick, index = 0 }, ref) => {
@@ -22,7 +20,6 @@ export const ExerciseCard = forwardRef<HTMLDivElement, ExerciseCardProps>(({ exe
     const isInView = useInView(cardRef, { once: true, margin: '-50px' });
     const prefersReducedMotion = useReducedMotion();
 
-    // Stores and hooks
     const { isFavorite, toggleFavorite } = usePreferencesStore();
     const { isTrending, trackView } = useExerciseInteraction();
     const haptics = useHaptics();
@@ -30,60 +27,57 @@ export const ExerciseCard = forwardRef<HTMLDivElement, ExerciseCardProps>(({ exe
     const favorite = isFavorite(exercise.id);
     const trending = isTrending(exercise.id);
 
-    // Hover state for adaptive glow
     const [isHovered, setIsHovered] = useState(false);
 
-    // Get theme colors based on exercise category/type
     const theme = useMemo(() => getExerciseTheme(exercise), [exercise]);
     const cardStyles = useMemo(() => getExerciseCardStyles(exercise), [exercise]);
 
-    // Determine difficulty color
-    const difficultyColor = useMemo(() => ({
-        'Beginner': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-        'Intermediate': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30',
-        'Advanced': 'bg-red-500/20 text-red-300 border-red-500/30',
-        'Elite': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-        'All Levels': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-    }[exercise.difficulty || 'Intermediate'] || 'bg-slate-500/20 text-slate-300'), [exercise.difficulty]);
+    const difficultyConfig = useMemo(() => ({
+        'Beginner': { class: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25', dot: 'bg-emerald-400' },
+        'Intermediate': { class: 'bg-amber-500/15 text-amber-400 border-amber-500/25', dot: 'bg-amber-400' },
+        'Advanced': { class: 'bg-red-500/15 text-red-400 border-red-500/25', dot: 'bg-red-400' },
+        'Elite': { class: 'bg-purple-500/15 text-purple-400 border-purple-500/25', dot: 'bg-purple-400' },
+        'All Levels': { class: 'bg-blue-500/15 text-blue-400 border-blue-500/25', dot: 'bg-blue-400' },
+    }[exercise.difficulty || 'Intermediate'] || { class: 'bg-slate-500/15 text-slate-400', dot: 'bg-slate-400' }), [exercise.difficulty]);
 
-    // Handle card click
     const handleClick = useCallback(() => {
         haptics.light();
         trackView(exercise.id);
         onClick(exercise);
     }, [exercise, onClick, haptics, trackView]);
 
-    // Handle favorite toggle
     const handleFavoriteToggle = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         haptics.favoriteToggle();
         toggleFavorite(exercise.id);
     }, [exercise.id, haptics, toggleFavorite]);
 
-    // Animation variants
     const cardVariants = {
         hidden: {
             opacity: 0,
-            y: prefersReducedMotion ? 0 : 20,
+            y: prefersReducedMotion ? 0 : 16,
         },
         visible: {
             opacity: 1,
             y: 0,
             transition: {
-                duration: 0.4,
-                delay: prefersReducedMotion ? 0 : index * 0.05,
+                duration: 0.35,
+                delay: prefersReducedMotion ? 0 : index * 0.04,
                 ease: 'easeOut' as const,
             },
         },
         hover: {
-            y: prefersReducedMotion ? 0 : -5,
+            y: prefersReducedMotion ? 0 : -3,
             transition: { duration: 0.2 },
         },
         exit: {
             opacity: 0,
-            scale: 0.95,
+            scale: 0.97,
         },
     };
+
+    const primaryMuscle = exercise.primaryMuscles[0]?.replace('_', ' ');
+    const equipmentLabel = exercise.equipment[0]?.replace('_', ' ') || 'Bodyweight';
 
     return (
         <motion.div
@@ -101,36 +95,45 @@ export const ExerciseCard = forwardRef<HTMLDivElement, ExerciseCardProps>(({ exe
             role="article"
             aria-label={`View details for ${exercise.name}`}
         >
-            <Card
+            <div
                 className={cn(
-                    'h-full bg-black/40 backdrop-blur-md border-white/5 transition-all duration-300 overflow-hidden relative',
-                    'hover:border-opacity-50'
+                    'h-full rounded-xl bg-black/40 backdrop-blur-md border border-white/[0.06] transition-all duration-300 overflow-hidden relative',
+                    'hover:border-white/[0.12]'
                 )}
                 style={isHovered ? cardStyles.hover : cardStyles.default}
             >
-                {/* Adaptive gradient glow effect on hover */}
+                {/* Top accent line */}
+                <div
+                    className="h-[2px] w-full opacity-60 group-hover:opacity-100 transition-opacity"
+                    style={{ background: `linear-gradient(90deg, ${theme.glow}, ${theme.border}, transparent)` }}
+                />
+
+                {/* Subtle gradient overlay on hover */}
                 <div
                     className={cn(
-                        'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500',
+                        'absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none',
                         `bg-gradient-to-br ${theme.gradient}`
                     )}
                 />
 
-                <CardHeader className="p-4 pb-2 relative z-10">
-                    <div className="flex justify-between items-start gap-2">
+                {/* Card Content */}
+                <div className="relative z-10 p-4 space-y-3">
+                    {/* Header: Name + Difficulty */}
+                    <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-lg text-white group-hover:text-primary transition-colors line-clamp-1">
+                            <h3 className="font-semibold text-[15px] text-white/95 group-hover:text-white transition-colors leading-tight line-clamp-1">
                                 {exercise.name}
                             </h3>
-                            <p className="text-xs text-muted-foreground capitalize">
-                                {exercise.category} • {exercise.primaryMuscles[0]?.replace('_', ' ')}
+                            <p className="text-[11px] text-white/40 mt-0.5 capitalize tracking-wide">
+                                {exercise.category}
+                                {primaryMuscle && <> &middot; {primaryMuscle}</>}
                             </p>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-1.5 shrink-0">
                             {trending && (
                                 <Badge
                                     variant="outline"
-                                    className="bg-orange-500/20 text-orange-300 border-orange-500/30 text-[9px] px-1.5"
+                                    className="bg-orange-500/15 text-orange-400 border-orange-500/25 text-[9px] px-1.5 py-0"
                                 >
                                     <TrendingUp className="w-2.5 h-2.5 mr-0.5" />
                                     Hot
@@ -138,80 +141,66 @@ export const ExerciseCard = forwardRef<HTMLDivElement, ExerciseCardProps>(({ exe
                             )}
                             <Badge
                                 variant="outline"
-                                className={cn('text-[10px] uppercase tracking-wider', difficultyColor)}
+                                className={cn('text-[9px] uppercase tracking-wider px-1.5 py-0 font-medium', difficultyConfig.class)}
                             >
-                                {exercise.difficulty || 'Inter'}
+                                {exercise.difficulty || 'Intermediate'}
                             </Badge>
                         </div>
                     </div>
-                    {/* Favorite button */}
-                    <motion.button
-                        onClick={handleFavoriteToggle}
-                        className={cn(
-                            'absolute top-4 right-4 z-20 transition-colors',
-                            favorite ? 'text-red-500' : 'text-white/50 hover:text-red-500'
-                        )}
-                        aria-label={favorite ? 'Remove from favorites' : 'Add to favorites'}
-                        whileTap={{ scale: 0.9 }}
-                    >
-                        <Heart
-                            className={cn('w-5 h-5', favorite && 'fill-red-500')}
-                        />
-                    </motion.button>
-                </CardHeader>
 
-                <CardContent className="p-4 pt-2 relative z-10 space-y-3">
-                    {/* Visual Preview Placeholder */}
-                    <div
-                        className={cn(
-                            'w-full h-32 rounded-lg bg-black/50 border border-white/5 flex items-center justify-center overflow-hidden transition-colors',
-                            'group-hover:border-opacity-20'
-                        )}
-                        style={{
-                            borderColor: isHovered ? theme.border : undefined,
-                        }}
-                    >
-                        {exercise.imageUrl ? (
-                            <img
-                                src={exercise.imageUrl}
-                                alt={exercise.name}
-                                loading="lazy"
-                                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                            />
-                        ) : (
-                            <Activity
-                                className={cn(
-                                    'w-8 h-8 text-white/10 group-hover:text-primary/40 transition-colors',
-                                    theme.icon
-                                )}
-                            />
-                        )}
-                        <QuickActions
-                            exerciseId={exercise.id}
-                            exerciseName={exercise.name}
-                            isVisible={isHovered}
-                            onAddToWorkout={() => { }}
-                            onCompare={() => { }}
-                        />
-                    </div>
-
-                    {/* Metrics / Info */}
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                            <Dumbbell className="w-3 h-3" />
-                            <span className="capitalize text-nowrap truncate max-w-[80px]">
-                                {exercise.equipment[0]?.replace('_', ' ') || 'None'}
-                            </span>
+                    {/* Metadata row */}
+                    <div className="flex items-center gap-3 text-[11px] text-white/45">
+                        <div className="flex items-center gap-1.5">
+                            <Dumbbell className="w-3 h-3 shrink-0" />
+                            <span className="capitalize truncate">{equipmentLabel}</span>
                         </div>
                         {exercise.metabolic && (
-                            <div className="flex items-center gap-1" title="Metabolic Equivalent">
-                                <Flame className="w-3 h-3 text-orange-500/70" />
+                            <div className="flex items-center gap-1" title="Estimated calorie burn">
+                                <Flame className="w-3 h-3 text-orange-500/60 shrink-0" />
                                 <span>~{(exercise.metabolic.met * 75 * 10 / 200).toFixed(0)} cal</span>
                             </div>
                         )}
                     </div>
-                </CardContent>
-            </Card>
+
+                    {/* Muscle tags */}
+                    <div className="flex flex-wrap gap-1">
+                        {exercise.primaryMuscles.slice(0, 3).map((m) => (
+                            <span
+                                key={m}
+                                className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-white/55 capitalize border border-white/[0.04]"
+                            >
+                                {m.replace('_', ' ')}
+                            </span>
+                        ))}
+                        {exercise.primaryMuscles.length > 3 && (
+                            <span className="text-[10px] px-2 py-0.5 text-white/30">
+                                +{exercise.primaryMuscles.length - 3}
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Footer: Actions */}
+                    <div className="flex items-center justify-between pt-1 border-t border-white/[0.04]">
+                        <motion.button
+                            onClick={handleFavoriteToggle}
+                            className={cn(
+                                'p-1.5 rounded-md transition-colors',
+                                favorite ? 'text-red-500' : 'text-white/25 hover:text-red-400'
+                            )}
+                            aria-label={favorite ? 'Remove from favorites' : 'Add to favorites'}
+                            whileTap={{ scale: 0.85 }}
+                        >
+                            <Heart
+                                className={cn('w-4 h-4', favorite && 'fill-red-500')}
+                            />
+                        </motion.button>
+                        <div className="flex items-center gap-1 text-[11px] text-white/30 group-hover:text-white/50 transition-colors">
+                            <span>Details</span>
+                            <ChevronRight className="w-3 h-3" />
+                        </div>
+                    </div>
+                </div>
+            </div>
         </motion.div>
     );
 });

@@ -233,6 +233,22 @@
             "context": "Maximale Kraft aufzubauen ist nur mit Körpergewicht schwieriger. Erwäge Bänder oder Gewichte, wenn möglich."
         }
     },
+    "exercises": {
+        "detail": {
+            "muscles_targeted": "Zielmuskulatur",
+            "equipment": "Ausrüstung",
+            "metabolic_impact": "Metabolischer Effekt",
+            "high_burn": "Hohes Kalorienverbrennungspotenzial",
+            "instructions": "Anleitung",
+            "variations": "Variationen",
+            "related": "Verwandt",
+            "history": "Verlauf",
+            "pro_cues": "Profi-Tipps",
+            "execution": "Schritt-für-Schritt Ausführung",
+            "no_history": "Noch kein Verlauf",
+            "history_prompt": "Führe diese Übung in einem Training aus, um deinen Verlauf und Fortschritt zu verfolgen."
+        }
+    },
     "common": {
         "loading": "Wird geladen...",
         "error": "Etwas ist schiefgelaufen",

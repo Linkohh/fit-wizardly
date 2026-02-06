@@ -379,18 +379,18 @@
             "quick_sets": "Sets Rápidos:"
         },
         "detail": {
-            "instructions": "Instrucciones",
-            "related": "Relacionado",
-            "history": "Historial",
-            "muscles_targeted": "Músculos Trabajados",
+            "muscles_targeted": "Músculos Objetivo",
             "equipment": "Equipamiento",
             "metabolic_impact": "Impacto Metabólico",
             "high_burn": "Alto potencial de quema calórica",
-            "pro_cues": "Consejos Pro",
-            "execution": "Ejecución",
+            "instructions": "Instrucciones",
             "variations": "Variaciones",
-            "no_history": "Sin historial aún",
-            "history_prompt": "Completa este ejercicio para rastrear tu progreso."
+            "related": "Relacionados",
+            "history": "Historial",
+            "pro_cues": "Consejos Pro",
+            "execution": "Ejecución Paso a Paso",
+            "no_history": "Sin Historial Aún",
+            "history_prompt": "Completa este ejercicio en un entrenamiento para comenzar a rastrear tu historial y progreso."
         }
     },
     "commands": {

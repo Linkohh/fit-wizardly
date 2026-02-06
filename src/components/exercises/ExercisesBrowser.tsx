@@ -110,12 +110,13 @@ export function ExercisesBrowser() {
                         <span className="bg-primary/20 p-1 rounded-md text-primary text-sm">★</span>
                         Recommended for You
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {recommendedExercises.map((exercise) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {recommendedExercises.map((exercise, i) => (
                             <ExerciseCard
                                 key={`rec-${exercise.id}`}
                                 exercise={exercise}
                                 onClick={setSelectedExercise}
+                                index={i}
                             />
                         ))}
                     </div>
@@ -138,13 +139,14 @@ export function ExercisesBrowser() {
                     <Button onClick={clearFilters} variant="outline">Clear Filters</Button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     <AnimatePresence mode="popLayout">
-                        {displayedExercises.map((exercise) => (
+                        {displayedExercises.map((exercise, i) => (
                             <ExerciseCard
                                 key={exercise.id}
                                 exercise={exercise}
                                 onClick={setSelectedExercise}
+                                index={i}
                             />
                         ))}
                     </AnimatePresence>
