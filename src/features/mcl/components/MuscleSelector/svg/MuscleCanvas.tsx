@@ -52,8 +52,6 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
     return [...visibleMuscles].sort((a, b) => {
       const aSelected = selectedMuscles.includes(a.id);
       const bSelected = selectedMuscles.includes(b.id);
-      const aHovered = hoveredMuscle === a.id;
-      const bHovered = hoveredMuscle === b.id;
       const aHighlighted = highlightMap.has(a.id);
       const bHighlighted = highlightMap.has(b.id);
       const aDisabled = disabledSet.has(a.id);
@@ -63,11 +61,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
       if (aDisabled && !bDisabled) return -1;
       if (bDisabled && !aDisabled) return 1;
 
-      // Hovered muscle on top
-      if (aHovered && !bHovered) return 1;
-      if (bHovered && !aHovered) return -1;
-
-      // Selected muscles above highlighted but below hovered
+      // Selected muscles above highlighted
       if (aSelected && !bSelected) return 1;
       if (bSelected && !aSelected) return -1;
 
@@ -77,7 +71,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
 
       return 0;
     });
-  }, [visibleMuscles, selectedMuscles, hoveredMuscle, highlightMap, disabledSet]);
+  }, [visibleMuscles, selectedMuscles, highlightMap, disabledSet]);
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleMouseEnter = useCallback(

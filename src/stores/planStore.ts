@@ -26,9 +26,10 @@ import {
   postWorkoutToCircles,
   postPRToCircles,
 } from '@/lib/circleActivity';
+import { generateUuid } from '@/lib/uuid';
 
 // Helper for generating unique IDs
-const generateUniqueId = () => `log_${crypto.randomUUID()}`;
+const generateUniqueId = () => `log_${generateUuid()}`;
 
 // Helper for async operations with error handling
 const handleAsyncOperation = async <T>(
