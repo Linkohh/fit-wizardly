@@ -72,7 +72,7 @@ function getReactProps(element: Element): ReactPropsLike | null {
 
   for (const key of ownKeys) {
     if (!key.startsWith('__reactProps$')) continue;
-    const value = (element as Record<string, unknown>)[key];
+    const value = (element as unknown as Record<string, unknown>)[key];
     if (value && typeof value === 'object') {
       return value as ReactPropsLike;
     }

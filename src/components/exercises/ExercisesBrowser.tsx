@@ -51,7 +51,7 @@ export function ExercisesBrowser() {
         || filters.muscle !== 'all'
         || filters.difficulty !== 'all'
         || filters.equipment !== 'all'
-        || filters.search.trim() !== '';
+        || (filters.search ?? '').trim() !== '';
 
     const handleFilterChange = (key: string, value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
