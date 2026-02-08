@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { generateUuid } from '@/lib/uuid';
 
 // Analytics event types
 export interface AnalyticsEvent {
@@ -12,7 +11,7 @@ export interface AnalyticsEvent {
 }
 
 // Generate unique IDs using cryptographically secure random values
-const generateId = () => generateUuid();
+const generateId = () => crypto.randomUUID();
 
 interface AnalyticsState {
     // Consent

@@ -145,7 +145,6 @@ export const MusclePath: React.FC<MusclePathProps> = ({
       className={`muscle-path ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${shouldPulse ? 'muscle-pulse' : ''}`}
       style={{
         transformOrigin: 'center',
-        pointerEvents: 'visibleFill',
         ...(animationDelay ? { animationDelay } : {}),
       }}
       fill={fillColor}
@@ -154,13 +153,13 @@ export const MusclePath: React.FC<MusclePathProps> = ({
       initial={{ opacity: 0.25 }}
       animate={{
         opacity,
-        scale: isSelected ? 1.01 : 1,
+        scale: isHovered && !isDisabled ? (hoverIntensity === 'strong' ? 1.07 : 1.03) : isSelected ? 1.01 : 1,
         filter: glowFilter,
       }}
       transition={{
-        duration: 0.22,
+        duration: 0.25,
         ease: [0.4, 0, 0.2, 1], // Custom easing for smoothness
-        scale: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
+        scale: { type: 'spring', stiffness: 300, damping: 20 },
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={onMouseLeave}

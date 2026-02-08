@@ -14,7 +14,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useAuthStore } from '@/stores/authStore';
-import { generateUuid } from '@/lib/uuid';
 import type {
     ExerciseSettings,
     ExerciseCollection,
@@ -76,7 +75,7 @@ interface PreferencesState {
 }
 
 // Generate unique ID
-const generateId = () => generateUuid();
+const generateId = () => crypto.randomUUID();
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value);

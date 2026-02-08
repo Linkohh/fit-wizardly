@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ChevronRight, Trophy, Flame, Zap } from 'lucide-react';
 import { Exercise, MuscleGroup as LegacyMuscleGroup } from '@/types/fitness';
@@ -26,23 +26,23 @@ interface AnatomyFocusState {
 
 const BASE_ANATOMY_FOCUS: AnatomyFocusState = {
     origin: '50% 52%',
-    scale: 1.24,
+    scale: 1.16,
 };
 
 const GROUP_FOCUS_PROFILE: Record<MclMuscleGroup, { y: number; scale: number }> = {
-    chest: { y: 31, scale: 1.5 },
-    back: { y: 32, scale: 1.5 },
-    shoulders: { y: 26, scale: 1.56 },
-    arms: { y: 40, scale: 1.48 },
-    core: { y: 50, scale: 1.44 },
-    glutes: { y: 61, scale: 1.42 },
-    legs: { y: 73, scale: 1.5 },
-    calves: { y: 83, scale: 1.56 },
+    chest: { y: 31, scale: 1.34 },
+    back: { y: 32, scale: 1.34 },
+    shoulders: { y: 26, scale: 1.4 },
+    arms: { y: 40, scale: 1.33 },
+    core: { y: 50, scale: 1.3 },
+    glutes: { y: 61, scale: 1.28 },
+    legs: { y: 73, scale: 1.34 },
+    calves: { y: 83, scale: 1.38 },
 };
 
 function getDirectionalX(muscleId: string): number {
-    if (muscleId.includes('left')) return 38;
-    if (muscleId.includes('right')) return 62;
+    if (muscleId.includes('left')) return 36;
+    if (muscleId.includes('right')) return 64;
     return 50;
 }
 
@@ -119,10 +119,6 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
     // View state for anatomy toggle (initialized with smart default)
     const [currentView, setCurrentView] = useState<ViewType>(defaultView);
     const [hoveredMuscle, setHoveredMuscle] = useState<Muscle | null>(null);
-    const hoveredMuscleRef = useRef<Muscle | null>(null);
-    const hoverCandidateRef = useRef<Muscle | null>(null);
-    const pointerInsideAnatomyRef = useRef(false);
-    const hoverTransitionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Calculate total muscle count for badge
     const muscleCount = highlights.length;
@@ -130,60 +126,6 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
         () => resolveAnatomyFocus(currentView, hoveredMuscle),
         [currentView, hoveredMuscle]
     );
-
-    const clearHoverTransitionTimeout = useCallback(() => {
-        if (!hoverTransitionTimeoutRef.current) return;
-        clearTimeout(hoverTransitionTimeoutRef.current);
-        hoverTransitionTimeoutRef.current = null;
-    }, []);
-
-    const commitHoveredMuscle = useCallback((muscle: Muscle | null) => {
-        hoveredMuscleRef.current = muscle;
-        setHoveredMuscle((prev) => (prev?.id === muscle?.id ? prev : muscle));
-    }, []);
-
-    useEffect(() => {
-        hoveredMuscleRef.current = hoveredMuscle;
-    }, [hoveredMuscle]);
-
-    const handleAnatomyHover = useCallback((muscle: Muscle | null) => {
-        clearHoverTransitionTimeout();
-
-        if (!muscle) {
-            if (pointerInsideAnatomyRef.current) return;
-            hoverCandidateRef.current = null;
-            hoverTransitionTimeoutRef.current = setTimeout(() => {
-                commitHoveredMuscle(null);
-                hoverTransitionTimeoutRef.current = null;
-            }, 120);
-            return;
-        }
-
-        const current = hoveredMuscleRef.current;
-        if (current?.id === muscle.id) return;
-
-        const isGroupSwitch = current ? current.group !== muscle.group : false;
-        const isSideSwitch = current ? getDirectionalX(current.id) !== getDirectionalX(muscle.id) : false;
-        const applyDelay = current ? (isGroupSwitch || isSideSwitch ? 220 : 100) : 32;
-
-        hoverCandidateRef.current = muscle;
-        hoverTransitionTimeoutRef.current = setTimeout(() => {
-            const candidate = hoverCandidateRef.current;
-            if (candidate) {
-                commitHoveredMuscle(candidate);
-            }
-            hoverTransitionTimeoutRef.current = null;
-        }, applyDelay);
-    }, [clearHoverTransitionTimeout, commitHoveredMuscle]);
-
-    const handleAnatomyMouseLeave = useCallback(() => {
-        pointerInsideAnatomyRef.current = false;
-        clearHoverTransitionTimeout();
-        hoverCandidateRef.current = null;
-        commitHoveredMuscle(null);
-    }, [clearHoverTransitionTimeout, commitHoveredMuscle]);
-
-    useEffect(() => () => clearHoverTransitionTimeout(), [clearHoverTransitionTimeout]);
 
     if (!exercise) return null;
 
@@ -294,10 +236,7 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
                         {/* Muscle Diagram */}
                         <div
                             className="absolute inset-x-4 top-2 bottom-14 md:bottom-18 z-10 flex items-end justify-center"
-                            onMouseEnter={() => {
-                                pointerInsideAnatomyRef.current = true;
-                            }}
-                            onMouseLeave={handleAnatomyMouseLeave}
+                            onMouseLeave={() => setHoveredMuscle(null)}
                         >
                             <div className="relative h-full w-full max-w-[370px]">
                                 <motion.div
@@ -307,7 +246,7 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
                                     transition={
                                         reduceMotion
                                             ? { duration: 0 }
-                                            : { duration: 0.34, ease: [0.22, 1, 0.36, 1] }
+                                            : { type: 'spring', stiffness: 250, damping: 28, mass: 0.55 }
                                     }
                                 >
                                     <MuscleSelector
@@ -326,7 +265,9 @@ export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
                                         theme={themeMode}
                                         width="100%"
                                         height="100%"
-                                        onMuscleHover={handleAnatomyHover}
+                                        onMuscleHover={(muscle) => {
+                                            setHoveredMuscle(muscle);
+                                        }}
                                         className="bg-transparent"
                                     />
                                 </motion.div>

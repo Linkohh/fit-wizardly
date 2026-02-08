@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { generateUuid } from '@/lib/uuid';
 
 /**
  * Hook to detect online/offline status
@@ -108,7 +107,7 @@ class OfflineQueue {
         const queue = this.getQueue();
         queue.push({
             ...operation,
-            id: `op_${generateUuid()}`,
+            id: `op_${crypto.randomUUID()}`,
             timestamp: Date.now(),
         });
         localStorageWithFallback.setItem(this.STORAGE_KEY, JSON.stringify(queue));

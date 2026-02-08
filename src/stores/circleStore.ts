@@ -7,7 +7,6 @@
 
 import { create } from 'zustand';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { generateUuid } from '@/lib/uuid';
 import type {
     Circle,
     CircleMember,
@@ -468,7 +467,7 @@ export const useCircleStore = create<CircleState>((set, get) => ({
         const currentReactions = get().reactions;
         const activityReactions = currentReactions.get(activityId) || [];
         const newReaction: ActivityReaction = {
-            id: generateUuid(),
+            id: crypto.randomUUID(),
             activity_id: activityId,
             user_id: user.id,
             reaction_type: reactionType,

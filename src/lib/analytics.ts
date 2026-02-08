@@ -1,6 +1,5 @@
 // Analytics utility for tracking wizard completion funnel
 // Stub implementation - logs to console in dev, can be connected to external service
-import { generateUuid } from '@/lib/uuid';
 
 type AnalyticsEvent =
     | 'step_enter'
@@ -81,7 +80,7 @@ function getSessionId(): string {
     const key = 'fitwizard_session_id';
     let sessionId = sessionStorage.getItem(key);
     if (!sessionId) {
-        sessionId = `session_${generateUuid()}`;
+        sessionId = `session_${crypto.randomUUID()}`;
         sessionStorage.setItem(key, sessionId);
     }
     return sessionId;
