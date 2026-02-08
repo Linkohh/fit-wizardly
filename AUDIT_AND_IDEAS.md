@@ -1,0 +1,1605 @@
+# 🛡️ FitWizard Audit & Implementation Roadmap
+
+> **Status:** Living Document — Last verified: 2026-02-08  
+> **Goal:** Transition from "Prototype" to "Production-Grade Product"  
+> **Philosophy:** Fix the foundation before adding more decoration.  
+> **Audience:** Human developers and AI coding agents (Claude, Copilot, etc.)
+
+---
+
+## Table of Contents
+
+- [Quick Wins Summary](#-quick-wins-summary)
+- [Section 1: UI/UX Polish](#section-1-uiux-polish-12-items)
+- [Section 2: New Features](#section-2-new-features-7-items)
+- [Section 3: Sub-Feature Enhancements](#section-3-sub-feature-enhancements-10-items)
+- [Section 4: Fitness Domain Intelligence](#section-4-fitness-domain-intelligence-5-items)
+- [Section 5: Architecture & Code Quality](#section-5-architecture--code-quality-5-items)
+- [Section 6: Growth & Monetization](#section-6-growth--monetization-3-items)
+- [Phase Timeline](#phase-timeline)
+
+---
+
+## 🏁 Quick Wins Summary
+
+High impact, low effort. Start here.
+
+| # | ID  | Title                          | Priority | Effort | Impact                                        |
+|---|-----|--------------------------------|----------|--------|-----------------------------------------------|
+| 1 | 1.1 | Nutrition Page Light Mode Fix  | CRITICAL | S      | Fixes invisible text for ~50% of users        |
+| 2 | 1.2 | SetLogger Touch Targets        | HIGH     | S      | Prevents misclicks during workouts            |
+| 3 | 3.1 | "Last Time" History Data       | HIGH     | M      | Enables progressive overload tracking         |
+| 4 | 2.1 | Rest Timer Between Sets        | HIGH     | M      | #1 most-requested fitness app feature         |
+| 5 | 3.2 | Difficulty Rating Picker       | MEDIUM   | S      | Replaces hardcoded RPE value                  |
+| 6 | 3.3 | Share Workout Card             | MEDIUM   | M      | Social growth via image sharing               |
+| 7 | 1.3 | Nutrition Tabs Mobile Overflow | MEDIUM   | S      | Fixes broken layout on iPhone SE              |
+| 8 | 5.2 | Offline Queue Wiring           | HIGH     | M      | Prevents data loss in gym basements           |
+| 9 | 1.5 | Confetti on PR Detection       | MEDIUM   | S      | Emotional reward, hook already built          |
+
+---
+
+## Section 1: UI/UX Polish (12 items)
+
+These items fix immediate visual bugs and usability issues found in the current codebase.
+
+---
+
+### [1.1] Nutrition Page Light Mode Breakage
+
+- **Priority:** CRITICAL
+- **Effort:** S (1-2h)
+- **Impact:** Fixes invisible text and broken UI for all light-mode users (~50% of mobile users default to light mode)
+- **Files:** `src/pages/Nutrition.tsx`, `src/components/nutrition/HydrationTracker.tsx`, `src/components/nutrition/FoodLogger.tsx`, `src/components/nutrition/NutritionInsights.tsx`, `src/components/ui/ProgressRing.tsx`
+- **Dependencies:** None
+
+The app was designed dark-mode-first. Hardcoded `white` and `black` color patterns make entire sections invisible in light mode. Every instance must be replaced with semantic design tokens.
+
+#### File: `src/pages/Nutrition.tsx`
+
+| Line | Current Code | Replacement |
+|------|-------------|-------------|
+| 59 | `hover:text-white` | `hover:text-foreground` |
+| 62 | `from-white to-white/50` | `from-foreground to-foreground/50` |
+| 71 | `bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 ... hover:text-white` | `bg-muted/50 border border-border hover:bg-muted hover:border-ring/20 ... hover:text-foreground` |
+| 80 | `bg-white/5 rounded-xl p-1 border border-white/10` | `bg-muted/50 rounded-xl p-1 border border-border` |
+| 81 | `hover:bg-white/10 ... hover:text-white` | `hover:bg-muted ... hover:text-foreground` |
+| 88 | `hover:bg-white/10 ... hover:text-white` | `hover:bg-muted ... hover:text-foreground` |
+| 100 | `hover:text-white` | `hover:text-foreground` |
+| 131 | `bg-white/5` | `bg-muted/50` |
+| 187 | `bg-white/5` | `bg-muted/50` |
+| 191 | `text-white/80` | `text-foreground/80` |
+| 198 | `bg-white/5 border border-white/5 hover:bg-white/10` | `bg-muted/50 border border-border/50 hover:bg-muted` |
+| 200 | `text-white` | `text-foreground` |
+| 241 | `bg-white/10` | `bg-muted/20` |
+
+**Example — Line 71 (Edit Goals button):**
+
+```tsx
+// BEFORE (line 71):
+className="inline-flex items-center gap-2 px-4 py-2 mt-3 text-sm font-medium rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all text-muted-foreground hover:text-white"
+
+// AFTER:
+className="inline-flex items-center gap-2 px-4 py-2 mt-3 text-sm font-medium rounded-xl bg-muted/50 border border-border hover:bg-muted hover:border-ring/20 transition-all text-muted-foreground hover:text-foreground"
+```
+
+**Example — Line 198 (Meal log row):**
+
+```tsx
+// BEFORE (line 198):
+<div className="group flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all ..."
+
+// AFTER:
+<div className="group flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border/50 hover:bg-muted transition-all ..."
+```
+
+#### File: `src/components/nutrition/HydrationTracker.tsx`
+
+| Line | Current Code | Replacement |
+|------|-------------|-------------|
+| 59 | `text-blue-100` | `text-blue-600 dark:text-blue-100` |
+| 68 | `bg-black/20 backdrop-blur-sm` | `bg-muted/30 backdrop-blur-sm` |
+| 82 | `text-white/80` | `text-foreground/80` |
+| 91 | `bg-white/5` | `bg-muted/50` |
+| 98 | `bg-white/5` | `bg-muted/50` |
+| 105 | `bg-white/5` | `bg-muted/50` |
+
+**Example — Line 59 (Current water amount):**
+
+```tsx
+// BEFORE (line 59):
+<div className="text-3xl font-bold text-blue-100">{currentAmount} ...
+
+// AFTER:
+<div className="text-3xl font-bold text-blue-600 dark:text-blue-100">{currentAmount} ...
+```
+
+**Example — Line 68 (Circle background):**
+
+```tsx
+// BEFORE (line 68):
+className="w-40 h-40 rounded-full border-4 flex items-center justify-center relative bg-black/20 backdrop-blur-sm ..."
+
+// AFTER:
+className="w-40 h-40 rounded-full border-4 flex items-center justify-center relative bg-muted/30 backdrop-blur-sm ..."
+```
+
+#### File: `src/components/nutrition/FoodLogger.tsx`
+
+| Line | Current Code | Replacement |
+|------|-------------|-------------|
+| 98 | `hover:bg-white/10` | `hover:bg-muted` |
+| 108 | `border-dashed border-white/20` | `border-dashed border-border` |
+| 120 | `bg-white/5 ... border border-white/5` | `bg-muted/50 ... border border-border/50` |
+| 134 | `bg-black/20` | `bg-muted/30` |
+| 139 | `"text-muted-foreground hover:text-white"` | `"text-muted-foreground hover:text-foreground"` |
+| 163 | `bg-black/20 border border-white/10` | `bg-muted/30 border border-border` |
+| 170 | `hover:bg-white/5 ... hover:border-white/10` | `hover:bg-muted/50 ... hover:border-border` |
+| 176 | `text-white` | `text-foreground` |
+| 214 | `bg-white/5 border border-white/5` | `bg-muted/50 border border-border/50` |
+| 241 | `bg-black/20 border border-white/10` | `bg-muted/30 border border-border` |
+| 252 | `bg-black/20 border border-white/10` | `bg-muted/30 border border-border` |
+| 262 | `bg-black/20 border border-white/10` | `bg-muted/30 border border-border` |
+| 272 | `bg-black/20 border border-white/10` | `bg-muted/30 border border-border` |
+| 282 | `bg-black/20 border border-white/10` | `bg-muted/30 border border-border` |
+| 296 | `border-white/10` | `border-border` |
+| 304 | `hover:bg-white/5` | `hover:bg-muted/50` |
+
+**Example — Line 134 (Logging tabs container):**
+
+```tsx
+// BEFORE (line 134):
+<div className="flex p-1 bg-black/20 rounded-xl mb-4">
+
+// AFTER:
+<div className="flex p-1 bg-muted/30 rounded-xl mb-4">
+```
+
+**Example — Line 241 (Custom food name input):**
+
+```tsx
+// BEFORE (line 241):
+className="w-full bg-black/20 border border-white/10 rounded-xl p-3 outline-none focus:ring-2 ring-primary/50"
+// AFTER:
+className="w-full bg-muted/30 border border-border rounded-xl p-3 outline-none focus:ring-2 ring-primary/50"
+```
+
+#### File: `src/components/nutrition/NutritionInsights.tsx`
+
+| Line | Current Code | Replacement |
+|------|-------------|-------------|
+| 94 | `'rgba(255,255,255,0.08)'` (JS color) | `'hsl(var(--muted))'` or `'rgba(128,128,128,0.08)'` |
+| 241 | `bg-white/5 h-3 rounded-full` | `bg-muted/10 h-3 rounded-full` |
+| 251 | `bg-white/5 h-3 rounded-full` | `bg-muted/10 h-3 rounded-full` |
+| 298 | `color: 'bg-white'` (Calories bar) | `color: 'bg-foreground'` |
+| 313 | `bg-white/5 h-2 rounded-full` | `bg-muted/10 h-2 rounded-full` |
+
+> **Note:** Lines 99, 221, 276, 334 use the `glass-card` CSS class. Audit this class in `src/index.css` to ensure it uses semantic tokens.
+
+#### File: `src/components/ui/ProgressRing.tsx`
+
+| Line | Current Code | Replacement |
+|------|-------------|-------------|
+| 39 | `className="text-white/5"` | `className="text-muted/20"` |
+| 65 | `group-hover:text-white` | `group-hover:text-foreground` |
+| 66 | `text-white/30 group-hover:text-white/50` | `text-muted-foreground/50 group-hover:text-muted-foreground` |
+
+**Example — Line 39 (Background ring):**
+
+```tsx
+// BEFORE (line 39):
+className="text-white/5"
+
+// AFTER:
+className="text-muted/20"
+```
+
+**Why:** This component is used on the Nutrition dashboard to show calorie/macro progress rings. With `text-white/5`, the background ring is invisible in light mode, making it look like a floating number with no context.
+
+---
+
+### [1.2] SetLogger Touch Targets
+
+- **Priority:** HIGH
+- **Effort:** S (1-2h)
+- **Impact:** Prevents misclicks during workouts — users are often sweaty and distracted
+- **Files:** `src/components/logging/SetLogger.tsx`
+- **Dependencies:** None
+
+All four increment/decrement buttons are `h-8 w-8` (32px). Apple HIG and WCAG 2.5.5 both require 44px minimum touch targets.
+
+**Affected Lines:** 129, 145, 163, 186
+
+```tsx
+// BEFORE (lines 129, 145, 163, 186):
+className="h-8 w-8"
+
+// AFTER:
+className="h-8 w-8 min-h-[44px] min-w-[44px]"
+```
+
+**Why (CPT rationale):** During a working set, grip fatigue and sweat reduce fine motor control. A 32px button requires precision that a fatigued lifter doesn't have. The 44px minimum is a usability floor, not a ceiling.
+
+---
+
+### [1.3] Nutrition Tabs Mobile Overflow
+
+- **Priority:** MEDIUM
+- **Effort:** S (1h)
+- **Impact:** Fixes broken layout on iPhone SE (375px) and smaller devices
+- **Files:** `src/pages/Nutrition.tsx`, lines 111-119
+- **Dependencies:** None
+
+The three tab labels "Dashboard", "Insights", "Learn" overflow on screens < 375px.
+
+```tsx
+// BEFORE (line 112):
+<TabsTrigger value="dashboard" className="py-3 rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+    <LayoutDashboard className="w-4 h-4" /> Dashboard
+</TabsTrigger>
+
+// AFTER:
+<TabsTrigger value="dashboard" className="py-3 rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+    <LayoutDashboard className="w-4 h-4" />
+    <span className="hidden sm:inline">Dashboard</span>
+</TabsTrigger>
+```
+
+Apply the same `<span className="hidden sm:inline">` pattern to:
+- Line 115: "Insights"
+- Line 118: "Learn"
+
+On screens < 640px, only icons show. Labels appear at the `sm:` breakpoint and above.
+
+---
+
+### [1.4] WorkoutLogger Header Mobile Collision
+
+- **Priority:** MEDIUM
+- **Effort:** S (1h)
+- **Impact:** Prevents UI elements from overlapping on 320px screens
+- **Files:** `src/components/logging/WorkoutLogger.tsx`, lines 149-167
+- **Dependencies:** None
+
+The Cancel button, timer display, and exercise count badge share one flex row. On 320px screens (iPhone SE 1st gen), these elements collide.
+
+```tsx
+// BEFORE (line 149):
+<div className="flex items-center justify-between">
+    <Button variant="ghost" size="sm" onClick={() => setShowCancelDialog(true)}>
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        {t('workout.cancel')}
+    </Button>
+    <div className="flex items-center gap-2 text-lg font-mono">
+        <Timer className="h-5 w-5 text-primary" />
+        <span className="font-semibold">{formattedTime}</span>
+    </div>
+    <Badge variant="outline" className="font-semibold">
+        {completedExercises}/{totalExercises}
+    </Badge>
+</div>
+
+// AFTER:
+<div className="flex items-center justify-between gap-2">
+    <Button variant="ghost" size="sm" onClick={() => setShowCancelDialog(true)} className="shrink-0">
+        <ArrowLeft className="h-4 w-4 sm:mr-2" />
+        <span className="hidden sm:inline">{t('workout.cancel')}</span>
+    </Button>
+    <div className="flex items-center gap-2 text-base sm:text-lg font-mono">
+        <Timer className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+        <span className="font-semibold">{formattedTime}</span>
+    </div>
+    <Badge variant="outline" className="font-semibold shrink-0">
+        {completedExercises}/{totalExercises}
+    </Badge>
+</div>
+```
+
+On mobile: hide the "Cancel" text (arrow icon only), reduce timer font size.
+
+---
+
+### [1.5] Confetti on PR Detection
+
+- **Priority:** MEDIUM
+- **Effort:** S (30min)
+- **Impact:** Emotional reward when users hit a personal record — the hook is already built
+- **Files:** `src/components/logging/WorkoutSummary.tsx`
+- **Dependencies:** None
+
+**Current state:** Line 256 has `{/* Confetti animation placeholder */}` followed by a CSS keyframe for `bounce-slow`. The actual confetti is never fired.
+
+The `useConfetti` hook exists at `src/hooks/useConfetti.ts` and exports a `fire` method (line 102/141).
+
+**Implementation:**
+
+```tsx
+// Add import at top of WorkoutSummary.tsx:
+import { useConfetti } from '@/hooks/useConfetti';
+import { useEffect } from 'react';
+
+// Add inside WorkoutSummary component (after line 29, after workoutPRs calculation):
+const { fire: fireConfetti } = useConfetti();
+
+useEffect(() => {
+    if (workoutPRs.length > 0) {
+        // Small delay so the user sees the summary before confetti
+        const timer = setTimeout(() => fireConfetti(), 500);
+        return () => clearTimeout(timer);
+    }
+}, []); // Fire once on mount
+```
+
+After wiring confetti, the CSS keyframe block at lines 257-265 (`animate-bounce-slow`) can remain for the Trophy icon animation — it's separate from confetti.
+
+---
+
+### [1.6] Meal Delete Button Touch Accessibility
+
+- **Priority:** MEDIUM
+- **Effort:** S (15min)
+- **Impact:** Makes the delete button visible on mobile (currently requires hover, which doesn't exist on touch)
+- **Files:** `src/pages/Nutrition.tsx`, line 218
+- **Dependencies:** None
+
+```tsx
+// BEFORE (line 218):
+className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+
+// AFTER:
+className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+```
+
+**Why:** Touch devices have no hover state. With `opacity-0`, the delete button is permanently invisible on phones. The fix shows it always on mobile, while preserving the hover-reveal effect on desktop.
+
+---
+
+### [1.7] HydrationTracker Circle Light Mode
+
+- **Priority:** LOW
+- **Effort:** S (15min)
+- **Impact:** Removes dark smudge on the hydration circle in light mode
+- **Files:** `src/components/nutrition/HydrationTracker.tsx`, line 68
+- **Dependencies:** None
+
+```tsx
+// BEFORE (line 68):
+className="... bg-black/20 backdrop-blur-sm ..."
+
+// AFTER:
+className="... bg-muted/30 backdrop-blur-sm ..."
+```
+
+---
+
+### [1.8] Skeleton Loading for Nutrition Dashboard
+
+- **Priority:** LOW
+- **Effort:** S (1h)
+- **Impact:** Prevents layout shift and blank states while nutrition data loads
+- **Files:** Create `src/components/nutrition/NutritionSkeleton.tsx`
+- **Dependencies:** None
+
+The Plan page has `PlanSkeleton.tsx` but the Nutrition page has no loading skeleton. Create a `NutritionSkeleton.tsx` using the same shimmer pattern from `src/components/plan/PlanSkeleton.tsx`.
+
+---
+
+### [1.9] FoodLogger Favorites Scroll Indicator
+
+- **Priority:** LOW
+- **Effort:** S (30min)
+- **Impact:** Visual affordance that the favorites list is scrollable
+- **Files:** `src/components/nutrition/FoodLogger.tsx`, line 118
+- **Dependencies:** None
+
+The favorites horizontal scroll uses `scrollbar-hide` but has no visual indicator that more items exist off-screen.
+
+```tsx
+// Add gradient fade edges to the scroll container:
+// BEFORE (line 118):
+<div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+
+// AFTER:
+<div className="relative">
+    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        {/* ...favorites... */}
+    </div>
+    {favorites.length > 3 && (
+        <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-card to-transparent pointer-events-none" />
+    )}
+</div>
+```
+
+---
+
+### [1.10] Empty State Illustrations
+
+- **Priority:** LOW
+- **Effort:** M (3h)
+- **Impact:** Polishes the empty states from plain icons to illustrated SVGs
+- **Files:** Multiple pages
+- **Dependencies:** None
+
+Currently, empty states use a simple icon + text pattern. Replace with richer illustrated SVGs:
+
+| File | Line | Current Icon | Suggested Upgrade |
+|------|------|-------------|-------------------|
+| `src/components/logging/WorkoutLogger.tsx` | 78 | `<Dumbbell>` | Illustrated dumbbell with motion lines |
+| `src/pages/Nutrition.tsx` | 187-188 | `<UtensilsCrossed>` | Illustrated plate with utensils |
+| `src/components/nutrition/FoodLogger.tsx` | 209 | `<Heart>` | Illustrated star/bookmark |
+| `src/pages/Plan.tsx` | 66-67 | `<Wand2>` | Illustrated wizard wand with sparkles |
+
+---
+
+### [1.11] Glass Card Light Mode Audit
+
+- **Priority:** LOW
+- **Effort:** S (1h)
+- **Impact:** Ensures the `glass-card` CSS class works correctly in light mode
+- **Files:** `src/index.css` (audit only), multiple component files
+- **Dependencies:** None
+
+The `glass-card` class is used extensively in `NutritionInsights.tsx` (lines 99, 221, 276, 334), `HydrationTracker.tsx` (line 35), `FoodLogger.tsx` (line 94), and `Nutrition.tsx` (lines 128, 180, 234). Verify that the CSS definition in `index.css` uses semantic tokens and doesn't assume a dark background.
+
+---
+
+### [1.12] NutritionInsights Score Bar Color
+
+- **Priority:** LOW
+- **Effort:** S (15min)
+- **Impact:** Fixes the "Calories" score bar being invisible in light mode
+- **Files:** `src/components/nutrition/NutritionInsights.tsx`, line 298
+- **Dependencies:** Item 1.1
+
+```tsx
+// BEFORE (line 298):
+<ScoreBreakdownRow label="Calories" value={score.breakdown.calorieAdherence} max={40} color="bg-white" />
+
+// AFTER:
+<ScoreBreakdownRow label="Calories" value={score.breakdown.calorieAdherence} max={40} color="bg-foreground" />
+```
+
+**Why:** `bg-white` makes the bar invisible on a white background. `bg-foreground` adapts to both themes.
+
+---
+
+## Section 2: New Features (7 items)
+
+New pages, components, and capabilities to add.
+
+---
+
+### [2.1] Rest Timer Between Sets
+
+- **Priority:** HIGH
+- **Effort:** M (3-5h)
+- **Impact:** The #1 most-requested feature in fitness apps — keeps users engaged in the app between sets instead of switching to Instagram
+- **Files:**
+  - Create: `src/components/logging/RestTimer.tsx`
+  - Modify: `src/components/logging/WorkoutLogger.tsx`
+  - Modify: `src/stores/planStore.ts` (optional: add `restTimerEndTime` to `ActiveWorkout`)
+- **Dependencies:** None
+
+**Context:** The `prescription.restSeconds` field is already displayed at `WorkoutLogger.tsx` line 203 (`{prescription.restSeconds}s rest`) but is never used functionally.
+
+**Component Blueprint — `src/components/logging/RestTimer.tsx`:**
+
+```tsx
+import { useState, useEffect, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { ProgressRing } from '@/components/ui/ProgressRing';
+import { useHaptics } from '@/hooks/useHaptics';
+import { SkipForward, Play, Pause } from 'lucide-react';
+
+interface RestTimerProps {
+    durationSeconds: number;
+    onComplete: () => void;
+    onSkip: () => void;
+}
+
+export function RestTimer({ durationSeconds, onComplete, onSkip }: RestTimerProps) {
+    const [remaining, setRemaining] = useState(durationSeconds);
+    const [isPaused, setIsPaused] = useState(false);
+    const { success: hapticSuccess } = useHaptics();
+
+    useEffect(() => {
+        if (isPaused || remaining <= 0) return;
+
+        const interval = setInterval(() => {
+            setRemaining((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    hapticSuccess(); // Vibrate on completion
+                    onComplete();
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [isPaused, remaining, onComplete, hapticSuccess]);
+
+    const progress = ((durationSeconds - remaining) / durationSeconds) * 100;
+
+    return (
+        <div className="flex flex-col items-center py-6 px-4 rounded-xl bg-primary/5 border border-primary/20 animate-in fade-in slide-in-from-top-2">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider mb-3">Rest Timer</span>
+
+            <ProgressRing
+                label=""
+                current={durationSeconds - remaining}
+                target={durationSeconds}
+                color="text-primary"
+                size="lg"
+            />
+
+            <div className="text-3xl font-mono font-bold mt-2 tabular-nums">
+                {Math.floor(remaining / 60)}:{(remaining % 60).toString().padStart(2, '0')}
+            </div>
+
+            <div className="flex gap-3 mt-4">
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsPaused(!isPaused)}
+                >
+                    {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+                </Button>
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onSkip}
+                    className="text-muted-foreground"
+                >
+                    <SkipForward className="h-4 w-4 mr-1" />
+                    Skip Rest
+                </Button>
+            </div>
+        </div>
+    );
+}
+```
+
+**Integration in `WorkoutLogger.tsx`:**
+
+Insert after the `SetLogger` map (after line 232), inside the `CardContent`:
+
+```tsx
+// After the SetLogger map, before </CardContent>:
+{!currentExercise.skipped && (() => {
+    const lastCompletedIdx = currentExercise.sets.findLastIndex(s => s.completed);
+    const hasNextSet = lastCompletedIdx >= 0 && lastCompletedIdx < currentExercise.sets.length - 1;
+    const nextSetNotDone = hasNextSet && !currentExercise.sets[lastCompletedIdx + 1].completed;
+
+    return hasNextSet && nextSetNotDone ? (
+        <RestTimer
+            durationSeconds={prescription.restSeconds}
+            onComplete={() => { /* auto-focus next set */ }}
+            onSkip={() => { /* dismiss timer */ }}
+        />
+    ) : null;
+})()}
+```
+
+**Optional Store Change — `src/stores/planStore.ts` line 54:**
+
+```typescript
+interface ActiveWorkout {
+    // ... existing fields ...
+    restTimerEndTime: number | null; // NEW: Timestamp when rest timer expires
+}
+```
+
+This allows persisting the timer across re-renders if the user navigates away and back.
+
+---
+
+### [2.2] Workout History Page
+
+- **Priority:** MEDIUM
+- **Effort:** L (1-2 days)
+- **Impact:** Users can review past workouts, track consistency, and see progress over time
+- **Files:**
+  - Create: `src/pages/History.tsx`
+  - Create: `src/components/history/CalendarHeatmap.tsx`
+  - Create: `src/components/history/WorkoutHistoryCard.tsx`
+  - Modify: `src/App.tsx` (add route after line 165)
+  - Modify: `src/components/Header.tsx` (add nav item to `navItems` array, line 46-67)
+- **Dependencies:** None
+
+**Data Source:** `usePlanStore().workoutLogs` (line 74 of `planStore.ts`, capped at 100 entries, sorted newest-first per line 413).
+
+**Route Addition — `src/App.tsx` (after line 165):**
+
+```tsx
+<Route path="/history" element={
+    <RequireAuth>
+        <HistoryPage />
+    </RequireAuth>
+} />
+```
+
+**Nav Item — `src/components/Header.tsx` (inside `navItems` array, after the exercises entry ~line 58):**
+
+```tsx
+{
+    path: '/history',
+    label: t('nav.history', 'History'),
+},
+```
+
+**CalendarHeatmap Component:**
+- 7-column grid (Mon-Sun), rows = weeks
+- Each cell colored by volume intensity (gray = no workout, green shades = volume)
+- Uses `date-fns` (already installed) for week calculations
+- Clicking a day opens `WorkoutHistoryCard` with that day's log details
+
+---
+
+### [2.3] Profile / Settings Page
+
+- **Priority:** MEDIUM
+- **Effort:** M (4-6h)
+- **Impact:** Consolidates scattered settings into one discoverable location
+- **Files:**
+  - Create: `src/pages/Profile.tsx`
+  - Modify: `src/App.tsx` (add route)
+  - Modify: `src/components/Header.tsx` (add nav item or profile icon)
+- **Dependencies:** None
+
+**Currently scattered across:**
+
+| Setting | Current Location | Store |
+|---------|-----------------|-------|
+| Weight unit | Header (hidden) | `planStore.preferredWeightUnit` (line 78) |
+| Theme | Header dropdown (lines 195-230) | `themeStore` |
+| Language | Header `LanguageSelector` (line 233) | `i18next` |
+| Trainer mode | Header toggle (lines 236-261) | `trainerStore` |
+| Display name | Onboarding only | `achievementStore.userName` |
+
+**Sections for Profile page:**
+1. Personal Info (display name, avatar)
+2. Preferences (weight unit, theme, language, click sounds, haptics)
+3. Account (sign out, data export as JSON, delete account)
+4. Privacy (link to `/legal`)
+
+---
+
+### [2.4] Body Measurements Tracker
+
+- **Priority:** LOW
+- **Effort:** L (1-2 days)
+- **Impact:** Allows users to track body composition changes over time
+- **Files:**
+  - Create: `src/stores/measurementsStore.ts`
+  - Create: `src/components/measurements/BodyTracker.tsx`
+  - Modify: `src/types/fitness.ts` (add `BodyMeasurement` interface)
+- **Dependencies:** Item 2.3 (Profile page to host the component)
+
+**New Type:**
+
+```typescript
+export interface BodyMeasurement {
+    id: string;
+    date: string; // ISO date
+    weight?: number;
+    bodyFat?: number;
+    chest?: number;
+    waist?: number;
+    hips?: number;
+    arms?: number;
+    thighs?: number;
+    unit: 'imperial' | 'metric';
+}
+```
+
+Uses Recharts (already installed) for line charts showing trends over time.
+
+---
+
+### [2.5] Superset Visual Pairing
+
+- **Priority:** LOW
+- **Effort:** M (4-6h)
+- **Impact:** Visually groups paired exercises for users following superset-style programming
+- **Files:**
+  - Modify: `src/components/plan/WorkoutDayCard.tsx`
+  - Modify: `src/components/logging/WorkoutLogger.tsx`
+- **Dependencies:** None
+
+**Context:** The `supersetGroup` field exists on `ExercisePrescription` (line 183 of `src/types/fitness.ts`) but is **completely unused in UI**.
+
+**In `WorkoutDayCard.tsx`:** Group exercises with matching `supersetGroup` values visually:
+- A1/A2 notation labels
+- Shared background color band
+- Connecting line or bracket between paired exercises
+
+**In `WorkoutLogger.tsx`:** Show paired exercises in a circuit flow — after completing A1 Set 1, auto-advance to A2 Set 1 before returning to A1 Set 2.
+
+---
+
+### [2.6] Warm-Up and Cool-Down Generation
+
+- **Priority:** LOW
+- **Effort:** M (4-6h)
+- **Impact:** Provides dynamic warm-up and cool-down routines based on the day's target muscles
+- **Files:**
+  - Modify: `src/lib/planGenerator.ts`
+  - (Display already handled by `src/components/plan/WorkoutDayCard.tsx` lines 41-73)
+- **Dependencies:** None
+
+**Context:** `WorkoutDay` type has `warmUp?: string[]` and `coolDown?: string[]` (lines 194-195 of `src/types/fitness.ts`). `WorkoutDayCard.tsx` already renders these arrays when populated, but the plan generator typically leaves them empty.
+
+**Fix:** Update `planGenerator.ts` to populate these arrays dynamically based on the day's target muscle groups. For example, a chest/triceps day would get "Band pull-aparts", "Shoulder dislocates", "Light bench press warm-up sets".
+
+---
+
+### [2.7] Exercise Demo Media
+
+- **Priority:** LOW
+- **Effort:** L (1-2 days)
+- **Impact:** Users can see how to perform exercises correctly
+- **Files:**
+  - Modify: `src/components/exercises/ExerciseDetailModal.tsx`
+  - Modify: Exercise data sources
+- **Dependencies:** None
+
+**Context:** The `Exercise` type has `videoUrl`, `gifUrl`, `imageUrl` fields (lines 160-164 of `src/types/fitness.ts`) — currently empty for most exercises.
+
+In `ExerciseDetailModal.tsx`: Add a video/GIF embed section when URLs are populated. Source from public exercise demonstration databases or generate placeholder animations.
+
+---
+
+## Section 3: Sub-Feature Enhancements (10 items)
+
+Small but high-impact improvements to existing features.
+
+---
+
+### [3.1] "Last Time" Historical Data in SetLogger
+
+- **Priority:** HIGH
+- **Effort:** M (3-5h)
+- **Impact:** CRITICAL for progressive overload. Users currently have to guess what they lifted last time. This is the single most requested feature in any workout logger.
+- **Files:**
+  - Modify: `src/stores/planStore.ts`
+  - Modify: `src/components/logging/WorkoutLogger.tsx`
+  - Modify: `src/components/logging/SetLogger.tsx`
+- **Dependencies:** None
+
+**Step 1 — New Store Method**
+
+Add to `src/stores/planStore.ts` after `getWorkoutLogsForPlan` (line 447):
+
+```typescript
+getLastPerformance: (exerciseId: string): SetLog[] | null => {
+    const logs = get().workoutLogs;
+    // workoutLogs are sorted newest-first (line 413: [workoutLog, ...state.workoutLogs])
+    for (const log of logs) {
+        const exerciseLog = log.exercises.find(
+            e => e.exerciseId === exerciseId && !e.skipped
+        );
+        if (exerciseLog) {
+            return exerciseLog.sets.filter(s => s.completed);
+        }
+    }
+    return null;
+},
+```
+
+Also add to the `PlanState` interface (after line 103):
+
+```typescript
+getLastPerformance: (exerciseId: string) => SetLog[] | null;
+```
+
+**Step 2 — Pass to SetLogger**
+
+Modify `src/components/logging/WorkoutLogger.tsx` (around lines 222-231):
+
+```tsx
+// Before the SetLogger map, destructure the new method:
+const { getLastPerformance } = usePlanStore();
+
+// Inside the map:
+currentExercise.sets.map((set, idx) => {
+    const lastPerformance = getLastPerformance(prescription.exercise.id);
+
+    return (
+        <SetLogger
+            key={idx}
+            setNumber={idx + 1}
+            targetReps={prescription.reps}
+            targetRIR={prescription.rir}
+            previousSet={set.completed ? set : undefined}
+            historicalSet={lastPerformance?.[idx]}  // NEW PROP
+            defaultWeightUnit={preferredWeightUnit}
+            onComplete={handleSetComplete}
+            isActive={!set.completed && currentExercise.sets.slice(0, idx).every(s => s.completed)}
+        />
+    );
+})
+```
+
+**Step 3 — Update SetLogger**
+
+Modify `src/components/logging/SetLogger.tsx`:
+
+Add to props interface (line 10-18):
+
+```typescript
+interface SetLoggerProps {
+    setNumber: number;
+    targetReps: string;
+    targetRIR: number;
+    previousSet?: SetLog;
+    historicalSet?: SetLog;  // NEW
+    defaultWeightUnit?: WeightUnit;
+    onComplete: (setLog: SetLog) => void;
+    isActive?: boolean;
+}
+```
+
+Add pre-fill logic (after line 32):
+
+```typescript
+// Pre-fill weight from last session if this is a fresh set
+useEffect(() => {
+    if (historicalSet && !previousSet && weight === 0) {
+        setWeight(historicalSet.weight);
+    }
+}, [historicalSet]);
+```
+
+Add display text (after line 123, below the weight label):
+
+```tsx
+<label className="text-xs text-muted-foreground mb-1 block">
+    Weight ({defaultWeightUnit})
+    {historicalSet && (
+        <span className="text-[10px] text-muted-foreground ml-1">
+            — Last: {historicalSet.weight}{defaultWeightUnit} × {historicalSet.reps}
+        </span>
+    )}
+</label>
+```
+
+**Why (CPT rationale):** Progressive overload is the #1 principle of strength training. Without knowing what you lifted last time, you can't systematically add load. Every successful fitness app (Strong, Hevy, JEFIT) shows last-session data. This is table stakes.
+
+---
+
+### [3.2] Difficulty Rating Picker
+
+- **Priority:** MEDIUM
+- **Effort:** S (1-2h)
+- **Impact:** Captures actual perceived difficulty instead of hardcoded 'just_right', enabling smarter progression recommendations
+- **Files:** `src/components/logging/WorkoutLogger.tsx`
+- **Dependencies:** None
+
+**Current Problem:** Lines 262 and 290 both hardcode:
+
+```tsx
+onClick={() => handleFinishWorkout('just_right')}
+```
+
+The `PerceivedDifficulty` type (line 255 of `src/types/fitness.ts`) supports 4 options: `'too_easy' | 'just_right' | 'challenging' | 'too_hard'`.
+
+`WorkoutSummary.tsx` lines 65-83 already defines emoji mappings for all 4 options:
+
+| Value | Emoji | Label |
+|-------|-------|-------|
+| `too_easy` | 😎 | Too Easy |
+| `just_right` | 💪 | Just Right |
+| `challenging` | 🔥 | Challenging |
+| `too_hard` | 😤 | Too Hard |
+
+**Implementation:**
+
+```tsx
+// Add state (near line 55):
+const [showDifficultySheet, setShowDifficultySheet] = useState(false);
+
+// Change line 262:
+onClick={() => setShowDifficultySheet(true)}
+
+// Change line 290:
+onClick={() => setShowDifficultySheet(true)}
+
+// Add Sheet/Dialog before the Cancel Dialog (before line 312):
+<AlertDialog open={showDifficultySheet} onOpenChange={setShowDifficultySheet}>
+    <AlertDialogContent>
+        <AlertDialogHeader>
+            <AlertDialogTitle>How did that feel?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This helps FitWizard adjust your progression.
+            </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="grid grid-cols-2 gap-3 py-4">
+            {([
+                { value: 'too_easy', emoji: '😎', label: 'Too Easy' },
+                { value: 'just_right', emoji: '💪', label: 'Just Right' },
+                { value: 'challenging', emoji: '🔥', label: 'Challenging' },
+                { value: 'too_hard', emoji: '😤', label: 'Too Hard' },
+            ] as const).map(option => (
+                <Button
+                    key={option.value}
+                    variant="outline"
+                    className="h-20 flex flex-col gap-1"
+                    onClick={() => handleFinishWorkout(option.value)}
+                >
+                    <span className="text-2xl">{option.emoji}</span>
+                    <span className="text-sm">{option.label}</span>
+                </Button>
+            ))}
+        </div>
+    </AlertDialogContent>
+</AlertDialog>
+```
+
+---
+
+### [3.3] Share Workout Card
+
+- **Priority:** MEDIUM
+- **Effort:** M (3-5h)
+- **Impact:** Social sharing drives organic growth — users share achievements to Instagram stories
+- **Files:** `src/components/logging/WorkoutSummary.tsx`
+- **Dependencies:** None
+
+**Current state:** Lines 238-241 have a TODO:
+
+```tsx
+onClick={() => {
+    // TODO: Implement share functionality
+}}
+```
+
+**Implementation:**
+
+First, add `id="workout-summary-card"` to the main container div at line 86:
+
+```tsx
+// BEFORE (line 86):
+<div className="min-h-screen bg-gradient-to-b from-primary/10 via-background to-background">
+
+// AFTER:
+<div id="workout-summary-card" className="min-h-screen bg-gradient-to-b from-primary/10 via-background to-background">
+```
+
+Then replace the TODO onClick handler (lines 238-241):
+
+```tsx
+onClick={async () => {
+    try {
+        const element = document.getElementById('workout-summary-card');
+        if (!element) return;
+
+        // html2canvas is already installed
+        const { default: html2canvas } = await import('html2canvas');
+        const canvas = await html2canvas(element, {
+            backgroundColor: '#0a0a0a',
+            scale: 2,
+        });
+        const blob = await new Promise<Blob>((resolve) =>
+            canvas.toBlob((b) => resolve(b!), 'image/png')
+        );
+
+        // Mobile: use native share sheet
+        if (navigator.share && navigator.canShare?.({
+            files: [new File([blob], 'workout.png', { type: 'image/png' })]
+        })) {
+            await navigator.share({
+                title: 'My FitWizard Workout',
+                text: `Completed ${log.dayName} — ${log.duration}min`,
+                files: [new File([blob], 'workout.png', { type: 'image/png' })],
+            });
+        } else {
+            // Desktop fallback: copy to clipboard
+            await navigator.clipboard.write([
+                new ClipboardItem({ 'image/png': blob })
+            ]);
+            toast.success('Workout card copied to clipboard!');
+        }
+    } catch (err) {
+        console.error('Share failed:', err);
+        toast.error('Could not share workout');
+    }
+}}
+```
+
+Add `import { toast } from 'sonner';` at the top if not already imported.
+
+---
+
+### [3.4] Plate Calculator
+
+- **Priority:** LOW
+- **Effort:** M (3-4h)
+- **Impact:** Eliminates mental math when loading a barbell — a small feature that delights
+- **Files:**
+  - Create: `src/components/tools/PlateCalculator.tsx`
+  - Optionally integrate into `SetLogger.tsx`
+- **Dependencies:** None
+
+When a user enters a barbell weight in `SetLogger`, show what plates to load per side.
+
+**Standard plates:**
+- Imperial: 45, 35, 25, 10, 5, 2.5 lbs (bar = 45 lbs)
+- Metric: 25, 20, 15, 10, 5, 2.5, 1.25 kg (bar = 20 kg)
+
+**Example output:** "135 lbs = Bar (45) + 45 per side"
+
+---
+
+### [3.5] RPE as Alternative to RIR
+
+- **Priority:** LOW
+- **Effort:** S (2h)
+- **Impact:** Accommodates users who prefer the RPE scale (common in powerlifting)
+- **Files:** `src/components/logging/SetLogger.tsx`
+- **Dependencies:** None
+
+Add a toggle between RIR (current, lines 196-217) and RPE (10 - RIR). RPE 10 = Failure, RPE 7 = 3 reps in reserve.
+
+Store the toggle preference in `planStore.preferredWeightUnit` area (or a new `preferredEffortScale` field).
+
+---
+
+### [3.6] Meal Templates / Quick Re-log
+
+- **Priority:** LOW
+- **Effort:** M (4h)
+- **Impact:** Reduces meal logging friction — users eat similar meals daily
+- **Files:**
+  - Modify: `src/components/nutrition/FoodLogger.tsx`
+  - Modify: `src/stores/nutritionStore.ts`
+- **Dependencies:** None
+
+**Context:** `FoodLogger.tsx` has favorites (lines 115-127) but no concept of "meals" (groupings of multiple foods).
+
+Add a "Save as Meal" button that saves the current day's logged foods as a single template. One-tap to re-log an entire meal (e.g., "Morning Oats + Protein Shake + Banana").
+
+---
+
+### [3.7] Weekly Calorie Trend Line
+
+- **Priority:** LOW
+- **Effort:** M (3h)
+- **Impact:** Shows longer-term nutrition adherence trends
+- **Files:** `src/components/nutrition/NutritionInsights.tsx`
+- **Dependencies:** None
+
+`NutritionInsights.tsx` has a bar chart (lines 71-173) but no rolling average line chart. Add a `LineChart` using Recharts (already installed) showing 7-day rolling average of calories consumed vs. target.
+
+---
+
+### [3.8] Exercise History in Detail Modal
+
+- **Priority:** LOW
+- **Effort:** M (3h)
+- **Impact:** Users can see their performance history for any exercise
+- **Files:** `src/components/exercises/ExerciseDetailModal.tsx`
+- **Dependencies:** None
+
+Add a "History" section to the exercise detail modal showing: last performed date, best weight, best volume, and a mini chart of estimated 1RM over time. Pull data from `planStore.workoutLogs`.
+
+---
+
+### [3.9] Custom Exercise Creation
+
+- **Priority:** LOW
+- **Effort:** M (4h)
+- **Impact:** Users can add exercises not in the library
+- **Files:**
+  - Modify: `src/components/exercises/ExercisesBrowser.tsx`
+  - Create: `src/stores/customExerciseStore.ts`
+- **Dependencies:** None
+
+Add a form in the Exercise Browser to create user-defined exercises with name, primary muscles, equipment, and cues. Store in a new `customExercises` array.
+
+---
+
+### [3.10] Inline Estimated 1RM Display
+
+- **Priority:** LOW
+- **Effort:** S (1h)
+- **Impact:** Immediate feedback on strength level after each set
+- **Files:** `src/components/logging/SetLogger.tsx`
+- **Dependencies:** None
+
+The `OneRepMaxCalculator` component exists at `src/components/tools/OneRepMaxCalculator.tsx`. Extract the Epley formula and show inline estimated 1RM in SetLogger after completing a set:
+
+``` 
+Estimated 1RM = weight × (1 + reps / 30)
+```
+
+Display as a small chip below the completed set: "Est. 1RM: 225 lbs"
+
+---
+
+## Section 4: Fitness Domain Intelligence (5 items)
+
+Features that leverage exercise science to make FitWizard smarter.
+
+---
+
+### [4.1] Periodization Timeline Visualization
+
+- **Priority:** MEDIUM
+- **Effort:** M (4-6h)
+- **Impact:** Replaces a text-based badge list with a visual timeline that users can actually understand
+- **Files:**
+  - Create: `src/components/plan/PeriodizationTimeline.tsx`
+  - Modify: `src/pages/Plan.tsx` (replace lines 159-187)
+- **Dependencies:** None
+
+**Current state:** `Plan.tsx` lines 159-187 render `rirProgression` as a row of `<Badge>` components. This is hard to parse.
+
+**Proposed:** A horizontal bar divided into 4 segments (one per week), each colored by intensity:
+- Normal weeks: Primary color, increasing intensity
+- Deload week (`isDeload: true`): Lighter shade, "Recovery" label
+- Current week (`planStore.currentWeek`): Pulsing border highlight
+- Each segment shows the target RIR number
+
+Uses `rirProgression` array from Plan type (`src/types/fitness.ts`, line 217 — `rirProgression: RIRProgression[]`).
+
+---
+
+### [4.2] Daily Readiness Score
+
+- **Priority:** LOW
+- **Effort:** M (4-6h)
+- **Impact:** Adjusts workout intensity based on how the user feels — a key feature in modern periodization
+- **Files:**
+  - Create: `src/components/logging/ReadinessCheck.tsx`
+  - Create: `src/types/readiness.ts`
+  - Modify: `src/components/logging/WorkoutLogger.tsx`
+- **Dependencies:** None
+
+**New Type:**
+
+```typescript
+interface ReadinessEntry {
+    date: string;
+    sleepQuality: 1 | 2 | 3 | 4 | 5;
+    muscleSoreness: 1 | 2 | 3 | 4 | 5;
+    energyLevel: 1 | 2 | 3 | 4 | 5;
+    stressLevel: 1 | 2 | 3 | 4 | 5;
+    overallScore: number; // Computed average
+}
+```
+
+**Integration:** In `WorkoutLogger.tsx`, show `ReadinessCheck` before `startWorkout` fires (line 68-71). A quick 4-question slider modal (takes <10 seconds). If overall score < 2.5, suggest: "Consider a lighter session today — reduce volume by 20%."
+
+**Why (CPT rationale):** Auto-regulation is the gold standard in modern strength training. Training hard when under-recovered leads to injury and stagnation. A readiness check captures the data needed for intelligent auto-regulation.
+
+---
+
+### [4.3] Progressive Overload Visualization (Strength Curve)
+
+- **Priority:** LOW
+- **Effort:** L (1-2 days)
+- **Impact:** Visual proof of progress — the strongest motivator for continued training
+- **Files:**
+  - Create: `src/components/charts/StrengthCurve.tsx`
+- **Dependencies:** None
+
+Line chart of estimated 1RM per exercise over time using Recharts (already installed). Highlight PRs as gold dots.
+
+**Data sources:**
+- `planStore.workoutLogs` — historical sets with weight × reps
+- `planStore.personalRecords` — explicit PR entries
+
+---
+
+### [4.4] Volume Landmark Warnings (MRV Detection)
+
+- **Priority:** LOW
+- **Effort:** M (4-6h)
+- **Impact:** Prevents overtraining by warning when volume exceeds Maximum Recoverable Volume
+- **Files:**
+  - Modify: `src/lib/progressionEngine.ts`
+  - Modify: `src/pages/Plan.tsx`
+- **Dependencies:** None
+
+**Context:** `weeklyVolume` on Plan tracks sets per muscle with `isWithinCap` (line 198-202 of `src/types/fitness.ts`).
+
+After completing a week, compare actual logged volume per muscle group to known MRV thresholds (e.g., Chest MRV ≈ 22 sets/week for intermediates). If volume exceeds MRV, show an orange warning banner.
+
+**MRV Reference Values (per Dr. Mike Israetel):**
+
+| Muscle Group | MEV | MAV | MRV |
+|-------------|-----|-----|-----|
+| Chest | 8 | 12-18 | 22 |
+| Back | 8 | 14-22 | 25 |
+| Quads | 6 | 12-18 | 20 |
+| Hamstrings | 4 | 10-16 | 20 |
+| Delts | 6 | 16-22 | 26 |
+| Biceps | 4 | 14-20 | 26 |
+| Triceps | 4 | 10-14 | 18 |
+
+---
+
+### [4.5] Training Split Auto-Recommendation
+
+- **Priority:** LOW
+- **Effort:** M (4-6h)
+- **Impact:** Suggests a better split if actual training frequency consistently differs from plan
+- **Files:**
+  - Modify: `src/lib/progressionEngine.ts`
+- **Dependencies:** Item 2.2 (History page for data)
+
+If the user planned 5 days/week but consistently trains 3 days/week (based on `workoutLogs`), suggest switching from PPL to Upper/Lower or Full Body. New function: `suggestSplitAdjustment()` in `progressionEngine.ts`.
+
+---
+
+## Section 5: Architecture & Code Quality (5 items)
+
+Technical improvements that don't change user-facing behavior but improve reliability.
+
+---
+
+### [5.1] Supabase Type Stubs — ✅ VERIFIED COMPLETE
+
+- **Priority:** N/A
+- **Status:** No action needed
+
+The `src/types/supabase.ts` file already contains comprehensive type definitions for all referenced tables:
+- `exercise_interactions` (line 464+)
+- `user_exercise_preferences`
+- `profiles` (line 233)
+- `circles` (line 192)
+- `circle_members` (line 153)
+- `circle_activities` (line 41)
+- `circle_challenges` (line 83)
+- `challenge_participants` (line 422)
+- `activity_reactions` (line 293)
+- `activity_comments` (line 332)
+- `circle_posts` (line 374)
+- `plans` (line 266)
+
+---
+
+### [5.2] Offline Workout Logging
+
+- **Priority:** HIGH
+- **Effort:** M (3-5h)
+- **Impact:** Prevents data loss when users work out in gym basements with no signal
+- **Files:**
+  - Modify: `src/stores/planStore.ts`
+  - Modify: `src/App.tsx`
+  - Modify: `src/components/Header.tsx` (optional)
+  - (Existing: `src/lib/offlineSupport.ts`)
+- **Dependencies:** None
+
+**Current state:** The `OfflineQueue` class exists in `src/lib/offlineSupport.ts` (lines 98-124) and is exported as `offlineQueue` (line 126), but it is **never imported anywhere** in the codebase.
+
+**Step 1 — Wire into `planStore.ts`**
+
+Inside `completeWorkout` (lines 369-438), after creating the `workoutLog` and before posting to circles:
+
+```typescript
+import { offlineQueue } from '@/lib/offlineSupport';
+
+// Inside completeWorkout, after line 416 (set state), before line 418 (circle posting):
+if (!navigator.onLine) {
+    offlineQueue.add({
+        operation: 'save',
+        data: workoutLog,
+    });
+    toast.info('Workout saved locally. It will sync when you reconnect.');
+    return workoutLog;
+}
+```
+
+**Step 2 — Flush queue on reconnect in `App.tsx`**
+
+```typescript
+import { offlineQueue } from '@/lib/offlineSupport';
+
+// Inside the App component (after line 247):
+useEffect(() => {
+    const handleOnline = async () => {
+        const queue = offlineQueue.getQueue();
+        if (queue.length > 0) {
+            toast.info(`Syncing ${queue.length} offline workout(s)...`);
+            for (const op of queue) {
+                try {
+                    // Process each queued operation
+                    // (Post to circles, sync to backend, etc.)
+                    offlineQueue.remove(op.id);
+                } catch (err) {
+                    console.error('Failed to sync queued operation:', err);
+                }
+            }
+            toast.success('All workouts synced!');
+        }
+    };
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+}, []);
+```
+
+**Step 3 — Visual indicator in `Header.tsx` (optional)**
+
+The `useNetworkStatus` hook is already called in `App.tsx` (line 225) and shows toast notifications. Optionally add a small wifi-off icon next to the logo when `!navigator.onLine`.
+
+---
+
+### [5.3] Performance: Exercise Library Lazy Loading
+
+- **Priority:** LOW
+- **Effort:** S (1h)
+- **Impact:** Reduces initial bundle size as the exercise library grows
+- **Files:** Files that import `src/data/exerciseLibrary.json`
+- **Dependencies:** None
+
+`src/data/exerciseLibrary.json` is statically imported and bundled into the main chunk. Convert to dynamic `import()` for code splitting:
+
+```typescript
+// BEFORE:
+import exerciseLibrary from '@/data/exerciseLibrary.json';
+
+// AFTER:
+const exerciseLibrary = await import('@/data/exerciseLibrary.json');
+```
+
+Or use React `lazy()` for the components that depend on it.
+
+---
+
+### [5.4] Testing Gaps
+
+- **Priority:** LOW
+- **Effort:** L (1-2 weeks cumulative)
+- **Impact:** Prevents regressions as the codebase grows
+- **Files:** Various test files
+- **Dependencies:** None
+
+**Existing tests (verified):**
+
+| Test File | Coverage |
+|-----------|----------|
+| `src/components/exercises/__tests__/ExerciseCard.test.tsx` | Exercise card rendering |
+| `src/components/exercises/__tests__/ExerciseDetailModal.test.tsx` | Detail modal |
+| `src/components/exercises/__tests__/ExercisesBrowser.test.tsx` | Browser component |
+| `src/lib/__tests__/planGenerator.test.ts` | Plan generation logic |
+| `src/lib/__tests__/planValidation.test.ts` | Plan validation |
+| `src/lib/__tests__/suggestExercises.test.ts` | Exercise suggestions |
+| `src/lib/__tests__/clickFeedback.test.ts` | Click feedback utility |
+| `src/lib/pdfExport.test.ts` | PDF export |
+| `src/test/exercises.test.ts` | Exercise data integrity |
+| `src/test/onboardingStore.test.ts` | Onboarding store |
+| `src/features/mcl/hooks/useMuscleSelection.test.ts` | Muscle selection hook |
+
+**Missing coverage (prioritized):**
+
+1. **Workout logging flow** — Start → log sets → complete → summary → PR detection
+2. **Progression engine edge cases** — Empty logs, single-set exercises, deload weeks
+3. **Nutrition store operations** — Add/remove meals, hydration updates, date navigation
+4. **Circle store operations** — Create/join circles, post activities, reactions
+
+---
+
+### [5.5] Accessibility Audit Checklist
+
+- **Priority:** MEDIUM
+- **Effort:** M (4-8h)
+- **Impact:** Makes the app usable for all users, including those with disabilities
+- **Files:** Multiple components
+- **Dependencies:** None
+
+**Identified issues:**
+
+| Issue | File | Line(s) | Fix |
+|-------|------|---------|-----|
+| RIR color-only indicators | `SetLogger.tsx` | 70-84 | Add `aria-label` with `getRIRLabel()` text. Colors (`text-red-500`, `text-orange-500`, etc.) are the only differentiator — colorblind users can't distinguish them. The `getRIRLabel()` function exists (line 77) but its output isn't always visible. |
+| Delete button invisible to keyboard | `Nutrition.tsx` | 218 | Fix with item 1.6 (opacity change). Also add `aria-label="Remove meal"`. |
+| Modal focus trapping | Various | — | Audit focus trapping in: `ExerciseSwapModal`, `AuthModal`, `CreateCircleModal`, `BadgeUnlockModal`. Radix Dialog handles this by default, but verify custom implementations. |
+| Skip-to-content link | `Header.tsx` | — | Add `<a href="#main-content" className="sr-only focus:not-sr-only">Skip to content</a>` before the nav. |
+| Wizard keyboard navigation | `src/pages/Wizard.tsx` | — | Ensure wizard steps can be navigated with Tab/Enter/Space keys. |
+
+---
+
+## Section 6: Growth & Monetization (3 items)
+
+Features that drive user acquisition, retention, and revenue.
+
+---
+
+### [6.1] PWA Manifest
+
+- **Priority:** HIGH
+- **Effort:** S (1-2h)
+- **Impact:** Enables "Add to Home Screen" on iOS/Android — the app feels native
+- **Files:**
+  - Create: `public/manifest.json`
+  - Modify: `index.html` (add manifest link)
+- **Dependencies:** None
+
+**Icons already exist:**
+- `public/favicon.png`
+- `public/apple-touch-icon.png`
+- `public/logo.png`
+
+**Create `public/manifest.json`:**
+
+```json
+{
+    "name": "FitWizard",
+    "short_name": "FitWizard",
+    "description": "Your AI-powered workout companion",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0a0a0a",
+    "theme_color": "#8B5CF6",
+    "icons": [
+        {
+            "src": "/favicon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
+```
+
+**Add to `index.html` `<head>`:**
+
+```html
+<link rel="manifest" href="/manifest.json" />
+```
+
+---
+
+### [6.2] Shareable Branded Workout Cards
+
+- **Priority:** LOW
+- **Effort:** M (3-4h, extends item 3.3)
+- **Impact:** Branded sharing drives organic user acquisition
+- **Files:** `src/components/logging/WorkoutSummary.tsx`
+- **Dependencies:** Item 3.3 (basic share functionality)
+
+Extend the share card from item 3.3 with:
+- FitWizard logo watermark in corner
+- Branded color scheme matching the app's gradient
+- Deep link URL back to app (e.g., "fitwizard.app/join")
+- "Generated by FitWizard" footer text
+
+---
+
+### [6.3] Coach Portal Expansion
+
+- **Priority:** LOW
+- **Effort:** XL (1+ weeks)
+- **Impact:** Monetization opportunity — coaches pay for premium features
+- **Files:**
+  - Modify: `src/stores/trainerStore.ts`
+  - Modify: `src/components/TrainerGuard.tsx`
+  - Modify: `src/pages/Clients.tsx`
+  - Create: Multiple new components
+- **Dependencies:** Cloud/Supabase backend for multi-user data
+
+**Existing infrastructure:**
+- `trainerStore.ts` — basic trainer mode state
+- `TrainerGuard.tsx` — route protection
+- `Clients.tsx` — minimal client list page
+
+**Expansion roadmap:**
+1. Plan assignment to clients
+2. Client progress dashboards (view client's `workoutLogs`)
+3. Template marketplace (save/share plan templates)
+4. Client communication (in-app messaging)
+5. Revenue: $X/month per coach seat
+
+---
+
+## 📅 Phase Timeline
+
+### Phase 1 — Quick Wins (Week 1)
+
+| ID | Item | Est. Hours |
+|----|------|-----------|
+| 1.1 | Nutrition Light Mode Fix | 2h |
+| 1.2 | SetLogger Touch Targets | 1h |
+| 1.3 | Nutrition Tabs Overflow | 1h |
+| 1.5 | Confetti on PR | 0.5h |
+| 1.6 | Meal Delete Button | 0.25h |
+| 2.1 | Rest Timer | 4h |
+| 3.1 | "Last Time" Data | 4h |
+| 3.2 | Difficulty Picker | 2h |
+| 3.3 | Share Workout Card | 3h |
+| 5.2 | Offline Queue Wiring | 3h |
+| **Total** | | **~21h** |
+
+### Phase 2 — Core Features (Weeks 2-3)
+
+| ID | Item | Est. Hours |
+|----|------|-----------|
+| 2.2 | History Page | 12h |
+| 2.3 | Profile/Settings | 6h |
+| 2.5 | Superset Pairing | 5h |
+| 2.6 | Warm-Up Generation | 5h |
+| 3.4 | Plate Calculator | 3h |
+| 3.6 | Meal Templates | 4h |
+| 3.7 | Weekly Trend Line | 3h |
+| 6.1 | PWA Manifest | 1h |
+| **Total** | | **~39h** |
+
+### Phase 3 — Domain Intelligence (Weeks 3-4)
+
+| ID | Item | Est. Hours |
+|----|------|-----------|
+| 4.1 | Periodization Timeline | 5h |
+| 4.2 | Readiness Score | 5h |
+| 4.3 | Strength Curve | 10h |
+| 4.4 | MRV Warnings | 5h |
+| 4.5 | Split Auto-Recommendation | 5h |
+| 2.4 | Body Measurements | 10h |
+| **Total** | | **~40h** |
+
+### Phase 4 — Growth & Stability (Ongoing)
+
+| ID | Item | Est. Hours |
+|----|------|-----------|
+| 5.3 | Lazy Loading | 1h |
+| 5.4 | Test Coverage | 20h+ |
+| 5.5 | Accessibility Audit | 6h |
+| 6.2 | Branded Cards | 4h |
+| 6.3 | Coach Portal | 40h+ |
+| 2.7 | Exercise Media | 12h |
+| 3.5 | RPE Toggle | 2h |
+| 3.8-3.10 | Detail Modal, Custom Exercises, 1RM | 8h |
+| **Total** | | **~93h+** |
+
+---
+
+## Item Template
+
+For agents adding new items to this document, use this template:
+
+```markdown
+### [SECTION.NUMBER] Item Title
+
+- **Priority:** CRITICAL / HIGH / MEDIUM / LOW
+- **Effort:** S (1-2h) / M (3-8h) / L (1-3d) / XL (1+ week)
+- **Impact:** One sentence describing user/business value
+- **Files:** Exact paths to create or modify with line numbers
+- **Dependencies:** Other items that must be done first (if any)
+
+**Current Code:**
+
+```tsx
+// File: path/to/file.tsx, line XX
+<current code>
+```
+
+**Proposed Code:**
+
+```tsx
+<replacement code>
+```
+
+**Why:**
+Engineering and/or CPT-level fitness rationale for the change.
+```
+
+---
+
+## Verification Notes
+
+- All line numbers verified against the codebase as of **2026-02-08**
+- File paths are relative to the project root
+- Code examples are taken directly from the source files
+- CPT (Certified Personal Trainer) rationale provided for fitness-specific features
+- MRV values sourced from Dr. Mike Israetel's research (Renaissance Periodization)
+
+---
+
+> *"Amateurs sit and wait for inspiration, the rest of us just get up and go to work."*  
+> — Stephen King
