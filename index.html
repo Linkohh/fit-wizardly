@@ -4,7 +4,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>FitWizard - AI Workout Planner</title>
+  <meta name="description"
+    content="FitWizard: Your AI-powered personal trainer. Generate custom workout plans, track your progress, log nutrition, and achieve your fitness goals with smart insights." />
   <meta name="author" content="FitWizard" />
+
+  <!-- Fonts: Outfit (Premium, Geometric) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- PWA Mobile Enhancements -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,10 +32,89 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:site" content="@FitWizard" />
   <meta name="twitter:image" content="/logo.png" />
+
+  <!-- Immediate Theme Application (Anti-Flicker) -->
+  <script>
+    (function () {
+      try {
+        const storage = localStorage.getItem('theme-storage');
+        if (storage) {
+          const theme = JSON.parse(storage).state.mode;
+          const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (isDark) document.documentElement.classList.add('dark');
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) { }
+    })();
+  </script>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <!-- Inline Critical Loader -->
+    <style>
+      #inline-loader {
+        position: fixed;
+        inset: 0;
+        background-color: #ffffff;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.3s ease-out;
+      }
+
+      .dark #inline-loader {
+        background-color: #09090b;
+      }
+
+      .inline-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(139, 92, 246, 0.2);
+        border-top-color: #8b5cf6;
+        border-radius: 50%;
+        animation: inline-spin 1s linear infinite;
+      }
+
+      @keyframes inline-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .inline-text {
+        margin-top: 16px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #71717a;
+        animation: inline-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      .dark .inline-text {
+        color: #a1a1aa;
+      }
+
+      @keyframes inline-pulse {
+
+        0%,
+        100% {
+          opacity: 1;
+        }
+
+        50% {
+          opacity: 0.5;
+        }
+      }
+    </style>
+    <div id="inline-loader">
+      <div class="inline-spinner"></div>
+      <div class="inline-text">Loading FitWizard...</div>
+    </div>
+  </div>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 

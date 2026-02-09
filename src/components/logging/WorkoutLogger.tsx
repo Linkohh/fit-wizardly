@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +19,7 @@ import {
 import { usePlanStore } from '@/stores/planStore';
 import { SetLogger } from './SetLogger';
 import { WorkoutSummary } from './WorkoutSummary';
+import { RestTimer } from './RestTimer';
 import type { PerceivedDifficulty, SetLog } from '@/types/fitness';
 import {
     AlertDialog,
@@ -46,6 +48,8 @@ export function WorkoutLogger() {
         skipExercise,
         completeWorkout,
         preferredWeightUnit,
+        getLastPerformance,
+        startRestTimer,
     } = usePlanStore();
 
     const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
@@ -95,6 +99,16 @@ export function WorkoutLogger() {
 
     const handleSetComplete = (setLog: SetLog) => {
         logSet(currentExerciseIndex, setLog);
+
+        // Start rest timer if needed
+        const isLastSet = currentExerciseIndex === totalExercises - 1 &&
+            currentExercise.sets.every((s, i) => i === setLog.setNumber - 1 || s.completed);
+
+        // Don't start timer if it's the very last set of the workout, 
+        // or if explicitly disabled (could add a setting later).
+        if (!isLastExercise) {
+            startRestTimer(prescription.restSeconds);
+        }
     };
 
     const handleSkipExercise = () => {
@@ -116,10 +130,17 @@ export function WorkoutLogger() {
         }
     };
 
-    const handleFinishWorkout = (difficulty: PerceivedDifficulty) => {
+    const [showDifficultyDialog, setShowDifficultyDialog] = useState(false);
+
+    const handleFinishWorkout = (difficulty?: PerceivedDifficulty) => {
+        if (!difficulty) {
+            setShowDifficultyDialog(true);
+            return;
+        }
         const log = completeWorkout(difficulty, notes);
         setCompletedLog(log);
         setShowSummary(true);
+        setShowDifficultyDialog(false);
     };
 
     const handleCancel = () => {
@@ -130,6 +151,7 @@ export function WorkoutLogger() {
     const allSetsCompleted = currentExercise?.sets.every(s => s.completed) || currentExercise?.skipped;
     const isLastExercise = currentExerciseIndex === totalExercises - 1;
     const allExercisesCompleted = completedExercises === totalExercises;
+    const lastPerformance = getLastPerformance(currentExercise.exerciseId);
 
     if (showSummary && completedLog) {
         return (
@@ -225,6 +247,7 @@ export function WorkoutLogger() {
                                     targetReps={prescription.reps}
                                     targetRIR={prescription.rir}
                                     previousSet={set.completed ? set : undefined}
+                                    lastPerformance={lastPerformance?.sets[idx]}
                                     defaultWeightUnit={preferredWeightUnit}
                                     onComplete={handleSetComplete}
                                     isActive={!set.completed && currentExercise.sets.slice(0, idx).every(s => s.completed)}
@@ -259,7 +282,7 @@ export function WorkoutLogger() {
                     {isLastExercise && allExercisesCompleted ? (
                         <Button
                             className="gradient-primary text-white font-semibold"
-                            onClick={() => handleFinishWorkout('just_right')}
+                            onClick={() => handleFinishWorkout()}
                         >
                             <Trophy className="h-4 w-4 mr-2" />
                             {t('workout.finish')}
@@ -287,7 +310,7 @@ export function WorkoutLogger() {
                                 </div>
                                 <Button
                                     className="gradient-primary text-white"
-                                    onClick={() => handleFinishWorkout('just_right')}
+                                    onClick={() => handleFinishWorkout()}
                                 >
                                     {t('workout.finish')}
                                 </Button>
@@ -326,7 +349,43 @@ export function WorkoutLogger() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-        </div>
+
+            {/* Difficulty Rating Dialog */}
+            <AlertDialog open={showDifficultyDialog} onOpenChange={setShowDifficultyDialog}>
+                <AlertDialogContent className="max-w-md">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{t('workout.difficulty_title', 'How was the workout?')}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {t('workout.difficulty_desc', 'Rate the overall perceived difficulty.')}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="grid gap-2 py-4">
+                        {[
+                            { value: 'very_easy', label: 'Very Easy', color: 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-600' },
+                            { value: 'easy', label: 'Easy', color: 'bg-green-500/10 hover:bg-green-500/20 text-green-600' },
+                            { value: 'just_right', label: 'Just Right', color: 'bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-600' },
+                            { value: 'hard', label: 'Hard', color: 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-600' },
+                            { value: 'very_hard', label: 'Very Hard', color: 'bg-red-500/10 hover:bg-red-500/20 text-red-600' },
+                        ].map((option) => (
+                            <Button
+                                key={option.value}
+                                variant="ghost"
+                                className={cn("w-full justify-between h-12", option.color)}
+                                onClick={() => handleFinishWorkout(option.value as PerceivedDifficulty)}
+                            >
+                                <span>{option.label}</span>
+                            </Button>
+                        ))}
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>{t('common.cancel', 'Cancel')}</AlertDialogCancel>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Rest Timer Overlay */}
+            < RestTimer />
+        </div >
     );
 }
 

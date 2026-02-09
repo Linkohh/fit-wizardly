@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { visualizer } from "rollup-plugin-visualizer";
+import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -14,7 +16,45 @@ export default defineConfig(({ mode }) => ({
     },
     allowedHosts: true,
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [
+    react(),
+    mode === "development" && componentTagger(),
+    visualizer({
+      open: false,
+      gzipSize: true,
+      brotliSize: true,
+    }),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.png', 'logo.png', 'robots.txt'],
+      manifest: {
+        name: 'FitWizard',
+        short_name: 'FitWizard',
+        description: 'Your AI-powered workout companion',
+        theme_color: '#8B5CF6',
+        background_color: '#0a0a0a',
+        display: 'standalone',
+        orientation: 'portrait',
+        icons: [
+          {
+            src: 'favicon.png',
+            sizes: '64x64 32x32 24x24 16x16',
+            type: 'image/x-icon'
+          },
+          {
+            src: 'logo.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'logo.png',
+            sizes: '512x512',
+            type: 'image/png'
+          }
+        ]
+      }
+    }),
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -24,88 +64,66 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (!id.includes("node_modules")) return undefined;
-          if (id.includes("@tanstack")) return "vendor-query";
-          if (id.includes("framer-motion")) return "vendor-motion";
-          if (id.includes("@supabase")) return "vendor-supabase";
-          if (id.includes("recharts")) return "vendor-charts";
-          if (
-            id.includes("jspdf") ||
-            id.includes("jspdf-autotable")
-          ) {
-            return "vendor-jspdf";
+          if (id.includes("node_modules")) {
+            // Core React ecosystem (Critical)
+            if (
+              id.includes("react-router") ||
+              id.includes("/react/") ||
+              id.includes("/react-dom/")
+            ) {
+              return "vendor-react";
+            }
+
+            // UI Libraries (Critical Path - Keep together for coherence)
+            if (
+              id.includes("@radix-ui") ||
+              id.includes("lucide-react") ||
+              id.includes("framer-motion") ||
+              id.includes("class-variance-authority") ||
+              id.includes("clsx") ||
+              id.includes("tailwind-merge")
+            ) {
+              return "vendor-ui";
+            }
+
+            // Supabase (Auth - Semi-critical)
+            if (id.includes("@supabase")) {
+              return "vendor-auth";
+            }
+
+            // Charts (Heavy - Lazy Load)
+            if (id.includes("recharts")) {
+              return "vendor-charts";
+            }
+
+            // PDF/Export (Heavy - Lazy Load)
+            if (id.includes("jspdf") || id.includes("html2canvas")) {
+              return "vendor-pdf";
+            }
+
+            // Data & State (Critical-ish)
+            if (
+              id.includes("@tanstack") ||
+              id.includes("zustand") ||
+              id.includes("react-hook-form") ||
+              id.includes("zod")
+            ) {
+              return "vendor-data";
+            }
           }
-          if (
-            id.includes("canvg") ||
-            id.includes("svg-pathdata") ||
-            id.includes("rgbcolor") ||
-            id.includes("stackblur-canvas") ||
-            id.includes("fflate") ||
-            id.includes("pako") ||
-            id.includes("core-js")
-          ) {
-            return "vendor-export-support";
-          }
-          if (id.includes("html2canvas") || id.includes("dompurify")) {
-            return "vendor-export-canvas";
-          }
-          if (
-            id.includes("react-markdown") ||
-            id.includes("remark-") ||
-            id.includes("rehype-") ||
-            id.includes("micromark") ||
-            id.includes("mdast-") ||
-            id.includes("hast-") ||
-            id.includes("unist-") ||
-            id.includes("vfile") ||
-            id.includes("property-information")
-          ) {
-            return "vendor-markdown";
-          }
-          if (id.includes("i18next") || id.includes("react-i18next")) {
-            return "vendor-i18n";
-          }
-          if (id.includes("react-hook-form") || id.includes("@hookform")) {
-            return "vendor-forms";
-          }
-          if (
-            id.includes("@reduxjs") ||
-            id.includes("redux") ||
-            id.includes("immer") ||
-            id.includes("reselect") ||
-            id.includes("zustand")
-          ) {
-            return "vendor-state";
-          }
-          if (
-            id.includes("zod") ||
-            id.includes("date-fns") ||
-            id.includes("react-day-picker") ||
-            id.includes("sonner") ||
-            id.includes("cmdk") ||
-            id.includes("vaul") ||
-            id.includes("@capacitor")
-          ) {
-            return "vendor-utils";
-          }
-          if (
-            id.includes("@radix-ui") ||
-            id.includes("lucide-react") ||
-            id.includes("class-variance-authority") ||
-            id.includes("clsx") ||
-            id.includes("tailwind-merge")
-          ) {
-            return "vendor-ui";
-          }
-          if (
-            id.includes("react-router") ||
-            id.includes("/react/") ||
-            id.includes("/react-dom/")
-          ) {
-            return "vendor-react";
-          }
-          return "vendor-misc";
         },
+      },
+    },
+    modulePreload: {
+      resolveDependencies: (filename, deps, { hostId, hostType }) => {
+        // Don't preload heavy/lazy chunks
+        return deps.filter((dep) => {
+          return (
+            !dep.includes("vendor-pdf") &&
+            !dep.includes("vendor-charts") &&
+            !dep.includes("vendor-auth")
+          );
+        });
       },
     },
   },

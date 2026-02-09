@@ -95,7 +95,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
             <div className="flex justify-between items-center">
                 <h3 className="font-semibold text-lg">Log Food</h3>
                 {mode !== 'view' && (
-                    <button onClick={close} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                    <button onClick={close} className="p-2 hover:bg-muted rounded-full transition-colors">
                         <X className="w-4 h-4" />
                     </button>
                 )}
@@ -105,9 +105,9 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                 <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4">
                     <button
                         onClick={() => { setMode('logging'); setActiveTab('search'); }}
-                        className="w-full py-4 border border-dashed border-white/20 rounded-2xl flex items-center justify-center gap-2 text-muted-foreground hover:bg-white/5 hover:text-white transition-all group"
+                        className="w-full py-4 border border-dashed border-border rounded-2xl flex items-center justify-center gap-2 text-muted-foreground hover:bg-muted hover:text-foreground transition-all group"
                     >
-                        <div className="p-2 bg-white/5 rounded-lg group-hover:scale-110 transition-transform"><Plus className="w-4 h-4 text-primary" /></div>
+                        <div className="p-2 bg-muted/50 rounded-lg group-hover:scale-110 transition-transform"><Plus className="w-4 h-4 text-primary" /></div>
                         <span className="font-medium">Add Food</span>
                     </button>
 
@@ -117,7 +117,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                             <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2 ml-1">Quick Add Favorites</div>
                             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                                 {favorites.slice(0, 5).map(fav => (
-                                    <button key={fav.id} onClick={() => handleLogSavedItem(fav)} className="flex-shrink-0 bg-white/5 hover:bg-primary/20 border border-white/5 hover:border-primary/30 rounded-xl p-3 flex flex-col items-center gap-1 min-w-[80px] transition-all">
+                                    <button key={fav.id} onClick={() => handleLogSavedItem(fav)} className="flex-shrink-0 bg-muted/50 hover:bg-primary/20 border border-border/50 hover:border-primary/30 rounded-xl p-3 flex flex-col items-center gap-1 min-w-[80px] transition-all">
                                         <span className="text-xl">⭐</span>
                                         <span className="text-[10px] font-medium truncate max-w-[70px]">{fav.name}</span>
                                     </button>
@@ -131,12 +131,12 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
             {mode === 'logging' && (
                 <div className="flex flex-col h-full animate-in fade-in slide-in-from-bottom-4">
                     {/* TABS */}
-                    <div className="flex p-1 bg-black/20 rounded-xl mb-4">
+                    <div className="flex p-1 bg-muted/30 rounded-xl mb-4">
                         {(['search', 'favorites', 'custom'] as const).map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={cn("flex-1 py-2 text-sm font-medium rounded-lg transition-all capitalize flex items-center justify-center gap-2", activeTab === tab ? "bg-primary text-white shadow-lg" : "text-muted-foreground hover:text-white")}
+                                className={cn("flex-1 py-2 text-sm font-medium rounded-lg transition-all capitalize flex items-center justify-center gap-2", activeTab === tab ? "bg-primary text-white shadow-lg" : "text-muted-foreground hover:text-foreground")}
                             >
                                 {tab === 'search' && <Search className="w-4 h-4" />}
                                 {tab === 'favorites' && <Heart className="w-4 h-4" />}
@@ -160,20 +160,20 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         autoFocus
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl py-3 pl-10 pr-4 outline-none focus:ring-2 ring-primary/50 transition-all font-medium"
+                                        className="w-full bg-muted/30 border border-border rounded-xl py-3 pl-10 pr-4 outline-none focus:ring-2 ring-primary/50 transition-all font-medium"
                                     />
                                     {isLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />}
                                 </div>
 
                                 <div className="space-y-2">
                                     {searchResults.map((product) => (
-                                        <div key={product.code} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-all group">
+                                        <div key={product.code} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/50 border border-transparent hover:border-border transition-all group">
                                             <button
                                                 type="button"
                                                 className="flex-1 min-w-0 cursor-pointer text-left"
                                                 onClick={() => handleAddProduct(product)}
                                             >
-                                                <div className="font-medium truncate text-sm text-white group-hover:text-primary">{product.product_name}</div>
+                                                <div className="font-medium truncate text-sm text-foreground group-hover:text-primary">{product.product_name}</div>
                                                 <div className="text-xs text-muted-foreground">{Math.round(product.nutriments["energy-kcal_100g"] || 0)} kcal / 100g</div>
                                             </button>
                                             <button
@@ -211,7 +211,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                     </div>
                                 )}
                                 {favorites.map((food) => (
-                                    <div key={food.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5 hover:border-primary/30 transition-all">
+                                    <div key={food.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border/50 hover:border-primary/30 transition-all">
                                         <button
                                             type="button"
                                             className="cursor-pointer flex-1 text-left"
@@ -238,7 +238,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                         placeholder="e.g. Grandma's Chicken Rice"
                                         value={customForm.name}
                                         onChange={e => setCustomForm({ ...customForm, name: e.target.value })}
-                                        className="w-full bg-black/20 border border-white/10 rounded-xl p-3 outline-none focus:ring-2 ring-primary/50"
+                                        className="w-full bg-muted/30 border border-border rounded-xl p-3 outline-none focus:ring-2 ring-primary/50"
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
@@ -249,7 +249,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                             placeholder="0"
                                             value={customForm.calories}
                                             onChange={e => setCustomForm({ ...customForm, calories: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl p-3 outline-none focus:ring-2 ring-primary/50"
+                                            className="w-full bg-muted/30 border border-border rounded-xl p-3 outline-none focus:ring-2 ring-primary/50"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -259,7 +259,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                             placeholder="0"
                                             value={customForm.protein}
                                             onChange={e => setCustomForm({ ...customForm, protein: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl p-3 outline-none focus:ring-2 ring-blue-500/50"
+                                            className="w-full bg-muted/30 border border-border rounded-xl p-3 outline-none focus:ring-2 ring-blue-500/50"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -269,7 +269,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                             placeholder="0"
                                             value={customForm.carbs}
                                             onChange={e => setCustomForm({ ...customForm, carbs: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl p-3 outline-none focus:ring-2 ring-green-500/50"
+                                            className="w-full bg-muted/30 border border-border rounded-xl p-3 outline-none focus:ring-2 ring-green-500/50"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -279,7 +279,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                             placeholder="0"
                                             value={customForm.fats}
                                             onChange={e => setCustomForm({ ...customForm, fats: e.target.value })}
-                                            className="w-full bg-black/20 border border-white/10 rounded-xl p-3 outline-none focus:ring-2 ring-yellow-500/50"
+                                            className="w-full bg-muted/30 border border-border rounded-xl p-3 outline-none focus:ring-2 ring-yellow-500/50"
                                         />
                                     </div>
                                 </div>
@@ -293,7 +293,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                     </button>
 
                                     {customFoods.length > 0 && (
-                                        <div className="border-t border-white/10 pt-3">
+                                        <div className="border-t border-border pt-3">
                                             <div className="text-xs text-muted-foreground uppercase mb-2">My Custom Foods</div>
                                             <div className="space-y-2 max-h-[150px] overflow-y-auto">
                                                 {customFoods.map(food => (
@@ -301,7 +301,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                                         key={food.id}
                                                         type="button"
                                                         onClick={() => handleLogSavedItem(food)}
-                                                        className="flex w-full items-center justify-between p-2 rounded-lg hover:bg-white/5 cursor-pointer text-sm text-left"
+                                                        className="flex w-full items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer text-sm text-left"
                                                     >
                                                         <span>{food.name}</span>
                                                         <span className="text-muted-foreground text-xs">{food.calories} kcal</span>

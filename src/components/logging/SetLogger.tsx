@@ -12,6 +12,7 @@ interface SetLoggerProps {
     targetReps: string;
     targetRIR: number;
     previousSet?: SetLog;
+    lastPerformance?: SetLog;
     defaultWeightUnit?: WeightUnit;
     onComplete: (setLog: SetLog) => void;
     isActive?: boolean;
@@ -22,12 +23,13 @@ export function SetLogger({
     targetReps,
     targetRIR,
     previousSet,
+    lastPerformance,
     defaultWeightUnit = 'lbs',
     onComplete,
     isActive = false,
 }: SetLoggerProps) {
-    const [weight, setWeight] = useState(previousSet?.weight ?? 0);
-    const [reps, setReps] = useState(previousSet?.reps ?? 0);
+    const [weight, setWeight] = useState(previousSet?.weight ?? lastPerformance?.weight ?? 0);
+    const [reps, setReps] = useState(previousSet?.reps ?? lastPerformance?.reps ?? 0);
     const [rir, setRIR] = useState(previousSet?.rir ?? targetRIR);
     const [completed, setCompleted] = useState(previousSet?.completed ?? false);
 
@@ -96,19 +98,26 @@ export function SetLogger({
         >
             {/* Set Header */}
             <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <Badge
-                        variant={completed ? 'default' : 'outline'}
-                        className={cn(
-                            'text-sm font-semibold',
-                            completed && 'bg-green-500 hover:bg-green-600'
-                        )}
-                    >
-                        Set {setNumber}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">
-                        Target: {targetReps} @ RIR {targetRIR}
-                    </span>
+                <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                        <Badge
+                            variant={completed ? 'default' : 'outline'}
+                            className={cn(
+                                'text-sm font-semibold',
+                                completed && 'bg-green-500 hover:bg-green-600'
+                            )}
+                        >
+                            Set {setNumber}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                            Target: {targetReps} @ RIR {targetRIR}
+                        </span>
+                    </div>
+                    {lastPerformance && (
+                        <span className="text-xs text-muted-foreground/80 pl-1">
+                            Last: {lastPerformance.weight} {lastPerformance.weightUnit} × {lastPerformance.reps}
+                        </span>
+                    )}
                 </div>
                 {completed && (
                     <Check className="h-5 w-5 text-green-500" />
@@ -126,27 +135,27 @@ export function SetLogger({
                         <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-12 w-12 shrink-0"
                             onClick={() => adjustWeight(-1)}
                             disabled={completed}
                         >
-                            <ChevronDown className="h-4 w-4" />
+                            <ChevronDown className="h-6 w-6" />
                         </Button>
                         <Input
                             type="number"
                             value={weight}
                             onChange={(e) => setWeight(Number(e.target.value))}
-                            className="h-10 text-center text-lg font-semibold"
+                            className="h-12 text-center text-xl font-semibold px-0"
                             disabled={completed}
                         />
                         <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-12 w-12 shrink-0"
                             onClick={() => adjustWeight(1)}
                             disabled={completed}
                         >
-                            <ChevronUp className="h-4 w-4" />
+                            <ChevronUp className="h-6 w-6" />
                         </Button>
                     </div>
                 </div>
@@ -160,18 +169,18 @@ export function SetLogger({
                         <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-12 w-12 shrink-0"
                             onClick={() => adjustReps(-1)}
                             disabled={completed}
                         >
-                            <ChevronDown className="h-4 w-4" />
+                            <ChevronDown className="h-6 w-6" />
                         </Button>
                         <Input
                             type="number"
                             value={reps}
                             onChange={(e) => setReps(Number(e.target.value))}
                             className={cn(
-                                'h-10 text-center text-lg font-semibold',
+                                'h-12 text-center text-xl font-semibold px-0',
                                 reps >= repRange[0] && reps <= repRange[1]
                                     ? 'text-green-600 dark:text-green-400'
                                     : reps < repRange[0]
@@ -183,11 +192,11 @@ export function SetLogger({
                         <Button
                             variant="outline"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-12 w-12 shrink-0"
                             onClick={() => adjustReps(1)}
                             disabled={completed}
                         >
-                            <ChevronUp className="h-4 w-4" />
+                            <ChevronUp className="h-6 w-6" />
                         </Button>
                     </div>
                 </div>
@@ -209,6 +218,8 @@ export function SetLogger({
                     step={1}
                     disabled={completed}
                     className="w-full"
+                    aria-label={`Reps in Reserve: ${rir} - ${getRIRLabel()}`}
+                    aria-valuetext={getRIRLabel()}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>Failure</span>

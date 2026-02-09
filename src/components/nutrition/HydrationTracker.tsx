@@ -56,7 +56,7 @@ export function HydrationTracker() {
                     <p className="text-sm text-muted-foreground">Goal: {targetAmount}ml</p>
                 </div>
                 <div className="text-right">
-                    <div className="text-3xl font-bold text-blue-100">{currentAmount} <span className="text-sm font-normal text-muted-foreground">ml</span></div>
+                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-100">{currentAmount} <span className="text-sm font-normal text-muted-foreground">ml</span></div>
                     <div className={cn("text-xs font-medium transition-colors", percentage >= 100 ? "text-green-400" : "text-blue-400")}>
                         {Math.round(percentage)}%
                     </div>
@@ -65,7 +65,7 @@ export function HydrationTracker() {
 
             {/* Center Visual */}
             <div className="relative z-10 my-6">
-                <div className={cn("w-40 h-40 rounded-full border-4 flex items-center justify-center relative bg-black/20 backdrop-blur-sm transition-colors overflow-hidden", percentage >= 100 ? "border-green-500/50 shadow-glow" : "border-white/10")}>
+                <div className={cn("w-40 h-40 rounded-full border-4 flex items-center justify-center relative bg-muted/30 backdrop-blur-sm transition-colors overflow-hidden", percentage >= 100 ? "border-green-500/50 shadow-glow" : "border-border")}>
 
                     {/* Liquid Fill */}
                     <div
@@ -79,7 +79,7 @@ export function HydrationTracker() {
                         ) : (
                             <Droplets className={cn("w-8 h-8 text-white mx-auto mb-1 transition-all", isAdding ? "scale-125" : "scale-100")} />
                         )}
-                        <span className="text-xs font-medium text-white/80">{percentage >= 100 ? "GOAL!" : "H2O"}</span>
+                        <span className="text-xs font-medium text-foreground/80">{percentage >= 100 ? "GOAL!" : "H2O"}</span>
                     </div>
                 </div>
             </div>
@@ -88,21 +88,21 @@ export function HydrationTracker() {
             <div className="grid grid-cols-3 gap-3 w-full z-10">
                 <button
                     onClick={() => handleUpdate(250)}
-                    className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/5 hover:bg-blue-500/20 hover:border-blue-500/50 border border-transparent transition-all group active:scale-95"
+                    className="flex flex-col items-center justify-center p-3 rounded-2xl bg-muted/50 hover:bg-blue-500/20 hover:border-blue-500/50 border border-transparent transition-all group active:scale-95"
                 >
                     <Plus className="w-4 h-4 mb-1 text-muted-foreground group-hover:text-blue-400" />
                     <span className="text-xs font-semibold">+250ml</span>
                 </button>
                 <button
                     onClick={() => handleUpdate(500)}
-                    className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/5 hover:bg-blue-500/20 hover:border-blue-500/50 border border-transparent transition-all group active:scale-95"
+                    className="flex flex-col items-center justify-center p-3 rounded-2xl bg-muted/50 hover:bg-blue-500/20 hover:border-blue-500/50 border border-transparent transition-all group active:scale-95"
                 >
                     <Plus className="w-4 h-4 mb-1 text-muted-foreground group-hover:text-blue-400" />
                     <span className="text-xs font-semibold">+500ml</span>
                 </button>
                 <button
                     onClick={() => handleUpdate(-250)}
-                    className="flex flex-col items-center justify-center p-3 rounded-2xl bg-white/5 hover:bg-red-500/20 hover:border-red-500/50 border border-transparent transition-all group active:scale-95"
+                    className="flex flex-col items-center justify-center p-3 rounded-2xl bg-muted/50 hover:bg-red-500/20 hover:border-red-500/50 border border-transparent transition-all group active:scale-95"
                 >
                     <Minus className="w-4 h-4 mb-1 text-muted-foreground group-hover:text-red-400" />
                     <span className="text-xs font-semibold">Undo</span>

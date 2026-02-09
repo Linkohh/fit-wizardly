@@ -15,7 +15,6 @@ import { Label } from '@/components/ui/label';
 import { ExerciseSwapModal } from '@/components/plan/ExerciseSwapModal';
 import { WisdomBubble } from '@/components/wisdom/WisdomBubble';
 import { useWisdomStore } from '@/stores/wisdomStore';
-import { exportPlanToPDF } from '@/lib/pdfExport';
 import { PlanSkeleton } from '@/components/plan/PlanSkeleton';
 import { WorkoutDayCard } from '@/components/plan/WorkoutDayCard';
 import { useWizardStore } from '@/stores/wizardStore';
@@ -73,7 +72,8 @@ export default function PlanPage() {
     );
   }
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
+    const { exportPlanToPDF } = await import('@/lib/pdfExport');
     exportPlanToPDF(currentPlan, redactSensitive);
   };
 

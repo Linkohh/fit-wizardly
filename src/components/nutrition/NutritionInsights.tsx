@@ -91,7 +91,7 @@ function WeeklyCalorieChart({
       case 'good': return '#22c55e';
       case 'over': return '#f59e0b';
       case 'under': return '#eab308';
-      default: return 'rgba(255,255,255,0.08)';
+      default: return 'hsl(var(--muted))';
     }
   };
 
@@ -186,10 +186,10 @@ function MacroDistribution({
 
   const avgMacros = daysWithData.length > 0
     ? {
-        protein: Math.round(daysWithData.reduce((s, d) => s + d.protein, 0) / daysWithData.length),
-        carbs: Math.round(daysWithData.reduce((s, d) => s + d.carbs, 0) / daysWithData.length),
-        fats: Math.round(daysWithData.reduce((s, d) => s + d.fats, 0) / daysWithData.length),
-      }
+      protein: Math.round(daysWithData.reduce((s, d) => s + d.protein, 0) / daysWithData.length),
+      carbs: Math.round(daysWithData.reduce((s, d) => s + d.carbs, 0) / daysWithData.length),
+      fats: Math.round(daysWithData.reduce((s, d) => s + d.fats, 0) / daysWithData.length),
+    }
     : { protein: 0, carbs: 0, fats: 0 };
 
   const totalActualCal = avgMacros.protein * 4 + avgMacros.carbs * 4 + avgMacros.fats * 9;
@@ -197,18 +197,18 @@ function MacroDistribution({
 
   const actualSplit = totalActualCal > 0
     ? {
-        protein: Math.round((avgMacros.protein * 4 / totalActualCal) * 100),
-        carbs: Math.round((avgMacros.carbs * 4 / totalActualCal) * 100),
-        fats: Math.round((avgMacros.fats * 9 / totalActualCal) * 100),
-      }
+      protein: Math.round((avgMacros.protein * 4 / totalActualCal) * 100),
+      carbs: Math.round((avgMacros.carbs * 4 / totalActualCal) * 100),
+      fats: Math.round((avgMacros.fats * 9 / totalActualCal) * 100),
+    }
     : { protein: 0, carbs: 0, fats: 0 };
 
   const targetSplit = totalTargetCal > 0
     ? {
-        protein: Math.round((targets.protein * 4 / totalTargetCal) * 100),
-        carbs: Math.round((targets.carbs * 4 / totalTargetCal) * 100),
-        fats: Math.round((targets.fats * 9 / totalTargetCal) * 100),
-      }
+      protein: Math.round((targets.protein * 4 / totalTargetCal) * 100),
+      carbs: Math.round((targets.carbs * 4 / totalTargetCal) * 100),
+      fats: Math.round((targets.fats * 9 / totalTargetCal) * 100),
+    }
     : { protein: 0, carbs: 0, fats: 0 };
 
   const macros = [
@@ -238,7 +238,7 @@ function MacroDistribution({
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground w-12">Actual</span>
-                  <div className="flex-1 bg-white/5 h-3 rounded-full overflow-hidden">
+                  <div className="flex-1 bg-muted/10 h-3 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${macro.color} transition-all duration-700`}
                       style={{ width: `${Math.min(100, macro.actual)}%` }}
@@ -248,7 +248,7 @@ function MacroDistribution({
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground w-12">Target</span>
-                  <div className="flex-1 bg-white/5 h-3 rounded-full overflow-hidden">
+                  <div className="flex-1 bg-muted/10 h-3 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full ${macro.color} opacity-40 transition-all duration-700`}
                       style={{ width: `${Math.min(100, macro.target)}%` }}
@@ -295,7 +295,7 @@ function NutritionScoreCard({
           </div>
 
           <div className="flex-1 space-y-2">
-            <ScoreBreakdownRow label="Calories" value={score.breakdown.calorieAdherence} max={40} color="bg-white" />
+            <ScoreBreakdownRow label="Calories" value={score.breakdown.calorieAdherence} max={40} color="bg-foreground" />
             <ScoreBreakdownRow label="Protein" value={score.breakdown.proteinHit} max={30} color="bg-blue-400" />
             <ScoreBreakdownRow label="Hydration" value={score.breakdown.hydration} max={20} color="bg-cyan-400" />
             <ScoreBreakdownRow label="Consistency" value={score.breakdown.consistency} max={10} color="bg-green-400" />
@@ -310,7 +310,7 @@ function ScoreBreakdownRow({ label, value, max, color }: { label: string; value:
   return (
     <div className="flex items-center gap-2">
       <span className="text-xs text-muted-foreground w-20">{label}</span>
-      <div className="flex-1 bg-white/5 h-2 rounded-full overflow-hidden">
+      <div className="flex-1 bg-muted/10 h-2 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full ${color} transition-all duration-700`}
           style={{ width: `${(value / max) * 100}%` }}
@@ -339,7 +339,7 @@ function ConsistencyStreakCard({ streak, hasData }: { streak: number; hasData: b
 
       <div className="flex items-center gap-4">
         <div className="relative">
-          <div className={`w-20 h-20 rounded-2xl flex items-center justify-center ${streak > 0 ? 'bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30' : 'bg-white/5 border border-white/10'}`}>
+          <div className={`w-20 h-20 rounded-2xl flex items-center justify-center ${streak > 0 ? 'bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30' : 'bg-muted/10 border border-border'}`}>
             <span className={`text-3xl font-bold ${streak > 0 ? 'text-orange-400' : 'text-muted-foreground'}`}>
               {streak}
             </span>

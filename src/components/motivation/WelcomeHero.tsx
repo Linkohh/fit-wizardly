@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { FloatingElement } from "@/components/ui/page-transition";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { InteractiveWord } from "./InteractiveWord";
-import { useRef, useCallback, memo, useEffect } from "react";
+import { useRef, useCallback, memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 // --- Sub-Components (Memoized) ---
@@ -147,6 +147,15 @@ export function WelcomeHero() {
     const { t, i18n } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const rectRef = useRef<DOMRect | null>(null);
+    const [showBackground, setShowBackground] = useState(false);
+
+    // Defer heavy background animations to prioritize LCP
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowBackground(true);
+        }, 100); // Small delay to let the main content paint first
+        return () => clearTimeout(timer);
+    }, []);
 
     // Motion values don't trigger re-renders
     const mouseX = useMotionValue(0);
@@ -186,11 +195,15 @@ export function WelcomeHero() {
         <section
             ref={containerRef}
             onMouseMove={handleMouseMove}
-            className="relative pt-24 pb-20 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#F8F5FC]/90 via-[#EDE4F5]/80 to-[#F0E8F8]/70 dark:from-[#1a0a2e]/85 dark:via-[#2D1548]/75 dark:to-[#1a0a2e]/60"
+            className="relative pt-24 pb-20 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#F8F5FC]/90 via-[#EDE4F5]/80 to-[#F0E8F8]/70 dark:from-[#1a0a2e]/85 dark:via-[#2D1548]/75 dark:to-[#1a0a2e]/60 min-h-[100dvh] flex flex-col justify-center"
         >
-            {/* Animated Background Elements */}
-            <FloatingOrbs />
-            <Particles />
+            {/* Animated Background Elements - Deferred */}
+            {showBackground && (
+                <>
+                    <FloatingOrbs />
+                    <Particles />
+                </>
+            )}
 
             {/* Mesh gradient overlay */}
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.25),transparent)] pointer-events-none" />
@@ -218,26 +231,17 @@ export function WelcomeHero() {
                     <AnimatedBadge />
                 </FloatingElement>
 
-                <motion.h1
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
+                <h1
                     className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground mb-6 tracking-tight flex flex-col items-center justify-center leading-tight"
                 >
-                    <motion.div
+                    <div
                         className="flex items-center justify-center flex-wrap gap-2 md:gap-4"
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6, delay: 0.3 }}
                     >
                         <InteractiveWord word={t('hero.unleash')} type="unleash" />
                         <InteractiveWord word={t('hero.your')} type="your" />
-                    </motion.div>
-                    <motion.span
+                    </div>
+                    <span
                         className="relative mt-2"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.6, delay: 0.5 }}
                     >
                         <span className="flex items-center justify-center gap-2 md:gap-4 text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary">
                             <InteractiveWord word={t('hero.full')} type="full" className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary" />
@@ -249,8 +253,8 @@ export function WelcomeHero() {
                             animate={{ opacity: [0.5, 0.8, 0.5], scale: [1, 1.05, 1] }}
                             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                         />
-                    </motion.span>
-                </motion.h1>
+                    </span>
+                </h1>
 
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}

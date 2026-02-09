@@ -56,6 +56,9 @@ export function Header() {
     path: '/exercises',
     label: t('nav.exercises')
   }, {
+    path: '/history',
+    label: t('nav.history', 'History')
+  }, {
     path: '/circles',
     label: t('nav.circles')
   }, {
@@ -102,6 +105,9 @@ export function Header() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[100] px-4 py-2 bg-background border border-primary text-primary rounded-md shadow-lg">
+        {t('a11y.skip_to_content', 'Skip to content')}
+      </a>
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         {/* NOTE: Tooltip removed here to prevent potential interference/looping with Link logic */}

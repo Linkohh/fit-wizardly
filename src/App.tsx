@@ -20,6 +20,7 @@ import { useGlobalClickFeedback } from "@/hooks/useGlobalClickFeedback";
 import { Footer } from "@/components/Footer";
 import { ConsentModal } from "@/components/legal/ConsentModal";
 import { LivingBackground } from "@/components/ui/living-background";
+import { LoadingScreen } from "@/components/ui/loading-screen";
 
 const Index = lazy(() => import("./pages/Index"));
 const WizardPage = lazy(() => import("./pages/Wizard"));
@@ -29,6 +30,7 @@ const ClientsPage = lazy(() => import("./pages/Clients"));
 const MCLIntegrationTest = lazy(() => import("./pages/MCLIntegrationTest"));
 const OnboardingPage = lazy(() => import("./pages/Onboarding"));
 const NutritionPage = lazy(() => import("./pages/Nutrition"));
+const HistoryPage = lazy(() => import("./pages/History"));
 const CirclesPage = lazy(() => import("./pages/Circles"));
 const UserGuide = lazy(() => import("./pages/UserGuide"));
 const LegalPage = lazy(() => import("./pages/Legal"));
@@ -133,7 +135,7 @@ function AnimatedRoutes() {
     return (
       <AnimatePresence mode="wait" initial={false}>
         <PageTransition key={location.pathname}>
-          <Suspense fallback={null}>
+          <Suspense fallback={<LoadingScreen />}>
             <Routes location={location}>
               <Route path="/onboarding" element={<OnboardingPage />} />
             </Routes>
@@ -147,7 +149,7 @@ function AnimatedRoutes() {
     <OnboardingGuard>
       <AnimatePresence mode="wait" initial={false}>
         <PageTransition key={location.pathname}>
-          <Suspense fallback={null}>
+          <Suspense fallback={<LoadingScreen />}>
             <Routes location={location}>
               <Route path="/" element={<Index />} />
               <Route path="/wizard" element={<WizardPage />} />
@@ -166,6 +168,11 @@ function AnimatedRoutes() {
               <Route path="/nutrition" element={
                 <RequireAuth>
                   <NutritionPage />
+                </RequireAuth>
+              } />
+              <Route path="/history" element={
+                <RequireAuth>
+                  <HistoryPage />
                 </RequireAuth>
               } />
               <Route path="/exercises" element={
@@ -245,6 +252,20 @@ const App = () => {
       syncWithBackend(user.id);
     }
   }, [user, isLoading, syncWithBackend]);
+
+  useEffect(() => {
+    const handleOnline = () => {
+      if (user) {
+        console.log('Back online, triggering sync...');
+        syncWithBackend(user.id);
+        // Toast is handled by useNetworkStatus, but we can add a specific sync toast if needed
+        // toast.success("Syncing data..."); 
+      }
+    };
+
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [user, syncWithBackend]);
 
   return (
     <ErrorBoundary>

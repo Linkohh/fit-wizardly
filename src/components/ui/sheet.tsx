@@ -57,7 +57,7 @@ const sheetVariants = cva(
 
 interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
-    VariantProps<typeof sheetVariants> {
+  VariantProps<typeof sheetVariants> {
   /** Enable glass morphism effect */
   glassEffect?: boolean;
   /** Enable swipe-to-close gesture (only for left/right sides) */
@@ -179,6 +179,8 @@ const SheetContent = React.forwardRef<
         onPointerCancel={handlePointerUp}
         {...props}
       >
+        <SheetPrimitive.Title className="sr-only">Sheet Content</SheetPrimitive.Title>
+        <SheetPrimitive.Description className="sr-only">Sheet Description</SheetPrimitive.Description>
         {/* Drag Handle Indicator */}
         {showDragHandle && (side === "left" || side === "right") && (
           <div className="drag-handle absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full animate-pulse" />

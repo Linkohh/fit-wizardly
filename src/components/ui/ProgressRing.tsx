@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import React from "react";
 
 interface ProgressRingProps {
     label: string;
@@ -19,7 +20,14 @@ export function ProgressRing({
     size = 'md',
     showRemaining = false
 }: ProgressRingProps) {
-    const percentage = Math.min(100, (current / target) * 100);
+    const [animatedCurrent, setAnimatedCurrent] = React.useState(0);
+
+    React.useEffect(() => {
+        const timer = setTimeout(() => setAnimatedCurrent(current), 100);
+        return () => clearTimeout(timer);
+    }, [current]);
+
+    const percentage = target > 0 ? Math.min(100, (animatedCurrent / target) * 100) : 0;
     const radius = size === 'sm' ? 24 : size === 'md' ? 36 : 48;
     const strokeWidth = size === 'sm' ? 4 : 8;
     const width = radius * 2 + strokeWidth * 2;
@@ -36,7 +44,7 @@ export function ProgressRing({
                         cx="50%" cy="50%" r={radius}
                         stroke="currentColor" strokeWidth={strokeWidth}
                         fill="transparent"
-                        className="text-white/5"
+                        className="text-muted/20"
                     />
                     <circle
                         cx="50%" cy="50%" r={radius}
@@ -62,8 +70,8 @@ export function ProgressRing({
                     )}
                 </div>
             </div>
-            <span className="text-xs font-medium text-muted-foreground group-hover:text-white transition-colors">{label}</span>
-            <span className="text-[10px] text-white/30 group-hover:text-white/50 transition-colors">
+            <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors">{label}</span>
+            <span className="text-[10px] text-muted-foreground/50 group-hover:text-muted-foreground transition-colors">
                 {showRemaining ? `${Math.round(percentage)}%` : `/ ${target}${unit}`}
             </span>
         </div>

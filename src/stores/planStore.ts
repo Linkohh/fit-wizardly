@@ -59,6 +59,7 @@ interface ActiveWorkout {
   exercises: ExerciseLog[];
   currentExerciseIndex: number;
   currentSetIndex: number;
+  restTimerEndTime: number | null; // Timestamp in ms
 }
 
 // ============================================
@@ -98,6 +99,11 @@ interface PlanState {
   skipExercise: (exerciseIndex: number, reason?: string) => void;
   completeWorkout: (perceivedDifficulty: PerceivedDifficulty, notes?: string) => WorkoutLog | null;
 
+  // NEW: Timer actions
+  startRestTimer: (durationSeconds: number) => void;
+  cancelRestTimer: () => void;
+  adjustRestTimer: (seconds: number) => void;
+
   // NEW: Analytics actions
   getWorkoutLogsForPlan: (planId: string) => WorkoutLog[];
   getWeeklySummary: (planId: string, weekNumber: number) => WeeklySummary | null;
@@ -107,6 +113,9 @@ interface PlanState {
   // NEW: Preferences
   setPreferredWeightUnit: (unit: WeightUnit) => void;
   setCurrentWeek: (week: number) => void;
+
+  // NEW: History
+  getLastPerformance: (exerciseId: string) => ExerciseLog | null;
 }
 
 // ============================================
@@ -314,6 +323,7 @@ export const usePlanStore = create<PlanState>()(
             exercises,
             currentExerciseIndex: 0,
             currentSetIndex: 0,
+            restTimerEndTime: null,
           },
         });
       },
@@ -361,6 +371,43 @@ export const usePlanStore = create<PlanState>()(
               exercises,
               currentExerciseIndex: exerciseIndex + 1,
               currentSetIndex: 0,
+            },
+          };
+        });
+      },
+
+      // TIMER ACTIONS
+      startRestTimer: (durationSeconds) => {
+        set((state) => {
+          if (!state.activeWorkout) return state;
+          return {
+            activeWorkout: {
+              ...state.activeWorkout,
+              restTimerEndTime: Date.now() + durationSeconds * 1000,
+            },
+          };
+        });
+      },
+
+      cancelRestTimer: () => {
+        set((state) => {
+          if (!state.activeWorkout) return state;
+          return {
+            activeWorkout: {
+              ...state.activeWorkout,
+              restTimerEndTime: null,
+            },
+          };
+        });
+      },
+
+      adjustRestTimer: (seconds) => {
+        set((state) => {
+          if (!state.activeWorkout || !state.activeWorkout.restTimerEndTime) return state;
+          return {
+            activeWorkout: {
+              ...state.activeWorkout,
+              restTimerEndTime: state.activeWorkout.restTimerEndTime + seconds * 1000,
             },
           };
         });
@@ -426,12 +473,12 @@ export const usePlanStore = create<PlanState>()(
         // Post any new PRs to circles
         if (newPRs.length > 0) {
           for (const pr of newPRs) {
-              postPRToCircles({
-                exerciseName: pr.exerciseName,
-                oldValue: pr.previousValue || 0,
+            postPRToCircles({
+              exerciseName: pr.exerciseName,
+              oldValue: pr.previousValue || 0,
               newValue: pr.newValue,
-                prType: pr.type as 'weight' | 'reps' | 'volume',
-              }).catch(err => console.error('Failed to post PR to circles:', err));
+              prType: pr.type as 'weight' | 'reps' | 'volume',
+            }).catch(err => console.error('Failed to post PR to circles:', err));
           }
         }
 
@@ -530,6 +577,16 @@ export const usePlanStore = create<PlanState>()(
       setPreferredWeightUnit: (unit) => set({ preferredWeightUnit: unit }),
 
       setCurrentWeek: (week) => set({ currentWeek: Math.max(1, Math.min(4, week)) }),
+
+      getLastPerformance: (exerciseId) => {
+        const { workoutLogs } = get();
+        // Logs are already sorted by date (newest first)
+        for (const log of workoutLogs) {
+          const exercise = log.exercises.find(e => e.exerciseId === exerciseId);
+          if (exercise) return exercise;
+        }
+        return null;
+      },
     }),
     {
       name: 'fitwizard-plans',

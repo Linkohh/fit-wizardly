@@ -15,6 +15,9 @@ import {
 import type { WorkoutLog, Plan } from '@/types/fitness';
 import { usePlanStore } from '@/stores/planStore';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 interface WorkoutSummaryProps {
     log: WorkoutLog;
@@ -87,7 +90,25 @@ export function WorkoutSummary({ log, plan, onClose }: WorkoutSummaryProps) {
             {/* Celebration Header */}
             <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-pink-500/20 blur-3xl" />
-                <div className="relative container max-w-2xl mx-auto px-4 py-12 text-center">
+
+                {/* Confetti Particles */}
+                <AnimatePresence>
+                    {workoutPRs.length > 0 && Array.from({ length: 20 }).map((_, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ y: -50, x: Math.random() * window.innerWidth, opacity: 1, rotate: 0 }}
+                            animate={{ y: window.innerHeight, rotate: 360 }}
+                            transition={{ duration: 2 + Math.random() * 2, ease: "linear", repeat: Infinity, delay: Math.random() * 2 }}
+                            className="absolute top-0 w-3 h-3 rounded-full z-10"
+                            style={{
+                                backgroundColor: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'][Math.floor(Math.random() * 5)],
+                                left: `${Math.random() * 100}%`
+                            }}
+                        />
+                    ))}
+                </AnimatePresence>
+
+                <div className="relative container max-w-2xl mx-auto px-4 py-12 text-center z-20">
                     <div className="animate-bounce-slow">
                         <Trophy className="h-16 w-16 mx-auto text-yellow-500 mb-4" />
                     </div>
@@ -235,9 +256,27 @@ export function WorkoutSummary({ log, plan, onClose }: WorkoutSummaryProps) {
                     <Button
                         variant="outline"
                         className="flex-1"
-                        onClick={() => {
-                            // TODO: Implement share functionality
+                        onClick={async () => {
+                            const shareText = `I just crushed a workout on FitWizard! 🧙‍♂️\n\n` +
+                                `💪 ${log.dayName}\n` +
+                                `⏱️ ${log.duration} minutes\n` +
+                                `🔥 ${formatVolume(log.totalVolume)} ${preferredWeightUnit} volume\n` +
+                                `${workoutPRs.length > 0 ? `✨ ${workoutPRs.length} Personal Records!\n` : ''}\n` +
+                                `#FitWizard #WorkoutComplete`;
 
+                            if (navigator.share) {
+                                try {
+                                    await navigator.share({
+                                        title: 'Workout Complete!',
+                                        text: shareText,
+                                    });
+                                } catch (err) {
+                                    console.log('Share aborted');
+                                }
+                            } else {
+                                await navigator.clipboard.writeText(shareText);
+                                toast.success('Stats copied to clipboard!');
+                            }
                         }}
                     >
                         <Share2 className="h-4 w-4 mr-2" />
