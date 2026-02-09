@@ -20,6 +20,8 @@ import { usePlanStore } from '@/stores/planStore';
 import { SetLogger } from './SetLogger';
 import { WorkoutSummary } from './WorkoutSummary';
 import { RestTimer } from './RestTimer';
+import { WarmUpSets } from './WarmUpSets';
+import { SupersetIndicator, getSupersetLabel } from './SupersetIndicator';
 import type { PerceivedDifficulty, SetLog } from '@/types/fitness';
 import {
     AlertDialog,
@@ -210,14 +212,37 @@ export function WorkoutLogger() {
                     </p>
                 </div>
 
+                {/* Warm-Up Sets (only for first compound exercise) */}
+                {currentExerciseIndex === 0 && lastPerformance?.sets[0]?.weight && (
+                    <WarmUpSets
+                        workingWeight={lastPerformance.sets[0].weight}
+                        weightUnit={preferredWeightUnit}
+                        exerciseName={prescription.exercise.name}
+                    />
+                )}
+
                 {/* Exercise Card */}
                 <Card className="mb-6 overflow-hidden">
                     <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent border-b">
                         <div className="flex items-center justify-between">
                             <div>
-                                <Badge variant="secondary" className="mb-2">
-                                    {t('workout.exercise_count', { current: currentExerciseIndex + 1, total: totalExercises })}
-                                </Badge>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Badge variant="secondary">
+                                        {t('workout.exercise_count', { current: currentExerciseIndex + 1, total: totalExercises })}
+                                    </Badge>
+                                    {prescription.supersetGroup && (() => {
+                                        const groupExercises = workoutDay.exercises.filter(e => e.supersetGroup === prescription.supersetGroup);
+                                        const indexInGroup = groupExercises.findIndex(e => e.exercise.id === prescription.exercise.id) + 1;
+                                        return (
+                                            <SupersetIndicator
+                                                groupLabel={getSupersetLabel(prescription.supersetGroup)}
+                                                exerciseIndex={indexInGroup}
+                                                totalInGroup={groupExercises.length}
+                                                isActive={true}
+                                            />
+                                        );
+                                    })()}
+                                </div>
                                 <CardTitle className="text-xl">
                                     {prescription.exercise.name}
                                 </CardTitle>

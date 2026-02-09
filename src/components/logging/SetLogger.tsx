@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { PlateCalculatorDialog } from '@/components/tools/PlateCalculator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -141,13 +142,21 @@ export function SetLogger({
                         >
                             <ChevronDown className="h-6 w-6" />
                         </Button>
-                        <Input
-                            type="number"
-                            value={weight}
-                            onChange={(e) => setWeight(Number(e.target.value))}
-                            className="h-12 text-center text-xl font-semibold px-0"
-                            disabled={completed}
-                        />
+                        <div className="relative">
+                            <Input
+                                type="number"
+                                value={weight}
+                                onChange={(e) => setWeight(Number(e.target.value))}
+                                className="h-12 w-20 text-center text-xl font-semibold px-0 z-10"
+                                disabled={completed}
+                            />
+                            {/* Calculator Integration */}
+                            {!completed && weight >= 45 && (
+                                <div className="absolute -top-3 -right-3 z-20">
+                                    <PlateCalculatorDialog initialWeight={weight} weightUnit={defaultWeightUnit} />
+                                </div>
+                            )}
+                        </div>
                         <Button
                             variant="outline"
                             size="icon"

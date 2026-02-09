@@ -1,13 +1,14 @@
 
 import { useState, useEffect } from "react";
 import { Plus, Search, X, Loader2, Star, ChefHat, Heart } from "lucide-react";
+import { SmartActions } from "./SmartActions";
 import { MealEntry, MacroTargets } from "@/types/nutrition";
 import { cn } from "@/lib/utils";
 import { searchProducts, OFFFoodProduct } from "@/lib/openFoodFacts";
 import { useNutritionStore } from "@/stores/nutritionStore";
 
 interface FoodLoggerProps {
-    onLogMeal: (meal: MealEntry) => void;
+    onLogMeal: (meal: MealEntry | MealEntry[]) => void;
     dayTotal: MacroTargets;
 }
 
@@ -59,8 +60,17 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
         close();
     };
 
-    const handleLogSavedItem = (item: MealEntry) => {
-        onLogMeal({ ...item, id: Math.random().toString(), timestamp: new Date() });
+    const handleLogSavedItem = (itemOrItems: MealEntry | MealEntry[]) => {
+        if (Array.isArray(itemOrItems)) {
+            const meals = itemOrItems.map(item => ({
+                ...item,
+                id: Math.random().toString(),
+                timestamp: new Date()
+            }));
+            onLogMeal(meals);
+        } else {
+            onLogMeal({ ...itemOrItems, id: Math.random().toString(), timestamp: new Date() });
+        }
         close();
     };
 
@@ -110,6 +120,12 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                         <div className="p-2 bg-muted/50 rounded-lg group-hover:scale-110 transition-transform"><Plus className="w-4 h-4 text-primary" /></div>
                         <span className="font-medium">Add Food</span>
                     </button>
+
+                    {/* Smart Actions */}
+                    <SmartActions
+                        onLog={handleLogSavedItem}
+                        onSaveTemplate={(meal) => console.log('Save template not supported from here yet')}
+                    />
 
                     {/* Quick Favorites Mini-List (Top 3) */}
                     {favorites.length > 0 && (

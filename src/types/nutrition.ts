@@ -43,6 +43,17 @@ export interface MealRecommendation {
     imageUrl?: string;
 }
 
+export interface MealTemplate {
+    id: string;
+    name: string;
+    items: MealEntry[];
+    totalCalories: number;
+    totalProtein: number; // calculated sum
+    totalCarbs: number;   // calculated sum
+    totalFats: number;    // calculated sum
+    tags?: string[];
+}
+
 export interface UserNutritionProfile {
     weight: number;      // kg
     height: number;      // cm

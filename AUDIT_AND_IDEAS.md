@@ -666,7 +666,7 @@ This allows persisting the timer across re-renders if the user navigates away an
 
 ---
 
-### [2.3] Profile / Settings Page
+### [2.3] Profile / Settings Page ✅
 
 - **Priority:** MEDIUM
 - **Effort:** M (4-6h)
@@ -676,6 +676,11 @@ This allows persisting the timer across re-renders if the user navigates away an
   - Modify: `src/App.tsx` (add route)
   - Modify: `src/components/Header.tsx` (add nav item or profile icon)
 - **Dependencies:** None
+
+**Completed Actions:**
+- Created `Profile.tsx` with sections for Theme, Language, Units, Trainer Mode, and Data Export.
+- Updated `Header.tsx` to link to Profile and removed inline settings.
+- Added `/profile` route.
 
 **Currently scattered across:**
 
@@ -727,379 +732,85 @@ Uses Recharts (already installed) for line charts showing trends over time.
 
 ---
 
-### [2.5] Superset Visual Pairing
+### [2.5] Superset Visual & Logical Pairing ⏳ TODO
 
 - **Priority:** LOW
 - **Effort:** M (4-6h)
-- **Impact:** Visually groups paired exercises for users following superset-style programming
-- **Files:**
-  - Modify: `src/components/plan/WorkoutDayCard.tsx`
-  - Modify: `src/components/logging/WorkoutLogger.tsx`
-- **Dependencies:** None
-
-**Context:** The `supersetGroup` field exists on `ExercisePrescription` (line 183 of `src/types/fitness.ts`) but is **completely unused in UI**.
-
-**In `WorkoutDayCard.tsx`:** Group exercises with matching `supersetGroup` values visually:
-- A1/A2 notation labels
-- Shared background color band
-- Connecting line or bracket between paired exercises
-
-**In `WorkoutLogger.tsx`:** Show paired exercises in a circuit flow — after completing A1 Set 1, auto-advance to A2 Set 1 before returning to A1 Set 2.
+- **Impact:** Critical flow improvement for circuit/superset training
+- **Refinement:**
+    1. **Visual:** Group exercises with brackets/color bands in `WorkoutDayCard`.
+    2. **Logical:** Auto-advance navigation. If Ex A and B are paired:
+       - Complete A.1 -> Auto-focus B.1
+       - Complete B.1 -> Auto-switch back to A.2
+       - (Support "Jump to next set" override)
 
 ---
 
-### [2.6] Warm-Up and Cool-Down Generation
+### [2.6] Smart Warm-Up Generation ⏳ TODO
 
 - **Priority:** LOW
 - **Effort:** M (4-6h)
-- **Impact:** Provides dynamic warm-up and cool-down routines based on the day's target muscles
-- **Files:**
-  - Modify: `src/lib/planGenerator.ts`
-  - (Display already handled by `src/components/plan/WorkoutDayCard.tsx` lines 41-73)
-- **Dependencies:** None
-
-**Context:** `WorkoutDay` type has `warmUp?: string[]` and `coolDown?: string[]` (lines 194-195 of `src/types/fitness.ts`). `WorkoutDayCard.tsx` already renders these arrays when populated, but the plan generator typically leaves them empty.
-
-**Fix:** Update `planGenerator.ts` to populate these arrays dynamically based on the day's target muscle groups. For example, a chest/triceps day would get "Band pull-aparts", "Shoulder dislocates", "Light bench press warm-up sets".
+- **Impact:** Reduces injury risk; auto-calculates warm-up sets
+- **Refinement:**
+    - Don't just list "Push-ups".
+    - **Auto-calculate ramp-up sets:**
+      - Set 1: 50% working weight x 10
+      - Set 2: 70% working weight x 5
+      - Set 3: 90% working weight x 2
+    - Insert these rows dynamically into `WorkoutLogger`.
 
 ---
 
-### [2.7] Exercise Demo Media
+### [2.7] Exercise Demo Media ⏳ TODO
 
 - **Priority:** LOW
 - **Effort:** L (1-2 days)
-- **Impact:** Users can see how to perform exercises correctly
-- **Files:**
-  - Modify: `src/components/exercises/ExerciseDetailModal.tsx`
-  - Modify: Exercise data sources
-- **Dependencies:** None
-
-**Context:** The `Exercise` type has `videoUrl`, `gifUrl`, `imageUrl` fields (lines 160-164 of `src/types/fitness.ts`) — currently empty for most exercises.
-
-In `ExerciseDetailModal.tsx`: Add a video/GIF embed section when URLs are populated. Source from public exercise demonstration databases or generate placeholder animations.
+- **Impact:** Correct form education
+- **Refinement:**
+    - Add `videoUrl` support to `ExerciseDetailModal`.
+    - **Fallback:** If no video, auto-generate a "Muscle Highlight" SVG using the `MCL` component data (highlighting primary/secondary muscles).
 
 ---
 
-## Section 3: Sub-Feature Enhancements (10 items)
+## Section 3: Sub-Feature Enhancements (Refined)
 
-Small but high-impact improvements to existing features.
-
----
-
-### [3.1] "Last Time" Historical Data in SetLogger ✅
-
-- **Priority:** HIGH
-- **Effort:** M (3-5h)
-- **Impact:** CRITICAL for progressive overload. Users currently have to guess what they lifted last time. This is the single most requested feature in any workout logger.
-- **Files:**
-  - Modify: `src/stores/planStore.ts`
-  - Modify: `src/components/logging/WorkoutLogger.tsx`
-  - Modify: `src/components/logging/SetLogger.tsx`
-- **Dependencies:** None
-
-**Step 1 — New Store Method**
-
-Add to `src/stores/planStore.ts` after `getWorkoutLogsForPlan` (line 447):
-
-```typescript
-getLastPerformance: (exerciseId: string): SetLog[] | null => {
-    const logs = get().workoutLogs;
-    // workoutLogs are sorted newest-first (line 413: [workoutLog, ...state.workoutLogs])
-    for (const log of logs) {
-        const exerciseLog = log.exercises.find(
-            e => e.exerciseId === exerciseId && !e.skipped
-        );
-        if (exerciseLog) {
-            return exerciseLog.sets.filter(s => s.completed);
-        }
-    }
-    return null;
-},
-```
-
-Also add to the `PlanState` interface (after line 103):
-
-```typescript
-getLastPerformance: (exerciseId: string) => SetLog[] | null;
-```
-
-**Step 2 — Pass to SetLogger**
-
-Modify `src/components/logging/WorkoutLogger.tsx` (around lines 222-231):
-
-```tsx
-// Before the SetLogger map, destructure the new method:
-const { getLastPerformance } = usePlanStore();
-
-// Inside the map:
-currentExercise.sets.map((set, idx) => {
-    const lastPerformance = getLastPerformance(prescription.exercise.id);
-
-    return (
-        <SetLogger
-            key={idx}
-            setNumber={idx + 1}
-            targetReps={prescription.reps}
-            targetRIR={prescription.rir}
-            previousSet={set.completed ? set : undefined}
-            historicalSet={lastPerformance?.[idx]}  // NEW PROP
-            defaultWeightUnit={preferredWeightUnit}
-            onComplete={handleSetComplete}
-            isActive={!set.completed && currentExercise.sets.slice(0, idx).every(s => s.completed)}
-        />
-    );
-})
-```
-
-**Step 3 — Update SetLogger**
-
-Modify `src/components/logging/SetLogger.tsx`:
-
-Add to props interface (line 10-18):
-
-```typescript
-interface SetLoggerProps {
-    setNumber: number;
-    targetReps: string;
-    targetRIR: number;
-    previousSet?: SetLog;
-    historicalSet?: SetLog;  // NEW
-    defaultWeightUnit?: WeightUnit;
-    onComplete: (setLog: SetLog) => void;
-    isActive?: boolean;
-}
-```
-
-Add pre-fill logic (after line 32):
-
-```typescript
-// Pre-fill weight from last session if this is a fresh set
-useEffect(() => {
-    if (historicalSet && !previousSet && weight === 0) {
-        setWeight(historicalSet.weight);
-    }
-}, [historicalSet]);
-```
-
-Add display text (after line 123, below the weight label):
-
-```tsx
-<label className="text-xs text-muted-foreground mb-1 block">
-    Weight ({defaultWeightUnit})
-    {historicalSet && (
-        <span className="text-[10px] text-muted-foreground ml-1">
-            — Last: {historicalSet.weight}{defaultWeightUnit} × {historicalSet.reps}
-        </span>
-    )}
-</label>
-```
-
-**Why (CPT rationale):** Progressive overload is the #1 principle of strength training. Without knowing what you lifted last time, you can't systematically add load. Every successful fitness app (Strong, Hevy, JEFIT) shows last-session data. This is table stakes.
-
----
-
-### [3.2] Difficulty Rating Picker ✅
-
-- **Priority:** MEDIUM
-- **Effort:** S (1-2h)
-- **Impact:** Captures actual perceived difficulty instead of hardcoded 'just_right', enabling smarter progression recommendations
-- **Files:** `src/components/logging/WorkoutLogger.tsx`
-- **Dependencies:** None
-
-**Current Problem:** Lines 262 and 290 both hardcode:
-
-```tsx
-onClick={() => handleFinishWorkout('just_right')}
-```
-
-The `PerceivedDifficulty` type (line 255 of `src/types/fitness.ts`) supports 4 options: `'too_easy' | 'just_right' | 'challenging' | 'too_hard'`.
-
-`WorkoutSummary.tsx` lines 65-83 already defines emoji mappings for all 4 options:
-
-| Value | Emoji | Label |
-|-------|-------|-------|
-| `too_easy` | 😎 | Too Easy |
-| `just_right` | 💪 | Just Right |
-| `challenging` | 🔥 | Challenging |
-| `too_hard` | 😤 | Too Hard |
-
-**Implementation:**
-
-```tsx
-// Add state (near line 55):
-const [showDifficultySheet, setShowDifficultySheet] = useState(false);
-
-// Change line 262:
-onClick={() => setShowDifficultySheet(true)}
-
-// Change line 290:
-onClick={() => setShowDifficultySheet(true)}
-
-// Add Sheet/Dialog before the Cancel Dialog (before line 312):
-<AlertDialog open={showDifficultySheet} onOpenChange={setShowDifficultySheet}>
-    <AlertDialogContent>
-        <AlertDialogHeader>
-            <AlertDialogTitle>How did that feel?</AlertDialogTitle>
-            <AlertDialogDescription>
-                This helps FitWizard adjust your progression.
-            </AlertDialogDescription>
-        </AlertDialogHeader>
-        <div className="grid grid-cols-2 gap-3 py-4">
-            {([
-                { value: 'too_easy', emoji: '😎', label: 'Too Easy' },
-                { value: 'just_right', emoji: '💪', label: 'Just Right' },
-                { value: 'challenging', emoji: '🔥', label: 'Challenging' },
-                { value: 'too_hard', emoji: '😤', label: 'Too Hard' },
-            ] as const).map(option => (
-                <Button
-                    key={option.value}
-                    variant="outline"
-                    className="h-20 flex flex-col gap-1"
-                    onClick={() => handleFinishWorkout(option.value)}
-                >
-                    <span className="text-2xl">{option.emoji}</span>
-                    <span className="text-sm">{option.label}</span>
-                </Button>
-            ))}
-        </div>
-    </AlertDialogContent>
-</AlertDialog>
-```
-
----
-
-### [3.3] Share Workout Card (Basic Text Impl) ✅
-
-- **Priority:** MEDIUM
-- **Effort:** M (3-5h)
-- **Impact:** Social sharing drives organic growth — users share achievements to Instagram stories
-- **Files:** `src/components/logging/WorkoutSummary.tsx`
-- **Dependencies:** None
-
-**Current state:** Lines 238-241 have a TODO:
-
-```tsx
-onClick={() => {
-    // TODO: Implement share functionality
-}}
-```
-
-**Implementation:**
-
-First, add `id="workout-summary-card"` to the main container div at line 86:
-
-```tsx
-// BEFORE (line 86):
-<div className="min-h-screen bg-gradient-to-b from-primary/10 via-background to-background">
-
-// AFTER:
-<div id="workout-summary-card" className="min-h-screen bg-gradient-to-b from-primary/10 via-background to-background">
-```
-
-Then replace the TODO onClick handler (lines 238-241):
-
-```tsx
-onClick={async () => {
-    try {
-        const element = document.getElementById('workout-summary-card');
-        if (!element) return;
-
-        // html2canvas is already installed
-        const { default: html2canvas } = await import('html2canvas');
-        const canvas = await html2canvas(element, {
-            backgroundColor: '#0a0a0a',
-            scale: 2,
-        });
-        const blob = await new Promise<Blob>((resolve) =>
-            canvas.toBlob((b) => resolve(b!), 'image/png')
-        );
-
-        // Mobile: use native share sheet
-        if (navigator.share && navigator.canShare?.({
-            files: [new File([blob], 'workout.png', { type: 'image/png' })]
-        })) {
-            await navigator.share({
-                title: 'My FitWizard Workout',
-                text: `Completed ${log.dayName} — ${log.duration}min`,
-                files: [new File([blob], 'workout.png', { type: 'image/png' })],
-            });
-        } else {
-            // Desktop fallback: copy to clipboard
-            await navigator.clipboard.write([
-                new ClipboardItem({ 'image/png': blob })
-            ]);
-            toast.success('Workout card copied to clipboard!');
-        }
-    } catch (err) {
-        console.error('Share failed:', err);
-        toast.error('Could not share workout');
-    }
-}}
-```
-
-Add `import { toast } from 'sonner';` at the top if not already imported.
-
----
-
-### [3.4] Plate Calculator
+### [3.4] Integrated Plate Calculator ✅
 
 - **Priority:** LOW
 - **Effort:** M (3-4h)
-- **Impact:** Eliminates mental math when loading a barbell — a small feature that delights
-- **Files:**
-  - Create: `src/components/tools/PlateCalculator.tsx`
-  - Optionally integrate into `SetLogger.tsx`
-- **Dependencies:** None
+- **Impact:** Instant math assistance during logging
+- **Refinement:**
+    - **Not just a standalone tool.**
+    - Add a small "Calculator" icon inside the `SetLogger` weight input.
+    - Tapping it opens a drawer showing the exact plate loading for true/false inputs (45s, 35s, 25s, etc.).
 
-When a user enters a barbell weight in `SetLogger`, show what plates to load per side.
-
-**Standard plates:**
-- Imperial: 45, 35, 25, 10, 5, 2.5 lbs (bar = 45 lbs)
-- Metric: 25, 20, 15, 10, 5, 2.5, 1.25 kg (bar = 20 kg)
-
-**Example output:** "135 lbs = Bar (45) + 45 per side"
+**Completed Actions:** (Pulled forward to Phase 2)
+- Created `PlateCalculator.tsx` with visual plate stack.
+- Integrated into `SetLogger.tsx` with a calculator icon that appears for weights >= 45lbs.
 
 ---
 
-### [3.5] RPE as Alternative to RIR
-
-- **Priority:** LOW
-- **Effort:** S (2h)
-- **Impact:** Accommodates users who prefer the RPE scale (common in powerlifting)
-- **Files:** `src/components/logging/SetLogger.tsx`
-- **Dependencies:** None
-
-Add a toggle between RIR (current, lines 196-217) and RPE (10 - RIR). RPE 10 = Failure, RPE 7 = 3 reps in reserve.
-
-Store the toggle preference in `planStore.preferredWeightUnit` area (or a new `preferredEffortScale` field).
-
----
-
-### [3.6] Meal Templates / Quick Re-log
+### [3.6] Smart Meal Shortcuts (Quick Log) ⏳ TODO
 
 - **Priority:** LOW
 - **Effort:** M (4h)
-- **Impact:** Reduces meal logging friction — users eat similar meals daily
-- **Files:**
-  - Modify: `src/components/nutrition/FoodLogger.tsx`
-  - Modify: `src/stores/nutritionStore.ts`
-- **Dependencies:** None
-
-**Context:** `FoodLogger.tsx` has favorites (lines 115-127) but no concept of "meals" (groupings of multiple foods).
-
-Add a "Save as Meal" button that saves the current day's logged foods as a single template. One-tap to re-log an entire meal (e.g., "Morning Oats + Protein Shake + Banana").
+- **Impact:** Drastically reduces friction (typing food names is slow)
+- **Refinement:**
+    1. **"Copy Previous Meal":** One-tap to clone "Yesterday's Breakfast".
+    2. **"Saved Meals":** Group foods (Oats + Whey + Berries) into a "Morning Oats" template.
 
 ---
 
-### [3.7] Weekly Calorie Trend Line
+### [3.7] Energy Balance Trend (Calories vs Weight) ⏳ TODO
 
 - **Priority:** LOW
-- **Effort:** M (3h)
-- **Impact:** Shows longer-term nutrition adherence trends
-- **Files:** `src/components/nutrition/NutritionInsights.tsx`
-- **Dependencies:** None
-
-`NutritionInsights.tsx` has a bar chart (lines 71-173) but no rolling average line chart. Add a `LineChart` using Recharts (already installed) showing 7-day rolling average of calories consumed vs. target.
+- **Effort:** M (3-5h)
+- **Impact:** The "Truth" chart — shows if you are actually in a surplus/deficit
+- **Refinement:**
+    - Dual-axis chart in `NutritionInsights`.
+    - **Left Axis:** Calories (Bar)
+    - **Right Axis:** Body Weight (Line)
+    - **Insight:** "You are averaging 2800kcal and weight is +0.5lbs/week. Est TDEE: 2550kcal."
 
 ---
 
@@ -1438,7 +1149,7 @@ Features that drive user acquisition, retention, and revenue.
 
 ---
 
-### [6.1] PWA Manifest
+### [6.1] PWA Manifest ✅ DONE
 
 - **Priority:** HIGH
 - **Effort:** S (1-2h)
@@ -1533,59 +1244,59 @@ Extend the share card from item 3.3 with:
 
 ### Phase 1 — Quick Wins (Week 1)
 
-| ID | Item | Est. Hours |
-|----|------|-----------|
-| 1.1 | Nutrition Light Mode Fix | 2h |
-| 1.2 | SetLogger Touch Targets | 1h |
-| 1.3 | Nutrition Tabs Overflow | 1h |
-| 1.5 | Confetti on PR | 0.5h |
-| 1.6 | Meal Delete Button | 0.25h |
-| 2.1 | Rest Timer | 4h |
-| 3.1 | "Last Time" Data | 4h |
-| 3.2 | Difficulty Picker | 2h |
-| 3.3 | Share Workout Card | 3h |
-| 5.2 | Offline Queue Wiring | 3h |
-| **Total** | | **~21h** |
+| ID | Item | Status | Est. Hours |
+|----|------|--------|-----------|
+| 1.1 | Nutrition Light Mode Fix | ✅ DONE | 2h |
+| 1.2 | SetLogger Touch Targets | ✅ DONE | 1h |
+| 1.3 | Nutrition Tabs Overflow | ✅ DONE | 1h |
+| 1.5 | Confetti on PR | ✅ DONE | 0.5h |
+| 1.6 | Meal Delete Button | ✅ DONE | 0.25h |
+| 2.1 | Rest Timer | ✅ DONE | 4h |
+| 3.1 | "Last Time" Data | ✅ DONE | 4h |
+| 3.2 | Difficulty Picker | ✅ DONE | 2h |
+| 3.3 | Share Workout Card | ✅ DONE | 3h |
+| 5.2 | Offline Queue Wiring | ✅ DONE | 3h |
+| **Total** | | | **~21h** |
 
 ### Phase 2 — Core Features (Weeks 2-3)
 
-| ID | Item | Est. Hours |
-|----|------|-----------|
-| 2.2 | History Page | 12h |
-| 2.3 | Profile/Settings | 6h |
-| 2.5 | Superset Pairing | 5h |
-| 2.6 | Warm-Up Generation | 5h |
-| 3.4 | Plate Calculator | 3h |
-| 3.6 | Meal Templates | 4h |
-| 3.7 | Weekly Trend Line | 3h |
-| 6.1 | PWA Manifest | 1h |
-| **Total** | | **~39h** |
+| ID | Item | Status | Est. Hours |
+|----|------|--------|-----------|
+| 2.2 | History Page | ✅ DONE | 12h |
+| 2.3 | **Profile/Settings** | ✅ DONE | 6h |
+| 2.5 | Superset (Visual + Logic) | ✅ DONE | 6h |
+| 2.6 | Smart Warm-Ups | ✅ DONE | 5h |
+| 3.4 | Plate Calc (Integrated) | ✅ DONE | 4h |
+| 3.6 | Smart Meal Shortcuts | ✅ DONE | 4h |
+| 3.7 | Energy Balance Trend | ✅ DONE | 3h |
+| 6.1 | PWA Manifest | ✅ DONE | 1h |
+| **Total Remaining** | | | **~28h** |
 
 ### Phase 3 — Domain Intelligence (Weeks 3-4)
 
-| ID | Item | Est. Hours |
-|----|------|-----------|
-| 4.1 | Periodization Timeline | 5h |
-| 4.2 | Readiness Score | 5h |
-| 4.3 | Strength Curve | 10h |
-| 4.4 | MRV Warnings | 5h |
-| 4.5 | Split Auto-Recommendation | 5h |
-| 2.4 | Body Measurements | 10h |
-| **Total** | | **~40h** |
+| ID | Item | Status | Est. Hours |
+|----|------|--------|-----------|
+| 4.1 | Periodization Timeline | ⏳ TODO | 5h |
+| 4.2 | Readiness Score | ⏳ TODO | 5h |
+| 4.3 | Strength Curve | ⏳ TODO | 10h |
+| 4.4 | MRV Warnings | ⏳ TODO | 5h |
+| 4.5 | Split Auto-Recommendation | ⏳ TODO | 5h |
+| 2.4 | Body Measurements | ⏳ TODO | 10h |
+| **Total** | | | **~40h** |
 
 ### Phase 4 — Growth & Stability (Ongoing)
 
-| ID | Item | Est. Hours |
-|----|------|-----------|
-| 5.3 | Lazy Loading | 1h |
-| 5.4 | Test Coverage | 20h+ |
-| 5.5 | Accessibility Audit | 6h |
-| 6.2 | Branded Cards | 4h |
-| 6.3 | Coach Portal | 40h+ |
-| 2.7 | Exercise Media | 12h |
-| 3.5 | RPE Toggle | 2h |
-| 3.8-3.10 | Detail Modal, Custom Exercises, 1RM | 8h |
-| **Total** | | **~93h+** |
+| ID | Item | Status | Est. Hours |
+|----|------|--------|-----------|
+| 5.3 | Lazy Loading | ⏳ TODO | 1h |
+| 5.4 | Test Coverage | ⏳ TODO | 20h+ |
+| 5.5 | Accessibility Audit | ⏳ TODO | 6h |
+| 6.2 | Branded Cards | ⏳ TODO | 4h |
+| 6.3 | Coach Portal | ⏳ TODO | 40h+ |
+| 2.7 | Exercise Media | ⏳ TODO | 12h |
+| 3.5 | RPE Toggle | ⏳ TODO | 2h |
+| 3.8-3.10 | Detail Modal, Custom Exercises, 1RM | ⏳ TODO | 8h |
+| **Total** | | | **~93h+** |
 
 ---
 

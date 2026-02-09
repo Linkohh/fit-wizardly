@@ -1,39 +1,19 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Users, Sun, Moon, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { cn, debounce } from '@/lib/utils';
-import { LanguageSelector } from '@/components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
 import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
-import { usePreferencesStore } from '@/hooks/useUserPreferences';
+import { Users, Sun, Moon, Monitor } from 'lucide-react';
 
 export function Header() {
   const location = useLocation();
-  const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
-  const toggleTrainerMode = useTrainerStore((state) => state.toggleTrainerMode);
-  const mode = useThemeStore((state) => state.mode);
-  const setMode = useThemeStore((state) => state.setMode);
-  const getEffectiveTheme = useThemeStore((state) => state.getEffectiveTheme);
-
-  // FIXED: Split selectors to prevent unnecessary re-renders that were causing infinite loops
-  const settings = usePreferencesStore((state) => state.settings);
-  const updateSettings = usePreferencesStore((state) => state.updateSettings);
-
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -64,14 +44,12 @@ export function Header() {
   }, {
     path: '/nutrition',
     label: 'Nutrition'
-  }, ...(isTrainerMode ? [{
+  }, {
     path: '/clients',
     label: t('nav.clients')
-  }] : [])]), [t, isTrainerMode]);
+  }]), [t]);
 
   const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
-  const effectiveTheme = getEffectiveTheme();
-  const ThemeIcon = mode === 'system' ? Monitor : effectiveTheme === 'dark' ? Moon : Sun;
 
   // Update indicator position when route changes
   useEffect(() => {
@@ -101,7 +79,7 @@ export function Header() {
       clearTimeout(timeoutId);
       window.removeEventListener('resize', handleResize);
     };
-  }, [location.pathname, isTrainerMode]);
+  }, [location.pathname]);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top">
@@ -181,90 +159,13 @@ export function Header() {
 
         {/* Right Side Controls */}
         <div className="hidden md:flex items-center gap-2 ml-4">
-          {/* Theme Toggle */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="touch-target" aria-label="Toggle theme">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={mode}
-                    initial={{ rotate: -90, opacity: 0, scale: 0.5 }}
-                    animate={{ rotate: 0, opacity: 1, scale: 1 }}
-                    exit={{ rotate: 90, opacity: 0, scale: 0.5 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <ThemeIcon className="h-5 w-5" />
-                  </motion.div>
-                </AnimatePresence>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => setMode('light')} className={mode === 'light' ? 'bg-accent' : ''}>
-                <Sun className="mr-2 h-4 w-4" />
-                {t('header.theme.light')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode('dark')} className={mode === 'dark' ? 'bg-accent' : ''}>
-                <Moon className="mr-2 h-4 w-4" />
-                {t('header.theme.dark')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode('system')} className={mode === 'system' ? 'bg-accent' : ''}>
-                <Monitor className="mr-2 h-4 w-4" />
-                {t('header.theme.system')}
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator />
-
-              <DropdownMenuCheckboxItem
-                checked={settings.sounds !== false}
-                onCheckedChange={(checked) =>
-                  updateSettings({
-                    sounds: checked === true,
-                    soundsExplicitlySet: true,
-                  })
-                }
-              >
-                Click sounds
-              </DropdownMenuCheckboxItem>
-
-              <DropdownMenuCheckboxItem
-                checked={settings.haptics !== false}
-                onCheckedChange={(checked) => updateSettings({ haptics: checked === true })}
-              >
-                Haptics
-              </DropdownMenuCheckboxItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Language Selector */}
-          <LanguageSelector />
-
-          {/* Trainer Mode Toggle */}
-          <motion.div
-            className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-lg transition-colors duration-300",
-              isTrainerMode ? "bg-primary/20" : "bg-secondary/50"
-            )}
-            animate={{
-              boxShadow: isTrainerMode
-                ? "0 0 20px rgba(139, 92, 246, 0.4)"
-                : "0 0 0px rgba(139, 92, 246, 0)"
-            }}
-            transition={{ duration: 0.3 }}
-          >
-            <motion.div
-              animate={{ rotate: isTrainerMode ? 360 : 0 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              <Users className={cn(
-                "h-4 w-4 transition-colors duration-300",
-                isTrainerMode ? 'text-primary' : 'text-muted-foreground'
-              )} />
-            </motion.div>
-            <Label htmlFor="trainer-mode" className="text-sm font-medium cursor-pointer hidden lg:inline">
-              {t('header.trainer_mode')}
-            </Label>
-            <Switch id="trainer-mode" checked={isTrainerMode} onCheckedChange={toggleTrainerMode} aria-label="Toggle trainer mode" />
-          </motion.div>
+          <Link to="/profile">
+            <Button variant="ghost" size="icon" className="touch-target" aria-label="Profile">
+              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
+                <span className="text-sm font-medium text-primary">U</span>
+              </div>
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Menu */}
@@ -353,71 +254,20 @@ export function Header() {
                 );
               })}
 
-              {/* Mobile Theme Selection */}
+              {/* Mobile Theme Selection & Trainer Mode - MOVED TO PROFILE */}
               <motion.div
-                className="flex flex-col gap-2 mt-4 p-3 rounded-lg bg-secondary/50 backdrop-blur-sm"
+                className="mt-4 p-3 rounded-lg bg-secondary/50 backdrop-blur-sm"
                 variants={{
-                  hidden: { opacity: 0, x: -24, scale: 0.96, filter: "blur(4px)" },
-                  visible: {
-                    opacity: 1,
-                    x: 0,
-                    scale: 1,
-                    filter: "blur(0px)",
-                    transition: { type: "spring", stiffness: 400, damping: 28 }
-                  }
+                  hidden: { opacity: 0, y: 10 },
+                  visible: { opacity: 1, y: 0 }
                 }}
               >
-                <Label className="text-sm font-medium mb-1">{t('header.theme.label')}</Label>
-                <div className="flex gap-1">
-                  <motion.div whileTap={{ scale: 0.95 }} className="flex-1">
-                    <Button variant={mode === 'light' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('light')} className="w-full">
-                      <Sun className="h-4 w-4" />
-                    </Button>
-                  </motion.div>
-                  <motion.div whileTap={{ scale: 0.95 }} className="flex-1">
-                    <Button variant={mode === 'dark' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('dark')} className="w-full">
-                      <Moon className="h-4 w-4" />
-                    </Button>
-                  </motion.div>
-                  <motion.div whileTap={{ scale: 0.95 }} className="flex-1">
-                    <Button variant={mode === 'system' ? 'default' : 'ghost'} size="sm" onClick={() => setMode('system')} className="w-full">
-                      <Monitor className="h-4 w-4" />
-                    </Button>
-                  </motion.div>
-                </div>
-              </motion.div>
-
-              {/* Mobile Trainer Mode */}
-              <motion.div
-                className={cn(
-                  "flex items-center gap-3 mt-2 p-3 rounded-lg transition-colors duration-300 backdrop-blur-sm",
-                  isTrainerMode ? "bg-primary/20" : "bg-secondary/50"
-                )}
-                variants={{
-                  hidden: { opacity: 0, x: -24, scale: 0.96, filter: "blur(4px)" },
-                  visible: {
-                    opacity: 1,
-                    x: 0,
-                    scale: 1,
-                    filter: "blur(0px)",
-                    transition: { type: "spring", stiffness: 400, damping: 28 }
-                  }
-                }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <motion.div
-                  animate={{ rotate: isTrainerMode ? 360 : 0 }}
-                  transition={{ duration: 0.5, ease: "easeOut" }}
-                >
-                  <Users className={cn(
-                    "h-4 w-4 transition-colors duration-300",
-                    isTrainerMode ? 'text-primary' : 'text-muted-foreground'
-                  )} />
-                </motion.div>
-                <Label htmlFor="trainer-mode-mobile" className="text-sm font-medium flex-1">
-                  {t('header.trainer_mode')}
-                </Label>
-                <Switch id="trainer-mode-mobile" checked={isTrainerMode} onCheckedChange={toggleTrainerMode} aria-label="Toggle trainer mode" />
+                <Link to="/profile" onClick={() => setMobileOpen(false)}>
+                  <Button variant="default" className="w-full justify-start gap-2">
+                    <Users className="h-4 w-4" />
+                    {t('profile.title', 'Settings & Profile')}
+                  </Button>
+                </Link>
               </motion.div>
             </motion.nav>
           </SheetContent>

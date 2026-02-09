@@ -218,37 +218,68 @@ export default function NutritionPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="space-y-3">
-                                            {dailyLog.meals.map((meal) => (
-                                                <div key={meal.id} className="group flex items-center justify-between p-3 rounded-xl bg-muted/50 border border-border/50 hover:bg-muted transition-all animate-in slide-in-from-left-4 duration-300">
-                                                    <div className="flex-1">
-                                                        <div className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">{meal.name}</div>
-                                                        <div className="text-xs text-muted-foreground capitalize flex gap-2">
-                                                            <span>{meal.mealType}</span>
-                                                            <span>•</span>
-                                                            <span>{new Date(meal.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="text-right">
-                                                            <div className="font-bold text-sm">{meal.calories} kcal</div>
-                                                            <div className="text-[10px] text-muted-foreground space-x-1">
-                                                                <span className="text-blue-400">{meal.protein}p</span>
-                                                                <span className="text-green-400">{meal.carbs}c</span>
-                                                                <span className="text-yellow-400">{meal.fats}f</span>
+                                        <div className="space-y-6">
+                                            {(['breakfast', 'lunch', 'dinner', 'snack', 'pre_workout', 'post_workout'] as const).map(type => {
+                                                const mealsOfType = dailyLog.meals.filter(m => m.mealType === type);
+                                                if (mealsOfType.length === 0) return null;
+
+                                                const groupCalories = mealsOfType.reduce((acc, m) => acc + m.calories, 0);
+
+                                                return (
+                                                    <div key={type} className="animate-in slide-in-from-left-4 duration-300">
+                                                        <div className="flex items-center justify-between mb-2 px-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <span className="capitalize font-semibold text-sm text-foreground/80">{type.replace('_', ' ')}</span>
+                                                                <span className="text-xs text-muted-foreground">({groupCalories} kcal)</span>
                                                             </div>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const name = window.prompt(`Name this ${type} template:`);
+                                                                    if (name) {
+                                                                        useNutritionStore.getState().saveMealTemplate({
+                                                                            name,
+                                                                            items: mealsOfType
+                                                                        });
+                                                                        toast.success("Template saved!");
+                                                                    }
+                                                                }}
+                                                                className="text-xs text-blue-500 hover:text-blue-400 flex items-center gap-1 hover:bg-blue-500/10 px-2 py-1 rounded-md transition-colors"
+                                                            >
+                                                                <Sparkles className="w-3 h-3" /> Save Template
+                                                            </button>
                                                         </div>
-                                                        <button
-                                                            onClick={(e) => handleRemoveMeal(meal.id, e)}
-                                                            className="p-3 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-                                                            title="Remove meal"
-                                                            aria-label="Remove meal"
-                                                        >
-                                                            <Trash2 className="w-5 h-5" />
-                                                        </button>
+                                                        <div className="space-y-2 pl-2 border-l-2 border-muted">
+                                                            {mealsOfType.map((meal) => (
+                                                                <div key={meal.id} className="group flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-all">
+                                                                    <div className="flex-1">
+                                                                        <div className="font-medium text-sm text-foreground">{meal.name}</div>
+                                                                        <div className="text-xs text-muted-foreground truncate max-w-[200px]">
+                                                                            {new Date(meal.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                        </div>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="text-right">
+                                                                            <div className="font-bold text-sm">{meal.calories}</div>
+                                                                            <div className="text-[10px] text-muted-foreground flex gap-1 justify-end">
+                                                                                <span className="text-blue-400">{meal.protein}p</span>
+                                                                                <span className="text-green-400">{meal.carbs}c</span>
+                                                                                <span className="text-yellow-400">{meal.fats}f</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <button
+                                                                            onClick={(e) => handleRemoveMeal(meal.id, e)}
+                                                                            className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                                                                            title="Remove meal"
+                                                                        >
+                                                                            <Trash2 className="w-4 h-4" />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>

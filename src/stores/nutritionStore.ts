@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { UserNutritionProfile, MacroTargets, DailyNutritionLog, MealEntry } from '@/types/nutrition';
+import { UserNutritionProfile, MacroTargets, DailyNutritionLog, MealEntry, MealTemplate } from '@/types/nutrition';
 
 interface NutritionState {
     profile: UserNutritionProfile | null;
@@ -13,11 +13,12 @@ interface NutritionState {
     // Custom & Favorites
     customFoods: MealEntry[];
     favorites: MealEntry[];
+    savedMeals: MealTemplate[]; // Templates
 
     // Actions
     setProfile: (profile: UserNutritionProfile, targets: MacroTargets) => void;
     updateHydration: (amount: number) => void;
-    logMeal: (meal: MealEntry) => void;
+    logMeal: (meal: MealEntry | MealEntry[]) => void;
     removeMeal: (mealId: string) => void;
     changeDate: (date: string) => void;
 
@@ -26,8 +27,14 @@ interface NutritionState {
     deleteCustomFood: (id: string) => void;
     toggleFavorite: (food: MealEntry) => void;
 
-    // Computed helpers (though strict Zustand recommends selectors, we can expose a getter or just ensure data exists)
+    // Template Actions
+    saveMealTemplate: (template: Omit<MealTemplate, 'id' | 'totalCalories' | 'totalProtein' | 'totalCarbs' | 'totalFats'>) => void;
+    deleteMealTemplate: (id: string) => void;
+
+    // Computed helpers
     getCurrentLog: () => DailyNutritionLog;
+    getRecentMeals: (type: string) => MealEntry[];
+    getLastFullMeal: (type: string) => MealEntry[]; // New helper
 }
 
 export const useNutritionStore = create<NutritionState>()(
@@ -39,6 +46,29 @@ export const useNutritionStore = create<NutritionState>()(
             selectedDate: new Date().toISOString().split('T')[0],
             customFoods: [],
             favorites: [],
+            savedMeals: [],
+
+            getRecentMeals: (type) => {
+                const { history } = get();
+                const allMeals = Object.values(history).flatMap(day => day.meals);
+
+                // If type is provided, filter by it. If 'all', return all.
+                const filtered = type === 'all'
+                    ? allMeals
+                    : allMeals.filter(m => m.mealType === type);
+
+                // De-duplicate by name to show unique options
+                const uniqueMap = new Map();
+                filtered.forEach(meal => {
+                    if (!uniqueMap.has(meal.name)) {
+                        uniqueMap.set(meal.name, meal);
+                    }
+                });
+
+                return Array.from(uniqueMap.values())
+                    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                    .slice(0, 5);
+            },
 
             getCurrentLog: () => {
                 const { history, selectedDate, targets } = get();
@@ -75,61 +105,50 @@ export const useNutritionStore = create<NutritionState>()(
             changeDate: (date) => set({ selectedDate: date }),
 
             updateHydration: (amount) => set((state) => {
-                const date = state.selectedDate;
-                const currentLog = state.history[date] || {
-                    id: date,
-                    date: new Date(date).toISOString(),
-                    meals: [],
-                    water: 0,
-                    targets: state.targets || { calories: 0, protein: 0, carbs: 0, fats: 0 },
-                    isWorkoutDay: false
-                };
+                const log = get().getCurrentLog();
+                const newLog = { ...log, water: Math.max(0, log.water + amount) };
 
                 return {
                     history: {
                         ...state.history,
-                        [date]: { ...currentLog, water: Math.max(0, amount) }
+                        [log.date]: newLog
                     }
                 };
             }),
 
-            logMeal: (meal) => set((state) => {
-                const date = state.selectedDate;
-                const currentLog = state.history[date] || {
-                    id: date,
-                    date: new Date(date).toISOString(),
-                    meals: [],
-                    water: 0,
-                    targets: state.targets || { calories: 0, protein: 0, carbs: 0, fats: 0 },
-                    isWorkoutDay: false
+            logMeal: (mealOrMeals) => set((state) => {
+                const log = get().getCurrentLog();
+                const mealsToAdd = Array.isArray(mealOrMeals) ? mealOrMeals : [mealOrMeals];
+
+                const newLog = {
+                    ...log,
+                    meals: [...log.meals, ...mealsToAdd]
                 };
 
                 return {
                     history: {
                         ...state.history,
-                        [date]: {
-                            ...currentLog,
-                            meals: [...currentLog.meals, meal]
-                        }
+                        [log.date]: newLog
                     }
                 };
             }),
 
             removeMeal: (mealId) => set((state) => {
-                const date = state.selectedDate;
-                const currentLog = state.history[date];
-                if (!currentLog) return state; // Should not happen if removing a meal from a rendered list
+                const log = get().getCurrentLog();
+                const newLog = {
+                    ...log,
+                    meals: log.meals.filter(m => m.id !== mealId)
+                };
 
                 return {
                     history: {
                         ...state.history,
-                        [date]: {
-                            ...currentLog,
-                            meals: currentLog.meals.filter(m => m.id !== mealId)
-                        }
+                        [log.date]: newLog
                     }
                 };
             }),
+
+
 
             addCustomFood: (food) => set((state) => ({
                 customFoods: [...state.customFoods, food]
@@ -140,13 +159,49 @@ export const useNutritionStore = create<NutritionState>()(
             })),
 
             toggleFavorite: (food) => set((state) => {
-                const isFav = state.favorites.some(f => f.name === food.name); // Simple match by name for now, or ID if persistent
-                if (isFav) {
+                const exists = state.favorites.some(f => f.name === food.name);
+                if (exists) {
                     return { favorites: state.favorites.filter(f => f.name !== food.name) };
                 } else {
                     return { favorites: [...state.favorites, food] };
                 }
             }),
+
+            saveMealTemplate: (input) => set((state) => {
+                const totalCalories = input.items.reduce((sum, item) => sum + item.calories, 0);
+                const totalProtein = input.items.reduce((sum, item) => sum + item.protein, 0);
+                const totalCarbs = input.items.reduce((sum, item) => sum + item.carbs, 0);
+                const totalFats = input.items.reduce((sum, item) => sum + item.fats, 0);
+
+                const newTemplate: MealTemplate = {
+                    ...input,
+                    id: Math.random().toString(),
+                    totalCalories,
+                    totalProtein,
+                    totalCarbs,
+                    totalFats
+                };
+
+                return { savedMeals: [...state.savedMeals, newTemplate] };
+            }),
+
+            deleteMealTemplate: (id) => set((state) => ({
+                savedMeals: state.savedMeals.filter(m => m.id !== id)
+            })),
+
+            getLastFullMeal: (type) => {
+                const { history } = get();
+                const dates = Object.keys(history).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+                for (const date of dates) {
+                    const dayLog = history[date];
+                    const mealsOfType = dayLog.meals.filter(m => m.mealType === type);
+                    if (mealsOfType.length > 0) {
+                        return mealsOfType;
+                    }
+                }
+                return [];
+            },
         }),
         {
             name: 'fitwizard-nutrition-storage',
@@ -155,8 +210,9 @@ export const useNutritionStore = create<NutritionState>()(
                 targets: state.targets,
                 history: state.history,
                 customFoods: state.customFoods,
-                favorites: state.favorites
-            }), // Don't persist selectedDate, always start on Today
+                favorites: state.favorites,
+                savedMeals: state.savedMeals
+            }),
         }
     )
 );
