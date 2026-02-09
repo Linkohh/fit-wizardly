@@ -11,11 +11,20 @@ import { cn, debounce } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
 import { Users, Sun, Moon, Monitor } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Header() {
   const location = useLocation();
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const { isTrainerMode } = useTrainerStore();
+  const { mode, setMode } = useThemeStore();
 
   // Refs for tracking nav item positions for the sliding indicator
   const navRef = useRef<HTMLElement>(null);
@@ -23,31 +32,39 @@ export function Header() {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
 
   /* Navigation items with translations - Memoized to prevent re-creation on every render */
-  const navItems = useMemo(() => ([{
-    path: '/',
-    label: t('nav.home')
-  }, {
-    path: '/wizard',
-    label: t('nav.create_plan')
-  }, {
-    path: '/plan',
-    label: t('nav.view_plan')
-  }, {
-    path: '/exercises',
-    label: t('nav.exercises')
-  }, {
-    path: '/history',
-    label: t('nav.history', 'History')
-  }, {
-    path: '/circles',
-    label: t('nav.circles')
-  }, {
-    path: '/nutrition',
-    label: 'Nutrition'
-  }, {
-    path: '/clients',
-    label: t('nav.clients')
-  }]), [t]);
+  const navItems = useMemo(() => {
+    const items = [{
+      path: '/',
+      label: t('nav.home')
+    }, {
+      path: '/wizard',
+      label: t('nav.create_plan')
+    }, {
+      path: '/plan',
+      label: t('nav.view_plan')
+    }, {
+      path: '/exercises',
+      label: t('nav.exercises')
+    }, {
+      path: '/history',
+      label: t('nav.history', 'History')
+    }, {
+      path: '/circles',
+      label: t('nav.circles')
+    }, {
+      path: '/nutrition',
+      label: 'Nutrition'
+    }];
+
+    if (isTrainerMode) {
+      items.push({
+        path: '/clients',
+        label: t('nav.clients')
+      });
+    }
+
+    return items;
+  }, [t, isTrainerMode]);
 
   const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
 
@@ -159,13 +176,50 @@ export function Header() {
 
         {/* Right Side Controls */}
         <div className="hidden md:flex items-center gap-2 ml-4">
-          <Link to="/profile">
-            <Button variant="ghost" size="icon" className="touch-target" aria-label="Profile">
-              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
-                <span className="text-sm font-medium text-primary">U</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="touch-target">
+                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setMode("light")}>
+                <Sun className="mr-2 h-4 w-4" /> Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setMode("dark")}>
+                <Moon className="mr-2 h-4 w-4" /> Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setMode("system")}>
+                <Monitor className="mr-2 h-4 w-4" /> System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="touch-target" aria-label="Profile">
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
+                  <span className="text-sm font-medium text-primary">U</span>
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <div className="flex items-center justify-between px-2 py-2">
+                <span className="text-sm font-medium">Trainer Mode</span>
+                <Switch
+                  checked={isTrainerMode}
+                  onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
+                />
               </div>
-            </Button>
-          </Link>
+              <DropdownMenuItem asChild>
+                <Link to="/profile" className="cursor-pointer w-full">
+                  Settings & Profile
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Mobile Menu */}
@@ -254,7 +308,7 @@ export function Header() {
                 );
               })}
 
-              {/* Mobile Theme Selection & Trainer Mode - MOVED TO PROFILE */}
+              {/* Mobile Theme Selection & Settings */}
               <motion.div
                 className="mt-4 p-3 rounded-lg bg-secondary/50 backdrop-blur-sm"
                 variants={{
@@ -262,12 +316,52 @@ export function Header() {
                   visible: { opacity: 1, y: 0 }
                 }}
               >
+                <div className="flex items-center justify-between mb-3 px-1">
+                  <span className="text-sm font-medium text-muted-foreground">{t('header.theme.label', 'Theme')}</span>
+                  <div className="flex bg-background/50 rounded-lg p-1">
+                    <Button
+                      variant={mode === 'light' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setMode('light')}
+                      className="h-7 w-7 p-0"
+                    >
+                      <Sun className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant={mode === 'dark' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setMode('dark')}
+                      className="h-7 w-7 p-0"
+                    >
+                      <Moon className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant={mode === 'system' ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setMode('system')}
+                      className="h-7 w-7 p-0"
+                    >
+                      <Monitor className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+
                 <Link to="/profile" onClick={() => setMobileOpen(false)}>
                   <Button variant="default" className="w-full justify-start gap-2">
                     <Users className="h-4 w-4" />
                     {t('profile.title', 'Settings & Profile')}
                   </Button>
                 </Link>
+
+                <div className="flex items-center justify-between mb-3 px-1 mt-4">
+                  <div className="space-y-0.5">
+                    <Label className="text-base text-muted-foreground">{t('header.trainer_mode', 'Trainer Mode')}</Label>
+                  </div>
+                  <Switch
+                    checked={isTrainerMode}
+                    onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
+                  />
+                </div>
               </motion.div>
             </motion.nav>
           </SheetContent>
