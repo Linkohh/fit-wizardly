@@ -27,6 +27,7 @@ const WizardPage = lazy(() => import("./pages/Wizard"));
 const PlanPage = lazy(() => import("./pages/Plan"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ClientsPage = lazy(() => import("./pages/Clients"));
+const ClientDetailsPage = lazy(() => import("./pages/ClientDetails"));
 const MCLIntegrationTest = lazy(() => import("./pages/MCLIntegrationTest"));
 const OnboardingPage = lazy(() => import("./pages/Onboarding"));
 const NutritionPage = lazy(() => import("./pages/Nutrition"));
@@ -180,14 +181,22 @@ function AnimatedRoutes() {
                   <ExercisesBrowser />
                 </RequireAuth>
               } />
-              <Route path="/clients" element={
-                <RequireAuth>
-                  <TrainerGuard>
-                    <ClientsPage />
-                  </TrainerGuard>
-                </RequireAuth>
-              }
-              />
+              <Route path="/clients">
+                <Route index element={
+                  <RequireAuth>
+                    <TrainerGuard>
+                      <ClientsPage />
+                    </TrainerGuard>
+                  </RequireAuth>
+                } />
+                <Route path=":clientId" element={
+                  <RequireAuth>
+                    <TrainerGuard>
+                      <ClientDetailsPage />
+                    </TrainerGuard>
+                  </RequireAuth>
+                } />
+              </Route>
               {/* Circles Portal Routes */}
               <Route path="/circles">
                 <Route index element={
