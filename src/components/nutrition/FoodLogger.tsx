@@ -131,13 +131,19 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                     {favorites.length > 0 && (
                         <div className="pt-2">
                             <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2 ml-1">Quick Add Favorites</div>
-                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                                {favorites.slice(0, 5).map(fav => (
-                                    <button key={fav.id} onClick={() => handleLogSavedItem(fav)} className="flex-shrink-0 bg-muted/50 hover:bg-primary/20 border border-border/50 hover:border-primary/30 rounded-xl p-3 flex flex-col items-center gap-1 min-w-[80px] transition-all">
-                                        <span className="text-xl">⭐</span>
-                                        <span className="text-[10px] font-medium truncate max-w-[70px]">{fav.name}</span>
-                                    </button>
-                                ))}
+                            <div className="relative group">
+                                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                                    {favorites.slice(0, 5).map(fav => (
+                                        <button key={fav.id} onClick={() => handleLogSavedItem(fav)} className="flex-shrink-0 bg-muted/50 hover:bg-primary/20 border border-border/50 hover:border-primary/30 rounded-xl p-3 flex flex-col items-center gap-1 min-w-[80px] transition-all">
+                                            <span className="text-xl">⭐</span>
+                                            <span className="text-[10px] font-medium truncate max-w-[70px]">{fav.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                                {/* Fade indicator for scroll */}
+                                {favorites.length > 2 && (
+                                    <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none" />
+                                )}
                             </div>
                         </div>
                     )}
@@ -221,9 +227,17 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                         {activeTab === 'favorites' && (
                             <div className="space-y-2">
                                 {favorites.length === 0 && (
-                                    <div className="text-center py-12 text-muted-foreground text-sm flex flex-col items-center gap-2">
-                                        <Heart className="w-8 h-8 opacity-20" />
-                                        <span>No favorites yet. Star items from Search!</span>
+                                    <div className="text-center py-12 text-muted-foreground text-sm flex flex-col items-center gap-4">
+                                        <div className="relative w-16 h-16">
+                                            <div className="absolute inset-0 bg-yellow-500/10 rounded-full blur-xl" />
+                                            <div className="relative bg-muted/30 p-4 rounded-full border border-border flex items-center justify-center w-full h-full">
+                                                <Star className="w-8 h-8 text-yellow-500/50 fill-yellow-500/20" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <p className="font-medium text-foreground">No favorites yet</p>
+                                            <p>Star items from Search to see them here!</p>
+                                        </div>
                                     </div>
                                 )}
                                 {favorites.map((food) => (

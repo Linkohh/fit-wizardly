@@ -175,7 +175,13 @@ export const useInteractionStore = create<InteractionState>((set, get) => ({
                 lastTrendingFetch: now,
             });
         } catch (error) {
-            console.error('Failed to fetch trending:', error);
+            // Only log detailed error once to avoid spamming console during network issues
+            const now = Date.now();
+            const lastError = (window as any).__lastTrendingError;
+            if (!lastError || now - lastError > 30000) {
+                console.warn('Unable to fetch trending exercises (likely offline or network issue):', error);
+                (window as any).__lastTrendingError = now;
+            }
         }
     },
 

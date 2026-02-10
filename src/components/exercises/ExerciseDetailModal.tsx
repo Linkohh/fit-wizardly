@@ -1,7 +1,8 @@
 import { Exercise } from '@/types/fitness';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Drawer, DrawerContent } from '@/components/ui/drawer';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { Badge } from '@/components/ui/badge';
+import { ExerciseMuscleHighlight } from './ExerciseMuscleHighlight';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -34,7 +35,8 @@ interface ExerciseDetailModalProps {
     onSelectExercise?: (exercise: Exercise) => void;
 }
 
-function formatToken(value: string) {
+function formatToken(value: string | null | undefined) {
+    if (!value) return '';
     return value.replaceAll('_', ' ');
 }
 
@@ -70,8 +72,8 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
     const favorite = isFavorite(exercise.id);
     const theme = getExerciseTheme(exercise);
 
-    const handleFavoriteToggle = () => {
-        haptics.favoriteToggle();
+    const handleFavoriteToggle = async () => {
+        await haptics.selection();
         toggleFavorite(exercise.id);
     };
 
@@ -85,17 +87,29 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                     background: `linear-gradient(to bottom right, ${theme.glowHover}, rgba(0,0,0,0.65))`,
                 }}
             >
-                {exercise.imageUrl ? (
-                    <img
-                        src={exercise.imageUrl}
-                        alt={exercise.name}
-                        className="absolute inset-0 h-full w-full object-cover opacity-55"
-                    />
-                ) : (
-                    <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                        <Network className="h-32 w-32" />
-                    </div>
-                )}
+                {/* Media Section */}
+                <div className="relative flex-1 bg-zinc-900/50 min-h-[300px] md:min-h-full">
+                    {exercise.videoUrl ? (
+                        <video
+                            src={exercise.videoUrl}
+                            controls
+                            loop
+                            playsInline
+                            className="h-full w-full object-cover"
+                            poster={exercise.gifUrl || undefined} // Fallback to gif if available as poster
+                        />
+                    ) : (
+                        <ExerciseMuscleHighlight
+                            primaryMuscles={exercise.primaryMuscles}
+                            secondaryMuscles={exercise.secondaryMuscles}
+                            className="h-full w-full"
+                        />
+                    )}
+
+                    {/* Overlay Gradient (only if video is playing? or always?) 
+                      Remove overlay if interactive video/canvas is present to handle clicks 
+                  */}
+                </div>
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-transparent" />
 
@@ -121,7 +135,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                 {exercise.name}
                             </h2>
                             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/70">
-                                {exercise.primaryMuscles.slice(0, 2).map((muscle) => (
+                                {exercise.primaryMuscles?.slice(0, 2).map((muscle) => (
                                     <span key={muscle} className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/20 px-2 py-0.5 capitalize">
                                         <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                                         {formatToken(muscle)}
@@ -155,12 +169,12 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                             icon={Target}
                         >
                             <div className="flex flex-wrap gap-2">
-                                {exercise.primaryMuscles.map((muscle) => (
+                                {exercise.primaryMuscles?.map((muscle) => (
                                     <Badge key={muscle} className="bg-primary/90 text-primary-foreground capitalize hover:bg-primary/80">
                                         {formatToken(muscle)}
                                     </Badge>
                                 ))}
-                                {exercise.secondaryMuscles.map((muscle) => (
+                                {exercise.secondaryMuscles?.map((muscle) => (
                                     <Badge
                                         key={muscle}
                                         variant="outline"
@@ -174,7 +188,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
 
                         <MetaCard title={t('exercises.detail.equipment', 'Equipment')} icon={Dumbbell}>
                             <ul className="space-y-2">
-                                {exercise.equipment.map((item) => (
+                                {exercise.equipment?.map((item) => (
                                     <li
                                         key={item}
                                         className="flex items-center gap-2 text-sm capitalize text-white/80"
@@ -242,14 +256,14 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                     </p>
                                 </section>
 
-                                {exercise.cues.length > 0 && (
+                                {(exercise.cues?.length ?? 0) > 0 && (
                                     <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                                         <h5 className="mb-2 flex items-center gap-2 text-sm font-semibold text-sky-200">
                                             <Info className="h-4 w-4" />
                                             {t('exercises.detail.pro_cues', 'Pro Cues')}
                                         </h5>
                                         <ul className="space-y-2 text-sm text-sky-100/90">
-                                            {exercise.cues.map((cue) => (
+                                            {exercise.cues?.map((cue) => (
                                                 <li key={cue} className="flex items-start gap-2">
                                                     <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-sky-300" />
                                                     <span className="break-words">{cue}</span>
@@ -266,7 +280,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                             {t('exercises.detail.execution', 'Execution')}
                                         </h5>
                                         <ol className="space-y-3">
-                                            {exercise.steps.map((step, index) => (
+                                            {exercise.steps?.map((step, index) => (
                                                 <li key={`${step}-${index}`} className="flex items-start gap-3">
                                                     <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/25 text-xs font-semibold text-white/90">
                                                         {index + 1}
@@ -356,6 +370,10 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                 }}
             >
                 <DrawerContent className="max-h-[92vh] border-white/10 bg-black/95 text-white backdrop-blur-xl">
+                    <DrawerTitle className="sr-only">{exercise.name} Details</DrawerTitle>
+                    <DrawerDescription className="sr-only">
+                        Detailed view of {exercise.name} including instructions, muscles targeted, and variations.
+                    </DrawerDescription>
                     <ModalContent />
                 </DrawerContent>
             </Drawer>
@@ -370,6 +388,10 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
             }}
         >
             <DialogContent className="h-[90vh] max-w-5xl overflow-hidden border-white/10 bg-black/95 p-0 text-white backdrop-blur-xl md:h-[84vh]">
+                <DialogTitle className="sr-only">{exercise.name} Details</DialogTitle>
+                <DialogDescription className="sr-only">
+                    Detailed view of {exercise.name} including instructions, muscles targeted, and variations.
+                </DialogDescription>
                 <ModalContent />
             </DialogContent>
         </Dialog>

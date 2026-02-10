@@ -449,3 +449,20 @@ export const EQUIPMENT_PRESETS: { name: string; equipment: Equipment[] }[] = [
   { name: 'Dumbbells Only', equipment: ['dumbbells', 'bodyweight'] },
   { name: 'Bodyweight Only', equipment: ['bodyweight'] },
 ];
+
+export interface BodyMeasurement {
+  id: string;
+  date: string; // ISO date string
+  weight?: number;
+  bodyFat?: number;
+  chest?: number;
+  waist?: number;
+  hips?: number;
+  arms?: number;
+  thighs?: number;
+  calves?: number;
+  neck?: number;
+  shoulders?: number;
+  unit: 'imperial' | 'metric';
+  notes?: string;
+}

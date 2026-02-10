@@ -1,6 +1,6 @@
 # 🛡️ FitWizard Audit & Implementation Roadmap
 
-> **Status:** Living Document — Last verified: 2026-02-08  
+> **Status:** Living Document — Last verified: 2026-02-09  
 > **Goal:** Transition from "Prototype" to "Production-Grade Product"  
 > **Philosophy:** Fix the foundation before adding more decoration.  
 > **Audience:** Human developers and AI coding agents (Claude, Copilot, etc.)
@@ -10,7 +10,7 @@
 ## Table of Contents
 
 - [Quick Wins Summary](#-quick-wins-summary)
-- [Section 1: UI/UX Polish](#section-1-uiux-polish-12-items)
+- [Section 1: UI/UX Polish (13 items)](#section-1-uiux-polish-13-items)
 - [Section 2: New Features](#section-2-new-features-7-items)
 - [Section 3: Sub-Feature Enhancements](#section-3-sub-feature-enhancements-10-items)
 - [Section 4: Fitness Domain Intelligence](#section-4-fitness-domain-intelligence-5-items)
@@ -42,6 +42,7 @@ High impact, low effort. Start here.
 | 14 | 2.2 | ✅ Workout History Page           | MEDIUM   | L      | View past workouts & consistency              |
 | 15 | 1.9 | ✅ FoodLogger Favorites Scroll    | LOW      | S      | Visual cue for horizontal scrolling           |
 | 16 | 1.12| ✅ NutritionInsights Bar Color    | LOW      | S      | Fixes invisible score bar in light mode       |
+| 17 | 1.13| ✅ Header & Navigation Restore    | HIGH     | S      | Restores core nav features (Theme/Trainer)    |
 
 
 ---
@@ -260,7 +261,7 @@ On screens < 640px, only icons show. Labels appear at the `sm:` breakpoint and a
 
 ---
 
-### [1.4] WorkoutLogger Header Mobile Collision
+### [1.4] WorkoutLogger Header Mobile Collision ✅
 
 - **Priority:** MEDIUM
 - **Effort:** S (1h)
@@ -361,7 +362,7 @@ className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-r
 
 ---
 
-### [1.7] HydrationTracker Circle Light Mode
+### [1.7] HydrationTracker Circle Light Mode ✅
 
 - **Priority:** LOW
 - **Effort:** S (15min)
@@ -391,7 +392,7 @@ The Plan page has `PlanSkeleton.tsx` but the Nutrition page has no loading skele
 
 ---
 
-### [1.9] FoodLogger Favorites Scroll Indicator
+### [1.9] FoodLogger Favorites Scroll Indicator ✅
 
 - **Priority:** LOW
 - **Effort:** S (30min)
@@ -408,11 +409,11 @@ The favorites horizontal scroll uses `scrollbar-hide` but has no visual indicato
 
 // AFTER:
 <div className="relative">
-    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">
         {/* ...favorites... */}
     </div>
-    {favorites.length > 3 && (
-        <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-card to-transparent pointer-events-none" />
+    {favorites.length > 2 && (
+        <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none" />
     )}
 </div>
 ```
@@ -453,6 +454,7 @@ Currently, empty states use a simple icon + text pattern. Replace with richer il
 - **Haptics:** Added subtle vibration on Rest Timer completion and Meal Delete actions.
 - **Sound:** Added a "ding" oscillator sound to the Rest Timer.
 - **Animations:** Nutrition progress rings now smoothly fill up on load.
+- **WorkoutLogger:** Added slide animations and tactile haptic feedback to navigation buttons.
 
 ---
 
@@ -473,7 +475,7 @@ Currently, empty states use a simple icon + text pattern. Replace with richer il
 
 ---
 
-### [1.11] Glass Card Light Mode Audit
+### [1.11] Glass Card Light Mode Audit ✅
 
 - **Priority:** LOW
 - **Effort:** S (1h)
@@ -481,11 +483,11 @@ Currently, empty states use a simple icon + text pattern. Replace with richer il
 - **Files:** `src/index.css` (audit only), multiple component files
 - **Dependencies:** None
 
-The `glass-card` class is used extensively in `NutritionInsights.tsx` (lines 99, 221, 276, 334), `HydrationTracker.tsx` (line 35), `FoodLogger.tsx` (line 94), and `Nutrition.tsx` (lines 128, 180, 234). Verify that the CSS definition in `index.css` uses semantic tokens and doesn't assume a dark background.
+The `glass-card` class is used extensively in `NutritionInsights.tsx` (lines 99, 221, 276, 334), `HydrationTracker.tsx` (line 35), `FoodLogger.tsx` (line 94), and `Nutrition.tsx` (lines 128, 180, 234). Verified that the CSS definition in `index.css` uses semantic tokens.
 
 ---
 
-### [1.12] NutritionInsights Score Bar Color
+### [1.12] NutritionInsights Score Bar Color ✅
 
 - **Priority:** LOW
 - **Effort:** S (15min)
@@ -501,10 +503,31 @@ The `glass-card` class is used extensively in `NutritionInsights.tsx` (lines 99,
 <ScoreBreakdownRow label="Calories" value={score.breakdown.calorieAdherence} max={40} color="bg-foreground" />
 ```
 
+**Status:** Verified. Line 298 already uses `bg-foreground`. This was likely fixed as part of Item 1.1 (Nutrition Page Light Mode Fix).
+
+// AFTER:
+<ScoreBreakdownRow label="Calories" value={score.breakdown.calorieAdherence} max={40} color="bg-foreground" />
+```
+
 **Why:** `bg-white` makes the bar invisible on a white background. `bg-foreground` adapts to both themes.
 
 **Completed Actions:**
 - Updated `NutritionInsights.tsx` to use `color="bg-foreground"` for the calorie bar.
+
+---
+
+### [1.13] Header & Navigation Restore ✅
+
+- **Priority:** HIGH
+- **Effort:** S (1h)
+- **Impact:** Restores missing core navigation features and fixes conditional visibility logic.
+- **Files:** `src/components/Header.tsx`
+- **Dependencies:** None
+
+**Completed Actions:**
+- **Restored Theme Toggle:** Added Sun/Moon icon toggle to the desktop header and mobile menu.
+- **Fixed Clients Tab:** Made the "Clients" tab visibility conditional on Trainer Mode (hidden for regular users).
+- **Added Trainer Mode Toggle:** Added the Trainer Mode toggle to both the mobile menu and the desktop user profile dropdown for easy access.
 
 ---
 
@@ -700,7 +723,7 @@ This allows persisting the timer across re-renders if the user navigates away an
 
 ---
 
-### [2.4] Body Measurements Tracker
+### [2.4] Body Measurements Tracker ✅
 
 - **Priority:** LOW
 - **Effort:** L (1-2 days)
@@ -710,6 +733,11 @@ This allows persisting the timer across re-renders if the user navigates away an
   - Create: `src/components/measurements/BodyTracker.tsx`
   - Modify: `src/types/fitness.ts` (add `BodyMeasurement` interface)
 - **Dependencies:** Item 2.3 (Profile page to host the component)
+
+**Completed Actions:**
+- Created `measurementsStore.ts` with local persistence.
+- Implemented `BodyTracker.tsx` with Recharts visualization.
+- Integrated into `Profile.tsx`.
 
 **New Type:**
 
@@ -732,7 +760,7 @@ Uses Recharts (already installed) for line charts showing trends over time.
 
 ---
 
-### [2.5] Superset Visual & Logical Pairing ⏳ TODO
+### [2.5] Superset Visual & Logical Pairing ✅
 
 - **Priority:** LOW
 - **Effort:** M (4-6h)
@@ -744,9 +772,13 @@ Uses Recharts (already installed) for line charts showing trends over time.
        - Complete B.1 -> Auto-switch back to A.2
        - (Support "Jump to next set" override)
 
+**Completed Actions:**
+- **Visual:** Updated `WorkoutDayCard.tsx` to group superset exercises with a distinct border and label.
+- **Logical:** Updated `WorkoutLogger.tsx` to automatically navigate to the next exercise in the superset upon set completion.
+
 ---
 
-### [2.6] Smart Warm-Up Generation ⏳ TODO
+### [2.6] Smart Warm-Up Generation ✅
 
 - **Priority:** LOW
 - **Effort:** M (4-6h)
@@ -759,16 +791,24 @@ Uses Recharts (already installed) for line charts showing trends over time.
       - Set 3: 90% working weight x 2
     - Insert these rows dynamically into `WorkoutLogger`.
 
+**Completed Actions:**
+- Implemented `WarmUpSets.tsx` with percentage-based logic (50/70/90%).
+- Integrated into `WorkoutLogger.tsx`, using the **Max Weight** from previous workout history as the baseline.
+
 ---
 
-### [2.7] Exercise Demo Media ⏳ TODO
-
+### [2.7] Exercise Demo Media ✅
 - **Priority:** LOW
 - **Effort:** L (1-2 days)
 - **Impact:** Correct form education
 - **Refinement:**
     - Add `videoUrl` support to `ExerciseDetailModal`.
     - **Fallback:** If no video, auto-generate a "Muscle Highlight" SVG using the `MCL` component data (highlighting primary/secondary muscles).
+
+**Completed Actions:**
+- Implemented `ExerciseMuscleHighlight` component.
+- Integrated video player with muscle highlight fallback in `ExerciseDetailModal`.
+- Added logic to map legacy muscle groups to MCL data.
 
 ---
 
@@ -1293,7 +1333,7 @@ Extend the share card from item 3.3 with:
 | 5.5 | Accessibility Audit | ⏳ TODO | 6h |
 | 6.2 | Branded Cards | ⏳ TODO | 4h |
 | 6.3 | Coach Portal | ⏳ TODO | 40h+ |
-| 2.7 | Exercise Media | ⏳ TODO | 12h |
+| 2.7 | Exercise Media | ✅ DONE | 12h |
 | 3.5 | RPE Toggle | ⏳ TODO | 2h |
 | 3.8-3.10 | Detail Modal, Custom Exercises, 1RM | ⏳ TODO | 8h |
 | **Total** | | | **~93h+** |

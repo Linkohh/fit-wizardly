@@ -15,6 +15,7 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useHaptics } from '@/hooks/useHaptics';
+import { NotificationType } from '@capacitor/haptics';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -48,14 +49,14 @@ export function QuickActions({
 
     const handleFavorite = (e: React.MouseEvent) => {
         e.stopPropagation();
-        haptics.favoriteToggle();
+        haptics.impact('medium');
         toggleFavorite(exerciseId);
         toast.success(favorite ? 'Removed from favorites' : 'Added to favorites');
     };
 
     const handleAddToWorkout = (e: React.MouseEvent) => {
         e.stopPropagation();
-        haptics.addToWorkout();
+        haptics.notification(NotificationType.Success);
         setAddedToWorkout(true);
         onAddToWorkout?.();
         toast.success(`${exerciseName} added to workout`);

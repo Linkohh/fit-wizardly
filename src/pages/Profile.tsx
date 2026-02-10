@@ -30,6 +30,7 @@ import { useTrainerStore } from '@/stores/trainerStore';
 import { usePlanStore } from '@/stores/planStore';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
+import { BodyTracker } from '@/components/measurements/BodyTracker';
 
 export function Profile() {
     const { t, i18n } = useTranslation();
@@ -307,6 +308,12 @@ export function Profile() {
                     </motion.div>
 
                 </motion.div>
+
+                {/* Body Measurements */}
+                <motion.div variants={itemVariants}>
+                    <BodyTracker />
+                </motion.div>
+
             </div>
         </div>
     );

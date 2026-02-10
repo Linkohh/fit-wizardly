@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePlanStore } from '@/stores/planStore';
 import { type ExercisePrescription } from '@/types/fitness';
-import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, Calculator } from 'lucide-react';
+import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, Calculator, Sparkles } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { OneRepMaxCalculator } from '@/components/tools/OneRepMaxCalculator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -62,12 +62,20 @@ export default function PlanPage() {
   if (!currentPlan) {
     return (
       <main className="container-content py-20 text-center">
-        <div className="mx-auto w-20 h-20 rounded-full gradient-primary flex items-center justify-center mb-6 shadow-glow animate-float">
-          <Wand2 className="h-10 w-10 text-primary-foreground" />
+        <div className="relative w-32 h-32 mx-auto mb-8">
+          <div className="absolute inset-0 gradient-primary opacity-20 blur-2xl rounded-full animate-pulse" />
+          <div className="relative w-full h-full rounded-full gradient-primary flex items-center justify-center shadow-glow animate-float border-4 border-background">
+            <Wand2 className="h-16 w-16 text-primary-foreground" />
+          </div>
         </div>
-        <h1 className="text-2xl font-bold mb-4">{t('plan.noplan.title')}</h1>
-        <p className="text-muted-foreground mb-8">{t('plan.noplan.description')}</p>
-        <Link to="/wizard"><Button variant="gradient" size="lg">{t('plan.noplan.cta')}</Button></Link>
+        <h1 className="text-3xl font-bold mb-4">{t('plan.noplan.title')}</h1>
+        <p className="text-xl text-muted-foreground mb-10 max-w-lg mx-auto leading-relaxed">{t('plan.noplan.description')}</p>
+        <Link to="/wizard">
+          <Button size="lg" className="gradient-primary text-lg h-14 px-8 shadow-lg hover:shadow-xl transition-all hover:scale-105">
+            <Sparkles className="mr-2 h-5 w-5" />
+            {t('plan.noplan.cta')}
+          </Button>
+        </Link>
       </main>
     );
   }

@@ -48,14 +48,14 @@ export function ExerciseCard({ exercise, onClick, index = 0, variant = 'library'
     const difficultyStyle = DIFFICULTY_STYLES[exercise.difficulty || 'Intermediate'] || 'bg-slate-500/20 text-slate-200 border-slate-400/30';
 
     const handleClick = useCallback(() => {
-        haptics.light();
+        haptics.impact('light');
         trackView(exercise.id);
         onClick(exercise);
     }, [exercise, onClick, haptics, trackView]);
 
     const handleFavoriteToggle = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
-        haptics.favoriteToggle();
+        haptics.impact('medium');
         toggleFavorite(exercise.id);
     }, [exercise.id, haptics, toggleFavorite]);
 

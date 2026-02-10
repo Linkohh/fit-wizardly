@@ -209,8 +209,11 @@ export default function NutritionPage() {
 
                                     {dailyLog.meals.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center h-48 text-muted-foreground space-y-4 animate-in fade-in zoom-in duration-500">
-                                            <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
-                                                <UtensilsCrossed className="w-8 h-8 opacity-50" />
+                                            <div className="relative w-24 h-24">
+                                                <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl" />
+                                                <div className="relative bg-muted/30 p-5 rounded-full border border-border flex items-center justify-center w-full h-full">
+                                                    <UtensilsCrossed className="w-10 h-10 opacity-50 text-foreground/50" />
+                                                </div>
                                             </div>
                                             <div className="text-center">
                                                 <p className="font-medium text-foreground/80">Your plate is empty!</p>

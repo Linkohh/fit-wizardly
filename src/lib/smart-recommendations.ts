@@ -57,15 +57,15 @@ export function getRelatedExercises(target: Exercise, allExercises: Exercise[], 
 
             let score = 0;
             // Same primary muscle +3
-            const sharedPrimary = ex.primaryMuscles.filter(m => target.primaryMuscles.includes(m)).length;
+            const sharedPrimary = ex.primaryMuscles?.filter(m => target.primaryMuscles?.includes(m)).length ?? 0;
             score += sharedPrimary * 3;
 
             // Same movement pattern +2
-            const sharedPattern = ex.patterns.filter(p => target.patterns.includes(p)).length;
+            const sharedPattern = ex.patterns?.filter(p => target.patterns?.includes(p)).length ?? 0;
             score += sharedPattern * 2;
 
             // Same equipment +1
-            const sharedEquipment = ex.equipment.filter(e => target.equipment.includes(e)).length;
+            const sharedEquipment = ex.equipment?.filter(e => target.equipment?.includes(e)).length ?? 0;
             score += sharedEquipment * 1;
 
             return score > 0;
@@ -73,11 +73,11 @@ export function getRelatedExercises(target: Exercise, allExercises: Exercise[], 
         .sort((a, b) => {
             // Basic scoring sort, could be improved
             const scoreA =
-                a.primaryMuscles.filter(m => target.primaryMuscles.includes(m)).length * 3 +
-                a.patterns.filter(p => target.patterns.includes(p)).length * 2;
+                (a.primaryMuscles?.filter(m => target.primaryMuscles?.includes(m)).length ?? 0) * 3 +
+                (a.patterns?.filter(p => target.patterns?.includes(p)).length ?? 0) * 2;
             const scoreB =
-                b.primaryMuscles.filter(m => target.primaryMuscles.includes(m)).length * 3 +
-                b.patterns.filter(p => target.patterns.includes(p)).length * 2;
+                (b.primaryMuscles?.filter(m => target.primaryMuscles?.includes(m)).length ?? 0) * 3 +
+                (b.patterns?.filter(p => target.patterns?.includes(p)).length ?? 0) * 2;
             return scoreB - scoreA;
         })
         .slice(0, limit);
