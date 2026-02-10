@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePlanStore } from '@/stores/planStore';
 import { type ExercisePrescription } from '@/types/fitness';
-import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, Calculator, Sparkles } from 'lucide-react';
+import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, Calculator, Sparkles, Save } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { OneRepMaxCalculator } from '@/components/tools/OneRepMaxCalculator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -19,14 +19,18 @@ import { PlanSkeleton } from '@/components/plan/PlanSkeleton';
 import { WorkoutDayCard } from '@/components/plan/WorkoutDayCard';
 import { useWizardStore } from '@/stores/wizardStore';
 import { PlanNavigation } from '@/components/plan/PlanNavigation';
+import { SaveTemplateDialog } from '@/components/plan/SaveTemplateDialog';
+import { useTrainerStore } from '@/stores/trainerStore';
 
 export default function PlanPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { currentPlan, swapExercise, clearCurrentPlan } = usePlanStore();
+  const { isTrainerMode } = useTrainerStore();
   const { resetWizard } = useWizardStore();
   const [redactSensitive, setRedactSensitive] = useState(true);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
+  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; exerciseIndex: number; exercise: ExercisePrescription } | null>(null);
   // Sync loading state directly with store (no artificial delay)
   const [isLoadingPlan, setIsLoadingPlan] = useState(!currentPlan);
@@ -91,6 +95,24 @@ export default function PlanPage() {
         <h1 className="text-2xl font-bold gradient-text self-start sm:self-center">{t('plan.title')}</h1>
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+          {/* Trainer: Save as Template */}
+          {isTrainerMode && (
+            <>
+              <Button
+                variant="outline"
+                className="gap-2 w-full sm:w-auto border-primary/20 hover:border-primary text-primary"
+                onClick={() => setSaveTemplateOpen(true)}
+              >
+                <Save className="h-4 w-4" />
+                Save as Template
+              </Button>
+              <SaveTemplateDialog
+                open={saveTemplateOpen}
+                onOpenChange={setSaveTemplateOpen}
+              />
+            </>
+          )}
+
           {/* 1RM Calculator Modal */}
           <Dialog>
             <DialogTrigger asChild>

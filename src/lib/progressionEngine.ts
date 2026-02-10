@@ -412,6 +412,15 @@ export function detectPersonalRecords(
 // UTILITY EXPORTS
 // ============================================
 
+/**
+ * Calculate Estimated One Rep Max (e1RM) using Epley formula
+ */
+export function calculateOneRepMax(weight: number, reps: number): number {
+    if (reps === 1) return weight;
+    // Epley formula: w * (1 + r/30)
+    return weight * (1 + reps / 30);
+}
+
 export function calculateTotalVolume(sets: SetLog[]): number {
     return sets
         .filter(s => s.completed)

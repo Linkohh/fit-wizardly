@@ -1272,11 +1272,12 @@ Extend the share card from item 3.3 with:
 - `Clients.tsx` — minimal client list page
 
 **Expansion roadmap:**
-1. Plan assignment to clients
-2. Client progress dashboards (view client's `workoutLogs`)
-3. Template marketplace (save/share plan templates)
-4. Client communication (in-app messaging)
-5. Revenue: $X/month per coach seat
+1. ✅ Plan assignment to clients (Implemented via `AssignPlanDialog` & `ClientDetails`)
+2. ✅ Client details & management (Implemented `ClientCard`, `AddClientDialog`)
+3. ✅ Client progress dashboards (Implemented `ClientProgress` & `BodyTracker` charts)
+4. ✅ Template marketplace (Implemented `TemplateLibrary` & `SaveTemplateDialog`)
+5. ✅ Client communication (Implemented `ClientMessages` tab)
+6. ✅ Revenue dashboard (Implemented `Revenue` placeholder & pro upgrade flow)
 
 ---
 
@@ -1332,7 +1333,7 @@ Extend the share card from item 3.3 with:
 | 5.4 | Test Coverage | ⏳ TODO | 20h+ |
 | 5.5 | Accessibility Audit | ⏳ TODO | 6h |
 | 6.2 | Branded Cards | ⏳ TODO | 4h |
-| 6.3 | Coach Portal | ⏳ TODO | 40h+ |
+| 6.3 | Coach Portal (Phase 2 Done) | ✅ PARTIAL | 40h+ |
 | 2.7 | Exercise Media | ✅ DONE | 12h |
 | 3.5 | RPE Toggle | ⏳ TODO | 2h |
 | 3.8-3.10 | Detail Modal, Custom Exercises, 1RM | ⏳ TODO | 8h |

@@ -35,12 +35,16 @@ const HistoryPage = lazy(() => import("./pages/History"));
 const CirclesPage = lazy(() => import("./pages/Circles"));
 const UserGuide = lazy(() => import("./pages/UserGuide"));
 const LegalPage = lazy(() => import("./pages/Legal"));
+const TemplateLibrary = lazy(() => import("./pages/TemplateLibrary"));
+const Revenue = lazy(() => import("./pages/Revenue"));
+const Analytics = lazy(() => import("./pages/Analytics"));
 
 const ExercisesBrowser = lazy(() =>
   import("./components/exercises/ExercisesBrowser").then((module) => ({
     default: module.ExercisesBrowser,
   }))
 );
+
 const WorkoutLogger = lazy(() =>
   import("./components/logging/WorkoutLogger").then((module) => ({
     default: module.WorkoutLogger,
@@ -176,6 +180,11 @@ function AnimatedRoutes() {
                   <HistoryPage />
                 </RequireAuth>
               } />
+              <Route path="/analytics" element={
+                <RequireAuth>
+                  <Analytics />
+                </RequireAuth>
+              } />
               <Route path="/exercises" element={
                 <RequireAuth>
                   <ExercisesBrowser />
@@ -197,6 +206,20 @@ function AnimatedRoutes() {
                   </RequireAuth>
                 } />
               </Route>
+              <Route path="/templates" element={
+                <RequireAuth>
+                  <TrainerGuard>
+                    <TemplateLibrary />
+                  </TrainerGuard>
+                </RequireAuth>
+              } />
+              <Route path="/revenue" element={
+                <RequireAuth>
+                  <TrainerGuard>
+                    <Revenue />
+                  </TrainerGuard>
+                </RequireAuth>
+              } />
               {/* Circles Portal Routes */}
               <Route path="/circles">
                 <Route index element={
@@ -235,6 +258,10 @@ function AnimatedRoutes() {
     </OnboardingGuard>
   );
 }
+
+import { ReadinessModal } from "@/components/dashboard/ReadinessModal";
+
+// ... (existing imports, keep them but ensuring ReadinessModal is imported)
 
 const App = () => {
   // Monitor network status and show notifications
@@ -285,6 +312,7 @@ const App = () => {
               <Toaster />
               <Sonner />
               <CommandPalette />
+              <ReadinessModal />
               <div className="min-h-screen flex flex-col transition-colors duration-300 relative pt-16">
                 <LivingBackground />
                 <Header />

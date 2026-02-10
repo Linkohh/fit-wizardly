@@ -246,6 +246,15 @@ export interface Template {
   createdAt: Date;
 }
 
+export interface Message {
+  id: string;
+  clientId: string;
+  content: string;
+  sender: 'trainer' | 'client';
+  timestamp: Date;
+  isRead: boolean;
+}
+
 // ============================================
 // WORKOUT LOGGING TYPES
 // ============================================

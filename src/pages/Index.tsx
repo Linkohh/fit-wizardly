@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { PeriodizationTimeline } from '@/components/analytics/PeriodizationTimeline';
 import { ArrowRight, Dumbbell, Target, FileText, Users, Zap, Crown } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { StreakTracker, GoalVisualization, WelcomeHero, DailyQuote } from '@/components/motivation';
@@ -40,6 +41,11 @@ export default function Index() {
     <main>
       {/* Hero */}
       <WelcomeHero />
+
+      {/* Domain Intelligence: Periodization Timeline */}
+      <div className="container-content py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+        <PeriodizationTimeline />
+      </div>
 
       {/* BRIDGE: Enhanced Cosmic Transition */}
       <section

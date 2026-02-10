@@ -49,6 +49,9 @@ export function Header() {
       path: '/history',
       label: t('nav.history', 'History')
     }, {
+      path: '/analytics',
+      label: 'Analytics'
+    }, {
       path: '/circles',
       label: t('nav.circles')
     }, {
@@ -60,6 +63,14 @@ export function Header() {
       items.push({
         path: '/clients',
         label: t('nav.clients')
+      });
+      items.push({
+        path: '/templates',
+        label: t('nav.templates', 'Templates')
+      });
+      items.push({
+        path: '/revenue',
+        label: t('nav.revenue', 'Revenue')
       });
     }
 
