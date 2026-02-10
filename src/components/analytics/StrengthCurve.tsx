@@ -117,7 +117,7 @@ export function StrengthCurve() {
                                         backdropFilter: 'blur(8px)',
                                         borderRadius: '8px'
                                     }}
-                                    formatter={(value: number) => [`${value} lbs`, 'e1RM']}
+                                    formatter={(value) => value != null ? [`${value} lbs`, 'e1RM'] : ['', 'e1RM']}
                                     labelStyle={{ color: 'hsl(var(--foreground))' }}
                                 />
                                 {currentPR && (
