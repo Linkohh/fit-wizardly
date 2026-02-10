@@ -14,7 +14,7 @@ const FloatingOrbs = memo(function FloatingOrbs() {
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {/* Large primary orb */}
             <motion.div
-                className="absolute w-96 h-96 rounded-full bg-gradient-to-br from-primary/20 to-secondary/10 blur-3xl"
+                className="absolute w-96 h-96 rounded-full bg-gradient-to-br from-primary/20 to-secondary/10 blur-3xl will-change-transform"
                 animate={{
                     x: [0, 100, 50, 0],
                     y: [0, -50, 100, 0],
@@ -29,7 +29,7 @@ const FloatingOrbs = memo(function FloatingOrbs() {
             />
             {/* Secondary orb */}
             <motion.div
-                className="absolute w-64 h-64 rounded-full bg-gradient-to-br from-secondary/15 to-accent/10 blur-3xl"
+                className="absolute w-64 h-64 rounded-full bg-gradient-to-br from-secondary/15 to-accent/10 blur-3xl will-change-transform"
                 animate={{
                     x: [0, -80, 40, 0],
                     y: [0, 80, -40, 0],
@@ -45,7 +45,7 @@ const FloatingOrbs = memo(function FloatingOrbs() {
             />
             {/* Accent orb */}
             <motion.div
-                className="absolute w-48 h-48 rounded-full bg-gradient-to-br from-pink-500/10 to-purple-500/15 blur-2xl"
+                className="absolute w-48 h-48 rounded-full bg-gradient-to-br from-pink-500/10 to-purple-500/15 blur-2xl will-change-transform"
                 animate={{
                     x: [0, 60, -30, 0],
                     y: [0, -60, 30, 0],
@@ -77,7 +77,7 @@ const Particles = memo(function Particles() {
             {STATIC_PARTICLES.map((p) => (
                 <motion.div
                     key={p.id}
-                    className="absolute rounded-full bg-primary/30 dark:bg-primary/40"
+                    className="absolute rounded-full bg-primary/30 dark:bg-primary/40 will-change-transform"
                     style={{
                         width: p.size,
                         height: p.size,
@@ -210,8 +210,7 @@ export function WelcomeHero() {
 
             {/* Premium Layered Horizon Glow - 3D Depth with Aurora Color Cycling */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 horizon-glow-wrapper">
-                {/* Sharp Horizon Line with Electric Core - 1px High Definition */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[2px] w-[80%] horizon-line-sharp z-20 mix-blend-overlay" />
+
 
                 {/* Primary Layer - Hot Additive Core */}
                 <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[60%] w-[90%] animate-horizon-glow mix-blend-plus-lighter" />

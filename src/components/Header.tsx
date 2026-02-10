@@ -127,7 +127,7 @@ export function Header() {
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 15 }}
           >
-            <img alt="FitWizard Logo" className="h-full w-full object-contain" src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png" />
+            <img alt="FitWizard Logo" fetchPriority="high" width="64" height="64" className="h-full w-full object-contain" src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png" />
           </motion.div>
           <span className="text-3xl font-bold gradient-text hidden lg:inline">FitWizard</span>
         </Link>

@@ -7,10 +7,12 @@
 @utility container {
   margin-inline: auto;
   padding-inline: 2rem;
-  @media (width >= --theme(--breakpoint-sm)) {
+
+  @media (width >=--theme(--breakpoint-sm)) {
     max-width: none;
   }
-  @media (width >= 1400px) {
+
+  @media (width >=1400px) {
     max-width: 1400px;
   }
 }
@@ -81,165 +83,199 @@
   --animate-card-lift: card-lift 0.3s ease-out forwards;
   --animate-pulse-subtle: pulse-subtle 2s ease-in-out infinite;
   --animate-glow: glow 1.5s ease-in-out infinite alternate;
-  --animate-sheet-slide-in: sheet-slide-in 0.4s cubic-bezier(0.32, 0.72, 0, 1)
-    forwards;
-  --animate-sheet-slide-out: sheet-slide-out 0.25s
-    cubic-bezier(0.32, 0, 0.67, 0) forwards;
+  --animate-sheet-slide-in: sheet-slide-in 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  --animate-sheet-slide-out: sheet-slide-out 0.25s cubic-bezier(0.32, 0, 0.67, 0) forwards;
   --animate-backdrop-blur-in: backdrop-blur-in 0.3s ease-out forwards;
   --animate-backdrop-blur-out: backdrop-blur-out 0.2s ease-in forwards;
-  --animate-menu-item-slide: menu-item-slide 0.4s cubic-bezier(0.32, 0.72, 0, 1)
-    forwards;
+  --animate-menu-item-slide: menu-item-slide 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
   --animate-menu-item-exit: menu-item-exit 0.15s ease-in forwards;
 
   @keyframes pulse-subtle {
+
     0%,
     100% {
       opacity: 1;
     }
+
     50% {
       opacity: 0.8;
     }
   }
+
   @keyframes glow {
     0% {
       filter: drop-shadow(0 0 2px currentColor);
     }
+
     100% {
       filter: drop-shadow(0 0 8px currentColor);
     }
   }
+
   @keyframes accordion-down {
     from {
       height: 0;
     }
+
     to {
       height: var(--radix-accordion-content-height);
     }
   }
+
   @keyframes accordion-up {
     from {
       height: var(--radix-accordion-content-height);
     }
+
     to {
       height: 0;
     }
   }
+
   @keyframes pulse-glow {
+
     0%,
     100% {
       box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
     }
+
     50% {
       box-shadow: 0 0 20px 5px hsl(var(--primary) / 0.2);
     }
   }
+
   @keyframes slide-in {
     0% {
       transform: translateX(20px);
       opacity: 0;
     }
+
     100% {
       transform: translateX(0);
       opacity: 1;
     }
   }
+
   @keyframes fade-in {
     0% {
       opacity: 0;
       transform: translateY(10px);
     }
+
     100% {
       opacity: 1;
       transform: translateY(0);
     }
   }
+
   @keyframes fade-out {
     0% {
       opacity: 1;
       transform: translateY(0);
     }
+
     100% {
       opacity: 0;
       transform: translateY(-10px);
     }
   }
+
   @keyframes scale-in {
     0% {
       opacity: 0;
       transform: scale(0.95);
     }
+
     100% {
       opacity: 1;
       transform: scale(1);
     }
   }
+
   @keyframes shimmer {
     0% {
       background-position: -200% 0;
     }
+
     100% {
       background-position: 200% 0;
     }
   }
+
   @keyframes float {
+
     0%,
     100% {
       transform: translateY(0);
     }
+
     50% {
       transform: translateY(-5px);
     }
   }
+
   @keyframes glow-pulse {
+
     0%,
     100% {
       box-shadow:
         0 0 5px hsl(var(--primary) / 0.3),
         0 0 10px hsl(var(--primary) / 0.2);
     }
+
     50% {
       box-shadow:
         0 0 15px hsl(var(--primary) / 0.5),
         0 0 30px hsl(var(--secondary) / 0.3);
     }
   }
+
   @keyframes confetti-fall {
     0% {
       transform: translateY(-100%) rotate(0deg);
       opacity: 1;
     }
+
     100% {
       transform: translateY(100vh) rotate(720deg);
       opacity: 0;
     }
   }
+
   @keyframes checkmark {
     0% {
       stroke-dashoffset: 100;
       opacity: 0;
     }
+
     50% {
       opacity: 1;
     }
+
     100% {
       stroke-dashoffset: 0;
       opacity: 1;
     }
   }
+
   @keyframes icon-bounce {
+
     0%,
     100% {
       transform: scale(1);
     }
+
     50% {
       transform: scale(1.15);
     }
   }
+
   @keyframes card-lift {
     0% {
       transform: translateY(0) scale(1);
       box-shadow: 0 4px 6px -1px hsl(var(--primary) / 0.1);
     }
+
     100% {
       transform: translateY(-4px) scale(1.02);
       box-shadow:
@@ -247,59 +283,71 @@
         0 8px 10px -6px hsl(var(--secondary) / 0.15);
     }
   }
+
   @keyframes sheet-slide-in {
     0% {
       transform: translateX(100%) scale(0.96);
       opacity: 0;
     }
+
     100% {
       transform: translateX(0) scale(1);
       opacity: 1;
     }
   }
+
   @keyframes sheet-slide-out {
     0% {
       transform: translateX(0) scale(1);
       opacity: 1;
     }
+
     100% {
       transform: translateX(100%) scale(0.98);
       opacity: 0;
     }
   }
+
   @keyframes backdrop-blur-in {
     0% {
       opacity: 0;
     }
+
     100% {
       opacity: 1;
     }
   }
+
   @keyframes backdrop-blur-out {
     0% {
       opacity: 1;
     }
+
     100% {
       opacity: 0;
     }
   }
+
   @keyframes menu-item-slide {
     0% {
       transform: translateX(-24px) scale(0.96);
       opacity: 0;
       filter: blur(4px);
     }
+
     100% {
       transform: translateX(0) scale(1);
       opacity: 1;
       filter: blur(0px);
     }
   }
+
   @keyframes menu-item-exit {
     0% {
       transform: translateX(0) scale(1);
       opacity: 1;
     }
+
     100% {
       transform: translateX(24px) scale(0.96);
       opacity: 0;
@@ -316,6 +364,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
   *,
   ::after,
   ::before,
@@ -429,8 +478,7 @@
 }
 
 @utility safe-area-all {
-  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
-    env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
 }
 
 @utility gradient-primary {
@@ -604,12 +652,10 @@
 
 @utility shimmer-purple {
   /* Purple shimmer loading effect */
-  background: linear-gradient(
-    90deg,
-    hsl(var(--muted)) 0%,
-    hsl(var(--primary) / 0.3) 50%,
-    hsl(var(--muted)) 100%
-  );
+  background: linear-gradient(90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--primary) / 0.3) 50%,
+      hsl(var(--muted)) 100%);
   background-size: 200% 100%;
 }
 
@@ -655,12 +701,10 @@
 
 @utility gradient-text-animated {
   /* Gradient text with animation */
-  background: linear-gradient(
-    135deg,
-    hsl(var(--primary)) 0%,
-    hsl(var(--secondary)) 50%,
-    hsl(var(--primary)) 100%
-  );
+  background: linear-gradient(135deg,
+      hsl(var(--primary)) 0%,
+      hsl(var(--secondary)) 50%,
+      hsl(var(--primary)) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -834,11 +878,9 @@
   }
 
   .scrollbar-purple::-webkit-scrollbar-thumb {
-    background: linear-gradient(
-      90deg,
-      hsl(270 90% 65% / 0.6),
-      hsl(330 90% 65% / 0.6)
-    );
+    background: linear-gradient(90deg,
+        hsl(270 90% 65% / 0.6),
+        hsl(330 90% 65% / 0.6));
     border-radius: 9999px;
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -846,11 +888,9 @@
   }
 
   .scrollbar-purple::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(
-      90deg,
-      hsl(270 90% 65% / 0.9),
-      hsl(330 90% 65% / 0.9)
-    );
+    background: linear-gradient(90deg,
+        hsl(270 90% 65% / 0.9),
+        hsl(330 90% 65% / 0.9));
     background-clip: padding-box;
   }
 
@@ -887,6 +927,7 @@
 }
 
 @layer utilities {
+
   /* PWA/Mobile optimizations */
   html,
   body {
@@ -1408,6 +1449,7 @@
   from {
     filter: blur(28px) hue-rotate(0deg);
   }
+
   to {
     filter: blur(28px) hue-rotate(360deg);
   }
@@ -1417,6 +1459,7 @@
   from {
     filter: blur(40px) hue-rotate(0deg);
   }
+
   to {
     filter: blur(40px) hue-rotate(360deg);
   }
@@ -1426,6 +1469,7 @@
   from {
     filter: blur(50px) hue-rotate(0deg);
   }
+
   to {
     filter: blur(50px) hue-rotate(360deg);
   }
@@ -1433,10 +1477,12 @@
 
 /* Breathing animation - Opacity only to avoid layout shifts */
 @keyframes horizon-breathe {
+
   0%,
   100% {
     opacity: 0.8;
   }
+
   50% {
     opacity: 1.0;
   }
@@ -1452,9 +1498,8 @@
   background-position: center;
   filter: blur(28px);
   opacity: 1;
-  will-change: filter, opacity;
+  will-change: opacity, transform;
   animation:
-    horizon-spin-primary 30s linear infinite,
     horizon-breathe 8s ease-in-out infinite;
 }
 
@@ -1467,9 +1512,8 @@
   background-position: center;
   filter: blur(40px);
   opacity: 0.8;
-  will-change: filter;
+  will-change: opacity, transform;
   animation:
-    horizon-spin-secondary 40s linear infinite reverse,
     horizon-breathe 10s ease-in-out infinite reverse;
 }
 
@@ -1482,9 +1526,8 @@
   background-position: center;
   filter: blur(50px);
   opacity: 0.6;
-  will-change: filter;
-  animation:
-    horizon-spin-tertiary 50s linear infinite;
+  will-change: auto;
+  animation: none;
 }
 
 /* Sharp Horizon Line with Electric Core - White Hot Center */
