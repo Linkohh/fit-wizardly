@@ -164,15 +164,15 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                 <Calculator className="w-32 h-32 text-primary" />
             </div>
 
-            <div className="space-y-2 relative z-10">
-                <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary flex items-center gap-2">
-                    <Calculator className="w-6 h-6 text-primary" />
-                    Macro Calculator
-                </h2>
-                <p className="text-muted-foreground">Calculate your optimal nutrition targets based on your biology and goals.</p>
+            <div className="space-y-3 relative z-10 md:pr-40">
+                <h2 className="sr-only">Macro Calculator</h2>
+                <Calculator className="w-6 h-6 text-primary" />
+                <p className="text-muted-foreground text-lg">
+                    Calculate your optimal nutrition targets based on your biology and goals.
+                </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+            <div className="grid grid-cols-1 gap-6 relative z-10 items-start md:pt-12 lg:pt-8 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
                 {/* INPUTS */}
                 <div className="space-y-6">
                     {/* Weight and Height - stack on mobile */}
@@ -304,7 +304,7 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                     </div>
 
                     {/* Age and Gender - stack on mobile */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Age</label>
                             <input
@@ -360,12 +360,12 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
                 </div>
 
                 {/* RESULTS */}
-                <div className="bg-background/30 backdrop-blur-md rounded-2xl p-6 flex flex-col justify-center gap-6 border border-white/5 relative overflow-hidden animate-in fade-in zoom-in duration-500">
+                <div className="min-w-0 bg-background/30 backdrop-blur-md rounded-2xl p-6 flex flex-col justify-center gap-6 border border-white/5 relative overflow-hidden animate-in fade-in zoom-in duration-500">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5" />
 
                     <div className="text-center space-y-1 relative z-10 transition-all">
                         <span className="text-muted-foreground text-sm uppercase tracking-wider">Daily Target</span>
-                        <div className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/70">
+                        <div className="text-4xl sm:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/70">
                             {result?.calories.toLocaleString()}
                         </div>
                         <span className="text-sm text-muted-foreground">kcal / day</span>
@@ -379,7 +379,6 @@ export function MacroCalculator({ onSave, initialProfile }: MacroCalculatorProps
 
                     <button
                         onClick={() => {
-                            alert('Button clicked! Result: ' + JSON.stringify(result));
                             if (result) {
                                 onSave(result, profile);
                             }
