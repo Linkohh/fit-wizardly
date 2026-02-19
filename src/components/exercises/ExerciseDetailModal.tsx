@@ -26,7 +26,11 @@ import { cn } from '@/lib/utils';
 import { RelatedExercises } from './RelatedExercises';
 import { ExerciseBadges } from './ExerciseBadges';
 import { useTranslation } from 'react-i18next';
-import { ComponentType, ReactNode } from 'react';
+import { ComponentType, ReactNode, useMemo } from 'react';
+import { usePlanStore } from '@/stores/planStore';
+import { calculateOneRepMax } from '@/lib/progressionEngine';
+import { format } from 'date-fns';
+import { ResponsiveContainer, LineChart, Line, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
 interface ExerciseDetailModalProps {
     exercise: Exercise | null;
@@ -62,10 +66,55 @@ function MetaCard({ title, icon: Icon, children, className }: MetaCardProps) {
 export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercise }: ExerciseDetailModalProps) {
     const { t } = useTranslation();
     const { isFavorite, toggleFavorite } = usePreferencesStore();
+    const { workoutLogs } = usePlanStore();
     const haptics = useHaptics();
     const isMobile = useIsMobile();
 
     useTrackExerciseView(isOpen ? exercise?.id ?? null : null);
+
+    const historyData = useMemo(() => {
+        if (!exercise) {
+            return {
+                entries: [],
+                lastPerformed: null,
+                bestWeight: null,
+                bestVolume: null,
+            };
+        }
+
+        const entries = workoutLogs
+            .map((workoutLog) => {
+                const exerciseLog = workoutLog.exercises.find((entry) => entry.exerciseId === exercise.id);
+                if (!exerciseLog || exerciseLog.skipped) return null;
+
+                const completedSets = exerciseLog.sets.filter((set) => set.completed);
+                if (completedSets.length === 0) return null;
+
+                const bestWeight = Math.max(...completedSets.map((set) => set.weight));
+                const bestVolume = Math.max(...completedSets.map((set) => set.weight * set.reps));
+                const bestE1RM = Math.max(...completedSets.map((set) => calculateOneRepMax(set.weight, set.reps)));
+                const completedDate = new Date(workoutLog.completedAt);
+
+                return {
+                    date: completedDate,
+                    label: format(completedDate, 'MMM d'),
+                    bestWeight,
+                    bestVolume,
+                    e1rm: Math.round(bestE1RM),
+                };
+            })
+            .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
+            .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+        const lastEntry = entries.length > 0 ? entries[entries.length - 1] : null;
+
+        return {
+            entries,
+            lastPerformed: lastEntry ? format(lastEntry.date, 'MMM d, yyyy') : null,
+            bestWeight: entries.length > 0 ? Math.max(...entries.map((entry) => entry.bestWeight)) : null,
+            bestVolume: entries.length > 0 ? Math.max(...entries.map((entry) => entry.bestVolume)) : null,
+        };
+    }, [workoutLogs, exercise]);
 
     if (!exercise) return null;
 
@@ -344,15 +393,61 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                             </TabsContent>
 
                             <TabsContent value="history" className="mt-4">
-                                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] py-12 text-center">
-                                    <Clock className="mb-4 h-12 w-12 text-white/35" />
-                                    <h5 className="mb-2 text-base font-semibold text-white/80">
-                                        {t('exercises.detail.no_history', 'No history yet')}
-                                    </h5>
-                                    <p className="max-w-sm break-words text-sm text-white/60">
-                                        {t('exercises.detail.history_prompt', 'Complete this exercise to track your progress over time.')}
-                                    </p>
-                                </div>
+                                {historyData.entries.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] py-12 text-center">
+                                        <Clock className="mb-4 h-12 w-12 text-white/35" />
+                                        <h5 className="mb-2 text-base font-semibold text-white/80">
+                                            {t('exercises.detail.no_history', 'No history yet')}
+                                        </h5>
+                                        <p className="max-w-sm break-words text-sm text-white/60">
+                                            {t('exercises.detail.history_prompt', 'Complete this exercise to track your progress over time.')}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        <div className="grid gap-3 sm:grid-cols-3">
+                                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                                                <p className="text-xs uppercase tracking-wide text-white/50">Last Performed</p>
+                                                <p className="mt-1 text-sm font-semibold text-white">{historyData.lastPerformed}</p>
+                                            </div>
+                                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                                                <p className="text-xs uppercase tracking-wide text-white/50">Best Weight</p>
+                                                <p className="mt-1 text-sm font-semibold text-white">{historyData.bestWeight}</p>
+                                            </div>
+                                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                                                <p className="text-xs uppercase tracking-wide text-white/50">Best Volume</p>
+                                                <p className="mt-1 text-sm font-semibold text-white">{historyData.bestVolume}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                                            <h5 className="mb-3 text-sm font-semibold text-white/90">Estimated 1RM Trend</h5>
+                                            <div className="h-56">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <LineChart data={historyData.entries}>
+                                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                                                        <XAxis dataKey="label" stroke="rgba(255,255,255,0.55)" fontSize={11} />
+                                                        <YAxis stroke="rgba(255,255,255,0.55)" fontSize={11} />
+                                                        <Tooltip
+                                                            contentStyle={{
+                                                                background: 'rgba(0,0,0,0.85)',
+                                                                border: '1px solid rgba(255,255,255,0.15)',
+                                                                borderRadius: 8,
+                                                            }}
+                                                        />
+                                                        <Line
+                                                            type="monotone"
+                                                            dataKey="e1rm"
+                                                            stroke="hsl(var(--primary))"
+                                                            strokeWidth={2.5}
+                                                            dot={{ r: 3 }}
+                                                        />
+                                                    </LineChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </TabsContent>
                         </Tabs>
                     </section>

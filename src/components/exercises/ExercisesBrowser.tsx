@@ -1,18 +1,114 @@
-import { useState, useMemo, useRef, useCallback } from 'react';
-import { filterExercises, ExerciseFilterOptions, getRecommendedExercises } from '@/lib/exercise-utils';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Plus, Search, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 import { useWizardStore } from '@/stores/wizardStore';
-import { Exercise } from '@/types/fitness';
+import { useCustomExerciseStore } from '@/stores/customExerciseStore';
+import { useExerciseDatabase } from '@/lib/exerciseRepository';
+import { Exercise, Equipment, MuscleGroup, EQUIPMENT_OPTIONS, MUSCLE_DATA } from '@/types/fitness';
 import { ExerciseCard } from './ExerciseCard';
 import { ExerciseFilters } from './ExerciseFilters';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
+import { ExerciseOfTheDay } from './ExerciseOfTheDay';
+import { CommunityPulse } from '@/components/community/CommunityPulse';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ChevronLeft, ChevronRight, Search, Sparkles } from 'lucide-react';
-import { CommunityPulse } from '@/components/community/CommunityPulse';
-import { ExerciseOfTheDay } from './ExerciseOfTheDay';
-import { AnimatePresence } from 'framer-motion';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const ITEMS_PER_PAGE = 24;
+
+type DifficultyFilter = 'Beginner' | 'Intermediate' | 'Advanced' | 'all';
+
+interface ExerciseFilterOptions {
+    category: string;
+    muscle: string;
+    difficulty: DifficultyFilter;
+    equipment: string;
+    search: string;
+}
+
+function filterExerciseList(exercises: Exercise[], options: ExerciseFilterOptions): Exercise[] {
+    let results = exercises;
+
+    if (options.category !== 'all') {
+        results = results.filter((exercise) => exercise.category === options.category);
+    }
+
+    if (options.muscle !== 'all') {
+        results = results.filter(
+            (exercise) =>
+                exercise.primaryMuscles.includes(options.muscle as MuscleGroup) ||
+                exercise.secondaryMuscles.includes(options.muscle as MuscleGroup)
+        );
+    }
+
+    if (options.equipment !== 'all') {
+        results = results.filter((exercise) =>
+            exercise.equipment.includes(options.equipment as Equipment)
+        );
+    }
+
+    if (options.difficulty !== 'all') {
+        results = results.filter((exercise) => exercise.difficulty === options.difficulty);
+    }
+
+    if (options.search.trim() !== '') {
+        const query = options.search.toLowerCase();
+        results = results.filter((exercise) =>
+            exercise.name.toLowerCase().includes(query) ||
+            exercise.primaryMuscles.some((muscle) => muscle.includes(query))
+        );
+    }
+
+    return results;
+}
+
+function getRecommendedExercisesForSelections(exercises: Exercise[], selections: {
+    goal?: 'strength' | 'hypertrophy' | 'general';
+    experienceLevel?: 'beginner' | 'intermediate' | 'advanced';
+    equipment: Equipment[];
+    targetMuscles: MuscleGroup[];
+}) {
+    const availableEquipment = new Set<Equipment>(['bodyweight', ...selections.equipment]);
+
+    let candidates = exercises.filter((exercise) =>
+        exercise.equipment.some((equipment) => availableEquipment.has(equipment))
+    );
+
+    if (selections.experienceLevel === 'beginner') {
+        candidates = candidates.filter(
+            (exercise) => exercise.difficulty !== 'Advanced' && exercise.difficulty !== 'Elite'
+        );
+    }
+
+    const scored = candidates.map((exercise) => {
+        let score = 0;
+
+        if (exercise.primaryMuscles.some((muscle) => selections.targetMuscles.includes(muscle))) {
+            score += 10;
+        }
+        if (exercise.secondaryMuscles.some((muscle) => selections.targetMuscles.includes(muscle))) {
+            score += 5;
+        }
+
+        if ((selections.goal === 'strength' || selections.goal === 'hypertrophy') && exercise.category === 'strength') {
+            score += 5;
+        }
+        if (selections.goal === 'general' && exercise.category === 'cardio') {
+            score += 3;
+        }
+
+        return { exercise, score };
+    });
+
+    return scored
+        .filter((entry) => entry.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .map((entry) => entry.exercise)
+        .slice(0, 12);
+}
 
 export function ExercisesBrowser() {
     const [filters, setFilters] = useState<ExerciseFilterOptions>({
@@ -22,39 +118,57 @@ export function ExercisesBrowser() {
         equipment: 'all',
         search: '',
     });
-
-    const { selections } = useWizardStore();
-    const hasWizardData = selections.targetMuscles.length > 0 || selections.equipment.length > 0;
-
-    const recommendedExercises = useMemo(() => {
-        if (hasWizardData) {
-            return getRecommendedExercises(selections);
-        }
-        return [];
-    }, [selections, hasWizardData]);
-    const recommendedForRail = useMemo(() => recommendedExercises.slice(0, 10), [recommendedExercises]);
-
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
     const [page, setPage] = useState(1);
+    const [showCustomExerciseForm, setShowCustomExerciseForm] = useState(false);
+    const [customName, setCustomName] = useState('');
+    const [customPrimaryMuscle, setCustomPrimaryMuscle] = useState<MuscleGroup>('chest');
+    const [customEquipment, setCustomEquipment] = useState<Equipment>('bodyweight');
+    const [customCues, setCustomCues] = useState('');
+    const [customDescription, setCustomDescription] = useState('');
+
+    const { selections } = useWizardStore();
+    const { customExercises, addCustomExercise } = useCustomExerciseStore();
+    const { exercises: loadedExercises, isLoading } = useExerciseDatabase();
+    const railRef = useRef<HTMLDivElement>(null);
+
+    const hasWizardData = selections.targetMuscles.length > 0 || selections.equipment.length > 0;
+    const exerciseDatabase = useMemo(
+        () => [...customExercises, ...loadedExercises],
+        [customExercises, loadedExercises]
+    );
+
+    const recommendedExercises = useMemo(() => {
+        if (!hasWizardData) return [];
+        return getRecommendedExercisesForSelections(exerciseDatabase, {
+            goal: selections.goal,
+            experienceLevel: selections.experienceLevel,
+            equipment: selections.equipment,
+            targetMuscles: selections.targetMuscles,
+        });
+    }, [exerciseDatabase, hasWizardData, selections]);
+
+    const recommendedForRail = useMemo(() => recommendedExercises.slice(0, 10), [recommendedExercises]);
 
     const filteredExercises = useMemo(() => {
-        // Reset page when filters change
-        return filterExercises(filters);
-    }, [filters]);
+        return filterExerciseList(exerciseDatabase, filters);
+    }, [exerciseDatabase, filters]);
 
     const displayedExercises = useMemo(() => {
         return filteredExercises.slice(0, page * ITEMS_PER_PAGE);
     }, [filteredExercises, page]);
 
     const isFiltering =
-        filters.category !== 'all'
-        || filters.muscle !== 'all'
-        || filters.difficulty !== 'all'
-        || filters.equipment !== 'all'
-        || (filters.search ?? '').trim() !== '';
+        filters.category !== 'all' ||
+        filters.muscle !== 'all' ||
+        filters.difficulty !== 'all' ||
+        filters.equipment !== 'all' ||
+        filters.search.trim() !== '';
+
+    const hasMore = displayedExercises.length < filteredExercises.length;
 
     const handleFilterChange = (key: string, value: string) => {
-        setFilters(prev => ({ ...prev, [key]: value }));
+        setFilters((previous) => ({ ...previous, [key]: value }));
         setPage(1);
     };
 
@@ -69,8 +183,33 @@ export function ExercisesBrowser() {
         setPage(1);
     };
 
-    const hasMore = displayedExercises.length < filteredExercises.length;
-    const railRef = useRef<HTMLDivElement>(null);
+    const handleCreateCustomExercise = () => {
+        const name = customName.trim();
+        if (!name) {
+            toast.error('Exercise name is required');
+            return;
+        }
+
+        const cues = customCues
+            .split(',')
+            .map((cue) => cue.trim())
+            .filter(Boolean);
+
+        const created = addCustomExercise({
+            name,
+            primaryMuscles: [customPrimaryMuscle],
+            equipment: [customEquipment],
+            cues: cues.length > 0 ? cues : ['Custom cue'],
+            description: customDescription.trim() || undefined,
+        });
+
+        toast.success('Custom exercise created');
+        setSelectedExercise(created);
+        setShowCustomExerciseForm(false);
+        setCustomName('');
+        setCustomCues('');
+        setCustomDescription('');
+    };
 
     const scrollRail = useCallback((direction: 'left' | 'right') => {
         const rail = railRef.current;
@@ -98,7 +237,7 @@ export function ExercisesBrowser() {
                     <CommunityPulse />
                 </div>
                 <p className="text-muted-foreground text-lg max-w-2xl">
-                    Explore our comprehensive database of over 100 exercises. Filter by muscle, category, or difficulty to build your perfect workout.
+                    Explore our exercise library. Filter by muscle, category, or difficulty to build your perfect workout.
                 </p>
 
                 <div className="relative max-w-md">
@@ -107,26 +246,116 @@ export function ExercisesBrowser() {
                         placeholder="Search exercises (e.g., 'Bench Press', 'Chest')..."
                         className="pl-9 bg-black/20 border-white/10 focus:border-primary/50 transition-all font-medium"
                         value={filters.search}
-                        onChange={(e) => handleFilterChange('search', e.target.value)}
+                        onChange={(event) => handleFilterChange('search', event.target.value)}
                     />
                 </div>
             </div>
 
-            {/* Featured Daily Exercise */}
-            {!isFiltering && (
-                <ExerciseOfTheDay onSelect={setSelectedExercise} />
-            )}
+            <Card className="mb-6 border-white/10 bg-black/20">
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between gap-2">
+                        <CardTitle className="text-lg">Custom Exercises</CardTitle>
+                        <Button
+                            variant={showCustomExerciseForm ? 'outline' : 'default'}
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => setShowCustomExerciseForm((value) => !value)}
+                        >
+                            <Plus className="h-4 w-4" />
+                            {showCustomExerciseForm ? 'Close' : 'Create'}
+                        </Button>
+                    </div>
+                </CardHeader>
+                {showCustomExerciseForm && (
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label htmlFor="custom-exercise-name">Name</Label>
+                                <Input
+                                    id="custom-exercise-name"
+                                    placeholder="e.g. Cable Bayesian Curl"
+                                    value={customName}
+                                    onChange={(event) => setCustomName(event.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Primary Muscle</Label>
+                                <Select
+                                    value={customPrimaryMuscle}
+                                    onValueChange={(value) => setCustomPrimaryMuscle(value as MuscleGroup)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select primary muscle" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {MUSCLE_DATA.map((muscle) => (
+                                            <SelectItem key={muscle.id} value={muscle.id}>
+                                                {muscle.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Equipment</Label>
+                                <Select
+                                    value={customEquipment}
+                                    onValueChange={(value) => setCustomEquipment(value as Equipment)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select equipment" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {EQUIPMENT_OPTIONS.map((equipment) => (
+                                            <SelectItem key={equipment.id} value={equipment.id}>
+                                                {equipment.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="custom-exercise-cues">Cues (comma separated)</Label>
+                                <Input
+                                    id="custom-exercise-cues"
+                                    placeholder="Brace core, Keep elbows high"
+                                    value={customCues}
+                                    onChange={(event) => setCustomCues(event.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="custom-exercise-description">Description (optional)</Label>
+                            <Input
+                                id="custom-exercise-description"
+                                placeholder="Short coaching note"
+                                value={customDescription}
+                                onChange={(event) => setCustomDescription(event.target.value)}
+                            />
+                        </div>
+
+                        <Button className="w-full gradient-primary" onClick={handleCreateCustomExercise}>
+                            Save Custom Exercise
+                        </Button>
+                    </CardContent>
+                )}
+            </Card>
+
+            {!isFiltering && !isLoading && <ExerciseOfTheDay onSelect={setSelectedExercise} />}
 
             <ExerciseFilters
-                category={filters.category || 'all'}
-                muscle={filters.muscle || 'all'}
-                difficulty={filters.difficulty || 'all'}
-                equipment={filters.equipment || 'all'}
+                category={filters.category}
+                muscle={filters.muscle}
+                difficulty={filters.difficulty}
+                equipment={filters.equipment}
                 onFilterChange={handleFilterChange}
                 onClear={clearFilters}
             />
 
-            {/* Recommendations Section */}
             {!isFiltering && hasWizardData && recommendedForRail.length > 0 && (
                 <section className="mb-12 rounded-3xl border border-white/10 bg-gradient-to-br from-primary/10 via-black/20 to-transparent p-5 md:p-6">
                     <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
@@ -164,10 +393,7 @@ export function ExercisesBrowser() {
                         </div>
                     </div>
 
-                    <div
-                        className="relative overflow-hidden"
-                        aria-label="Recommended exercises carousel"
-                    >
+                    <div className="relative overflow-hidden" aria-label="Recommended exercises carousel">
                         <div
                             ref={railRef}
                             data-testid="recommended-rail-track"
@@ -195,11 +421,15 @@ export function ExercisesBrowser() {
             <div className="mb-4 text-sm text-muted-foreground flex justify-between items-end">
                 <span>Showing {displayedExercises.length} of {filteredExercises.length} results</span>
                 {isFiltering && (
-                    <Button variant="link" onClick={clearFilters} className="text-primary p-0 h-auto">View All Exercises</Button>
+                    <Button variant="link" onClick={clearFilters} className="text-primary p-0 h-auto">
+                        View All Exercises
+                    </Button>
                 )}
             </div>
 
-            {displayedExercises.length === 0 ? (
+            {isLoading ? (
+                <div className="text-center py-12 text-muted-foreground">Loading exercise library...</div>
+            ) : displayedExercises.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-white/10 rounded-xl bg-black/20">
                     <Search className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
                     <h3 className="text-xl font-semibold mb-2">No exercises found</h3>
@@ -227,7 +457,7 @@ export function ExercisesBrowser() {
                     <Button
                         size="lg"
                         variant="secondary"
-                        onClick={() => setPage(p => p + 1)}
+                        onClick={() => setPage((value) => value + 1)}
                         className="min-w-[200px]"
                     >
                         Load More

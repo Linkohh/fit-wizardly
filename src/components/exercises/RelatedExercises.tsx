@@ -2,11 +2,11 @@ import { useMemo } from 'react';
 import { ArrowRight, Dumbbell } from 'lucide-react';
 import { Exercise } from '@/types/fitness';
 import { getRelatedExercises } from '@/lib/smart-recommendations';
-import { EXERCISE_DATABASE } from '@/data/exercises';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getExerciseTheme } from '@/lib/exerciseTheme';
+import { useExerciseDatabase } from '@/lib/exerciseRepository';
 
 interface RelatedExercisesProps {
     currentExercise: Exercise;
@@ -14,9 +14,10 @@ interface RelatedExercisesProps {
 }
 
 export function RelatedExercises({ currentExercise, onSelect }: RelatedExercisesProps) {
+    const { exercises } = useExerciseDatabase();
     const related = useMemo(
-        () => getRelatedExercises(currentExercise, EXERCISE_DATABASE, 4),
-        [currentExercise]
+        () => getRelatedExercises(currentExercise, exercises, 4),
+        [currentExercise, exercises]
     );
 
     if (related.length === 0) return null;

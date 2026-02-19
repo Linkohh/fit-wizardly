@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { EXERCISE_DATABASE } from '@/data/exercises';
 import type { Exercise, ExercisePrescription } from '@/types/fitness';
 import { Search, ArrowRight, Check } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
+import { useExerciseDatabase } from '@/lib/exerciseRepository';
+import { useCustomExerciseStore } from '@/stores/customExerciseStore';
 
 interface ExerciseSwapModalProps {
     isOpen: boolean;
@@ -29,15 +30,21 @@ export function ExerciseSwapModal({
     const { t } = useTranslation();
     const [search, setSearch] = useState('');
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+    const { exercises: loadedExercises } = useExerciseDatabase();
+    const { customExercises } = useCustomExerciseStore();
+    const exerciseDatabase = useMemo(
+        () => [...customExercises, ...loadedExercises],
+        [customExercises, loadedExercises]
+    );
 
     const exerciseLookup = useMemo(() => {
         const lookup = new Map<string, Exercise>();
-        EXERCISE_DATABASE.forEach((exercise) => {
+        exerciseDatabase.forEach((exercise) => {
             lookup.set(exercise.id.toLowerCase(), exercise);
             lookup.set(exercise.name.toLowerCase(), exercise);
         });
         return lookup;
-    }, []);
+    }, [exerciseDatabase]);
 
     const resolveVariationExercise = useCallback((variationName: string) => {
         const normalizedName = variationName.toLowerCase();
@@ -88,7 +95,7 @@ export function ExerciseSwapModal({
         const currentPatterns = currentExercise.exercise.patterns;
         const currentPrimaryMuscles = currentExercise.exercise.primaryMuscles;
 
-        return EXERCISE_DATABASE.filter((ex) => {
+        return exerciseDatabase.filter((ex) => {
             // Exclude current exercise
             if (ex.id === currentExercise.exercise.id) return false;
 
@@ -116,7 +123,7 @@ export function ExerciseSwapModal({
 
             return true;
         }).slice(0, 20); // Limit results for performance
-    }, [currentExercise, allowedEquipment, search]);
+    }, [currentExercise, allowedEquipment, search, exerciseDatabase]);
 
     const handleConfirm = () => {
         if (selectedExercise) {

@@ -38,12 +38,16 @@ import { useTranslation } from 'react-i18next';
 import { useWorkoutTimer } from '@/hooks/useWorkoutTimer';
 import { useHaptics } from '@/hooks/useHaptics';
 import { NotificationType } from '@capacitor/haptics';
+import { useReadinessStore } from '@/stores/readinessStore';
+import { ReadinessCheck } from './ReadinessCheck';
+import type { ReadinessEntry } from '@/types/readiness';
 
 export function WorkoutLogger() {
     const { t } = useTranslation();
     const { planId, dayIndex } = useParams();
     const navigate = useNavigate();
     const haptics = useHaptics();
+    const { getTodayLog } = useReadinessStore();
 
     const {
         getPlanById,
@@ -64,6 +68,9 @@ export function WorkoutLogger() {
     const [completedLog, setCompletedLog] = useState<ReturnType<typeof completeWorkout>>(null);
     const [notes, setNotes] = useState('');
     const [showDifficultyDialog, setShowDifficultyDialog] = useState(false);
+    const [showReadinessCheck, setShowReadinessCheck] = useState(false);
+    const [readinessResolved, setReadinessResolved] = useState(false);
+    const [readinessEntry, setReadinessEntry] = useState<ReadinessEntry | null>(null);
 
     const plan = planId ? getPlanById(planId) : null;
     const dayIndexNum = parseInt(dayIndex ?? '0', 10);
@@ -74,14 +81,68 @@ export function WorkoutLogger() {
         isActive: !!activeWorkout,
     });
 
-    // Start workout on mount
+    // Start workout on mount only after readiness check is resolved.
     useEffect(() => {
+        if (!planId || activeWorkout) {
+            return;
+        }
+
+        if (!readinessResolved) {
+            const todayEntry = getTodayLog();
+            if (todayEntry) {
+                setReadinessEntry(todayEntry);
+                setReadinessResolved(true);
+            } else {
+                setShowReadinessCheck(true);
+            }
+            return;
+        }
+
         if (planId && !activeWorkout) {
             startWorkout(planId, dayIndexNum);
         }
-    }, [planId, dayIndexNum, activeWorkout, startWorkout]);
+    }, [planId, dayIndexNum, activeWorkout, startWorkout, getTodayLog, readinessResolved]);
 
-    if (!plan || !activeWorkout) {
+    const handleReadinessComplete = (entry: ReadinessEntry) => {
+        setReadinessEntry(entry);
+        setShowReadinessCheck(false);
+        setReadinessResolved(true);
+    };
+
+    const handleReadinessSkip = () => {
+        setShowReadinessCheck(false);
+        setReadinessResolved(true);
+    };
+
+    if (!plan) {
+        return (
+            <div className="container max-w-2xl mx-auto px-4 py-8">
+                <Card>
+                    <CardContent className="p-12 text-center">
+                        <div className="relative w-20 h-20 mx-auto mb-6">
+                            <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
+                            <div className="relative bg-background border border-border p-4 rounded-full flex items-center justify-center h-full w-full">
+                                <Dumbbell className="h-10 w-10 text-primary" />
+                            </div>
+                        </div>
+                        <h2 className="text-xl font-semibold mb-2">{t('workout.loading')}</h2>
+                        <p className="text-muted-foreground">{t('workout.preparing')}</p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    if (!activeWorkout) {
+        if (showReadinessCheck) {
+            return (
+                <ReadinessCheck
+                    onComplete={handleReadinessComplete}
+                    onSkip={handleReadinessSkip}
+                />
+            );
+        }
+
         return (
             <div className="container max-w-2xl mx-auto px-4 py-8">
                 <Card>
@@ -259,6 +320,11 @@ export function WorkoutLogger() {
                     <p className="text-muted-foreground">
                         Week {plan.rirProgression[0]?.week ?? 1} • Target RIR: {prescription.rir}
                     </p>
+                    {readinessEntry && readinessEntry.overallScore < 2.5 && (
+                        <div className="mt-3 rounded-lg border border-orange-500/40 bg-orange-500/10 p-3 text-sm text-orange-200">
+                            Consider a lighter session today — reduce volume by 20%.
+                        </div>
+                    )}
                 </div>
 
                 {/* Warm-Up Sets (only for first compound exercise) */}
@@ -367,11 +433,10 @@ export function WorkoutLogger() {
                         </AlertDialogHeader>
                         <div className="grid gap-2 py-4">
                             {[
-                                { value: 'very_easy', label: 'Very Easy', color: 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-600' },
-                                { value: 'easy', label: 'Easy', color: 'bg-green-500/10 hover:bg-green-500/20 text-green-600' },
+                                { value: 'too_easy', label: 'Too Easy', color: 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-600' },
                                 { value: 'just_right', label: 'Just Right', color: 'bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-600' },
-                                { value: 'hard', label: 'Hard', color: 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-600' },
-                                { value: 'very_hard', label: 'Very Hard', color: 'bg-red-500/10 hover:bg-red-500/20 text-red-600' },
+                                { value: 'challenging', label: 'Challenging', color: 'bg-orange-500/10 hover:bg-orange-500/20 text-orange-600' },
+                                { value: 'too_hard', label: 'Too Hard', color: 'bg-red-500/10 hover:bg-red-500/20 text-red-600' },
                             ].map((option) => (
                                 <Button
                                     key={option.value}

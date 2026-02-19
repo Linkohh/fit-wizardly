@@ -14,10 +14,10 @@ export function ReadinessModal() {
     const [step, setStep] = useState(0); // 0: Input, 1: Result
 
     // Metrics state
-    const [sleep, setSleep] = useState([7]);
-    const [soreness, setSoreness] = useState([3]);
-    const [stress, setStress] = useState([3]);
-    const [energy, setEnergy] = useState([7]);
+    const [sleep, setSleep] = useState([3]);
+    const [soreness, setSoreness] = useState([2]);
+    const [stress, setStress] = useState([2]);
+    const [energy, setEnergy] = useState([3]);
 
     useEffect(() => {
         // Check if logged today on mount
@@ -31,12 +31,14 @@ export function ReadinessModal() {
 
     const handleSubmit = () => {
         const metrics = {
-            sleep: sleep[0],
-            soreness: soreness[0],
-            stress: stress[0],
-            energy: energy[0]
+            sleepQuality: sleep[0] as 1 | 2 | 3 | 4 | 5,
+            muscleSoreness: soreness[0] as 1 | 2 | 3 | 4 | 5,
+            stressLevel: stress[0] as 1 | 2 | 3 | 4 | 5,
+            energyLevel: energy[0] as 1 | 2 | 3 | 4 | 5,
         };
-        logReadiness(metrics);
+        const entry = logReadiness(metrics);
+        const computedScore = Math.round(entry.overallScore * 20);
+        setComputedReadinessScore(computedScore);
         setStep(1); // Show result
     };
 
@@ -46,16 +48,8 @@ export function ReadinessModal() {
         setTimeout(() => setStep(0), 500);
     };
 
-    const calculateScore = () => {
-        const sleepScore = sleep[0];
-        const energyScore = energy[0];
-        const sorenessScore = 11 - soreness[0];
-        const stressScore = 11 - stress[0];
-        const average = (sleepScore + energyScore + sorenessScore + stressScore) / 4;
-        return Math.round(average * 10);
-    };
-
-    const score = calculateScore();
+    const [computedReadinessScore, setComputedReadinessScore] = useState<number>(0);
+    const score = computedReadinessScore;
 
     const getVerdict = (s: number) => {
         if (s >= 85) return { text: "Peak Performance", color: "text-emerald-500" };
@@ -91,33 +85,33 @@ export function ReadinessModal() {
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center">
                                         <Label className="flex items-center gap-2"><Moon className="w-4 h-4 text-indigo-400" /> Sleep Quality</Label>
-                                        <span className="text-sm font-medium text-muted-foreground">{sleep[0]}/10</span>
+                                        <span className="text-sm font-medium text-muted-foreground">{sleep[0]}/5</span>
                                     </div>
-                                    <Slider value={sleep} onValueChange={setSleep} min={1} max={10} step={1} className="[&>.range]:bg-indigo-500" />
+                                    <Slider value={sleep} onValueChange={setSleep} min={1} max={5} step={1} className="[&>.range]:bg-indigo-500" />
                                 </div>
 
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center">
                                         <Label className="flex items-center gap-2"><Activity className="w-4 h-4 text-red-400" /> Muscle Soreness</Label>
-                                        <span className="text-sm font-medium text-muted-foreground">{soreness[0]}/10</span>
+                                        <span className="text-sm font-medium text-muted-foreground">{soreness[0]}/5</span>
                                     </div>
-                                    <Slider value={soreness} onValueChange={setSoreness} min={1} max={10} step={1} className="[&>.range]:bg-red-500" />
+                                    <Slider value={soreness} onValueChange={setSoreness} min={1} max={5} step={1} className="[&>.range]:bg-red-500" />
                                 </div>
 
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center">
                                         <Label className="flex items-center gap-2"><Brain className="w-4 h-4 text-yellow-400" /> Stress Level</Label>
-                                        <span className="text-sm font-medium text-muted-foreground">{stress[0]}/10</span>
+                                        <span className="text-sm font-medium text-muted-foreground">{stress[0]}/5</span>
                                     </div>
-                                    <Slider value={stress} onValueChange={setStress} min={1} max={10} step={1} className="[&>.range]:bg-yellow-500" />
+                                    <Slider value={stress} onValueChange={setStress} min={1} max={5} step={1} className="[&>.range]:bg-yellow-500" />
                                 </div>
 
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center">
                                         <Label className="flex items-center gap-2"><Battery className="w-4 h-4 text-green-400" /> Energy Level</Label>
-                                        <span className="text-sm font-medium text-muted-foreground">{energy[0]}/10</span>
+                                        <span className="text-sm font-medium text-muted-foreground">{energy[0]}/5</span>
                                     </div>
-                                    <Slider value={energy} onValueChange={setEnergy} min={1} max={10} step={1} className="[&>.range]:bg-green-500" />
+                                    <Slider value={energy} onValueChange={setEnergy} min={1} max={5} step={1} className="[&>.range]:bg-green-500" />
                                 </div>
                             </div>
 

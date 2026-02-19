@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
@@ -9,7 +9,7 @@ import { TrendingUp, Trophy } from 'lucide-react';
 
 export function StrengthCurve() {
     const { workoutLogs, personalRecords } = usePlanStore();
-    const [selectedExercise, setSelectedExercise] = useState<string>('Squat'); // Default, needs to be dynamic or 'Big 3'
+    const [selectedExercise, setSelectedExercise] = useState<string>('');
 
     // Extract unique exercise names from logs for the filter
     const availableExercises = useMemo(() => {
@@ -20,9 +20,20 @@ export function StrengthCurve() {
         return Array.from(names).sort();
     }, [workoutLogs]);
 
+    useEffect(() => {
+        if (availableExercises.length === 0) {
+            setSelectedExercise('');
+            return;
+        }
+        if (!selectedExercise || !availableExercises.includes(selectedExercise)) {
+            setSelectedExercise(availableExercises[0]);
+        }
+    }, [availableExercises, selectedExercise]);
+
     // Calculate 1RM history for the selected exercise
     const data = useMemo(() => {
-        const history: { date: string; e1rm: number; weight: number; reps: number }[] = [];
+        const history: { date: string; e1rm: number; weight: number; reps: number; isPR: boolean }[] = [];
+        let runningBest = 0;
 
         // Sort logs by date ascending
         const sortedLogs = [...workoutLogs].sort((a, b) => new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime());
@@ -45,11 +56,17 @@ export function StrengthCurve() {
                     });
 
                     if (best1RM > 0) {
+                        const rounded = Math.round(best1RM);
+                        const isPR = rounded > runningBest;
+                        if (isPR) {
+                            runningBest = rounded;
+                        }
                         history.push({
                             date: format(new Date(log.completedAt), 'MMM d'),
-                            e1rm: Math.round(best1RM),
+                            e1rm: rounded,
                             weight: bestSet.weight,
-                            reps: bestSet.reps
+                            reps: bestSet.reps,
+                            isPR,
                         });
                     }
                 }
@@ -72,15 +89,15 @@ export function StrengthCurve() {
                     </CardTitle>
                     <CardDescription>Estimated 1 Rep Max (e1RM) progression.</CardDescription>
                 </div>
-                <Select value={selectedExercise} onValueChange={setSelectedExercise}>
-                    <SelectTrigger className="w-[180px] glass-card">
+                <Select value={selectedExercise || undefined} onValueChange={setSelectedExercise}>
+                    <SelectTrigger className="w-[180px] glass-card" disabled={availableExercises.length === 0}>
                         <SelectValue placeholder="Select Exercise" />
                     </SelectTrigger>
                     <SelectContent>
                         {availableExercises.map(ex => (
                             <SelectItem key={ex} value={ex}>{ex}</SelectItem>
                         ))}
-                        {availableExercises.length === 0 && <SelectItem value="Squat">Squat (No Data)</SelectItem>}
+                        {availableExercises.length === 0 && <SelectItem value="no-data">No Data</SelectItem>}
                     </SelectContent>
                 </Select>
             </CardHeader>
@@ -138,7 +155,20 @@ export function StrengthCurve() {
                                     dataKey="e1rm"
                                     stroke="url(#lineColor)"
                                     strokeWidth={3}
-                                    dot={{ fill: 'hsl(var(--background))', stroke: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+                                    dot={(props) => {
+                                        const entry = props.payload as { isPR?: boolean } | undefined;
+                                        const isPR = !!entry?.isPR;
+                                        return (
+                                            <circle
+                                                cx={props.cx}
+                                                cy={props.cy}
+                                                r={isPR ? 5 : 4}
+                                                fill={isPR ? '#facc15' : 'hsl(var(--background))'}
+                                                stroke={isPR ? '#ca8a04' : 'hsl(var(--primary))'}
+                                                strokeWidth={2}
+                                            />
+                                        );
+                                    }}
                                     activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
                                 />
                             </LineChart>

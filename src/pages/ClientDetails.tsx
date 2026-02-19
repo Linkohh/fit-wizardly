@@ -29,7 +29,7 @@ export default function ClientDetails() {
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
                 <p className="text-muted-foreground">Client not found.</p>
-                <Button onClick={() => navigate('/trainer/clients')}>Return to Clients</Button>
+                <Button onClick={() => navigate('/clients')}>Return to Clients</Button>
             </div>
         );
     }
@@ -43,7 +43,7 @@ export default function ClientDetails() {
     const handleDelete = () => {
         if (confirm('Are you sure you want to delete this client?')) {
             deleteClient(client!.id);
-            navigate('/trainer/clients');
+            navigate('/clients');
         }
     };
 
@@ -51,7 +51,7 @@ export default function ClientDetails() {
         <main className="flex-1 p-8 pt-6">
             <div className="flex items-center justify-between space-y-2 mb-6">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => navigate('/trainer/clients')}>
+                    <Button variant="ghost" size="icon" onClick={() => navigate('/clients')}>
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div className="flex items-center gap-4">

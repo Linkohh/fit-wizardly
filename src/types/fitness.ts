@@ -271,6 +271,8 @@ export interface SetLog {
   weightUnit: WeightUnit;
   reps: number;
   rir: number;
+  rpe?: number;
+  effortMode?: 'rir' | 'rpe';
   completed: boolean;
   notes?: string;
 }

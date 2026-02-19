@@ -8,8 +8,8 @@ const mocks = vi.hoisted(() => ({
     toggleFavorite: vi.fn(),
     isTrending: vi.fn(() => false),
     trackView: vi.fn(),
-    light: vi.fn(),
-    favoriteToggle: vi.fn(),
+    impact: vi.fn(),
+    selection: vi.fn(),
 }));
 
 vi.mock('@/hooks/useUserPreferences', () => ({
@@ -28,8 +28,8 @@ vi.mock('@/hooks/useExerciseInteraction', () => ({
 
 vi.mock('@/hooks/useHaptics', () => ({
     useHaptics: () => ({
-        light: mocks.light,
-        favoriteToggle: mocks.favoriteToggle,
+        impact: mocks.impact,
+        selection: mocks.selection,
     }),
 }));
 

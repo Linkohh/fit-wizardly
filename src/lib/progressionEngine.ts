@@ -16,6 +16,7 @@ import type {
     PersonalRecord,
     Plan,
     MuscleGroup,
+    SplitType,
 } from '@/types/fitness';
 
 // ============================================
@@ -431,4 +432,196 @@ export function convertWeight(weight: number, from: 'lbs' | 'kg', to: 'lbs' | 'k
     if (from === to) return weight;
     if (from === 'lbs' && to === 'kg') return weight * 0.453592;
     return weight * 2.20462; // kg to lbs
+}
+
+// ============================================
+// DOMAIN INTELLIGENCE HELPERS
+// ============================================
+
+export type VolumeLandmarkGroup =
+    | 'chest'
+    | 'back'
+    | 'quads'
+    | 'hamstrings'
+    | 'delts'
+    | 'biceps'
+    | 'triceps';
+
+export interface VolumeLandmark {
+    mev: number;
+    mav: [number, number];
+    mrv: number;
+}
+
+export interface MRVWarning {
+    muscleGroup: VolumeLandmarkGroup;
+    weeklySets: number;
+    mrv: number;
+}
+
+export interface SplitAdjustmentSuggestion {
+    recommendedSplit: SplitType;
+    plannedDaysPerWeek: number;
+    actualDaysPerWeek: number;
+    rationale: string;
+}
+
+export const VOLUME_LANDMARKS: Record<VolumeLandmarkGroup, VolumeLandmark> = {
+    chest: { mev: 8, mav: [12, 18], mrv: 22 },
+    back: { mev: 8, mav: [14, 22], mrv: 25 },
+    quads: { mev: 6, mav: [12, 18], mrv: 20 },
+    hamstrings: { mev: 4, mav: [10, 16], mrv: 20 },
+    delts: { mev: 6, mav: [16, 22], mrv: 26 },
+    biceps: { mev: 4, mav: [14, 20], mrv: 26 },
+    triceps: { mev: 4, mav: [10, 14], mrv: 18 },
+};
+
+export function getLandmarkGroupForMuscle(muscle: MuscleGroup): VolumeLandmarkGroup | null {
+    if (muscle === 'chest') return 'chest';
+    if (muscle === 'quads') return 'quads';
+    if (muscle === 'hamstrings') return 'hamstrings';
+    if (muscle === 'biceps') return 'biceps';
+    if (muscle === 'triceps') return 'triceps';
+
+    if (
+        muscle === 'upper_back' ||
+        muscle === 'lats' ||
+        muscle === 'lower_back' ||
+        muscle === 'traps'
+    ) {
+        return 'back';
+    }
+
+    if (
+        muscle === 'front_deltoid' ||
+        muscle === 'side_deltoid' ||
+        muscle === 'rear_deltoid'
+    ) {
+        return 'delts';
+    }
+
+    return null;
+}
+
+export function getMRVForMuscle(muscle: MuscleGroup): number | null {
+    const group = getLandmarkGroupForMuscle(muscle);
+    if (!group) return null;
+    return VOLUME_LANDMARKS[group].mrv;
+}
+
+export function getWeeklySetsByLandmarkGroup(
+    logs: WorkoutLog[],
+    plan: Plan,
+    lookbackDays = 7
+): Record<VolumeLandmarkGroup, number> {
+    const start = new Date();
+    start.setDate(start.getDate() - lookbackDays);
+    start.setHours(0, 0, 0, 0);
+
+    const setsByGroup: Record<VolumeLandmarkGroup, number> = {
+        chest: 0,
+        back: 0,
+        quads: 0,
+        hamstrings: 0,
+        delts: 0,
+        biceps: 0,
+        triceps: 0,
+    };
+
+    const exerciseMuscleLookup = new Map<string, MuscleGroup[]>();
+    for (const day of plan.workoutDays) {
+        for (const prescription of day.exercises) {
+            exerciseMuscleLookup.set(prescription.exercise.id, prescription.exercise.primaryMuscles);
+        }
+    }
+
+    for (const log of logs) {
+        if (new Date(log.completedAt) < start) continue;
+
+        for (const exerciseLog of log.exercises) {
+            if (exerciseLog.skipped) continue;
+
+            const primaryMuscles = exerciseMuscleLookup.get(exerciseLog.exerciseId) ?? [];
+            const completedSets = exerciseLog.sets.filter((set) => set.completed).length;
+            if (completedSets === 0) continue;
+
+            for (const muscle of primaryMuscles) {
+                const group = getLandmarkGroupForMuscle(muscle);
+                if (!group) continue;
+                setsByGroup[group] += completedSets;
+            }
+        }
+    }
+
+    return setsByGroup;
+}
+
+export function detectMRVWarnings(
+    logs: WorkoutLog[],
+    plan: Plan,
+    lookbackDays = 7
+): MRVWarning[] {
+    const setsByGroup = getWeeklySetsByLandmarkGroup(logs, plan, lookbackDays);
+
+    return (Object.keys(setsByGroup) as VolumeLandmarkGroup[])
+        .map((muscleGroup) => ({
+            muscleGroup,
+            weeklySets: setsByGroup[muscleGroup],
+            mrv: VOLUME_LANDMARKS[muscleGroup].mrv,
+        }))
+        .filter((entry) => entry.weeklySets > entry.mrv)
+        .sort((a, b) => b.weeklySets - a.weeklySets);
+}
+
+export function suggestSplitAdjustment(
+    logs: WorkoutLog[],
+    plan: Plan,
+    lookbackDays = 28
+): SplitAdjustmentSuggestion | null {
+    if (logs.length === 0) return null;
+
+    const start = new Date();
+    start.setDate(start.getDate() - lookbackDays);
+    start.setHours(0, 0, 0, 0);
+
+    const recentLogs = logs.filter((log) => new Date(log.completedAt) >= start);
+    if (recentLogs.length < 6) return null;
+
+    const weekToDays = new Map<string, Set<string>>();
+    for (const log of recentLogs) {
+        const completed = new Date(log.completedAt);
+        const weekStart = new Date(completed);
+        const day = weekStart.getDay();
+        const mondayOffset = day === 0 ? -6 : 1 - day;
+        weekStart.setDate(weekStart.getDate() + mondayOffset);
+        weekStart.setHours(0, 0, 0, 0);
+
+        const weekKey = weekStart.toISOString().split('T')[0];
+        const dayKey = completed.toISOString().split('T')[0];
+        const existing = weekToDays.get(weekKey) ?? new Set<string>();
+        existing.add(dayKey);
+        weekToDays.set(weekKey, existing);
+    }
+
+    const weeklyCounts = Array.from(weekToDays.values()).map((days) => days.size);
+    if (weeklyCounts.length < 3) return null;
+
+    const planned = Math.max(1, plan.selections.daysPerWeek);
+    const actual = Number((weeklyCounts.reduce((sum, count) => sum + count, 0) / weeklyCounts.length).toFixed(1));
+    const underPlannedWeeks = weeklyCounts.filter((count) => count <= planned - 1).length;
+    const adherenceMismatch = underPlannedWeeks / weeklyCounts.length >= 0.75;
+
+    if (!adherenceMismatch || planned - actual < 1) {
+        return null;
+    }
+
+    const recommendedSplit: SplitType = actual <= 3 ? 'full_body' : 'upper_lower';
+    const rationale = `Planned ${planned} days/week but averaged ${actual} over the past ${weeklyCounts.length} weeks. A ${recommendedSplit.replace('_', ' ')} split may improve adherence.`;
+
+    return {
+        recommendedSplit,
+        plannedDaysPerWeek: planned,
+        actualDaysPerWeek: actual,
+        rationale,
+    };
 }

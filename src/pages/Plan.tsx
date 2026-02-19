@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePlanStore } from '@/stores/planStore';
 import { type ExercisePrescription } from '@/types/fitness';
@@ -21,11 +20,13 @@ import { useWizardStore } from '@/stores/wizardStore';
 import { PlanNavigation } from '@/components/plan/PlanNavigation';
 import { SaveTemplateDialog } from '@/components/plan/SaveTemplateDialog';
 import { useTrainerStore } from '@/stores/trainerStore';
+import { PeriodizationTimeline } from '@/components/plan/PeriodizationTimeline';
+import { detectMRVWarnings, suggestSplitAdjustment } from '@/lib/progressionEngine';
 
 export default function PlanPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { currentPlan, swapExercise, clearCurrentPlan } = usePlanStore();
+  const { currentPlan, currentWeek, workoutLogs, swapExercise, clearCurrentPlan } = usePlanStore();
   const { isTrainerMode } = useTrainerStore();
   const { resetWizard } = useWizardStore();
   const [redactSensitive, setRedactSensitive] = useState(true);
@@ -58,6 +59,21 @@ export default function PlanPage() {
     navigate('/wizard');
   };
 
+  const planLogs = useMemo(
+    () => (currentPlan ? workoutLogs.filter((log) => log.planId === currentPlan.id) : []),
+    [workoutLogs, currentPlan]
+  );
+
+  const mrvWarnings = useMemo(
+    () => (currentPlan ? detectMRVWarnings(planLogs, currentPlan, 7) : []),
+    [planLogs, currentPlan]
+  );
+
+  const splitSuggestion = useMemo(
+    () => (currentPlan ? suggestSplitAdjustment(planLogs, currentPlan, 28) : null),
+    [planLogs, currentPlan]
+  );
+
   // Show skeleton while loading
   if (isLoadingPlan && currentPlan) {
     return <PlanSkeleton />;
@@ -85,6 +101,7 @@ export default function PlanPage() {
   }
 
   const handleExportPDF = async () => {
+    if (!currentPlan) return;
     const { exportPlanToPDF } = await import('@/lib/pdfExport');
     exportPlanToPDF(currentPlan, redactSensitive);
   };
@@ -186,6 +203,28 @@ export default function PlanPage() {
         </CardContent>
       </Card>
 
+      {mrvWarnings.length > 0 && (
+        <Card className="mb-6 border-orange-500/30 bg-orange-500/10">
+          <CardContent className="p-4 text-sm">
+            <p className="font-semibold text-orange-200">Volume warning: you may be above MRV this week.</p>
+            <p className="mt-1 text-orange-100/90">
+              {mrvWarnings
+                .map((warning) => `${warning.muscleGroup}: ${warning.weeklySets} sets (MRV ${warning.mrv})`)
+                .join(' • ')}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {splitSuggestion && (
+        <Card className="mb-6 border-blue-500/30 bg-blue-500/10">
+          <CardContent className="p-4 text-sm">
+            <p className="font-semibold text-blue-100">Split recommendation: {splitSuggestion.recommendedSplit.replace('_', ' ')}</p>
+            <p className="mt-1 text-blue-100/90">{splitSuggestion.rationale}</p>
+          </CardContent>
+        </Card>
+      )}
+
       {currentPlan.rirProgression.length > 0 && (
         <Card className="mb-6">
           <CardContent className="p-6 space-y-4">
@@ -193,25 +232,7 @@ export default function PlanPage() {
               <h2 className="text-base font-semibold">{t('plan.progression.title')}</h2>
               <p className="text-sm text-muted-foreground">{t('plan.progression.subtitle')}</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {currentPlan.rirProgression.map((progression) => (
-                <Badge
-                  key={progression.week}
-                  variant={progression.isDeload ? 'secondary' : 'default'}
-                  className="flex items-center gap-1.5"
-                >
-                  <span>{t('plan.progression.week_label', { week: progression.week })}</span>
-                  <span>•</span>
-                  <span>{t('plan.progression.rir_label', { count: progression.targetRIR })}</span>
-                  {progression.isDeload && (
-                    <>
-                      <span>•</span>
-                      <span className="text-[10px] uppercase tracking-wide">{t('plan.progression.deload')}</span>
-                    </>
-                  )}
-                </Badge>
-              ))}
-            </div>
+            <PeriodizationTimeline progression={currentPlan.rirProgression} currentWeek={currentWeek} />
           </CardContent>
         </Card>
       )}

@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { usePlanStore } from '@/stores/planStore';
 import { Activity, AlertTriangle } from 'lucide-react';
 import { MuscleGroup } from '@/types/fitness';
+import { getMRVForMuscle } from '@/lib/progressionEngine';
 
 export function VolumeHealth() {
     const { workoutLogs, currentPlan, currentWeek } = usePlanStore();
@@ -61,13 +62,17 @@ export function VolumeHealth() {
             .slice(0, 8);
     }, [workoutLogs, currentPlan]);
 
-    const getBarColor = (sets: number) => {
-        if (sets > 22) return '#ef4444'; // Red - Overreaching/Junk Volume risk
-        if (sets >= 10) return '#10b981'; // Green - Optimal Hypertrophy
-        return '#eab308'; // Yellow - Maintenance/Low
+    const getBarColor = (muscleName: MuscleGroup, sets: number) => {
+        const mrv = getMRVForMuscle(muscleName);
+        if (mrv && sets > mrv) return '#ef4444'; // Above MRV
+        if (mrv && sets >= Math.round(mrv * 0.7)) return '#10b981'; // High productive range
+        return '#eab308'; // Below productive range
     };
 
-    const hasOverreaching = data.some(d => d.sets > 22);
+    const hasOverreaching = data.some((d) => {
+        const mrv = getMRVForMuscle(d.name);
+        return mrv ? d.sets > mrv : false;
+    });
 
     return (
         <Card variant="glass" className="col-span-1 lg:col-span-2">
@@ -112,14 +117,21 @@ export function VolumeHealth() {
                                         borderRadius: '8px',
                                         color: 'hsl(var(--foreground))'
                                     }}
+                                    formatter={(value, _name, props) => {
+                                        const muscle = props.payload?.name as MuscleGroup;
+                                        const mrv = getMRVForMuscle(muscle);
+                                        return [
+                                            `${value} sets${mrv ? ` (MRV ${mrv})` : ''}`,
+                                            muscle.replaceAll('_', ' '),
+                                        ];
+                                    }}
                                 />
                                 <Bar dataKey="sets" radius={[0, 4, 4, 0]} barSize={20}>
                                     {data.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={getBarColor(entry.sets)} />
+                                        <Cell key={`cell-${index}`} fill={getBarColor(entry.name, entry.sets)} />
                                     ))}
                                 </Bar>
                                 <ReferenceLine x={10} stroke="#10b981" strokeDasharray="3 3" label={{ value: 'Min Effective', position: 'insideBottom', fill: '#10b981', fontSize: 10 }} />
-                                <ReferenceLine x={20} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'MRV Cap', position: 'insideBottom', fill: '#ef4444', fontSize: 10 }} />
                             </BarChart>
                         </ResponsiveContainer>
                     ) : (

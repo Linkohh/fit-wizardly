@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, ChevronUp, ChevronDown } from 'lucide-react';
 import type { SetLog, WeightUnit } from '@/types/fitness';
 import { cn } from '@/lib/utils';
+import { calculateOneRepMax } from '@/lib/progressionEngine';
 
 interface SetLoggerProps {
     setNumber: number;
@@ -32,6 +33,8 @@ export function SetLogger({
     const [weight, setWeight] = useState(previousSet?.weight ?? lastPerformance?.weight ?? 0);
     const [reps, setReps] = useState(previousSet?.reps ?? lastPerformance?.reps ?? 0);
     const [rir, setRIR] = useState(previousSet?.rir ?? targetRIR);
+    const [effortMode, setEffortMode] = useState<'rir' | 'rpe'>(previousSet?.effortMode ?? 'rir');
+    const [rpe, setRPE] = useState<number>(previousSet?.rpe ?? Math.max(6, Math.min(10, 10 - targetRIR)));
     const [completed, setCompleted] = useState(previousSet?.completed ?? false);
 
     // Parse target reps range
@@ -44,17 +47,25 @@ export function SetLogger({
             setWeight(previousSet.weight);
             setReps(previousSet.reps);
             setRIR(previousSet.rir);
+            setEffortMode(previousSet.effortMode ?? 'rir');
+            setRPE(previousSet.rpe ?? Math.max(6, Math.min(10, 10 - previousSet.rir)));
             setCompleted(previousSet.completed);
         }
     }, [previousSet]);
 
     const handleComplete = () => {
+        const derivedRIR = effortMode === 'rpe'
+            ? Math.max(0, Math.min(5, Math.round((10 - rpe) * 2) / 2))
+            : rir;
+
         const setLog: SetLog = {
             setNumber,
             weight,
             weightUnit: defaultWeightUnit,
             reps,
-            rir,
+            rir: derivedRIR,
+            rpe: effortMode === 'rpe' ? rpe : undefined,
+            effortMode,
             completed: true,
         };
         setCompleted(true);
@@ -71,20 +82,29 @@ export function SetLogger({
     };
 
     const getRIRColor = () => {
-        if (rir <= 1) return 'text-red-500';
-        if (rir <= 2) return 'text-orange-500';
-        if (rir <= 3) return 'text-yellow-500';
+        const displayRIR = effortMode === 'rpe'
+            ? Math.max(0, Math.min(5, Math.round((10 - rpe) * 2) / 2))
+            : rir;
+        if (displayRIR <= 1) return 'text-red-500';
+        if (displayRIR <= 2) return 'text-orange-500';
+        if (displayRIR <= 3) return 'text-yellow-500';
         return 'text-green-500';
     };
 
     const getRIRLabel = () => {
-        if (rir === 0) return 'Failure';
-        if (rir === 1) return 'Very Hard';
-        if (rir === 2) return 'Hard';
-        if (rir === 3) return 'Moderate';
-        if (rir === 4) return 'Easy';
+        const displayRIR = effortMode === 'rpe'
+            ? Math.max(0, Math.min(5, Math.round((10 - rpe) * 2) / 2))
+            : rir;
+        if (displayRIR === 0) return 'Failure';
+        if (displayRIR === 1) return 'Very Hard';
+        if (displayRIR === 2) return 'Hard';
+        if (displayRIR === 3) return 'Moderate';
+        if (displayRIR === 4) return 'Easy';
         return 'Very Easy';
     };
+
+    const estimatedOneRepMax =
+        completed && weight > 0 && reps > 0 ? Math.round(calculateOneRepMax(weight, reps)) : null;
 
     return (
         <div
@@ -211,31 +231,86 @@ export function SetLogger({
                 </div>
             </div>
 
-            {/* RIR Slider */}
+            {/* Effort Mode */}
+            <div className="mb-4">
+                <div className="mb-2 flex items-center justify-between">
+                    <label className="text-xs text-muted-foreground">Effort Mode</label>
+                    <div className="flex rounded-md border border-border/60 p-1">
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant={effortMode === 'rir' ? 'default' : 'ghost'}
+                            className="h-7 px-3 text-xs"
+                            onClick={() => setEffortMode('rir')}
+                            disabled={completed}
+                        >
+                            RIR
+                        </Button>
+                        <Button
+                            type="button"
+                            size="sm"
+                            variant={effortMode === 'rpe' ? 'default' : 'ghost'}
+                            className="h-7 px-3 text-xs"
+                            onClick={() => setEffortMode('rpe')}
+                            disabled={completed}
+                        >
+                            RPE
+                        </Button>
+                    </div>
+                </div>
+            </div>
+
+            {/* RIR / RPE Slider */}
             <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs text-muted-foreground">RIR (Reps in Reserve)</label>
+                    <label className="text-xs text-muted-foreground">
+                        {effortMode === 'rir' ? 'RIR (Reps in Reserve)' : 'RPE (Rate of Perceived Exertion)'}
+                    </label>
                     <span className={cn('text-sm font-semibold', getRIRColor())}>
-                        {rir} - {getRIRLabel()}
+                        {effortMode === 'rir' ? `${rir}` : `${rpe.toFixed(1)} RPE`} - {getRIRLabel()}
                     </span>
                 </div>
                 <Slider
-                    value={[rir]}
-                    onValueChange={(value) => setRIR(value[0])}
-                    min={0}
-                    max={5}
-                    step={1}
+                    value={[effortMode === 'rir' ? rir : rpe]}
+                    onValueChange={(value) => {
+                        if (effortMode === 'rir') {
+                            setRIR(value[0]);
+                            return;
+                        }
+                        setRPE(value[0]);
+                    }}
+                    min={effortMode === 'rir' ? 0 : 6}
+                    max={effortMode === 'rir' ? 5 : 10}
+                    step={effortMode === 'rir' ? 1 : 0.5}
                     disabled={completed}
                     className="w-full"
-                    aria-label={`Reps in Reserve: ${rir} - ${getRIRLabel()}`}
+                    aria-label={`Effort: ${effortMode === 'rir' ? rir : rpe} - ${getRIRLabel()}`}
                     aria-valuetext={getRIRLabel()}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>Failure</span>
-                    <span>Target: {targetRIR}</span>
-                    <span>Easy</span>
+                    {effortMode === 'rir' ? (
+                        <>
+                            <span>Failure</span>
+                            <span>Target: {targetRIR}</span>
+                            <span>Easy</span>
+                        </>
+                    ) : (
+                        <>
+                            <span>6.0</span>
+                            <span>High Effort</span>
+                            <span>10.0</span>
+                        </>
+                    )}
                 </div>
             </div>
+
+            {estimatedOneRepMax !== null && (
+                <div className="mb-3">
+                    <Badge variant="outline" className="border-primary/40 bg-primary/10 text-primary">
+                        Est. 1RM: {estimatedOneRepMax} {defaultWeightUnit}
+                    </Badge>
+                </div>
+            )}
 
             {/* Complete Button */}
             {!completed && (

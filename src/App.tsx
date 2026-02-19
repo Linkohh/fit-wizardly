@@ -38,6 +38,11 @@ const LegalPage = lazy(() => import("./pages/Legal"));
 const TemplateLibrary = lazy(() => import("./pages/TemplateLibrary"));
 const Revenue = lazy(() => import("./pages/Revenue"));
 const Analytics = lazy(() => import("./pages/Analytics"));
+const ProfilePage = lazy(() =>
+  import("./pages/Profile").then((module) => ({
+    default: module.Profile,
+  }))
+);
 
 const ExercisesBrowser = lazy(() =>
   import("./components/exercises/ExercisesBrowser").then((module) => ({
@@ -185,6 +190,11 @@ function AnimatedRoutes() {
                   <Analytics />
                 </RequireAuth>
               } />
+              <Route path="/profile" element={
+                <RequireAuth>
+                  <ProfilePage />
+                </RequireAuth>
+              } />
               <Route path="/exercises" element={
                 <RequireAuth>
                   <ExercisesBrowser />
@@ -259,10 +269,6 @@ function AnimatedRoutes() {
   );
 }
 
-import { ReadinessModal } from "@/components/dashboard/ReadinessModal";
-
-// ... (existing imports, keep them but ensuring ReadinessModal is imported)
-
 const App = () => {
   // Monitor network status and show notifications
   useNetworkStatus();
@@ -312,12 +318,11 @@ const App = () => {
               <Toaster />
               <Sonner />
               <CommandPalette />
-              <ReadinessModal />
               <div className="min-h-screen flex flex-col transition-colors duration-300 relative pt-16">
                 <LivingBackground />
                 <Header />
                 <ConsentModal />
-                <div className="flex-1 overflow-x-hidden">
+                <div id="main-content" className="flex-1 overflow-x-hidden">
                   <AnimatedRoutes />
                 </div>
                 <Footer />

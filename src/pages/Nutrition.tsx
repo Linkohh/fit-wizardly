@@ -271,7 +271,8 @@ export default function NutritionPage() {
                                                                         </div>
                                                                         <button
                                                                             onClick={(e) => handleRemoveMeal(meal.id, e)}
-                                                                            className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                                                                            className="p-2 rounded-lg hover:bg-red-500/20 text-muted-foreground hover:text-red-400 transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring"
+                                                                            aria-label={`Remove meal ${meal.name}`}
                                                                             title="Remove meal"
                                                                         >
                                                                             <Trash2 className="w-4 h-4" />

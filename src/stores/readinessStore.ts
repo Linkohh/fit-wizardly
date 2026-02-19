@@ -1,20 +1,19 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { ReadinessEntry, ReadinessRating } from '@/types/readiness';
 
-export interface ReadinessLog {
-    date: string; // YYYY-MM-DD
-    sleep: number; // 1-10
-    soreness: number; // 1-10
-    stress: number; // 1-10
-    energy: number; // 1-10
-    score: number; // 0-100
-}
+type ReadinessInput = {
+    sleepQuality: ReadinessRating;
+    muscleSoreness: ReadinessRating;
+    energyLevel: ReadinessRating;
+    stressLevel: ReadinessRating;
+};
 
 interface ReadinessState {
-    logs: ReadinessLog[];
+    logs: ReadinessEntry[];
     hasLoggedToday: () => boolean;
-    logReadiness: (log: Omit<ReadinessLog, 'date' | 'score'>) => void;
-    getTodayLog: () => ReadinessLog | undefined;
+    logReadiness: (entry: ReadinessInput) => ReadinessEntry;
+    getTodayLog: () => ReadinessEntry | undefined;
 }
 
 export const useReadinessStore = create<ReadinessState>()(
@@ -35,28 +34,24 @@ export const useReadinessStore = create<ReadinessState>()(
             logReadiness: (metrics) => {
                 const today = new Date().toISOString().split('T')[0];
 
-                // Calculate score (simple average mapped to 0-100)
-                // Sleep (high is good), Energy (high is good)
-                // Soreness (high is bad), Stress (high is bad)
+                // High is better for sleep/energy; inverse for soreness/stress.
+                const sleepScore = metrics.sleepQuality;
+                const energyScore = metrics.energyLevel;
+                const sorenessScore = 6 - metrics.muscleSoreness;
+                const stressScore = 6 - metrics.stressLevel;
+                const overallScore = Number(((sleepScore + energyScore + sorenessScore + stressScore) / 4).toFixed(2));
 
-                // Normalize to 0-10 (where 10 is 'good')
-                const sleepScore = metrics.sleep;
-                const energyScore = metrics.energy;
-                const sorenessScore = 11 - metrics.soreness; // 1=10 (good), 10=1 (bad)
-                const stressScore = 11 - metrics.stress;     // 1=10 (good), 10=1 (bad)
-
-                const average = (sleepScore + energyScore + sorenessScore + stressScore) / 4;
-                const score = Math.round(average * 10); // Map 1-10 to 10-100 roughly
-
-                const newLog: ReadinessLog = {
+                const newLog: ReadinessEntry = {
                     date: today,
                     ...metrics,
-                    score
+                    overallScore,
                 };
 
                 set((state) => ({
                     logs: [newLog, ...state.logs.filter((l) => l.date !== today)]
                 }));
+
+                return newLog;
             },
         }),
         {

@@ -30,7 +30,7 @@ vi.mock('@/hooks/useExerciseInteraction', () => ({
 
 vi.mock('@/hooks/useHaptics', () => ({
     useHaptics: () => ({
-        favoriteToggle: mocks.favoriteToggle,
+        selection: mocks.favoriteToggle,
     }),
 }));
 
@@ -50,6 +50,12 @@ vi.mock('@/components/ui/dialog', () => ({
     Dialog: ({ children }: { children: ReactNode }) => <div>{children}</div>,
     DialogContent: ({ children, className }: { children: ReactNode; className?: string }) => (
         <section className={className}>{children}</section>
+    ),
+    DialogTitle: ({ children, className }: { children: ReactNode; className?: string }) => (
+        <h2 className={className}>{children}</h2>
+    ),
+    DialogDescription: ({ children, className }: { children: ReactNode; className?: string }) => (
+        <p className={className}>{children}</p>
     ),
 }));
 

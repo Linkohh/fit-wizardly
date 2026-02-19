@@ -107,11 +107,12 @@ export const useNutritionStore = create<NutritionState>()(
             updateHydration: (amount) => set((state) => {
                 const log = get().getCurrentLog();
                 const newLog = { ...log, water: Math.max(0, log.water + amount) };
+                const dateKey = get().selectedDate;
 
                 return {
                     history: {
                         ...state.history,
-                        [log.date]: newLog
+                        [dateKey]: newLog
                     }
                 };
             }),
@@ -119,6 +120,7 @@ export const useNutritionStore = create<NutritionState>()(
             logMeal: (mealOrMeals) => set((state) => {
                 const log = get().getCurrentLog();
                 const mealsToAdd = Array.isArray(mealOrMeals) ? mealOrMeals : [mealOrMeals];
+                const dateKey = get().selectedDate;
 
                 const newLog = {
                     ...log,
@@ -128,13 +130,14 @@ export const useNutritionStore = create<NutritionState>()(
                 return {
                     history: {
                         ...state.history,
-                        [log.date]: newLog
+                        [dateKey]: newLog
                     }
                 };
             }),
 
             removeMeal: (mealId) => set((state) => {
                 const log = get().getCurrentLog();
+                const dateKey = get().selectedDate;
                 const newLog = {
                     ...log,
                     meals: log.meals.filter(m => m.id !== mealId)
@@ -143,7 +146,7 @@ export const useNutritionStore = create<NutritionState>()(
                 return {
                     history: {
                         ...state.history,
-                        [log.date]: newLog
+                        [dateKey]: newLog
                     }
                 };
             }),

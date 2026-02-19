@@ -2,27 +2,38 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { ExercisesBrowser } from '../ExercisesBrowser';
 
-const mocks = vi.hoisted(() => {
-    const recommendedExercises = Array.from({ length: 12 }).map((_, index) => ({
-        id: `rec-${index + 1}`,
-        name: `Recommended ${index + 1}`,
-    }));
+const recommendedExercises = Array.from({ length: 12 }).map((_, index) => ({
+    id: `rec-${index + 1}`,
+    name: `Recommended ${index + 1}`,
+    primaryMuscles: ['chest'],
+    secondaryMuscles: ['triceps'],
+    equipment: ['bodyweight'],
+    patterns: ['horizontal_push'],
+    contraindications: [],
+    cues: ['Cue'],
+    category: 'strength',
+    difficulty: 'Beginner',
+}));
 
-    return {
-        recommendedExercises,
-        filterExercises: vi.fn(() => []),
-        getRecommendedExercises: vi.fn(() => recommendedExercises),
-    };
-});
+vi.mock('@/lib/exerciseRepository', () => ({
+    useExerciseDatabase: () => ({
+        exercises: recommendedExercises,
+        isLoading: false,
+    }),
+}));
 
-vi.mock('@/lib/exercise-utils', () => ({
-    filterExercises: mocks.filterExercises,
-    getRecommendedExercises: mocks.getRecommendedExercises,
+vi.mock('@/stores/customExerciseStore', () => ({
+    useCustomExerciseStore: () => ({
+        customExercises: [],
+        addCustomExercise: vi.fn(),
+    }),
 }));
 
 vi.mock('@/stores/wizardStore', () => ({
     useWizardStore: () => ({
         selections: {
+            goal: 'hypertrophy',
+            experienceLevel: 'beginner',
             targetMuscles: ['chest'],
             equipment: ['bodyweight'],
         },

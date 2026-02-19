@@ -8,12 +8,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getExerciseOfTheDay } from '@/lib/smart-recommendations';
 import { MuscleSelector, MuscleHighlight, ViewType, Muscle, MuscleGroup as MclMuscleGroup, getMuscleGroupColor, getMuscleGroupName } from '@/features/mcl';
 import { getMclIdsForLegacyGroup } from '@/lib/muscleMapping';
-import { EXERCISE_DATABASE } from '@/data/exercises';
 import { cn } from '@/lib/utils';
 import { getExerciseTheme, getThemeForCategory } from '@/lib/exerciseTheme';
 import { format } from 'date-fns';
 import { MiniViewToggle } from './MiniViewToggle';
 import { useThemeStore } from '@/stores/themeStore';
+import { useExerciseDatabase } from '@/lib/exerciseRepository';
 
 interface ExerciseOfTheDayProps {
     onSelect: (exercise: Exercise) => void;
@@ -61,7 +61,11 @@ function resolveAnatomyFocus(view: ViewType, muscle: Muscle | null): AnatomyFocu
 
 export function ExerciseOfTheDay({ onSelect }: ExerciseOfTheDayProps) {
     const themeMode = useThemeStore((state) => state.mode);
-    const exercise = useMemo(() => getExerciseOfTheDay(EXERCISE_DATABASE), []);
+    const { exercises } = useExerciseDatabase();
+    const exercise = useMemo(() => {
+        if (exercises.length === 0) return null;
+        return getExerciseOfTheDay(exercises);
+    }, [exercises]);
     const theme = useMemo(() => {
         if (!exercise) return getThemeForCategory('default');
         return getExerciseTheme(exercise);
