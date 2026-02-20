@@ -1,6 +1,6 @@
 # 🛡️ FitWizard Audit & Implementation Roadmap
 
-> **Status:** Living Document — Last verified: 2026-02-09  
+> **Status:** Living Document — Last verified: 2026-02-20  
 > **Goal:** Transition from "Prototype" to "Production-Grade Product"  
 > **Philosophy:** Fix the foundation before adding more decoration.  
 > **Audience:** Human developers and AI coding agents (Claude, Copilot, etc.)
@@ -830,6 +830,21 @@ Uses Recharts (already installed) for line charts showing trends over time.
 
 ---
 
+### [3.5] RPE Toggle in SetLogger ✅
+
+- **Priority:** LOW
+- **Effort:** S (2h)
+- **Impact:** Lets users log effort via either RIR or RPE while preserving progression compatibility
+- **Files:** `src/components/logging/SetLogger.tsx`, `src/types/fitness.ts`
+- **Dependencies:** None
+
+**Completed Actions:**
+- Added RIR/RPE effort mode toggle in `SetLogger.tsx`.
+- Added derived RIR logic when logging with RPE to preserve existing progression logic.
+- Extended `SetLog` in `src/types/fitness.ts` with optional `rpe` and `effortMode`.
+
+---
+
 ### [3.6] Smart Meal Shortcuts (Quick Log) ⏳ TODO
 
 - **Priority:** LOW
@@ -854,7 +869,7 @@ Uses Recharts (already installed) for line charts showing trends over time.
 
 ---
 
-### [3.8] Exercise History in Detail Modal
+### [3.8] Exercise History in Detail Modal ✅
 
 - **Priority:** LOW
 - **Effort:** M (3h)
@@ -864,9 +879,13 @@ Uses Recharts (already installed) for line charts showing trends over time.
 
 Add a "History" section to the exercise detail modal showing: last performed date, best weight, best volume, and a mini chart of estimated 1RM over time. Pull data from `planStore.workoutLogs`.
 
+**Completed Actions:**
+- Implemented History tab in `ExerciseDetailModal.tsx`.
+- Added empty state + populated state with last performed date, best weight, best volume, and mini e1RM chart from workout logs.
+
 ---
 
-### [3.9] Custom Exercise Creation
+### [3.9] Custom Exercise Creation ✅
 
 - **Priority:** LOW
 - **Effort:** M (4h)
@@ -878,9 +897,14 @@ Add a "History" section to the exercise detail modal showing: last performed dat
 
 Add a form in the Exercise Browser to create user-defined exercises with name, primary muscles, equipment, and cues. Store in a new `customExercises` array.
 
+**Completed Actions:**
+- Created persisted `customExerciseStore` (`add/update/delete/list`) in `src/stores/customExerciseStore.ts`.
+- Added custom exercise creation UI in `ExercisesBrowser.tsx`.
+- Merged custom exercises into browser filtering/search flow.
+
 ---
 
-### [3.10] Inline Estimated 1RM Display
+### [3.10] Inline Estimated 1RM Display ✅
 
 - **Priority:** LOW
 - **Effort:** S (1h)
@@ -896,6 +920,9 @@ Estimated 1RM = weight × (1 + reps / 30)
 
 Display as a small chip below the completed set: "Est. 1RM: 225 lbs"
 
+**Completed Actions:**
+- Added inline estimated 1RM chip after set completion in `SetLogger.tsx`.
+
 ---
 
 ## Section 4: Fitness Domain Intelligence (5 items)
@@ -904,7 +931,7 @@ Features that leverage exercise science to make FitWizard smarter.
 
 ---
 
-### [4.1] Periodization Timeline Visualization
+### [4.1] Periodization Timeline Visualization ✅
 
 - **Priority:** MEDIUM
 - **Effort:** M (4-6h)
@@ -924,9 +951,13 @@ Features that leverage exercise science to make FitWizard smarter.
 
 Uses `rirProgression` array from Plan type (`src/types/fitness.ts`, line 217 — `rirProgression: RIRProgression[]`).
 
+**Completed Actions:**
+- Added `src/components/plan/PeriodizationTimeline.tsx`.
+- Replaced badge-row progression display in `src/pages/Plan.tsx` with timeline segments, deload labeling, and current-week highlighting.
+
 ---
 
-### [4.2] Daily Readiness Score
+### [4.2] Daily Readiness Score ✅
 
 - **Priority:** LOW
 - **Effort:** M (4-6h)
@@ -954,9 +985,16 @@ interface ReadinessEntry {
 
 **Why (CPT rationale):** Auto-regulation is the gold standard in modern strength training. Training hard when under-recovered leads to injury and stagnation. A readiness check captures the data needed for intelligent auto-regulation.
 
+**Completed Actions:**
+- Added strict readiness type in `src/types/readiness.ts`.
+- Refactored readiness persistence/computation in `src/stores/readinessStore.ts` using 1-5 inputs and computed `overallScore`.
+- Added pre-workout readiness flow in `src/components/logging/ReadinessCheck.tsx`.
+- Gated workout start in `src/components/logging/WorkoutLogger.tsx` (submit or skip required before `startWorkout`).
+- Added low-readiness recommendation (`overallScore < 2.5`) and removed global readiness popup from app shell.
+
 ---
 
-### [4.3] Progressive Overload Visualization (Strength Curve)
+### [4.3] Progressive Overload Visualization (Strength Curve) ✅
 
 - **Priority:** LOW
 - **Effort:** L (1-2 days)
@@ -971,9 +1009,14 @@ Line chart of estimated 1RM per exercise over time using Recharts (already insta
 - `planStore.workoutLogs` — historical sets with weight × reps
 - `planStore.personalRecords` — explicit PR entries
 
+**Completed Actions:**
+- Completed existing implementation in `src/components/analytics/StrengthCurve.tsx` (component path differs from original proposal).
+- Removed hardcoded default selection and derived first available exercise dynamically.
+- Added PR-point highlighting with gold dots while preserving e1RM line.
+
 ---
 
-### [4.4] Volume Landmark Warnings (MRV Detection)
+### [4.4] Volume Landmark Warnings (MRV Detection) ✅
 
 - **Priority:** LOW
 - **Effort:** M (4-6h)
@@ -999,9 +1042,14 @@ After completing a week, compare actual logged volume per muscle group to known 
 | Biceps | 4 | 14-20 | 26 |
 | Triceps | 4 | 10-14 | 18 |
 
+**Completed Actions:**
+- Added MRV landmark constants and evaluation helpers in `src/lib/progressionEngine.ts`.
+- Added Plan-page MRV warning banner in `src/pages/Plan.tsx`.
+- Updated analytics volume logic in `src/components/analytics/VolumeHealth.tsx` to use muscle-specific MRV thresholds instead of a fixed heuristic.
+
 ---
 
-### [4.5] Training Split Auto-Recommendation
+### [4.5] Training Split Auto-Recommendation ✅
 
 - **Priority:** LOW
 - **Effort:** M (4-6h)
@@ -1011,6 +1059,10 @@ After completing a week, compare actual logged volume per muscle group to known 
 - **Dependencies:** Item 2.2 (History page for data)
 
 If the user planned 5 days/week but consistently trains 3 days/week (based on `workoutLogs`), suggest switching from PPL to Upper/Lower or Full Body. New function: `suggestSplitAdjustment()` in `progressionEngine.ts`.
+
+**Completed Actions:**
+- Added `suggestSplitAdjustment()` in `src/lib/progressionEngine.ts`.
+- Surfaced recommendation banner in `src/pages/Plan.tsx` when adherence mismatch persists.
 
 ---
 
@@ -1108,7 +1160,7 @@ The `useNetworkStatus` hook is already called in `App.tsx` (line 225) and shows 
 
 ---
 
-### [5.3] Performance: Exercise Library Lazy Loading
+### [5.3] Performance: Exercise Library Lazy Loading ✅ PARTIAL
 
 - **Priority:** LOW
 - **Effort:** S (1h)
@@ -1128,9 +1180,18 @@ const exerciseLibrary = await import('@/data/exerciseLibrary.json');
 
 Or use React `lazy()` for the components that depend on it.
 
+**Completed Actions (Stability Slice):**
+- Added async exercise repository loader (`src/lib/exerciseRepository.ts`) with caching.
+- Migrated exercise UI paths to lazy dataset loading:
+  - `src/components/exercises/ExercisesBrowser.tsx`
+  - `src/components/exercises/ExerciseOfTheDay.tsx`
+  - `src/components/exercises/RelatedExercises.tsx`
+  - `src/components/plan/ExerciseSwapModal.tsx`
+- Plan-generation path was intentionally left unchanged this cycle.
+
 ---
 
-### [5.4] Testing Gaps
+### [5.4] Testing Gaps ✅ PARTIAL
 
 - **Priority:** LOW
 - **Effort:** L (1-2 weeks cumulative)
@@ -1161,9 +1222,16 @@ Or use React `lazy()` for the components that depend on it.
 3. **Nutrition store operations** — Add/remove meals, hydration updates, date navigation
 4. **Circle store operations** — Create/join circles, post activities, reactions
 
+**Completed Actions (Stability Slice):**
+- Added `src/components/logging/__tests__/WorkoutLogger.test.tsx`.
+- Added `src/lib/__tests__/progressionEngine.phase3.test.ts`.
+- Added `src/stores/__tests__/nutritionStore.test.ts`.
+- Added `src/stores/__tests__/circleStore.test.ts`.
+- Repaired and updated exercise tests to keep the full suite green.
+
 ---
 
-### [5.5] Accessibility Audit Checklist
+### [5.5] Accessibility Audit Checklist ✅ PARTIAL
 
 - **Priority:** MEDIUM
 - **Effort:** M (4-8h)
@@ -1180,6 +1248,11 @@ Or use React `lazy()` for the components that depend on it.
 | Modal focus trapping | Various | — | Audit focus trapping in: `ExerciseSwapModal`, `AuthModal`, `CreateCircleModal`, `BadgeUnlockModal`. Radix Dialog handles this by default, but verify custom implementations. |
 | Skip-to-content link | `Header.tsx` | — | Add `<a href="#main-content" className="sr-only focus:not-sr-only">Skip to content</a>` before the nav. |
 | Wizard keyboard navigation | `src/pages/Wizard.tsx` | — | Ensure wizard steps can be navigated with Tab/Enter/Space keys. |
+
+**Completed Actions (Stability Slice):**
+- Added valid skip-link target (`id="main-content"`) in `src/App.tsx`.
+- Made meal delete action keyboard-visible and added ARIA labeling in `src/pages/Nutrition.tsx`.
+- Ensured dialog naming/description coverage in exercise modal tests and components.
 
 ---
 
@@ -1238,7 +1311,7 @@ Features that drive user acquisition, retention, and revenue.
 
 ---
 
-### [6.2] Shareable Branded Workout Cards
+### [6.2] Shareable Branded Workout Cards ✅
 
 - **Priority:** LOW
 - **Effort:** M (3-4h, extends item 3.3)
@@ -1251,6 +1324,11 @@ Extend the share card from item 3.3 with:
 - Branded color scheme matching the app's gradient
 - Deep link URL back to app (e.g., "fitwizard.app/join")
 - "Generated by FitWizard" footer text
+
+**Completed Actions:**
+- Implemented branded share-card image generation in `src/components/logging/WorkoutSummary.tsx`.
+- Added watermark/footer/deep-link support via `VITE_SHARE_BASE_URL` with fallback `https://fitwizard.app/join`.
+- Added native share + file share + clipboard fallback paths.
 
 ---
 
@@ -1317,26 +1395,26 @@ Extend the share card from item 3.3 with:
 
 | ID | Item | Status | Est. Hours |
 |----|------|--------|-----------|
-| 4.1 | Periodization Timeline | ⏳ TODO | 5h |
-| 4.2 | Readiness Score | ⏳ TODO | 5h |
-| 4.3 | Strength Curve | ⏳ TODO | 10h |
-| 4.4 | MRV Warnings | ⏳ TODO | 5h |
-| 4.5 | Split Auto-Recommendation | ⏳ TODO | 5h |
-| 2.4 | Body Measurements | ⏳ TODO | 10h |
+| 4.1 | Periodization Timeline | ✅ DONE | 5h |
+| 4.2 | Readiness Score | ✅ DONE | 5h |
+| 4.3 | Strength Curve | ✅ DONE | 10h |
+| 4.4 | MRV Warnings | ✅ DONE | 5h |
+| 4.5 | Split Auto-Recommendation | ✅ DONE | 5h |
+| 2.4 | Body Measurements | ✅ DONE | 10h |
 | **Total** | | | **~40h** |
 
 ### Phase 4 — Growth & Stability (Ongoing)
 
 | ID | Item | Status | Est. Hours |
 |----|------|--------|-----------|
-| 5.3 | Lazy Loading | ⏳ TODO | 1h |
-| 5.4 | Test Coverage | ⏳ TODO | 20h+ |
-| 5.5 | Accessibility Audit | ⏳ TODO | 6h |
-| 6.2 | Branded Cards | ⏳ TODO | 4h |
+| 5.3 | Lazy Loading | ✅ PARTIAL | 1h |
+| 5.4 | Test Coverage | ✅ PARTIAL | 20h+ |
+| 5.5 | Accessibility Audit | ✅ PARTIAL | 6h |
+| 6.2 | Branded Cards | ✅ DONE | 4h |
 | 6.3 | Coach Portal (Phase 2 Done) | ✅ PARTIAL | 40h+ |
 | 2.7 | Exercise Media | ✅ DONE | 12h |
-| 3.5 | RPE Toggle | ⏳ TODO | 2h |
-| 3.8-3.10 | Detail Modal, Custom Exercises, 1RM | ⏳ TODO | 8h |
+| 3.5 | RPE Toggle | ✅ DONE | 2h |
+| 3.8-3.10 | Detail Modal, Custom Exercises, 1RM | ✅ DONE | 8h |
 | **Total** | | | **~93h+** |
 
 ---
@@ -1375,7 +1453,7 @@ Engineering and/or CPT-level fitness rationale for the change.
 
 ## Verification Notes
 
-- All line numbers verified against the codebase as of **2026-02-08**
+- All line numbers/statuses verified against the codebase as of **2026-02-20**
 - File paths are relative to the project root
 - Code examples are taken directly from the source files
 - CPT (Certified Personal Trainer) rationale provided for fitness-specific features
