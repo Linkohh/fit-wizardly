@@ -262,14 +262,14 @@ export function Header() {
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-72"
+            className="w-72 h-[100svh] supports-[height:100dvh]:h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]"
             glassEffect
             enableGestures
             showDragHandle
             onGestureClose={() => setMobileOpen(false)}
           >
             <motion.nav
-              className="flex flex-col gap-2 mt-8"
+              className="flex flex-col gap-2 mt-8 flex-1 min-h-0 overflow-y-auto overscroll-contain"
               role="navigation"
               aria-label="Mobile navigation"
               initial="hidden"
