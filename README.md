@@ -102,3 +102,16 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## Native app icons (Capacitor)
+
+- Source icon: `resources/icon.png` (1024x1024, no alpha channel)
+- iOS app icon asset: `ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png`
+
+When Android is added to this repo, run:
+
+```sh
+npx cap add android
+npm i -D @capacitor/assets
+npx @capacitor/assets generate --android
+```

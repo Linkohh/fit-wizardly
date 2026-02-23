@@ -4,6 +4,7 @@ import { Muscle, ViewType, MuscleHighlight } from '../../../types';
 import { getMusclesByView } from '../../../data/muscles';
 import BodyOutline from './BodyOutline';
 import MusclePath from './MusclePath';
+import { getTimedTransition } from '@/lib/motion/tokens';
 
 interface MuscleCanvasProps {
   view: ViewType;
@@ -15,8 +16,12 @@ interface MuscleCanvasProps {
   accentColor: string;
   animateHighlights?: boolean;
   hoverIntensity?: 'default' | 'strong';
+  enableTouchInfo?: boolean;
+  longPressMs?: number;
+  reduceMotion?: boolean;
   onMuscleHover: (muscle: Muscle | null, event?: React.MouseEvent) => void;
   onMuscleClick: (muscle: Muscle) => void;
+  onMuscleLongPress?: (muscle: Muscle) => void;
   customViewBox?: string;
 }
 
@@ -30,8 +35,12 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   accentColor,
   animateHighlights = false,
   hoverIntensity = 'default',
+  enableTouchInfo = false,
+  longPressMs = 380,
+  reduceMotion = false,
   onMuscleHover,
   onMuscleClick,
+  onMuscleLongPress,
   customViewBox,
 }) => {
   // Get muscles for current view
@@ -97,10 +106,10 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
         key={view}
         viewBox={customViewBox || "0 0 200 440"}
         className="w-full h-full"
-        initial={{ opacity: 0, x: view === 'front' ? -20 : 20 }}
+        initial={reduceMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: view === 'front' ? -20 : 20 }}
         animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: view === 'front' ? 20 : -20 }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        exit={reduceMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: view === 'front' ? 20 : -20 }}
+        transition={getTimedTransition('slow', reduceMotion)}
         preserveAspectRatio="xMidYMid meet"
       >
         {/* SVG Definitions: Gradients for muscle groups */}
@@ -164,7 +173,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
           rx="90"
           ry="180"
           fill="url(#ambientGlow)"
-          className="pointer-events-none animate-bio-breathe"
+          className={reduceMotion ? "pointer-events-none" : "pointer-events-none animate-bio-breathe"}
         />
 
         {/* Background body outline */}
@@ -185,10 +194,14 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
               accentColor={accentColor}
               animateHighlights={animateHighlights}
               hoverIntensity={hoverIntensity}
+              enableTouchInfo={enableTouchInfo}
+              longPressMs={longPressMs}
+              reduceMotion={reduceMotion}
               highlightIndex={highlightMap.has(muscle.id) ? Array.from(highlightMap.keys()).indexOf(muscle.id) : index}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
               onClick={onMuscleClick}
+              onLongPress={onMuscleLongPress}
             />
           ))}
         </g>

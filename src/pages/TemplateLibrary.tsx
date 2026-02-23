@@ -9,6 +9,7 @@ import { Plus, Search, Dumbbell, Calendar, Clock, MoreVertical, Trash2, Copy, Fi
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { formatIdentifierLabel } from '@/lib/displayText';
 
 export default function TemplateLibrary() {
     const { templates, deleteTemplate } = useTrainerStore();
@@ -104,7 +105,7 @@ export default function TemplateLibrary() {
                                         </div>
                                         <CardTitle className="line-clamp-1">{template.name}</CardTitle>
                                         <CardDescription className="line-clamp-2 min-h-[2.5rem]">
-                                            {template.planSnapshot.splitType.replace('_', ' ')} split • {template.planSnapshot.workoutDays.length} days/week
+                                            {formatIdentifierLabel(template.planSnapshot.splitType)} split • {template.planSnapshot.workoutDays.length} days/week
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent>

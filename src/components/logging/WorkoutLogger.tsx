@@ -36,8 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useTranslation } from 'react-i18next';
 import { useWorkoutTimer } from '@/hooks/useWorkoutTimer';
-import { useHaptics } from '@/hooks/useHaptics';
-import { NotificationType } from '@capacitor/haptics';
+import { NotificationType, useHaptics } from '@/hooks/useHaptics';
 import { useReadinessStore } from '@/stores/readinessStore';
 import { ReadinessCheck } from './ReadinessCheck';
 import type { ReadinessEntry } from '@/types/readiness';

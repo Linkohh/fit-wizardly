@@ -1,7 +1,8 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Muscle, ViewType, MuscleHighlight } from '../../../types';
 import { getMuscleGroupColor } from '../../../data/muscleGroups';
+import { getSpringTransition, getTimedTransition } from '@/lib/motion/tokens';
 
 interface MusclePathProps {
   muscle: Muscle;
@@ -15,9 +16,13 @@ interface MusclePathProps {
   animateHighlights?: boolean;
   hoverIntensity?: 'default' | 'strong';
   highlightIndex?: number;
+  enableTouchInfo?: boolean;
+  longPressMs?: number;
+  reduceMotion?: boolean;
   onMouseEnter: (muscle: Muscle, event: React.MouseEvent) => void;
   onMouseLeave: () => void;
   onClick: (muscle: Muscle) => void;
+  onLongPress?: (muscle: Muscle) => void;
 }
 
 // Color mapping for highlight types
@@ -40,11 +45,19 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   animateHighlights = false,
   hoverIntensity = 'default',
   highlightIndex = 0,
+  enableTouchInfo = false,
+  longPressMs = 380,
+  reduceMotion = false,
   onMouseEnter,
   onMouseLeave,
   onClick,
+  onLongPress,
 }) => {
   const pathData = muscle.paths[view];
+  const longPressTimerRef = useRef<number | null>(null);
+  const longPressTriggeredRef = useRef(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const touchMoveTolerance = 10;
 
   const groupColor = getMuscleGroupColor(muscle.group);
 
@@ -118,24 +131,87 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   );
 
   const handleClick = useCallback(() => {
+    if (longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false;
+      return;
+    }
+
     if (!isDisabled) {
       onClick(muscle);
     }
   }, [muscle, onClick, isDisabled]);
 
+  const clearLongPressTimer = useCallback(() => {
+    if (longPressTimerRef.current !== null) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<SVGPathElement>) => {
+      if (!enableTouchInfo || event.pointerType !== 'touch' || isDisabled) {
+        return;
+      }
+
+      longPressTriggeredRef.current = false;
+      touchStartRef.current = { x: event.clientX, y: event.clientY };
+      clearLongPressTimer();
+
+      longPressTimerRef.current = window.setTimeout(() => {
+        longPressTriggeredRef.current = true;
+        onLongPress?.(muscle);
+      }, longPressMs);
+    },
+    [enableTouchInfo, isDisabled, clearLongPressTimer, onLongPress, muscle, longPressMs]
+  );
+
+  const handlePointerMove = useCallback(
+    (event: React.PointerEvent<SVGPathElement>) => {
+      if (!enableTouchInfo || event.pointerType !== 'touch' || !touchStartRef.current) {
+        return;
+      }
+
+      const dx = event.clientX - touchStartRef.current.x;
+      const dy = event.clientY - touchStartRef.current.y;
+      if (Math.sqrt(dx * dx + dy * dy) > touchMoveTolerance) {
+        clearLongPressTimer();
+      }
+    },
+    [enableTouchInfo, clearLongPressTimer]
+  );
+
+  const handlePointerEnd = useCallback(
+    (event: React.PointerEvent<SVGPathElement>) => {
+      if (event.pointerType === 'touch') {
+        touchStartRef.current = null;
+        clearLongPressTimer();
+      }
+    },
+    [clearLongPressTimer]
+  );
+
   // Determine if this muscle should have the pulse animation
   const shouldPulse = useMemo(() => {
+    if (reduceMotion) return false;
     if (isDisabled) return false;
     if (isSelected) return true;
     if (animateHighlights && highlight && highlight.intensity > 50) return true;
     return false;
-  }, [isDisabled, isSelected, animateHighlights, highlight]);
+  }, [reduceMotion, isDisabled, isSelected, animateHighlights, highlight]);
 
   // Calculate animation delay for staggered effect
   const animationDelay = useMemo(() => {
     if (!shouldPulse || !animateHighlights) return undefined;
     return `${highlightIndex * 0.15}s`;
   }, [shouldPulse, animateHighlights, highlightIndex]);
+
+  useEffect(
+    () => () => {
+      clearLongPressTimer();
+    },
+    [clearLongPressTimer]
+  );
 
   if (!pathData) return null;
 
@@ -156,14 +232,23 @@ export const MusclePath: React.FC<MusclePathProps> = ({
         scale: isHovered && !isDisabled ? (hoverIntensity === 'strong' ? 1.07 : 1.03) : isSelected ? 1.01 : 1,
         filter: glowFilter,
       }}
-      transition={{
-        duration: 0.25,
-        ease: [0.4, 0, 0.2, 1], // Custom easing for smoothness
-        scale: { type: 'spring', stiffness: 300, damping: 20 },
-      }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : {
+              ...getTimedTransition('base', reduceMotion),
+              scale: getSpringTransition('snappy', reduceMotion),
+            }
+      }
       onMouseEnter={handleMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={handleClick}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
+      data-click-feedback="off"
+      data-interaction-feedback="explicit"
       role="button"
       aria-label={`${muscle.name}${isDisabled ? ' (disabled)' : ''}${highlight ? ` - ${highlight.label || highlight.type}` : ''}`}
       aria-pressed={isSelected}

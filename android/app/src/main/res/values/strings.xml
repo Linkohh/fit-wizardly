@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Fit Wizardly</string>
+    <string name="title_activity_main">Fit Wizardly</string>
+    <string name="package_name">com.fitwizardly.app</string>
+    <string name="custom_url_scheme">com.fitwizardly.app</string>
+</resources>

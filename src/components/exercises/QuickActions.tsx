@@ -14,8 +14,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useHaptics } from '@/hooks/useHaptics';
-import { NotificationType } from '@capacitor/haptics';
+import { NotificationType, useHaptics } from '@/hooks/useHaptics';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';

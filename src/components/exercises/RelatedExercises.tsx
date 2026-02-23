@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { getExerciseTheme } from '@/lib/exerciseTheme';
 import { useExerciseDatabase } from '@/lib/exerciseRepository';
+import { formatIdentifierLabel } from '@/lib/displayText';
 
 interface RelatedExercisesProps {
     currentExercise: Exercise;
@@ -55,7 +56,7 @@ export function RelatedExercises({ currentExercise, onSelect }: RelatedExercises
                                 </h4>
                                 <div className="flex items-center gap-2 mt-1">
                                     <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 border-white/10 text-muted-foreground">
-                                        {exercise.equipment?.[0]?.replace('_', ' ')}
+                                        {exercise.equipment?.[0] ? formatIdentifierLabel(exercise.equipment[0]) : ''}
                                     </Badge>
                                     <span className="text-[10px] text-muted-foreground capitalize">
                                         {exercise.difficulty}

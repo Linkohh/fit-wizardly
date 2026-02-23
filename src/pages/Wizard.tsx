@@ -233,7 +233,8 @@ export default function WizardPage() {
       <div
         ref={stepContainerRef}
         tabIndex={-1}
-        className="mt-8 min-h-[400px] outline-none"
+        className="mt-8 min-h-[400px] pb-28 md:pb-0 outline-none"
+        style={currentStep === 'anatomy' ? { paddingBottom: 'calc(7rem + env(safe-area-inset-bottom, 0px))' } : undefined}
         aria-label={`Step ${currentStepIndex + 1}: ${stepNames[currentStep]}`}
       >
         <AnimatePresence mode="popLayout">
@@ -243,7 +244,7 @@ export default function WizardPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="glass-premium rounded-2xl p-6"
+            className="glass-premium rounded-2xl p-4 sm:p-6"
           >
             {renderStep()}
           </motion.div>

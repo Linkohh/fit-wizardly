@@ -7,6 +7,7 @@ import { ArrowLeft, Search, Dumbbell, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { Exercise } from '@/types/fitness';
+import { formatIdentifierLabel } from '@/lib/displayText';
 
 export default function ExerciseList() {
     const { categoryId } = useParams();
@@ -52,7 +53,7 @@ export default function ExerciseList() {
                                 )}
                                 <div className="flex flex-wrap gap-2">
                                     {ex.primaryMuscles.slice(0, 2).map(muscle => (
-                                        <span key={muscle} className="text-xs text-muted-foreground bg-white/5 px-2 py-0.5 rounded">{muscle}</span>
+                                        <span key={muscle} className="text-xs text-muted-foreground bg-white/5 px-2 py-0.5 rounded">{formatIdentifierLabel(muscle)}</span>
                                     ))}
                                 </div>
                             </div>

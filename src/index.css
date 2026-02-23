@@ -497,6 +497,24 @@
   background: var(--gradient-subtle);
 }
 
+@utility surface-premium {
+  background: var(--surface-glass-soft);
+  backdrop-filter: blur(18px) saturate(155%);
+  -webkit-backdrop-filter: blur(18px) saturate(155%);
+  box-shadow: var(--elevation-soft);
+}
+
+@utility surface-premium-strong {
+  background: var(--surface-glass-strong);
+  backdrop-filter: blur(24px) saturate(170%);
+  -webkit-backdrop-filter: blur(24px) saturate(170%);
+  box-shadow: var(--elevation-floating);
+}
+
+@utility surface-premium-stroke {
+  border: 1px solid var(--surface-stroke);
+}
+
 @utility shadow-glow {
   box-shadow: var(--shadow-glow);
 }
@@ -753,6 +771,13 @@
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(270 80% 60%), hsl(330 85% 60%));
     --gradient-hero: linear-gradient(135deg, hsl(270 80% 60% / 0.1), hsl(330 85% 60% / 0.1));
+
+    /* Premium surfaces */
+    --surface-glass-soft: hsl(270 35% 12% / 0.58);
+    --surface-glass-strong: hsl(268 40% 10% / 0.8);
+    --surface-stroke: hsl(0 0% 100% / 0.16);
+    --elevation-soft: 0 10px 30px -16px hsl(265 75% 15% / 0.55);
+    --elevation-floating: 0 16px 40px -20px hsl(265 75% 12% / 0.72);
   }
 
   .dark {
@@ -792,6 +817,13 @@
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(270 90% 65%), hsl(330 90% 65%));
     --gradient-hero: linear-gradient(to bottom right, #0F0518, #1A0B2E);
+
+    /* Premium surfaces */
+    --surface-glass-soft: hsl(269 42% 9% / 0.68);
+    --surface-glass-strong: hsl(268 46% 8% / 0.86);
+    --surface-stroke: hsl(0 0% 100% / 0.12);
+    --elevation-soft: 0 10px 32px -16px hsl(0 0% 0% / 0.6);
+    --elevation-floating: 0 20px 48px -24px hsl(0 0% 0% / 0.75);
   }
 }
 
@@ -938,6 +970,28 @@
   body {
     min-height: 100vh;
     min-height: -webkit-fill-available;
+  }
+
+  /*
+    Hide page-level scrollbars on mobile while preserving desktop behavior.
+    Native app webviews also enforce this via platform-specific settings.
+  */
+  @media (hover: none) and (pointer: coarse) {
+    html,
+    body,
+    #root {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    #root::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;
+      background: transparent;
+    }
   }
 }
 

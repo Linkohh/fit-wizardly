@@ -11,12 +11,15 @@ import { useRef, useMemo, useState } from 'react';
 import { FeatureCard, type FeatureCardFeature } from '@/components/landing/FeatureCard';
 import { FeatureDetailModal, type Feature } from '@/components/landing/FeatureDetailModal';
 import { useTranslation, Trans } from 'react-i18next';
+import { cn } from '@/lib/utils';
+import { isNativeApp } from '@/lib/platform';
 
 export default function Index() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { totalPlansGenerated } = useAchievementStore();
   const { isTrainerMode } = useTrainerStore();
+  const nativeApp = isNativeApp();
   const hasActivity = totalPlansGenerated > 0;
 
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
@@ -43,7 +46,10 @@ export default function Index() {
       <WelcomeHero />
 
       {/* Domain Intelligence: Periodization Timeline */}
-      <div className="container-content py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200">
+      <div className={cn(
+        "container-content pb-4 lg:py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200",
+        nativeApp ? "pt-10" : "pt-8"
+      )}>
         <PeriodizationTimeline />
       </div>
 

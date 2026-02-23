@@ -12,6 +12,12 @@ import InfoPanel from './ui/InfoPanel';
 import SelectionSidebar from './ui/SelectionSidebar';
 import Legend from './ui/Legend';
 import SearchBar from './ui/SearchBar';
+import { SelectedMusclesSheet } from './ui/SelectedMusclesSheet';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useAppleMobile } from '@/hooks/use-apple-mobile';
+import { useMotionPreferences } from '@/hooks/use-motion-preferences';
+import { useInteractionFeedback } from '@/hooks/useInteractionFeedback';
+import { getTimedTransition } from '@/lib/motion/tokens';
 
 export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   selectedMuscles: controlledSelection,
@@ -25,6 +31,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   showTooltip = true,
   showInfoPanel = true,
   showSelectionSidebar = true,
+  showPresets = true,
   colorByGroup: initialColorByGroup = true,
   theme: themeProp = 'system',
   accentColor = '#EF4444',
@@ -42,6 +49,16 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   className = '',
   customViewBox,
 }) => {
+  const isMobile = useIsMobile();
+  const isAppleMobile = useAppleMobile();
+  const isTouchContext = isMobile;
+  const { shouldReduceMotion } = useMotionPreferences();
+  const { emit } = useInteractionFeedback();
+  const shouldUseAppleSheet = showSelectionSidebar && isMobile && isAppleMobile;
+  const shouldUseAppleHaptics = isMobile && isAppleMobile;
+  const showInlineMobileSidebar = showSelectionSidebar && isMobile && !isAppleMobile;
+  const showDesktopSidebar = showSelectionSidebar && !isMobile;
+
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -94,6 +111,8 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
   // Hover state for highlighting
   const [hoveredMuscle, setHoveredMuscle] = useState<string | null>(null);
+  const [isSelectionSheetOpen, setIsSelectionSheetOpen] = useState(false);
+  const [selectionSheetSnap, setSelectionSheetSnap] = useState<number | string | null>(0.22);
 
   // Handlers
   const handleViewChange = useCallback(
@@ -126,10 +145,26 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
   const handleMuscleClick = useCallback(
     (muscle: Muscle) => {
+      const wasSelected = selectedIds.includes(muscle.id);
       toggleMuscle(muscle.id);
       onMuscleClick?.(muscle);
+      void emit(wasSelected ? 'deselect' : 'select');
     },
-    [toggleMuscle, onMuscleClick]
+    [selectedIds, toggleMuscle, onMuscleClick, emit]
+  );
+
+  const handleMuscleLongPress = useCallback(
+    (muscle: Muscle) => {
+      setInfoPanel({ isOpen: true, muscle });
+      onInfoRequest?.(muscle);
+      void emit('longPressInfo');
+
+      // Switch to a view where this muscle is visible
+      if (!muscle.views.includes(currentView) && muscle.views.length > 0) {
+        setCurrentView(muscle.views[0]);
+      }
+    },
+    [onInfoRequest, emit, currentView]
   );
 
   const handleCloseInfo = useCallback(() => {
@@ -141,6 +176,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
       const muscle = getMuscleById(muscleId);
       if (muscle) {
         selectMuscle(muscleId);
+        void emit('select');
         setInfoPanel({ isOpen: true, muscle });
         // Switch to a view where this muscle is visible
         if (!muscle.views.includes(currentView) && muscle.views.length > 0) {
@@ -148,25 +184,27 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
         }
       }
     },
-    [selectMuscle, currentView]
+    [selectMuscle, currentView, emit]
   );
 
   const handleSearchSelect = useCallback(
     (muscle: Muscle) => {
       selectMuscle(muscle.id);
+      void emit('select');
       // Switch to a view where this muscle is visible
       if (!muscle.views.includes(currentView) && muscle.views.length > 0) {
         setCurrentView(muscle.views[0]);
       }
     },
-    [selectMuscle, currentView]
+    [selectMuscle, currentView, emit]
   );
 
   const handleRemoveMuscle = useCallback(
     (muscleId: string) => {
       deselectMuscle(muscleId);
+      void emit('deselect');
     },
-    [deselectMuscle]
+    [deselectMuscle, emit]
   );
 
   const handleViewMuscleInfo = useCallback((muscle: Muscle) => {
@@ -174,17 +212,31 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
     onInfoRequest?.(muscle);
   }, [onInfoRequest]);
 
+  const handleOpenSelectionSheet = useCallback(() => {
+    setSelectionSheetSnap(0.22);
+    if (shouldUseAppleHaptics) {
+      void emit('sheetOpen');
+    }
+  }, [emit, shouldUseAppleHaptics]);
+
+  const handleSelectionSheetSnap = useCallback(() => {
+    if (shouldUseAppleHaptics) {
+      void emit('sheetSnap');
+    }
+  }, [emit, shouldUseAppleHaptics]);
+
   return (
     <div
       ref={containerRef}
-      className={`relative flex bg-transparent ${themeClassName} ${className}`}
+      data-testid="muscle-selector-root"
+      className={`relative flex flex-col md:flex-row surface-premium surface-premium-stroke ${themeClassName} ${className}`}
       style={{ width, height }}
     >
       {/* Main content area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 min-h-0" data-testid="muscle-selector-main">
         {/* Header / Controls */}
         {showHeader && (
-          <div className="flex items-center justify-between p-4 border-b border-white/10 overflow-hidden">
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-white/10 overflow-hidden">
             <div className="flex items-center gap-4">
               {/* View Switcher */}
               <ViewSwitcher
@@ -204,67 +256,69 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
               )}
             </div>
 
-            <div className="flex items-center gap-2">
-              {/* Undo/Redo */}
-              <div className="flex items-center gap-2 border-l border-white/10 pl-2 ml-2">
+            {!isMobile && (
+              <div className="flex items-center gap-2">
+                {/* Undo/Redo */}
+                <div className="flex items-center gap-2 border-l border-white/10 pl-2 ml-2">
+                  <button
+                    onClick={undo}
+                    disabled={!canUndo}
+                    className={`
+                      p-2 rounded-lg transition-colors
+                      ${canUndo
+                        ? 'bg-white/5 text-white hover:bg-white/10'
+                        : 'bg-white/5 text-white/20 cursor-not-allowed'
+                      }
+                    `}
+                    title="Undo (Ctrl+Z)"
+                  >
+                    <Undo2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={redo}
+                    disabled={!canRedo}
+                    className={`
+                      p-2 rounded-lg transition-colors
+                      ${canRedo
+                        ? 'bg-white/5 text-white hover:bg-white/10'
+                        : 'bg-white/5 text-white/20 cursor-not-allowed'
+                      }
+                    `}
+                    title="Redo (Ctrl+Shift+Z)"
+                  >
+                    <Redo2 className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Color mode toggle */}
                 <button
-                  onClick={undo}
-                  disabled={!canUndo}
+                  onClick={() => setColorByGroup(!colorByGroup)}
                   className={`
                     p-2 rounded-lg transition-colors
-                    ${canUndo
-                      ? 'bg-white/5 text-white hover:bg-white/10'
-                      : 'bg-white/5 text-white/20 cursor-not-allowed'
+                    ${colorByGroup
+                      ? 'bg-primary/20 text-primary-300 ring-1 ring-primary/50'
+                      : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
                     }
                   `}
-                  title="Undo (Ctrl+Z)"
+                  title={colorByGroup ? 'Disable color by group' : 'Enable color by group'}
                 >
-                  <Undo2 className="w-4 h-4" />
+                  <Palette className="w-4 h-4" />
                 </button>
+
+                {/* Theme toggle */}
                 <button
-                  onClick={redo}
-                  disabled={!canRedo}
-                  className={`
-                    p-2 rounded-lg transition-colors
-                    ${canRedo
-                      ? 'bg-white/5 text-white hover:bg-white/10'
-                      : 'bg-white/5 text-white/20 cursor-not-allowed'
-                    }
-                  `}
-                  title="Redo (Ctrl+Shift+Z)"
+                  onClick={toggleTheme}
+                  className="p-2 rounded-lg bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+                  title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                 >
-                  <Redo2 className="w-4 h-4" />
+                  {resolvedTheme === 'dark' ? (
+                    <Sun className="w-4 h-4" />
+                  ) : (
+                    <Moon className="w-4 h-4" />
+                  )}
                 </button>
               </div>
-
-              {/* Color mode toggle */}
-              <button
-                onClick={() => setColorByGroup(!colorByGroup)}
-                className={`
-                  p-2 rounded-lg transition-colors
-                  ${colorByGroup
-                    ? 'bg-primary/20 text-primary-300 ring-1 ring-primary/50'
-                    : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
-                  }
-                `}
-                title={colorByGroup ? 'Disable color by group' : 'Enable color by group'}
-              >
-                <Palette className="w-4 h-4" />
-              </button>
-
-              {/* Theme toggle */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
-                title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {resolvedTheme === 'dark' ? (
-                  <Sun className="w-4 h-4" />
-                ) : (
-                  <Moon className="w-4 h-4" />
-                )}
-              </button>
-            </div>
+            )}
           </div>
         )}
 
@@ -276,11 +330,12 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
         )}
 
         {/* SVG Canvas Area */}
-        <div className="flex-1 relative overflow-hidden p-4">
+        <div className="flex-1 relative overflow-hidden p-2 sm:p-4" data-testid="muscle-selector-canvas-area">
           <motion.div
             className="w-full h-full flex items-center justify-center"
-            initial={{ opacity: 0 }}
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
+            transition={getTimedTransition('base', shouldReduceMotion)}
           >
             <div className="w-full h-full max-w-lg">
               <MuscleCanvas
@@ -291,17 +346,21 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 disabledMuscles={disabledMuscles}
                 colorByGroup={colorByGroup}
                 accentColor={accentColor}
-                animateHighlights={animateHighlights}
+                animateHighlights={!shouldReduceMotion && animateHighlights}
                 hoverIntensity={hoverIntensity}
+                enableTouchInfo={isAppleMobile && isMobile}
+                longPressMs={380}
+                reduceMotion={shouldReduceMotion}
                 onMuscleHover={handleMuscleHover}
                 onMuscleClick={handleMuscleClick}
+                onMuscleLongPress={handleMuscleLongPress}
                 customViewBox={customViewBox}
               />
             </div>
           </motion.div>
 
           {/* Tooltip */}
-          {showTooltip && (
+          {showTooltip && !isTouchContext && (
             <MuscleTooltip
               muscle={tooltip.muscle}
               position={{ x: tooltip.x, y: tooltip.y }}
@@ -312,14 +371,16 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
         </div>
       </div>
 
-      {/* Selection Sidebar */}
-      {showSelectionSidebar && (
-        <div className="w-72 flex-shrink-0">
+      {/* Selection Sidebar (Desktop) */}
+      {showDesktopSidebar && (
+        <div className="w-full md:w-72 md:flex-shrink-0 min-h-0" data-testid="muscle-selector-sidebar">
           <SelectionSidebar
             selectedMuscles={selectedMuscles}
             onRemoveMuscle={handleRemoveMuscle}
             onClearAll={clearSelection}
             onViewInfo={handleViewMuscleInfo}
+            showPresets={showPresets}
+            reduceMotion={shouldReduceMotion}
             onPresetSelect={(muscleIds, presetId) => {
               setSelection(muscleIds);
               onPresetApply?.(presetId, muscleIds);
@@ -329,11 +390,59 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
         </div>
       )}
 
+      {/* Selection Sidebar (Android + non-Apple mobile) */}
+      {showInlineMobileSidebar && (
+        <div className="w-full min-h-0" data-testid="muscle-selector-sidebar">
+          <SelectionSidebar
+            selectedMuscles={selectedMuscles}
+            onRemoveMuscle={handleRemoveMuscle}
+            onClearAll={clearSelection}
+            onViewInfo={handleViewMuscleInfo}
+            showPresets={showPresets}
+            reduceMotion={shouldReduceMotion}
+            onPresetSelect={(muscleIds, presetId) => {
+              setSelection(muscleIds);
+              onPresetApply?.(presetId, muscleIds);
+            }}
+            currentSelectionIds={selectedIds}
+          />
+        </div>
+      )}
+
+      {/* Selection Sheet (Apple mobile only) */}
+      {shouldUseAppleSheet && (
+        <SelectedMusclesSheet
+          open={isSelectionSheetOpen}
+          selectedCount={selectedMuscles.length}
+          activeSnapPoint={selectionSheetSnap}
+          onOpenChange={setIsSelectionSheetOpen}
+          onActiveSnapPointChange={setSelectionSheetSnap}
+          onTriggerOpen={handleOpenSelectionSheet}
+          onSnapPointChange={handleSelectionSheetSnap}
+        >
+          <SelectionSidebar
+            mobileSheetMode
+            selectedMuscles={selectedMuscles}
+            onRemoveMuscle={handleRemoveMuscle}
+            onClearAll={clearSelection}
+            onViewInfo={handleViewMuscleInfo}
+            showPresets={showPresets}
+            reduceMotion={shouldReduceMotion}
+            onPresetSelect={(muscleIds, presetId) => {
+              setSelection(muscleIds);
+              onPresetApply?.(presetId, muscleIds);
+            }}
+            currentSelectionIds={selectedIds}
+          />
+        </SelectedMusclesSheet>
+      )}
+
       {/* Info Panel (overlay) */}
       {showInfoPanel && (
         <InfoPanel
           muscle={infoPanel.muscle}
           isOpen={infoPanel.isOpen}
+          reduceMotion={shouldReduceMotion}
           onClose={handleCloseInfo}
           onMuscleClick={handleInfoMuscleClick}
         />

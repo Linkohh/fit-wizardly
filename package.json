@@ -14,11 +14,14 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
-    "ios:dev": "npx cap run ios --live --external",
+    "ios:dev": "npx cap run ios",
+    "ios:live": "npx cap run ios -l --host=0.0.0.0 --port=8080",
     "ios:open": "npx cap open ios",
     "ios:sync": "npx cap sync ios"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/assets": "^3.0.5",
     "@eslint/js": "^9.32.0",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.9.1",

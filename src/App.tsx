@@ -21,6 +21,8 @@ import { Footer } from "@/components/Footer";
 import { ConsentModal } from "@/components/legal/ConsentModal";
 import { LivingBackground } from "@/components/ui/living-background";
 import { LoadingScreen } from "@/components/ui/loading-screen";
+import { cn } from "@/lib/utils";
+import { isNativeApp } from "@/lib/platform";
 
 const Index = lazy(() => import("./pages/Index"));
 const WizardPage = lazy(() => import("./pages/Wizard"));
@@ -273,6 +275,7 @@ const App = () => {
   // Monitor network status and show notifications
   useNetworkStatus();
   useGlobalClickFeedback();
+  const nativeApp = isNativeApp();
 
   // Handle post-login redirects for invites
   const { user, isLoading } = useAuthStore();
@@ -318,7 +321,12 @@ const App = () => {
               <Toaster />
               <Sonner />
               <CommandPalette />
-              <div className="min-h-screen flex flex-col transition-colors duration-300 relative pt-16">
+              <div className={cn(
+                "min-h-screen flex flex-col transition-colors duration-300 relative",
+                nativeApp
+                  ? "pt-[calc(env(safe-area-inset-top,0px)+3.25rem)] md:pt-[calc(env(safe-area-inset-top,0px)+4rem)]"
+                  : "pt-16",
+              )}>
                 <LivingBackground />
                 <Header />
                 <ConsentModal />

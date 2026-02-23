@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dumbbell, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { formatIdentifierLabel } from '@/lib/displayText';
 
 interface AssignPlanDialogProps {
     clientId: string;
@@ -73,7 +74,7 @@ export function AssignPlanDialog({ clientId, clientName, trigger }: AssignPlanDi
                                                     </div>
                                                 </div>
                                                 <div className="text-sm text-muted-foreground line-clamp-2">
-                                                    {template.planSnapshot.workoutDays.length} days • {template.planSnapshot.splitType.replace('_', ' ')}
+                                                    {template.planSnapshot.workoutDays.length} days • {formatIdentifierLabel(template.planSnapshot.splitType)}
                                                 </div>
                                             </Label>
                                         </div>

@@ -7,6 +7,7 @@ import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { useExerciseInteraction } from '@/hooks/useExerciseInteraction';
 import { useHaptics } from '@/hooks/useHaptics';
 import { getExerciseTheme } from '@/lib/exerciseTheme';
+import { formatIdentifierLabel } from '@/lib/displayText';
 import { cn } from '@/lib/utils';
 import { Exercise } from '@/types/fitness';
 
@@ -25,10 +26,6 @@ const DIFFICULTY_STYLES: Record<string, string> = {
     'All Levels': 'bg-sky-500/20 text-sky-100 border-sky-400/30',
 };
 
-function formatToken(value: string) {
-    return value.replaceAll('_', ' ');
-}
-
 export function ExerciseCard({ exercise, onClick, index = 0, variant = 'library' }: ExerciseCardProps) {
     const prefersReducedMotion = useReducedMotion();
     const { isFavorite, toggleFavorite } = usePreferencesStore();
@@ -42,8 +39,8 @@ export function ExerciseCard({ exercise, onClick, index = 0, variant = 'library'
 
     const theme = useMemo(() => getExerciseTheme(exercise), [exercise]);
 
-    const primaryMuscle = exercise.primaryMuscles[0] ? formatToken(exercise.primaryMuscles[0]) : 'full body';
-    const primaryEquipment = exercise.equipment[0] ? formatToken(exercise.equipment[0]) : 'none';
+    const primaryMuscle = exercise.primaryMuscles[0] ? formatIdentifierLabel(exercise.primaryMuscles[0]) : 'Full Body';
+    const primaryEquipment = exercise.equipment[0] ? formatIdentifierLabel(exercise.equipment[0]) : 'None';
     const estimatedCalories = exercise.metabolic ? Math.round((exercise.metabolic.met * 75 * 10) / 200) : null;
     const difficultyStyle = DIFFICULTY_STYLES[exercise.difficulty || 'Intermediate'] || 'bg-slate-500/20 text-slate-200 border-slate-400/30';
 
@@ -208,7 +205,7 @@ export function ExerciseCard({ exercise, onClick, index = 0, variant = 'library'
                     </div>
 
                     <div className="flex items-center justify-between gap-2 border-t border-white/10 pt-2 text-[11px] uppercase tracking-[0.12em] text-white/45">
-                        <span>{formatToken(exercise.category || 'strength')}</span>
+                        <span>{formatIdentifierLabel(exercise.category || 'strength')}</span>
                         <span>Tap to open</span>
                     </div>
                 </CardContent>

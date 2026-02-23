@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Dumbbell, Activity, AlertCircle, CheckCircle2, User } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { formatIdentifierLabel } from '@/lib/displayText';
 
 export default function ExerciseDetail() {
     const { categoryId, exerciseId } = useParams();
@@ -74,7 +75,7 @@ export default function ExerciseDetail() {
                                     <div className="flex flex-wrap gap-2">
                                         {exercise.primaryMuscles.map(m => (
                                             <Badge key={m} className="bg-primary/20 hover:bg-primary/30 text-primary-foreground border-none text-md py-1 px-3">
-                                                {m}
+                                                {formatIdentifierLabel(m)}
                                             </Badge>
                                         ))}
                                     </div>
@@ -82,7 +83,7 @@ export default function ExerciseDetail() {
                                         <div className="flex flex-wrap gap-2 mt-2">
                                             {exercise.secondaryMuscles.map(m => (
                                                 <Badge key={m} variant="outline" className="text-muted-foreground border-white/10">
-                                                    {m}
+                                                    {formatIdentifierLabel(m)}
                                                 </Badge>
                                             ))}
                                         </div>
@@ -98,7 +99,7 @@ export default function ExerciseDetail() {
                                     <div className="flex gap-2">
                                         {exercise.equipment.map(e => (
                                             <span key={e} className="text-lg text-white/90 font-medium">
-                                                {e}
+                                                {formatIdentifierLabel(e)}
                                             </span>
                                         ))}
                                     </div>

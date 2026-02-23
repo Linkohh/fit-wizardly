@@ -18,6 +18,7 @@ import type {
 import { EXERCISE_DATABASE } from '@/data/exercises';
 import { sha256 } from '@/lib/hash';
 import { determineOptPhase } from '@/lib/phaseMapper';
+import { formatIdentifierLabel } from '@/lib/displayText';
 
 // NASM Phase Variables
 function getPhaseVariables(phase: OptPhase) {
@@ -234,8 +235,8 @@ function selectExercisesForMuscle(
     // Standard rationale
     const isCompound = !exercise.patterns.includes('isolation');
     const rationale = isCompound
-      ? `Primary compound movement for ${phase.replace('_', ' ')}.`
-      : `Isolation assistance for ${muscle.replace('_', ' ')}.`;
+      ? `Primary compound movement for ${formatIdentifierLabel(phase)}.`
+      : `Isolation assistance for ${formatIdentifierLabel(muscle)}.`;
 
     // SUPERSET LOGIC (Phase 2 & 5)
     if (settings.isSuperset) {
@@ -552,15 +553,15 @@ export function generatePlan(selections: WizardSelections, options: PlanIdOption
 
   // Generate notes
   const notes: string[] = [
-    `Split: ${splitType.replace('_', ' ').toUpperCase()}`,
+    `Split: ${formatIdentifierLabel(splitType).toUpperCase()}`,
     `Goal: ${goal.charAt(0).toUpperCase() + goal.slice(1)}`,
-    `Phase: ${currentPhase.replace(/_/g, ' ').toUpperCase()}`,
+    `Phase: ${formatIdentifierLabel(currentPhase).toUpperCase()}`,
     `Experience: ${experienceLevel.charAt(0).toUpperCase() + experienceLevel.slice(1)}`,
     `Days per week: ${daysPerWeek}`,
   ];
 
   if (constraints.length > 0) {
-    notes.push(`Constraints applied: ${constraints.join(', ')}`);
+    notes.push(`Constraints applied: ${constraints.map((constraint) => formatIdentifierLabel(constraint)).join(', ')}`);
   }
 
   return {

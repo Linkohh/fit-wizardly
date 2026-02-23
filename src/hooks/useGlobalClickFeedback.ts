@@ -1,8 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
-import { playRetroClickSound } from '@/lib/clickFeedback/clickSound';
 import { getClickFeedbackTarget } from '@/lib/clickFeedback/interactiveTarget';
-import { useHaptics } from '@/hooks/useHaptics';
+import { useInteractionFeedback } from '@/hooks/useInteractionFeedback';
 
 function useLatestRef<T>(value: T) {
   const ref = useRef(value);
@@ -15,7 +14,7 @@ function useLatestRef<T>(value: T) {
 export function useGlobalClickFeedback() {
   // Force HMR update
   const settings = usePreferencesStore((state) => state.settings);
-  const { impact } = useHaptics();
+  const { emit } = useInteractionFeedback();
 
   // Default to enabled for everyone; only disable when explicitly set to false.
   const soundsEnabled = settings.sounds !== false;
@@ -23,7 +22,7 @@ export function useGlobalClickFeedback() {
 
   const soundsEnabledRef = useLatestRef(soundsEnabled);
   const hapticsEnabledRef = useLatestRef(hapticsEnabled);
-  const impactRef = useLatestRef(impact);
+  const emitRef = useLatestRef(emit);
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -34,14 +33,10 @@ export function useGlobalClickFeedback() {
 
       const feedbackTarget = getClickFeedbackTarget(event.target);
       if (!feedbackTarget) return;
+      if (feedbackTarget.closest('[data-interaction-feedback="explicit"]')) return;
 
-      if (soundsEnabledRef.current) {
-        void playRetroClickSound();
-      }
-
-      // Haptics are most appropriate on touch devices.
-      if (hapticsEnabledRef.current && event.pointerType !== 'mouse') {
-        impactRef.current('light');
+      if (soundsEnabledRef.current || hapticsEnabledRef.current) {
+        void emitRef.current('globalClick', { pointerType: event.pointerType });
       }
     };
 
@@ -52,8 +47,9 @@ export function useGlobalClickFeedback() {
 
       const feedbackTarget = getClickFeedbackTarget(event.target);
       if (!feedbackTarget) return;
+      if (feedbackTarget.closest('[data-interaction-feedback="explicit"]')) return;
 
-      void playRetroClickSound();
+      void emitRef.current('keyboardClick', { pointerType: 'keyboard' });
     };
 
     const target = document;
@@ -69,6 +65,5 @@ export function useGlobalClickFeedback() {
       });
       target.removeEventListener('keydown', handleKeyDown as any, { capture: true });
     };
-  }, [soundsEnabledRef, hapticsEnabledRef, impactRef]);
+  }, [soundsEnabledRef, hapticsEnabledRef, emitRef]);
 }
-

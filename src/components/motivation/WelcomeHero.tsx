@@ -6,6 +6,8 @@ import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { InteractiveWord } from "./InteractiveWord";
 import { useRef, useCallback, memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
+import { isNativeApp } from "@/lib/platform";
 
 // --- Sub-Components (Memoized) ---
 
@@ -148,6 +150,7 @@ export function WelcomeHero() {
     const containerRef = useRef<HTMLDivElement>(null);
     const rectRef = useRef<DOMRect | null>(null);
     const [showBackground, setShowBackground] = useState(false);
+    const nativeApp = isNativeApp();
 
     // Defer heavy background animations to prioritize LCP
     useEffect(() => {
@@ -195,7 +198,10 @@ export function WelcomeHero() {
         <section
             ref={containerRef}
             onMouseMove={handleMouseMove}
-            className="relative pt-24 pb-20 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#F8F5FC]/90 via-[#EDE4F5]/80 to-[#F0E8F8]/70 dark:from-[#1a0a2e]/85 dark:via-[#2D1548]/75 dark:to-[#1a0a2e]/60 min-h-[100dvh] flex flex-col justify-center"
+            className={cn(
+                "relative pb-4 lg:pt-24 lg:pb-20 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#F8F5FC]/90 via-[#EDE4F5]/80 to-[#F0E8F8]/70 dark:from-[#1a0a2e]/85 dark:via-[#2D1548]/75 dark:to-[#1a0a2e]/60 lg:min-h-[100dvh] flex flex-col justify-center",
+                nativeApp ? "pt-12 min-h-[58dvh]" : "pt-14 min-h-[62dvh]"
+            )}
         >
             {/* Animated Background Elements - Deferred */}
             {showBackground && (

@@ -6,12 +6,14 @@ import { FormError } from '@/components/ui/form-error';
 import { MuscleSelector } from '@/features/mcl';
 import { mapLegacyToMcl, mapMclToLegacy } from '@/lib/muscleMapping';
 import { useThemeStore } from '@/stores/themeStore';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const EMPTY_TARGET_MUSCLES: string[] = [];
 
 export function AnatomyPanel() {
     const { selections, setTargetMuscles } = useWizardStore();
     const themeMode = useThemeStore((state) => state.mode);
+    const isMobile = useIsMobile();
 
     // React Hook Form integration with Zustand sync
     const { watch, setValue, formState: { errors }, trigger } = useWizardForm({
@@ -51,16 +53,20 @@ export function AnatomyPanel() {
             </div>
 
             {/* MCL Integration */}
-            <div className="w-full min-h-[600px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-gradient-to-br from-[#1a103c]/80 to-[#2d1b4e]/40 backdrop-blur-md">
+            <div
+                data-testid="anatomy-selector-shell"
+                className="w-full h-[min(62vh,560px)] supports-[height:100dvh]:h-[min(62dvh,560px)] sm:h-[600px] rounded-2xl overflow-hidden surface-premium-strong surface-premium-stroke"
+            >
                 <MuscleSelector
                     selectedMuscles={selectedMclIds}
                     onSelectionChange={handleSelectionChange}
                     showPresets={true}
                     showInfoPanel={true}
                     showSelectionSidebar={true}
+                    showSideView={!isMobile}
                     showLegend={false} // Cleaner look
                     theme={themeMode}
-                    height="600px"
+                    height="100%"
                     className="w-full bg-transparent"
                 />
             </div>

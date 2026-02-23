@@ -3,6 +3,7 @@ import { usePlanStore } from '@/stores/planStore';
 import { motion } from 'framer-motion';
 import { Calendar, ChevronRight, Trophy, Dumbbell } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatIdentifierLabel } from '@/lib/displayText';
 
 export function PeriodizationTimeline() {
     const { currentPlan, currentWeek } = usePlanStore();
@@ -27,7 +28,7 @@ export function PeriodizationTimeline() {
 
     // Derive a display name since Plan doesn't have a direct name property
     const planName = currentPlan.selections.personalGoalNote ||
-        `${currentPlan.selections.goal.charAt(0).toUpperCase() + currentPlan.selections.goal.slice(1)} ${currentPlan.splitType.replace('_', ' ')} Split`;
+        `${formatIdentifierLabel(currentPlan.selections.goal)} ${formatIdentifierLabel(currentPlan.splitType)} Split`;
 
     return (
         <Card variant="glass" className="w-full overflow-hidden relative">
@@ -61,22 +62,22 @@ export function PeriodizationTimeline() {
             </CardHeader>
 
             <CardContent>
-                <div className="relative pt-6 pb-2">
+                <div className="relative pt-7 pb-2">
                     {/* Connecting Line */}
-                    <div className="absolute top-[2.75rem] left-0 w-full h-0.5 bg-muted/30 -z-10" />
+                    <div className="absolute top-[3rem] left-0 w-full h-0.5 bg-muted/30 -z-10" />
 
-                    <div className="flex justify-between overflow-x-auto pb-4 gap-4 no-scrollbar snap-x">
+                    <div className="flex justify-between overflow-x-auto pt-2 pb-4 gap-4 no-scrollbar snap-x">
                         {weeks.map((week) => {
                             const isPast = week < currentWeek;
                             const isCurrent = week === currentWeek;
-                            const isFuture = week > currentWeek;
 
                             return (
                                 <div
                                     key={week}
+                                    data-testid={`timeline-week-${week}`}
                                     className={cn(
                                         "flex flex-col items-center gap-3 min-w-[80px] snap-center transition-all duration-300",
-                                        isCurrent ? "scale-110" : "opacity-70 scale-95"
+                                        isCurrent ? "opacity-100" : "opacity-70"
                                     )}
                                 >
                                     <div

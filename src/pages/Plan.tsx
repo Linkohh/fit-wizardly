@@ -22,6 +22,7 @@ import { SaveTemplateDialog } from '@/components/plan/SaveTemplateDialog';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { PeriodizationTimeline } from '@/components/plan/PeriodizationTimeline';
 import { detectMRVWarnings, suggestSplitAdjustment } from '@/lib/progressionEngine';
+import { formatIdentifierLabel } from '@/lib/displayText';
 
 export default function PlanPage() {
   const { t } = useTranslation();
@@ -199,7 +200,7 @@ export default function PlanPage() {
         <CardContent className="p-6 flex flex-wrap gap-6">
           <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Calendar className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.selections.daysPerWeek} {t('plan.summary.days_week')}</span></div>
           <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Clock className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.selections.sessionDuration} {t('plan.summary.min_sessions')}</span></div>
-          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Target className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.splitType.replace('_', ' ')}</span></div>
+          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Target className="h-4 w-4 text-primary-foreground" /></div><span>{formatIdentifierLabel(currentPlan.splitType)}</span></div>
         </CardContent>
       </Card>
 
@@ -209,7 +210,7 @@ export default function PlanPage() {
             <p className="font-semibold text-orange-200">Volume warning: you may be above MRV this week.</p>
             <p className="mt-1 text-orange-100/90">
               {mrvWarnings
-                .map((warning) => `${warning.muscleGroup}: ${warning.weeklySets} sets (MRV ${warning.mrv})`)
+                .map((warning) => `${formatIdentifierLabel(warning.muscleGroup)}: ${warning.weeklySets} sets (MRV ${warning.mrv})`)
                 .join(' • ')}
             </p>
           </CardContent>
@@ -219,7 +220,7 @@ export default function PlanPage() {
       {splitSuggestion && (
         <Card className="mb-6 border-blue-500/30 bg-blue-500/10">
           <CardContent className="p-4 text-sm">
-            <p className="font-semibold text-blue-100">Split recommendation: {splitSuggestion.recommendedSplit.replace('_', ' ')}</p>
+            <p className="font-semibold text-blue-100">Split recommendation: {formatIdentifierLabel(splitSuggestion.recommendedSplit)}</p>
             <p className="mt-1 text-blue-100/90">{splitSuggestion.rationale}</p>
           </CardContent>
         </Card>

@@ -11,6 +11,7 @@ import { cn, debounce } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
 import { Users, Sun, Moon, Monitor } from 'lucide-react';
+import { isNativeApp } from '@/lib/platform';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +23,7 @@ export function Header() {
   const location = useLocation();
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const nativeApp = isNativeApp();
 
   const { isTrainerMode } = useTrainerStore();
   const { mode, setMode } = useThemeStore();
@@ -114,12 +116,18 @@ export function Header() {
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[100] px-4 py-2 bg-background border border-primary text-primary rounded-md shadow-lg">
         {t('a11y.skip_to_content', 'Skip to content')}
       </a>
-      <div className="container flex h-16 items-center justify-between px-4">
+      <div className={cn(
+        "container flex items-center justify-between px-4",
+        nativeApp ? "h-[52px] md:h-16" : "h-16"
+      )}>
         {/* Logo */}
         {/* NOTE: Tooltip removed here to prevent potential interference/looping with Link logic */}
         <Link to="/" className="flex items-center gap-3 touch-target group">
           <motion.div
-            className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden"
+            className={cn(
+              "flex shrink-0 items-center justify-center overflow-hidden",
+              nativeApp ? "h-[52px] w-[52px] md:h-16 md:w-16" : "h-16 w-16"
+            )}
             whileHover={{
               scale: 1.1,
               rotate: 0,

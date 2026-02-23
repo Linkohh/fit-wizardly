@@ -5,10 +5,12 @@ import { Muscle } from '../../../types';
 import { getMuscleGroupColor, getMuscleGroupName } from '../../../data/muscleGroups';
 import { getMuscleById } from '../../../data/muscles';
 import { getMuscleMetadata, defaultMuscleMetadata } from '../../../data/muscleRelationships';
+import { getSpringTransition, getTimedTransition } from '@/lib/motion/tokens';
 
 interface InfoPanelProps {
   muscle: Muscle | null;
   isOpen: boolean;
+  reduceMotion?: boolean;
   onClose: () => void;
   onMuscleClick: (muscleId: string) => void;
 }
@@ -16,6 +18,7 @@ interface InfoPanelProps {
 export const InfoPanel: React.FC<InfoPanelProps> = ({
   muscle,
   isOpen,
+  reduceMotion = false,
   onClose,
   onMuscleClick,
 }) => {
@@ -63,21 +66,22 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({
         <>
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             data-click-feedback="on"
             className="fixed inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm z-40"
             onClick={onClose}
+            transition={getTimedTransition('base', reduceMotion)}
           />
 
           {/* Panel - Glassmorphism */}
           <motion.div
-            initial={{ x: '100%' }}
+            initial={reduceMotion ? false : { x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md glass-panel-stronger shadow-premium-lg z-50 overflow-y-auto border-l border-white/10"
+            transition={getSpringTransition('snappy', reduceMotion)}
+            className="fixed right-0 top-0 h-full w-full max-w-md surface-premium-strong surface-premium-stroke z-50 overflow-y-auto border-l border-white/10"
           >
             {/* Header with gradient accent */}
             <div
@@ -100,16 +104,16 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: groupColor }}
                 />
-                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                <span className="text-fluid-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                   {getMuscleGroupName(muscle.group)}
                 </span>
               </div>
 
               {/* Muscle name */}
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              <h2 className="text-fluid-2xl font-bold text-gray-900 dark:text-white">
                 {muscle.name}
               </h2>
-              <p className="text-gray-500 dark:text-gray-400 italic">
+              <p className="text-fluid-sm text-gray-500 dark:text-gray-400 italic">
                 {muscle.scientificName}
               </p>
 

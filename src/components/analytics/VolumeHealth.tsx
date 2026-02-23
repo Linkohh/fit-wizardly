@@ -5,6 +5,7 @@ import { usePlanStore } from '@/stores/planStore';
 import { Activity, AlertTriangle } from 'lucide-react';
 import { MuscleGroup } from '@/types/fitness';
 import { getMRVForMuscle } from '@/lib/progressionEngine';
+import { formatIdentifierLabel } from '@/lib/displayText';
 
 export function VolumeHealth() {
     const { workoutLogs, currentPlan, currentWeek } = usePlanStore();
@@ -122,7 +123,7 @@ export function VolumeHealth() {
                                         const mrv = getMRVForMuscle(muscle);
                                         return [
                                             `${value} sets${mrv ? ` (MRV ${mrv})` : ''}`,
-                                            muscle.replaceAll('_', ' '),
+                                            formatIdentifierLabel(muscle),
                                         ];
                                     }}
                                 />

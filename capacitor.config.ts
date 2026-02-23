@@ -5,8 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Fit Wizardly',
   webDir: 'dist',
   server: {
-    // When using `cap run ios --live --external`, Capacitor automatically
-    // injects the server URL. No manual IP config needed.
+    // When using `cap run ios -l` (or `npm run ios:live`), Capacitor injects
+    // a temporary server URL automatically. No manual IP config needed.
     androidScheme: 'https',
   },
 };

@@ -18,6 +18,7 @@ import type {
     MuscleGroup,
     SplitType,
 } from '@/types/fitness';
+import { formatIdentifierLabel } from '@/lib/displayText';
 
 // ============================================
 // HELPER FUNCTIONS
@@ -616,7 +617,7 @@ export function suggestSplitAdjustment(
     }
 
     const recommendedSplit: SplitType = actual <= 3 ? 'full_body' : 'upper_lower';
-    const rationale = `Planned ${planned} days/week but averaged ${actual} over the past ${weeklyCounts.length} weeks. A ${recommendedSplit.replace('_', ' ')} split may improve adherence.`;
+    const rationale = `Planned ${planned} days/week but averaged ${actual} over the past ${weeklyCounts.length} weeks. A ${formatIdentifierLabel(recommendedSplit)} split may improve adherence.`;
 
     return {
         recommendedSplit,

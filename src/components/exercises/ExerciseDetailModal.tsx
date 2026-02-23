@@ -29,6 +29,7 @@ import { useTranslation } from 'react-i18next';
 import { ComponentType, ReactNode, useMemo } from 'react';
 import { usePlanStore } from '@/stores/planStore';
 import { calculateOneRepMax } from '@/lib/progressionEngine';
+import { formatIdentifierLabel } from '@/lib/displayText';
 import { format } from 'date-fns';
 import { ResponsiveContainer, LineChart, Line, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
@@ -37,11 +38,6 @@ interface ExerciseDetailModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSelectExercise?: (exercise: Exercise) => void;
-}
-
-function formatToken(value: string | null | undefined) {
-    if (!value) return '';
-    return value.replaceAll('_', ' ');
 }
 
 interface MetaCardProps {
@@ -187,7 +183,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                 {exercise.primaryMuscles?.slice(0, 2).map((muscle) => (
                                     <span key={muscle} className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/20 px-2 py-0.5 capitalize">
                                         <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {formatToken(muscle)}
+                                        {formatIdentifierLabel(muscle)}
                                     </span>
                                 ))}
                             </div>
@@ -220,7 +216,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                             <div className="flex flex-wrap gap-2">
                                 {exercise.primaryMuscles?.map((muscle) => (
                                     <Badge key={muscle} className="bg-primary/90 text-primary-foreground capitalize hover:bg-primary/80">
-                                        {formatToken(muscle)}
+                                        {formatIdentifierLabel(muscle)}
                                     </Badge>
                                 ))}
                                 {exercise.secondaryMuscles?.map((muscle) => (
@@ -229,7 +225,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                         variant="outline"
                                         className="border-white/20 bg-white/5 text-white/80 capitalize"
                                     >
-                                        {formatToken(muscle)}
+                                        {formatIdentifierLabel(muscle)}
                                     </Badge>
                                 ))}
                             </div>
@@ -243,7 +239,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                         className="flex items-center gap-2 text-sm capitalize text-white/80"
                                     >
                                         <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {formatToken(item)}
+                                        {formatIdentifierLabel(item)}
                                     </li>
                                 ))}
                             </ul>

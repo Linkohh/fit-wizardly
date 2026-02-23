@@ -1,6 +1,9 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Plan } from '@/types/fitness';
+import { formatIdentifierLabel } from '@/lib/displayText';
+
+const WORKOUT_PLAN_FILENAME_SUFFIX = 'Fitz-Wizardly workout plan';
 
 export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean): jsPDF => {
     const doc = new jsPDF();
@@ -92,7 +95,7 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
 
     doc.setFontSize(12);
     doc.setTextColor(148, 163, 184); // Slate 400
-    doc.text(`${currentPlan.splitType.replace('_', ' ').toUpperCase()} • ${selections.goal.toUpperCase()}`, 20, 170);
+    doc.text(`${formatIdentifierLabel(currentPlan.splitType).toUpperCase()} • ${selections.goal.toUpperCase()}`, 20, 170);
 
     // Footer Info
     doc.setFontSize(10);
@@ -231,15 +234,26 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
     return doc;
 };
 
+const toInitial = (value: string): string => {
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+    return `${trimmed.charAt(0).toUpperCase()}.`;
+};
+
+export const buildWorkoutPlanPdfFilename = (firstName?: string, lastName?: string): string => {
+    const firstInitial = toInitial(firstName || '');
+    const lastInitial = toInitial(lastName || '');
+    const initials = `${firstInitial}${lastInitial}`;
+
+    return initials
+        ? `${initials} ${WORKOUT_PLAN_FILENAME_SUFFIX}.pdf`
+        : `${WORKOUT_PLAN_FILENAME_SUFFIX}.pdf`;
+};
+
 export const exportPlanToPDF = (currentPlan: Plan, redactSensitive: boolean) => {
     const doc = generatePlanDocument(currentPlan, redactSensitive);
     const selections = currentPlan.selections;
-    const userName = redactSensitive ? '' : `${selections.firstName || ''} ${selections.lastName || ''}`.trim();
-
-    // Generate filename with user's name if available
-    const filename = userName && !redactSensitive
-        ? `${userName.replace(/\s+/g, '_')}_FitWizard_Plan.pdf`
-        : 'FitWizard_Plan.pdf';
+    const filename = buildWorkoutPlanPdfFilename(selections.firstName, selections.lastName);
 
     doc.save(filename);
 };

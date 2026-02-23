@@ -1,6 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ViewType } from '../../../types';
+import { useMotionPreferences } from '@/hooks/use-motion-preferences';
+import { getSpringTransition } from '@/lib/motion/tokens';
 
 interface ViewSwitcherProps {
   currentView: ViewType;
@@ -19,16 +21,17 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
   showSideView,
   onViewChange,
 }) => {
+  const { shouldReduceMotion } = useMotionPreferences();
   const availableViews = showSideView ? views : views.filter((v) => v.id !== 'side');
 
   return (
-    <div className="flex items-center gap-1 p-1 bg-white/5 backdrop-blur-md rounded-xl border border-white/10">
+    <div className="flex items-center gap-1 p-1 surface-premium rounded-xl surface-premium-stroke">
       {availableViews.map((view) => (
         <button
           key={view.id}
           onClick={() => onViewChange(view.id)}
           className={`
-            relative px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200
+            relative px-2.5 py-2 text-fluid-sm font-semibold rounded-lg transition-colors
             focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2
             focus:ring-offset-black/50
             ${currentView === view.id
@@ -45,7 +48,7 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
               style={{
                 boxShadow: '0 4px 15px rgba(59, 130, 246, 0.4), 0 2px 8px rgba(139, 92, 246, 0.3)',
               }}
-              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+              transition={getSpringTransition('snappy', shouldReduceMotion)}
             />
           )}
           <span className="relative z-10">{view.label}</span>

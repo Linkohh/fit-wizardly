@@ -17,6 +17,8 @@ import { SmartRemaining } from "@/components/nutrition/SmartRemaining";
 import { MealSuggestions } from "@/components/nutrition/MealSuggestions";
 import { MacroCalculator } from "@/components/nutrition/MacroCalculator";
 import { getPriorityMacro } from "@/lib/nutritionUtils";
+import { formatIdentifierLabel } from "@/lib/displayText";
+import type { MacroTargets, UserNutritionProfile } from "@/types/nutrition";
 import { toast } from "sonner";
 import { useHaptics } from "@/hooks/useHaptics";
 
@@ -54,7 +56,7 @@ export default function NutritionPage() {
         { calories: 0, protein: 0, carbs: 0, fats: 0 }
     );
 
-    const handleSaveProfile = (newProfile: any, newTargets: any) => {
+    const handleSaveProfile = (newProfile: UserNutritionProfile, newTargets: MacroTargets) => {
         setProfile(newProfile, newTargets);
         setIsEditingCalculator(false);
         toast.success("Targets updated successfully");
@@ -227,17 +229,18 @@ export default function NutritionPage() {
                                                 if (mealsOfType.length === 0) return null;
 
                                                 const groupCalories = mealsOfType.reduce((acc, m) => acc + m.calories, 0);
+                                                const typeLabel = formatIdentifierLabel(type);
 
                                                 return (
                                                     <div key={type} className="animate-in slide-in-from-left-4 duration-300">
                                                         <div className="flex items-center justify-between mb-2 px-1">
                                                             <div className="flex items-center gap-2">
-                                                                <span className="capitalize font-semibold text-sm text-foreground/80">{type.replace('_', ' ')}</span>
+                                                                <span className="font-semibold text-sm text-foreground/80">{typeLabel}</span>
                                                                 <span className="text-xs text-muted-foreground">({groupCalories} kcal)</span>
                                                             </div>
                                                             <button
                                                                 onClick={() => {
-                                                                    const name = window.prompt(`Name this ${type} template:`);
+                                                                    const name = window.prompt(`Name this ${typeLabel} template:`);
                                                                     if (name) {
                                                                         useNutritionStore.getState().saveMealTemplate({
                                                                             name,

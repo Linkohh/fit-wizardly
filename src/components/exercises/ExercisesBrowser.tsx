@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { StateCard } from '@/components/ui/state-card';
 
 const ITEMS_PER_PAGE = 24;
 
@@ -428,14 +429,23 @@ export function ExercisesBrowser() {
             </div>
 
             {isLoading ? (
-                <div className="text-center py-12 text-muted-foreground">Loading exercise library...</div>
+                <StateCard
+                    variant="loading"
+                    title="Loading exercise library"
+                    description="Crunching your exercise catalogue now."
+                />
             ) : displayedExercises.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-white/10 rounded-xl bg-black/20">
-                    <Search className="w-12 h-12 text-muted-foreground mb-4 opacity-50" />
-                    <h3 className="text-xl font-semibold mb-2">No exercises found</h3>
-                    <p className="text-muted-foreground mb-4">Try adjusting your filters or search term.</p>
-                    <Button onClick={clearFilters} variant="outline">Clear Filters</Button>
-                </div>
+                <StateCard
+                    variant="empty"
+                    title="No exercises found"
+                    description="Try adjusting your filters or search terms."
+                    action={{
+                        label: 'Clear Filters',
+                        onClick: clearFilters,
+                        variant: 'outline',
+                    }}
+                    className="border-dashed border-white/10 bg-black/20"
+                />
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     <AnimatePresence mode="popLayout">
