@@ -1,0 +1,270 @@
+
+=== TS DATABASE ANALYSIS ===
+Total Exercises: 956
+Flagged Exercises: 122
+
+- Dumbbell Bench Press (dumbbell_bench_press):
+  * Missing step-by-step instructions
+- Push-Up (push_up):
+  * Missing step-by-step instructions
+- Incline Dumbbell Press (incline_dumbbell_press):
+  * Missing step-by-step instructions
+- Cable Fly (cable_fly):
+  * Description too short (28 chars)
+  * Missing step-by-step instructions
+- Dumbbell Row (dumbbell_row):
+  * Missing step-by-step instructions
+- Seated Cable Row (seated_cable_row):
+  * Missing step-by-step instructions
+- Inverted Row (inverted_row):
+  * Missing step-by-step instructions
+- Pull-Up (pull_up):
+  * Missing step-by-step instructions
+- Lat Pulldown (lat_pulldown):
+  * Missing step-by-step instructions
+- Chin-Up (chinup):
+  * Description too short (26 chars)
+  * Missing step-by-step instructions
+- Overhead Press (overhead_press):
+  * Missing step-by-step instructions
+- Dumbbell Shoulder Press (dumbbell_shoulder_press):
+  * Missing step-by-step instructions
+- Pike Push-Up (pike_pushup):
+  * Missing step-by-step instructions
+- Lateral Raise (lateral_raise):
+  * Missing step-by-step instructions
+- Face Pull (face_pull):
+  * Description too short (28 chars)
+  * Missing step-by-step instructions
+- Barbell Back Squat (squat):
+  * Missing step-by-step instructions
+- Goblet Squat (goblet_squat):
+  * Missing step-by-step instructions
+- Leg Press (leg_press):
+  * Missing step-by-step instructions
+- Bodyweight Squat (bodyweight_squat):
+  * Missing step-by-step instructions
+- Romanian Deadlift (romanian_deadlift):
+  * Missing step-by-step instructions
+- Kettlebell Swing (kettlebell_swing):
+  * Missing step-by-step instructions
+- Hip Thrust (hip_thrust):
+  * Missing step-by-step instructions
+- Glute Bridge (glute_bridge):
+  * Missing step-by-step instructions
+- Walking Lunge (walking_lunge):
+  * Missing step-by-step instructions
+- Split Squat (split_squat):
+  * Missing step-by-step instructions
+- Bulgarian Split Squat (bulgarian_split_squat):
+  * Missing step-by-step instructions
+- Step-Up (step_up):
+  * Description too short (26 chars)
+  * Missing step-by-step instructions
+- Barbell Curl (barbell_curl):
+  * Missing step-by-step instructions
+- Dumbbell Curl (dumbbell_curl):
+  * Missing step-by-step instructions
+- Hammer Curl (hammer_curl):
+  * Missing step-by-step instructions
+- Tricep Pushdown (tricep_pushdown):
+  * Missing step-by-step instructions
+- Skull Crusher (skull_crusher):
+  * Missing step-by-step instructions
+- Tricep Dips (dips):
+  * Missing step-by-step instructions
+- Overhead Tricep Extension (overhead_tricep_extension):
+  * Missing step-by-step instructions
+- Plank (plank):
+  * Description too short (24 chars)
+  * Missing step-by-step instructions
+- Crunch (crunch):
+  * Description too short (25 chars)
+  * Missing step-by-step instructions
+- Russian Twist (Basic) (russian_twist_basic):
+  * Missing step-by-step instructions
+- Leg Raise (leg_raise):
+  * Description too short (28 chars)
+  * Missing step-by-step instructions
+- Dead Bug (dead_bug):
+  * Missing step-by-step instructions
+- Standing Calf Raise (calf_raise):
+  * Missing step-by-step instructions
+- Seated Calf Raise (seated_calf_raise):
+  * Missing step-by-step instructions
+- Farmer's Carry (farmers_carry):
+  * Missing step-by-step instructions
+- Dumbbell Shrug (shrug):
+  * Missing step-by-step instructions
+- Single-Leg Squat (single_leg_squat):
+  * Missing step-by-step instructions
+- Stability Ball Push-Up (stability_ball_pushup):
+  * Missing step-by-step instructions
+- Single-Leg RDL (single_leg_rdl):
+  * Missing step-by-step instructions
+- Stability Ball Plank (stability_ball_plank):
+  * Missing step-by-step instructions
+- Squat Jump (squat_jump):
+  * Description too short (29 chars)
+  * Missing step-by-step instructions
+- Plyometric Push-Up (plyo_push_up):
+  * Missing step-by-step instructions
+- Medicine Ball Chest Pass (medicine_ball_chest_pass):
+  * Missing step-by-step instructions
+- Box Jump (box_jump):
+  * Description too short (27 chars)
+  * Missing step-by-step instructions
+- Stomach Vacuum (stomach_vacuum):
+  * Missing step-by-step instructions
+- Bird Dog (Basic) (bird_dog_basic):
+  * Missing step-by-step instructions
+- Hollow Body Hold (hollow_body_hold):
+  * Missing step-by-step instructions
+- Pallof Press (pallof_press):
+  * Missing step-by-step instructions
+- RKC Plank (rkc_plank):
+  * Missing step-by-step instructions
+- Swiss Ball Stir the Pot (swiss_ball_stir_pot):
+  * Missing step-by-step instructions
+- Jefferson Curl (jefferson_curl):
+  * Missing step-by-step instructions
+- Cat-Cow (cat_cow):
+  * Description too short (28 chars)
+  * Missing step-by-step instructions
+- Skullcrushers (skullcrushers):
+  * Missing step-by-step instructions
+- Cable Crunch (cable_crunch):
+  * Missing step-by-step instructions
+- Farmer's Walk (farmers_walk):
+  * Missing step-by-step instructions
+- Face Pulls (face_pulls):
+  * Missing step-by-step instructions
+- Incline Bench Press (incline_bench):
+  * Missing step-by-step instructions
+- Barbell Bicep Curl (bicep_curl):
+  * Description too short (27 chars)
+  * Missing step-by-step instructions
+- Lying Leg Curl (leg_curl):
+  * Description too short (28 chars)
+  * Missing step-by-step instructions
+- Hanging Leg Raise (hanging_leg_raise):
+  * Missing step-by-step instructions
+- Ab Wheel Rollout (ab_wheel):
+  * Description too short (28 chars)
+  * Missing step-by-step instructions
+- Bicycle Crunch (bicycle_crunch):
+  * Missing step-by-step instructions
+- Med Ball Slam (med_ball_slam):
+  * Missing step-by-step instructions
+- Serratus Punch (serratus_punch):
+  * Missing step-by-step instructions
+- Tibialis Raise (tibialis_raise):
+  * Missing step-by-step instructions
+- Heavy Farmer's Walk (farmers_walk_heavy):
+  * Missing step-by-step instructions
+- Sled Push (sled_push):
+  * Missing step-by-step instructions
+- Planche (planche):
+  * Missing step-by-step instructions
+- Muscle Up (muscle_up):
+  * Missing step-by-step instructions
+- Landmine Press (landmine_press):
+  * Missing step-by-step instructions
+- Renegade Row (renegade_row):
+  * Missing step-by-step instructions
+- Beast Crawl (beast_crawl):
+  * Description too short (29 chars)
+  * Missing step-by-step instructions
+- Running (running):
+  * Description too short (29 chars)
+  * Missing step-by-step instructions
+- Yoga (yoga):
+  * Missing step-by-step instructions
+- Foam Rolling (foam_rolling):
+  * Missing step-by-step instructions
+- Clamshells (clamshells):
+  * Missing step-by-step instructions
+- Banded Lateral Walk (banded_lateral_walk):
+  * Missing step-by-step instructions
+- Decline Bench Press (decline_bench):
+  * Missing step-by-step instructions
+- Front Raise (frontal_raise):
+  * Description too short (27 chars)
+  * Missing step-by-step instructions
+- Preacher Curl (preacher_curl):
+  * Missing step-by-step instructions
+- Front Squat (front_squat):
+  * Missing step-by-step instructions
+- Cable Woodchopper (woodchopper):
+  * Missing step-by-step instructions
+- Depth Jump (depth_jump):
+  * Missing step-by-step instructions
+- Neck Flexion (neck_flexion):
+  * Missing step-by-step instructions
+- Sandbag Load (sandbag_load):
+  * Missing step-by-step instructions
+- Atlas Stone Lift (atlas_stone):
+  * Missing step-by-step instructions
+- Front Lever (front_lever):
+  * Missing step-by-step instructions
+- Human Flag (human_flag):
+  * Missing step-by-step instructions
+- Turkish Get-Up (turkish_get_up):
+  * Missing step-by-step instructions
+- Cossack Squat (cossack_squat):
+  * Missing step-by-step instructions
+- Crab Walk (crab_walk):
+  * Missing step-by-step instructions
+- Jump Rope (jump_rope):
+  * Missing step-by-step instructions
+- Rowing (rowing):
+  * Missing step-by-step instructions
+- Dynamic Stretching (dynamic_stretching):
+  * Missing step-by-step instructions
+- Band Hip Adductions (band_hip_adductions):
+  * Contains very short/un-descriptive steps
+- Barbell Squat To A Bench (barbell_squat_to_a_bench):
+  * Contains very short/un-descriptive steps
+- Bicycling (bicycling):
+  * Only 1 step(s) provided
+- Body-Up (body_up):
+  * Contains very short/un-descriptive steps
+- Clean (clean):
+  * Contains very short/un-descriptive steps
+- Close-Grip EZ-Bar Press (close_grip_ez_bar_press):
+  * Contains very short/un-descriptive steps
+- EZ-Bar Skullcrusher (ez_bar_skullcrusher):
+  * Contains very short/un-descriptive steps
+- Iron Cross (iron_cross):
+  * Missing description
+  * Missing step-by-step instructions
+- On-Your-Back Quad Stretch (on_your_back_quad_stretch):
+  * Contains very short/un-descriptive steps
+- One-Arm Kettlebell Row (one_arm_kettlebell_row):
+  * Only 1 step(s) provided
+- One-Arm Kettlebell Swings (one_arm_kettlebell_swings):
+  * Missing description
+  * Missing step-by-step instructions
+- One Handed Hang (one_handed_hang):
+  * Only 1 step(s) provided
+- Push Press (push_press):
+  * Missing description
+  * Missing step-by-step instructions
+- Shoulder Raise (shoulder_raise):
+  * Only 1 step(s) provided
+- Shoulder Stretch (shoulder_stretch):
+  * Only 1 step(s) provided
+- Side Bridge (side_bridge):
+  * Missing description
+  * Missing step-by-step instructions
+- Side Jackknife (side_jackknife):
+  * Missing description
+  * Missing step-by-step instructions
+- Triceps Stretch (triceps_stretch):
+  * Only 1 step(s) provided
+- Tricep Side Stretch (tricep_side_stretch):
+  * Only 1 step(s) provided
+- Two-Arm Kettlebell Jerk (two_arm_kettlebell_jerk):
+  * Only 1 step(s) provided
+- Upper Back Stretch (upper_back_stretch):
+  * Only 1 step(s) provided

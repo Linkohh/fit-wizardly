@@ -86,7 +86,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Control the descent"
     ],
     "description": "Standard Dumbbell Bench Press movement.",
-    "steps": [],
+    "steps": [
+      "Lie flat on a bench holding dumbbells above your chest.",
+      "Keep your feet flat on the floor and your back slightly arched.",
+      "Lower the dumbbells until they are level with your chest.",
+      "Press them back up, squeezing your chest at the top."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -106,7 +111,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Classic bodyweight chest and tricep builder.",
-    "steps": [],
+    "steps": [
+      "Start in a high plank position with hands slightly wider than shoulders.",
+      "Keep your core tight and body straight from head to heels.",
+      "Lower your body until your chest nearly touches the floor.",
+      "Push back up to the starting position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner",
@@ -138,7 +148,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Squeeze at top"
     ],
     "description": "Standard Incline Dumbbell Press movement.",
-    "steps": [],
+    "steps": [
+      "Set an incline bench to 30-45 degrees.",
+      "Hold dumbbells at shoulder level.",
+      "Press the weights upward until your arms are straight.",
+      "Slowly lower them back to the start position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -164,8 +179,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Squeeze chest at center",
       "Control the stretch"
     ],
-    "description": "Standard Cable Fly movement.",
-    "steps": [],
+    "description": "Chest isolation using a cable machine for continuous tension.",
+    "steps": [
+      "Stand in the center of a cable crossover machine.",
+      "Grab the handles and step forward to create tension.",
+      "Keep a slight bend in your elbows and bring your hands together in an arc.",
+      "Control the weight as you slowly return to the starting stretch."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -250,7 +270,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Lead with elbow"
     ],
     "description": "Unilateral rowing for back thickness.",
-    "steps": [],
+    "steps": [
+      "Place one knee and one hand on a bench, keeping your back flat.",
+      "Hold a dumbbell in your free hand with your arm extended.",
+      "Pull the dumbbell up toward your hip.",
+      "Squeeze your back, then slowly lower the weight."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -270,7 +295,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Horizontal row for mid-back thickness.",
-    "steps": [],
+    "steps": [
+      "Sit with your feet firmly planted on the platform pads and a slight bend in your knees.",
+      "Grip the attachment and sit upright with a flat back.",
+      "Pull the handle straight toward your stomach or lower chest.",
+      "Squeeze your shoulder blades, then let the cable slowly stretch your back as you return."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner",
@@ -302,7 +332,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Control descent"
     ],
     "description": "Standard Inverted Row movement.",
-    "steps": [],
+    "steps": [
+      "Set a barbell in a rack at waist height.",
+      "Lie under the bar and grab it with an overhand grip wider than shoulder-width.",
+      "Keep your body in a straight line from head to heels.",
+      "Pull your chest to the bar, then lower yourself down with control."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -321,7 +356,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Vertical pulling exercise for back width.",
-    "steps": [],
+    "steps": [
+      "Hang from a pull-up bar with an overhand grip, hands slightly wider than shoulder-width.",
+      "Engage your core and pull your shoulder blades down and back.",
+      "Pull your body up until your chin clears the bar.",
+      "Lower yourself in a controlled motion until your arms are fully extended."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate",
@@ -351,7 +391,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Squeeze lats"
     ],
     "description": "Vertical pull machine for back width.",
-    "steps": [],
+    "steps": [
+      "Sit at a lat pulldown machine and grip the bar slightly wider than shoulder-width.",
+      "Keep your torso relatively upright with a slight lean back.",
+      "Pull the bar down toward your upper chest, squeezing your lats.",
+      "Control the bar back to the starting position for a full stretch."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -382,8 +427,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Pull chin over bar",
       "Control down"
     ],
-    "description": "Standard Chin-Up movement.",
-    "steps": [],
+    "description": "A vertical bodyweight pull targeting the lats and biceps.",
+    "steps": [
+      "Hang from a pull-up bar with an underhand grip.",
+      "Keep your core tight and your chest up.",
+      "Pull your chin over the bar.",
+      "Lower yourself back to a full hang."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -416,7 +466,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Lockout overhead"
     ],
     "description": "Standing barbell press for shoulder strength.",
-    "steps": [],
+    "steps": [
+      "Stand tall with a barbell resting on your upper chest, grasping it slightly wider than shoulder-width.",
+      "Engage your core and squeeze your glutes.",
+      "Press the bar straight up overhead until your arms are fully extended.",
+      "Lower back to the chest under control."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -447,7 +502,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Control down"
     ],
     "description": "Standard Dumbbell Shoulder Press movement.",
-    "steps": [],
+    "steps": [
+      "Sit on a bench with back support or stand tall.",
+      "Hold dumbbells at shoulder height with palms facing forward.",
+      "Press the weights straight up overhead until your arms are fully extended.",
+      "Lower them back to your shoulders slowly."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -477,8 +537,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Head between arms",
       "Touch floor with head"
     ],
-    "description": "Standard Pike Push-Up movement.",
-    "steps": [],
+    "description": "Classic bodyweight chest and tricep builder.",
+    "steps": [
+      "Start in a high plank position with hands slightly wider than shoulders.",
+      "Keep your core tight and body straight from head to heels.",
+      "Lower your body until your chest nearly touches the floor.",
+      "Push back up to the starting position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -505,7 +570,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Control down"
     ],
     "description": "Isolation movement for the side delts to build width.",
-    "steps": [],
+    "steps": [
+      "Stand tall holding dumbbells at your sides with a slight bend in your elbows.",
+      "Raise the dumbbells out to the sides until they are level with your shoulders.",
+      "Pause briefly at the top.",
+      "Slowly lower the weights back to the starting position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -532,8 +602,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Externally rotate at end",
       "Squeeze rear delts"
     ],
-    "description": "Standard Face Pull movement.",
-    "steps": [],
+    "description": "Rear delt and rotator cuff exercise for posture.",
+    "steps": [
+      "Attach a rope to a cable pulley at upper-chest height.",
+      "Grip the rope and step back to create tension.",
+      "Pull the rope toward your face, letting your elbows flare high and out.",
+      "Squeeze your rear delts and upper back, then slowly release."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -554,7 +629,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "The king of lower body exercises.",
-    "steps": [],
+    "steps": [
+      "Rest a barbell securely on your upper back/traps.",
+      "Stand with feet shoulder-width apart, core braced.",
+      "Initiate the movement by pushing your hips back and bending your knees.",
+      "Lower yourself until your hips drop below parallel.",
+      "Drive through your feet to stand back up."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate",
@@ -586,7 +667,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Sit between heels"
     ],
     "description": "Squat holding dumbbell at chest, great for beginners.",
-    "steps": [],
+    "steps": [
+      "Hold a kettlebell or dumbbell vertically against your upper chest.",
+      "Set your feet shoulder width apart and squat down.",
+      "Drop your hips until your elbows touch the inside of your knees.",
+      "Drive through your legs back to a standing position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -614,7 +700,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Control eccentric"
     ],
     "description": "Machine-based heavy leg builder.",
-    "steps": [],
+    "steps": [
+      "Sit in a leg press machine with feet shoulder-width apart on the sled.",
+      "Release the safety catches and lower the weight slowly until knees are around 90 degrees.",
+      "Drive through your entire foot to push the platform back up.",
+      "Do not forcefully lock out your knees at the top."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -644,7 +735,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Full depth"
     ],
     "description": "Standard Bodyweight Squat movement.",
-    "steps": [],
+    "steps": [
+      "Stand with your feet shoulder-width apart.",
+      "Keep your chest up and push your hips back and down.",
+      "Squat as low as you comfortably can.",
+      "Drive through your heels to return to the standing position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -731,7 +827,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Feel hamstring stretch"
     ],
     "description": "Hip hinge focusing on hamstring stretch.",
-    "steps": [],
+    "steps": [
+      "Stand holding a barbell or dumbbells in front of your thighs.",
+      "Keep your legs mostly straight with a slight knee bend.",
+      "Hinge backward at the hips, lowering the weight until you feel a hamstring stretch.",
+      "Drive your hips forward to stand tall and squeeze your glutes."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -763,7 +864,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Arms are pendulum"
     ],
     "description": "Standard Kettlebell Swing movement.",
-    "steps": [],
+    "steps": [
+      "Stand with feet wider than shoulder-width, holding a kettlebell with both hands.",
+      "Hinge at your hips and swing the bell back between your legs.",
+      "Squeeze your glutes and thrust your hips forward to swing the bell to chest height.",
+      "Let it swing back down naturally and repeat."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -791,7 +897,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Squeeze at top"
     ],
     "description": "Loaded glute bridge for maximum glute hypertrophy.",
-    "steps": [],
+    "steps": [
+      "Sit on the ground with a bench directly behind your upper back.",
+      "Roll a padded barbell over your hips.",
+      "Plant your feet flat on the floor, shoulder-width apart.",
+      "Drive your hips directly upward, squeezing your glutes at the top.",
+      "Lower your hips back down smoothly."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -818,7 +930,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Hold briefly"
     ],
     "description": "Bodyweight hip extension from floor.",
-    "steps": [],
+    "steps": [
+      "Lie face up on the floor with your knees bent and feet flat.",
+      "Brace your core to keep your spine in a neutral position.",
+      "Drive through your heels to raise your hips until your body forms a straight line.",
+      "Squeeze your glutes briefly, then lower down."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -850,7 +967,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Push through front heel"
     ],
     "description": "Standard Walking Lunge movement.",
-    "steps": [],
+    "steps": [
+      "Stand tall with your feet together.",
+      "Step forward with one leg and lower your hips until both knees are bent at a 90-degree angle.",
+      "Push off your back foot to bring it forward into the next lunge.",
+      "Continue alternating legs as you walk forward."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -880,8 +1002,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Drop back knee",
       "Stay upright"
     ],
-    "description": "Standard Split Squat movement.",
-    "steps": [],
+    "description": "Unilateral leg exercise for balance and hypertrophy.",
+    "steps": [
+      "Stand in a staggered stance, one foot forward and one back.",
+      "Lower your body straight down until your back knee almost touches the floor.",
+      "Push back up to the starting position.",
+      "Complete reps on one leg before switching."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -913,7 +1040,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Drive through front heel"
     ],
     "description": "Unilateral leg exercise for balance and hypertrophy.",
-    "steps": [],
+    "steps": [
+      "Stand facing away from a bench with one foot resting on it behind you.",
+      "Lower your hips until your front thigh is parallel to the ground.",
+      "Keep your chest up and core tight.",
+      "Drive through your front heel to stand back up."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -943,8 +1075,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Push through working leg only",
       "Control down"
     ],
-    "description": "Standard Step-Up movement.",
-    "steps": [],
+    "description": "Unilateral leg exercise for building quad and glute strength.",
+    "steps": [
+      "Stand in front of a sturdy box or bench.",
+      "Place one foot entirely on the box.",
+      "Drive through that heel to step up, bringing your other foot up.",
+      "Step back down under control and repeat."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -973,7 +1110,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Control down"
     ],
     "description": "Standard Barbell Curl movement.",
-    "steps": [],
+    "steps": [
+      "Stand holding a barbell with an underhand grip, hands shoulder-width apart.",
+      "Keep your elbows pinned to your sides.",
+      "Curl the bar up toward your shoulders, squeezing your biceps.",
+      "Lower the bar back down slowly."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1000,7 +1142,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Full stretch at bottom"
     ],
     "description": "Standard Dumbbell Curl movement.",
-    "steps": [],
+    "steps": [
+      "Stand holding a dumbbell in each hand with palms facing forward.",
+      "Keep your upper arms stationary.",
+      "Curl the weights toward your shoulders.",
+      "Slowly lower them back to the starting position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1026,7 +1173,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Squeeze at top"
     ],
     "description": "Neutral grip curl targeting brachialis.",
-    "steps": [],
+    "steps": [
+      "Stand holding dumbbells with a neutral grip (palms facing your sides).",
+      "Keep your elbows stationary at your sides.",
+      "Curl the weights toward your shoulders.",
+      "Slowly lower them back down."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -1050,8 +1202,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Full extension",
       "Control up"
     ],
-    "description": "Standard Tricep Pushdown movement.",
-    "steps": [],
+    "description": "Cable isolation exercise targeting the triceps with a pushdown motion.",
+    "steps": [
+      "Stand facing a cable machine holding a bar or rope attachment at chest level.",
+      "Keep your elbows pinned to your sides.",
+      "Push the attachment down until your arms are fully extended.",
+      "Control the weight as it comes back up to chest height."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -1080,7 +1237,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Full extension"
     ],
     "description": "Standard Skull Crusher movement.",
-    "steps": [],
+    "steps": [
+      "Lie on a bench holding an EZ bar or dumbbells straight above your chest.",
+      "Keep your upper arms locked in place.",
+      "Bend your elbows to lower the weight toward your forehead.",
+      "Extend your arms to push the weight back up."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1110,7 +1272,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Control descent"
     ],
     "description": "Bodyweight pushing exercise for chest and triceps.",
-    "steps": [],
+    "steps": [
+      "Support yourself on parallel bars with your arms fully extended.",
+      "Lean forward slightly to target the chest, or stay upright for triceps.",
+      "Lower your body until your shoulders drop slightly below your elbows.",
+      "Press forcefully back up to the start."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1139,7 +1306,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Squeeze at top"
     ],
     "description": "Standard Overhead Tricep Extension movement.",
-    "steps": [],
+    "steps": [
+      "Stand or sit holding a dumbbell or cable rope behind your neck.",
+      "Keep your elbows pointing straight up.",
+      "Extend your arms to raise the weight overhead.",
+      "Slowly lower it back behind your head."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1165,8 +1337,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Brace core",
       "Breathe steadily"
     ],
-    "description": "Standard Plank movement.",
-    "steps": [],
+    "description": "High-tension plank maximizing full body contraction.",
+    "steps": [
+      "Get into a forearm plank position.",
+      "Squeeze your glutes, quads, and core as tightly as possible.",
+      "Pull your elbows toward your toes to create maximum full-body tension.",
+      "Hold for 10-15 seconds."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1192,8 +1369,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Don't pull neck",
       "Exhale on way up"
     ],
-    "description": "Standard Crunch movement.",
-    "steps": [],
+    "description": "Weighted abdominal flexion using a high cable.",
+    "steps": [
+      "Kneel facing a cable pulley holding a rope attachment near your head.",
+      "Keep your hips stationary.",
+      "Flex your spine downward, crunching your elbows toward your knees.",
+      "Slowly control the weight back up."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1224,7 +1406,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Touch floor each side"
     ],
     "description": "Rotational core exercise sitting on floor.",
-    "steps": [],
+    "steps": [
+      "Sit on the floor with your knees bent and feet slightly elevated.",
+      "Lean back slightly, keeping your spine straight.",
+      "Hold a weight or medicine ball and twist your torso to one side, touching it to the ground.",
+      "Rotate to the other side and repeat."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Beginner"
@@ -1252,8 +1439,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Control the descent",
       "Don't swing"
     ],
-    "description": "Standard Leg Raise movement.",
-    "steps": [],
+    "description": "Advanced core flexion hanging from a bar.",
+    "steps": [
+      "Hang from a pull-up bar with a firm overhand grip.",
+      "Keep your core tight and limit swinging.",
+      "Raise your legs straight up until they form a 90-degree angle with your torso.",
+      "Lower them back down with control."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1280,7 +1472,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Breathe throughout"
     ],
     "description": "Core stability exercise moving opposite limbs while keeping spine flat.",
-    "steps": [],
+    "steps": [
+      "Lie on your back with arms extended up and knees bent at 90 degrees.",
+      "Brace your core to keep your lower back flat against the floor.",
+      "Slowly extend one leg and the opposite arm toward the floor.",
+      "Return to the starting position and repeat on the other side."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Beginner"
@@ -1307,7 +1504,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Pause at top"
     ],
     "description": "Isolation for the gastrocnemius muscle.",
-    "steps": [],
+    "steps": [
+      "Stand with the balls of your feet on an elevated block or step.",
+      "Let your heels drop down for a deep stretch.",
+      "Press up onto your toes as high as possible, contracting your calves.",
+      "Slowly lower back to the stretched position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -1333,7 +1535,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Slow negatives"
     ],
     "description": "Standard Seated Calf Raise movement.",
-    "steps": [],
+    "steps": [
+      "Sit on a calf raise machine with the pads resting above your knees.",
+      "Lower your heels for a deep stretch.",
+      "Press up onto the balls of your feet, contracting your calves.",
+      "Slowly return to the start position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1363,7 +1570,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Walk with control"
     ],
     "description": "Standard Farmer's Carry movement.",
-    "steps": [],
+    "steps": [
+      "Stand between two heavy dumbbells or kettlebells.",
+      "Deadlift them up with a straight back.",
+      "Walk forward with short, quick steps while keeping your chest tall.",
+      "Carefully set the weights down once you reach your target distance."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1389,7 +1601,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Pause at top"
     ],
     "description": "Standard Dumbbell Shrug movement.",
-    "steps": [],
+    "steps": [
+      "Stand holding dumbbells or a barbell at your sides.",
+      "Keep your arms straight.",
+      "Shrug your shoulders up toward your ears.",
+      "Squeeze at the top, then lower slowly."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1424,7 +1641,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Keep knee aligned"
     ],
     "description": "Standard Single-Leg Squat movement.",
-    "steps": [],
+    "steps": [
+      "Stand on one leg with your other leg extended out in front of you.",
+      "Push your hips back and squat down as low as possible on the standing leg.",
+      "Keep your chest up and balance steady.",
+      "Drive through your heel to stand back up."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1456,8 +1678,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Stabilize core",
       "Control descent"
     ],
-    "description": "Standard Stability Ball Push-Up movement.",
-    "steps": [],
+    "description": "Classic bodyweight chest and tricep builder.",
+    "steps": [
+      "Start in a high plank position with hands slightly wider than shoulders.",
+      "Keep your core tight and body straight from head to heels.",
+      "Lower your body until your chest nearly touches the floor.",
+      "Push back up to the starting position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1492,7 +1719,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Floating leg stays straight"
     ],
     "description": "Unilateral hinge for balance and hamstring strength.",
-    "steps": [],
+    "steps": [
+      "Stand balancing on one leg, holding a weight in the opposite hand.",
+      "Keeping a slight bend in your standing knee, hinge forward at the hips.",
+      "Extend your free leg straight back behind you.",
+      "Return to standing and squeeze your glute."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Intermediate"
@@ -1521,7 +1753,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Brace hard"
     ],
     "description": "Standard Stability Ball Plank movement.",
-    "steps": [],
+    "steps": [
+      "Place your forearms on top of a stability ball.",
+      "Step your feet back into a plank position.",
+      "Keep your body perfectly straight and your core extremely tight.",
+      "Hold the position without letting your hips sag."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1554,8 +1791,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Soft landing",
       "Reset between reps"
     ],
-    "description": "Standard Squat Jump movement.",
-    "steps": [],
+    "description": "Explosive jumping variation of the squat to develop leg power.",
+    "steps": [
+      "Stand in an athletic stance with feet shoulder-width apart.",
+      "Squat down by pushing your hips back.",
+      "Explode straight upward, jumping as high as you can.",
+      "Land softly and immediately go into the next repetition."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1575,7 +1817,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Explosive push-up leaving the ground.",
-    "steps": [],
+    "steps": [
+      "Start in a standard push-up position.",
+      "Lower your body until your chest is close to the floor.",
+      "Explode upward with enough force to lift your hands off the ground.",
+      "Land smoothly, immediately descending back into the next rep."
+    ],
     "variations": [],
     "category": "plyometric",
     "difficulty": "Advanced",
@@ -1607,7 +1854,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Step into it"
     ],
     "description": "Standard Medicine Ball Chest Pass movement.",
-    "steps": [],
+    "steps": [
+      "Stand facing a wall or a partner, holding a medicine ball at chest level.",
+      "Keep your core braced and knees slightly bent.",
+      "Explosively push the ball forward as hard as you can.",
+      "Catch the rebound and repeat the motion quickly."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -1639,8 +1891,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
       "Stand tall at top",
       "Step down"
     ],
-    "description": "Standard Box Jump movement.",
-    "steps": [],
+    "description": "Explosive plyometric movement jumping onto an elevated surface.",
+    "steps": [
+      "Stand facing a sturdy box in an athletic stance.",
+      "Swing your arms back and descend into a quarter squat to load your jump.",
+      "Explosively jump up and land softly on the box with both feet.",
+      "Step down carefully—do not jump off backward."
+    ],
     "variations": [],
     "category": "plyometric",
     "difficulty": "Intermediate"
@@ -1659,7 +1916,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Isometric contraction of the Transverse Abdominis to tighten the waist.",
-    "steps": [],
+    "steps": [
+      "Stand or sit upright with good posture.",
+      "Exhale completely, forcing all the air out.",
+      "Pull your belly button in toward your spine.",
+      "Hold for 10-20 seconds.",
+      "Release and repeat."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Intermediate",
@@ -1681,7 +1944,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Spinal stability movement extending opposite arm and leg.",
-    "steps": [],
+    "steps": [
+      "Start on all fours with hands under shoulders and knees under hips.",
+      "Keep your back flat and core engaged.",
+      "Simultaneously extend your right arm forward and your left leg backward.",
+      "Hold for a second, then return to the start and switch sides."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Beginner",
@@ -1702,7 +1970,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Gymnastic core hold creating a 'dish' shape.",
-    "steps": [],
+    "steps": [
+      "Lie flat on your back with arms extended above your head and legs straight.",
+      "Press your lower back firmly into the floor.",
+      "Lift your arms, head, shoulders, and legs slightly off the ground.",
+      "Hold this tension for the desired duration."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Intermediate",
@@ -1724,7 +1997,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Anti-rotation hold resisting sideways cable tension.",
-    "steps": [],
+    "steps": [
+      "Stand perpendicular to a cable machine or banded anchor point.",
+      "Hold the handle with both hands at chest level, stepping away to create tension.",
+      "Press the cable straight out in front of you, resisting the pull to rotate.",
+      "Pause, then slowly bring it back to your chest."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Intermediate",
@@ -1746,7 +2024,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "High-tension plank maximizing full body contraction.",
-    "steps": [],
+    "steps": [
+      "Get into a forearm plank position.",
+      "Squeeze your glutes, quads, and core as tightly as possible.",
+      "Pull your elbows toward your toes to create maximum full-body tension.",
+      "Hold for 10-15 seconds."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Advanced",
@@ -1766,7 +2049,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Dynamic plank rolling elbows in circles on a stability ball.",
-    "steps": [],
+    "steps": [
+      "Get into a forearm plank with your elbows on a stability ball.",
+      "Keep your core tight and body in a straight line.",
+      "Slowly roll your forearms in small circles.",
+      "Change direction after a set number of circles."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Advanced",
@@ -1788,7 +2076,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Segmental spinal flexion and extension with weight.",
-    "steps": [],
+    "steps": [
+      "Stand tall on an elevated surface holding a light barbell or kettlebell.",
+      "Tuck your chin to your chest and slowly roll your spine down vertebrae by vertebrae.",
+      "Let the weight pull you into a deep stretch with straight legs.",
+      "Slowly reverse the motion to return to a standing position."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Advanced",
@@ -1807,8 +2100,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "Gentle spinal mobility flow.",
-    "steps": [],
+    "description": "Gentle spinal mobility flow alternating between flexion and extension.",
+    "steps": [
+      "Start on all fours with a neutral spine.",
+      "Inhale as you arch your back and look up (Cow).",
+      "Exhale as you round your spine toward the ceiling and tuck your chin (Cat).",
+      "Repeat smoothly to mobilize your spine."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Beginner",
@@ -1829,7 +2127,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Tricep isolation exercise lying on a bench.",
-    "steps": [],
+    "steps": [
+      "Lie on a bench holding an EZ-bar or dumbbells straight up over your chest.",
+      "Keep your upper arms stationary.",
+      "Bend your elbows to lower the weight down toward your forehead.",
+      "Extend your arms back up to the starting position."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate",
@@ -1849,7 +2152,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Weighted abdominal flexion using a high cable.",
-    "steps": [],
+    "steps": [
+      "Kneel facing a cable pulley holding a rope attachment near your head.",
+      "Keep your hips stationary.",
+      "Flex your spine downward, crunching your elbows toward your knees.",
+      "Slowly control the weight back up."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Intermediate",
@@ -1871,7 +2179,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Walking with heavy weights for grip and core.",
-    "steps": [],
+    "steps": [
+      "Stand tall with heavy dumbbells or kettlebells in each hand.",
+      "Keep your chest up, shoulders back, and core braced.",
+      "Walk forward taking short, quick steps.",
+      "Walk for distance or time, staying upright the entire time."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner",
@@ -1892,7 +2205,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Rear delt and rotator cuff exercise for posture.",
-    "steps": [],
+    "steps": [
+      "Attach a rope to a cable pulley at upper-chest height.",
+      "Grip the rope and step back to create tension.",
+      "Pull the rope toward your face, letting your elbows flare high and out.",
+      "Squeeze your rear delts and upper back, then slowly release."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Beginner",
@@ -1916,7 +2234,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Pressing movement targeting the upper chest.",
-    "steps": [],
+    "steps": [
+      "Set a bench to a 30-45 degree incline.",
+      "Lie back, unrack the barbell or hold dumbbells.",
+      "Lower the weight to your upper chest.",
+      "Press the weight up and slightly back toward your face."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate",
@@ -1935,8 +2258,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "Classic bicep mass builder.",
-    "steps": [],
+    "description": "Classic isolation exercise to build strength and size in the biceps.",
+    "steps": [
+      "Stand tall holding a barbell or dumbbells with an underhand grip.",
+      "Keep your elbows tucked against your sides.",
+      "Curl the weight up, contracting your biceps fully at the top.",
+      "Lower the weight in a slow, controlled motion."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner",
@@ -1955,8 +2283,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "Hamstring isolation machine.",
-    "steps": [],
+    "description": "Isolation exercise on a machine targeting the hamstring muscles.",
+    "steps": [
+      "Lie face down on a leg curl machine with the pad resting just above your ankles.",
+      "Curl the weight up by pulling your heels toward your glutes.",
+      "Squeeze the hamstrings hard at the peak of the movement.",
+      "Lower the weight with control until your legs are fully extended."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner",
@@ -1976,7 +2309,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Advanced core flexion hanging from a bar.",
-    "steps": [],
+    "steps": [
+      "Hang from a pull-up bar with a firm overhand grip.",
+      "Keep your core tight and limit swinging.",
+      "Raise your legs straight up until they form a 90-degree angle with your torso.",
+      "Lower them back down with control."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Advanced",
@@ -1995,8 +2333,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "Anti-extension core rollout.",
-    "steps": [],
+    "description": "Advanced core exercise using a wheel to resist extreme spinal extension.",
+    "steps": [
+      "Kneel on a soft pad while holding the handles of an ab wheel.",
+      "Keeping your core tight, roll the wheel slowly out in front of you.",
+      "Go as far out as you can without letting your lower back sag.",
+      "Use your abdominals to pull yourself back to the starting position."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Advanced",
@@ -2017,7 +2360,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Dynamic core exercise hitting abs and obliques.",
-    "steps": [],
+    "steps": [
+      "Lie flat on your back with your hands lightly resting behind your head.",
+      "Lift your legs and bend your knees to 90 degrees.",
+      "Bring one knee toward your chest while simultaneously twisting your opposite elbow to meet it.",
+      "Alternate sides in a smooth, continuous pedaling motion."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Beginner",
@@ -2038,7 +2386,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Explosive full body slam for power.",
-    "steps": [],
+    "steps": [
+      "Stand with a non-bouncing medicine ball held in both hands.",
+      "Reach up tall, bringing the ball overhead.",
+      "Forcefully slam the ball straight down into the floor, hinging at your hips and bending your knees.",
+      "Catch the ball as it bounces and repeats."
+    ],
     "variations": [],
     "category": "plyometric",
     "difficulty": "Beginner",
@@ -2059,7 +2412,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Scapular protraction exercise.",
-    "steps": [],
+    "steps": [
+      "Lie on your back pressing light dumbbells straight up towards the ceiling.",
+      "Without bending your elbows, protract your shoulder blades to push the weights slightly higher.",
+      "Feel the contraction in the sides of your ribcage.",
+      "Retract your shoulder blades to return to the start."
+    ],
     "variations": [],
     "category": "other",
     "difficulty": "Beginner",
@@ -2080,7 +2438,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Shin muscle exercise for knee health.",
-    "steps": [],
+    "steps": [
+      "Lean your back or glutes against a wall, walking your feet out 1-2 feet in front.",
+      "Lock your knees straight.",
+      "Raise your toes and the balls of your feet toward your shins.",
+      "Lower them back to the floor slowly."
+    ],
     "variations": [],
     "category": "other",
     "difficulty": "Beginner",
@@ -2101,7 +2464,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Walking with heavy weights for strongman conditioning.",
-    "steps": [],
+    "steps": [
+      "Stand between two heavy farmer’s walk handles or trap bar.",
+      "Deadlift the weight up safely with your chest tall and core braced.",
+      "Take short, rapid, controlled steps forward.",
+      "Maintain posture; drop the weight carefully when you hit your distance or failure."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate",
@@ -2123,7 +2491,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Conditioning exercise pushing a weighted sled.",
-    "steps": [],
+    "steps": [
+      "Grip the handles of a loaded sled.",
+      "Lean forward, keeping your spine straight and core tight.",
+      "Drive forcefully through your legs to march the sled forward.",
+      "Keep a low, aggressive posture the entire distance."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate",
@@ -2144,7 +2517,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Static hold with body parallel to ground.",
-    "steps": [],
+    "steps": [
+      "Get into a push-up position, leaning forward slightly over your wrists.",
+      "Protract your shoulders and push them down.",
+      "Lean your weight forward.",
+      "Raise your hips and hold your body perfectly parallel to the ground."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Elite",
@@ -2167,7 +2545,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Explosive pull-up transitioning into a dip.",
-    "steps": [],
+    "steps": [
+      "Hang from the pull-up bar with a false grip, keeping a slight hollow body.",
+      "Perform an explosive pull-up, driving your chest towards the bar.",
+      "Aggressively transition your chest over the bar.",
+      "Press up out of the dip to full extension."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Advanced",
@@ -2188,7 +2571,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Unilateral shoulder press with leverage.",
-    "steps": [],
+    "steps": [
+      "Stand holding the sleeve of a landmine barbell at shoulder height, holding a strong staggered stance.",
+      "Keep your core braced and ribs tucked down.",
+      "Press the bar up and away until your arm is fully locked out.",
+      "Slowly lower it back down to your shoulder."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Intermediate",
@@ -2209,7 +2597,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Plank row hybrid for anti-rotation core strength.",
-    "steps": [],
+    "steps": [
+      "Start in a push-up position with each hand gripping a dumbbell on the floor.",
+      "Spread your feet wider than usual for balance and engage your core tightly.",
+      "Row one dumbbell up to your hip while keeping your torso perfectly still.",
+      "Lower the weight and repeat on the other side."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Advanced",
@@ -2228,8 +2621,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "Quadrupedal movement pattern.",
-    "steps": [],
+    "description": "Primal mobility crawl requiring coordination and full body core stability.",
+    "steps": [
+      "Start on all fours with hands under shoulders and knees hovering an inch off the floor.",
+      "Keep your back perfectly flat and level.",
+      "Move forward by stepping with opposing limbs (e.g., right hand, left foot).",
+      "Maintain control and low hips throughout."
+    ],
     "variations": [],
     "category": "other",
     "difficulty": "Intermediate",
@@ -2249,8 +2647,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "Fundamental human locomotion.",
-    "steps": [],
+    "description": "Continuous aerobic effort on road or treadmill to build endurance.",
+    "steps": [
+      "Start with a quick walking warm-up or dynamic stretch.",
+      "Transition into an easy jog, focusing on a midfoot strike and upright posture.",
+      "Pace yourself appropriately for the intended duration.",
+      "Cool down with walking and stretching."
+    ],
     "variations": [],
     "category": "cardio",
     "difficulty": "Beginner",
@@ -2270,7 +2673,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Mind-body practice for flexibility.",
-    "steps": [],
+    "steps": [
+      "Roll out a mat in a clear space.",
+      "Start with some gentle breath work to center your focus.",
+      "Follow your chosen sequence of poses, linking movement with your breathing.",
+      "Conclude with an extended resting pose (Savasana)."
+    ],
     "variations": [],
     "category": "flexibility",
     "difficulty": "All Levels",
@@ -2290,7 +2698,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Self-myofascial release technique.",
-    "steps": [],
+    "steps": [
+      "Place the foam roller on the floor and lie with the target muscle group resting on top.",
+      "Apply appropriate body weight pressure onto the roller.",
+      "Slowly roll back and forth over the length of the muscle.",
+      "Pause for 20-30 seconds on specific tight spots or trigger points."
+    ],
     "variations": [],
     "category": "flexibility",
     "difficulty": "Beginner",
@@ -2310,7 +2723,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Glute medius isolation for hip stability.",
-    "steps": [],
+    "steps": [
+      "Lie on your side with hips stacked and knees bent at 45 degrees.",
+      "Rest your head on your lower arm.",
+      "Keeping your feet together, raise your top knee as high as you can without rolling your hips backward.",
+      "Pause, then slowly lower the knee."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Beginner",
@@ -2331,7 +2749,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Walking sideways with band tension for hips.",
-    "steps": [],
+    "steps": [
+      "Place a small resistance loop around your ankles or just above your knees.",
+      "Lower into a quarter-squat athletic stance.",
+      "Take a wide, controlled step laterally to the side.",
+      "Follow smoothly with your trailing leg, keeping constant tension."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Beginner",
@@ -2352,7 +2775,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Bench press with feet elevated targeting lower chest.",
-    "steps": [],
+    "steps": [
+      "Secure your legs on a decline bench and unrack the barbell.",
+      "Keep your core engaged against the pad.",
+      "Lower the barbell directly to your lower chest.",
+      "Powerfully press the barbell back up."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate",
@@ -2371,8 +2799,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "Anterior deltoid isolation.",
-    "steps": [],
+    "description": "Shoulder isolation exercise bringing the arms straight out in front to target the anterior delts.",
+    "steps": [
+      "Stand or sit holding dumbbells in front of your thighs with a pronated or neutral grip.",
+      "With a slight bend in your elbow, raise the weights straight in front of you.",
+      "Stop when your arms are parallel to the floor.",
+      "Slowly lower the weights back down."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner",
@@ -2393,7 +2826,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Bicep isolation removing momentum.",
-    "steps": [],
+    "steps": [
+      "Sit down and position your upper arms firmly flat against the angled preacher pad.",
+      "Grip the barbell or dumbbells firmly.",
+      "Curl the weight upward entirely using your biceps.",
+      "Lower the weight with control until your arms are near full extension."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner",
@@ -2414,7 +2852,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Squat with bar on front delts, targeting quads and core.",
-    "steps": [],
+    "steps": [
+      "Rest a barbell securely across your front deltoids and clavicle.",
+      "Keep your chest tall and elbows pointed up.",
+      "Squat straight down, tracking your knees over your toes.",
+      "Drive out of the hole, leading up with your elbows."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Advanced",
@@ -2434,7 +2877,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Rotational power movement across the body.",
-    "steps": [],
+    "steps": [
+      "Stand perpendicular to a cable machine set in a high or low position.",
+      "Grip the handle with both hands.",
+      "Rotate your torso and pull the cable diagonally across your body.",
+      "Keep your arms relatively straight, returning slowly to the start."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Intermediate",
@@ -2454,7 +2902,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Stepping off box and immediately jumping up.",
-    "steps": [],
+    "steps": [
+      "Stand on top of a plyometric box, focusing straight ahead.",
+      "Step off the edge with one foot—do not jump.",
+      "As both feet hit the ground simultaneously, immediately rebound and explode upward.",
+      "Land softly in an athletic stance."
+    ],
     "variations": [],
     "category": "plyometric",
     "difficulty": "Advanced",
@@ -2474,7 +2927,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Strengthening the front neck muscles.",
-    "steps": [],
+    "steps": [
+      "Lie on a bench with your head hanging off the edge face up, or use a neck harness.",
+      "Place a weight plate on your forehead wrapped in a towel.",
+      "Tuck your chin and curl your neck fully upwards towards your chest.",
+      "Slowly lower your head back."
+    ],
     "variations": [],
     "category": "other",
     "difficulty": "Intermediate",
@@ -2494,7 +2952,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Lifting unstable object to a platform.",
-    "steps": [],
+    "steps": [
+      "Stand over a heavy sandbag and grip it by wrapping your arms deeply underneath.",
+      "Powerfully deadlift it to your lap, straddling it wide.",
+      "Re-adjust your grip around the entire bag.",
+      "Drive forcefully with your hips to roll and load the bag onto a platform."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Advanced",
@@ -2514,7 +2977,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Lifting a concrete stone to a platform.",
-    "steps": [],
+    "steps": [
+      "Stand over the stone and straddle it slightly.",
+      "Squat low, crush the stone against your chest with extended, overlapping arms.",
+      "Extend your legs to pull the stone into your lap.",
+      "Hinge back, re-grip the stone tightly, and explode upward to load it."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Advanced",
@@ -2535,7 +3003,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Static hold hanging horizontally from bar.",
-    "steps": [],
+    "steps": [
+      "Hang from a pull-up bar or gymnastics rings.",
+      "Engage your core, pull your shoulder blades down and back.",
+      "Pivot backward at the shoulders.",
+      "Raise your body to be perfectly parallel to the ground in a straight line."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Elite",
@@ -2556,7 +3029,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Sideways static hold on a vertical pole.",
-    "steps": [],
+    "steps": [
+      "Grip a vertical pole firmly.",
+      "Push hard with the bottom arm and pull firmly with the top arm.",
+      "Kick your legs up and engage your entire lateral chain.",
+      "Hold your entire body out parallel to the ground like a flag."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Elite",
@@ -2576,7 +3054,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Standing up from floor with weight held overhead.",
-    "steps": [],
+    "steps": [
+      "Lie flat on your back, holding a kettlebell straight up in one hand. Bend the same side knee.",
+      "Roll onto your opposite elbow.",
+      "Push up onto your extended hand.",
+      "Lift your hips high and sweep your straight leg underneath to to a kneeling position.",
+      "Stand up completely, then smoothly reverse back to the floor."
+    ],
     "variations": [],
     "category": "core",
     "difficulty": "Advanced",
@@ -2597,7 +3081,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Side-to-side deep squat for mobility and strength.",
-    "steps": [],
+    "steps": [
+      "Stand with your feet in a very wide stance.",
+      "Shift your weight to one side, squatting deeply on that leg.",
+      "Keep the other leg completely straight with the toes pointing slightly up.",
+      "Push through the bent leg to return to the center, then repeat on the opposite side."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate",
@@ -2618,7 +3107,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Walking on hands and feet in reverse bridge.",
-    "steps": [],
+    "steps": [
+      "Sit on the floor, place your hands behind your hips, and bend your knees.",
+      "Lift your hips up so your weight rests only on your hands and feet.",
+      "Walk forward or backward by moving opposite hand and opposite foot simultaneously.",
+      "Keep your chest elevated and hips off the ground."
+    ],
     "variations": [],
     "category": "other",
     "difficulty": "Beginner",
@@ -2639,7 +3133,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Bouncing conditioning for calves and coordination.",
-    "steps": [],
+    "steps": [
+      "Stand upright holding a rope handle in each hand, rope resting behind your heels.",
+      "Flick your wrists to swing the rope overhead.",
+      "Jump slightly over the rope as it passes under your feet.",
+      "Stay light on your toes, maintaining a regular rhythm."
+    ],
     "variations": [],
     "category": "cardio",
     "difficulty": "Beginner",
@@ -2660,7 +3159,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Full body cardio pulling movement.",
-    "steps": [],
+    "steps": [
+      "Sit on the ergometer, strap your feet firmly, and grab the handle.",
+      "Start the 'catch' with knees bent and shins vertical, arms extended.",
+      "Power through the 'drive' by pushing with your legs, leaning back slightly, and then pulling the handle.",
+      "Reverse the motion smoothly during the 'recovery' phase."
+    ],
     "variations": [],
     "category": "cardio",
     "difficulty": "Beginner",
@@ -2680,7 +3184,12 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "contraindications": [],
     "cues": [],
     "description": "Moving through range of motion to warm up.",
-    "steps": [],
+    "steps": [
+      "Find an open area.",
+      "Begin performing movements that take your joints slightly past their current range of motion without holding the stretch.",
+      "Move quickly but under control.",
+      "Gradually increase the range to thoroughly warm and mobilize the active muscles."
+    ],
     "variations": [],
     "category": "flexibility",
     "difficulty": "Beginner",
@@ -3927,12 +4436,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Anchor a band around a solid post or other object. Stand with your left side to the post, and put your right foot through the band, getting it around the ankle. Stand up straight and hold onto the post if needed. This will be your starting position. Keeping the knee straight, raise your right legs out to the side as far as you can. Return to the starting position and repeat for the desired rep count. Switch sides.",
     "steps": [
-      "Anchor a band around a solid post or other object.",
-      "Stand with your left side to the post, and put your right foot through the band, getting it around the ankle.",
-      "Stand up straight and hold onto the post if needed. This will be your starting position.",
-      "Keeping the knee straight, raise your right legs out to the side as far as you can.",
-      "Return to the starting position and repeat for the desired rep count.",
-      "Switch sides."
+      "Anchor a resistance band low and loop it around the ankle closest to the anchor.",
+      "Stand tall and hold onto a steady surface.",
+      "Sweep the banded leg across your body in front of your other leg.",
+      "Slowly return the leg to the starting position against the resistance."
     ],
     "variations": [],
     "category": "strength",
@@ -4617,14 +5124,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "This exercise is best performed inside a squat rack for safety purposes. To begin, first place a flat bench or a box behind you. The flat bench is used to teach you to set your hips back and to hit depth.  Then, set the bar on a rack that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it. Hold on to the bar using both arms at each side and lift it off the rack by first pushing with your legs and at the same time straightening your torso. Step away from the rack and position your legs using a shoulder width medium stance with the toes slightly pointed out. Keep your head up at all times as looking down will get you off balance and also maintain a straight back. This will be your starting position. (Note: For the purposes of this discussion we will use the medium stance described above which targets overall development; however you can choose any of the three stances discussed in the foot stances section). Begin to slowly lower the bar by bending the knees and sitting your hips back as you maintain a straight posture with the head up. Continue down until you slightly touch the bench behind you. Inhale as you perform this portion of the movement. Tip: If you performed the exercise correctly, the front of the knees should make an imaginary straight line with the toes that is perpendicular to the front. If your knees are past that imaginary line (if they are past your toes) then you are placing undue stress on the knee and the exercise has been performed incorrectly. Begin to raise the bar as you exhale by pushing the floor with the heel of your foot as you straighten the legs and extend the hips to go back to the starting position. Repeat for the recommended amount of repetitions.",
     "steps": [
-      "This exercise is best performed inside a squat rack for safety purposes. To begin, first place a flat bench or a box behind you. The flat bench is used to teach you to set your hips back and to hit depth.",
-      "",
-      "Then, set the bar on a rack that best matches your height. Once the correct height is chosen and the bar is loaded, step under the bar and place the back of your shoulders (slightly below the neck) across it.",
-      "Hold on to the bar using both arms at each side and lift it off the rack by first pushing with your legs and at the same time straightening your torso.",
-      "Step away from the rack and position your legs using a shoulder width medium stance with the toes slightly pointed out. Keep your head up at all times as looking down will get you off balance and also maintain a straight back. This will be your starting position. (Note: For the purposes of this discussion we will use the medium stance described above which targets overall development; however you can choose any of the three stances discussed in the foot stances section).",
-      "Begin to slowly lower the bar by bending the knees and sitting your hips back as you maintain a straight posture with the head up. Continue down until you slightly touch the bench behind you. Inhale as you perform this portion of the movement. Tip: If you performed the exercise correctly, the front of the knees should make an imaginary straight line with the toes that is perpendicular to the front. If your knees are past that imaginary line (if they are past your toes) then you are placing undue stress on the knee and the exercise has been performed incorrectly.",
-      "Begin to raise the bar as you exhale by pushing the floor with the heel of your foot as you straighten the legs and extend the hips to go back to the starting position.",
-      "Repeat for the recommended amount of repetitions."
+      "Set a bench or box behind you and rest a barbell on your upper back.",
+      "Squat down by sitting your hips back until your glutes lightly tap the bench.",
+      "Do not completely rest your weight on the bench.",
+      "Drive back up to a standing position."
     ],
     "variations": [],
     "category": "strength",
@@ -5268,7 +5771,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "To begin, seat yourself on the bike and adjust the seat to your height.",
     "steps": [
-      "To begin, seat yourself on the bike and adjust the seat to your height."
+      "Adjust the bike seat so your leg is almost fully extended at the bottom pedal stroke.",
+      "Keep your chest up and grip the handles comfortably.",
+      "Pedal at a steady, consistent cadence.",
+      "Increase resistance slightly if it feels too easy or your hips bounce."
     ],
     "variations": [],
     "category": "cardio",
@@ -5347,10 +5853,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Assume a plank position on the ground. You should be supporting your bodyweight on your toes and forearms, keeping your torso straight. Your forearms should be shoulder-width apart. This will be your starting position. Pressing your palms firmly into the ground, extend through the elbows to raise your body from the ground. Keep your torso rigid as you perform the movement. Slowly lower your forearms back to the ground by allowing the elbows to flex. Repeat.",
     "steps": [
-      "Assume a plank position on the ground. You should be supporting your bodyweight on your toes and forearms, keeping your torso straight. Your forearms should be shoulder-width apart. This will be your starting position.",
-      "Pressing your palms firmly into the ground, extend through the elbows to raise your body from the ground. Keep your torso rigid as you perform the movement.",
-      "Slowly lower your forearms back to the ground by allowing the elbows to flex.",
-      "Repeat."
+      "Start in a standard forearm plank position.",
+      "Press both hands flat into the floor to lift your elbows off the ground simultaneously.",
+      "Straighten your arms fully into a high plank.",
+      "Lower yourself back down to your forearms with control."
     ],
     "variations": [],
     "category": "strength",
@@ -7165,12 +7671,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "With a barbell on the floor close to the shins, take an overhand (or hook) grip just outside the legs. Lower your hips with the weight focused on the heels, back straight, head facing forward, chest up, with your shoulders just in front of the bar. This will be your starting position.  Begin the first pull by driving through the heels, extending your knees. Your back angle should stay the same, and your arms should remain straight. Move the weight with control as you continue to above the knees. Next comes the second pull, the main source of acceleration for the clean. As the bar approaches the mid-thigh position, begin extending through the hips. In a jumping motion, accelerate by extending the hips, knees, and ankles, using speed to move the bar upward. There should be no need to actively pull through the arms to accelerate the weight; at the end of the second pull, the body should be fully extended, leaning slightly back, with the arms still extended. As full extension is achieved, transition into the third pull by aggressively shrugging and flexing the arms with the elbows up and out. At peak extension, aggressively pull yourself down, rotating your elbows under the bar as you do so. Receive the bar in a front squat position, the depth of which is dependent upon the height of the bar at the end of the third pull. The bar should be racked onto the protracted shoulders, lightly touching the throat with the hands relaxed. Continue to descend to the bottom squat position, which will help in the recovery. Immediately recover by driving through the heels, keeping the torso upright and elbows up. Continue until you have risen to a standing position.",
     "steps": [
-      "With a barbell on the floor close to the shins, take an overhand (or hook) grip just outside the legs. Lower your hips with the weight focused on the heels, back straight, head facing forward, chest up, with your shoulders just in front of the bar. This will be your starting position.",
-      "",
-      "Begin the first pull by driving through the heels, extending your knees. Your back angle should stay the same, and your arms should remain straight. Move the weight with control as you continue to above the knees.",
-      "Next comes the second pull, the main source of acceleration for the clean. As the bar approaches the mid-thigh position, begin extending through the hips. In a jumping motion, accelerate by extending the hips, knees, and ankles, using speed to move the bar upward. There should be no need to actively pull through the arms to accelerate the weight; at the end of the second pull, the body should be fully extended, leaning slightly back, with the arms still extended.",
-      "As full extension is achieved, transition into the third pull by aggressively shrugging and flexing the arms with the elbows up and out. At peak extension, aggressively pull yourself down, rotating your elbows under the bar as you do so. Receive the bar in a front squat position, the depth of which is dependent upon the height of the bar at the end of the third pull. The bar should be racked onto the protracted shoulders, lightly touching the throat with the hands relaxed. Continue to descend to the bottom squat position, which will help in the recovery.",
-      "Immediately recover by driving through the heels, keeping the torso upright and elbows up. Continue until you have risen to a standing position."
+      "Start with a barbell on the floor, gripping it just outside your legs.",
+      "Pull the bar up powerfully, fully extending your hips, knees, and ankles.",
+      "Shrug your shoulders and drop quickly under the bar.",
+      "Catch the bar on your shoulders in a front squat position, then stand tall."
     ],
     "variations": [],
     "category": "strength",
@@ -7494,11 +7998,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Lie on a flat bench with an EZ bar loaded to an appropriate weight. Using a narrow grip lift the bar and hold it straight over your torso with your elbows in. The arms should be perpendicular to the floor. This will be your starting position. Now lower the bar down to your lower chest as you breathe in. Keep the elbows in as you perform this movement. Using the triceps to push the bar back up, press it back to the starting position by extending the elbows as you exhale. Repeat.",
     "steps": [
-      "Lie on a flat bench with an EZ bar loaded to an appropriate weight.",
-      "Using a narrow grip lift the bar and hold it straight over your torso with your elbows in. The arms should be perpendicular to the floor. This will be your starting position.",
-      "Now lower the bar down to your lower chest as you breathe in. Keep the elbows in as you perform this movement.",
-      "Using the triceps to push the bar back up, press it back to the starting position by extending the elbows as you exhale.",
-      "Repeat."
+      "Lie on a bench holding an EZ-bar with hands close together on the inner grips.",
+      "Lower the bar to your lower chest, keeping your elbows tucked close to your body.",
+      "Press the bar straight back up to full extension.",
+      "Focus on squeezing your triceps at the top."
     ],
     "variations": [],
     "category": "strength",
@@ -9855,10 +10358,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Using a close grip, lift the EZ bar and hold it with your elbows in as you lie on the bench. Your arms should be perpendicular to the floor. This will be your starting position. Keeping the upper arms stationary, lower the bar by allowing the elbows to flex. Inhale as you perform this portion of the movement. Pause once the bar is directly above the forehead. Lift the bar back to the starting position by extending the elbow and exhaling. Repeat.",
     "steps": [
-      "Using a close grip, lift the EZ bar and hold it with your elbows in as you lie on the bench. Your arms should be perpendicular to the floor. This will be your starting position.",
-      "Keeping the upper arms stationary, lower the bar by allowing the elbows to flex. Inhale as you perform this portion of the movement. Pause once the bar is directly above the forehead.",
-      "Lift the bar back to the starting position by extending the elbow and exhaling.",
-      "Repeat."
+      "Lie flat on a bench and press an EZ-bar straight above your chest.",
+      "Keep your upper arms locked pointing straight up.",
+      "Lower the bar by bending your elbows until it is just above your forehead.",
+      "Extend your elbows to press the weight back to the top."
     ],
     "variations": [],
     "category": "strength",
@@ -12131,8 +12634,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "",
-    "steps": [],
+    "description": "Advanced gymnastics ring movement demonstrating extreme upper body strength.",
+    "steps": [
+      "Support yourself on gymnastics rings with arms straight by your sides.",
+      "Slowly push the rings directly outward away from your body.",
+      "Lower until your arms are perfectly parallel to the floor in a cross shape.",
+      "Hold the position, keeping your core and shoulders highly engaged."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -15324,10 +15832,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Lie on a flat bench or step, and hang one leg and arm over the side. Bend the knee and hold the top of the foot. As you do this, be careful not to arch your lower back. Pull the belly button to the spine to stay in neutral. Press your foot down and into your hand. To add the hip stretch, lift the hip of the leg you're holding up toward the ceiling. Switch sides.",
     "steps": [
-      "Lie on a flat bench or step, and hang one leg and arm over the side.",
-      "Bend the knee and hold the top of the foot. As you do this, be careful not to arch your lower back.",
-      "Pull the belly button to the spine to stay in neutral. Press your foot down and into your hand. To add the hip stretch, lift the hip of the leg you're holding up toward the ceiling.",
-      "Switch sides."
+      "Lie face up on the floor or a mat.",
+      "Bend one knee and grab your ankle or foot with your hand.",
+      "Gently pull your heel toward your glute until you feel a stretch in the front of your thigh.",
+      "Hold the stretch for 20-30 seconds, then switch legs."
     ],
     "variations": [],
     "category": "flexibility",
@@ -15646,7 +16154,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Place a kettlebell in front of your feet. Bend your knees slightly and then push your butt out as much as possible as you bend over to get in the starting position. Grab the kettlebell and pull it to your stomach, retracting your shoulder blade and flexing the elbow. Keep your back straight. Lower and repeat.",
     "steps": [
-      "Place a kettlebell in front of your feet. Bend your knees slightly and then push your butt out as much as possible as you bend over to get in the starting position. Grab the kettlebell and pull it to your stomach, retracting your shoulder blade and flexing the elbow. Keep your back straight. Lower and repeat."
+      "Place one knee and hand on a bench while holding a kettlebell in your other hand.",
+      "Keep your back flat and core tight.",
+      "Pull the kettlebell up toward your hip, keeping your elbow close to your body.",
+      "Lower the weight slowly under full control."
     ],
     "variations": [],
     "category": "strength",
@@ -15757,8 +16268,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "",
-    "steps": [],
+    "description": "Unilateral kettlebell swing to build power and challenge rotational core stability.",
+    "steps": [
+      "Stand in a wide stance, holding a kettlebell with one hand between your legs.",
+      "Hinge sideways slightly, then thrust your hips forward to swing the bell to chest height.",
+      "Keep your torso square; do not let the weight twist your body.",
+      "Let it drop and hinge again for the next rep."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Intermediate"
@@ -16226,7 +16742,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Grab onto a chinup bar with one hand, using a pronated grip. Keep your feet on the floor or a step. Allow the majority of your weight to hang from that hand, while keeping your feet on the ground. Hold for 10-20 seconds and switch sides.",
     "steps": [
-      "Grab onto a chinup bar with one hand, using a pronated grip. Keep your feet on the floor or a step. Allow the majority of your weight to hang from that hand, while keeping your feet on the ground. Hold for 10-20 seconds and switch sides."
+      "Grip a pull-up bar firmly with one hand.",
+      "Remove your other hand and let your body hang entirely from the single working arm.",
+      "Keep your shoulder engaged (don't totally relax the joint) and your core tight.",
+      "Hold for time, then repeat on the other arm."
     ],
     "variations": [],
     "category": "flexibility",
@@ -17603,8 +18122,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "",
-    "steps": [],
+    "description": "Explosive overhead press using leg drive to lift heavier weights.",
+    "steps": [
+      "Hold a barbell resting across your upper chest and shoulders.",
+      "Dip your knees slightly while keeping your torso perfectly upright.",
+      "Explosively drive up through your legs and press the bar overhead simultaneously.",
+      "Lock the arms out, then safely return the bar to your chest."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Advanced"
@@ -19928,7 +20452,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Relax your arms to your sides and raise your shoulders up toward your ears, then back down.",
     "steps": [
-      "Relax your arms to your sides and raise your shoulders up toward your ears, then back down."
+      "Stand holding dumbbells at your sides.",
+      "Raise your arms straight out to the sides (lateral) or in front of you (frontal) depending on the variation.",
+      "Stop when the weights reach shoulder level.",
+      "Slowly lower them back to the start."
     ],
     "variations": [],
     "category": "flexibility",
@@ -19949,7 +20476,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Reach your left arm across your body and hold it straight.",
     "steps": [
-      "Reach your left arm across your body and hold it straight."
+      "Stand or sit upright.",
+      "Bring one arm straight across your chest.",
+      "Use your other arm to gently pull the extended arm closer to your body until you feel a stretch.",
+      "Hold for 20-30 seconds, then switch sides."
     ],
     "variations": [],
     "category": "flexibility",
@@ -19992,8 +20522,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "",
-    "steps": [],
+    "description": "Lateral core stability exercise targeting the obliques.",
+    "steps": [
+      "Lie on your side, resting on your forearm with your elbow directly beneath your shoulder.",
+      "Stack your feet on top of each other.",
+      "Lift your hips off the ground so your body forms a straight line.",
+      "Hold this position, bracing your core tightly."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -20038,8 +20573,13 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "patterns": [],
     "contraindications": [],
     "cues": [],
-    "description": "",
-    "steps": [],
+    "description": "Dynamic oblique crunch performed on your side.",
+    "steps": [
+      "Lie on your side with your legs straight and stacked.",
+      "Place the hand of your top arm behind your head.",
+      "Simultaneously lift your top leg and your torso, bringing your elbow toward your leg.",
+      "Lower back down with control."
+    ],
     "variations": [],
     "category": "strength",
     "difficulty": "Beginner"
@@ -24374,7 +24914,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Reach your hand behind your head, grasp your elbow and gently pull. Hold for 10 to 20 seconds, then switch sides.",
     "steps": [
-      "Reach your hand behind your head, grasp your elbow and gently pull. Hold for 10 to 20 seconds, then switch sides."
+      "Stand or sit up straight.",
+      "Raise one arm toward the ceiling, then bend your elbow to touch your upper back.",
+      "Use your other hand to gently push the bent elbow further back.",
+      "Hold the stretch for 20-30 seconds and repeat on the other side."
     ],
     "variations": [],
     "category": "flexibility",
@@ -24421,7 +24964,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Bring right arm across your body and over your left shoulder, holding your elbow with your left hand, until you feel a stretch in your tricep. Then repeat for your other arm.",
     "steps": [
-      "Bring right arm across your body and over your left shoulder, holding your elbow with your left hand, until you feel a stretch in your tricep. Then repeat for your other arm."
+      "Reach one arm straight across your body to the opposite side.",
+      "Use your other hand or arm to pull the stretched arm closer to your chest.",
+      "Keep your shoulder pressed down away from your ear.",
+      "Feel the stretch across the back of the arm and hold."
     ],
     "variations": [],
     "category": "flexibility",
@@ -24525,7 +25071,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Clean two kettlebells to your shoulders. Clean the kettlebells to your shoulders by extending through the legs and hips as you swing the kettlebells towards your shoulders. Rotate your wrists as you do so, so that the palms face forward. Squat down a few inches and reverse the motion rapidly driving both kettlebells overhead. Immediately after the initial push, squat down again and get under the kettlebells. Once the kettlebells are locked out, stand upright to complete the exercise.",
     "steps": [
-      "Clean two kettlebells to your shoulders. Clean the kettlebells to your shoulders by extending through the legs and hips as you swing the kettlebells towards your shoulders. Rotate your wrists as you do so, so that the palms face forward. Squat down a few inches and reverse the motion rapidly driving both kettlebells overhead. Immediately after the initial push, squat down again and get under the kettlebells. Once the kettlebells are locked out, stand upright to complete the exercise."
+      "Hold two kettlebells in the rack position at your chest.",
+      "Dip slightly at the knees, keeping your torso vertical.",
+      "Explosively drive upward with your legs to propel the bells off your chest.",
+      "Quickly dip under the bells, locking your arms out overhead, then stand up tall."
     ],
     "variations": [],
     "category": "strength",
@@ -24652,7 +25201,10 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "cues": [],
     "description": "Clasp fingers together with your thumbs pointing down, round your shoulders as you reach your hands forward.",
     "steps": [
-      "Clasp fingers together with your thumbs pointing down, round your shoulders as you reach your hands forward."
+      "Stand tall or sit up straight.",
+      "Clasp your hands together in front of you with arms fully extended.",
+      "Round your upper back and push your hands as far away as possible.",
+      "Tuck your chin to your chest and hold the stretch."
     ],
     "variations": [],
     "category": "flexibility",
@@ -25643,23 +26195,3 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "difficulty": "Intermediate"
   }
 ];
-
-export function getExerciseById(id: string): Exercise | undefined {
-  return EXERCISE_DATABASE.find(e => e.id === id);
-}
-
-export function getExercisesByMuscle(muscle: string): Exercise[] {
-  return EXERCISE_DATABASE.filter(e =>
-    e.primaryMuscles.includes(muscle as any) || e.secondaryMuscles.includes(muscle as any)
-  );
-}
-
-export function getExercisesByEquipment(equipment: string[]): Exercise[] {
-  return EXERCISE_DATABASE.filter(e =>
-    e.equipment.some(eq => equipment.includes(eq as any))
-  );
-}
-
-export function getExercisesByPattern(pattern: string): Exercise[] {
-  return EXERCISE_DATABASE.filter(e => e.patterns.includes(pattern as any));
-}
