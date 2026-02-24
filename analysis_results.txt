@@ -1,0 +1,173 @@
+
+=== PASS 1 ANALYSIS ===
+Total Exercises: 76
+Flagged Exercises: 76
+
+- Stomach Vacuum (stomach-vacuum):
+  * Missing step-by-step instructions
+- Dead Bug (dead-bug):
+  * Missing step-by-step instructions
+- Bird Dog (bird-dog):
+  * Missing step-by-step instructions
+- Hollow Body Hold (hollow-body-hold):
+  * Missing step-by-step instructions
+- Pallof Press (pallof-press):
+  * Missing step-by-step instructions
+- RKC Plank (rkc-plank):
+  * Missing step-by-step instructions
+- Swiss Ball Stir the Pot (swiss-ball-stir-pot):
+  * Missing step-by-step instructions
+- Jefferson Curl (jefferson-curl):
+  * Missing step-by-step instructions
+- Cat-Cow (cat-cow):
+  * Description too short (28 chars)
+  * Missing step-by-step instructions
+- Barbell Bench Press (bench-press):
+  * Missing step-by-step instructions
+- Push-Up (push-up):
+  * Missing step-by-step instructions
+- Overhead Press (overhead-press):
+  * Missing step-by-step instructions
+- Dumbbell Lateral Raise (lateral-raise):
+  * Missing step-by-step instructions
+- Skullcrushers (skullcrushers):
+  * Missing step-by-step instructions
+- Pull-Up (pull-up):
+  * Missing step-by-step instructions
+- Barbell Row (barbell-row):
+  * Missing step-by-step instructions
+- Deadlift (deadlift):
+  * Missing step-by-step instructions
+- Barbell Back Squat (squat):
+  * Missing step-by-step instructions
+- Leg Press (leg-press):
+  * Missing step-by-step instructions
+- Bulgarian Split Squat (bulgarian-split-squat):
+  * Missing step-by-step instructions
+- Romanian Deadlift (romanian-deadlift):
+  * Missing step-by-step instructions
+- Standing Calf Raise (calf-raise):
+  * Missing step-by-step instructions
+- Cable Crunch (cable-crunch):
+  * Missing step-by-step instructions
+- Russian Twist (russian-twist):
+  * Missing step-by-step instructions
+- Box Jump (box-jump):
+  * Description too short (26 chars)
+  * Missing step-by-step instructions
+- Farmer's Walk (farmers-walk):
+  * Missing step-by-step instructions
+- Face Pulls (face-pulls):
+  * Missing step-by-step instructions
+- Incline Bench Press (incline-bench):
+  * Missing step-by-step instructions
+- Dips (dips):
+  * Missing step-by-step instructions
+- Tricep Pushdown (tricep-pushdown):
+  * Description too short (28 chars)
+  * Missing step-by-step instructions
+- Lat Pulldown (lat-pulldown):
+  * Missing step-by-step instructions
+- Dumbbell Row (dumbbell-row):
+  * Missing step-by-step instructions
+- Barbell Bicep Curl (bicep-curl):
+  * Description too short (27 chars)
+  * Missing step-by-step instructions
+- Hammer Curl (hammer-curl):
+  * Missing step-by-step instructions
+- Lying Leg Curl (leg-curl):
+  * Description too short (28 chars)
+  * Missing step-by-step instructions
+- Hip Thrust (hip-thrust):
+  * Missing step-by-step instructions
+- Hanging Leg Raise (hanging-leg-raise):
+  * Missing step-by-step instructions
+- Ab Wheel Rollout (ab-wheel):
+  * Description too short (28 chars)
+  * Missing step-by-step instructions
+- Bicycle Crunch (bicycle-crunch):
+  * Missing step-by-step instructions
+- Med Ball Slam (med-ball-slam):
+  * Missing step-by-step instructions
+- Plyometric Push-Up (plyo-push-up):
+  * Missing step-by-step instructions
+- Serratus Punch (serratus-punch):
+  * Missing step-by-step instructions
+- Tibialis Raise (tibialis-raise):
+  * Missing step-by-step instructions
+- Heavy Farmer's Walk (farmers-walk-heavy):
+  * Missing step-by-step instructions
+- Sled Push (sled-push):
+  * Missing step-by-step instructions
+- Planche (planche):
+  * Missing step-by-step instructions
+- Muscle Up (muscle-up):
+  * Missing step-by-step instructions
+- Landmine Press (landmine-press):
+  * Missing step-by-step instructions
+- Renegade Row (renegade-row):
+  * Missing step-by-step instructions
+- Beast Crawl (beast-crawl):
+  * Description too short (29 chars)
+  * Missing step-by-step instructions
+- Running (running):
+  * Description too short (29 chars)
+  * Missing step-by-step instructions
+- Yoga (yoga):
+  * Missing step-by-step instructions
+- Foam Rolling (foam-rolling):
+  * Missing step-by-step instructions
+- Clamshells (clamshells):
+  * Missing step-by-step instructions
+- Banded Lateral Walk (banded-lateral-walk):
+  * Missing step-by-step instructions
+- Single Leg RDL (single-leg-rdl):
+  * Missing step-by-step instructions
+- Decline Bench Press (decline-bench):
+  * Missing step-by-step instructions
+- Front Raise (frontal-raise):
+  * Description too short (27 chars)
+  * Missing step-by-step instructions
+- Seated Cable Row (seated-cable-row):
+  * Missing step-by-step instructions
+- Preacher Curl (preacher-curl):
+  * Missing step-by-step instructions
+- Front Squat (front-squat):
+  * Missing step-by-step instructions
+- Goblet Squat (goblet-squat):
+  * Missing step-by-step instructions
+- Glute Bridge (glute-bridge):
+  * Missing step-by-step instructions
+- Cable Woodchopper (woodchopper):
+  * Missing step-by-step instructions
+- Depth Jump (depth-jump):
+  * Missing step-by-step instructions
+- Neck Flexion (neck-flexion):
+  * Missing step-by-step instructions
+- Sandbag Load (sandbag-load):
+  * Missing step-by-step instructions
+- Atlas Stone Lift (atlas-stone):
+  * Missing step-by-step instructions
+- Front Lever (front-lever):
+  * Missing step-by-step instructions
+- Human Flag (human-flag):
+  * Missing step-by-step instructions
+- Turkish Get-Up (turkish-get-up):
+  * Missing step-by-step instructions
+- Cossack Squat (cossack-squat):
+  * Missing step-by-step instructions
+- Crab Walk (crab-walk):
+  * Missing step-by-step instructions
+- Jump Rope (jump-rope):
+  * Missing step-by-step instructions
+- Rowing (rowing):
+  * Missing step-by-step instructions
+- Dynamic Stretching (dynamic-stretching):
+  * Missing step-by-step instructions
+
+=== PASS 2 VERIFICATION (Strict Mode) ===
+Strict Flagged Exercises: 76
+
+No additional exercises caught with strict criteria.
+
+Analysis Complete.
