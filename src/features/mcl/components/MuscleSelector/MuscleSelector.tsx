@@ -229,7 +229,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
     <div
       ref={containerRef}
       data-testid="muscle-selector-root"
-      className={`relative flex flex-col md:flex-row ${className.includes('bg-transparent') ? '' : 'surface-premium surface-premium-stroke'} ${themeClassName} ${className}`}
+      className={`relative flex flex-col md:flex-row ${(className || '').includes('bg-transparent') ? '' : 'surface-premium surface-premium-stroke'} ${themeClassName} ${className || ''}`}
       style={{ width, height }}
     >
       {/* Main content area */}
