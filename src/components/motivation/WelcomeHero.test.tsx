@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { WelcomeHero } from './WelcomeHero';
@@ -10,7 +10,7 @@ type HeroTiltResult = {
   handlePointerLeave: () => void;
   handlePointerUp: () => void;
   handlePointerCancel: () => void;
-  enableMotion: () => Promise<'granted' | 'denied' | 'unsupported'>;
+  enableMotion: (options?: { userInitiated?: boolean }) => Promise<'granted' | 'denied' | 'unsupported'>;
   canEnableSensor: boolean;
   isTouchFallbackActive: boolean;
   isSensorActive: boolean;
@@ -113,16 +113,20 @@ describe('WelcomeHero tilt integration', () => {
     mocks.lastUseHeroTiltArgs = null;
   });
 
-  it('shows mobile motion CTA and triggers enableMotion on click', () => {
+  it('auto-attempts motion on mobile and allows manual enable fallback', async () => {
     mocks.isMobile = true;
     mocks.override = { canEnableSensor: true };
 
     renderHero();
 
-    const enableButton = screen.getByRole('button', { name: 'Enable Motion Tilt' });
+    await waitFor(() => {
+      expect(mocks.enableMotion).toHaveBeenCalledWith({ userInitiated: false });
+    });
+
+    const enableButton = await screen.findByRole('button', { name: 'Enable Motion Tilt' });
     fireEvent.click(enableButton);
 
-    expect(mocks.enableMotion).toHaveBeenCalledTimes(1);
+    expect(mocks.enableMotion).toHaveBeenCalledWith({ userInitiated: true });
   });
 
   it('does not show sensor CTA on desktop and still forwards pointer move', () => {

@@ -153,6 +153,7 @@ export function WelcomeHero() {
     const { t, i18n } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const [showBackground, setShowBackground] = useState(false);
+    const [hasAutoEnableAttempted, setHasAutoEnableAttempted] = useState(false);
     const nativeApp = isNativeApp();
     const isMobile = useIsMobile();
     const { shouldReduceMotion } = useMotionPreferences();
@@ -185,6 +186,24 @@ export function WelcomeHero() {
         }, 100); // Small delay to let the main content paint first
         return () => clearTimeout(timer);
     }, []);
+
+    useEffect(() => {
+        if (!tiltEnabled || !isMobileContext) {
+            setHasAutoEnableAttempted(false);
+            return;
+        }
+
+        let isMounted = true;
+        void enableMotion({ userInitiated: false }).finally(() => {
+            if (isMounted) {
+                setHasAutoEnableAttempted(true);
+            }
+        });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [enableMotion, isMobileContext, tiltEnabled]);
 
     return (
         <section
@@ -281,12 +300,12 @@ export function WelcomeHero() {
                         transition={{ duration: 0.3, delay: 0.9 }}
                         className="mb-6 flex flex-col items-center gap-2"
                     >
-                        {canEnableSensor && (
+                        {hasAutoEnableAttempted && canEnableSensor && (
                             <Button
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                    void enableMotion();
+                                    void enableMotion({ userInitiated: true });
                                 }}
                                 disabled={isEnablingMotion}
                                 className="rounded-full border-primary/40 bg-background/60 backdrop-blur-sm hover:bg-primary/5"
