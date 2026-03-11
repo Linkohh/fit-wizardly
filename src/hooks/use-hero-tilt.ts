@@ -4,7 +4,9 @@ import { useMotionValue, useSpring, useTransform } from 'framer-motion';
 
 const MAX_POINTER_DISTANCE = 300;
 const MAX_ROTATION_DEGREES = 5;
-const SENSOR_MAX_ANGLE = 35;
+const SENSOR_MAX_ANGLE = 20;
+const SENSOR_GAIN = 1.35;
+const SENSOR_STARTUP_TIMEOUT_MS = 1200;
 const TILT_SPRING = { stiffness: 100, damping: 30 };
 
 type MotionPermissionResult = 'granted' | 'denied' | 'unsupported';
@@ -14,6 +16,10 @@ type SensorStatus = 'idle' | 'enabled' | 'denied' | 'unsupported' | 'error';
 type DeviceOrientationPermissionState = 'granted' | 'denied';
 
 type DeviceOrientationWithPermission = {
+  requestPermission?: () => Promise<DeviceOrientationPermissionState>;
+};
+
+type DeviceMotionWithPermission = {
   requestPermission?: () => Promise<DeviceOrientationPermissionState>;
 };
 
@@ -49,6 +55,9 @@ export function useHeroTilt({
 }: UseHeroTiltOptions): UseHeroTiltResult {
   const rectRef = useRef<DOMRect | null>(null);
   const sensorAttachedRef = useRef(false);
+  const sensorDataReceivedRef = useRef(false);
+  const sensorBaselineRef = useRef<{ beta: number; gamma: number } | null>(null);
+  const sensorStartupTimeoutRef = useRef<number | null>(null);
 
   const [sensorStatus, setSensorStatus] = useState<SensorStatus>('idle');
   const [isTouchFallbackActive, setIsTouchFallbackActive] = useState(false);
@@ -85,6 +94,13 @@ export function useHeroTilt({
     pointerX.set(0);
     pointerY.set(0);
   }, [pointerX, pointerY]);
+
+  const clearSensorStartupTimeout = useCallback(() => {
+    if (sensorStartupTimeoutRef.current !== null) {
+      window.clearTimeout(sensorStartupTimeoutRef.current);
+      sensorStartupTimeoutRef.current = null;
+    }
+  }, []);
 
   const updateRect = useCallback(() => {
     if (containerRef.current) {
@@ -127,19 +143,30 @@ export function useHeroTilt({
       const { beta, gamma } = event;
       if (beta == null || gamma == null) return;
 
-      const normalizedX = clamp(gamma, -SENSOR_MAX_ANGLE, SENSOR_MAX_ANGLE) / SENSOR_MAX_ANGLE;
-      const normalizedY = clamp(beta, -SENSOR_MAX_ANGLE, SENSOR_MAX_ANGLE) / SENSOR_MAX_ANGLE;
+      sensorDataReceivedRef.current = true;
+      clearSensorStartupTimeout();
 
-      pointerX.set(normalizedX * MAX_POINTER_DISTANCE);
-      pointerY.set(normalizedY * MAX_POINTER_DISTANCE);
+      if (!sensorBaselineRef.current) {
+        sensorBaselineRef.current = { beta, gamma };
+      }
+
+      const relativeGamma = gamma - sensorBaselineRef.current.gamma;
+      const relativeBeta = beta - sensorBaselineRef.current.beta;
+
+      const normalizedX = clamp(relativeGamma, -SENSOR_MAX_ANGLE, SENSOR_MAX_ANGLE) / SENSOR_MAX_ANGLE;
+      const normalizedY = clamp(relativeBeta, -SENSOR_MAX_ANGLE, SENSOR_MAX_ANGLE) / SENSOR_MAX_ANGLE;
+
+      pointerX.set(clamp(normalizedX * MAX_POINTER_DISTANCE * SENSOR_GAIN, -MAX_POINTER_DISTANCE, MAX_POINTER_DISTANCE));
+      pointerY.set(clamp(normalizedY * MAX_POINTER_DISTANCE * SENSOR_GAIN, -MAX_POINTER_DISTANCE, MAX_POINTER_DISTANCE));
     },
-    [isEnabled, pointerX, pointerY]
+    [clearSensorStartupTimeout, isEnabled, pointerX, pointerY]
   );
 
   const detachSensorListener = useCallback(() => {
     if (!sensorAttachedRef.current) return;
 
     window.removeEventListener('deviceorientation', handleOrientation);
+    window.removeEventListener('deviceorientationabsolute', handleOrientation);
     sensorAttachedRef.current = false;
   }, [handleOrientation]);
 
@@ -153,6 +180,7 @@ export function useHeroTilt({
     }
 
     window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+    window.addEventListener('deviceorientationabsolute', handleOrientation, { passive: true });
     sensorAttachedRef.current = true;
     return true;
   }, [handleOrientation, hasSensorSupport]);
@@ -160,6 +188,9 @@ export function useHeroTilt({
   useEffect(() => {
     if (!isEnabled) {
       detachSensorListener();
+      clearSensorStartupTimeout();
+      sensorBaselineRef.current = null;
+      sensorDataReceivedRef.current = false;
       setSensorStatus('idle');
       setIsTouchFallbackActive(false);
       resetTilt();
@@ -173,8 +204,16 @@ export function useHeroTilt({
 
     return () => {
       detachSensorListener();
+      clearSensorStartupTimeout();
     };
-  }, [detachSensorListener, hasSensorSupport, isEnabled, isMobileContext, resetTilt]);
+  }, [
+    clearSensorStartupTimeout,
+    detachSensorListener,
+    hasSensorSupport,
+    isEnabled,
+    isMobileContext,
+    resetTilt,
+  ]);
 
   const enableMotion = useCallback(async (): Promise<MotionPermissionResult> => {
     if (!isEnabled || !isMobileContext) {
@@ -188,13 +227,25 @@ export function useHeroTilt({
     }
 
     setIsEnablingMotion(true);
+    sensorDataReceivedRef.current = false;
+    sensorBaselineRef.current = null;
+    clearSensorStartupTimeout();
 
     try {
       const maybeDeviceOrientationEvent =
         window.DeviceOrientationEvent as DeviceOrientationWithPermission | undefined;
+      const maybeDeviceMotionEvent =
+        window.DeviceMotionEvent as DeviceMotionWithPermission | undefined;
 
       if (typeof maybeDeviceOrientationEvent?.requestPermission === 'function') {
         const permission = await maybeDeviceOrientationEvent.requestPermission();
+        if (permission !== 'granted') {
+          setSensorStatus('denied');
+          setIsTouchFallbackActive(true);
+          return 'denied';
+        }
+      } else if (typeof maybeDeviceMotionEvent?.requestPermission === 'function') {
+        const permission = await maybeDeviceMotionEvent.requestPermission();
         if (permission !== 'granted') {
           setSensorStatus('denied');
           setIsTouchFallbackActive(true);
@@ -211,6 +262,13 @@ export function useHeroTilt({
 
       setSensorStatus('enabled');
       setIsTouchFallbackActive(false);
+      sensorStartupTimeoutRef.current = window.setTimeout(() => {
+        if (!sensorDataReceivedRef.current) {
+          detachSensorListener();
+          setSensorStatus('unsupported');
+          setIsTouchFallbackActive(true);
+        }
+      }, SENSOR_STARTUP_TIMEOUT_MS);
       return 'granted';
     } catch {
       setSensorStatus('error');
@@ -219,7 +277,14 @@ export function useHeroTilt({
     } finally {
       setIsEnablingMotion(false);
     }
-  }, [attachSensorListener, hasSensorSupport, isEnabled, isMobileContext]);
+  }, [
+    attachSensorListener,
+    clearSensorStartupTimeout,
+    detachSensorListener,
+    hasSensorSupport,
+    isEnabled,
+    isMobileContext,
+  ]);
 
   const handlePointerMove = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {

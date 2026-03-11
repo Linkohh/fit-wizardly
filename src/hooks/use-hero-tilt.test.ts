@@ -6,8 +6,20 @@ type MockDeviceOrientationEvent = {
   requestPermission?: () => Promise<'granted' | 'denied'>;
 };
 
+type MockDeviceMotionEvent = {
+  requestPermission?: () => Promise<'granted' | 'denied'>;
+};
+
 function setDeviceOrientationEvent(value: MockDeviceOrientationEvent | undefined) {
   Object.defineProperty(window, 'DeviceOrientationEvent', {
+    configurable: true,
+    writable: true,
+    value,
+  });
+}
+
+function setDeviceMotionEvent(value: MockDeviceMotionEvent | undefined) {
+  Object.defineProperty(window, 'DeviceMotionEvent', {
     configurable: true,
     writable: true,
     value,
@@ -24,6 +36,7 @@ describe('useHeroTilt', () => {
 
   afterEach(() => {
     setDeviceOrientationEvent(undefined);
+    setDeviceMotionEvent(undefined);
   });
 
   it('attaches the sensor listener when permission is granted', async () => {
@@ -46,13 +59,14 @@ describe('useHeroTilt', () => {
     });
 
     const sensorListenerCalls = addEventListenerSpy.mock.calls.filter(
-      ([eventName]) => eventName === 'deviceorientation'
+      ([eventName]) =>
+        eventName === 'deviceorientation' || eventName === 'deviceorientationabsolute'
     );
 
     expect(requestPermission).toHaveBeenCalledTimes(1);
     expect(result.current.sensorStatus).toBe('enabled');
     expect(result.current.isTouchFallbackActive).toBe(false);
-    expect(sensorListenerCalls).toHaveLength(1);
+    expect(sensorListenerCalls).toHaveLength(2);
   });
 
   it('falls back to touch tilt when permission is denied', async () => {
@@ -83,6 +97,7 @@ describe('useHeroTilt', () => {
 
   it('marks unsupported and enables touch fallback when sensor APIs are unavailable', async () => {
     setDeviceOrientationEvent(undefined);
+    setDeviceMotionEvent(undefined);
 
     const container = document.createElement('section');
     const containerRef = { current: container };
@@ -127,9 +142,10 @@ describe('useHeroTilt', () => {
     unmount();
 
     const sensorRemoveCalls = removeEventListenerSpy.mock.calls.filter(
-      ([eventName]) => eventName === 'deviceorientation'
+      ([eventName]) =>
+        eventName === 'deviceorientation' || eventName === 'deviceorientationabsolute'
     );
 
-    expect(sensorRemoveCalls).toHaveLength(1);
+    expect(sensorRemoveCalls).toHaveLength(2);
   });
 });
