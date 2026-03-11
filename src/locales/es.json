@@ -25,7 +25,10 @@
         "personalized": "personalizado",
         "effective": "innegablemente efectivo",
         "start": "Comienza Tu Evolución",
-        "view_plan": "Ver Plan Actual"
+        "view_plan": "Ver Plan Actual",
+        "enable_motion_tilt": "Activar inclinación por movimiento",
+        "enabling_motion": "Activando movimiento...",
+        "tilt_fallback_hint": "La inclinación por movimiento no está disponible. Arrastra para inclinar."
     },
     "features": {
         "badge": "Potentes Funcionalidades",

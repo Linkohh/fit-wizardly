@@ -2,12 +2,16 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Zap, Star, Flame } from "lucide-react";
 import { Link } from "react-router-dom";
 import { FloatingElement } from "@/components/ui/page-transition";
-import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { motion } from "framer-motion";
 import { InteractiveWord } from "./InteractiveWord";
-import { useRef, useCallback, memo, useEffect, useState } from "react";
+import { useRef, memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
+import { useMotionPreferences } from "@/hooks/use-motion-preferences";
+import { usePreferencesStore } from "@/hooks/useUserPreferences";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useHeroTilt } from "@/hooks/use-hero-tilt";
 
 // --- Sub-Components (Memoized) ---
 
@@ -148,9 +152,31 @@ const AnimatedBadge = memo(function AnimatedBadge() {
 export function WelcomeHero() {
     const { t, i18n } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
-    const rectRef = useRef<DOMRect | null>(null);
     const [showBackground, setShowBackground] = useState(false);
     const nativeApp = isNativeApp();
+    const isMobile = useIsMobile();
+    const { shouldReduceMotion } = useMotionPreferences();
+    const motionTiltEnabled = usePreferencesStore((state) => state.settings.motionTilt !== false);
+
+    const tiltEnabled = motionTiltEnabled && !shouldReduceMotion;
+    const isMobileContext = nativeApp || isMobile;
+
+    const {
+        rotateX,
+        rotateY,
+        handlePointerMove,
+        handlePointerLeave,
+        handlePointerUp,
+        handlePointerCancel,
+        enableMotion,
+        canEnableSensor,
+        isTouchFallbackActive,
+        isEnablingMotion,
+    } = useHeroTilt({
+        containerRef,
+        isEnabled: tiltEnabled,
+        isMobileContext,
+    });
 
     // Defer heavy background animations to prioritize LCP
     useEffect(() => {
@@ -160,44 +186,13 @@ export function WelcomeHero() {
         return () => clearTimeout(timer);
     }, []);
 
-    // Motion values don't trigger re-renders
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
-
-    const rotateX = useSpring(useTransform(mouseY, [-300, 300], [5, -5]), { stiffness: 100, damping: 30 });
-    const rotateY = useSpring(useTransform(mouseX, [-300, 300], [-5, 5]), { stiffness: 100, damping: 30 });
-
-    // Cache the bounding rect to avoid layout thrashing on every mouse move
-    useEffect(() => {
-        const updateRect = () => {
-            if (containerRef.current) {
-                rectRef.current = containerRef.current.getBoundingClientRect();
-            }
-        };
-
-        updateRect();
-        window.addEventListener('resize', updateRect);
-        // Also update on scroll as the element position relative to viewport might change
-        window.addEventListener('scroll', updateRect);
-
-        return () => {
-            window.removeEventListener('resize', updateRect);
-            window.removeEventListener('scroll', updateRect);
-        };
-    }, []);
-
-    const handleMouseMove = useCallback((e: React.MouseEvent) => {
-        if (rectRef.current) {
-            const rect = rectRef.current;
-            mouseX.set(e.clientX - rect.left - rect.width / 2);
-            mouseY.set(e.clientY - rect.top - rect.height / 2);
-        }
-    }, [mouseX, mouseY]);
-
     return (
         <section
             ref={containerRef}
-            onMouseMove={handleMouseMove}
+            onPointerMove={handlePointerMove}
+            onPointerLeave={handlePointerLeave}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerCancel}
             className={cn(
                 "relative pb-4 lg:pt-24 lg:pb-20 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#F8F5FC]/90 via-[#EDE4F5]/80 to-[#F0E8F8]/70 dark:from-[#1a0a2e]/85 dark:via-[#2D1548]/75 dark:to-[#1a0a2e]/60 lg:min-h-[100dvh] flex flex-col justify-center",
                 nativeApp ? "pt-12 min-h-[58dvh]" : "pt-14 min-h-[62dvh]"
@@ -278,6 +273,37 @@ export function WelcomeHero() {
                         className="text-foreground font-semibold hover:text-primary transition-colors duration-300"
                     > {t('hero.effective')}</motion.span>.
                 </motion.p>
+
+                {tiltEnabled && isMobileContext && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.9 }}
+                        className="mb-6 flex flex-col items-center gap-2"
+                    >
+                        {canEnableSensor && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    void enableMotion();
+                                }}
+                                disabled={isEnablingMotion}
+                                className="rounded-full border-primary/40 bg-background/60 backdrop-blur-sm hover:bg-primary/5"
+                            >
+                                {isEnablingMotion
+                                    ? t('hero.enabling_motion', 'Enabling motion...')
+                                    : t('hero.enable_motion_tilt', 'Enable Motion Tilt')}
+                            </Button>
+                        )}
+
+                        {isTouchFallbackActive && (
+                            <p className="text-xs text-muted-foreground">
+                                {t('hero.tilt_fallback_hint', 'Motion tilt unavailable. Drag to tilt instead.')}
+                            </p>
+                        )}
+                    </motion.div>
+                )}
 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

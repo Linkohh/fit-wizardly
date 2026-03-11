@@ -11,6 +11,7 @@ export interface ExerciseSettings {
     sounds: boolean;
     soundsExplicitlySet?: boolean;
     reducedMotion?: boolean;
+    motionTilt?: boolean;
 }
 
 // Exercise collection type

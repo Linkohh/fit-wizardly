@@ -25,7 +25,10 @@
         "personalized": "personalized",
         "effective": "undeniably effective",
         "start": "Start Your Evolution",
-        "view_plan": "View Current Plan"
+        "view_plan": "View Current Plan",
+        "enable_motion_tilt": "Enable Motion Tilt",
+        "enabling_motion": "Enabling motion...",
+        "tilt_fallback_hint": "Motion tilt unavailable. Drag to tilt instead."
     },
     "features": {
         "badge": "Powerful Features",

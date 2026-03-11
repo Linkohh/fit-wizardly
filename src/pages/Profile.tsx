@@ -16,7 +16,8 @@ import {
     Shield,
     ChevronRight,
     LogOut,
-    Mail
+    Mail,
+    Smartphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -210,6 +211,22 @@ export function Profile() {
                                             id="haptics"
                                             checked={settings.haptics !== false}
                                             onCheckedChange={(checked) => updateSettings({ haptics: checked })}
+                                        />
+                                    </div>
+                                    <div className="flex items-center justify-between md:col-span-2">
+                                        <div className="flex items-center gap-2">
+                                            <Smartphone className={settings.motionTilt === false ? "h-4 w-4 text-muted-foreground" : "h-4 w-4"} />
+                                            <div className="space-y-0.5">
+                                                <Label htmlFor="motion-tilt">{t('profile.motion_tilt', 'Motion Tilt')}</Label>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {t('profile.motion_tilt_desc', 'Enable 3D tilt effects on supported devices.')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Switch
+                                            id="motion-tilt"
+                                            checked={settings.motionTilt !== false}
+                                            onCheckedChange={(checked) => updateSettings({ motionTilt: checked })}
                                         />
                                     </div>
                                 </div>

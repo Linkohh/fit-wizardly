@@ -71,5 +71,7 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSMotionUsageDescription</key>
+	<string>Fit Wizardly uses device motion to power subtle 3D tilt effects on the welcome screen.</string>
 </dict>
 </plist>

@@ -81,6 +81,43 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+const DEFAULT_SETTINGS: ExerciseSettings = {
+    haptics: true,
+    sounds: true,
+    soundsExplicitlySet: true,
+    reducedMotion: false,
+    motionTilt: true,
+};
+
+function normalizeSettings(rawSettings: ExerciseSettings | null | undefined) {
+    const mergedSettings: ExerciseSettings = {
+        ...DEFAULT_SETTINGS,
+        ...(rawSettings ?? {}),
+    };
+
+    const shouldForceEnableSounds =
+        !rawSettings?.soundsExplicitlySet && rawSettings?.sounds !== true;
+
+    if (shouldForceEnableSounds) {
+        mergedSettings.sounds = true;
+        mergedSettings.soundsExplicitlySet = true;
+    }
+
+    const shouldPersistNormalization =
+        rawSettings == null ||
+        shouldForceEnableSounds ||
+        rawSettings.haptics === undefined ||
+        rawSettings.sounds === undefined ||
+        rawSettings.soundsExplicitlySet === undefined ||
+        rawSettings.reducedMotion === undefined ||
+        rawSettings.motionTilt === undefined;
+
+    return {
+        settings: mergedSettings,
+        shouldPersistNormalization,
+    };
+}
+
 // Create the store with persistence
 export const usePreferencesStore = create<PreferencesState>()(
     persist(
@@ -89,12 +126,7 @@ export const usePreferencesStore = create<PreferencesState>()(
             favorites: [],
             collections: {},
             filterPresets: {},
-            settings: {
-                haptics: true,
-                sounds: true,
-                soundsExplicitlySet: true,
-                reducedMotion: false,
-            },
+            settings: DEFAULT_SETTINGS,
             recentlyViewed: [],
             isSyncing: false,
             lastSyncedAt: null,
@@ -301,20 +333,10 @@ export const usePreferencesStore = create<PreferencesState>()(
 
                     if (data) {
                         const cloudSettings = (data.settings as ExerciseSettings | null) ?? null;
-                        const shouldForceEnableSounds =
-                            !cloudSettings?.soundsExplicitlySet && cloudSettings?.sounds !== true;
-
-                        const migratedSettings: ExerciseSettings = shouldForceEnableSounds
-                            ? {
-                                ...(cloudSettings ?? { haptics: true, sounds: true }),
-                                sounds: true,
-                                soundsExplicitlySet: true,
-                            }
-                            : (cloudSettings ?? {
-                                haptics: true,
-                                sounds: true,
-                                soundsExplicitlySet: true,
-                            });
+                        const {
+                            settings: normalizedSettings,
+                            shouldPersistNormalization,
+                        } = normalizeSettings(cloudSettings);
 
                         set({
                             favorites: data.favorites || [],
@@ -324,14 +346,14 @@ export const usePreferencesStore = create<PreferencesState>()(
                             filterPresets: isRecord(data.filter_presets)
                                 ? (data.filter_presets as Record<string, unknown>)
                                 : {},
-                            settings: migratedSettings,
+                            settings: normalizedSettings,
                             recentlyViewed: data.recently_viewed || [],
                             lastSyncedAt: data.updated_at,
                         });
 
                         // Persist the migrated default back to cloud so the behavior is consistent across devices.
-                        if (shouldForceEnableSounds) {
-                            get()._queueAction({ type: 'settings', payload: migratedSettings });
+                        if (shouldPersistNormalization) {
+                            get()._queueAction({ type: 'settings', payload: normalizedSettings });
                         }
                     }
                 } catch (error) {
@@ -352,22 +374,19 @@ export const usePreferencesStore = create<PreferencesState>()(
         }),
         {
             name: 'fitwizard-preferences',
-            version: 1,
-            migrate: (persistedState, version) => {
-                if (version !== 0) return persistedState as PreferencesState;
+            version: 2,
+            migrate: (persistedState) => {
                 if (!isRecord(persistedState)) return persistedState as PreferencesState;
 
                 const existingSettings = isRecord(persistedState.settings)
-                    ? persistedState.settings
-                    : {};
+                    ? (persistedState.settings as ExerciseSettings)
+                    : null;
+
+                const { settings } = normalizeSettings(existingSettings);
 
                 return {
                     ...persistedState,
-                    settings: {
-                        ...existingSettings,
-                        sounds: true,
-                        soundsExplicitlySet: true,
-                    },
+                    settings,
                 } as PreferencesState;
             },
             partialize: (state) => ({
