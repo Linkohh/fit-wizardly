@@ -106,7 +106,7 @@ export function Header() {
     }
 
     if (motionTiltStatus.permission === 'prompt') {
-      return t('profile.motion_tilt_status_prompt', 'Needs device access');
+      return t('profile.motion_tilt_status_prompt', 'Tap to enable motion tilt');
     }
 
     if (motionTiltStatus.permission === 'denied' && motionTiltStatus.available) {
@@ -116,11 +116,15 @@ export function Header() {
     return t('profile.motion_tilt_status_unavailable', 'Unavailable on this device');
   }, [motionTiltEnabled, motionTiltStatus.available, motionTiltStatus.permission, shouldReduceMotion, t]);
 
+  const canRequestMotionTilt =
+    motionTiltStatus.available &&
+    (motionTiltStatus.permission === 'prompt' || motionTiltStatus.permission === 'denied');
+
   const showMotionTiltAction =
     motionTiltEnabled &&
     !shouldReduceMotion &&
     !isRefreshingMotionTiltStatus &&
-    motionTiltStatus.permission !== 'granted';
+    canRequestMotionTilt;
 
   const motionTiltActionLabel =
     motionTiltStatus.permission === 'denied'

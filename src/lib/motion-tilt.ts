@@ -54,8 +54,6 @@ const DEFAULT_NATIVE_STATUS: MotionTiltStatus = {
 
 const motionTiltSubscribers = new Set<(status: MotionTiltStatus) => void>();
 
-let cachedStatus = Capacitor.isNativePlatform() ? DEFAULT_NATIVE_STATUS : DEFAULT_WEB_STATUS;
-
 function notifyStatus(status: MotionTiltStatus) {
   cachedStatus = status;
 
@@ -113,6 +111,8 @@ function getWebMotionStatus(): MotionTiltStatus {
 export function isNativeMotionTiltSupported() {
   return Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('MotionTilt');
 }
+
+let cachedStatus = isNativeMotionTiltSupported() ? DEFAULT_NATIVE_STATUS : getWebMotionStatus();
 
 export function getCachedMotionTiltStatus() {
   return cachedStatus;
@@ -182,13 +182,13 @@ export async function requestMotionTiltPermission() {
         : await deviceMotionEvent?.requestPermission?.();
 
     return notifyStatus({
-      available: permission === 'granted',
+      available: true,
       permission: permission === 'granted' ? 'granted' : 'denied',
       source: 'web',
     });
   } catch {
     return notifyStatus({
-      available: false,
+      available: true,
       permission: 'denied',
       source: 'web',
     });

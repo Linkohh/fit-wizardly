@@ -435,7 +435,7 @@ export function useHeroTilt({
             setSensorStatus('denied');
             setIsTouchFallbackActive(true);
             publishMotionTiltStatus({
-              available: false,
+              available: true,
               permission: 'denied',
               source: 'web',
             });
@@ -450,7 +450,7 @@ export function useHeroTilt({
             setSensorStatus('denied');
             setIsTouchFallbackActive(true);
             publishMotionTiltStatus({
-              available: false,
+              available: true,
               permission: 'denied',
               source: 'web',
             });
@@ -481,6 +481,17 @@ export function useHeroTilt({
         sensorStartupTimeoutRef.current = window.setTimeout(() => {
           if (!sensorDataReceivedRef.current) {
             detachWebSensorListener();
+            if (!userInitiated && hasExplicitPermissionApi) {
+              setSensorStatus('idle');
+              setIsTouchFallbackActive(true);
+              publishMotionTiltStatus({
+                available: true,
+                permission: 'prompt',
+                source: 'web',
+              });
+              return;
+            }
+
             setSensorStatus('unsupported');
             setIsTouchFallbackActive(true);
             publishMotionTiltStatus({
@@ -497,7 +508,7 @@ export function useHeroTilt({
         setSensorStatus('error');
         setIsTouchFallbackActive(true);
         publishMotionTiltStatus({
-          available: false,
+          available: true,
           permission: 'denied',
           source: 'web',
         });

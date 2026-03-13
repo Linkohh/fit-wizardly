@@ -75,6 +75,7 @@ describe('useHeroTilt', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     setDeviceOrientationEvent(undefined);
     setDeviceMotionEvent(undefined);
   });
@@ -185,6 +186,46 @@ describe('useHeroTilt', () => {
 
     expect(sensorListenerCalls).toHaveLength(2);
     expect(result.current.sensorStatus).toBe('enabled');
+  });
+
+  it('preserves the prompt state on iOS web when auto-start times out before permission is granted', async () => {
+    vi.useFakeTimers();
+    setDeviceOrientationEvent({
+      requestPermission: vi.fn().mockResolvedValue('granted'),
+    });
+
+    const container = document.createElement('section');
+    const containerRef = { current: container };
+
+    const { result } = renderHook(() =>
+      useHeroTilt({
+        containerRef,
+        isEnabled: true,
+        isMobileContext: true,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.enableMotion({ userInitiated: false });
+    });
+
+    expect(mocks.publishMotionTiltStatus).toHaveBeenLastCalledWith({
+      available: true,
+      permission: 'prompt',
+      source: 'web',
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime(2000);
+    });
+
+    expect(result.current.sensorStatus).toBe('idle');
+    expect(result.current.isTouchFallbackActive).toBe(true);
+    expect(mocks.publishMotionTiltStatus).toHaveBeenLastCalledWith({
+      available: true,
+      permission: 'prompt',
+      source: 'web',
+    });
   });
 
   it('removes the native listener and stops motion updates on unmount', async () => {

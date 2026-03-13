@@ -106,16 +106,20 @@ export function Profile() {
             : motionTiltStatus.available && motionTiltStatus.permission === 'granted'
                 ? t('profile.motion_tilt_status_active', 'Active')
                 : motionTiltStatus.permission === 'prompt'
-                    ? t('profile.motion_tilt_status_prompt', 'Needs device access')
+                    ? t('profile.motion_tilt_status_prompt', 'Tap to enable motion tilt')
                     : motionTiltStatus.permission === 'denied' && motionTiltStatus.available
                         ? t('profile.motion_tilt_status_denied', 'Access blocked')
                         : t('profile.motion_tilt_status_unavailable', 'Unavailable on this device');
+
+    const canRequestMotionTilt =
+        motionTiltStatus.available &&
+        (motionTiltStatus.permission === 'prompt' || motionTiltStatus.permission === 'denied');
 
     const showMotionTiltAction =
         settings.motionTilt !== false &&
         !shouldReduceMotion &&
         !isRefreshingMotionTiltStatus &&
-        motionTiltStatus.permission !== 'granted';
+        canRequestMotionTilt;
 
     return (
         <div className="min-h-screen pt-20 pb-24 px-4 bg-background">
@@ -261,7 +265,7 @@ export function Profile() {
                                         <div className="flex items-start justify-between gap-3">
                                             <div className="space-y-1">
                                                 <p className="text-sm font-medium">
-                                                    {t('profile.motion_tilt_access', 'Device motion access')}
+                                                    {t('profile.motion_tilt_access', 'Motion tilt access')}
                                                 </p>
                                                 <p className="text-xs text-muted-foreground">
                                                     {motionTiltStatusLabel}

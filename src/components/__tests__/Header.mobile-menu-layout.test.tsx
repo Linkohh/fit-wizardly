@@ -150,7 +150,8 @@ describe('Header mobile menu layout', () => {
 
     expect(within(sheetContent).getByText('nav.clients')).toBeInTheDocument();
     expect(within(sheetContent).getByText('Motion Tilt')).toBeInTheDocument();
-    expect(within(sheetContent).getByText('Needs device access')).toBeInTheDocument();
+    expect(within(sheetContent).getByText('Tap to enable motion tilt')).toBeInTheDocument();
+    expect(within(sheetContent).queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
     fireEvent.click(within(sheetContent).getByRole('button', { name: 'Enable' }));
     expect(mocks.requestPermission).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: /close menu/i })).toBeInTheDocument();

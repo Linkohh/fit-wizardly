@@ -106,12 +106,13 @@ describe('Profile motion tilt controls', () => {
     vi.clearAllMocks();
   });
 
-  it('keeps the motion tilt switch and shows the retry affordance outside the hero', () => {
+  it('keeps the motion tilt switch and shows the enable affordance outside the hero', () => {
     render(<Profile />);
 
     expect(screen.getByText('Motion Tilt')).toBeInTheDocument();
-    expect(screen.getByText('Device motion access')).toBeInTheDocument();
-    expect(screen.getByText('Needs device access')).toBeInTheDocument();
+    expect(screen.getByText('Motion tilt access')).toBeInTheDocument();
+    expect(screen.getByText('Tap to enable motion tilt')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Enable' }));
 
