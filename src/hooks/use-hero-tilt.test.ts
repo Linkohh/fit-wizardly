@@ -10,6 +10,41 @@ type MockDeviceMotionEvent = {
   requestPermission?: () => Promise<'granted' | 'denied'>;
 };
 
+const mocks = vi.hoisted(() => {
+  const removeListener = vi.fn(async () => {});
+  const state = {
+    nativeSupported: false,
+    nativeStatus: {
+      available: true,
+      permission: 'granted' as const,
+      source: 'native' as const,
+    },
+    refreshMotionTiltStatus: vi.fn(async () => state.nativeStatus),
+    publishMotionTiltStatus: vi.fn(),
+    subscribeToMotionTiltStatus: vi.fn(() => () => {}),
+    addListener: vi.fn(async () => ({
+      remove: removeListener,
+    })),
+    start: vi.fn(async () => {}),
+    stop: vi.fn(async () => {}),
+    removeListener,
+  };
+
+  return state;
+});
+
+vi.mock('@/lib/motion-tilt', () => ({
+  MotionTilt: {
+    addListener: (...args: unknown[]) => mocks.addListener(...args),
+    start: () => mocks.start(),
+    stop: () => mocks.stop(),
+  },
+  isNativeMotionTiltSupported: () => mocks.nativeSupported,
+  publishMotionTiltStatus: (...args: unknown[]) => mocks.publishMotionTiltStatus(...args),
+  refreshMotionTiltStatus: () => mocks.refreshMotionTiltStatus(),
+  subscribeToMotionTiltStatus: (...args: unknown[]) => mocks.subscribeToMotionTiltStatus(...args),
+}));
+
 function setDeviceOrientationEvent(value: MockDeviceOrientationEvent | undefined) {
   Object.defineProperty(window, 'DeviceOrientationEvent', {
     configurable: true,
@@ -28,10 +63,15 @@ function setDeviceMotionEvent(value: MockDeviceMotionEvent | undefined) {
 
 describe('useHeroTilt', () => {
   const addEventListenerSpy = vi.spyOn(window, 'addEventListener');
-  const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener');
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.nativeSupported = false;
+    mocks.nativeStatus = {
+      available: true,
+      permission: 'granted',
+      source: 'native',
+    };
   });
 
   afterEach(() => {
@@ -39,9 +79,8 @@ describe('useHeroTilt', () => {
     setDeviceMotionEvent(undefined);
   });
 
-  it('attaches the sensor listener when permission is granted', async () => {
-    const requestPermission = vi.fn().mockResolvedValue('granted');
-    setDeviceOrientationEvent({ requestPermission });
+  it('prefers the native motion source in native app contexts', async () => {
+    mocks.nativeSupported = true;
 
     const container = document.createElement('section');
     const containerRef = { current: container };
@@ -51,28 +90,27 @@ describe('useHeroTilt', () => {
         containerRef,
         isEnabled: true,
         isMobileContext: true,
-      })
+      }),
     );
 
     await act(async () => {
-      await result.current.enableMotion();
+      await result.current.enableMotion({ userInitiated: false });
     });
 
-    const sensorListenerCalls = addEventListenerSpy.mock.calls.filter(
-      ([eventName]) =>
-        eventName === 'deviceorientation' || eventName === 'deviceorientationabsolute'
-    );
-
-    expect(requestPermission).toHaveBeenCalledTimes(1);
+    expect(mocks.refreshMotionTiltStatus).toHaveBeenCalledTimes(1);
+    expect(mocks.addListener).toHaveBeenCalledWith('tilt', expect.any(Function));
+    expect(mocks.start).toHaveBeenCalledTimes(1);
     expect(result.current.sensorStatus).toBe('enabled');
     expect(result.current.isTouchFallbackActive).toBe(false);
-    expect(sensorListenerCalls).toHaveLength(2);
   });
 
-  it('falls back to touch tilt when permission is denied', async () => {
-    setDeviceOrientationEvent({
-      requestPermission: vi.fn().mockResolvedValue('denied'),
-    });
+  it('stays tilt-disabled in native mode when motion permission is denied', async () => {
+    mocks.nativeSupported = true;
+    mocks.nativeStatus = {
+      available: true,
+      permission: 'denied',
+      source: 'native',
+    };
 
     const container = document.createElement('section');
     const containerRef = { current: container };
@@ -82,20 +120,21 @@ describe('useHeroTilt', () => {
         containerRef,
         isEnabled: true,
         isMobileContext: true,
-      })
+      }),
     );
 
     await act(async () => {
-      const permissionResult = await result.current.enableMotion();
+      const permissionResult = await result.current.enableMotion({ userInitiated: false });
       expect(permissionResult).toBe('denied');
     });
 
+    expect(mocks.addListener).not.toHaveBeenCalled();
+    expect(mocks.start).not.toHaveBeenCalled();
     expect(result.current.sensorStatus).toBe('denied');
-    expect(result.current.isTouchFallbackActive).toBe(true);
-    expect(result.current.canEnableSensor).toBe(false);
+    expect(result.current.isTouchFallbackActive).toBe(false);
   });
 
-  it('marks unsupported and enables touch fallback when sensor APIs are unavailable', async () => {
+  it('falls back to touch tilt in browser mode when sensors are unavailable', async () => {
     setDeviceOrientationEvent(undefined);
     setDeviceMotionEvent(undefined);
 
@@ -107,7 +146,7 @@ describe('useHeroTilt', () => {
         containerRef,
         isEnabled: true,
         isMobileContext: true,
-      })
+      }),
     );
 
     await act(async () => {
@@ -119,10 +158,37 @@ describe('useHeroTilt', () => {
     expect(result.current.isTouchFallbackActive).toBe(true);
   });
 
-  it('removes the sensor listener on unmount after enabling motion', async () => {
+  it('attaches browser orientation listeners when web motion permission is granted', async () => {
     setDeviceOrientationEvent({
       requestPermission: vi.fn().mockResolvedValue('granted'),
     });
+
+    const container = document.createElement('section');
+    const containerRef = { current: container };
+
+    const { result } = renderHook(() =>
+      useHeroTilt({
+        containerRef,
+        isEnabled: true,
+        isMobileContext: true,
+      }),
+    );
+
+    await act(async () => {
+      await result.current.enableMotion();
+    });
+
+    const sensorListenerCalls = addEventListenerSpy.mock.calls.filter(
+      ([eventName]) =>
+        eventName === 'deviceorientation' || eventName === 'deviceorientationabsolute',
+    );
+
+    expect(sensorListenerCalls).toHaveLength(2);
+    expect(result.current.sensorStatus).toBe('enabled');
+  });
+
+  it('removes the native listener and stops motion updates on unmount', async () => {
+    mocks.nativeSupported = true;
 
     const container = document.createElement('section');
     const containerRef = { current: container };
@@ -132,20 +198,18 @@ describe('useHeroTilt', () => {
         containerRef,
         isEnabled: true,
         isMobileContext: true,
-      })
+      }),
     );
 
     await act(async () => {
-      await result.current.enableMotion();
+      await result.current.enableMotion({ userInitiated: false });
     });
 
-    unmount();
+    await act(async () => {
+      unmount();
+    });
 
-    const sensorRemoveCalls = removeEventListenerSpy.mock.calls.filter(
-      ([eventName]) =>
-        eventName === 'deviceorientation' || eventName === 'deviceorientationabsolute'
-    );
-
-    expect(sensorRemoveCalls).toHaveLength(2);
+    expect(mocks.removeListener).toHaveBeenCalledTimes(1);
+    expect(mocks.stop).toHaveBeenCalled();
   });
 });

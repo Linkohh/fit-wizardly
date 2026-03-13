@@ -27,6 +27,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { useThemeStore } from '@/stores/themeStore';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
+import { useMotionPreferences } from '@/hooks/use-motion-preferences';
+import { useMotionTiltStatus } from '@/hooks/use-motion-tilt-status';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { usePlanStore } from '@/stores/planStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -41,6 +43,13 @@ export function Profile() {
 
     // Preferences Store
     const { settings, updateSettings } = usePreferencesStore();
+    const { shouldReduceMotion } = useMotionPreferences();
+    const {
+        status: motionTiltStatus,
+        isRefreshing: isRefreshingMotionTiltStatus,
+        isRequestingPermission: isRequestingMotionTiltPermission,
+        requestPermission: requestMotionTiltPermission,
+    } = useMotionTiltStatus();
 
     // Trainer Store
     const { isTrainerMode, toggleTrainerMode } = useTrainerStore();
@@ -89,6 +98,24 @@ export function Profile() {
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 }
     };
+
+    const motionTiltStatusLabel = shouldReduceMotion
+        ? t('profile.motion_tilt_status_reduced', 'Reduced motion is on')
+        : settings.motionTilt === false
+            ? t('profile.motion_tilt_status_off', 'Off')
+            : motionTiltStatus.available && motionTiltStatus.permission === 'granted'
+                ? t('profile.motion_tilt_status_active', 'Active')
+                : motionTiltStatus.permission === 'prompt'
+                    ? t('profile.motion_tilt_status_prompt', 'Needs device access')
+                    : motionTiltStatus.permission === 'denied' && motionTiltStatus.available
+                        ? t('profile.motion_tilt_status_denied', 'Access blocked')
+                        : t('profile.motion_tilt_status_unavailable', 'Unavailable on this device');
+
+    const showMotionTiltAction =
+        settings.motionTilt !== false &&
+        !shouldReduceMotion &&
+        !isRefreshingMotionTiltStatus &&
+        motionTiltStatus.permission !== 'granted';
 
     return (
         <div className="min-h-screen pt-20 pb-24 px-4 bg-background">
@@ -228,6 +255,37 @@ export function Profile() {
                                             checked={settings.motionTilt !== false}
                                             onCheckedChange={(checked) => updateSettings({ motionTilt: checked })}
                                         />
+                                    </div>
+
+                                    <div className="md:col-span-2 rounded-xl border border-border/60 bg-secondary/30 px-3 py-3">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div className="space-y-1">
+                                                <p className="text-sm font-medium">
+                                                    {t('profile.motion_tilt_access', 'Device motion access')}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {motionTiltStatusLabel}
+                                                </p>
+                                            </div>
+
+                                            {showMotionTiltAction && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        void requestMotionTiltPermission();
+                                                    }}
+                                                    disabled={isRequestingMotionTiltPermission}
+                                                    className="rounded-full"
+                                                >
+                                                    {isRequestingMotionTiltPermission
+                                                        ? t('profile.motion_tilt_enabling', 'Enabling...')
+                                                        : motionTiltStatus.permission === 'denied'
+                                                            ? t('profile.motion_tilt_retry', 'Retry')
+                                                            : t('profile.motion_tilt_enable', 'Enable')}
+                                                </Button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
 

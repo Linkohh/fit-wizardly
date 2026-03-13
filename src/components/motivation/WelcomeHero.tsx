@@ -153,7 +153,6 @@ export function WelcomeHero() {
     const { t, i18n } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const [showBackground, setShowBackground] = useState(false);
-    const [hasAutoEnableAttempted, setHasAutoEnableAttempted] = useState(false);
     const nativeApp = isNativeApp();
     const isMobile = useIsMobile();
     const { shouldReduceMotion } = useMotionPreferences();
@@ -170,9 +169,6 @@ export function WelcomeHero() {
         handlePointerUp,
         handlePointerCancel,
         enableMotion,
-        canEnableSensor,
-        isTouchFallbackActive,
-        isEnablingMotion,
     } = useHeroTilt({
         containerRef,
         isEnabled: tiltEnabled,
@@ -189,20 +185,10 @@ export function WelcomeHero() {
 
     useEffect(() => {
         if (!tiltEnabled || !isMobileContext) {
-            setHasAutoEnableAttempted(false);
             return;
         }
 
-        let isMounted = true;
-        void enableMotion({ userInitiated: false }).finally(() => {
-            if (isMounted) {
-                setHasAutoEnableAttempted(true);
-            }
-        });
-
-        return () => {
-            isMounted = false;
-        };
+        void enableMotion({ userInitiated: false });
     }, [enableMotion, isMobileContext, tiltEnabled]);
 
     return (
@@ -292,37 +278,6 @@ export function WelcomeHero() {
                         className="text-foreground font-semibold hover:text-primary transition-colors duration-300"
                     > {t('hero.effective')}</motion.span>.
                 </motion.p>
-
-                {tiltEnabled && isMobileContext && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.9 }}
-                        className="mb-6 flex flex-col items-center gap-2"
-                    >
-                        {hasAutoEnableAttempted && canEnableSensor && (
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                    void enableMotion({ userInitiated: true });
-                                }}
-                                disabled={isEnablingMotion}
-                                className="rounded-full border-primary/40 bg-background/60 backdrop-blur-sm hover:bg-primary/5"
-                            >
-                                {isEnablingMotion
-                                    ? t('hero.enabling_motion', 'Enabling motion...')
-                                    : t('hero.enable_motion_tilt', 'Enable Motion Tilt')}
-                            </Button>
-                        )}
-
-                        {isTouchFallbackActive && (
-                            <p className="text-xs text-muted-foreground">
-                                {t('hero.tilt_fallback_hint', 'Motion tilt unavailable. Drag to tilt instead.')}
-                            </p>
-                        )}
-                    </motion.div>
-                )}
 
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}

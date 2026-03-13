@@ -6,6 +6,12 @@ import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
     @Override
+    protected void onCreate(android.os.Bundle savedInstanceState) {
+        registerPlugin(MotionTiltPlugin.class);
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         hideWebViewScrollIndicators();

@@ -113,9 +113,8 @@ describe('WelcomeHero tilt integration', () => {
     mocks.lastUseHeroTiltArgs = null;
   });
 
-  it('auto-attempts motion on mobile and allows manual enable fallback', async () => {
+  it('auto-attempts motion on mobile without rendering a hero CTA', async () => {
     mocks.isMobile = true;
-    mocks.override = { canEnableSensor: true };
 
     renderHero();
 
@@ -123,10 +122,7 @@ describe('WelcomeHero tilt integration', () => {
       expect(mocks.enableMotion).toHaveBeenCalledWith({ userInitiated: false });
     });
 
-    const enableButton = await screen.findByRole('button', { name: 'Enable Motion Tilt' });
-    fireEvent.click(enableButton);
-
-    expect(mocks.enableMotion).toHaveBeenCalledWith({ userInitiated: true });
+    expect(screen.queryByRole('button', { name: 'Enable Motion Tilt' })).not.toBeInTheDocument();
   });
 
   it('does not show sensor CTA on desktop and still forwards pointer move', () => {

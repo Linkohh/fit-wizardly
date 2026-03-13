@@ -6,6 +6,11 @@ import { Header } from '@/components/Header';
 const mocks = vi.hoisted(() => ({
   setMode: vi.fn(),
   toggleTrainerMode: vi.fn(),
+  requestPermission: vi.fn(async () => ({
+    available: true,
+    permission: 'granted' as const,
+    source: 'web' as const,
+  })),
 }));
 
 vi.mock('react-i18next', () => ({
@@ -22,6 +27,37 @@ vi.mock('@/stores/themeStore', () => ({
   useThemeStore: () => ({
     mode: 'dark',
     setMode: mocks.setMode,
+  }),
+}));
+
+vi.mock('@/hooks/useUserPreferences', () => ({
+  usePreferencesStore: (selector: (state: { settings: { motionTilt?: boolean } }) => unknown) =>
+    selector({
+      settings: {
+        motionTilt: true,
+      },
+    }),
+}));
+
+vi.mock('@/hooks/use-motion-preferences', () => ({
+  useMotionPreferences: () => ({
+    shouldReduceMotion: false,
+    prefersReducedMotion: false,
+    reducedMotionEnabled: false,
+  }),
+}));
+
+vi.mock('@/hooks/use-motion-tilt-status', () => ({
+  useMotionTiltStatus: () => ({
+    status: {
+      available: true,
+      permission: 'prompt',
+      source: 'web',
+    },
+    isRefreshing: false,
+    isRequestingPermission: false,
+    refreshStatus: vi.fn(),
+    requestPermission: mocks.requestPermission,
   }),
 }));
 
@@ -113,6 +149,10 @@ describe('Header mobile menu layout', () => {
     expect(mobileNav).toHaveClass('flex-1', 'min-h-0', 'overflow-y-auto', 'overscroll-contain');
 
     expect(within(sheetContent).getByText('nav.clients')).toBeInTheDocument();
+    expect(within(sheetContent).getByText('Motion Tilt')).toBeInTheDocument();
+    expect(within(sheetContent).getByText('Needs device access')).toBeInTheDocument();
+    fireEvent.click(within(sheetContent).getByRole('button', { name: 'Enable' }));
+    expect(mocks.requestPermission).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: /close menu/i })).toBeInTheDocument();
   });
 });

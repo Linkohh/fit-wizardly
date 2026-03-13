@@ -4,13 +4,16 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { usePreferencesStore } from '@/hooks/useUserPreferences';
+import { useMotionPreferences } from '@/hooks/use-motion-preferences';
+import { useMotionTiltStatus } from '@/hooks/use-motion-tilt-status';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { cn, debounce } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
-import { Users, Sun, Moon, Monitor } from 'lucide-react';
+import { Users, Sun, Moon, Monitor, Smartphone } from 'lucide-react';
 import { isNativeApp } from '@/lib/platform';
 import {
   DropdownMenu,
@@ -27,6 +30,14 @@ export function Header() {
 
   const { isTrainerMode } = useTrainerStore();
   const { mode, setMode } = useThemeStore();
+  const { shouldReduceMotion } = useMotionPreferences();
+  const motionTiltEnabled = usePreferencesStore((state) => state.settings.motionTilt !== false);
+  const {
+    status: motionTiltStatus,
+    isRefreshing: isRefreshingMotionTiltStatus,
+    isRequestingPermission: isRequestingMotionTiltPermission,
+    requestPermission: requestMotionTiltPermission,
+  } = useMotionTiltStatus();
 
   // Refs for tracking nav item positions for the sliding indicator
   const navRef = useRef<HTMLElement>(null);
@@ -80,6 +91,41 @@ export function Header() {
   }, [t, isTrainerMode]);
 
   const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
+
+  const motionTiltStatusLabel = useMemo(() => {
+    if (shouldReduceMotion) {
+      return t('profile.motion_tilt_status_reduced', 'Reduced motion is on');
+    }
+
+    if (!motionTiltEnabled) {
+      return t('profile.motion_tilt_status_off', 'Off');
+    }
+
+    if (motionTiltStatus.available && motionTiltStatus.permission === 'granted') {
+      return t('profile.motion_tilt_status_active', 'Active');
+    }
+
+    if (motionTiltStatus.permission === 'prompt') {
+      return t('profile.motion_tilt_status_prompt', 'Needs device access');
+    }
+
+    if (motionTiltStatus.permission === 'denied' && motionTiltStatus.available) {
+      return t('profile.motion_tilt_status_denied', 'Access blocked');
+    }
+
+    return t('profile.motion_tilt_status_unavailable', 'Unavailable on this device');
+  }, [motionTiltEnabled, motionTiltStatus.available, motionTiltStatus.permission, shouldReduceMotion, t]);
+
+  const showMotionTiltAction =
+    motionTiltEnabled &&
+    !shouldReduceMotion &&
+    !isRefreshingMotionTiltStatus &&
+    motionTiltStatus.permission !== 'granted';
+
+  const motionTiltActionLabel =
+    motionTiltStatus.permission === 'denied'
+      ? t('profile.motion_tilt_retry', 'Retry')
+      : t('profile.motion_tilt_enable', 'Enable');
 
   // Update indicator position when route changes
   useEffect(() => {
@@ -362,6 +408,38 @@ export function Header() {
                     >
                       <Monitor className="h-3.5 w-3.5" />
                     </Button>
+                  </div>
+                </div>
+
+                <div className="rounded-xl border border-border/60 bg-background/50 px-3 py-2.5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-2">
+                      <Smartphone className="mt-0.5 h-4 w-4 text-primary" />
+                      <div className="space-y-0.5">
+                        <p className="text-sm font-medium">
+                          {t('profile.motion_tilt', 'Motion Tilt')}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {motionTiltStatusLabel}
+                        </p>
+                      </div>
+                    </div>
+
+                    {showMotionTiltAction && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          void requestMotionTiltPermission();
+                        }}
+                        disabled={isRequestingMotionTiltPermission}
+                        className="h-8 rounded-full px-3 text-xs"
+                      >
+                        {isRequestingMotionTiltPermission
+                          ? t('profile.motion_tilt_enabling', 'Enabling...')
+                          : motionTiltActionLabel}
+                      </Button>
+                    )}
                   </div>
                 </div>
 

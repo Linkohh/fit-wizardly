@@ -1,14 +1,26 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, RefObject } from 'react';
+import type { PluginListenerHandle } from '@capacitor/core';
 import { useMotionValue, useSpring, useTransform } from 'framer-motion';
+import {
+  MotionTilt,
+  isNativeMotionTiltSupported,
+  publishMotionTiltStatus,
+  refreshMotionTiltStatus,
+  subscribeToMotionTiltStatus,
+  type MotionTiltSample,
+} from '@/lib/motion-tilt';
 
 const MAX_POINTER_DISTANCE = 300;
 const DESKTOP_MAX_ROTATION_DEGREES = 5;
-const MOBILE_MAX_ROTATION_DEGREES = 8;
-const SENSOR_MAX_ANGLE = 20;
-const SENSOR_GAIN = 1.8;
-const SENSOR_STARTUP_TIMEOUT_MS = 1200;
-const TILT_SPRING = { stiffness: 100, damping: 30 };
+const MOBILE_MAX_ROTATION_DEGREES = 10;
+const SENSOR_MAX_ANGLE = 18;
+const SENSOR_DEAD_ZONE = 1.1;
+const SENSOR_GAIN = 2.2;
+const SENSOR_STARTUP_TIMEOUT_MS = 1600;
+const SENSOR_BASELINE_SAMPLE_COUNT = 8;
+const SENSOR_FRAME_BLEND = 0.42;
+const TILT_SPRING = { stiffness: 140, damping: 24, mass: 0.82 };
 
 type MotionPermissionResult = 'granted' | 'denied' | 'unsupported';
 
@@ -17,10 +29,6 @@ type SensorStatus = 'idle' | 'enabled' | 'denied' | 'unsupported' | 'error';
 type DeviceOrientationPermissionState = 'granted' | 'denied';
 
 type DeviceOrientationWithPermission = {
-  requestPermission?: () => Promise<DeviceOrientationPermissionState>;
-};
-
-type DeviceMotionWithPermission = {
   requestPermission?: () => Promise<DeviceOrientationPermissionState>;
 };
 
@@ -49,27 +57,59 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function applyDeadZone(value: number) {
+  const magnitude = Math.abs(value);
+  if (magnitude <= SENSOR_DEAD_ZONE) {
+    return 0;
+  }
+
+  return Math.sign(value) * (magnitude - SENSOR_DEAD_ZONE);
+}
+
+function averageSamples(samples: MotionTiltSample[]) {
+  const total = samples.reduce(
+    (accumulator, sample) => ({
+      pitch: accumulator.pitch + sample.pitch,
+      roll: accumulator.roll + sample.roll,
+    }),
+    { pitch: 0, roll: 0 },
+  );
+
+  return {
+    pitch: total.pitch / samples.length,
+    roll: total.roll / samples.length,
+  };
+}
+
 export function useHeroTilt({
   containerRef,
   isEnabled,
   isMobileContext,
 }: UseHeroTiltOptions): UseHeroTiltResult {
   const rectRef = useRef<DOMRect | null>(null);
-  const sensorAttachedRef = useRef(false);
+  const webSensorAttachedRef = useRef(false);
+  const nativeListenerRef = useRef<PluginListenerHandle | null>(null);
   const sensorDataReceivedRef = useRef(false);
-  const sensorBaselineRef = useRef<{ beta: number; gamma: number } | null>(null);
+  const sensorBaselineRef = useRef<{ pitch: number; roll: number } | null>(null);
+  const sensorBaselineSamplesRef = useRef<MotionTiltSample[]>([]);
   const sensorStartupTimeoutRef = useRef<number | null>(null);
+  const pendingAnimationFrameRef = useRef<number | null>(null);
+  const pendingTargetRef = useRef({ x: 0, y: 0 });
+  const filteredTargetRef = useRef({ x: 0, y: 0 });
+  const isEnablingMotionRef = useRef(false);
 
   const [sensorStatus, setSensorStatus] = useState<SensorStatus>('idle');
   const [isTouchFallbackActive, setIsTouchFallbackActive] = useState(false);
   const [isEnablingMotion, setIsEnablingMotion] = useState(false);
 
-  const hasSensorSupport = useMemo(
+  const hasWebSensorSupport = useMemo(
     () =>
       typeof window !== 'undefined' &&
       typeof window.DeviceOrientationEvent !== 'undefined',
-    []
+    [],
   );
+
+  const usesNativeMotionTilt = isMobileContext && isNativeMotionTiltSupported();
 
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
@@ -81,23 +121,22 @@ export function useHeroTilt({
     useTransform(
       pointerY,
       [-MAX_POINTER_DISTANCE, MAX_POINTER_DISTANCE],
-      [maxRotationDegrees, -maxRotationDegrees]
+      [maxRotationDegrees, -maxRotationDegrees],
     ),
-    TILT_SPRING
+    TILT_SPRING,
   );
   const rotateY = useSpring(
     useTransform(
       pointerX,
       [-MAX_POINTER_DISTANCE, MAX_POINTER_DISTANCE],
-      [-maxRotationDegrees, maxRotationDegrees]
+      [-maxRotationDegrees, maxRotationDegrees],
     ),
-    TILT_SPRING
+    TILT_SPRING,
   );
 
-  const resetTilt = useCallback(() => {
-    pointerX.set(0);
-    pointerY.set(0);
-  }, [pointerX, pointerY]);
+  useEffect(() => {
+    isEnablingMotionRef.current = isEnablingMotion;
+  }, [isEnablingMotion]);
 
   const clearSensorStartupTimeout = useCallback(() => {
     if (sensorStartupTimeoutRef.current !== null) {
@@ -105,6 +144,27 @@ export function useHeroTilt({
       sensorStartupTimeoutRef.current = null;
     }
   }, []);
+
+  const clearAnimationFrame = useCallback(() => {
+    if (pendingAnimationFrameRef.current !== null) {
+      window.cancelAnimationFrame(pendingAnimationFrameRef.current);
+      pendingAnimationFrameRef.current = null;
+    }
+  }, []);
+
+  const resetSensorCalibration = useCallback(() => {
+    sensorDataReceivedRef.current = false;
+    sensorBaselineRef.current = null;
+    sensorBaselineSamplesRef.current = [];
+  }, []);
+
+  const resetTilt = useCallback(() => {
+    clearAnimationFrame();
+    pendingTargetRef.current = { x: 0, y: 0 };
+    filteredTargetRef.current = { x: 0, y: 0 };
+    pointerX.set(0);
+    pointerY.set(0);
+  }, [clearAnimationFrame, pointerX, pointerY]);
 
   const updateRect = useCallback(() => {
     if (containerRef.current) {
@@ -123,198 +183,419 @@ export function useHeroTilt({
     };
   }, [updateRect]);
 
-  const applyPointerTilt = useCallback(
-    (clientX: number, clientY: number) => {
-      const rect = rectRef.current;
-      if (!rect) return;
+  const scheduleTiltTarget = useCallback(
+    (targetX: number, targetY: number) => {
+      pendingTargetRef.current = {
+        x: clamp(targetX, -MAX_POINTER_DISTANCE, MAX_POINTER_DISTANCE),
+        y: clamp(targetY, -MAX_POINTER_DISTANCE, MAX_POINTER_DISTANCE),
+      };
 
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
+      if (pendingAnimationFrameRef.current !== null) {
+        return;
+      }
 
-      const relativeX = clamp(clientX - centerX, -MAX_POINTER_DISTANCE, MAX_POINTER_DISTANCE);
-      const relativeY = clamp(clientY - centerY, -MAX_POINTER_DISTANCE, MAX_POINTER_DISTANCE);
+      pendingAnimationFrameRef.current = window.requestAnimationFrame(() => {
+        pendingAnimationFrameRef.current = null;
+        filteredTargetRef.current = {
+          x:
+            filteredTargetRef.current.x +
+            (pendingTargetRef.current.x - filteredTargetRef.current.x) * SENSOR_FRAME_BLEND,
+          y:
+            filteredTargetRef.current.y +
+            (pendingTargetRef.current.y - filteredTargetRef.current.y) * SENSOR_FRAME_BLEND,
+        };
 
-      pointerX.set(relativeX);
-      pointerY.set(relativeY);
+        pointerX.set(filteredTargetRef.current.x);
+        pointerY.set(filteredTargetRef.current.y);
+      });
     },
-    [pointerX, pointerY]
+    [pointerX, pointerY],
   );
 
-  const handleOrientation = useCallback(
-    (event: DeviceOrientationEvent) => {
-      if (!isEnabled) return;
-
-      const { beta, gamma } = event;
-      if (beta == null || gamma == null) return;
+  const applySensorSample = useCallback(
+    (sample: MotionTiltSample) => {
+      if (!isEnabled) {
+        return;
+      }
 
       sensorDataReceivedRef.current = true;
       clearSensorStartupTimeout();
 
       if (!sensorBaselineRef.current) {
-        sensorBaselineRef.current = { beta, gamma };
+        sensorBaselineSamplesRef.current = [
+          ...sensorBaselineSamplesRef.current,
+          sample,
+        ].slice(-SENSOR_BASELINE_SAMPLE_COUNT);
+
+        if (sensorBaselineSamplesRef.current.length < SENSOR_BASELINE_SAMPLE_COUNT) {
+          return;
+        }
+
+        sensorBaselineRef.current = averageSamples(sensorBaselineSamplesRef.current);
+        return;
       }
 
-      const relativeGamma = gamma - sensorBaselineRef.current.gamma;
-      const relativeBeta = beta - sensorBaselineRef.current.beta;
+      const relativeRoll = applyDeadZone(sample.roll - sensorBaselineRef.current.roll);
+      const relativePitch = applyDeadZone(sample.pitch - sensorBaselineRef.current.pitch);
 
-      const normalizedX = clamp(relativeGamma, -SENSOR_MAX_ANGLE, SENSOR_MAX_ANGLE) / SENSOR_MAX_ANGLE;
-      const normalizedY = clamp(relativeBeta, -SENSOR_MAX_ANGLE, SENSOR_MAX_ANGLE) / SENSOR_MAX_ANGLE;
+      const normalizedX =
+        clamp(relativeRoll, -SENSOR_MAX_ANGLE, SENSOR_MAX_ANGLE) / SENSOR_MAX_ANGLE;
+      const normalizedY =
+        clamp(relativePitch, -SENSOR_MAX_ANGLE, SENSOR_MAX_ANGLE) / SENSOR_MAX_ANGLE;
 
-      pointerX.set(clamp(normalizedX * MAX_POINTER_DISTANCE * SENSOR_GAIN, -MAX_POINTER_DISTANCE, MAX_POINTER_DISTANCE));
-      pointerY.set(clamp(normalizedY * MAX_POINTER_DISTANCE * SENSOR_GAIN, -MAX_POINTER_DISTANCE, MAX_POINTER_DISTANCE));
+      scheduleTiltTarget(
+        normalizedX * MAX_POINTER_DISTANCE * SENSOR_GAIN,
+        normalizedY * MAX_POINTER_DISTANCE * SENSOR_GAIN,
+      );
     },
-    [clearSensorStartupTimeout, isEnabled, pointerX, pointerY]
+    [clearSensorStartupTimeout, isEnabled, scheduleTiltTarget],
   );
 
-  const detachSensorListener = useCallback(() => {
-    if (!sensorAttachedRef.current) return;
+  const handleOrientation = useCallback(
+    (event: DeviceOrientationEvent) => {
+      const { beta, gamma } = event;
+      if (beta == null || gamma == null) {
+        return;
+      }
+
+      applySensorSample({
+        pitch: beta,
+        roll: gamma,
+        timestamp: event.timeStamp,
+      });
+    },
+    [applySensorSample],
+  );
+
+  const stopNativeMotion = useCallback(async () => {
+    clearSensorStartupTimeout();
+
+    if (nativeListenerRef.current) {
+      const listener = nativeListenerRef.current;
+      nativeListenerRef.current = null;
+      await listener.remove();
+    }
+
+    if (usesNativeMotionTilt) {
+      try {
+        await MotionTilt.stop();
+      } catch {
+        // Ignore plugin shutdown failures to avoid trapping the UI in a bad state.
+      }
+    }
+  }, [clearSensorStartupTimeout, usesNativeMotionTilt]);
+
+  const detachWebSensorListener = useCallback(() => {
+    if (!webSensorAttachedRef.current) {
+      return;
+    }
 
     window.removeEventListener('deviceorientation', handleOrientation);
     window.removeEventListener('deviceorientationabsolute', handleOrientation);
-    sensorAttachedRef.current = false;
+    webSensorAttachedRef.current = false;
   }, [handleOrientation]);
 
-  const attachSensorListener = useCallback(() => {
-    if (sensorAttachedRef.current) {
+  const attachWebSensorListener = useCallback(() => {
+    if (webSensorAttachedRef.current) {
       return true;
     }
 
-    if (!hasSensorSupport) {
+    if (!hasWebSensorSupport) {
       return false;
     }
 
     window.addEventListener('deviceorientation', handleOrientation, { passive: true });
     window.addEventListener('deviceorientationabsolute', handleOrientation, { passive: true });
-    sensorAttachedRef.current = true;
+    webSensorAttachedRef.current = true;
     return true;
-  }, [handleOrientation, hasSensorSupport]);
+  }, [handleOrientation, hasWebSensorSupport]);
+
+  const applyPointerTilt = useCallback(
+    (clientX: number, clientY: number) => {
+      const rect = rectRef.current;
+      if (!rect) {
+        return;
+      }
+
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const relativeX = clamp(
+        clientX - centerX,
+        -MAX_POINTER_DISTANCE,
+        MAX_POINTER_DISTANCE,
+      );
+      const relativeY = clamp(
+        clientY - centerY,
+        -MAX_POINTER_DISTANCE,
+        MAX_POINTER_DISTANCE,
+      );
+
+      pointerX.set(relativeX);
+      pointerY.set(relativeY);
+    },
+    [pointerX, pointerY],
+  );
+
+  const enableMotion = useCallback(
+    async (options?: { userInitiated?: boolean }): Promise<MotionPermissionResult> => {
+      const userInitiated = options?.userInitiated ?? true;
+
+      if (!isEnabled || !isMobileContext) {
+        return 'unsupported';
+      }
+
+      setIsEnablingMotion(true);
+      resetSensorCalibration();
+      clearSensorStartupTimeout();
+
+      if (usesNativeMotionTilt) {
+        try {
+          const status = await refreshMotionTiltStatus();
+
+          if (!status.available) {
+            setSensorStatus('unsupported');
+            return 'unsupported';
+          }
+
+          if (status.permission !== 'granted') {
+            setSensorStatus(status.permission === 'denied' ? 'denied' : 'idle');
+            return status.permission === 'denied' ? 'denied' : 'unsupported';
+          }
+
+          setIsTouchFallbackActive(false);
+          await stopNativeMotion();
+
+          nativeListenerRef.current = await MotionTilt.addListener('tilt', applySensorSample);
+          await MotionTilt.start();
+
+          setSensorStatus('enabled');
+          publishMotionTiltStatus({
+            available: true,
+            permission: 'granted',
+            source: 'native',
+          });
+
+          sensorStartupTimeoutRef.current = window.setTimeout(() => {
+            if (!sensorDataReceivedRef.current) {
+              void stopNativeMotion();
+              setSensorStatus('unsupported');
+              resetTilt();
+              publishMotionTiltStatus({
+                available: false,
+                permission: 'granted',
+                source: 'native',
+              });
+            }
+          }, SENSOR_STARTUP_TIMEOUT_MS);
+
+          return 'granted';
+        } catch {
+          await stopNativeMotion();
+          setSensorStatus('error');
+          resetTilt();
+          publishMotionTiltStatus({
+            available: false,
+            permission: 'denied',
+            source: 'native',
+          });
+          return 'denied';
+        } finally {
+          setIsEnablingMotion(false);
+        }
+      }
+
+      if (!hasWebSensorSupport) {
+        setSensorStatus('unsupported');
+        setIsTouchFallbackActive(true);
+        publishMotionTiltStatus({
+          available: false,
+          permission: 'denied',
+          source: 'web',
+        });
+        setIsEnablingMotion(false);
+        return 'unsupported';
+      }
+
+      try {
+        const deviceOrientationEvent =
+          window.DeviceOrientationEvent as DeviceOrientationWithPermission | undefined;
+        const deviceMotionEvent =
+          window.DeviceMotionEvent as DeviceOrientationWithPermission | undefined;
+        const hasExplicitPermissionApi =
+          typeof deviceOrientationEvent?.requestPermission === 'function' ||
+          typeof deviceMotionEvent?.requestPermission === 'function';
+
+        if (
+          userInitiated &&
+          typeof deviceOrientationEvent?.requestPermission === 'function'
+        ) {
+          const permission = await deviceOrientationEvent.requestPermission();
+          if (permission !== 'granted') {
+            setSensorStatus('denied');
+            setIsTouchFallbackActive(true);
+            publishMotionTiltStatus({
+              available: false,
+              permission: 'denied',
+              source: 'web',
+            });
+            return 'denied';
+          }
+        } else if (
+          userInitiated &&
+          typeof deviceMotionEvent?.requestPermission === 'function'
+        ) {
+          const permission = await deviceMotionEvent.requestPermission();
+          if (permission !== 'granted') {
+            setSensorStatus('denied');
+            setIsTouchFallbackActive(true);
+            publishMotionTiltStatus({
+              available: false,
+              permission: 'denied',
+              source: 'web',
+            });
+            return 'denied';
+          }
+        }
+
+        const didAttach = attachWebSensorListener();
+        if (!didAttach) {
+          setSensorStatus('unsupported');
+          setIsTouchFallbackActive(true);
+          publishMotionTiltStatus({
+            available: false,
+            permission: 'denied',
+            source: 'web',
+          });
+          return 'unsupported';
+        }
+
+        setSensorStatus('enabled');
+        setIsTouchFallbackActive(false);
+        publishMotionTiltStatus({
+          available: true,
+          permission: userInitiated || !hasExplicitPermissionApi ? 'granted' : 'prompt',
+          source: 'web',
+        });
+
+        sensorStartupTimeoutRef.current = window.setTimeout(() => {
+          if (!sensorDataReceivedRef.current) {
+            detachWebSensorListener();
+            setSensorStatus('unsupported');
+            setIsTouchFallbackActive(true);
+            publishMotionTiltStatus({
+              available: false,
+              permission: 'denied',
+              source: 'web',
+            });
+          }
+        }, SENSOR_STARTUP_TIMEOUT_MS);
+
+        return 'granted';
+      } catch {
+        detachWebSensorListener();
+        setSensorStatus('error');
+        setIsTouchFallbackActive(true);
+        publishMotionTiltStatus({
+          available: false,
+          permission: 'denied',
+          source: 'web',
+        });
+        return 'denied';
+      } finally {
+        setIsEnablingMotion(false);
+      }
+    },
+    [
+      applySensorSample,
+      attachWebSensorListener,
+      clearSensorStartupTimeout,
+      detachWebSensorListener,
+      hasWebSensorSupport,
+      isEnabled,
+      isMobileContext,
+      resetSensorCalibration,
+      resetTilt,
+      stopNativeMotion,
+      usesNativeMotionTilt,
+    ],
+  );
 
   useEffect(() => {
     if (!isEnabled) {
-      detachSensorListener();
+      detachWebSensorListener();
+      void stopNativeMotion();
       clearSensorStartupTimeout();
-      sensorBaselineRef.current = null;
-      sensorDataReceivedRef.current = false;
+      resetSensorCalibration();
       setSensorStatus('idle');
       setIsTouchFallbackActive(false);
       resetTilt();
       return;
     }
 
-    if (isMobileContext && !hasSensorSupport) {
+    if (!usesNativeMotionTilt && isMobileContext && !hasWebSensorSupport) {
       setSensorStatus('unsupported');
       setIsTouchFallbackActive(true);
     }
 
     return () => {
-      detachSensorListener();
+      detachWebSensorListener();
+      void stopNativeMotion();
       clearSensorStartupTimeout();
+      clearAnimationFrame();
     };
   }, [
+    clearAnimationFrame,
     clearSensorStartupTimeout,
-    detachSensorListener,
-    hasSensorSupport,
+    detachWebSensorListener,
+    hasWebSensorSupport,
     isEnabled,
     isMobileContext,
+    resetSensorCalibration,
     resetTilt,
+    stopNativeMotion,
+    usesNativeMotionTilt,
   ]);
 
-  const enableMotion = useCallback(async (
-    options?: { userInitiated?: boolean }
-  ): Promise<MotionPermissionResult> => {
-    const userInitiated = options?.userInitiated ?? true;
-
-    if (!isEnabled || !isMobileContext) {
-      return 'unsupported';
+  useEffect(() => {
+    if (!isEnabled || !isMobileContext || !usesNativeMotionTilt) {
+      return;
     }
 
-    if (!hasSensorSupport) {
-      setSensorStatus('unsupported');
-      setIsTouchFallbackActive(true);
-      return 'unsupported';
-    }
+    return subscribeToMotionTiltStatus((status) => {
+      if (status.source !== 'native') {
+        return;
+      }
 
-    setIsEnablingMotion(true);
-    sensorDataReceivedRef.current = false;
-    sensorBaselineRef.current = null;
-    clearSensorStartupTimeout();
+      if (!status.available) {
+        void stopNativeMotion();
+        setSensorStatus('unsupported');
+        resetTilt();
+        return;
+      }
 
-    try {
-      const maybeDeviceOrientationEvent =
-        window.DeviceOrientationEvent as DeviceOrientationWithPermission | undefined;
-      const maybeDeviceMotionEvent =
-        window.DeviceMotionEvent as DeviceMotionWithPermission | undefined;
-
-      const hasExplicitPermissionApi =
-        typeof maybeDeviceOrientationEvent?.requestPermission === 'function' ||
-        typeof maybeDeviceMotionEvent?.requestPermission === 'function';
+      if (status.permission === 'denied') {
+        void stopNativeMotion();
+        setSensorStatus('denied');
+        resetTilt();
+        return;
+      }
 
       if (
-        userInitiated &&
-        typeof maybeDeviceOrientationEvent?.requestPermission === 'function'
+        status.permission === 'granted' &&
+        !nativeListenerRef.current &&
+        !isEnablingMotionRef.current
       ) {
-        const permission = await maybeDeviceOrientationEvent.requestPermission();
-        if (permission !== 'granted') {
-          setSensorStatus('denied');
-          setIsTouchFallbackActive(true);
-          return 'denied';
-        }
-      } else if (
-        userInitiated &&
-        typeof maybeDeviceMotionEvent?.requestPermission === 'function'
-      ) {
-        const permission = await maybeDeviceMotionEvent.requestPermission();
-        if (permission !== 'granted') {
-          setSensorStatus('denied');
-          setIsTouchFallbackActive(true);
-          return 'denied';
-        }
+        void enableMotion({ userInitiated: false });
       }
-
-      const didAttach = attachSensorListener();
-      if (!didAttach) {
-        setSensorStatus('unsupported');
-        setIsTouchFallbackActive(true);
-        return 'unsupported';
-      }
-
-      setSensorStatus('enabled');
-      setIsTouchFallbackActive(false);
-      sensorStartupTimeoutRef.current = window.setTimeout(() => {
-        if (!sensorDataReceivedRef.current) {
-          detachSensorListener();
-
-          // Auto-attempt path: if explicit permission APIs exist, keep fallback button path available.
-          if (!userInitiated && hasExplicitPermissionApi) {
-            setSensorStatus('idle');
-            setIsTouchFallbackActive(false);
-            return;
-          }
-
-          setSensorStatus('unsupported');
-          setIsTouchFallbackActive(true);
-        }
-      }, SENSOR_STARTUP_TIMEOUT_MS);
-      return 'granted';
-    } catch {
-      setSensorStatus('error');
-      setIsTouchFallbackActive(true);
-      return 'denied';
-    } finally {
-      setIsEnablingMotion(false);
-    }
-  }, [
-    attachSensorListener,
-    clearSensorStartupTimeout,
-    detachSensorListener,
-    hasSensorSupport,
-    isEnabled,
-    isMobileContext,
-  ]);
+    });
+  }, [enableMotion, isEnabled, isMobileContext, resetTilt, stopNativeMotion, usesNativeMotionTilt]);
 
   const handlePointerMove = useCallback(
     (event: ReactPointerEvent<HTMLElement>) => {
-      if (!isEnabled) return;
+      if (!isEnabled) {
+        return;
+      }
 
       if (event.pointerType === 'touch' && !isTouchFallbackActive) {
         return;
@@ -322,12 +603,17 @@ export function useHeroTilt({
 
       applyPointerTilt(event.clientX, event.clientY);
     },
-    [applyPointerTilt, isEnabled, isTouchFallbackActive]
+    [applyPointerTilt, isEnabled, isTouchFallbackActive],
   );
 
   const handlePointerLeave = useCallback(() => {
-    if (!isEnabled) return;
-    if (sensorStatus === 'enabled') return;
+    if (!isEnabled) {
+      return;
+    }
+
+    if (sensorStatus === 'enabled') {
+      return;
+    }
 
     resetTilt();
   }, [isEnabled, resetTilt, sensorStatus]);
@@ -335,7 +621,8 @@ export function useHeroTilt({
   const canEnableSensor =
     isEnabled &&
     isMobileContext &&
-    hasSensorSupport &&
+    !usesNativeMotionTilt &&
+    hasWebSensorSupport &&
     sensorStatus !== 'enabled' &&
     !isTouchFallbackActive;
 
