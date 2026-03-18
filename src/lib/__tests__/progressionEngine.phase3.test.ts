@@ -118,7 +118,7 @@ describe('progressionEngine phase 3 intelligence', () => {
             }
         }
 
-        const suggestion = suggestSplitAdjustment(logs, plan, 28);
+        const suggestion = suggestSplitAdjustment(logs, plan, 28, now);
 
         expect(suggestion).not.toBeNull();
         expect(suggestion?.recommendedSplit).toBe('full_body');

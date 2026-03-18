@@ -314,4 +314,16 @@ describe('App auth routing', () => {
     expect(await screen.findByText('Account Feature Unavailable')).toBeInTheDocument();
     expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
   });
+
+  it('shows trainer mode required screen for authenticated users without trainer mode on trainer routes', async () => {
+    mocks.authState.user = { id: 'user-1' };
+    mocks.authState.session = { access_token: 'token-1' };
+    mocks.trainerState.isTrainerMode = false;
+
+    renderAt('/clients');
+
+    expect(await screen.findByText('Trainer Mode Required')).toBeInTheDocument();
+    expect(screen.queryByText('Clients Page')).not.toBeInTheDocument();
+    expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
+  });
 });

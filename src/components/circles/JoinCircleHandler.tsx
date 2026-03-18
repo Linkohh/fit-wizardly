@@ -164,6 +164,7 @@ export function JoinCircleHandler() {
             <AuthUnavailableState
                 title="Circle Invite Unavailable"
                 description="Joining a circle from an invite link requires Supabase auth and backend setup. This prototype is still running in demo mode."
+                secondaryLink={{ to: "/circles", label: "View Circles" }}
             />
         );
     }

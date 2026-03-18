@@ -6,11 +6,13 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 interface AuthUnavailableStateProps {
   title?: string;
   description?: string;
+  secondaryLink?: { to: string; label: string };
 }
 
 export function AuthUnavailableState({
   title = "Account Feature Unavailable",
   description = "This feature requires Supabase auth and backend setup. It is not available in demo mode yet. To enable it, add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env.local file.",
+  secondaryLink,
 }: AuthUnavailableStateProps) {
   return (
     <main className="container-content py-12">
@@ -28,9 +30,11 @@ export function AuthUnavailableState({
           <Button asChild className="w-full">
             <Link to="/">Return Home</Link>
           </Button>
-          <Button asChild className="w-full" variant="outline">
-            <Link to="/circles">View Circles</Link>
-          </Button>
+          {secondaryLink && (
+            <Button asChild className="w-full" variant="outline">
+              <Link to={secondaryLink.to}>{secondaryLink.label}</Link>
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </main>

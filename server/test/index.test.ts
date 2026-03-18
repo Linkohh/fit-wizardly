@@ -351,3 +351,92 @@ test('rejects GET /plans/:id with a malformed (non-UUID) plan ID', async () => {
   assert.deepEqual(response.body, { error: 'Invalid plan ID format' });
   assert.equal(repoCalled, false);
 });
+
+test('rejects GET /plans when userId query param belongs to a different user', async () => {
+  let listCalled = false;
+
+  const { listPlans } = createRouteHandlers(appConfig, {
+    logger: quietLogger,
+    listPlansForUser: async () => {
+      listCalled = true;
+      return [];
+    },
+  });
+  const request = createRequest({
+    query: { userId: OTHER_USER_ID },
+    user: { id: OWNER_USER_ID, email: 'owner@example.com' },
+    authToken: 'valid-token',
+  });
+  const response = createResponse();
+
+  await listPlans(request, response);
+
+  assert.equal(response.statusCode, 403);
+  assert.deepEqual(response.body, { error: 'Unauthorized to view these plans' });
+  assert.equal(listCalled, false);
+});
+
+test('rejects PATCH /plans/:id when plan is owned by a different user', async () => {
+  let upsertCalled = false;
+
+  const { updatePlan } = createRouteHandlers(appConfig, {
+    logger: quietLogger,
+    getPlanForUser: async () => ({
+      ...createValidPlanPayload(),
+      userId: OTHER_USER_ID,
+      createdAt: '2026-03-18T00:00:00.000Z',
+      updatedAt: '2026-03-18T00:00:00.000Z',
+    }),
+    upsertPlanForUser: async () => {
+      upsertCalled = true;
+      throw new Error('should not reach repo');
+    },
+  });
+  const request = createRequest({
+    params: { id: VALID_UUID },
+    body: { notes: ['updated note'] },
+    user: { id: OWNER_USER_ID, email: 'owner@example.com' },
+    authToken: 'valid-token',
+  });
+  const response = createResponse();
+
+  await updatePlan(request, response);
+
+  assert.equal(response.statusCode, 403);
+  assert.deepEqual(response.body, { error: 'Forbidden' });
+  assert.equal(upsertCalled, false);
+});
+
+test('accepts PATCH /plans/:id for the owning user and merges fields', async () => {
+  const existing = {
+    ...createValidPlanPayload(),
+    userId: OWNER_USER_ID,
+    createdAt: '2026-03-18T00:00:00.000Z',
+    updatedAt: '2026-03-18T00:00:00.000Z',
+  };
+
+  const { updatePlan } = createRouteHandlers(appConfig, {
+    logger: quietLogger,
+    getPlanForUser: async () => existing,
+    upsertPlanForUser: async ({ plan, planId, userId, schemaVersion }) => ({
+      ...(plan as object),
+      id: planId,
+      userId,
+      schemaVersion,
+      updatedAt: new Date().toISOString(),
+    }),
+  });
+  const request = createRequest({
+    params: { id: VALID_UUID },
+    body: { notes: ['merged note'] },
+    user: { id: OWNER_USER_ID, email: 'owner@example.com' },
+    authToken: 'valid-token',
+  });
+  const response = createResponse();
+
+  await updatePlan(request, response);
+
+  assert.equal(response.statusCode, 200);
+  const body = response.body as { notes: string[] };
+  assert.deepEqual(body.notes, ['merged note']);
+});

@@ -577,11 +577,12 @@ export function detectMRVWarnings(
 export function suggestSplitAdjustment(
     logs: WorkoutLog[],
     plan: Plan,
-    lookbackDays = 28
+    lookbackDays = 28,
+    referenceDate: Date = new Date()
 ): SplitAdjustmentSuggestion | null {
     if (logs.length === 0) return null;
 
-    const start = new Date();
+    const start = new Date(referenceDate);
     start.setDate(start.getDate() - lookbackDays);
     start.setHours(0, 0, 0, 0);
 
