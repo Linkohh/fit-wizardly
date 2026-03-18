@@ -40,6 +40,9 @@ export async function savePlanRemote(plan: Plan, userId?: string): Promise<Plan>
 }
 
 export async function getPlansRemote(userId?: string): Promise<Plan[]> {
+  // In Supabase mode, userId is intentionally not forwarded: listPlansSupabase()
+  // calls supabase.auth.getUser() and Supabase RLS (auth.uid() = user_id) scopes
+  // the query to the authenticated user automatically.
   return shouldUseSupabase()
     ? listPlansSupabase()
     : getPlansApiClient(userId);

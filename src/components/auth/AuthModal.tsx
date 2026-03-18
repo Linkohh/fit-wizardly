@@ -22,7 +22,15 @@ export function AuthModal() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    const trimmed = email.trim();
+    if (!trimmed) return;
+
+    // Defense-in-depth: validate format before calling Supabase so we can show
+    // an inline error instead of silently sending to a malformed address.
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
 
     setIsLoading(true);
     setError(null);

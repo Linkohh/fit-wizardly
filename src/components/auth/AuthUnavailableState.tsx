@@ -10,7 +10,7 @@ interface AuthUnavailableStateProps {
 
 export function AuthUnavailableState({
   title = "Account Feature Unavailable",
-  description = "This feature requires Supabase auth and backend setup. It is not available in demo mode yet.",
+  description = "This feature requires Supabase auth and backend setup. It is not available in demo mode yet. To enable it, add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env.local file.",
 }: AuthUnavailableStateProps) {
   return (
     <main className="container-content py-12">

@@ -84,4 +84,94 @@ describe('authStore.initialize', () => {
     expect(unsubscribeSecond).not.toHaveBeenCalled();
     expect(mocks.onAuthStateChange).toHaveBeenCalledTimes(2);
   });
+
+  it('sets session and marks loading false when an existing session is found', async () => {
+    const fakeSession = {
+      access_token: 'token-abc',
+      user: { id: 'user-1', email: 'user@example.com' },
+    };
+
+    mocks.getSession.mockResolvedValue({ data: { session: fakeSession }, error: null });
+    mocks.onAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    });
+
+    const { useAuthStore } = await loadAuthStore();
+
+    await useAuthStore.getState().initialize();
+
+    const state = useAuthStore.getState();
+    expect(state.isLoading).toBe(false);
+    expect(state.isConfigured).toBe(true);
+    expect(state.session).toEqual(fakeSession);
+    expect(state.user).toEqual(fakeSession.user);
+  });
+});
+
+describe('authStore.signInWithEmail', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+  });
+
+  it('returns an error immediately when Supabase is not configured', async () => {
+    const { useAuthStore } = await loadAuthStore({ configured: false });
+
+    const result = await useAuthStore.getState().signInWithEmail('test@example.com');
+
+    expect(result.error).toBeDefined();
+    expect(result.error?.message).toMatch(/not configured/i);
+    expect(mocks.signInWithOtp).not.toHaveBeenCalled();
+  });
+
+  it('calls signInWithOtp and returns no error on success', async () => {
+    mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
+    mocks.onAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    });
+    mocks.signInWithOtp.mockResolvedValue({ error: null });
+
+    const { useAuthStore } = await loadAuthStore();
+    await useAuthStore.getState().initialize();
+
+    const result = await useAuthStore.getState().signInWithEmail('user@example.com');
+
+    expect(result.error).toBeNull();
+    expect(mocks.signInWithOtp).toHaveBeenCalledWith(
+      expect.objectContaining({ email: 'user@example.com' })
+    );
+  });
+});
+
+describe('authStore.signOut', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+  });
+
+  it('clears session, user, and profile state after sign out', async () => {
+    const fakeSession = {
+      access_token: 'token-abc',
+      user: { id: 'user-1', email: 'user@example.com' },
+    };
+
+    mocks.getSession.mockResolvedValue({ data: { session: fakeSession }, error: null });
+    mocks.onAuthStateChange.mockReturnValue({
+      data: { subscription: { unsubscribe: vi.fn() } },
+    });
+    mocks.signOut.mockResolvedValue({ error: null });
+
+    const { useAuthStore } = await loadAuthStore();
+    await useAuthStore.getState().initialize();
+
+    // Pre-condition: session should be set
+    expect(useAuthStore.getState().session).toEqual(fakeSession);
+
+    await useAuthStore.getState().signOut();
+
+    const state = useAuthStore.getState();
+    expect(state.session).toBeNull();
+    expect(state.user).toBeNull();
+    expect(state.profile).toBeNull();
+  });
 });
