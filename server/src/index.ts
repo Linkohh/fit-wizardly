@@ -59,6 +59,8 @@ function loadConfig(overrides: Partial<AppConfig> = {}): AppConfig {
   };
 }
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 async function verifySupabaseAuthToken(
   token: string,
   config: AppConfig
@@ -67,13 +69,21 @@ async function verifySupabaseAuthToken(
     throw new Error('Server missing Supabase credentials');
   }
 
-  const response = await fetch(`${config.supabaseUrl}/auth/v1/user`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${token}`,
-      apikey: config.supabaseAnonKey,
-    },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  let response: Response;
+  try {
+    response = await fetch(`${config.supabaseUrl}/auth/v1/user`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        apikey: config.supabaseAnonKey,
+      },
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (!response.ok) {
     return null;
@@ -217,8 +227,9 @@ export function createRouteHandlers(
       }
 
       const now = new Date().toISOString();
-      const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, ...planPayload } = data;
-      const storedPlan = { ...planPayload, createdAt: data.createdAt || now };
+      // Strip all server-controlled timestamps from client payload — never trust client time
+      const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, createdAt: _ignoreCreatedAt, ...planPayload } = data;
+      const storedPlan = { ...planPayload, createdAt: now };
 
       const upserted = await deps.upsertPlanForUser({
         supabaseUrl: config.supabaseUrl!,
@@ -265,23 +276,30 @@ export function createRouteHandlers(
     }
   };
 
-  const getPlan = (req: AuthRequest, res: express.Response) => {
+  const getPlan = async (req: AuthRequest, res: express.Response) => {
     try {
-      deps
-        .getPlanForUser({
-          supabaseUrl: config.supabaseUrl!,
-          supabaseAnonKey: config.supabaseAnonKey!,
-          userToken: req.authToken!,
-          planId: req.params.id,
-        })
-        .then((plan) => {
-          if (!plan) return res.status(404).json({ error: 'Plan not found' });
-          res.json(plan);
-        })
-        .catch((error) => {
-          deps.logger.error('Error fetching plan:', error);
-          res.status(500).json({ error: 'Failed to fetch plan' });
-        });
+      const planId = req.params.id;
+      if (!UUID_REGEX.test(planId)) {
+        return res.status(400).json({ error: 'Invalid plan ID format' });
+      }
+
+      const userId = req.user!.id;
+      const plan = await deps.getPlanForUser({
+        supabaseUrl: config.supabaseUrl!,
+        supabaseAnonKey: config.supabaseAnonKey!,
+        userToken: req.authToken!,
+        planId,
+      });
+
+      if (!plan) return res.status(404).json({ error: 'Plan not found' });
+
+      // Defense-in-depth: verify ownership even though RLS should already scope by auth.uid()
+      const planData = plan as unknown as Partial<PlanPayload>;
+      if (planData.userId && planData.userId !== userId) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+
+      res.json(plan);
     } catch (error) {
       deps.logger.error('Error fetching plan:', error);
       res.status(500).json({ error: 'Failed to fetch plan' });
@@ -290,6 +308,11 @@ export function createRouteHandlers(
 
   const updatePlan = async (req: AuthRequest, res: express.Response) => {
     try {
+      const planId = req.params.id;
+      if (!UUID_REGEX.test(planId)) {
+        return res.status(400).json({ error: 'Invalid plan ID format' });
+      }
+
       const UpdateSchema = PlanPayloadSchema.pick({
         selections: true,
         splitType: true,
@@ -311,17 +334,23 @@ export function createRouteHandlers(
         supabaseUrl: config.supabaseUrl!,
         supabaseAnonKey: config.supabaseAnonKey!,
         userToken: req.authToken!,
-        planId: req.params.id,
+        planId,
       });
       if (!existing) return res.status(404).json({ error: 'Plan not found' });
 
       const existingPlan = existing as unknown as Partial<PlanPayload>;
+
+      // Defense-in-depth: verify ownership even though RLS should already scope by auth.uid()
+      if (existingPlan.userId && existingPlan.userId !== req.user!.id) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+
       const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, ...existingPayload } = existingPlan;
       const now = new Date().toISOString();
       const merged = {
         ...existingPayload,
         ...data,
-        id: req.params.id,
+        id: planId,
         createdAt: existingPlan.createdAt || now,
       };
 
@@ -330,7 +359,7 @@ export function createRouteHandlers(
         supabaseAnonKey: config.supabaseAnonKey!,
         userToken: req.authToken!,
         userId: req.user!.id,
-        planId: req.params.id,
+        planId,
         plan: merged,
         schemaVersion: data.schemaVersion ?? existingPlan.schemaVersion ?? 1,
       });
@@ -344,11 +373,32 @@ export function createRouteHandlers(
 
   const deletePlan = async (req: AuthRequest, res: express.Response) => {
     try {
+      const planId = req.params.id;
+      if (!UUID_REGEX.test(planId)) {
+        return res.status(400).json({ error: 'Invalid plan ID format' });
+      }
+
+      const userId = req.user!.id;
+
+      // Verify plan exists and belongs to this user before deleting
+      const existing = await deps.getPlanForUser({
+        supabaseUrl: config.supabaseUrl!,
+        supabaseAnonKey: config.supabaseAnonKey!,
+        userToken: req.authToken!,
+        planId,
+      });
+      if (!existing) return res.status(404).json({ error: 'Plan not found' });
+
+      const existingPlan = existing as unknown as Partial<PlanPayload>;
+      if (existingPlan.userId && existingPlan.userId !== userId) {
+        return res.status(403).json({ error: 'Forbidden' });
+      }
+
       const deleted = await deps.deletePlanForUser({
         supabaseUrl: config.supabaseUrl!,
         supabaseAnonKey: config.supabaseAnonKey!,
         userToken: req.authToken!,
-        planId: req.params.id,
+        planId,
       });
       if (!deleted) return res.status(404).json({ error: 'Plan not found' });
       res.status(204).send();

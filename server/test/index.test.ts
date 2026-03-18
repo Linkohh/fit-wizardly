@@ -182,3 +182,172 @@ test('accepts valid plan writes', async () => {
     updatedAt: '2026-03-18T00:00:00.000Z',
   });
 });
+
+test('rejects plan body that fails schema validation', async () => {
+  let upsertCalled = false;
+
+  const { createPlan } = createRouteHandlers(appConfig, {
+    logger: quietLogger,
+    upsertPlanForUser: async () => {
+      upsertCalled = true;
+      throw new Error('should not reach repo');
+    },
+  });
+  const request = createRequest({
+    body: { id: 'plan-1', invalid: true }, // missing required fields
+    user: { id: 'user-1', email: 'user@example.com' },
+    authToken: 'valid-token',
+  });
+  const response = createResponse();
+
+  await createPlan(request, response);
+
+  assert.equal(response.statusCode, 400);
+  assert.equal((response.body as { error: string }).error, 'Invalid input');
+  assert.equal(upsertCalled, false);
+});
+
+test('ignores client-provided createdAt and uses server timestamp', async () => {
+  let capturedPlan: Record<string, unknown> | undefined;
+
+  const { createPlan } = createRouteHandlers(appConfig, {
+    logger: quietLogger,
+    upsertPlanForUser: async ({ plan }) => {
+      capturedPlan = plan as Record<string, unknown>;
+      return {
+        ...(plan as object),
+        id: 'plan-1',
+        userId: 'user-1',
+        schemaVersion: 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+    },
+  });
+
+  const clientBackdatedTime = '2000-01-01T00:00:00.000Z';
+  const beforeCreate = Date.now();
+  const request = createRequest({
+    body: createValidPlanPayload({ createdAt: clientBackdatedTime }),
+    user: { id: 'user-1', email: 'user@example.com' },
+    authToken: 'valid-token',
+  });
+  const response = createResponse();
+
+  await createPlan(request, response);
+  const afterCreate = Date.now();
+
+  assert.equal(response.statusCode, 201);
+  assert.ok(capturedPlan, 'upsert should have been called');
+  assert.notEqual(capturedPlan!.createdAt, clientBackdatedTime);
+  const serverTimestamp = new Date(capturedPlan!.createdAt as string).getTime();
+  assert.ok(
+    serverTimestamp >= beforeCreate && serverTimestamp <= afterCreate,
+    'createdAt should be a current server timestamp'
+  );
+});
+
+const VALID_UUID = '11111111-1111-4111-8111-111111111111';
+const OTHER_USER_ID = '99999999-9999-4999-8999-999999999999';
+const OWNER_USER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+
+test('rejects GET /plans/:id for a plan owned by a different user', async () => {
+  const { getPlan } = createRouteHandlers(appConfig, {
+    logger: quietLogger,
+    getPlanForUser: async () => ({
+      ...createValidPlanPayload(),
+      userId: OTHER_USER_ID,
+      createdAt: '2026-03-18T00:00:00.000Z',
+      updatedAt: '2026-03-18T00:00:00.000Z',
+    }),
+  });
+  const request = createRequest({
+    params: { id: VALID_UUID },
+    user: { id: OWNER_USER_ID, email: 'owner@example.com' },
+    authToken: 'valid-token',
+  });
+  const response = createResponse();
+
+  await getPlan(request, response);
+
+  assert.equal(response.statusCode, 403);
+  assert.deepEqual(response.body, { error: 'Forbidden' });
+});
+
+test('returns 200 for GET /plans/:id when plan belongs to the authenticated user', async () => {
+  const planData = {
+    ...createValidPlanPayload(),
+    userId: OWNER_USER_ID,
+    createdAt: '2026-03-18T00:00:00.000Z',
+    updatedAt: '2026-03-18T00:00:00.000Z',
+  };
+  const { getPlan } = createRouteHandlers(appConfig, {
+    logger: quietLogger,
+    getPlanForUser: async () => planData,
+  });
+  const request = createRequest({
+    params: { id: VALID_UUID },
+    user: { id: OWNER_USER_ID, email: 'owner@example.com' },
+    authToken: 'valid-token',
+  });
+  const response = createResponse();
+
+  await getPlan(request, response);
+
+  assert.equal(response.statusCode, 200);
+  assert.deepEqual(response.body, planData);
+});
+
+test('rejects DELETE /plans/:id for a plan owned by a different user', async () => {
+  let deleteCalled = false;
+
+  const { deletePlan } = createRouteHandlers(appConfig, {
+    logger: quietLogger,
+    getPlanForUser: async () => ({
+      ...createValidPlanPayload(),
+      userId: OTHER_USER_ID,
+      createdAt: '2026-03-18T00:00:00.000Z',
+      updatedAt: '2026-03-18T00:00:00.000Z',
+    }),
+    deletePlanForUser: async () => {
+      deleteCalled = true;
+      return true;
+    },
+  });
+  const request = createRequest({
+    params: { id: VALID_UUID },
+    user: { id: OWNER_USER_ID, email: 'owner@example.com' },
+    authToken: 'valid-token',
+  });
+  const response = createResponse();
+
+  await deletePlan(request, response);
+
+  assert.equal(response.statusCode, 403);
+  assert.deepEqual(response.body, { error: 'Forbidden' });
+  assert.equal(deleteCalled, false);
+});
+
+test('rejects GET /plans/:id with a malformed (non-UUID) plan ID', async () => {
+  let repoCalled = false;
+
+  const { getPlan } = createRouteHandlers(appConfig, {
+    logger: quietLogger,
+    getPlanForUser: async () => {
+      repoCalled = true;
+      return null;
+    },
+  });
+  const request = createRequest({
+    params: { id: 'not-a-uuid' },
+    user: { id: OWNER_USER_ID, email: 'owner@example.com' },
+    authToken: 'valid-token',
+  });
+  const response = createResponse();
+
+  await getPlan(request, response);
+
+  assert.equal(response.statusCode, 400);
+  assert.deepEqual(response.body, { error: 'Invalid plan ID format' });
+  assert.equal(repoCalled, false);
+});
