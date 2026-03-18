@@ -396,61 +396,44 @@ These items were intentionally left out of scope:
 - No change to the demo-first availability of plan/history/profile/nutrition/analytics/exercises
 - No broad cleanup of unrelated TypeScript errors
 
-## Potential Review Risks / What Claude Should Double-Check
+## Post-Codex Audit Results (2026-03-18)
 
-These are the main places I would want a second reviewer to verify:
+All review items below were verified and resolved in PR #23.
 
-### 1. Route policy correctness
+### 1. Route policy correctness — VERIFIED
 
-Claude should verify that the final route split is exactly what the product wants:
+Route split matches the handoff spec exactly. `/workout/:planId/:dayIndex` confirmed guest-accessible per demo-first policy — the workout logger reads from local plan state so no account is needed.
 
-- public/demo:
-  - `/plan`
-  - `/workout/:planId/:dayIndex`
-  - `/history`
-  - `/analytics`
-  - `/profile`
-  - `/nutrition`
-  - `/exercises`
-  - `/circles`
-  - `/circles/join/:inviteCode`
-- auth-backed:
-  - `/circles/:circleId/*`
-- auth + trainer:
-  - `/clients`
-  - `/clients/:clientId`
-  - `/templates`
-  - `/revenue`
+### 2. Redirect and auth modal behavior — VERIFIED
 
-In particular, Claude should confirm whether `/workout/:planId/:dayIndex` truly should remain guest-accessible, because it can look like a personalized flow even though the current product direction keeps it demo-friendly.
+- `RequireAuth` uses a `useEffect` to open the modal only after the redirect has already rendered (`<Navigate to="/" />`), so there is no loop: `/` has no `RequireAuth` wrapper.
+- `redirectUrl` stores `window.location.origin + requestedPath` which is the correct full URL for Supabase magic-link `emailRedirectTo`.
 
-### 2. Redirect and auth modal behavior
+### 3. Demo-mode boundaries — FIXED
 
-Claude should verify:
+`AuthUnavailableState` previously had a hardcoded "View Circles" secondary button that appeared on all auth-unavailable surfaces, including trainer routes (`/clients`, `/templates`, `/revenue`). Fixed by adding an optional `secondaryLink` prop (defaults to no secondary button). `JoinCircleHandler` now explicitly passes the circles link.
 
-- opening the global auth modal from `RequireAuth` is safe from every route
-- redirecting guests to `/` while opening the modal does not create edge-case loops
-- storing `redirectUrl` as `window.location.origin + requestedPath` is appropriate for the magic-link flow
+### 4. Circles mutation boundaries — VERIFIED
 
-### 3. Demo-mode boundaries
+`CreateCircleModal` and `JoinCircleModal` are only rendered inside the authenticated branch of `CirclesPage` (guarded by `if (!user && !authLoading)`). The join-by-invite flow gates on `isConfigured` and `user` before attempting any mutation.
 
-Claude should verify that showing `AuthUnavailableState` for auth-backed routes when Supabase is missing is the right UX and that there are no other auth-backed pages still silently depending on missing config.
+### 5. Server refactor safety — VERIFIED AND IMPROVED
 
-### 4. Circles mutation boundaries
+`createApp`/`createRouteHandlers`/`startServer` separation is clean and behaviorally equivalent. `listPlans` was the only handler not using `async/await` — converted for consistency. Added three missing server tests: `PATCH /plans/:id` cross-user ownership rejection, `PATCH` field-merge success, and `GET /plans` cross-user `userId` query param rejection.
 
-Claude should check whether any circle create/join/member actions can still be triggered from public/demo surfaces without a clean unavailable/auth-required gate.
+### 6. Auth store lifecycle — VERIFIED
 
-### 5. Server refactor safety
+Module-level `authSubscription` pattern is correct and safe. Test confirms unsubscribe-before-register works across multiple `initialize()` calls. Added a test for the authenticated-user-without-trainer-mode case on trainer routes.
 
-Claude should review `server/src/index.ts` for:
+### Additional bugs found and fixed
 
-- behavioral parity after introducing `createApp`, `createRouteHandlers`, and `startServer`
-- whether the new exported test seams are clean and acceptable for this codebase
-- whether any route handlers should be split further or typed more strictly
+- **Duplicate exercise ID**: `plyo_push_up` appeared twice in the migration-generated `src/data/exercises.ts`. First entry renamed to `plyometric_push_up`.
+- **`suggestSplitAdjustment` clock dependency**: The function used `new Date()` directly, causing its test to fail once the hardcoded Feb 2026 fixture dates aged past the 28-day window. Added an optional `referenceDate` parameter (defaults to `new Date()`).
 
-### 6. Auth store lifecycle
+### Final test counts after PR #23
 
-Claude should confirm that the module-level `authSubscription` pattern is acceptable in this app and that repeated `initialize()` calls are now handled correctly without introducing another lifecycle edge case.
+- Frontend: **184/184** (was 182 — two pre-existing failures now fixed)
+- Server: **13/13** (was 10 — three new tests added)
 
 ## Files Directly Changed For This Work
 
