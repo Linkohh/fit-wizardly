@@ -20,7 +20,7 @@ export function RestTimer() {
 
     const checkTimer = () => {
       const now = Date.now();
-      const remaining = Math.ceil((activeWorkout.restTimerEndTime - now) / 1000);
+      const remaining = Math.ceil((activeWorkout.restTimerEndTime! - now) / 1000);
 
       if (remaining <= 0) {
         setIsVisible(false);

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useWizardStore } from '@/stores/wizardStore';
 import { useCustomExerciseStore } from '@/stores/customExerciseStore';
 import { useExerciseDatabase } from '@/lib/exerciseRepository';
-import { Exercise, Equipment, MuscleGroup, EQUIPMENT_OPTIONS, MUSCLE_DATA } from '@/types/fitness';
+import { Exercise, Equipment, MuscleGroup, ExerciseCategory, EQUIPMENT_OPTIONS, MUSCLE_DATA } from '@/types/fitness';
 import { ExerciseCard } from './ExerciseCard';
 import { ExerciseFilters } from './ExerciseFilters';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
@@ -23,8 +23,8 @@ const ITEMS_PER_PAGE = 24;
 type DifficultyFilter = 'Beginner' | 'Intermediate' | 'Advanced' | 'all';
 
 interface ExerciseFilterOptions {
-    category: string;
-    muscle: string;
+    category: ExerciseCategory | 'all';
+    muscle: MuscleGroup | 'all';
     difficulty: DifficultyFilter;
     equipment: string;
     search: string;

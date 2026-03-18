@@ -16,7 +16,7 @@ const mocks = vi.hoisted(() => {
     nativeSupported: false,
     nativeStatus: {
       available: true,
-      permission: 'granted' as const,
+      permission: 'granted' as 'granted' | 'denied',
       source: 'native' as const,
     },
     refreshMotionTiltStatus: vi.fn(async () => state.nativeStatus),
@@ -35,14 +35,14 @@ const mocks = vi.hoisted(() => {
 
 vi.mock('@/lib/motion-tilt', () => ({
   MotionTilt: {
-    addListener: (...args: unknown[]) => mocks.addListener(...args),
+    addListener: (...args: unknown[]) => (mocks.addListener as (...a: unknown[]) => unknown)(...args),
     start: () => mocks.start(),
     stop: () => mocks.stop(),
   },
   isNativeMotionTiltSupported: () => mocks.nativeSupported,
-  publishMotionTiltStatus: (...args: unknown[]) => mocks.publishMotionTiltStatus(...args),
+  publishMotionTiltStatus: (...args: unknown[]) => (mocks.publishMotionTiltStatus as (...a: unknown[]) => unknown)(...args),
   refreshMotionTiltStatus: () => mocks.refreshMotionTiltStatus(),
-  subscribeToMotionTiltStatus: (...args: unknown[]) => mocks.subscribeToMotionTiltStatus(...args),
+  subscribeToMotionTiltStatus: (...args: unknown[]) => (mocks.subscribeToMotionTiltStatus as (...a: unknown[]) => unknown)(...args),
 }));
 
 function setDeviceOrientationEvent(value: MockDeviceOrientationEvent | undefined) {

@@ -1803,7 +1803,7 @@ export const EXERCISE_DATABASE: Exercise[] = [
     "difficulty": "Intermediate"
   },
   {
-    "id": "plyo_push_up",
+    "id": "plyometric_push_up",
     "name": "Plyometric Push-Up",
     "primaryMuscles": [
       "chest",

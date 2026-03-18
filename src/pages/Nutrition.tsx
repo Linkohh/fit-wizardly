@@ -56,7 +56,7 @@ export default function NutritionPage() {
         { calories: 0, protein: 0, carbs: 0, fats: 0 }
     );
 
-    const handleSaveProfile = (newProfile: UserNutritionProfile, newTargets: MacroTargets) => {
+    const handleSaveProfile = (newTargets: MacroTargets, newProfile: UserNutritionProfile) => {
         setProfile(newProfile, newTargets);
         setIsEditingCalculator(false);
         toast.success("Targets updated successfully");

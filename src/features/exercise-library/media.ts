@@ -80,12 +80,12 @@ function getViewForKey(key: string): ExerciseLibraryMediaView | null {
   return null;
 }
 
-function getAvailableViews(primaryKeys: string[], secondaryKeys: string[]) {
+function getAvailableViews(primaryKeys: string[], secondaryKeys: string[]): ExerciseLibraryMediaView[] {
   return uniqueKeys(
     uniqueKeys(primaryKeys.concat(secondaryKeys))
       .map((key) => getViewForKey(key))
       .filter((view): view is ExerciseLibraryMediaView => view !== null)
-  );
+  ) as ExerciseLibraryMediaView[];
 }
 
 function chooseDefaultView(primaryKeys: string[], secondaryKeys: string[]) {

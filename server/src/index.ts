@@ -248,7 +248,7 @@ export function createRouteHandlers(
     }
   };
 
-  const listPlans = (req: AuthRequest, res: express.Response) => {
+  const listPlans = async (req: AuthRequest, res: express.Response) => {
     try {
       const userId = req.user!.id;
       const userToken = req.authToken!;
@@ -258,18 +258,13 @@ export function createRouteHandlers(
         return res.status(403).json({ error: 'Unauthorized to view these plans' });
       }
 
-      deps
-        .listPlansForUser({
-          supabaseUrl: config.supabaseUrl!,
-          supabaseAnonKey: config.supabaseAnonKey!,
-          userToken,
-          limit: 20,
-        })
-        .then((plans) => res.json(plans))
-        .catch((error) => {
-          deps.logger.error('Error fetching plans:', error);
-          res.status(500).json({ error: 'Failed to fetch plans' });
-        });
+      const plans = await deps.listPlansForUser({
+        supabaseUrl: config.supabaseUrl!,
+        supabaseAnonKey: config.supabaseAnonKey!,
+        userToken,
+        limit: 20,
+      });
+      res.json(plans);
     } catch (error) {
       deps.logger.error('Error fetching plans:', error);
       res.status(500).json({ error: 'Failed to fetch plans' });
