@@ -23,6 +23,7 @@ import { LivingBackground } from "@/components/ui/living-background";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
+import { AuthModal } from "@/components/auth/AuthModal";
 
 const Index = lazy(() => import("./pages/Index"));
 const WizardPage = lazy(() => import("./pages/Wizard"));
@@ -46,9 +47,9 @@ const ProfilePage = lazy(() =>
   }))
 );
 
-const ExercisesBrowser = lazy(() =>
-  import("./components/exercises/ExercisesBrowser").then((module) => ({
-    default: module.ExercisesBrowser,
+const ExerciseLibraryPage = lazy(() =>
+  import("./features/exercise-library").then((module) => ({
+    default: module.ExerciseLibraryPage,
   }))
 );
 
@@ -166,42 +167,15 @@ function AnimatedRoutes() {
               <Route path="/" element={<Index />} />
               <Route path="/wizard" element={<WizardPage />} />
 
-              {/* Protected Routes */}
-              <Route path="/plan" element={
-                <RequireAuth>
-                  <PlanPage />
-                </RequireAuth>
-              } />
-              <Route path="/workout/:planId/:dayIndex" element={
-                <RequireAuth>
-                  <WorkoutLogger />
-                </RequireAuth>
-              } />
-              <Route path="/nutrition" element={
-                <RequireAuth>
-                  <NutritionPage />
-                </RequireAuth>
-              } />
-              <Route path="/history" element={
-                <RequireAuth>
-                  <HistoryPage />
-                </RequireAuth>
-              } />
-              <Route path="/analytics" element={
-                <RequireAuth>
-                  <Analytics />
-                </RequireAuth>
-              } />
-              <Route path="/profile" element={
-                <RequireAuth>
-                  <ProfilePage />
-                </RequireAuth>
-              } />
-              <Route path="/exercises" element={
-                <RequireAuth>
-                  <ExercisesBrowser />
-                </RequireAuth>
-              } />
+              <Route path="/plan" element={<PlanPage />} />
+              <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
+              <Route path="/nutrition" element={<NutritionPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/exercises" element={<ExerciseLibraryPage />} />
+
+              {/* Auth-backed trainer routes */}
               <Route path="/clients">
                 <Route index element={
                   <RequireAuth>
@@ -232,20 +206,17 @@ function AnimatedRoutes() {
                   </TrainerGuard>
                 </RequireAuth>
               } />
-              {/* Circles Portal Routes */}
+
+              {/* Demo landing + auth-backed circle membership routes */}
               <Route path="/circles">
-                <Route index element={
-                  <RequireAuth>
-                    <CirclesPage />
-                  </RequireAuth>
-                } />
+                <Route index element={<CirclesPage />} />
 
                 <Route path="join/:inviteCode" element={
                   <JoinCircleHandler />
                 } />
 
                 <Route path=":circleId" element={
-                  <RequireAuth strict>
+                  <RequireAuth>
                     <CircleLayout />
                   </RequireAuth>
                 }>
@@ -320,6 +291,7 @@ const App = () => {
             <AuthProvider>
               <Toaster />
               <Sonner />
+              <AuthModal />
               <CommandPalette />
               <div className={cn(
                 "min-h-screen flex flex-col transition-colors duration-300 relative",

@@ -16,12 +16,11 @@ import { useCircleStore } from '@/stores/circleStore';
 import { CircleCard } from '@/components/circles/CircleCard';
 import { CreateCircleModal } from '@/components/circles/CreateCircleModal';
 import { JoinCircleModal } from '@/components/circles/JoinCircleModal';
-import { AuthModal } from '@/components/auth/AuthModal';
 import { useState } from 'react';
 
 export default function CirclesPage() {
     const navigate = useNavigate();
-    const { user, profile, isLoading: authLoading, setShowAuthModal } = useAuthStore();
+    const { user, isConfigured, isLoading: authLoading, setShowAuthModal } = useAuthStore();
     // Use atomic selectors to prevent unnecessary re-renders
     const circles = useCircleStore((state) => state.circles);
     const isLoading = useCircleStore((state) => state.isLoading);
@@ -45,8 +44,6 @@ export default function CirclesPage() {
     if (!user && !authLoading) {
         return (
             <main className="container-content py-12">
-                <AuthModal />
-
                 <div className="text-center mb-12">
                     <div className="mx-auto w-20 h-20 rounded-full gradient-primary flex items-center justify-center mb-6 shadow-glow">
                         <Users className="h-10 w-10 text-white" />
@@ -104,7 +101,7 @@ export default function CirclesPage() {
                         onClick={() => setShowAuthModal(true)}
                     >
                         <LogIn className="h-5 w-5" />
-                        Sign In to Get Started
+                        {isConfigured ? 'Sign In to Get Started' : 'Account Setup Required'}
                     </Button>
                 </div>
             </main>
@@ -172,7 +169,6 @@ export default function CirclesPage() {
     // Authenticated view
     return (
         <main className="container-wide py-8">
-            <AuthModal />
             <CreateCircleModal
                 isOpen={showCreateModal}
                 onClose={() => setShowCreateModal(false)}

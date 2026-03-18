@@ -3,7 +3,7 @@
 
 import type { Plan } from '@/types/fitness';
 
-import { supabase } from './supabase';
+import { supabase } from '@/lib/supabase';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 

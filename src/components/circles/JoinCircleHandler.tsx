@@ -13,6 +13,7 @@ import { Loader2, Users, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 import { useCircleStore } from '@/stores/circleStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useToast } from '@/components/ui/use-toast';
+import { AuthUnavailableState } from '@/components/auth/AuthUnavailableState';
 
 type JoinStatus = 'loading' | 'success' | 'error' | 'already_member';
 
@@ -20,7 +21,12 @@ export function JoinCircleHandler() {
     const { inviteCode } = useParams<{ inviteCode: string }>();
     const navigate = useNavigate();
     const { toast } = useToast();
-    const { user, isLoading: authLoading, setShowAuthModal } = useAuthStore();
+    const {
+        user,
+        isConfigured,
+        isLoading: authLoading,
+        setShowAuthModal,
+    } = useAuthStore();
     const joinCircle = useCircleStore((state) => state.joinCircle);
     const fetchUserCircles = useCircleStore((state) => state.fetchUserCircles);
 
@@ -72,6 +78,12 @@ export function JoinCircleHandler() {
 
             if (authLoading) {
                 return; // Wait for auth to complete
+            }
+
+            if (!isConfigured) {
+                setStatus('error');
+                setErrorMessage('Circle invites require backend setup and are unavailable in demo mode.');
+                return;
             }
 
             if (!user) {
@@ -139,12 +151,22 @@ export function JoinCircleHandler() {
         authLoading,
         fetchUserCircles,
         inviteCode,
+        isConfigured,
         joinCircleWithDetails,
         navigate,
         setShowAuthModal,
         toast,
         user,
     ]);
+
+    if (!isConfigured && !authLoading) {
+        return (
+            <AuthUnavailableState
+                title="Circle Invite Unavailable"
+                description="Joining a circle from an invite link requires Supabase auth and backend setup. This prototype is still running in demo mode."
+            />
+        );
+    }
 
     // Loading state
     if (status === 'loading' || authLoading) {

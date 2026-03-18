@@ -2,45 +2,56 @@ import { useAuthStore } from "@/stores/authStore";
 import { Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { AuthUnavailableState } from "@/components/auth/AuthUnavailableState";
 
 interface RequireAuthProps {
-    children: React.ReactNode;
-    /** If true, require authentication. If false, allow guest access. Default: false (guest allowed) */
-    strict?: boolean;
+  children: React.ReactNode;
 }
 
-export function RequireAuth({ children, strict = false }: RequireAuthProps) {
-    const { session, isLoading, isConfigured, setShowAuthModal } = useAuthStore();
-    const location = useLocation();
+export function RequireAuth({ children }: RequireAuthProps) {
+  const {
+    session,
+    isLoading,
+    isConfigured,
+    setShowAuthModal,
+    setRedirectUrl,
+  } = useAuthStore();
+  const location = useLocation();
 
-    const { t } = useTranslation();
+  const { t } = useTranslation();
+  const requestedPath = `${location.pathname}${location.search}${location.hash}`;
 
-    useEffect(() => {
-        // Only show auth modal if strict mode and user isn't logged in
-        if (!isLoading && !session && isConfigured && strict) {
-            setShowAuthModal(true);
-        }
-    }, [isLoading, session, isConfigured, strict, setShowAuthModal]);
-
-    if (isLoading) {
-        return <div className="min-h-screen flex items-center justify-center">{t('common.loading')}</div>;
+  useEffect(() => {
+    if (isLoading || !isConfigured || session) {
+      return;
     }
 
-    // Allow access if Supabase isn't configured (local dev/demo mode)
-    if (!isConfigured) {
-        return <>{children}</>;
-    }
+    setRedirectUrl(`${window.location.origin}${requestedPath}`);
+    setShowAuthModal(true);
+  }, [
+    isConfigured,
+    isLoading,
+    requestedPath,
+    session,
+    setRedirectUrl,
+    setShowAuthModal,
+  ]);
 
-    // In non-strict mode, allow guest browsing (most pages)
-    // Only redirect in strict mode (e.g., user-specific data like saved plans)
-    if (!strict) {
-        return <>{children}</>;
-    }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        {t("common.loading")}
+      </div>
+    );
+  }
 
-    if (!session) {
-        // Redirect to home where the Auth Modal will appear
-        return <Navigate to="/" state={{ from: location }} replace />;
-    }
+  if (!isConfigured) {
+    return <AuthUnavailableState />;
+  }
 
-    return <>{children}</>;
+  if (!session) {
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
 }

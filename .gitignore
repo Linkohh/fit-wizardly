@@ -26,6 +26,8 @@ dist-ssr
 
 # Temporary files
 tmpclaude*
+playwright-report
+test-results
 
 # System files
 nul

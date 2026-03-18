@@ -12,7 +12,7 @@ import {
   getPlanSupabase,
   listPlansSupabase,
   upsertPlanSupabase,
-} from './supabasePlansRepo';
+} from '@/lib/plans/supabasePlansRepo';
 
 type PlansProvider = 'auto' | 'api' | 'supabase';
 
@@ -56,4 +56,3 @@ export async function deletePlanRemote(id: string): Promise<void> {
     ? deletePlanSupabase(id)
     : deletePlanApiClient(id);
 }
-

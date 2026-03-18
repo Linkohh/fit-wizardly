@@ -11,6 +11,8 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Profile } from '@/types/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
+let authSubscription: { unsubscribe: () => void } | null = null;
+
 interface AuthState {
     // State
     user: User | null;
@@ -44,10 +46,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // Initialize auth state
     initialize: async () => {
+        authSubscription?.unsubscribe();
+        authSubscription = null;
+
         if (!isSupabaseConfigured()) {
-            set({ isLoading: false, isConfigured: false });
+            set({
+                user: null,
+                session: null,
+                profile: null,
+                isLoading: false,
+                isConfigured: false,
+            });
             return;
         }
+
+        set({ isLoading: true, isConfigured: true });
 
         try {
             // Get current session
@@ -55,7 +68,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
             if (sessionError) {
                 console.error('Session error:', sessionError);
-                set({ isLoading: false });
+                set({ isLoading: false, isConfigured: true });
                 return;
             }
 
@@ -79,11 +92,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     isLoading: false,
                 });
             } else {
-                set({ isLoading: false });
+                set({ user: null, session: null, profile: null, isLoading: false });
             }
 
             // Listen for auth changes
-            supabase.auth.onAuthStateChange(async (event, session) => {
+            const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
                 try {
                     if (event === 'SIGNED_IN' && session?.user) {
                         // Fetch or create profile
@@ -142,10 +155,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                     console.error('Auth state change error:', error);
                 }
             });
+            authSubscription = data.subscription;
         } catch (error) {
             console.error('Auth initialization error:', error);
             toast.error('Failed to initialize authentication');
-            set({ isLoading: false });
+            set({ isLoading: false, isConfigured: true });
         }
     },
 

@@ -6,299 +6,389 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { PlanPayloadSchema, type PlanPayload } from './schemas/plan.js';
 import {
-    upsertPlanForUser as upsertPlanForUserSupabase,
-    listPlansForUser as listPlansForUserSupabase,
-    getPlanForUser as getPlanForUserSupabase,
-    deletePlanForUser as deletePlanForUserSupabase,
+  upsertPlanForUser as upsertPlanForUserSupabase,
+  listPlansForUser as listPlansForUserSupabase,
+  getPlanForUser as getPlanForUserSupabase,
+  deletePlanForUser as deletePlanForUserSupabase,
 } from './supabasePlansRepo.js';
 
-// Load environment variables from root
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const currentFilePath = fileURLToPath(import.meta.url);
+
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 dotenv.config({ path: path.join(__dirname, '../../.env.local') });
 
-const app = express();
-const PORT = process.env.PORT || 3001;
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
-
-// CORS configuration - specify allowed origins
-const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || [
-    'http://localhost:8080',
-    'http://localhost:5173',
-    'http://localhost:3000',
-];
-
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.warn('⚠️ Server missing Supabase credentials. Authentication will fail.');
+interface AuthRequest extends express.Request {
+  user?: {
+    id: string;
+    email?: string;
+  };
+  authToken?: string;
 }
 
-// Rate limiting configuration
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+type VerifiedUser = NonNullable<AuthRequest['user']>;
+
+type AppConfig = {
+  port: number;
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+  allowedOrigins: string[];
+};
+
+type AppDependencies = {
+  verifyAuthToken: (token: string, config: AppConfig) => Promise<VerifiedUser | null>;
+  upsertPlanForUser: typeof upsertPlanForUserSupabase;
+  listPlansForUser: typeof listPlansForUserSupabase;
+  getPlanForUser: typeof getPlanForUserSupabase;
+  deletePlanForUser: typeof deletePlanForUserSupabase;
+  logger: Pick<Console, 'log' | 'warn' | 'error'>;
+};
+
+function loadConfig(overrides: Partial<AppConfig> = {}): AppConfig {
+  return {
+    port: Number(overrides.port ?? process.env.PORT ?? 3001),
+    supabaseUrl: overrides.supabaseUrl ?? process.env.VITE_SUPABASE_URL,
+    supabaseAnonKey: overrides.supabaseAnonKey ?? process.env.VITE_SUPABASE_ANON_KEY,
+    allowedOrigins:
+      overrides.allowedOrigins ??
+      process.env.ALLOWED_ORIGINS?.split(',') ?? [
+        'http://localhost:8080',
+        'http://localhost:5173',
+        'http://localhost:3000',
+      ],
+  };
+}
+
+async function verifySupabaseAuthToken(
+  token: string,
+  config: AppConfig
+): Promise<VerifiedUser | null> {
+  if (!config.supabaseUrl || !config.supabaseAnonKey) {
+    throw new Error('Server missing Supabase credentials');
+  }
+
+  const response = await fetch(`${config.supabaseUrl}/auth/v1/user`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      apikey: config.supabaseAnonKey,
+    },
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const data = await response.json();
+  return { id: data.id, email: data.email };
+}
+
+function getDependencies(overrides: Partial<AppDependencies> = {}): AppDependencies {
+  return {
+    verifyAuthToken: overrides.verifyAuthToken ?? verifySupabaseAuthToken,
+    upsertPlanForUser: overrides.upsertPlanForUser ?? upsertPlanForUserSupabase,
+    listPlansForUser: overrides.listPlansForUser ?? listPlansForUserSupabase,
+    getPlanForUser: overrides.getPlanForUser ?? getPlanForUserSupabase,
+    deletePlanForUser: overrides.deletePlanForUser ?? deletePlanForUserSupabase,
+    logger: overrides.logger ?? console,
+  };
+}
+
+export function createApp(
+  configOverrides: Partial<AppConfig> = {},
+  dependencyOverrides: Partial<AppDependencies> = {}
+) {
+  const {
+    config,
+    deps,
+    requireAuth,
+    createPlan,
+    listPlans,
+    getPlan,
+    updatePlan,
+    deletePlan,
+  } = createRouteHandlers(configOverrides, dependencyOverrides);
+  const app = express();
+
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
     message: { error: 'Too many requests, please try again later' },
     standardHeaders: true,
     legacyHeaders: false,
-});
+  });
 
-// Stricter rate limit for auth-related endpoints
-// const authLimiter = rateLimit({ ... }); // Reserved for future /auth endpoints
-
-// Middleware
-app.use(cors({
-    origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps or curl requests)
+  app.use(
+    cors({
+      origin: (origin, callback) => {
         if (!origin) return callback(null, true);
 
-        if (ALLOWED_ORIGINS.includes(origin)) {
-            callback(null, true);
+        if (config.allowedOrigins.includes(origin)) {
+          callback(null, true);
         } else {
-            callback(new Error('Not allowed by CORS'));
+          callback(new Error('Not allowed by CORS'));
         }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-app.use(limiter);
-app.use(express.json());
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    })
+  );
+  app.use(limiter);
+  app.use(express.json());
 
-// Type definition for authenticated request
-interface AuthRequest extends express.Request {
-    user?: {
-        id: string;
-        email?: string;
-    };
-    authToken?: string;
+  app.use((req, _res, next) => {
+    const requestId = `req_${crypto.randomUUID()}`;
+    (req as express.Request & { id: string }).id = requestId;
+    deps.logger.log(`[${requestId}] ${req.method} ${req.path}`);
+    next();
+  });
+
+  app.get('/health', (_req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  app.post('/plans', requireAuth, createPlan);
+  app.get('/plans', requireAuth, listPlans);
+  app.get('/plans/:id', requireAuth, getPlan);
+  app.patch('/plans/:id', requireAuth, updatePlan);
+  app.delete('/plans/:id', requireAuth, deletePlan);
+
+  return app;
 }
 
-// ============================================================================
-// AUTHENTICATION MIDDLEWARE
-// ============================================================================
-const requireAuth = async (req: AuthRequest, res: express.Response, next: express.NextFunction) => {
-    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-        return res.status(500).json({ error: 'Server missing Supabase credentials' });
+export function createRouteHandlers(
+  configOverrides: Partial<AppConfig> = {},
+  dependencyOverrides: Partial<AppDependencies> = {}
+) {
+  const config = loadConfig(configOverrides);
+  const deps = getDependencies(dependencyOverrides);
+
+  if (!config.supabaseUrl || !config.supabaseAnonKey) {
+    deps.logger.warn('Server missing Supabase credentials. Authentication will fail.');
+  }
+
+  const requireAuth = async (
+    req: AuthRequest,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    if (!config.supabaseUrl || !config.supabaseAnonKey) {
+      return res.status(500).json({ error: 'Server missing Supabase credentials' });
     }
 
     const authHeader = req.headers.authorization;
     if (!authHeader?.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Missing or invalid Authorization header' });
+      return res.status(401).json({ error: 'Missing or invalid Authorization header' });
     }
 
     const token = authHeader.split(' ')[1];
     req.authToken = token;
 
     try {
-        // Verify token with Supabase Auth API
-        const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'apikey': SUPABASE_ANON_KEY || ''
-            }
-        });
+      const verifiedUser = await deps.verifyAuthToken(token, config);
 
-        if (!response.ok) {
-            return res.status(401).json({ error: 'Invalid or expired token' });
-        }
+      if (!verifiedUser) {
+        return res.status(401).json({ error: 'Invalid or expired token' });
+      }
 
-        const data = await response.json();
-        req.user = { id: data.id, email: data.email };
-        next();
+      req.user = verifiedUser;
+      next();
     } catch (error) {
-        console.error('Auth verification failed:', error);
-        res.status(500).json({ error: 'Internal authentication error' });
+      deps.logger.error('Auth verification failed:', error);
+      res.status(500).json({ error: 'Internal authentication error' });
     }
-};
+  };
 
-// ============================================================================
-// INPUT VALIDATION SCHEMAS
-// ============================================================================
-
-// Request logging
-app.use((req, _res, next) => {
-    const requestId = `req_${crypto.randomUUID()}`;
-    (req as express.Request & { id: string }).id = requestId;
-    console.log(`[${requestId}] ${req.method} ${req.path}`);
-    next();
-});
-
-// Health check
-app.get('/health', (_req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// ============================================================================
-// PLANS API
-// ============================================================================
-
-// Create/Upsert plan
-app.post('/plans', requireAuth, async (req: AuthRequest, res) => {
+  const createPlan = async (req: AuthRequest, res: express.Response) => {
     try {
-        const validation = PlanPayloadSchema.safeParse(req.body);
+      const validation = PlanPayloadSchema.safeParse(req.body);
 
-        if (!validation.success) {
-            return res.status(400).json({ error: 'Invalid input', details: validation.error.format() });
-        }
+      if (!validation.success) {
+        return res.status(400).json({ error: 'Invalid input', details: validation.error.format() });
+      }
 
-        const data = validation.data;
-        const userId = req.user!.id; // Guaranteed by requireAuth
-        const userToken = req.authToken!;
+      const data = validation.data;
+      const userId = req.user!.id;
+      const userToken = req.authToken!;
 
-        // Enforce user ownership
-        if (data.userId && data.userId !== userId) {
-            return res.status(403).json({ error: 'Cannot create plan for another user' });
-        }
+      if (data.userId && data.userId !== userId) {
+        return res.status(403).json({ error: 'Cannot create plan for another user' });
+      }
 
-        const now = new Date().toISOString();
-        const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, ...planPayload } = data;
-        const storedPlan = { ...planPayload, createdAt: data.createdAt || now };
+      const now = new Date().toISOString();
+      const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, ...planPayload } = data;
+      const storedPlan = { ...planPayload, createdAt: data.createdAt || now };
 
-	        const upserted = await upsertPlanForUserSupabase({
-	            supabaseUrl: SUPABASE_URL!,
-	            supabaseAnonKey: SUPABASE_ANON_KEY!,
-	            userToken,
-	            userId,
-	            planId: data.id,
-	            plan: storedPlan,
-            schemaVersion: data.schemaVersion,
-        });
+      const upserted = await deps.upsertPlanForUser({
+        supabaseUrl: config.supabaseUrl!,
+        supabaseAnonKey: config.supabaseAnonKey!,
+        userToken,
+        userId,
+        planId: data.id,
+        plan: storedPlan,
+        schemaVersion: data.schemaVersion,
+      });
 
-        res.status(201).json(upserted);
+      res.status(201).json(upserted);
     } catch (error) {
-        console.error('Error creating plan:', error);
-        res.status(500).json({ error: 'Failed to create plan' });
+      deps.logger.error('Error creating plan:', error);
+      res.status(500).json({ error: 'Failed to create plan' });
     }
-});
+  };
 
-// Get plans by user ID (Self only)
-app.get('/plans', requireAuth, (req: AuthRequest, res) => {
+  const listPlans = (req: AuthRequest, res: express.Response) => {
     try {
-        const userId = req.user!.id;
-        const userToken = req.authToken!;
-        const requestedUserId = req.query.userId as string | undefined;
+      const userId = req.user!.id;
+      const userToken = req.authToken!;
+      const requestedUserId = req.query.userId as string | undefined;
 
-        // Only allow listing own plans
-        if (requestedUserId && requestedUserId !== userId) {
-            return res.status(403).json({ error: 'Unauthorized to view these plans' });
-        }
+      if (requestedUserId && requestedUserId !== userId) {
+        return res.status(403).json({ error: 'Unauthorized to view these plans' });
+      }
 
-        listPlansForUserSupabase({
-            supabaseUrl: SUPABASE_URL!,
-            supabaseAnonKey: SUPABASE_ANON_KEY!,
-            userToken,
-            limit: 20,
+      deps
+        .listPlansForUser({
+          supabaseUrl: config.supabaseUrl!,
+          supabaseAnonKey: config.supabaseAnonKey!,
+          userToken,
+          limit: 20,
         })
-            .then((plans) => res.json(plans))
-            .catch((error) => {
-                console.error('Error fetching plans:', error);
-                res.status(500).json({ error: 'Failed to fetch plans' });
-            });
+        .then((plans) => res.json(plans))
+        .catch((error) => {
+          deps.logger.error('Error fetching plans:', error);
+          res.status(500).json({ error: 'Failed to fetch plans' });
+        });
     } catch (error) {
-        console.error('Error fetching plans:', error);
-        res.status(500).json({ error: 'Failed to fetch plans' });
+      deps.logger.error('Error fetching plans:', error);
+      res.status(500).json({ error: 'Failed to fetch plans' });
     }
-});
+  };
 
-// Get plan by ID
-app.get('/plans/:id', requireAuth, (req: AuthRequest, res) => {
+  const getPlan = (req: AuthRequest, res: express.Response) => {
     try {
-        getPlanForUserSupabase({
-            supabaseUrl: SUPABASE_URL!,
-            supabaseAnonKey: SUPABASE_ANON_KEY!,
-            userToken: req.authToken!,
-            planId: req.params.id,
+      deps
+        .getPlanForUser({
+          supabaseUrl: config.supabaseUrl!,
+          supabaseAnonKey: config.supabaseAnonKey!,
+          userToken: req.authToken!,
+          planId: req.params.id,
         })
-            .then((plan) => {
-                if (!plan) return res.status(404).json({ error: 'Plan not found' });
-                res.json(plan);
-            })
-            .catch((error) => {
-                console.error('Error fetching plan:', error);
-                res.status(500).json({ error: 'Failed to fetch plan' });
-            });
+        .then((plan) => {
+          if (!plan) return res.status(404).json({ error: 'Plan not found' });
+          res.json(plan);
+        })
+        .catch((error) => {
+          deps.logger.error('Error fetching plan:', error);
+          res.status(500).json({ error: 'Failed to fetch plan' });
+        });
     } catch (error) {
-        console.error('Error fetching plan:', error);
-        res.status(500).json({ error: 'Failed to fetch plan' });
+      deps.logger.error('Error fetching plan:', error);
+      res.status(500).json({ error: 'Failed to fetch plan' });
     }
-});
+  };
 
-// Update plan
-app.patch('/plans/:id', requireAuth, async (req: AuthRequest, res) => {
+  const updatePlan = async (req: AuthRequest, res: express.Response) => {
     try {
-        // Accept partial updates by validating a partial payload
-        const UpdateSchema = PlanPayloadSchema.pick({
-            selections: true,
-            splitType: true,
-            workoutDays: true,
-            weeklyVolume: true,
-            rirProgression: true,
-            notes: true,
-            schemaVersion: true,
-        }).partial();
+      const UpdateSchema = PlanPayloadSchema.pick({
+        selections: true,
+        splitType: true,
+        workoutDays: true,
+        weeklyVolume: true,
+        rirProgression: true,
+        notes: true,
+        schemaVersion: true,
+      }).partial();
 
-        const validation = UpdateSchema.safeParse(req.body);
-        if (!validation.success) {
-            return res.status(400).json({ error: 'Invalid input', details: validation.error.format() });
-        }
+      const validation = UpdateSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ error: 'Invalid input', details: validation.error.format() });
+      }
 
-        const data = validation.data;
+      const data = validation.data;
 
-        const existing = await getPlanForUserSupabase({
-            supabaseUrl: SUPABASE_URL!,
-            supabaseAnonKey: SUPABASE_ANON_KEY!,
-            userToken: req.authToken!,
-            planId: req.params.id,
-        });
-        if (!existing) return res.status(404).json({ error: 'Plan not found' });
+      const existing = await deps.getPlanForUser({
+        supabaseUrl: config.supabaseUrl!,
+        supabaseAnonKey: config.supabaseAnonKey!,
+        userToken: req.authToken!,
+        planId: req.params.id,
+      });
+      if (!existing) return res.status(404).json({ error: 'Plan not found' });
 
-        const existingPlan = existing as unknown as Partial<PlanPayload>;
-        const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, ...existingPayload } = existingPlan;
-        const now = new Date().toISOString();
-        const merged = {
-            ...existingPayload,
-            ...data,
-            id: req.params.id,
-            createdAt: existingPlan.createdAt || now,
-        };
+      const existingPlan = existing as unknown as Partial<PlanPayload>;
+      const { userId: _ignoreUserId, updatedAt: _ignoreUpdatedAt, ...existingPayload } = existingPlan;
+      const now = new Date().toISOString();
+      const merged = {
+        ...existingPayload,
+        ...data,
+        id: req.params.id,
+        createdAt: existingPlan.createdAt || now,
+      };
 
-        const updated = await upsertPlanForUserSupabase({
-            supabaseUrl: SUPABASE_URL!,
-            supabaseAnonKey: SUPABASE_ANON_KEY!,
-            userToken: req.authToken!,
-            userId: req.user!.id,
-            planId: req.params.id,
-            plan: merged,
-            schemaVersion: data.schemaVersion ?? existingPlan.schemaVersion ?? 1,
-        });
+      const updated = await deps.upsertPlanForUser({
+        supabaseUrl: config.supabaseUrl!,
+        supabaseAnonKey: config.supabaseAnonKey!,
+        userToken: req.authToken!,
+        userId: req.user!.id,
+        planId: req.params.id,
+        plan: merged,
+        schemaVersion: data.schemaVersion ?? existingPlan.schemaVersion ?? 1,
+      });
 
-        res.json(updated);
+      res.json(updated);
     } catch (error) {
-        console.error('Error updating plan:', error);
-        res.status(500).json({ error: 'Failed to update plan' });
+      deps.logger.error('Error updating plan:', error);
+      res.status(500).json({ error: 'Failed to update plan' });
     }
-});
+  };
 
-// Delete plan
-app.delete('/plans/:id', requireAuth, async (req: AuthRequest, res) => {
+  const deletePlan = async (req: AuthRequest, res: express.Response) => {
     try {
-        const deleted = await deletePlanForUserSupabase({
-            supabaseUrl: SUPABASE_URL!,
-            supabaseAnonKey: SUPABASE_ANON_KEY!,
-            userToken: req.authToken!,
-            planId: req.params.id,
-        });
-        if (!deleted) return res.status(404).json({ error: 'Plan not found' });
-        res.status(204).send();
+      const deleted = await deps.deletePlanForUser({
+        supabaseUrl: config.supabaseUrl!,
+        supabaseAnonKey: config.supabaseAnonKey!,
+        userToken: req.authToken!,
+        planId: req.params.id,
+      });
+      if (!deleted) return res.status(404).json({ error: 'Plan not found' });
+      res.status(204).send();
     } catch (error) {
-        console.error('Error deleting plan:', error);
-        res.status(500).json({ error: 'Failed to delete plan' });
+      deps.logger.error('Error deleting plan:', error);
+      res.status(500).json({ error: 'Failed to delete plan' });
     }
-});
+  };
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`🚀 FitWizard API running on http://localhost:${PORT}`);
-    console.log(`🔒 Security enabled: Auth & Validation active`);
-});
+  return {
+    config,
+    deps,
+    requireAuth,
+    createPlan,
+    listPlans,
+    getPlan,
+    updatePlan,
+    deletePlan,
+  };
+}
+
+export function startServer(
+  configOverrides: Partial<AppConfig> = {},
+  dependencyOverrides: Partial<AppDependencies> = {}
+) {
+  const config = loadConfig(configOverrides);
+  const deps = getDependencies(dependencyOverrides);
+  const app = createApp(config, deps);
+
+  return app.listen(config.port, () => {
+    deps.logger.log(`FitWizard API running on http://localhost:${config.port}`);
+    deps.logger.log('Security enabled: Auth & Validation active');
+  });
+}
+
+const isDirectExecution =
+  process.argv[1] && path.resolve(process.argv[1]) === currentFilePath;
+
+if (isDirectExecution) {
+  startServer();
+}
+
+export default createApp;

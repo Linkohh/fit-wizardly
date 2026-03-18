@@ -1,19 +1,51 @@
 import * as React from "react";
 
-const MOBILE_BREAKPOINT = 768;
+export const MOBILE_BREAKPOINT = 768;
+export const TABLET_BREAKPOINT = 1024;
 
-export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined);
+export type ViewportTier = "phone" | "tablet" | "desktop";
+
+export function getViewportTier(width: number): ViewportTier {
+  if (width < MOBILE_BREAKPOINT) {
+    return "phone";
+  }
+
+  if (width < TABLET_BREAKPOINT) {
+    return "tablet";
+  }
+
+  return "desktop";
+}
+
+function readViewportTier(): ViewportTier {
+  if (typeof window === "undefined") {
+    return "desktop";
+  }
+
+  return getViewportTier(window.innerWidth);
+}
+
+export function useViewportTier() {
+  const [viewportTier, setViewportTier] = React.useState<ViewportTier>(readViewportTier);
 
   React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    const updateViewportTier = () => {
+      setViewportTier(readViewportTier());
     };
-    mql.addEventListener("change", onChange);
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    return () => mql.removeEventListener("change", onChange);
+
+    updateViewportTier();
+    window.addEventListener("resize", updateViewportTier);
+
+    return () => window.removeEventListener("resize", updateViewportTier);
   }, []);
 
-  return !!isMobile;
+  return viewportTier;
+}
+
+export function useIsMobile() {
+  return useViewportTier() === "phone";
+}
+
+export function useIsTablet() {
+  return useViewportTier() === "tablet";
 }
