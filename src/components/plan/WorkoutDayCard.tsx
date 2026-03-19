@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +9,20 @@ import { PlayCircle, AlertTriangle, Lightbulb, ArrowLeftRight } from 'lucide-rea
 import type { Plan, ExercisePrescription, Constraint } from '@/types/fitness';
 import { MUSCLE_DATA } from '@/types/fitness';
 import { useTranslation } from 'react-i18next';
+
+const getMuscleGroupColor = (muscle?: string): string => {
+  const colors: Record<string, string> = {
+    chest: 'hsl(0 72% 51%)',
+    back: 'hsl(25 95% 53%)',
+    shoulders: 'hsl(45 93% 47%)',
+    arms: 'hsl(142 71% 45%)',
+    core: 'hsl(217 91% 60%)',
+    legs: 'hsl(270 91% 65%)',
+    glutes: 'hsl(330 90% 65%)',
+    calves: 'hsl(180 80% 50%)',
+  };
+  return colors[muscle?.toLowerCase() ?? ''] ?? 'hsl(var(--primary))';
+};
 
 interface WorkoutDayCardProps {
     day: Plan['workoutDays'][0];
@@ -21,11 +36,16 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
     const { t } = useTranslation();
     const navigate = useNavigate();
 
+    const primaryMuscle = day.focusTags?.[0];
+
     return (
-        <Card className="hover:shadow-lg transition-shadow hover:border-primary/30">
+        <Card
+            className="card-interactive hover:shadow-lg transition-shadow hover:border-primary/30 border-l-2"
+            style={{ borderLeftColor: getMuscleGroupColor(primaryMuscle) }}
+        >
             <CardHeader className="bg-gradient-to-r from-primary/10 to-transparent rounded-t-lg">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="text-primary">{day.name}</CardTitle>
+                    <CardTitle className="text-primary font-display">{day.name}</CardTitle>
                     <Button
                         variant="gradient"
                         size="sm"
@@ -192,6 +212,11 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
 
                                                     {/* Collapsible coaching cues */}
                                                     <CollapsibleContent className="mt-2 space-y-2">
+                                                    <motion.div
+                                                        initial={{ height: 0, opacity: 0 }}
+                                                        animate={{ height: 'auto', opacity: 1 }}
+                                                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                                    >
                                                         <div className="pl-0 sm:pl-4 py-2 px-3 bg-muted/30 rounded-lg border-l-2 border-primary/30">
                                                             <p className="text-xs font-medium text-primary mb-1 flex items-center gap-1">
                                                                 <Lightbulb className="h-3 w-3" />
@@ -216,6 +241,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                                                 <p className="text-sm text-muted-foreground">{ex.rationale}</p>
                                                             </div>
                                                         )}
+                                                    </motion.div>
                                                     </CollapsibleContent>
                                                 </Collapsible>
                                             );

@@ -4,13 +4,9 @@ import { ArrowLeft, History as HistoryIcon, CalendarRange } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-
 export default function HistoryPage() {
     const { t } = useTranslation();
     const { workoutLogs } = usePlanStore();
-    const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
 
     const hasLogs = workoutLogs.length > 0;
 
@@ -21,11 +17,11 @@ export default function HistoryPage() {
                 <div className="container max-w-md mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Link to="/">
-                            <Button variant="ghost" size="icon" className="-ml-2 text-muted-foreground hover:text-foreground">
+                            <Button variant="ghost" size="icon" className="-ml-2 text-muted-foreground hover:text-foreground" aria-label="Back to home">
                                 <ArrowLeft className="w-5 h-5" />
                             </Button>
                         </Link>
-                        <h1 className="font-bold text-lg flex items-center gap-2">
+                        <h1 className="font-display text-lg flex items-center gap-2">
                             <HistoryIcon className="w-5 h-5 text-primary" />
                             {t('nav.history', 'History')}
                         </h1>
@@ -38,15 +34,17 @@ export default function HistoryPage() {
                 {/* Stats Summary (Placeholder for now) */}
                 {hasLogs && (
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="glass-card p-4 rounded-xl flex flex-col items-center justify-center bg-primary/5 border-primary/10">
-                            <span className="text-3xl font-bold text-primary">{workoutLogs.length}</span>
-                            <span className="text-xs text-muted-foreground uppercase tracking-wider">Workouts</span>
+                        <div className="glass-card p-4 rounded-xl flex flex-col items-center justify-center relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-transparent" />
+                            <span className="font-display text-3xl font-bold text-primary">{workoutLogs.length}</span>
+                            <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Workouts</span>
                         </div>
-                        <div className="glass-card p-4 rounded-xl flex flex-col items-center justify-center">
-                            <span className="text-3xl font-bold">
+                        <div className="glass-card p-4 rounded-xl flex flex-col items-center justify-center relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-secondary via-primary to-transparent" />
+                            <span className="font-display text-3xl font-bold gradient-text">
                                 {Math.round(workoutLogs.reduce((acc, log) => acc + log.duration, 0) / 60)}
                             </span>
-                            <span className="text-xs text-muted-foreground uppercase tracking-wider">Hours</span>
+                            <span className="text-xs text-muted-foreground uppercase tracking-wider mt-1">Hours</span>
                         </div>
                     </div>
                 )}
@@ -78,7 +76,7 @@ export default function HistoryPage() {
                                 <WorkoutHistoryCard
                                     key={log.id}
                                     log={log}
-                                    onClick={() => console.log("Navigate to details", log.id)}
+                                    onClick={() => undefined}
                                 />
                             ))}
                         </div>

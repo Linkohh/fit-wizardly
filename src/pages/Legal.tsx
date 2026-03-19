@@ -4,7 +4,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ShieldAlert, Scale, Lock, FileText } from "lucide-react";
+import { ShieldAlert, Scale, Lock, FileText, Shield, Heart } from "lucide-react";
 
 export default function LegalPage() {
     const { t } = useTranslation();
@@ -14,16 +14,16 @@ export default function LegalPage() {
             <h1 className="text-3xl font-bold mb-6 gradient-text">{t('legal.page_title')}</h1>
 
             <Tabs defaultValue="disclaimer" className="w-full">
-                <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 h-auto">
-                    <TabsTrigger value="disclaimer" className="py-3">
+                <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 h-auto glass-card border border-primary/15 p-1">
+                    <TabsTrigger value="disclaimer" className="py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-secondary/10 data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg gap-1">
                         <ShieldAlert className="w-4 h-4 mr-2" />
                         {t('legal.tabs.medical')}
                     </TabsTrigger>
-                    <TabsTrigger value="privacy" className="py-3">
+                    <TabsTrigger value="privacy" className="py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-secondary/10 data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg gap-1">
                         <Lock className="w-4 h-4 mr-2" />
                         {t('legal.tabs.privacy')}
                     </TabsTrigger>
-                    <TabsTrigger value="terms" className="py-3">
+                    <TabsTrigger value="terms" className="py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-secondary/10 data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg gap-1">
                         <Scale className="w-4 h-4 mr-2" />
                         {t('legal.tabs.terms')}
                     </TabsTrigger>
@@ -31,10 +31,12 @@ export default function LegalPage() {
 
                 <div className="mt-6">
                     <TabsContent value="disclaimer">
+                        <div className="relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-primary/50 via-secondary/40 to-transparent" />
                         <Card>
                             <CardHeader>
-                                <CardTitle className="flex items-center text-destructive">
-                                    <ShieldAlert className="w-6 h-6 mr-2" />
+                                <CardTitle className="flex items-center text-destructive font-display">
+                                    <Heart className="w-6 h-6 mr-2 text-primary" />
                                     {t('legal.medical.title')}
                                 </CardTitle>
                             </CardHeader>
@@ -60,13 +62,16 @@ export default function LegalPage() {
                                 </div>
                             </CardContent>
                         </Card>
+                        </div>
                     </TabsContent>
 
                     <TabsContent value="privacy">
+                        <div className="relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-primary/50 via-secondary/40 to-transparent" />
                         <Card>
                             <CardHeader>
-                                <CardTitle className="flex items-center text-primary">
-                                    <Lock className="w-6 h-6 mr-2" />
+                                <CardTitle className="flex items-center text-primary font-display">
+                                    <Lock className="w-6 h-6 mr-2 text-secondary" />
                                     {t('legal.privacy.title')}
                                 </CardTitle>
                             </CardHeader>
@@ -92,13 +97,16 @@ export default function LegalPage() {
                                 </div>
                             </CardContent>
                         </Card>
+                        </div>
                     </TabsContent>
 
                     <TabsContent value="terms">
+                        <div className="relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-primary/50 via-secondary/40 to-transparent" />
                         <Card>
                             <CardHeader>
-                                <CardTitle className="flex items-center">
-                                    <FileText className="w-6 h-6 mr-2" />
+                                <CardTitle className="flex items-center font-display">
+                                    <Shield className="w-6 h-6 mr-2 text-primary" />
                                     {t('legal.terms.title')}
                                 </CardTitle>
                             </CardHeader>
@@ -116,6 +124,7 @@ export default function LegalPage() {
                                 </div>
                             </CardContent>
                         </Card>
+                        </div>
                     </TabsContent>
                 </div>
             </Tabs>

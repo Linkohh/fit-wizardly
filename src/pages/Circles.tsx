@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -56,41 +57,65 @@ export default function CirclesPage() {
 
                 {/* Features preview */}
                 <div className="grid md:grid-cols-3 gap-6 mb-12">
-                    <Card className="text-center">
-                        <CardContent className="p-6">
-                            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                                <Users className="h-6 w-6 text-primary" />
-                            </div>
-                            <h3 className="font-semibold mb-2">Small Groups</h3>
-                            <p className="text-sm text-muted-foreground">
-                                3-5 members per circle for meaningful connections
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0, type: 'spring', stiffness: 420, damping: 34 }}
+                        whileHover={{ scale: 1.02, y: -4 }}
+                    >
+                        <Card className="text-center bg-card/60 backdrop-blur-sm border border-primary/10 relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-primary/60 via-secondary/50 to-transparent" />
+                            <CardContent className="p-6">
+                                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/10 rounded-xl p-3 flex items-center justify-center mx-auto mb-4">
+                                    <Users className="h-6 w-6 text-primary" />
+                                </div>
+                                <h3 className="font-semibold mb-2">Small Groups</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    3-5 members per circle for meaningful connections
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
 
-                    <Card className="text-center">
-                        <CardContent className="p-6">
-                            <div className="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mx-auto mb-4">
-                                <ArrowRight className="h-6 w-6 text-secondary" />
-                            </div>
-                            <h3 className="font-semibold mb-2">Live Activity Feed</h3>
-                            <p className="text-sm text-muted-foreground">
-                                See when circle members complete workouts and hit PRs
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1, type: 'spring', stiffness: 420, damping: 34 }}
+                        whileHover={{ scale: 1.02, y: -4 }}
+                    >
+                        <Card className="text-center bg-card/60 backdrop-blur-sm border border-primary/10 relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-primary/60 via-secondary/50 to-transparent" />
+                            <CardContent className="p-6">
+                                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/10 rounded-xl p-3 flex items-center justify-center mx-auto mb-4">
+                                    <ArrowRight className="h-6 w-6 text-secondary" />
+                                </div>
+                                <h3 className="font-semibold mb-2">Live Activity Feed</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    See when circle members complete workouts and hit PRs
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
 
-                    <Card className="text-center">
-                        <CardContent className="p-6">
-                            <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-4">
-                                <Badge className="h-6 w-6 text-orange-500" />
-                            </div>
-                            <h3 className="font-semibold mb-2">Weekly Challenges</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Compete for most volume, workouts, or longest streaks
-                            </p>
-                        </CardContent>
-                    </Card>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2, type: 'spring', stiffness: 420, damping: 34 }}
+                        whileHover={{ scale: 1.02, y: -4 }}
+                    >
+                        <Card className="text-center bg-card/60 backdrop-blur-sm border border-primary/10 relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-primary/60 via-secondary/50 to-transparent" />
+                            <CardContent className="p-6">
+                                <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/10 rounded-xl p-3 flex items-center justify-center mx-auto mb-4">
+                                    <Badge className="h-6 w-6 text-orange-500" />
+                                </div>
+                                <h3 className="font-semibold mb-2">Weekly Challenges</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Compete for most volume, workouts, or longest streaks
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
                 </div>
 
                 {/* CTA */}

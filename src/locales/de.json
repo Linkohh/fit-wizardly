@@ -233,6 +233,9 @@
             "context": "Maximale Kraft aufzubauen ist nur mit Körpergewicht schwieriger. Erwäge Bänder oder Gewichte, wenn möglich."
         }
     },
+    "footer": {
+        "how_to_use": "Wie benutzen"
+    },
     "common": {
         "loading": "Wird geladen...",
         "error": "Etwas ist schiefgelaufen",

@@ -131,13 +131,15 @@ export function Profile() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex items-center gap-4 mb-8"
                 >
-                    <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center ring-4 ring-background shadow-xl overflow-hidden">
-                        {user?.user_metadata?.avatar_url ? (
-                            <img src={user.user_metadata.avatar_url} alt="Profile" className="h-full w-full object-cover" />
-                        ) : (
-                            <User className="h-10 w-10 text-primary" />
-                        )}
-                    </div>
+                    <motion.div whileHover={{ scale: 1.03 }} transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="relative">
+                        <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center ring-4 ring-background ring-2 ring-primary/30 ring-offset-2 ring-offset-background shadow-xl overflow-hidden">
+                            {user?.user_metadata?.avatar_url ? (
+                                <img src={user.user_metadata.avatar_url} alt="Profile" className="h-full w-full object-cover" />
+                            ) : (
+                                <User className="h-10 w-10 text-primary" />
+                            )}
+                        </div>
+                    </motion.div>
                     <div>
                         <h1 className="text-3xl font-bold">{user?.user_metadata?.full_name || 'Guest User'}</h1>
                         <p className="text-muted-foreground">{user?.email || 'Local Account'}</p>
@@ -152,9 +154,10 @@ export function Profile() {
                 >
                     {/* App Settings */}
                     <motion.div variants={itemVariants}>
-                        <Card className="border-border/50 shadow-sm">
+                        <Card className="border-border/50 shadow-sm relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-transparent" />
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="flex items-center gap-2 font-display">
                                     <Settings className="h-5 w-5 text-primary" />
                                     {t('profile.app_settings', 'App Settings')}
                                 </CardTitle>
@@ -299,9 +302,10 @@ export function Profile() {
 
                     {/* Fitness Preferences */}
                     <motion.div variants={itemVariants}>
-                        <Card className="border-border/50 shadow-sm">
+                        <Card className="border-border/50 shadow-sm relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-transparent" />
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="flex items-center gap-2 font-display">
                                     <Dumbbell className="h-5 w-5 text-primary" />
                                     {t('profile.fitness_prefs', 'Fitness Preferences')}
                                 </CardTitle>
@@ -351,9 +355,10 @@ export function Profile() {
 
                     {/* Data & Privacy */}
                     <motion.div variants={itemVariants}>
-                        <Card className="border-border/50 shadow-sm">
+                        <Card className="border-border/50 shadow-sm relative overflow-hidden">
+                            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-transparent" />
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
+                                <CardTitle className="flex items-center gap-2 font-display">
                                     <Shield className="h-5 w-5 text-primary" />
                                     Details
                                 </CardTitle>

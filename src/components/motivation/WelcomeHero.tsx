@@ -237,7 +237,7 @@ export function WelcomeHero() {
                 </FloatingElement>
 
                 <h1
-                    className="text-5xl md:text-7xl lg:text-8xl font-black text-foreground mb-6 tracking-tight flex flex-col items-center justify-center leading-tight"
+                    className="font-display text-5xl md:text-7xl lg:text-8xl font-black text-foreground mb-6 leading-tight flex flex-col items-center justify-center"
                 >
                     <div
                         className="flex items-center justify-center flex-wrap gap-2 md:gap-4"
