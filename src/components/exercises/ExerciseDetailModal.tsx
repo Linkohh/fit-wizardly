@@ -1,22 +1,11 @@
 import { Exercise } from '@/types/fitness';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Drawer, DrawerContent, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Drawer, DrawerContent } from '@/components/ui/drawer';
 import { Badge } from '@/components/ui/badge';
-import { ExerciseMuscleHighlight } from './ExerciseMuscleHighlight';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import {
-    Activity,
-    Clock,
-    Dumbbell,
-    Flame,
-    Heart,
-    Info,
-    List,
-    Network,
-    Target,
-} from 'lucide-react';
+import { Info, List, Network, Heart, Clock, Zap, Target, Dumbbell } from 'lucide-react';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { useTrackExerciseView } from '@/hooks/useExerciseInteraction';
 import { useHaptics } from '@/hooks/useHaptics';
@@ -26,12 +15,6 @@ import { cn } from '@/lib/utils';
 import { RelatedExercises } from './RelatedExercises';
 import { ExerciseBadges } from './ExerciseBadges';
 import { useTranslation } from 'react-i18next';
-import { ComponentType, ReactNode, useMemo } from 'react';
-import { usePlanStore } from '@/stores/planStore';
-import { calculateOneRepMax } from '@/lib/progressionEngine';
-import { formatIdentifierLabel } from '@/lib/displayText';
-import { format } from 'date-fns';
-import { ResponsiveContainer, LineChart, Line, CartesianGrid, Tooltip, XAxis, YAxis } from 'recharts';
 
 interface ExerciseDetailModalProps {
     exercise: Exercise | null;
@@ -40,165 +23,87 @@ interface ExerciseDetailModalProps {
     onSelectExercise?: (exercise: Exercise) => void;
 }
 
-interface MetaCardProps {
-    title: string;
-    icon: ComponentType<{ className?: string }>;
-    children: ReactNode;
-    className?: string;
-}
-
-function MetaCard({ title, icon: Icon, children, className }: MetaCardProps) {
-    return (
-        <section className={cn('rounded-2xl border border-white/10 bg-white/[0.03] p-4', className)}>
-            <h4 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-white/50">
-                <Icon className="h-3.5 w-3.5 text-primary" />
-                {title}
-            </h4>
-            {children}
-        </section>
-    );
-}
-
 export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercise }: ExerciseDetailModalProps) {
     const { t } = useTranslation();
     const { isFavorite, toggleFavorite } = usePreferencesStore();
-    const { workoutLogs } = usePlanStore();
     const haptics = useHaptics();
     const isMobile = useIsMobile();
 
     useTrackExerciseView(isOpen ? exercise?.id ?? null : null);
-
-    const historyData = useMemo(() => {
-        if (!exercise) {
-            return {
-                entries: [],
-                lastPerformed: null,
-                bestWeight: null,
-                bestVolume: null,
-            };
-        }
-
-        const entries = workoutLogs
-            .map((workoutLog) => {
-                const exerciseLog = workoutLog.exercises.find((entry) => entry.exerciseId === exercise.id);
-                if (!exerciseLog || exerciseLog.skipped) return null;
-
-                const completedSets = exerciseLog.sets.filter((set) => set.completed);
-                if (completedSets.length === 0) return null;
-
-                const bestWeight = Math.max(...completedSets.map((set) => set.weight));
-                const bestVolume = Math.max(...completedSets.map((set) => set.weight * set.reps));
-                const bestE1RM = Math.max(...completedSets.map((set) => calculateOneRepMax(set.weight, set.reps)));
-                const completedDate = new Date(workoutLog.completedAt);
-
-                return {
-                    date: completedDate,
-                    label: format(completedDate, 'MMM d'),
-                    bestWeight,
-                    bestVolume,
-                    e1rm: Math.round(bestE1RM),
-                };
-            })
-            .filter((entry): entry is NonNullable<typeof entry> => entry !== null)
-            .sort((a, b) => a.date.getTime() - b.date.getTime());
-
-        const lastEntry = entries.length > 0 ? entries[entries.length - 1] : null;
-
-        return {
-            entries,
-            lastPerformed: lastEntry ? format(lastEntry.date, 'MMM d, yyyy') : null,
-            bestWeight: entries.length > 0 ? Math.max(...entries.map((entry) => entry.bestWeight)) : null,
-            bestVolume: entries.length > 0 ? Math.max(...entries.map((entry) => entry.bestVolume)) : null,
-        };
-    }, [workoutLogs, exercise]);
 
     if (!exercise) return null;
 
     const favorite = isFavorite(exercise.id);
     const theme = getExerciseTheme(exercise);
 
-    const handleFavoriteToggle = async () => {
-        await haptics.selection();
+    const handleFavoriteToggle = () => {
+        haptics.favoriteToggle();
         toggleFavorite(exercise.id);
     };
 
-    const metabolicCalories = exercise.metabolic ? Math.round((exercise.metabolic.met * 75 * 10) / 200) : null;
+    const difficultyColor = {
+        'Beginner': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+        'Intermediate': 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+        'Advanced': 'bg-red-500/20 text-red-300 border-red-500/30',
+        'Elite': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+        'All Levels': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    }[exercise.difficulty || 'Intermediate'] || 'bg-slate-500/20 text-slate-300';
 
     const ModalContent = () => (
         <>
+            {/* Hero Header */}
             <div
-                className="relative h-52 shrink-0 overflow-hidden border-b border-white/10 md:h-64"
+                className="relative h-44 md:h-56 shrink-0 overflow-hidden"
                 style={{
-                    background: `linear-gradient(to bottom right, ${theme.glowHover}, rgba(0,0,0,0.65))`,
+                    background: `linear-gradient(135deg, ${theme.glow}, rgba(0,0,0,0.6))`,
                 }}
             >
-                {/* Media Section */}
-                <div className="relative flex-1 bg-zinc-900/50 min-h-[300px] md:min-h-full">
-                    {exercise.videoUrl ? (
-                        <video
-                            src={exercise.videoUrl}
-                            controls
-                            loop
-                            playsInline
-                            className="h-full w-full object-cover"
-                            poster={exercise.gifUrl || undefined} // Fallback to gif if available as poster
-                        />
-                    ) : (
-                        <ExerciseMuscleHighlight
-                            primaryMuscles={exercise.primaryMuscles}
-                            secondaryMuscles={exercise.secondaryMuscles}
-                            className="h-full w-full"
-                        />
-                    )}
+                {exercise.imageUrl ? (
+                    <img
+                        src={exercise.imageUrl}
+                        alt={exercise.name}
+                        className="absolute inset-0 w-full h-full object-cover opacity-40"
+                    />
+                ) : (
+                    <div className="absolute inset-0 flex items-center justify-center opacity-[0.06]">
+                        <Network className="w-28 h-28" />
+                    </div>
+                )}
 
-                    {/* Overlay Gradient (only if video is playing? or always?) 
-                      Remove overlay if interactive video/canvas is present to handle clicks 
-                  */}
-                </div>
+                {/* Gradient overlays for depth */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent" />
 
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-transparent" />
-
-                <div className="absolute inset-x-4 bottom-4 md:inset-x-6">
-                    <div className="mb-3 flex flex-wrap gap-2">
+                {/* Hero content */}
+                <div className="absolute bottom-5 left-6 right-6">
+                    <div className="flex gap-2 mb-2.5">
                         <Badge
                             variant="secondary"
-                            className="border-primary/20 bg-primary/20 text-[10px] uppercase tracking-[0.12em] text-primary-foreground"
+                            className="bg-white/10 backdrop-blur-sm text-white/90 border-white/10 uppercase tracking-[0.15em] text-[10px] font-medium"
                         >
-                            {exercise.category || 'strength'}
+                            {exercise.category}
                         </Badge>
                         <Badge
                             variant="outline"
-                            className="border-white/25 bg-black/25 text-[10px] uppercase tracking-[0.12em] text-white/80"
+                            className={cn('uppercase tracking-[0.15em] text-[10px] font-medium backdrop-blur-sm', difficultyColor)}
                         >
-                            {exercise.difficulty || 'Intermediate'}
+                            {exercise.difficulty}
                         </Badge>
                     </div>
-
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="min-w-0">
-                            <h2 className="line-clamp-2 text-[clamp(1.9rem,2.8vw,2.6rem)] font-extrabold leading-[1.06] tracking-tight text-white">
-                                {exercise.name}
-                            </h2>
-                            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-white/70">
-                                {exercise.primaryMuscles?.slice(0, 2).map((muscle) => (
-                                    <span key={muscle} className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-black/20 px-2 py-0.5 capitalize">
-                                        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {formatIdentifierLabel(muscle)}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight">
+                            {exercise.name}
+                        </h2>
                         <Button
                             variant="ghost"
                             size="icon"
                             onClick={handleFavoriteToggle}
-                            className="h-10 w-10 shrink-0 rounded-full border border-white/20 bg-black/25 text-white hover:bg-black/40 hover:text-rose-300"
+                            className="rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white hover:text-red-400 h-9 w-9 shrink-0"
                         >
                             <Heart
                                 className={cn(
-                                    'h-5 w-5',
-                                    favorite && 'fill-rose-400 text-rose-400'
+                                    'w-5 h-5',
+                                    favorite && 'fill-red-500 text-red-500'
                                 )}
                             />
                         </Button>
@@ -206,247 +111,215 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                 </div>
             </div>
 
+            {/* Body */}
             <ScrollArea className="flex-1">
-                <div className="grid grid-cols-1 gap-6 p-4 md:grid-cols-[290px_1fr] md:p-6">
-                    <aside className="space-y-4">
-                        <MetaCard
-                            title={t('exercises.detail.muscles_targeted', 'Muscles Targeted')}
-                            icon={Target}
-                        >
-                            <div className="flex flex-wrap gap-2">
-                                {exercise.primaryMuscles?.map((muscle) => (
-                                    <Badge key={muscle} className="bg-primary/90 text-primary-foreground capitalize hover:bg-primary/80">
-                                        {formatIdentifierLabel(muscle)}
-                                    </Badge>
-                                ))}
-                                {exercise.secondaryMuscles?.map((muscle) => (
-                                    <Badge
-                                        key={muscle}
-                                        variant="outline"
-                                        className="border-white/20 bg-white/5 text-white/80 capitalize"
-                                    >
-                                        {formatIdentifierLabel(muscle)}
-                                    </Badge>
-                                ))}
-                            </div>
-                        </MetaCard>
-
-                        <MetaCard title={t('exercises.detail.equipment', 'Equipment')} icon={Dumbbell}>
-                            <ul className="space-y-2">
-                                {exercise.equipment?.map((item) => (
-                                    <li
-                                        key={item}
-                                        className="flex items-center gap-2 text-sm capitalize text-white/80"
-                                    >
-                                        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                                        {formatIdentifierLabel(item)}
-                                    </li>
-                                ))}
-                            </ul>
-                        </MetaCard>
-
-                        {exercise.metabolic && (
-                            <MetaCard
-                                title={t('exercises.detail.metabolic_impact', 'Metabolic Impact')}
-                                icon={Flame}
-                                className="border-orange-300/20 bg-orange-500/10"
-                            >
-                                <div className="flex items-end gap-2">
-                                    <p className="text-3xl font-bold text-orange-100">
-                                        {exercise.metabolic.met}
-                                    </p>
-                                    <p className="pb-1 text-sm text-orange-200/80">METs</p>
+                <div className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {/* Left Column: Metadata */}
+                        <div className="space-y-5">
+                            {/* Muscles Targeted */}
+                            <div>
+                                <h4 className="text-[11px] font-semibold text-white/40 uppercase tracking-[0.15em] mb-2.5 flex items-center gap-1.5">
+                                    <Target className="w-3 h-3" />
+                                    {t('exercises.detail.muscles_targeted', 'Muscles Targeted')}
+                                </h4>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {exercise.primaryMuscles.map((m) => (
+                                        <Badge
+                                            key={m}
+                                            className="bg-primary/15 text-primary border-primary/20 capitalize text-xs font-medium"
+                                        >
+                                            {m.replace('_', ' ')}
+                                        </Badge>
+                                    ))}
+                                    {exercise.secondaryMuscles.map((m) => (
+                                        <Badge
+                                            key={m}
+                                            variant="secondary"
+                                            className="bg-white/[0.06] text-white/50 border-white/[0.08] capitalize text-xs font-normal"
+                                        >
+                                            {m.replace('_', ' ')}
+                                        </Badge>
+                                    ))}
                                 </div>
-                                <p className="mt-1 text-xs text-orange-100/80">
-                                    {t('exercises.detail.high_burn', 'High calorie burn potential')}
-                                </p>
-                                {metabolicCalories !== null && (
-                                    <p className="mt-2 text-xs uppercase tracking-[0.12em] text-orange-100/60">
-                                        Approx. {metabolicCalories} calories / 10 min
-                                    </p>
-                                )}
-                            </MetaCard>
-                        )}
+                            </div>
 
-                        <MetaCard title="Progress & Badges" icon={Activity}>
-                            <ExerciseBadges exerciseId={exercise.id} />
-                        </MetaCard>
-                    </aside>
+                            {/* Equipment */}
+                            <div>
+                                <h4 className="text-[11px] font-semibold text-white/40 uppercase tracking-[0.15em] mb-2.5 flex items-center gap-1.5">
+                                    <Dumbbell className="w-3 h-3" />
+                                    {t('exercises.detail.equipment', 'Equipment')}
+                                </h4>
+                                <div className="space-y-1.5">
+                                    {exercise.equipment.map((e) => (
+                                        <div
+                                            key={e}
+                                            className="text-sm text-white/70 capitalize flex items-center gap-2"
+                                        >
+                                            <div className="w-1.5 h-1.5 rounded-full bg-primary/60" />
+                                            {e.replace('_', ' ')}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
 
-                    <section className="min-w-0 rounded-2xl border border-white/10 bg-black/30 p-3 md:p-4">
-                        <Tabs defaultValue="instructions" className="w-full">
-                            <TabsList className="grid h-auto w-full grid-cols-2 gap-2 bg-transparent p-0 sm:grid-cols-4">
-                                <TabsTrigger value="instructions" className="min-h-9 border border-white/10 bg-white/5 text-[10px] uppercase tracking-[0.12em] data-[state=active]:bg-white data-[state=active]:text-black">
-                                    {t('exercises.detail.instructions', 'Instructions')}
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="variations"
-                                    disabled={!exercise.variations?.length}
-                                    className="min-h-9 border border-white/10 bg-white/5 text-[10px] uppercase tracking-[0.12em] data-[state=active]:bg-white data-[state=active]:text-black"
-                                >
-                                    {t('exercises.detail.variations', 'Variations')}
-                                </TabsTrigger>
-                                <TabsTrigger value="related" className="min-h-9 border border-white/10 bg-white/5 text-[10px] uppercase tracking-[0.12em] data-[state=active]:bg-white data-[state=active]:text-black">
-                                    {t('exercises.detail.related', 'Related')}
-                                </TabsTrigger>
-                                <TabsTrigger value="history" className="min-h-9 border border-white/10 bg-white/5 text-[10px] uppercase tracking-[0.12em] data-[state=active]:bg-white data-[state=active]:text-black">
-                                    {t('exercises.detail.history', 'History')}
-                                </TabsTrigger>
-                            </TabsList>
+                            {/* Metabolic Impact */}
+                            {exercise.metabolic && (
+                                <div className="rounded-lg bg-orange-500/[0.08] border border-orange-500/15 overflow-hidden">
+                                    <div className="px-3.5 py-3">
+                                        <div className="flex items-center gap-1.5 mb-2">
+                                            <Zap className="w-3 h-3 text-orange-400" />
+                                            <span className="text-[10px] font-semibold text-orange-400/80 uppercase tracking-[0.15em]">
+                                                {t('exercises.detail.metabolic_impact', 'Metabolic Impact')}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-baseline gap-1.5">
+                                            <span className="text-2xl font-bold text-orange-200">
+                                                {exercise.metabolic.met}
+                                            </span>
+                                            <span className="text-xs font-medium text-white/40">METs</span>
+                                        </div>
+                                        <p className="text-[11px] text-white/35 mt-1.5 leading-relaxed">
+                                            {t('exercises.detail.high_burn', 'High calorie burn potential')}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
 
-                            <TabsContent value="instructions" className="mt-4 space-y-4">
-                                <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                                    <p className="break-words text-base leading-relaxed text-white/90 md:text-lg">
-                                        {exercise.description || 'No description available yet for this exercise.'}
-                                    </p>
-                                </section>
+                            {/* Mastery & Badges */}
+                            <div className="pt-3 border-t border-white/[0.06]">
+                                <ExerciseBadges exerciseId={exercise.id} />
+                            </div>
+                        </div>
 
-                                {(exercise.cues?.length ?? 0) > 0 && (
-                                    <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                                        <h5 className="mb-2 flex items-center gap-2 text-sm font-semibold text-sky-200">
-                                            <Info className="h-4 w-4" />
-                                            {t('exercises.detail.pro_cues', 'Pro Cues')}
-                                        </h5>
-                                        <ul className="space-y-2 text-sm text-sky-100/90">
-                                            {exercise.cues?.map((cue) => (
-                                                <li key={cue} className="flex items-start gap-2">
-                                                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-sky-300" />
-                                                    <span className="break-words">{cue}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                )}
+                        {/* Right Column: Content Tabs */}
+                        <div className="md:col-span-2">
+                            <Tabs defaultValue="instructions" className="w-full">
+                                <TabsList className="grid w-full grid-cols-4 bg-white/[0.04] border border-white/[0.06] rounded-lg p-0.5">
+                                    <TabsTrigger value="instructions" className="text-xs data-[state=active]:bg-white/10 rounded-md">
+                                        {t('exercises.detail.instructions', 'Instructions')}
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="variations"
+                                        disabled={!exercise.variations?.length}
+                                        className="text-xs data-[state=active]:bg-white/10 rounded-md"
+                                    >
+                                        {t('exercises.detail.variations', 'Variations')}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="related" className="text-xs data-[state=active]:bg-white/10 rounded-md">
+                                        {t('exercises.detail.related', 'Related')}
+                                    </TabsTrigger>
+                                    <TabsTrigger value="history" className="text-xs data-[state=active]:bg-white/10 rounded-md">
+                                        {t('exercises.detail.history', 'History')}
+                                    </TabsTrigger>
+                                </TabsList>
 
-                                {exercise.steps && exercise.steps.length > 0 && (
-                                    <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                                        <h5 className="mb-3 flex items-center gap-2 text-sm font-semibold text-white/90">
-                                            <List className="h-4 w-4" />
-                                            {t('exercises.detail.execution', 'Execution')}
-                                        </h5>
-                                        <ol className="space-y-3">
-                                            {exercise.steps?.map((step, index) => (
-                                                <li key={`${step}-${index}`} className="flex items-start gap-3">
-                                                    <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/25 text-xs font-semibold text-white/90">
-                                                        {index + 1}
-                                                    </span>
-                                                    <p className="break-words text-sm leading-relaxed text-white/80">{step}</p>
-                                                </li>
-                                            ))}
-                                        </ol>
-                                    </section>
-                                )}
-                            </TabsContent>
+                                <TabsContent value="instructions" className="mt-5 space-y-5">
+                                    {/* Description */}
+                                    <div>
+                                        <p className="text-[15px] leading-[1.7] text-white/80">
+                                            {exercise.description}
+                                        </p>
+                                    </div>
 
-                            <TabsContent value="variations" className="mt-4">
-                                {exercise.variations && exercise.variations.length > 0 ? (
-                                    <div className="space-y-3">
-                                        {exercise.variations.map((variation, index) => (
-                                            <article
-                                                key={`${variation.name}-${index}`}
-                                                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+                                    {/* Pro Cues */}
+                                    {exercise.cues.length > 0 && (
+                                        <div className="bg-blue-500/[0.08] border border-blue-500/15 rounded-lg p-4">
+                                            <h5 className="font-semibold text-blue-400 text-sm mb-3 flex items-center gap-2">
+                                                <Info className="w-4 h-4" />
+                                                {t('exercises.detail.pro_cues', 'Pro Cues')}
+                                            </h5>
+                                            <ul className="space-y-2">
+                                                {exercise.cues.map((c) => (
+                                                    <li key={c} className="flex items-start gap-2 text-sm text-blue-100/70">
+                                                        <span className="w-1 h-1 rounded-full bg-blue-400/50 mt-2 shrink-0" />
+                                                        {c}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {/* Step-by-Step Execution */}
+                                    {exercise.steps && exercise.steps.length > 0 && (
+                                        <div className="space-y-4">
+                                            <h4 className="font-semibold text-sm flex items-center gap-2 text-white/70">
+                                                <List className="w-4 h-4" />
+                                                {t('exercises.detail.execution', 'Execution')}
+                                            </h4>
+                                            <ol className="space-y-3 relative border-l border-white/[0.08] ml-3 pl-6">
+                                                {exercise.steps.map((step, i) => (
+                                                    <li key={i} className="relative">
+                                                        <span className="absolute -left-[30px] top-0.5 w-5 h-5 rounded-full bg-white/[0.08] border border-white/[0.1] flex items-center justify-center text-[10px] font-bold text-white/50">
+                                                            {i + 1}
+                                                        </span>
+                                                        <p className="text-sm text-white/70 leading-relaxed">{step}</p>
+                                                    </li>
+                                                ))}
+                                            </ol>
+                                        </div>
+                                    )}
+                                </TabsContent>
+
+                                <TabsContent value="variations" className="mt-5">
+                                    <div className="space-y-2.5">
+                                        {exercise.variations?.map((v, i) => (
+                                            <div
+                                                key={i}
+                                                className="group/var p-4 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] transition-colors cursor-pointer"
                                             >
-                                                <div className="mb-2 flex items-center justify-between gap-2">
-                                                    <h5 className="text-base font-semibold text-white">
-                                                        {variation.name}
+                                                <div className="flex justify-between items-center mb-1.5">
+                                                    <h5 className="font-semibold text-sm text-white/90 group-hover/var:text-primary transition-colors">
+                                                        {v.name}
                                                     </h5>
                                                     <Badge
-                                                        variant="outline"
-                                                        className={cn(
-                                                            'text-[10px] uppercase tracking-[0.12em]',
-                                                            variation.type === 'progression' && 'border-primary/30 bg-primary/15 text-primary-foreground',
-                                                            variation.type === 'regression' && 'border-emerald-300/30 bg-emerald-500/15 text-emerald-100',
-                                                            variation.type === 'alternative' && 'border-white/20 bg-white/10 text-white/80'
-                                                        )}
+                                                        variant={
+                                                            v.type === 'progression'
+                                                                ? 'default'
+                                                                : v.type === 'regression'
+                                                                    ? 'secondary'
+                                                                    : 'outline'
+                                                        }
+                                                        className="text-[10px] uppercase tracking-wider"
                                                     >
-                                                        {variation.type}
+                                                        {v.type}
                                                     </Badge>
                                                 </div>
-                                                <p className="break-words text-sm leading-relaxed text-white/75">
-                                                    {variation.description}
-                                                </p>
-                                            </article>
+                                                <p className="text-xs text-white/45 leading-relaxed">{v.description}</p>
+                                            </div>
                                         ))}
                                     </div>
-                                ) : (
-                                    <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-6 text-center text-sm text-white/60">
-                                        No variation options available yet.
-                                    </div>
-                                )}
-                            </TabsContent>
+                                </TabsContent>
 
-                            <TabsContent value="related" className="mt-4">
-                                <RelatedExercises
-                                    currentExercise={exercise}
-                                    onSelect={(relatedExercise) => {
-                                        if (onSelectExercise) {
-                                            onSelectExercise(relatedExercise);
-                                            return;
-                                        }
-                                        onClose();
-                                    }}
-                                />
-                            </TabsContent>
+                                <TabsContent value="related" className="mt-5">
+                                    <RelatedExercises
+                                        currentExercise={exercise}
+                                        onSelect={(ex) => {
+                                            if (onSelectExercise) {
+                                                onSelectExercise(ex);
+                                            } else {
+                                                onClose();
+                                            }
+                                        }}
+                                    />
+                                </TabsContent>
 
-                            <TabsContent value="history" className="mt-4">
-                                {historyData.entries.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/15 bg-white/[0.02] py-12 text-center">
-                                        <Clock className="mb-4 h-12 w-12 text-white/35" />
-                                        <h5 className="mb-2 text-base font-semibold text-white/80">
+                                <TabsContent value="history" className="mt-5">
+                                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                                        <div className="w-12 h-12 rounded-full bg-white/[0.04] flex items-center justify-center mb-4">
+                                            <Clock className="w-6 h-6 text-white/25" />
+                                        </div>
+                                        <h5 className="font-semibold text-white/70 mb-1.5 text-sm">
                                             {t('exercises.detail.no_history', 'No history yet')}
                                         </h5>
-                                        <p className="max-w-sm break-words text-sm text-white/60">
+                                        <p className="text-xs text-white/35 max-w-xs leading-relaxed">
                                             {t('exercises.detail.history_prompt', 'Complete this exercise to track your progress over time.')}
                                         </p>
                                     </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        <div className="grid gap-3 sm:grid-cols-3">
-                                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                                                <p className="text-xs uppercase tracking-wide text-white/50">Last Performed</p>
-                                                <p className="mt-1 text-sm font-semibold text-white">{historyData.lastPerformed}</p>
-                                            </div>
-                                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                                                <p className="text-xs uppercase tracking-wide text-white/50">Best Weight</p>
-                                                <p className="mt-1 text-sm font-semibold text-white">{historyData.bestWeight}</p>
-                                            </div>
-                                            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                                                <p className="text-xs uppercase tracking-wide text-white/50">Best Volume</p>
-                                                <p className="mt-1 text-sm font-semibold text-white">{historyData.bestVolume}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                                            <h5 className="mb-3 text-sm font-semibold text-white/90">Estimated 1RM Trend</h5>
-                                            <div className="h-56">
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <LineChart data={historyData.entries}>
-                                                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                                                        <XAxis dataKey="label" stroke="rgba(255,255,255,0.55)" fontSize={11} />
-                                                        <YAxis stroke="rgba(255,255,255,0.55)" fontSize={11} />
-                                                        <Tooltip
-                                                            contentStyle={{
-                                                                background: 'rgba(0,0,0,0.85)',
-                                                                border: '1px solid rgba(255,255,255,0.15)',
-                                                                borderRadius: 8,
-                                                            }}
-                                                        />
-                                                        <Line
-                                                            type="monotone"
-                                                            dataKey="e1rm"
-                                                            stroke="hsl(var(--primary))"
-                                                            strokeWidth={2.5}
-                                                            dot={{ r: 3 }}
-                                                        />
-                                                    </LineChart>
-                                                </ResponsiveContainer>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                            </TabsContent>
-                        </Tabs>
-                    </section>
+                                </TabsContent>
+                            </Tabs>
+                        </div>
+                    </div>
                 </div>
             </ScrollArea>
         </>
@@ -454,17 +327,8 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
 
     if (isMobile) {
         return (
-            <Drawer
-                open={isOpen}
-                onOpenChange={(open) => {
-                    if (!open) onClose();
-                }}
-            >
-                <DrawerContent className="max-h-[92vh] border-white/10 bg-black/95 text-white backdrop-blur-xl">
-                    <DrawerTitle className="sr-only">{exercise.name} Details</DrawerTitle>
-                    <DrawerDescription className="sr-only">
-                        Detailed view of {exercise.name} including instructions, muscles targeted, and variations.
-                    </DrawerDescription>
+            <Drawer open={isOpen} onOpenChange={onClose}>
+                <DrawerContent className="bg-black/95 backdrop-blur-xl border-white/10 text-white max-h-[90vh] flex flex-col">
                     <ModalContent />
                 </DrawerContent>
             </Drawer>
@@ -472,17 +336,8 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
     }
 
     return (
-        <Dialog
-            open={isOpen}
-            onOpenChange={(open) => {
-                if (!open) onClose();
-            }}
-        >
-            <DialogContent className="h-[90vh] max-w-5xl overflow-hidden border-white/10 bg-black/95 p-0 text-white backdrop-blur-xl md:h-[84vh]">
-                <DialogTitle className="sr-only">{exercise.name} Details</DialogTitle>
-                <DialogDescription className="sr-only">
-                    Detailed view of {exercise.name} including instructions, muscles targeted, and variations.
-                </DialogDescription>
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-4xl bg-black/95 backdrop-blur-xl border-white/[0.08] text-white p-0 overflow-hidden h-[90vh] md:h-[80vh] flex flex-col">
                 <ModalContent />
             </DialogContent>
         </Dialog>

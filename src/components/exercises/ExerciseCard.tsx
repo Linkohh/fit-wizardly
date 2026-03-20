@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Activity, Dumbbell, Flame, Heart, Sparkles, TrendingUp } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { useExerciseInteraction } from '@/hooks/useExerciseInteraction';
@@ -88,8 +87,8 @@ export function ExerciseCard({ exercise, onClick, index = 0, variant = 'library'
             <Card
                 className={cn(
                     'relative h-full overflow-hidden border transition-all duration-300',
-                    'bg-gradient-to-b from-black/70 via-black/60 to-black/50 backdrop-blur-md',
-                    'hover:border-white/25',
+                    'bg-black/40 backdrop-blur-md border border-white/[0.06] transition-all duration-300 overflow-hidden relative',
+                    'hover:border-white/[0.12]',
                     isRecommended
                         ? 'min-h-[322px] w-[280px] sm:w-[312px] lg:w-[336px] xl:w-[348px] border-white/15 rounded-3xl'
                         : 'min-h-[296px] w-full border-white/10 rounded-2xl'
