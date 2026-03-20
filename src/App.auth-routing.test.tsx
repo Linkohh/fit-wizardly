@@ -1,5 +1,5 @@
 import { MemoryRouter, Outlet } from 'react-router-dom';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 
@@ -11,7 +11,7 @@ function selectState<TState, TResult>(state: TState, selector?: Selector<TState,
 
 const mocks = vi.hoisted(() => {
   const authState = {
-    user: null as { id: string } | null,
+    user: null as { id: string; email?: string } | null,
     session: null as { access_token: string } | null,
     profile: null,
     isLoading: false,
@@ -33,6 +33,9 @@ const mocks = vi.hoisted(() => {
   const trainerState = {
     isTrainerMode: false,
     toggleTrainerMode: vi.fn(),
+    setTrainerMode: vi.fn((enabled: boolean) => {
+      trainerState.isTrainerMode = enabled;
+    }),
   };
 
   const themeState = {
@@ -263,6 +266,8 @@ function resetState() {
   mocks.authState.showAuthModal = false;
   mocks.authState.redirectUrl = null;
   mocks.trainerState.isTrainerMode = false;
+  window.sessionStorage.clear();
+  vi.unstubAllEnvs();
   vi.clearAllMocks();
 }
 
@@ -325,5 +330,36 @@ describe('App auth routing', () => {
     expect(await screen.findByText('Trainer Mode Required')).toBeInTheDocument();
     expect(screen.queryByText('Clients Page')).not.toBeInTheDocument();
     expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
+  });
+
+  it('shows a temporary trainer access form when trainer passcode env vars are configured', async () => {
+    vi.stubEnv('VITE_TRAINER_ACCESS_USERNAME', 'coach@example.com');
+    vi.stubEnv('VITE_TRAINER_ACCESS_PASSCODE', 'letmein');
+    mocks.authState.user = { id: 'user-1', email: 'coach@example.com' };
+    mocks.authState.session = { access_token: 'token-1' };
+
+    renderAt('/clients');
+
+    expect(await screen.findByText('Trainer Access Verification')).toBeInTheDocument();
+    expect(screen.getByLabelText('Username')).toHaveValue('coach@example.com');
+    expect(screen.getByLabelText('Passcode')).toBeInTheDocument();
+  });
+
+  it('unlocks trainer pages for the current session after entering the correct temporary credentials', async () => {
+    vi.stubEnv('VITE_TRAINER_ACCESS_USERNAME', 'coach@example.com');
+    vi.stubEnv('VITE_TRAINER_ACCESS_PASSCODE', 'letmein');
+    mocks.authState.user = { id: 'user-1', email: 'coach@example.com' };
+    mocks.authState.session = { access_token: 'token-1' };
+
+    renderAt('/clients');
+
+    fireEvent.change(await screen.findByLabelText('Passcode'), {
+      target: { value: 'letmein' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Unlock Trainer Access' }));
+
+    expect(await screen.findByText('Clients Page')).toBeInTheDocument();
+    expect(mocks.trainerState.setTrainerMode).toHaveBeenCalledWith(true);
+    expect(window.sessionStorage.getItem('fitwizard-trainer-access-unlocked')).toBe('true');
   });
 });
