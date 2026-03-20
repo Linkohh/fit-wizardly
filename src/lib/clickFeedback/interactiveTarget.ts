@@ -1,4 +1,10 @@
+import {
+  isInteractionFeedbackEvent,
+  type InteractionFeedbackEvent,
+} from '@/lib/feedback/interaction-profile';
+
 const CLICK_FEEDBACK_ATTRIBUTE = 'data-click-feedback';
+const CLICK_FEEDBACK_EVENT_ATTRIBUTE = 'data-click-feedback-event';
 
 type ClickFeedbackOverride = 'on' | 'off';
 
@@ -129,4 +135,18 @@ export function getClickFeedbackTarget(target: EventTarget | null): Element | nu
   if (interactive && !isDisabled(interactive)) return interactive;
 
   return getReactClickableTarget(element);
+}
+
+export function getClickFeedbackEvent(
+  element: Element | null
+): InteractionFeedbackEvent | null {
+  if (!element) return null;
+
+  const eventTarget = element.closest(`[${CLICK_FEEDBACK_EVENT_ATTRIBUTE}]`);
+  if (!eventTarget) return null;
+
+  const eventName = eventTarget.getAttribute(CLICK_FEEDBACK_EVENT_ATTRIBUTE);
+  if (!isInteractionFeedbackEvent(eventName)) return null;
+
+  return eventName;
 }

@@ -7,6 +7,8 @@ import {
 describe('interaction feedback profile', () => {
   it('defines all required premium interaction events', () => {
     const requiredEvents: InteractionFeedbackEvent[] = [
+      'navigation',
+      'brandHome',
       'select',
       'deselect',
       'sheetOpen',
@@ -26,6 +28,18 @@ describe('interaction feedback profile', () => {
     expect(INTERACTION_FEEDBACK_PROFILE.select.sound).toBe('none');
     expect(INTERACTION_FEEDBACK_PROFILE.deselect.sound).toBe('none');
     expect(INTERACTION_FEEDBACK_PROFILE.longPressInfo.sound).toBe('none');
+  });
+
+  it('gives brand taps a distinct sound and stronger haptic than default navigation', () => {
+    expect(INTERACTION_FEEDBACK_PROFILE.brandHome.sound).toBe('brand');
+    expect(INTERACTION_FEEDBACK_PROFILE.brandHome.haptic).toEqual({
+      type: 'impact',
+      style: 'medium',
+    });
+    expect(INTERACTION_FEEDBACK_PROFILE.navigation.haptic).toEqual({
+      type: 'impact',
+      style: 'light',
+    });
   });
 
   it('maps success/warning/error to notification haptics', () => {

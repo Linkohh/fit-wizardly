@@ -172,7 +172,11 @@ export function Header() {
       )}>
         {/* Logo */}
         {/* NOTE: Tooltip removed here to prevent potential interference/looping with Link logic */}
-        <Link to="/" className="flex items-center gap-3 touch-target group">
+        <Link
+          to="/"
+          className="flex items-center gap-3 touch-target group"
+          data-click-feedback-event="brandHome"
+        >
           <motion.div
             className={cn(
               "flex shrink-0 items-center justify-center overflow-hidden",
@@ -219,6 +223,7 @@ export function Header() {
               <Link
                 key={item.path}
                 to={item.path}
+                data-click-feedback-event="navigation"
                 ref={(el) => {
                   if (el) {
                     navItemRefs.current.set(item.path, el);
@@ -283,7 +288,11 @@ export function Header() {
                 />
               </div>
               <DropdownMenuItem asChild>
-                <Link to="/profile" className="cursor-pointer w-full">
+                <Link
+                  to="/profile"
+                  className="cursor-pointer w-full"
+                  data-click-feedback-event="navigation"
+                >
                   Settings & Profile
                 </Link>
               </DropdownMenuItem>
@@ -303,6 +312,7 @@ export function Header() {
                 variant="ghost"
                 size="icon"
                 className="touch-target"
+                data-click-feedback-event="navigation"
                 aria-label={mobileOpen ? "Close menu" : "Open menu"}
                 aria-expanded={mobileOpen}
               >
@@ -362,7 +372,11 @@ export function Header() {
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       />
                     )}
-                    <Link to={item.path} onClick={() => setMobileOpen(false)}>
+                    <Link
+                      to={item.path}
+                      onClick={() => setMobileOpen(false)}
+                      data-click-feedback-event="navigation"
+                    >
                       <Button
                         variant={active ? 'default' : 'ghost'}
                         className={cn(
@@ -447,7 +461,11 @@ export function Header() {
                   </div>
                 </div>
 
-                <Link to="/profile" onClick={() => setMobileOpen(false)}>
+                <Link
+                  to="/profile"
+                  onClick={() => setMobileOpen(false)}
+                  data-click-feedback-event="navigation"
+                >
                   <Button variant="default" className="w-full justify-start gap-2">
                     <Users className="h-4 w-4" />
                     {t('profile.title', 'Settings & Profile')}

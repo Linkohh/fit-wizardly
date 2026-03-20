@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
-import { getClickFeedbackTarget } from '@/lib/clickFeedback/interactiveTarget';
+import {
+  getClickFeedbackEvent,
+  getClickFeedbackTarget,
+} from '@/lib/clickFeedback/interactiveTarget';
 import { useInteractionFeedback } from '@/hooks/useInteractionFeedback';
 
 function useLatestRef<T>(value: T) {
@@ -25,7 +28,8 @@ export function useGlobalClickFeedback() {
   const emitRef = useLatestRef(emit);
 
   useEffect(() => {
-    const handlePointerDown = (event: PointerEvent) => {
+    const handlePointerDown: EventListener = (event) => {
+      if (!(event instanceof PointerEvent)) return;
       if (!soundsEnabledRef.current && !hapticsEnabledRef.current) return;
 
       if (!event.isPrimary) return;
@@ -36,11 +40,13 @@ export function useGlobalClickFeedback() {
       if (feedbackTarget.closest('[data-interaction-feedback="explicit"]')) return;
 
       if (soundsEnabledRef.current || hapticsEnabledRef.current) {
-        void emitRef.current('globalClick', { pointerType: event.pointerType });
+        const feedbackEvent = getClickFeedbackEvent(feedbackTarget) ?? 'globalClick';
+        void emitRef.current(feedbackEvent, { pointerType: event.pointerType });
       }
     };
 
-    const handleKeyDown = (event: KeyboardEvent) => {
+    const handleKeyDown: EventListener = (event) => {
+      if (!(event instanceof KeyboardEvent)) return;
       if (!soundsEnabledRef.current) return;
       if (event.repeat) return;
       if (event.key !== 'Enter' && event.key !== ' ') return;
@@ -49,21 +55,22 @@ export function useGlobalClickFeedback() {
       if (!feedbackTarget) return;
       if (feedbackTarget.closest('[data-interaction-feedback="explicit"]')) return;
 
-      void emitRef.current('keyboardClick', { pointerType: 'keyboard' });
+      const feedbackEvent = getClickFeedbackEvent(feedbackTarget) ?? 'keyboardClick';
+      void emitRef.current(feedbackEvent, { pointerType: 'keyboard' });
     };
 
     const target = document;
-    target.addEventListener('pointerdown', handlePointerDown as any, {
+    target.addEventListener('pointerdown', handlePointerDown, {
       capture: true,
       passive: true,
     });
-    target.addEventListener('keydown', handleKeyDown as any, { capture: true });
+    target.addEventListener('keydown', handleKeyDown, { capture: true });
 
     return () => {
-      target.removeEventListener('pointerdown', handlePointerDown as any, {
+      target.removeEventListener('pointerdown', handlePointerDown, {
         capture: true,
       });
-      target.removeEventListener('keydown', handleKeyDown as any, { capture: true });
+      target.removeEventListener('keydown', handleKeyDown, { capture: true });
     };
   }, [soundsEnabledRef, hapticsEnabledRef, emitRef]);
 }

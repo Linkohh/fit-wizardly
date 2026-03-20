@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { getClickFeedbackTarget } from '@/lib/clickFeedback/interactiveTarget';
+import {
+    getClickFeedbackEvent,
+    getClickFeedbackTarget,
+} from '@/lib/clickFeedback/interactiveTarget';
 import { playRetroClickSound } from '@/lib/clickFeedback/clickSound';
 
 describe('clickFeedback', () => {
@@ -110,6 +113,32 @@ describe('clickFeedback', () => {
     describe('playRetroClickSound', () => {
         it('does not throw when AudioContext is unavailable', async () => {
             await expect(playRetroClickSound()).resolves.toBeUndefined();
+        });
+    });
+
+    describe('getClickFeedbackEvent', () => {
+        it('returns explicit feedback events from the closest annotated target', () => {
+            document.body.innerHTML = `
+                <a id="logoLink" data-click-feedback-event="brandHome" href="/">
+                    <span id="logoChild">Home</span>
+                </a>
+                <div data-click-feedback-event="navigation" id="navWrapper">
+                    <button id="navButton"><span id="navChild">Go</span></button>
+                </div>
+            `;
+
+            expect(getClickFeedbackEvent(document.getElementById('logoChild'))).toBe('brandHome');
+            expect(getClickFeedbackEvent(document.getElementById('navChild'))).toBe('navigation');
+        });
+
+        it('ignores unknown feedback events', () => {
+            document.body.innerHTML = `
+                <button id="mystery" data-click-feedback-event="unknown">
+                    <span id="mysteryChild">Mystery</span>
+                </button>
+            `;
+
+            expect(getClickFeedbackEvent(document.getElementById('mysteryChild'))).toBeNull();
         });
     });
 });

@@ -1,18 +1,39 @@
 import { NotificationType } from '@/hooks/useHaptics';
 
+export const INTERACTION_FEEDBACK_EVENTS = [
+  'globalClick',
+  'keyboardClick',
+  'navigation',
+  'brandHome',
+  'select',
+  'deselect',
+  'sheetOpen',
+  'sheetSnap',
+  'longPressInfo',
+  'success',
+  'warning',
+  'error',
+] as const;
+
 export type InteractionFeedbackEvent =
-  | 'globalClick'
-  | 'keyboardClick'
-  | 'select'
-  | 'deselect'
-  | 'sheetOpen'
-  | 'sheetSnap'
-  | 'longPressInfo'
+  (typeof INTERACTION_FEEDBACK_EVENTS)[number];
+
+export function isInteractionFeedbackEvent(
+  value: string | null | undefined
+): value is InteractionFeedbackEvent {
+  return (
+    typeof value === 'string' &&
+    (INTERACTION_FEEDBACK_EVENTS as readonly string[]).includes(value)
+  );
+}
+
+export type FeedbackSound =
+  | 'none'
+  | 'click'
+  | 'brand'
   | 'success'
   | 'warning'
   | 'error';
-
-export type FeedbackSound = 'none' | 'click' | 'success' | 'warning' | 'error';
 
 export interface InteractionFeedbackProfile {
   haptic?:
@@ -31,6 +52,14 @@ export const INTERACTION_FEEDBACK_PROFILE: Record<
   },
   keyboardClick: {
     sound: 'click',
+  },
+  navigation: {
+    haptic: { type: 'impact', style: 'light' },
+    sound: 'click',
+  },
+  brandHome: {
+    haptic: { type: 'impact', style: 'medium' },
+    sound: 'brand',
   },
   select: {
     haptic: { type: 'impact', style: 'light' },

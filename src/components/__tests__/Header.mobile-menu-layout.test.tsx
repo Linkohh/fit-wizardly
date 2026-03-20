@@ -129,6 +129,23 @@ vi.mock('@/components/ui/sheet', async () => {
 });
 
 describe('Header mobile menu layout', () => {
+  it('tags the brand logo and menu trigger with explicit mobile feedback events', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Header />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByAltText('FitWizard Logo').closest('a')).toHaveAttribute(
+      'data-click-feedback-event',
+      'brandHome',
+    );
+    expect(screen.getByRole('button', { name: /open menu/i })).toHaveAttribute(
+      'data-click-feedback-event',
+      'navigation',
+    );
+  });
+
   it('applies viewport-safe sheet sizing and makes the mobile menu scrollable', () => {
     render(
       <MemoryRouter initialEntries={['/']}>

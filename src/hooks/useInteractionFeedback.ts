@@ -17,6 +17,7 @@ type WebkitWindow = Window & {
 };
 
 const SOUND_PATTERNS: Record<Exclude<FeedbackSound, 'none' | 'click'>, number[]> = {
+  brand: [523.25, 659.25],
   success: [587.33, 783.99],
   warning: [440, 349.23],
   error: [329.63, 246.94],
@@ -88,10 +89,10 @@ export function useInteractionFeedback() {
 
       if (hapticsEnabled && profile.haptic) {
         const pointerType = options?.pointerType;
-        const isMousePointer = pointerType === 'mouse';
-        const shouldSkipMouseHaptic = event === 'globalClick' && isMousePointer;
+        const shouldSkipPointerHaptic =
+          pointerType === 'mouse' || pointerType === 'keyboard';
 
-        if (!shouldSkipMouseHaptic) {
+        if (!shouldSkipPointerHaptic) {
           if (profile.haptic.type === 'impact') {
             await impact(profile.haptic.style);
           } else {
