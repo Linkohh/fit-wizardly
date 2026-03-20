@@ -37,7 +37,10 @@
       "mcp__chrome-devtools__press_key",
       "mcp__chrome-devtools__resize_page",
       "mcp__chrome-devtools__list_pages",
-      "mcp__chrome-devtools__hover"
+      "mcp__chrome-devtools__hover",
+      "Skill(ralph-loop:ralph-loop)",
+      "Skill(ralph-loop:ralph-loop:*)",
+      "mcp__Claude_Preview__preview_start"
     ]
   },
   "askBeforeRunningTool": false
