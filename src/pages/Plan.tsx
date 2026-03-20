@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -76,7 +77,7 @@ export default function PlanPage() {
   );
 
   // Show skeleton while loading
-  if (isLoadingPlan && currentPlan) {
+  if (isLoadingPlan && !currentPlan) {
     return <PlanSkeleton />;
   }
 
@@ -240,16 +241,22 @@ export default function PlanPage() {
 
       {/* Workout Days */}
       <div className="space-y-6">
-        {currentPlan.workoutDays.map((day) => (
-          <WorkoutDayCard
+        {currentPlan.workoutDays.map((day, index) => (
+          <motion.div
             key={day.dayIndex}
-            day={day}
-            planId={currentPlan.id}
-            onSwap={(target) => {
-              setSwapTarget(target);
-              setSwapModalOpen(true);
-            }}
-          />
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.07, type: 'spring', stiffness: 420, damping: 34, mass: 0.85 }}
+          >
+            <WorkoutDayCard
+              day={day}
+              planId={currentPlan.id}
+              onSwap={(target) => {
+                setSwapTarget(target);
+                setSwapModalOpen(true);
+              }}
+            />
+          </motion.div>
         ))}
       </div>
 

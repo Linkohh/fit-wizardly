@@ -235,6 +235,9 @@
             "context": "Construir força máxima é mais difícil apenas com peso corporal. Considere adicionar bandas ou pesos se possível."
         }
     },
+    "footer": {
+        "how_to_use": "Como usar"
+    },
     "common": {
         "loading": "Carregando...",
         "error": "Algo deu errado",

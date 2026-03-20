@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
 import { usePlanStore } from '@/stores/planStore';
@@ -65,9 +66,9 @@ export function VolumeHealth() {
 
     const getBarColor = (muscleName: MuscleGroup, sets: number) => {
         const mrv = getMRVForMuscle(muscleName);
-        if (mrv && sets > mrv) return '#ef4444'; // Above MRV
-        if (mrv && sets >= Math.round(mrv * 0.7)) return '#10b981'; // High productive range
-        return '#eab308'; // Below productive range
+        if (mrv && sets > mrv) return 'hsl(0 72% 51%)'; // Above MRV
+        if (mrv && sets >= Math.round(mrv * 0.7)) return 'hsl(158 64% 52%)'; // High productive range
+        return 'hsl(45 93% 47%)'; // Below productive range
     };
 
     const hasOverreaching = data.some((d) => {
@@ -76,6 +77,12 @@ export function VolumeHealth() {
     });
 
     return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            whileHover={{ y: -2 }}
+        >
         <Card variant="glass" className="col-span-1 lg:col-span-2">
             <CardHeader>
                 <div className="flex justify-between items-start">
@@ -132,7 +139,7 @@ export function VolumeHealth() {
                                         <Cell key={`cell-${index}`} fill={getBarColor(entry.name, entry.sets)} />
                                     ))}
                                 </Bar>
-                                <ReferenceLine x={10} stroke="#10b981" strokeDasharray="3 3" label={{ value: 'Min Effective', position: 'insideBottom', fill: '#10b981', fontSize: 10 }} />
+                                <ReferenceLine x={10} stroke="hsl(158 64% 52%)" strokeDasharray="3 3" label={{ value: 'Min Effective', position: 'insideBottom', fill: 'hsl(158 64% 52%)', fontSize: 10 }} />
                             </BarChart>
                         </ResponsiveContainer>
                     ) : (
@@ -144,5 +151,6 @@ export function VolumeHealth() {
                 </div>
             </CardContent>
         </Card>
+        </motion.div>
     );
 }

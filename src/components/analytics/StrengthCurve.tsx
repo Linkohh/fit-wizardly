@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
@@ -80,6 +81,12 @@ export function StrengthCurve() {
     const currentPR = personalRecords.find(pr => pr.exerciseName === selectedExercise && pr.type === 'weight')?.newValue;
 
     return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            whileHover={{ y: -2 }}
+        >
         <Card variant="glass" className="col-span-1 lg:col-span-2">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div>
@@ -163,8 +170,8 @@ export function StrengthCurve() {
                                                 cx={props.cx}
                                                 cy={props.cy}
                                                 r={isPR ? 5 : 4}
-                                                fill={isPR ? '#facc15' : 'hsl(var(--background))'}
-                                                stroke={isPR ? '#ca8a04' : 'hsl(var(--primary))'}
+                                                fill={isPR ? 'hsl(45 93% 60%)' : 'hsl(var(--background))'}
+                                                stroke={isPR ? 'hsl(45 93% 60%)' : 'hsl(var(--primary))'}
                                                 strokeWidth={2}
                                             />
                                         );
@@ -182,5 +189,6 @@ export function StrengthCurve() {
                 </div>
             </CardContent>
         </Card>
+        </motion.div>
     );
 }

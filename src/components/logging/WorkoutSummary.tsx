@@ -179,31 +179,48 @@ export function WorkoutSummary({ log, plan, onClose }: WorkoutSummaryProps) {
             {/* Stats Grid */}
             <main className="container max-w-2xl mx-auto px-4 py-6 space-y-6">
                 {/* Primary Stats */}
-                <div className="grid grid-cols-3 gap-4">
-                    <Card className="text-center">
-                        <CardContent className="p-4">
-                            <Timer className="h-6 w-6 mx-auto text-primary mb-2" />
-                            <p className="text-2xl font-bold">{log.duration}</p>
-                            <p className="text-xs text-muted-foreground">Minutes</p>
-                        </CardContent>
-                    </Card>
+                <motion.div
+                    className="grid grid-cols-3 gap-4"
+                    variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}>
+                        <Card className="text-center bg-card/60 backdrop-blur-sm border border-primary/10 relative overflow-hidden">
+                            <CardContent className="p-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/10 flex items-center justify-center mx-auto mb-2">
+                                    <Timer className="h-6 w-6 text-primary" />
+                                </div>
+                                <p className="text-2xl font-bold font-display">{log.duration}</p>
+                                <p className="text-xs text-muted-foreground">Minutes</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
 
-                    <Card className="text-center">
-                        <CardContent className="p-4">
-                            <Flame className="h-6 w-6 mx-auto text-orange-500 mb-2" />
-                            <p className="text-2xl font-bold">{formatVolume(log.totalVolume)}</p>
-                            <p className="text-xs text-muted-foreground">{preferredWeightUnit} Volume</p>
-                        </CardContent>
-                    </Card>
+                    <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}>
+                        <Card className="text-center bg-card/60 backdrop-blur-sm border border-primary/10 relative overflow-hidden">
+                            <CardContent className="p-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/10 flex items-center justify-center mx-auto mb-2">
+                                    <Flame className="h-6 w-6 text-orange-500" />
+                                </div>
+                                <p className="text-2xl font-bold font-display">{formatVolume(log.totalVolume)}</p>
+                                <p className="text-xs text-muted-foreground">{preferredWeightUnit} Volume</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
 
-                    <Card className="text-center">
-                        <CardContent className="p-4">
-                            <CheckCircle2 className="h-6 w-6 mx-auto text-green-500 mb-2" />
-                            <p className="text-2xl font-bold">{completedSets}/{totalSets}</p>
-                            <p className="text-xs text-muted-foreground">Sets</p>
-                        </CardContent>
-                    </Card>
-                </div>
+                    <motion.div variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } }}>
+                        <Card className="text-center bg-card/60 backdrop-blur-sm border border-primary/10 relative overflow-hidden">
+                            <CardContent className="p-4">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/10 flex items-center justify-center mx-auto mb-2">
+                                    <CheckCircle2 className="h-6 w-6 text-green-500" />
+                                </div>
+                                <p className="text-2xl font-bold font-display">{completedSets}/{totalSets}</p>
+                                <p className="text-xs text-muted-foreground">Sets</p>
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+                </motion.div>
 
                 {/* RIR Performance */}
                 <Card>
@@ -229,7 +246,7 @@ export function WorkoutSummary({ log, plan, onClose }: WorkoutSummaryProps) {
                         </div>
                         <Progress
                             value={(avgRIR / 5) * 100}
-                            className="h-3"
+                            className="h-3 [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-secondary"
                         />
                         <p className="text-xs text-muted-foreground mt-2">
                             {Math.abs(avgRIR - targetRIR) <= 0.5
@@ -350,8 +367,8 @@ export function WorkoutSummary({ log, plan, onClose }: WorkoutSummaryProps) {
                                         title: shareTitle,
                                         text: shareText,
                                     });
-                                } catch (err) {
-                                    console.log('Share aborted');
+                                } catch {
+                                    // Share was aborted or cancelled by the user.
                                 }
                             } else {
                                 await navigator.clipboard.writeText(shareText);
@@ -372,16 +389,6 @@ export function WorkoutSummary({ log, plan, onClose }: WorkoutSummaryProps) {
                 </div>
             </main>
 
-            {/* Confetti animation placeholder */}
-            <style>{`
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-10px); }
-        }
-        .animate-bounce-slow {
-          animation: bounce-slow 2s infinite;
-        }
-      `}</style>
         </div>
     );
 }

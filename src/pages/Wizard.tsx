@@ -18,6 +18,12 @@ import { generatePlan } from '@/lib/planGenerator';
 import { useToast } from '@/hooks/use-toast';
 import { createFunnelTracker, trackWizardComplete, trackPlanGenerated } from '@/lib/analytics';
 
+const slideVariants = {
+  enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0, scale: 0.98 }),
+  center: { x: 0, opacity: 1, scale: 1 },
+  exit: (dir: number) => ({ x: dir < 0 ? 60 : -60, opacity: 0, scale: 0.98 }),
+};
+
 export default function WizardPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -42,6 +48,9 @@ export default function WizardPage() {
   // Ref for focus management
   const stepContainerRef = useRef<HTMLDivElement>(null);
   const prevStepIndexRef = useRef(currentStepIndex);
+
+  // Direction state for slide transitions: 1=forward, -1=back
+  const [direction, setDirection] = useState(1);
 
   // Hydration guard - wait for store to load from localStorage
   const [hydrated, setHydrated] = useState(false);
@@ -160,10 +169,10 @@ export default function WizardPage() {
       if (e.key === 'Enter') {
         if (validation.valid && !isGenerating) {
           if (currentStep === 'review') handleGenerate();
-          else nextStep();
+          else { setDirection(1); nextStep(); }
         }
       } else if (e.key === 'Escape') {
-        if (currentStepIndex > 0) prevStep();
+        if (currentStepIndex > 0) { setDirection(-1); prevStep(); }
       }
     };
 
@@ -192,10 +201,10 @@ export default function WizardPage() {
     return (
       <div className="container-content py-8">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/3" />
-          <div className="h-4 bg-muted rounded w-1/2" />
-          <div className="h-12 bg-muted rounded mt-6" />
-          <div className="h-64 bg-muted rounded-2xl mt-8" />
+          <div className="animate-pulse rounded-xl bg-gradient-to-r from-muted/50 via-muted/80 to-muted/50 h-[32px] w-1/3" />
+          <div className="animate-pulse rounded-xl bg-gradient-to-r from-muted/50 via-muted/80 to-muted/50 h-[16px] w-1/2" />
+          <div className="animate-pulse rounded-xl bg-gradient-to-r from-muted/50 via-muted/80 to-muted/50 h-[48px] mt-6" />
+          <div className="animate-pulse rounded-xl bg-gradient-to-r from-muted/50 via-muted/80 to-muted/50 h-[256px] mt-8" />
         </div>
       </div>
     );
@@ -207,7 +216,7 @@ export default function WizardPage() {
 
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
+          <h1 className="text-3xl font-bold font-display bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
             {t('wizard.title')}
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -216,7 +225,7 @@ export default function WizardPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block mr-2">
+          <span className="text-sm font-medium font-display text-muted-foreground hidden sm:inline-block mr-2">
             {t('wizard.progress', { percent: Math.round(((currentStepIndex + 1) / 6) * 100) })}
           </span>
         </div>
@@ -237,13 +246,15 @@ export default function WizardPage() {
         style={currentStep === 'anatomy' ? { paddingBottom: 'calc(7rem + env(safe-area-inset-bottom, 0px))' } : undefined}
         aria-label={`Step ${currentStepIndex + 1}: ${stepNames[currentStep]}`}
       >
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="popLayout" custom={direction}>
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            variants={slideVariants}
+            custom={direction}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.85 }}
             className="glass-premium rounded-2xl p-4 sm:p-6"
           >
             {renderStep()}
@@ -257,8 +268,8 @@ export default function WizardPage() {
         canGoForward={validation.valid}
         isLastStep={currentStep === 'review'}
         isGenerating={isGenerating}
-        onBack={prevStep}
-        onNext={nextStep}
+        onBack={() => { setDirection(-1); prevStep(); }}
+        onNext={() => { setDirection(1); nextStep(); }}
         onStartOver={resetWizard}
         validationMessage={!validation.valid ? validation.message : undefined}
       />

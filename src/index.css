@@ -1764,3 +1764,81 @@
     transform: none !important;
   }
 }
+
+/* =====================================================
+   DISPLAY FONT UTILITY
+   Unbounded — geometric, futuristic, for major headlines
+   ===================================================== */
+.font-display {
+  font-family: 'Unbounded', 'Outfit', sans-serif;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+/* =====================================================
+   INPUT FIELD PREMIUM FOCUS STATES
+   Gradient glow on focus, subtle tint when filled
+   ===================================================== */
+.dark input:focus-visible,
+.dark textarea:focus-visible,
+.dark [cmdk-input]:focus-visible {
+  outline: none !important;
+  border-color: hsl(var(--primary) / 0.5) !important;
+  box-shadow:
+    0 0 0 1px hsl(var(--primary) / 0.4),
+    0 0 0 3px hsl(var(--primary) / 0.12),
+    0 0 20px hsl(var(--primary) / 0.15) !important;
+}
+
+.dark input:not(:placeholder-shown):not(:focus-visible) {
+  border-color: hsl(var(--primary) / 0.25);
+}
+
+/* =====================================================
+   GLASS TREATMENT FOR SELECT DROPDOWNS & DIALOGS
+   Overrides radix/shadcn defaults in dark mode
+   ===================================================== */
+.dark [data-radix-select-content],
+.dark [role="listbox"] {
+  background: hsl(270 40% 10% / 0.92) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border: 1px solid hsl(var(--primary) / 0.18) !important;
+  box-shadow:
+    0 8px 32px hsl(0 0% 0% / 0.5),
+    0 0 0 1px hsl(var(--primary) / 0.08),
+    inset 0 1px 0 hsl(255 100% 100% / 0.06) !important;
+}
+
+.dark [data-radix-popper-content-wrapper] {
+  filter: drop-shadow(0 20px 40px hsl(270 50% 5% / 0.6));
+}
+
+.dark [data-radix-dialog-content],
+.dark [role="dialog"] {
+  background: hsl(270 45% 9% / 0.95) !important;
+  backdrop-filter: blur(28px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
+  border: 1px solid hsl(var(--primary) / 0.2) !important;
+  box-shadow:
+    0 16px 60px hsl(0 0% 0% / 0.6),
+    0 0 0 1px hsl(var(--primary) / 0.08),
+    inset 0 1px 0 hsl(255 100% 100% / 0.06) !important;
+}
+
+/* Select item hover state */
+.dark [data-radix-select-item][data-highlighted],
+.dark [role="option"][aria-selected="true"] {
+  background: hsl(var(--primary) / 0.15) !important;
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+/* Workout summary celebration animation */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s infinite;
+}
