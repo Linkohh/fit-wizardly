@@ -10,7 +10,7 @@ export function WelcomeStep() {
     const { userData, setDisplayName, setAvatarEmoji } = useOnboardingStore();
 
     return (
-        <div className="space-y-8 text-center">
+        <div className="space-y-6 text-center sm:space-y-8">
             {/* Hero text */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
