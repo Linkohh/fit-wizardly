@@ -154,8 +154,8 @@ describe('PlanPage', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('plan.noplan.title')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'plan.noplan.cta' })).toBeInTheDocument();
+    expect(screen.getByText('plan.noplan.headline')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /plan\.noplan\.cta_primary/i })).toBeInTheDocument();
     expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
   });
 
