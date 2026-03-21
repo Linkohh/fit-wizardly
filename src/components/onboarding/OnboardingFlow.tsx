@@ -97,113 +97,119 @@ export function OnboardingFlow() {
     }
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <div className="relative app-shell-page-min-height overflow-hidden px-4 py-6 sm:px-6 sm:py-8">
             {/* Background gradient orbs */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-pulse" />
                 <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/20 rounded-full blur-3xl animate-pulse delay-1000" />
             </div>
 
-            {/* Progress indicator */}
-            <div className="absolute top-6 left-6 z-20">
-                <OnboardingProgress progress={progress} currentStep={stepIndex + 1} totalSteps={totalSteps} />
-            </div>
-
-            {/* Skip button */}
-            <motion.div
-                className="absolute top-6 right-6 z-20"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-            >
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSkip}
-                    className="text-muted-foreground hover:text-foreground"
+            <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-6 sm:gap-8">
+                <div
+                    data-testid="onboarding-top-row"
+                    className="flex items-start justify-between gap-4 sm:items-center"
                 >
-                    {t('onboarding.skip')}
-                </Button>
-            </motion.div>
+                    <div data-testid="onboarding-progress-slot" className="shrink-0">
+                        <OnboardingProgress progress={progress} currentStep={stepIndex + 1} totalSteps={totalSteps} />
+                    </div>
 
-            {/* Main content area */}
-            <div className="w-full max-w-lg relative z-10">
-                <AnimatePresence mode="wait" custom={1}>
                     <motion.div
-                        key={currentStep}
-                        custom={1}
-                        variants={slideVariants}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{
-                            x: { type: 'spring', stiffness: 300, damping: 30 },
-                            opacity: { duration: 0.2 },
-                        }}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
                     >
-                        <CurrentStepComponent />
-                    </motion.div>
-                </AnimatePresence>
-            </div>
-
-            {/* Navigation buttons */}
-            <motion.div
-                className="flex items-center gap-4 mt-12"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-            >
-                {/* Back button */}
-                <AnimatePresence>
-                    {stepIndex > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleSkip}
+                            className="text-muted-foreground hover:text-foreground"
                         >
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                onClick={prevStep}
-                                className="gap-2"
-                            >
-                                <ChevronLeft className="h-4 w-4" />
-                                {t('onboarding.back')}
-                            </Button>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
+                            {t('onboarding.skip')}
+                        </Button>
+                    </motion.div>
+                </div>
 
-                {/* Next/Complete button */}
-                <Button
-                    size="lg"
-                    onClick={handleNext}
-                    disabled={!canProceed()}
-                    className={cn(
-                        "gap-2 min-w-[140px] transition-all duration-300",
-                        canProceed()
-                            ? "gradient-primary text-primary-foreground shadow-glow"
-                            : ""
-                    )}
-                >
-                    {currentStep === 'goals' && userData.role === 'user' ? (
-                        <>
-                            {t('onboarding.lets_go')}
-                            <Sparkles className="h-4 w-4" />
-                        </>
-                    ) : currentStep === 'import' ? (
-                        <>
-                            {t('onboarding.complete')}
-                            <Sparkles className="h-4 w-4" />
-                        </>
-                    ) : (
-                        <>
-                            {t('onboarding.next')}
-                            <ChevronRight className="h-4 w-4" />
-                        </>
-                    )}
-                </Button>
-            </motion.div>
+                <div className="flex flex-1 flex-col justify-start lg:justify-center">
+                    {/* Main content area */}
+                    <div className="mx-auto w-full max-w-lg">
+                        <AnimatePresence mode="wait" custom={1}>
+                            <motion.div
+                                key={currentStep}
+                                custom={1}
+                                variants={slideVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                                transition={{
+                                    x: { type: 'spring', stiffness: 300, damping: 30 },
+                                    opacity: { duration: 0.2 },
+                                }}
+                            >
+                                <CurrentStepComponent />
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+
+                    {/* Navigation buttons */}
+                    <motion.div
+                        className="mx-auto mt-8 flex w-full max-w-lg items-center justify-center gap-4 sm:mt-10"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                    >
+                        {/* Back button */}
+                        <AnimatePresence>
+                            {stepIndex > 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -20 }}
+                                >
+                                    <Button
+                                        variant="outline"
+                                        size="lg"
+                                        onClick={prevStep}
+                                        className="gap-2"
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                        {t('onboarding.back')}
+                                    </Button>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Next/Complete button */}
+                        <Button
+                            size="lg"
+                            onClick={handleNext}
+                            disabled={!canProceed()}
+                            className={cn(
+                                "gap-2 min-w-[140px] transition-all duration-300",
+                                canProceed()
+                                    ? "gradient-primary text-primary-foreground shadow-glow"
+                                    : ""
+                            )}
+                        >
+                            {currentStep === 'goals' && userData.role === 'user' ? (
+                                <>
+                                    {t('onboarding.lets_go')}
+                                    <Sparkles className="h-4 w-4" />
+                                </>
+                            ) : currentStep === 'import' ? (
+                                <>
+                                    {t('onboarding.complete')}
+                                    <Sparkles className="h-4 w-4" />
+                                </>
+                            ) : (
+                                <>
+                                    {t('onboarding.next')}
+                                    <ChevronRight className="h-4 w-4" />
+                                </>
+                            )}
+                        </Button>
+                    </motion.div>
+                </div>
+            </div>
         </div>
     );
 }

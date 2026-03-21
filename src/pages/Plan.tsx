@@ -22,6 +22,7 @@ import { SaveTemplateDialog } from '@/components/plan/SaveTemplateDialog';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { PeriodizationTimeline } from '@/components/plan/PeriodizationTimeline';
 import { NoPlanEmptyState } from '@/components/plan/NoPlanEmptyState';
+import { WeeklyProgressCard } from '@/components/plan/WeeklyProgressCard';
 import { detectMRVWarnings, suggestSplitAdjustment } from '@/lib/progressionEngine';
 import { formatIdentifierLabel } from '@/lib/displayText';
 
@@ -189,6 +190,9 @@ export default function PlanPage() {
           <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Target className="h-4 w-4 text-primary-foreground" /></div><span>{formatIdentifierLabel(activePlan.splitType)}</span></div>
         </CardContent>
       </Card>
+
+      {/* Weekly Progress */}
+      <WeeklyProgressCard planId={activePlan.id} />
 
       {mrvWarnings.length > 0 && (
         <Card className="mb-6 border-orange-500/30 bg-orange-500/10">

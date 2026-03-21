@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PlayCircle, AlertTriangle, Lightbulb, ArrowLeftRight } from 'lucide-react';
+import { ExerciseQuickStats } from '@/components/plan/ExerciseQuickStats';
 import type { Plan, ExercisePrescription, Constraint } from '@/types/fitness';
 import { MUSCLE_DATA } from '@/types/fitness';
 import { useTranslation } from 'react-i18next';
@@ -178,6 +179,7 @@ export function WorkoutDayCard({ day, planId, onSwap }: WorkoutDayCardProps) {
                                                                 <p className="text-sm text-muted-foreground">
                                                                     {ex.exercise.primaryMuscles.map(getMuscleLabel).join(', ')}
                                                                 </p>
+                                                                <ExerciseQuickStats exerciseId={ex.exercise.id} />
                                                             </div>
                                                         </div>
 

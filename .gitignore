@@ -29,5 +29,8 @@ tmpclaude*
 playwright-report
 test-results
 
+# Build analysis
+stats.html
+
 # System files
 nul

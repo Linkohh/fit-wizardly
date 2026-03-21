@@ -46,3 +46,7 @@ export function canUseWebHaptics(): boolean {
 
   return !isNativeApp() && getWebPlatform() === "android";
 }
+
+export function isIOSWebWithoutHaptics(): boolean {
+  return !isNativeApp() && getWebPlatform() === "ios";
+}

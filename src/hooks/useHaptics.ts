@@ -42,9 +42,16 @@ async function getHapticsModule(): Promise<HapticsModule | null> {
     return hapticsModulePromise;
 }
 
+let hasLoggedDiagnostics = false;
+
 export function useHaptics() {
     const isAvailable = Capacitor.isNativePlatform();
     const canUseVibrationFallback = canUseWebHaptics();
+
+    if (!hasLoggedDiagnostics && import.meta.env.DEV) {
+        hasLoggedDiagnostics = true;
+        console.debug('[Haptics] native:', isAvailable, 'webFallback:', canUseVibrationFallback, 'platform:', Capacitor.getPlatform());
+    }
 
     const impact = async (style: 'light' | 'medium' | 'heavy' = 'medium') => {
         if (isAvailable) {
@@ -110,11 +117,11 @@ export function useHaptics() {
                     await module.Haptics.selectionStart();
                     await module.Haptics.selectionChanged();
                     await module.Haptics.selectionEnd();
+                    return;
                 } catch {
                     // Ignore selection failures to avoid breaking interactions.
                 }
             }
-            return;
         }
 
         if (canUseVibrationFallback) {

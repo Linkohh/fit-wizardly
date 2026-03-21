@@ -22,6 +22,7 @@ async function loadUseHapticsModule({
   vi.doMock('@capacitor/core', () => ({
     Capacitor: {
       isNativePlatform: () => native,
+      getPlatform: () => (native ? 'ios' : 'web'),
     },
   }));
 
@@ -99,6 +100,34 @@ describe('useHaptics', () => {
     expect(navigator.vibrate).toHaveBeenNthCalledWith(2, [100, 50, 100]);
     expect(navigator.vibrate).toHaveBeenNthCalledWith(3, 10);
     expect(nativeMocks.impact).not.toHaveBeenCalled();
+  });
+
+  it('selection falls back to web vibration when native module fails to load', async () => {
+    vi.resetModules();
+
+    vi.doMock('@capacitor/core', () => ({
+      Capacitor: {
+        isNativePlatform: () => true,
+        getPlatform: () => 'ios',
+      },
+    }));
+
+    vi.doMock('@/lib/platform', () => ({
+      canUseWebHaptics: () => true,
+    }));
+
+    vi.doMock('@capacitor/haptics', () => {
+      throw new Error('Module not found');
+    });
+
+    const { useHaptics } = await import('./useHaptics');
+    const { result } = renderHook(() => useHaptics());
+
+    await act(async () => {
+      await result.current.selection();
+    });
+
+    expect(navigator.vibrate).toHaveBeenCalledWith(10);
   });
 
   it('does not attempt web haptics on unsupported web platforms', async () => {
