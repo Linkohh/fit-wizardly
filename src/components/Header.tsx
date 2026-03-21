@@ -440,7 +440,11 @@ export function Header() {
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          void requestMotionTiltPermission();
+                          void requestMotionTiltPermission().then((status) => {
+                            if (status.permission === 'granted') {
+                              usePreferencesStore.getState().setMotionTiltActivatedThisSession(true);
+                            }
+                          });
                         }}
                         disabled={isRequestingMotionTiltPermission}
                         className="h-8 rounded-full px-3 text-xs"

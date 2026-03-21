@@ -8,6 +8,7 @@ import { useRef, memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
+import { wasMotionPermissionGranted } from "@/lib/motion-tilt";
 import { useMotionPreferences } from "@/hooks/use-motion-preferences";
 import { usePreferencesStore } from "@/hooks/useUserPreferences";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -154,11 +155,12 @@ export function WelcomeHero() {
     const { t, i18n } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const [showBackground, setShowBackground] = useState(false);
-    const [mobileMotionEnabled, setMobileMotionEnabled] = useState(false);
     const nativeApp = isNativeApp();
     const isMobile = useIsMobile();
     const { shouldReduceMotion } = useMotionPreferences();
     const motionTiltEnabled = usePreferencesStore((state) => state.settings.motionTilt !== false);
+    const mobileMotionEnabled = usePreferencesStore((state) => state.motionTiltActivatedThisSession);
+    const setMobileMotionEnabled = usePreferencesStore((state) => state.setMotionTiltActivatedThisSession);
 
     const isMobileContext = nativeApp || isMobile;
     const staticMode = shouldReduceMotion || (isMobileContext && !mobileMotionEnabled);
@@ -191,6 +193,17 @@ export function WelcomeHero() {
         }, 100); // Small delay to let the main content paint first
         return () => clearTimeout(timer);
     }, [staticMode]);
+
+    // Auto-activate sensor if permission was previously granted this session.
+    useEffect(() => {
+        if (!isMobileContext || !motionTiltEnabled || shouldReduceMotion || mobileMotionEnabled) {
+            return;
+        }
+
+        if (wasMotionPermissionGranted()) {
+            setMobileMotionEnabled(true);
+        }
+    }, [isMobileContext, motionTiltEnabled, shouldReduceMotion, mobileMotionEnabled, setMobileMotionEnabled]);
 
     useEffect(() => {
         if (!isMobileContext || !motionTiltEnabled || shouldReduceMotion || !mobileMotionEnabled) {

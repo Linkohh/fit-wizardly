@@ -5,6 +5,7 @@ import { useMotionValue, useSpring, useTransform } from 'framer-motion';
 import {
   MotionTilt,
   isNativeMotionTiltSupported,
+  markMotionPermissionGranted,
   publishMotionTiltStatus,
   refreshMotionTiltStatus,
   subscribeToMotionTiltStatus,
@@ -370,6 +371,7 @@ export function useHeroTilt({
           await MotionTilt.start();
 
           setSensorStatus('enabled');
+          markMotionPermissionGranted();
           publishMotionTiltStatus({
             available: true,
             permission: 'granted',
@@ -472,6 +474,9 @@ export function useHeroTilt({
 
         setSensorStatus('enabled');
         setIsTouchFallbackActive(false);
+        if (userInitiated || !hasExplicitPermissionApi) {
+          markMotionPermissionGranted();
+        }
         publishMotionTiltStatus({
           available: true,
           permission: userInitiated || !hasExplicitPermissionApi ? 'granted' : 'prompt',

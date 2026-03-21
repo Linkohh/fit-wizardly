@@ -25,6 +25,8 @@ export interface PreferencesState {
   isSyncing: boolean;
   lastSyncedAt: string | null;
   offlineQueue: QueuedAction[];
+  motionTiltActivatedThisSession: boolean;
+  setMotionTiltActivatedThisSession: (value: boolean) => void;
   addFavorite: (exerciseId: string) => void;
   removeFavorite: (exerciseId: string) => void;
   toggleFavorite: (exerciseId: string) => void;
@@ -80,6 +82,8 @@ export const usePreferencesStore = create<PreferencesState>()(
       isSyncing: false,
       lastSyncedAt: null,
       offlineQueue: [],
+      motionTiltActivatedThisSession: false,
+      setMotionTiltActivatedThisSession: (value) => set({ motionTiltActivatedThisSession: value }),
       addFavorite: (exerciseId) => {
         set((state) => {
           if (state.favorites.includes(exerciseId)) {

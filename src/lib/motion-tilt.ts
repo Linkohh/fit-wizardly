@@ -112,6 +112,24 @@ export function isNativeMotionTiltSupported() {
   return Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('MotionTilt');
 }
 
+const SESSION_STORAGE_KEY = 'fitwizard-motion-granted';
+
+export function markMotionPermissionGranted() {
+  try {
+    sessionStorage.setItem(SESSION_STORAGE_KEY, '1');
+  } catch {
+    // sessionStorage may be unavailable in private browsing edge cases.
+  }
+}
+
+export function wasMotionPermissionGranted(): boolean {
+  try {
+    return sessionStorage.getItem(SESSION_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 let cachedStatus = isNativeMotionTiltSupported() ? DEFAULT_NATIVE_STATUS : getWebMotionStatus();
 
 export function getCachedMotionTiltStatus() {
@@ -151,6 +169,9 @@ export async function requestMotionTiltPermission() {
   if (isNativeMotionTiltSupported()) {
     try {
       const permissionResult = await MotionTilt.requestPermission();
+      if (permissionResult.permission === 'granted') {
+        markMotionPermissionGranted();
+      }
       return notifyStatus({
         ...(await refreshMotionTiltStatus()),
         permission: permissionResult.permission,
@@ -181,9 +202,13 @@ export async function requestMotionTiltPermission() {
         ? await deviceOrientationEvent.requestPermission()
         : await deviceMotionEvent?.requestPermission?.();
 
+    const resolvedPermission = permission === 'granted' ? 'granted' : 'denied';
+    if (resolvedPermission === 'granted') {
+      markMotionPermissionGranted();
+    }
     return notifyStatus({
       available: true,
-      permission: permission === 'granted' ? 'granted' : 'denied',
+      permission: resolvedPermission,
       source: 'web',
     });
   } catch {
