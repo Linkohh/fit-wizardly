@@ -210,7 +210,7 @@ export function WelcomeHero() {
             return;
         }
 
-        void enableMotion({ userInitiated: true });
+        void enableMotion({ userInitiated: false });
     }, [enableMotion, isMobileContext, mobileMotionEnabled, motionTiltEnabled, shouldReduceMotion]);
 
     return (
@@ -367,7 +367,13 @@ export function WelcomeHero() {
                             size="xl"
                             variant="secondary"
                             className="h-14 px-8 text-lg rounded-full"
-                            onClick={() => setMobileMotionEnabled(true)}
+                            onClick={() => {
+                                void enableMotion({ userInitiated: true }).then((result) => {
+                                    if (result === 'granted') {
+                                        setMobileMotionEnabled(true);
+                                    }
+                                });
+                            }}
                             disabled={isEnablingMotion}
                             aria-label={t('hero.enable_motion', 'Enable motion tilt')}
                         >

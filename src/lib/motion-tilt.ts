@@ -116,15 +116,19 @@ const SESSION_STORAGE_KEY = 'fitwizard-motion-granted';
 
 export function markMotionPermissionGranted() {
   try {
-    sessionStorage.setItem(SESSION_STORAGE_KEY, '1');
+    localStorage.setItem(SESSION_STORAGE_KEY, Date.now().toString());
   } catch {
-    // sessionStorage may be unavailable in private browsing edge cases.
+    // localStorage may be unavailable in private browsing edge cases.
   }
 }
 
 export function wasMotionPermissionGranted(): boolean {
   try {
-    return sessionStorage.getItem(SESSION_STORAGE_KEY) === '1';
+    const timestamp = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!timestamp) return false;
+    // Expire after 30 days to avoid stale grants persisting forever.
+    const age = Date.now() - Number(timestamp);
+    return age < 30 * 24 * 60 * 60 * 1000;
   } catch {
     return false;
   }
