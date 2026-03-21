@@ -502,7 +502,7 @@
 
 @utility app-shell-web {
   --app-shell-header-height: 4rem;
-  --app-shell-header-offset: var(--app-shell-header-height);
+  --app-shell-header-offset: calc(env(safe-area-inset-top, 0px) + var(--app-shell-header-height));
 }
 
 @utility app-shell-native {
