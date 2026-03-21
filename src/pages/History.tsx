@@ -13,7 +13,10 @@ export default function HistoryPage() {
     return (
         <div className="min-h-screen bg-background pb-20">
             {/* Header */}
-            <div className="sticky top-0 z-10 glass-header border-b border-border/40 backdrop-blur-md">
+            <div
+                data-testid="history-sticky-header"
+                className="sticky app-shell-sticky-offset z-10 glass-header border-b border-border/40 backdrop-blur-md"
+            >
                 <div className="container max-w-md mx-auto px-4 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <Link to="/">

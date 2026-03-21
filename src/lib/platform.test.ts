@@ -94,4 +94,37 @@ describe('platform haptic capabilities', () => {
     expect(getWebPlatform()).toBe('ios');
     expect(canUseWebHaptics()).toBe(false);
   });
+
+  it('detects iOS web without haptics', async () => {
+    const { isIOSWebWithoutHaptics } = await loadPlatformModule({
+      native: false,
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_3 like Mac OS X) AppleWebKit/605.1.15 Version/18.3 Mobile/15E148 Safari/604.1',
+      platform: 'iPhone',
+      maxTouchPoints: 5,
+    });
+
+    expect(isIOSWebWithoutHaptics()).toBe(true);
+  });
+
+  it('does not flag Android web as iOS without haptics', async () => {
+    const { isIOSWebWithoutHaptics } = await loadPlatformModule({
+      native: false,
+      userAgent: 'Mozilla/5.0 (Linux; Android 15; Pixel 8) AppleWebKit/537.36 Chrome/145.0 Mobile Safari/537.36',
+      platform: 'Linux armv8l',
+      vibrate: vi.fn(),
+    });
+
+    expect(isIOSWebWithoutHaptics()).toBe(false);
+  });
+
+  it('does not flag native iOS as iOS web without haptics', async () => {
+    const { isIOSWebWithoutHaptics } = await loadPlatformModule({
+      native: true,
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_3 like Mac OS X) AppleWebKit/605.1.15',
+      platform: 'iPhone',
+      maxTouchPoints: 5,
+    });
+
+    expect(isIOSWebWithoutHaptics()).toBe(false);
+  });
 });

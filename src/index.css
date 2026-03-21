@@ -500,6 +500,43 @@
   padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
 }
 
+@utility app-shell-web {
+  --app-shell-header-height: 4rem;
+  --app-shell-header-offset: var(--app-shell-header-height);
+}
+
+@utility app-shell-native {
+  --app-shell-header-height: 3.25rem;
+  --app-shell-header-offset: calc(env(safe-area-inset-top, 0px) + var(--app-shell-header-height));
+
+  @media (width >= --theme(--breakpoint-md)) {
+    --app-shell-header-height: 4rem;
+  }
+}
+
+@utility app-shell-main-offset {
+  padding-top: var(--app-shell-header-offset, 4rem);
+}
+
+@utility app-shell-sticky-offset {
+  top: var(--app-shell-header-offset, 4rem);
+}
+
+@utility app-shell-page-min-height {
+  min-height: calc(100vh - var(--app-shell-header-offset, 4rem));
+  min-height: calc(100svh - var(--app-shell-header-offset, 4rem));
+  min-height: calc(100dvh - var(--app-shell-header-offset, 4rem));
+}
+
+@utility app-shell-header-height {
+  height: var(--app-shell-header-height, 4rem);
+}
+
+@utility app-shell-header-square {
+  width: var(--app-shell-header-height, 4rem);
+  height: var(--app-shell-header-height, 4rem);
+}
+
 @utility gradient-primary {
   background: var(--gradient-primary);
 }
@@ -755,6 +792,7 @@
     --surface-stroke: hsl(0 0% 100% / 0.16);
     --elevation-soft: 0 10px 30px -16px hsl(265 75% 15% / 0.55);
     --elevation-floating: 0 16px 40px -20px hsl(265 75% 12% / 0.72);
+
   }
 
   .dark {

@@ -47,6 +47,9 @@ const mocks = vi.hoisted(() => {
     authState,
     trainerState,
     themeState,
+    platformState: {
+      nativeApp: false,
+    },
     syncWithBackend: vi.fn(),
   };
 });
@@ -148,7 +151,7 @@ vi.mock('@/hooks/useGlobalClickFeedback', () => ({
 }));
 
 vi.mock('@/lib/platform', () => ({
-  isNativeApp: () => false,
+  isNativeApp: () => mocks.platformState.nativeApp,
 }));
 
 vi.mock('./pages/Index', () => ({
@@ -266,6 +269,7 @@ function resetState() {
   mocks.authState.showAuthModal = false;
   mocks.authState.redirectUrl = null;
   mocks.trainerState.isTrainerMode = false;
+  mocks.platformState.nativeApp = false;
   window.sessionStorage.clear();
   vi.unstubAllEnvs();
   vi.clearAllMocks();
@@ -281,6 +285,25 @@ describe('App auth routing', () => {
 
     expect(await screen.findByText('Plan Page')).toBeInTheDocument();
     expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
+  });
+
+  it('keeps onboarding inside the shared shell', async () => {
+    renderAt('/onboarding');
+
+    expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
+    expect(screen.getByTestId('app-shell')).toHaveClass('app-shell-web', 'app-shell-main-offset');
+    expect(screen.getByText('Header')).toBeInTheDocument();
+    expect(screen.getByText('Footer')).toBeInTheDocument();
+    expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
+  });
+
+  it('uses the native shell offset contract when running inside the app shell', async () => {
+    mocks.platformState.nativeApp = true;
+
+    renderAt('/onboarding');
+
+    expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
+    expect(screen.getByTestId('app-shell')).toHaveClass('app-shell-native', 'app-shell-main-offset');
   });
 
   it('redirects guests away from auth-backed circle routes and opens auth modal', async () => {

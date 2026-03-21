@@ -149,7 +149,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 function AnimatedRoutes() {
   const location = useLocation();
 
-  // Onboarding has its own layout (no header/footer)
+  // Onboarding keeps the shared shell but manages its own page content layout.
   if (location.pathname === '/onboarding') {
     return (
       <AnimatePresence mode="wait" initial={false}>
@@ -309,12 +309,13 @@ const App = () => {
               <Sonner />
               <AuthModal />
               <CommandPalette />
-              <div className={cn(
-                "min-h-screen flex flex-col transition-colors duration-300 relative",
-                nativeApp
-                  ? "pt-[calc(env(safe-area-inset-top,0px)+3.25rem)] md:pt-[calc(env(safe-area-inset-top,0px)+4rem)]"
-                  : "pt-16",
-              )}>
+              <div
+                data-testid="app-shell"
+                className={cn(
+                  "min-h-screen flex flex-col transition-colors duration-300 relative app-shell-main-offset",
+                  nativeApp ? "app-shell-native" : "app-shell-web",
+                )}
+              >
                 <Suspense fallback={null}>
                   {shouldRenderLivingBackground && <LivingBackground />}
                 </Suspense>
