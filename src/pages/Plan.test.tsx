@@ -24,9 +24,13 @@ const planStoreState = vi.hoisted(() => ({
   currentWeek: 1,
   workoutLogs: [],
   planHistory: [] as unknown[],
+  personalRecords: [],
+  preferredWeightUnit: 'lbs' as const,
   setCurrentPlan: mocks.setCurrentPlan,
   swapExercise: mocks.swapExercise,
   clearCurrentPlan: mocks.clearCurrentPlan,
+  getWeeklySummary: () => null,
+  getLastPerformance: () => null,
 }));
 
 vi.mock('react-i18next', () => ({

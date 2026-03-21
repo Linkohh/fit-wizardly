@@ -270,6 +270,20 @@
             "benefit_timing": "Duración adaptada",
             "benefit_equipment": "Según tu equipo"
         },
+        "progress": {
+            "week_label": "Semana {{week}}",
+            "workouts": "Entrenos",
+            "volume": "Volumen",
+            "prs": "Récords",
+            "streak": "Racha",
+            "days": "días",
+            "empty": "Tu viaje empieza con la primera repetición",
+            "empty_hint": "Completa un entreno para ver tu progreso aquí"
+        },
+        "quick_stats": {
+            "last": "último",
+            "est_1rm": "1RM"
+        },
         "exercise": {
             "sets": "{{count}} series",
             "reps": "{{range}} repeticiones",

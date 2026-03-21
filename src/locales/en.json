@@ -270,6 +270,20 @@
             "benefit_timing": "Session timing",
             "benefit_equipment": "Equipment-aware"
         },
+        "progress": {
+            "week_label": "Week {{week}}",
+            "workouts": "Workouts",
+            "volume": "Volume",
+            "prs": "PRs",
+            "streak": "Streak",
+            "days": "days",
+            "empty": "Your journey starts with the first rep",
+            "empty_hint": "Complete a workout to see your progress here"
+        },
+        "quick_stats": {
+            "last": "last",
+            "est_1rm": "1RM"
+        },
         "exercise": {
             "sets": "{{count}} sets",
             "reps": "{{range}} reps",

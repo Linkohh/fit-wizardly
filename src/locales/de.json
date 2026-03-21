@@ -27,6 +27,20 @@
             "benefit_timing": "Angepasste Dauer",
             "benefit_equipment": "Equipment-bewusst"
         },
+        "progress": {
+            "week_label": "Woche {{week}}",
+            "workouts": "Trainings",
+            "volume": "Volumen",
+            "prs": "Rekorde",
+            "streak": "Serie",
+            "days": "Tage",
+            "empty": "Deine Reise beginnt mit der ersten Wiederholung",
+            "empty_hint": "Schließe ein Training ab, um deinen Fortschritt zu sehen"
+        },
+        "quick_stats": {
+            "last": "zuletzt",
+            "est_1rm": "1RM"
+        },
         "exercise": {
             "sets": "{{count}} Sätze",
             "reps": "{{range}} Wiederholungen",
