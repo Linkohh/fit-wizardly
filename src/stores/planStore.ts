@@ -17,18 +17,23 @@ import type {
 import { deletePlanRemote, getPlansRemote, isPlansRemoteEnabled, savePlanRemote } from '@/lib/plans/plansClient';
 import { useAuthStore } from '@/stores/authStore';
 import {
-  analyzePerformance,
-  generateWeeklySummary,
-  detectPersonalRecords,
-  calculateTotalVolume,
-} from '@/lib/progressionEngine';
-import {
   postWorkoutToCircles,
   postPRToCircles,
 } from '@/lib/circleActivity';
-
-// Helper for generating unique IDs
-const generateUniqueId = () => `log_${crypto.randomUUID()}`;
+import type { ActiveWorkout } from '@/stores/planStore.types';
+import {
+  applyRecommendationsToPlan,
+  buildProgressionRecommendations,
+  buildWeeklyPlanSummary,
+  buildWorkoutLog,
+  detectNewPersonalRecords,
+  findLastExercisePerformance,
+} from '@/lib/plans/planAnalytics';
+import {
+  removePlanFromHistory,
+  syncPlanStateWithRemote,
+  upsertPlanHistory,
+} from '@/lib/plans/planSyncService';
 
 // Helper for async operations with error handling
 const handleAsyncOperation = async <T>(
@@ -50,17 +55,6 @@ const handleAsyncOperation = async <T>(
 // ============================================
 // ACTIVE WORKOUT STATE
 // ============================================
-
-interface ActiveWorkout {
-  planId: string;
-  dayIndex: number;
-  dayName: string;
-  startedAt: Date;
-  exercises: ExerciseLog[];
-  currentExerciseIndex: number;
-  currentSetIndex: number;
-  restTimerEndTime: number | null; // Timestamp in ms
-}
 
 // ============================================
 // PLAN STATE INTERFACE
@@ -144,7 +138,7 @@ export const usePlanStore = create<PlanState>()(
 
       savePlanToHistory: (plan) => {
         set((state) => ({
-          planHistory: [plan, ...state.planHistory.filter(p => p.id !== plan.id)].slice(0, 20)
+          planHistory: upsertPlanHistory(state.planHistory, plan)
         }));
         const userId = useAuthStore.getState().user?.id;
         if (!userId || !isPlansRemoteEnabled()) return;
@@ -154,7 +148,7 @@ export const usePlanStore = create<PlanState>()(
           savePlanRemote(plan, userId),
           (savedPlan) => {
             set((state) => ({
-              planHistory: [savedPlan, ...state.planHistory.filter((p) => p.id !== savedPlan.id)].slice(0, 20),
+              planHistory: upsertPlanHistory(state.planHistory, savedPlan),
               currentPlan: state.currentPlan?.id === savedPlan.id ? savedPlan : state.currentPlan,
             }));
           },
@@ -164,7 +158,7 @@ export const usePlanStore = create<PlanState>()(
 
       deletePlanFromHistory: (planId) => {
         set((state) => ({
-          planHistory: state.planHistory.filter(p => p.id !== planId),
+          planHistory: removePlanFromHistory(state.planHistory, planId),
           currentPlan: state.currentPlan?.id === planId ? null : state.currentPlan,
           // Also clean up workout logs for this plan
           workoutLogs: state.workoutLogs.filter(log => log.planId !== planId),
@@ -187,33 +181,19 @@ export const usePlanStore = create<PlanState>()(
         if (!useAuthStore.getState().user) return;
 
         try {
-          const remotePlans = await getPlansRemote(userId);
-          const remoteIds = new Set(remotePlans.map((p) => p.id));
+          const { mergedPlanHistory, nextCurrentPlan, failedMigrationCount } =
+            await syncPlanStateWithRemote(userId, get().planHistory, get().currentPlan);
 
-          const localPlans = get().planHistory;
-          const candidates = localPlans.filter((localPlan) => !remoteIds.has(localPlan.id));
-
-          if (candidates.length > 0) {
-            const results = await Promise.allSettled(
-              candidates.map((localPlan) => savePlanRemote(localPlan, userId))
-            );
-            const failedCount = results.filter((r) => r.status === 'rejected').length;
-            if (failedCount > 0) {
-              toast.error(`Failed to migrate ${failedCount} plan(s) to your account`);
-            }
+          if (failedMigrationCount > 0) {
+            toast.error(`Failed to migrate ${failedMigrationCount} plan(s) to your account`);
           }
 
-          const refreshedPlans = candidates.length > 0 ? await getPlansRemote(userId) : remotePlans;
-          if (refreshedPlans.length === 0) return;
+          if (mergedPlanHistory.length === 0) return;
 
-          set((state) => ({
-            planHistory: [
-              ...refreshedPlans,
-              ...state.planHistory.filter(
-                (localPlan) => !refreshedPlans.some((serverPlan) => serverPlan.id === localPlan.id)
-              ),
-            ].slice(0, 20),
-          }));
+          set({
+            currentPlan: nextCurrentPlan,
+            planHistory: mergedPlanHistory,
+          });
         } catch (error) {
           console.error('Sync failed:', error);
           toast.error('Failed to sync plans');
@@ -243,7 +223,7 @@ export const usePlanStore = create<PlanState>()(
               (savedPlan) => {
                 set((s) => ({
                   currentPlan: savedPlan,
-                  planHistory: [savedPlan, ...s.planHistory.filter((p) => p.id !== savedPlan.id)].slice(0, 20),
+                  planHistory: upsertPlanHistory(s.planHistory, savedPlan),
                 }));
               },
               'Failed to save exercise changes'
@@ -277,7 +257,7 @@ export const usePlanStore = create<PlanState>()(
               (savedPlan) => {
                 set((s) => ({
                   currentPlan: savedPlan,
-                  planHistory: [savedPlan, ...s.planHistory.filter((p) => p.id !== savedPlan.id)].slice(0, 20),
+                  planHistory: upsertPlanHistory(s.planHistory, savedPlan),
                 }));
               },
               'Failed to save exercise swap'
@@ -417,72 +397,42 @@ export const usePlanStore = create<PlanState>()(
         const { activeWorkout, workoutLogs } = get();
         if (!activeWorkout) return null;
 
-        const completedAt = new Date();
-        const duration = Math.round(
-          (completedAt.getTime() - new Date(activeWorkout.startedAt).getTime()) / 60000
-        );
-
-        // Calculate total volume with error handling
-        let totalVolume = 0;
         try {
-          for (const exercise of activeWorkout.exercises) {
-            totalVolume += calculateTotalVolume(exercise.sets);
+          const workoutLog = buildWorkoutLog(activeWorkout, perceivedDifficulty, notes);
+          const newPRs = detectNewPersonalRecords(workoutLog, workoutLogs);
+
+          set((state) => ({
+            workoutLogs: [workoutLog, ...state.workoutLogs].slice(0, 100), // Keep last 100 logs
+            activeWorkout: null,
+            personalRecords: [...newPRs, ...state.personalRecords].slice(0, 50),
+          }));
+
+          // Post workout to user's circles (fire-and-forget)
+          postWorkoutToCircles({
+            workoutName: workoutLog.dayName,
+            duration: workoutLog.duration,
+            exerciseCount: workoutLog.exercises.length,
+            totalVolume: workoutLog.totalVolume,
+          }).catch(err => console.error('Failed to post workout to circles:', err));
+
+          // Post any new PRs to circles
+          if (newPRs.length > 0) {
+            for (const pr of newPRs) {
+              postPRToCircles({
+                exerciseName: pr.exerciseName,
+                oldValue: pr.previousValue || 0,
+                newValue: pr.newValue,
+                prType: pr.type as 'weight' | 'reps' | 'volume',
+              }).catch(err => console.error('Failed to post PR to circles:', err));
+            }
           }
+
+          return workoutLog;
         } catch (error) {
-          console.error('Error calculating volume:', error);
-          // Continue with 0 volume rather than failing
+          console.error('Error completing workout:', error);
+          toast.error('Failed to complete workout');
+          return null;
         }
-
-        const workoutLog: WorkoutLog = {
-          id: generateUniqueId(),
-          planId: activeWorkout.planId,
-          dayIndex: activeWorkout.dayIndex,
-          dayName: activeWorkout.dayName,
-          startedAt: activeWorkout.startedAt,
-          completedAt,
-          duration,
-          exercises: activeWorkout.exercises,
-          perceivedDifficulty,
-          notes,
-          totalVolume,
-        };
-
-        // Detect personal records with error handling
-        let newPRs: PersonalRecord[] = [];
-        try {
-          newPRs = detectPersonalRecords(workoutLog, workoutLogs);
-        } catch (error) {
-          console.error('Error detecting PRs:', error);
-          // Continue without PR detection
-        }
-
-        set((state) => ({
-          workoutLogs: [workoutLog, ...state.workoutLogs].slice(0, 100), // Keep last 100 logs
-          activeWorkout: null,
-          personalRecords: [...newPRs, ...state.personalRecords].slice(0, 50),
-        }));
-
-        // Post workout to user's circles (fire-and-forget)
-        postWorkoutToCircles({
-          workoutName: workoutLog.dayName,
-          duration: workoutLog.duration,
-          exerciseCount: workoutLog.exercises.length,
-          totalVolume: workoutLog.totalVolume,
-        }).catch(err => console.error('Failed to post workout to circles:', err));
-
-        // Post any new PRs to circles
-        if (newPRs.length > 0) {
-          for (const pr of newPRs) {
-            postPRToCircles({
-              exerciseName: pr.exerciseName,
-              oldValue: pr.previousValue || 0,
-              newValue: pr.newValue,
-              prType: pr.type as 'weight' | 'reps' | 'volume',
-            }).catch(err => console.error('Failed to post PR to circles:', err));
-          }
-        }
-
-        return workoutLog;
       },
 
       // ========================================
@@ -494,61 +444,28 @@ export const usePlanStore = create<PlanState>()(
       },
 
       getWeeklySummary: (planId, weekNumber) => {
-        const plan = get().getPlanById(planId);
-        if (!plan) return null;
-
-        // Filter logs for this week
-        const now = new Date();
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - (weekNumber - 1) * 7 - now.getDay());
-        weekStart.setHours(0, 0, 0, 0);
-
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 7);
-
-        const weekLogs = get().workoutLogs.filter(log => {
-          const logDate = new Date(log.completedAt);
-          return log.planId === planId && logDate >= weekStart && logDate < weekEnd;
-        });
-
-        const weekPRs = get().personalRecords.filter(pr => {
-          const prDate = new Date(pr.achievedAt);
-          return prDate >= weekStart && prDate < weekEnd;
-        });
-
-        return generateWeeklySummary(weekLogs, plan, weekNumber, weekStart, weekPRs);
+        return buildWeeklyPlanSummary(
+          planId,
+          weekNumber,
+          get().workoutLogs,
+          get().personalRecords,
+          get().getPlanById(planId) ?? null,
+        );
       },
 
       getProgressionRecommendations: () => {
-        const { currentPlan, workoutLogs } = get();
-        if (!currentPlan) return [];
-
-        const planLogs = workoutLogs.filter(log => log.planId === currentPlan.id);
-        return analyzePerformance(planLogs, currentPlan);
+        return buildProgressionRecommendations(get().currentPlan, get().workoutLogs);
       },
 
       applyProgressionRecommendations: (recommendations) => {
         set((state) => {
           if (!state.currentPlan) return state;
 
-          const newWorkoutDays = state.currentPlan.workoutDays.map(day => ({
-            ...day,
-            exercises: day.exercises.map(prescription => {
-              const rec = recommendations.find(
-                r => r.exerciseId === prescription.exercise.id && r.action === 'increase'
-              );
-              if (rec) {
-                // Apply the recommended load as a note for the user
-                return {
-                  ...prescription,
-                  notes: `Target: ${rec.recommendedLoad} ${state.preferredWeightUnit} (+${rec.changePercentage.toFixed(1)}%)`,
-                };
-              }
-              return prescription;
-            }),
-          }));
-
-          const updatedPlan = { ...state.currentPlan, workoutDays: newWorkoutDays };
+          const updatedPlan = applyRecommendationsToPlan(
+            state.currentPlan,
+            recommendations,
+            state.preferredWeightUnit,
+          );
           const userId = useAuthStore.getState().user?.id;
           if (userId && isPlansRemoteEnabled()) {
             handleAsyncOperation(
@@ -556,7 +473,7 @@ export const usePlanStore = create<PlanState>()(
               (savedPlan) => {
                 set((s) => ({
                   currentPlan: savedPlan,
-                  planHistory: [savedPlan, ...s.planHistory.filter((p) => p.id !== savedPlan.id)].slice(0, 20),
+                  planHistory: upsertPlanHistory(s.planHistory, savedPlan),
                 }));
                 toast.success('Progression recommendations applied');
               },
@@ -579,13 +496,7 @@ export const usePlanStore = create<PlanState>()(
       setCurrentWeek: (week) => set({ currentWeek: Math.max(1, Math.min(4, week)) }),
 
       getLastPerformance: (exerciseId) => {
-        const { workoutLogs } = get();
-        // Logs are already sorted by date (newest first)
-        for (const log of workoutLogs) {
-          const exercise = log.exercises.find(e => e.exerciseId === exerciseId);
-          if (exercise) return exercise;
-        }
-        return null;
+        return findLastExercisePerformance(get().workoutLogs, exerciseId);
       },
     }),
     {

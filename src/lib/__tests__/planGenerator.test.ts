@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { generatePlan, validateWizardInputs } from '@/lib/planGenerator';
+import { EXERCISE_DATABASE } from '@/data/exercises';
+import { generatePlanFromExercises, validateWizardInputs } from '@/lib/planGenerator';
 import type { WizardSelections } from '@/types/fitness';
 
 describe('planGenerator', () => {
@@ -17,6 +18,9 @@ describe('planGenerator', () => {
         daysPerWeek: 4,
         sessionDuration: 60,
     };
+
+    const generatePlan = (selections: WizardSelections, appendTimestamp = false) =>
+        generatePlanFromExercises(EXERCISE_DATABASE, selections, { appendTimestamp });
 
     describe('generatePlan', () => {
         it('generates a plan with correct number of workout days', () => {
@@ -38,7 +42,7 @@ describe('planGenerator', () => {
         });
 
         it('can append a timestamp when requested', () => {
-            const plan = generatePlan(validSelections, { appendTimestamp: true });
+            const plan = generatePlan(validSelections, true);
             expect(plan.id).toMatch(/^plan_[a-f0-9]{64}_[0-9]{12}$/);
         });
 

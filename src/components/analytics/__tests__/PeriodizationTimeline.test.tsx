@@ -2,6 +2,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { PeriodizationTimeline } from '../PeriodizationTimeline';
 
+type Selector<TState, TResult> = ((state: TState) => TResult) | undefined;
+
+function selectState<TState, TResult>(state: TState, selector?: Selector<TState, TResult>) {
+  return selector ? selector(state) : state;
+}
+
 type MockTimelinePlan = {
   selections: {
     personalGoalNote: string;
@@ -21,7 +27,8 @@ const mockedPlanStoreState = vi.hoisted(() => ({
 }));
 
 vi.mock('@/stores/planStore', () => ({
-  usePlanStore: () => mockedPlanStoreState,
+  usePlanStore: <T,>(selector?: Selector<typeof mockedPlanStoreState, T>) =>
+    selectState(mockedPlanStoreState, selector),
 }));
 
 function buildCurrentPlan() {

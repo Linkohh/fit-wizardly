@@ -12,6 +12,7 @@ import { useMotionPreferences } from "@/hooks/use-motion-preferences";
 import { usePreferencesStore } from "@/hooks/useUserPreferences";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useHeroTilt } from "@/hooks/use-hero-tilt";
+import styles from "./WelcomeHero.module.css";
 
 // --- Sub-Components (Memoized) ---
 
@@ -153,13 +154,15 @@ export function WelcomeHero() {
     const { t, i18n } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const [showBackground, setShowBackground] = useState(false);
+    const [mobileMotionEnabled, setMobileMotionEnabled] = useState(false);
     const nativeApp = isNativeApp();
     const isMobile = useIsMobile();
     const { shouldReduceMotion } = useMotionPreferences();
     const motionTiltEnabled = usePreferencesStore((state) => state.settings.motionTilt !== false);
 
-    const tiltEnabled = motionTiltEnabled && !shouldReduceMotion;
     const isMobileContext = nativeApp || isMobile;
+    const staticMode = shouldReduceMotion || (isMobileContext && !mobileMotionEnabled);
+    const tiltEnabled = motionTiltEnabled && !shouldReduceMotion && (!isMobileContext || mobileMotionEnabled);
 
     const {
         rotateX,
@@ -169,27 +172,33 @@ export function WelcomeHero() {
         handlePointerUp,
         handlePointerCancel,
         enableMotion,
+        isEnablingMotion,
     } = useHeroTilt({
         containerRef,
         isEnabled: tiltEnabled,
         isMobileContext,
     });
 
-    // Defer heavy background animations to prioritize LCP
+    // Defer heavy background animations to prioritize LCP.
     useEffect(() => {
+        if (staticMode) {
+            setShowBackground(false);
+            return;
+        }
+
         const timer = setTimeout(() => {
             setShowBackground(true);
         }, 100); // Small delay to let the main content paint first
         return () => clearTimeout(timer);
-    }, []);
+    }, [staticMode]);
 
     useEffect(() => {
-        if (!tiltEnabled || !isMobileContext) {
+        if (!isMobileContext || !motionTiltEnabled || shouldReduceMotion || !mobileMotionEnabled) {
             return;
         }
 
-        void enableMotion({ userInitiated: false });
-    }, [enableMotion, isMobileContext, tiltEnabled]);
+        void enableMotion({ userInitiated: true });
+    }, [enableMotion, isMobileContext, mobileMotionEnabled, motionTiltEnabled, shouldReduceMotion]);
 
     return (
         <section
@@ -199,12 +208,13 @@ export function WelcomeHero() {
             onPointerUp={handlePointerUp}
             onPointerCancel={handlePointerCancel}
             className={cn(
-                "relative pb-4 lg:pt-24 lg:pb-20 px-4 overflow-hidden hero-bloom bg-gradient-to-b from-[#F8F5FC]/90 via-[#EDE4F5]/80 to-[#F0E8F8]/70 dark:from-[#1a0a2e]/85 dark:via-[#2D1548]/75 dark:to-[#1a0a2e]/60 lg:min-h-[100dvh] flex flex-col justify-center",
+                styles.hero,
+                "relative pb-4 lg:pt-24 lg:pb-20 px-4 bg-gradient-to-b from-[#F8F5FC]/90 via-[#EDE4F5]/80 to-[#F0E8F8]/70 dark:from-[#1a0a2e]/85 dark:via-[#2D1548]/75 dark:to-[#1a0a2e]/60 lg:min-h-[100dvh] flex flex-col justify-center",
                 nativeApp ? "pt-12 min-h-[58dvh]" : "pt-14 min-h-[62dvh]"
             )}
         >
             {/* Animated Background Elements - Deferred */}
-            {showBackground && (
+            {showBackground && !staticMode && (
                 <>
                     <FloatingOrbs />
                     <Particles />
@@ -212,20 +222,20 @@ export function WelcomeHero() {
             )}
 
             {/* Mesh gradient overlay */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.15),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.25),transparent)] pointer-events-none" />
+            <div className={cn(styles.heroBloom, "absolute inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.25),transparent)] pointer-events-none")} />
 
             {/* Premium Layered Horizon Glow - 3D Depth with Aurora Color Cycling */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10 horizon-glow-wrapper">
+            <div className={cn(styles.horizonGlowWrapper, "absolute inset-0 pointer-events-none overflow-hidden -z-10")}>
 
 
                 {/* Primary Layer - Hot Additive Core */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[60%] w-[90%] animate-horizon-glow mix-blend-plus-lighter" />
+                <div className={cn(styles.horizonGlowPrimary, "absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[60%] w-[90%] mix-blend-plus-lighter")} />
 
                 {/* Secondary Layer - Wide Depth */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-[45%] -translate-y-1/2 h-[50%] w-[85%] animate-horizon-glow-secondary mix-blend-screen" />
+                <div className={cn(styles.horizonGlowSecondary, "absolute left-1/2 -translate-x-1/2 top-[45%] -translate-y-1/2 h-[50%] w-[85%] mix-blend-screen")} />
 
                 {/* Tertiary Layer - Grounding */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-[55%] -translate-y-1/2 h-[45%] w-[85%] animate-horizon-glow-tertiary mix-blend-screen" />
+                <div className={cn(styles.horizonGlowTertiary, "absolute left-1/2 -translate-x-1/2 top-[55%] -translate-y-1/2 h-[45%] w-[85%] mix-blend-screen")} />
             </div>
 
             <motion.div
@@ -253,11 +263,13 @@ export function WelcomeHero() {
                             <InteractiveWord word={t('hero.potential')} type="potential" className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary" />
                         </span>
                         {/* Glow effect behind text */}
-                        <motion.div
-                            className="absolute inset-0 bg-gradient-to-r from-primary/30 via-purple-400/30 to-secondary/30 blur-2xl -z-10"
-                            animate={{ opacity: [0.5, 0.8, 0.5], scale: [1, 1.05, 1] }}
-                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                        />
+                        {!staticMode && (
+                            <motion.div
+                                className="absolute inset-0 bg-gradient-to-r from-primary/30 via-purple-400/30 to-secondary/30 blur-2xl -z-10"
+                                animate={{ opacity: [0.5, 0.8, 0.5], scale: [1, 1.05, 1] }}
+                                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            />
+                        )}
                     </span>
                 </h1>
 
@@ -298,20 +310,26 @@ export function WelcomeHero() {
                                 <span className="relative z-10 flex items-center gap-2">
                                     <Flame className="h-5 w-5 group-hover:animate-pulse" />
                                     {t('hero.start')}
-                                    <motion.span
-                                        className="inline-block"
-                                        animate={{ x: [0, 4, 0] }}
-                                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                                    >
+                                    {staticMode ? (
                                         <ArrowRight className="h-5 w-5" />
-                                    </motion.span>
+                                    ) : (
+                                        <motion.span
+                                            className="inline-block"
+                                            animate={{ x: [0, 4, 0] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                        >
+                                            <ArrowRight className="h-5 w-5" />
+                                        </motion.span>
+                                    )}
                                 </span>
                                 {/* Animated gradient overlay */}
-                                <motion.div
-                                    className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0"
-                                    animate={{ x: ["-100%", "200%"] }}
-                                    transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
-                                />
+                                {!staticMode && (
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0"
+                                        animate={{ x: ["-100%", "200%"] }}
+                                        transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
+                                    />
+                                )}
                                 {/* Glow ring on hover */}
                                 <div className="absolute -inset-1 bg-gradient-to-r from-primary via-purple-500 to-secondary rounded-full opacity-0 group-hover:opacity-50 blur-lg transition-opacity duration-500 -z-10" />
                             </Button>
@@ -330,57 +348,76 @@ export function WelcomeHero() {
                             </Button>
                         </motion.div>
                     </Link>
+                    {isMobileContext && motionTiltEnabled && !shouldReduceMotion && !mobileMotionEnabled && (
+                        <Button
+                            type="button"
+                            size="xl"
+                            variant="secondary"
+                            className="h-14 px-8 text-lg rounded-full"
+                            onClick={() => setMobileMotionEnabled(true)}
+                            disabled={isEnablingMotion}
+                            aria-label={t('hero.enable_motion', 'Enable motion tilt')}
+                        >
+                            {isEnablingMotion
+                                ? t('hero.enabling_motion', 'Enabling motion...')
+                                : t('hero.enable_motion', 'Enable motion tilt')}
+                        </Button>
+                    )}
                 </motion.div>
 
                 {/* Decorative floating elements */}
-                <div className="absolute top-16 left-8 hidden lg:block pointer-events-none">
-                    <motion.div
-                        animate={{
-                            y: [0, -15, 0],
-                            rotate: [0, 10, 0]
-                        }}
-                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                        <Sparkles className="w-10 h-10 text-primary/40" />
-                    </motion.div>
-                </div>
-                <div className="absolute top-32 right-12 hidden lg:block pointer-events-none">
-                    <motion.div
-                        animate={{
-                            y: [0, 15, 0],
-                            rotate: [0, -15, 0]
-                        }}
-                        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    >
-                        <Star className="w-8 h-8 text-secondary/50 fill-secondary/30" />
-                    </motion.div>
-                </div>
-                <div className="absolute bottom-24 left-16 hidden lg:block pointer-events-none">
-                    <motion.div
-                        animate={{
-                            y: [0, -10, 0],
-                            x: [0, 5, 0],
-                            scale: [1, 1.1, 1]
-                        }}
-                        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                    >
-                        <div className="w-3 h-3 rounded-full bg-gradient-to-br from-primary to-secondary" />
-                    </motion.div>
-                </div>
-                <div className="absolute bottom-16 right-20 hidden lg:block pointer-events-none">
-                    <motion.div
-                        animate={{
-                            y: [0, 12, 0],
-                            rotate: [0, 360]
-                        }}
-                        transition={{
-                            y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-                            rotate: { duration: 20, repeat: Infinity, ease: "linear" }
-                        }}
-                    >
-                        <Sparkles className="w-6 h-6 text-accent/60" />
-                    </motion.div>
-                </div>
+                {!staticMode && (
+                    <>
+                        <div className="absolute top-16 left-8 hidden lg:block pointer-events-none">
+                            <motion.div
+                                animate={{
+                                    y: [0, -15, 0],
+                                    rotate: [0, 10, 0]
+                                }}
+                                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                            >
+                                <Sparkles className="w-10 h-10 text-primary/40" />
+                            </motion.div>
+                        </div>
+                        <div className="absolute top-32 right-12 hidden lg:block pointer-events-none">
+                            <motion.div
+                                animate={{
+                                    y: [0, 15, 0],
+                                    rotate: [0, -15, 0]
+                                }}
+                                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                            >
+                                <Star className="w-8 h-8 text-secondary/50 fill-secondary/30" />
+                            </motion.div>
+                        </div>
+                        <div className="absolute bottom-24 left-16 hidden lg:block pointer-events-none">
+                            <motion.div
+                                animate={{
+                                    y: [0, -10, 0],
+                                    x: [0, 5, 0],
+                                    scale: [1, 1.1, 1]
+                                }}
+                                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                            >
+                                <div className="w-3 h-3 rounded-full bg-gradient-to-br from-primary to-secondary" />
+                            </motion.div>
+                        </div>
+                        <div className="absolute bottom-16 right-20 hidden lg:block pointer-events-none">
+                            <motion.div
+                                animate={{
+                                    y: [0, 12, 0],
+                                    rotate: [0, 360]
+                                }}
+                                transition={{
+                                    y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                                    rotate: { duration: 20, repeat: Infinity, ease: "linear" }
+                                }}
+                            >
+                                <Sparkles className="w-6 h-6 text-accent/60" />
+                            </motion.div>
+                        </div>
+                    </>
+                )}
             </motion.div>
         </section>
     );

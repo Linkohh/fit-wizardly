@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { canUseWebHaptics } from '@/lib/platform';
 
 export const NotificationType = {
     Success: 'SUCCESS',
@@ -43,6 +44,7 @@ async function getHapticsModule(): Promise<HapticsModule | null> {
 
 export function useHaptics() {
     const isAvailable = Capacitor.isNativePlatform();
+    const canUseVibrationFallback = canUseWebHaptics();
 
     const impact = async (style: 'light' | 'medium' | 'heavy' = 'medium') => {
         if (isAvailable) {
@@ -63,8 +65,7 @@ export function useHaptics() {
             }
         }
 
-        // Web vibration fallback for supported browsers
-        if (navigator.vibrate) {
+        if (canUseVibrationFallback) {
             switch (style) {
                 case 'light': navigator.vibrate(10); break;
                 case 'medium': navigator.vibrate(20); break;
@@ -92,7 +93,7 @@ export function useHaptics() {
             }
         }
 
-        if (navigator.vibrate) {
+        if (canUseVibrationFallback) {
             switch (type) {
                 case NotificationType.Success: navigator.vibrate([50, 50, 50]); break;
                 case NotificationType.Warning: navigator.vibrate([100, 50, 100]); break;
@@ -113,6 +114,11 @@ export function useHaptics() {
                     // Ignore selection failures to avoid breaking interactions.
                 }
             }
+            return;
+        }
+
+        if (canUseVibrationFallback) {
+            navigator.vibrate(10);
         }
     };
 

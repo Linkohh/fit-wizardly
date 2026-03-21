@@ -1,5 +1,4 @@
-import snapshotPayload from './data/wger-snapshot.json';
-import { getLegacyExerciseLibraryRecords } from './legacy';
+import { loadLegacyExerciseLibraryRecords } from './legacy';
 import { normalizeWgerExercise, validateNormalizedRecords } from './normalize';
 import type {
   ExerciseLibraryRecord,
@@ -20,6 +19,8 @@ const DEFAULT_PAGE_SIZE = 100;
 const MAX_PAGE_COUNT = 30;
 const REQUEST_TIMEOUT_MS = 12000;
 const WGER_API_URL = 'https://wger.de/api/v2/exerciseinfo/';
+const SNAPSHOT_ASSET_VERSION = 'v1';
+const SNAPSHOT_ASSET_PATH = `${import.meta.env.BASE_URL}exercise-data/wger-snapshot.${SNAPSHOT_ASSET_VERSION}.json`;
 
 interface PersistedExerciseLibraryCache {
   version: number;
@@ -37,14 +38,12 @@ interface FailureMeta {
 
 const EMPTY_STATE: ExerciseLibraryState = {
   records: [],
-  source: 'legacy',
+  source: 'snapshot',
   isStale: true,
   lastSyncedAt: null,
   syncStatus: 'loading',
   error: null,
 };
-
-const SNAPSHOT = snapshotPayload as ExerciseLibrarySnapshotPayload;
 
 let currentState: ExerciseLibraryState = EMPTY_STATE;
 let loadPromise: Promise<ExerciseLibraryState> | null = null;
@@ -183,21 +182,37 @@ function persistLastKnownGood(
   writeJson(CACHE_KEY, payload);
 }
 
-function getSnapshotRecords() {
-  const records = Array.isArray(SNAPSHOT.records) ? SNAPSHOT.records : [];
+async function fetchSnapshotPayload() {
+  const response = await fetch(SNAPSHOT_ASSET_PATH, {
+    cache: 'force-cache',
+    headers: {
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to load exercise snapshot: HTTP ${response.status}`);
+  }
+
+  return (await response.json()) as ExerciseLibrarySnapshotPayload;
+}
+
+async function loadSnapshotRecords() {
+  const snapshot = await fetchSnapshotPayload();
+  const records = Array.isArray(snapshot.records) ? snapshot.records : [];
   const safeRecords = validateNormalizedRecords(records, 1) ? records : [];
 
   return {
     records: safeRecords,
     source: 'snapshot' as const,
     isStale: true,
-    lastSyncedAt: SNAPSHOT.generatedAt ?? null,
+    lastSyncedAt: snapshot.generatedAt ?? null,
   };
 }
 
-function getLegacyRecords() {
+async function loadLegacyRecords() {
   return {
-    records: getLegacyExerciseLibraryRecords(),
+    records: await loadLegacyExerciseLibraryRecords(),
     source: 'legacy' as const,
     isStale: true,
     lastSyncedAt: null,
@@ -210,12 +225,12 @@ export function resolveBootExerciseLibraryState() {
     return cached;
   }
 
-  const snapshot = getSnapshotRecords();
-  if (snapshot.records.length > 0) {
-    return snapshot;
-  }
-
-  return getLegacyRecords();
+  return {
+    records: [],
+    source: 'snapshot' as const,
+    isStale: true,
+    lastSyncedAt: null,
+  };
 }
 
 function shouldAttemptSync(force = false) {
@@ -295,18 +310,56 @@ function normalizeLivePayload(records: WgerExerciseInfoRecord[]) {
 export async function loadExerciseLibrary(): Promise<ExerciseLibraryState> {
   if (loadPromise) return loadPromise;
 
-  loadPromise = Promise.resolve().then(() => {
+  loadPromise = Promise.resolve().then(async () => {
     const bootState = resolveBootExerciseLibraryState();
-    const resolvedState: ExerciseLibraryState = {
+
+    setState({
       records: bootState.records,
       source: bootState.source,
       isStale: bootState.isStale,
       lastSyncedAt: bootState.lastSyncedAt,
-      syncStatus: 'ready',
+      syncStatus: bootState.records.length > 0 ? 'ready' : 'loading',
       error: null,
-    };
+    });
 
-    setState(resolvedState);
+    let resolvedState: ExerciseLibraryState = currentState;
+
+    if (bootState.records.length === 0) {
+      try {
+        const snapshotState = await loadSnapshotRecords();
+        resolvedState = {
+          records: snapshotState.records,
+          source: snapshotState.source,
+          isStale: snapshotState.isStale,
+          lastSyncedAt: snapshotState.lastSyncedAt,
+          syncStatus: 'ready',
+          error: null,
+        };
+      } catch (snapshotError) {
+        const legacyState = await loadLegacyRecords();
+        resolvedState = {
+          records: legacyState.records,
+          source: legacyState.source,
+          isStale: legacyState.isStale,
+          lastSyncedAt: legacyState.lastSyncedAt,
+          syncStatus: 'ready',
+          error:
+            snapshotError instanceof Error
+              ? snapshotError.message
+              : 'Failed to load snapshot asset',
+        };
+      }
+
+      setState(resolvedState);
+
+      if (resolvedState.records.length > 0) {
+        persistLastKnownGood(
+          resolvedState.records,
+          resolvedState.source,
+          resolvedState.lastSyncedAt
+        );
+      }
+    }
 
     if (shouldAttemptSync()) {
       globalThis.setTimeout(() => {

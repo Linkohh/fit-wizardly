@@ -18,6 +18,10 @@ const SNAPSHOT_PATH = path.join(
   ROOT_DIR,
   'src/features/exercise-library/data/wger-snapshot.json'
 );
+const PUBLIC_SNAPSHOT_PATH = path.join(
+  ROOT_DIR,
+  'public/exercise-data/wger-snapshot.v1.json'
+);
 const REPORT_PATH = path.join(ROOT_DIR, 'docs/exercise-library-wger.md');
 
 function slugify(value) {
@@ -349,14 +353,16 @@ async function main() {
     records: normalizedRecords,
   };
 
+  await fs.mkdir(path.dirname(PUBLIC_SNAPSHOT_PATH), { recursive: true });
   await fs.writeFile(SNAPSHOT_PATH, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
+  await fs.writeFile(PUBLIC_SNAPSHOT_PATH, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
   await writeReport(
     normalizedRecords.length,
     normalizedRecords.filter((record) => record.imageUrl).length
   );
 
   console.log(
-    `Generated wger snapshot with ${normalizedRecords.length} records at ${SNAPSHOT_PATH}`
+    `Generated wger snapshot with ${normalizedRecords.length} records at ${SNAPSHOT_PATH} and ${PUBLIC_SNAPSHOT_PATH}`
   );
 }
 

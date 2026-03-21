@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getCategoryById, getExercisesByCategory, getExerciseById } from '@/lib/exercise-utils';
+import {
+    getCategoryByIdFromCatalog,
+    getExerciseByIdFromCatalog,
+    getExercisesByCategoryFromCatalog,
+} from '@/lib/exercise-utils';
+import { useExerciseDatabase } from '@/lib/exerciseRepository';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Search, Dumbbell, Zap } from 'lucide-react';
@@ -12,11 +17,12 @@ import { formatIdentifierLabel } from '@/lib/displayText';
 export default function ExerciseList() {
     const { categoryId } = useParams();
     const [searchQuery, setSearchQuery] = useState('');
+    const { exercises, isLoading } = useExerciseDatabase();
 
-    const category = categoryId ? getCategoryById(categoryId) : undefined;
+    const category = categoryId ? getCategoryByIdFromCatalog(exercises, categoryId) : undefined;
 
     // Get all exercises for this category (flat list) to filter
-    const allExercises = categoryId ? getExercisesByCategory(categoryId) : [];
+    const allExercises = categoryId ? getExercisesByCategoryFromCatalog(exercises, categoryId) : [];
 
     // Filter exercises based on search
     const filteredExercises = allExercises.filter(ex =>
@@ -27,7 +33,15 @@ export default function ExerciseList() {
 
     // Grouping Logic: If we rely on subcategories from JSON
     // Mapping helper to get Exercise object from ID
-    const getExerciseObj = (id: string): Exercise | undefined => getExerciseById(id);
+    const getExerciseObj = (id: string): Exercise | undefined => getExerciseByIdFromCatalog(exercises, id);
+
+    if (isLoading && exercises.length === 0) {
+        return (
+            <div className="container py-20 text-center fade-in">
+                <h2 className="text-2xl font-bold mb-4">Loading Exercises</h2>
+            </div>
+        );
+    }
 
     if (!category) return (
         <div className="container py-20 text-center fade-in">

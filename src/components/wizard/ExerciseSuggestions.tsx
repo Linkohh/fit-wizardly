@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Dumbbell, Sparkles, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { suggestExercises } from '@/lib/suggestExercises';
+import { useExerciseDatabase } from '@/lib/exerciseRepository';
+import { suggestExercisesFromExercises } from '@/lib/suggestExercises';
 import type { MuscleGroup, Equipment, Exercise } from '@/types/fitness';
 import { cn } from '@/lib/utils';
 
@@ -45,18 +46,19 @@ export function ExerciseSuggestions({
     className,
 }: ExerciseSuggestionsProps) {
     const { t } = useTranslation();
+    const { exercises } = useExerciseDatabase();
 
     const suggestions = useMemo(() => {
-        if (muscles.length === 0 || equipment.length === 0) {
+        if (muscles.length === 0 || equipment.length === 0 || exercises.length === 0) {
             return [];
         }
-        return suggestExercises({
+        return suggestExercisesFromExercises(exercises, {
             muscles,
             equipment,
             experienceLevel,
             limit: 4,
         });
-    }, [muscles, equipment, experienceLevel]);
+    }, [equipment, exercises, experienceLevel, muscles]);
 
     if (suggestions.length === 0) {
         return null;

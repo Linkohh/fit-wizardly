@@ -1,80 +1,19 @@
 import { useCallback, useMemo } from 'react';
 import { useHaptics } from '@/hooks/useHaptics';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
-import { playRetroClickSound } from '@/lib/clickFeedback/clickSound';
+import {
+  playFeedbackTone,
+  playRetroClickSound,
+} from '@/lib/clickFeedback/clickSound';
 import {
   INTERACTION_FEEDBACK_PROFILE,
-  type FeedbackSound,
   type InteractionFeedbackEvent,
 } from '@/lib/feedback/interaction-profile';
 
 type EmitFeedbackOptions = {
   pointerType?: string;
+  channel?: 'all' | 'haptic' | 'sound';
 };
-
-type WebkitWindow = Window & {
-  webkitAudioContext?: typeof AudioContext;
-};
-
-const SOUND_PATTERNS: Record<Exclude<FeedbackSound, 'none' | 'click'>, number[]> = {
-  brand: [523.25, 659.25],
-  success: [587.33, 783.99],
-  warning: [440, 349.23],
-  error: [329.63, 246.94],
-};
-
-let sharedAudioContext: AudioContext | null = null;
-
-function getAudioContext(): AudioContext | null {
-  if (typeof window === 'undefined') return null;
-  if (sharedAudioContext) return sharedAudioContext;
-
-  const AudioContextCtor =
-    window.AudioContext ?? (window as WebkitWindow).webkitAudioContext;
-
-  if (!AudioContextCtor) return null;
-
-  try {
-    sharedAudioContext = new AudioContextCtor({ latencyHint: 'interactive' });
-    return sharedAudioContext;
-  } catch {
-    return null;
-  }
-}
-
-async function playTonePattern(type: Exclude<FeedbackSound, 'none' | 'click'>) {
-  const context = getAudioContext();
-  if (!context) return;
-
-  if (context.state === 'suspended') {
-    try {
-      await context.resume();
-    } catch {
-      return;
-    }
-  }
-
-  const pattern = SOUND_PATTERNS[type];
-  const start = context.currentTime;
-
-  pattern.forEach((frequency, index) => {
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    const toneStart = start + index * 0.085;
-    const toneEnd = toneStart + 0.08;
-
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(frequency, toneStart);
-    gain.gain.setValueAtTime(0.0001, toneStart);
-    gain.gain.exponentialRampToValueAtTime(0.09, toneStart + 0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001, toneEnd);
-
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-    oscillator.start(toneStart);
-    oscillator.stop(toneEnd + 0.01);
-  });
-}
 
 export function useInteractionFeedback() {
   const { impact, notification } = useHaptics();
@@ -86,8 +25,10 @@ export function useInteractionFeedback() {
   const emit = useCallback(
     async (event: InteractionFeedbackEvent, options?: EmitFeedbackOptions) => {
       const profile = INTERACTION_FEEDBACK_PROFILE[event];
+      const shouldEmitHaptic = options?.channel !== 'sound';
+      const shouldEmitSound = options?.channel !== 'haptic';
 
-      if (hapticsEnabled && profile.haptic) {
+      if (shouldEmitHaptic && hapticsEnabled && profile.haptic) {
         const pointerType = options?.pointerType;
         const shouldSkipPointerHaptic =
           pointerType === 'mouse' || pointerType === 'keyboard';
@@ -101,14 +42,14 @@ export function useInteractionFeedback() {
         }
       }
 
-      if (!soundsEnabled || profile.sound === 'none') return;
+      if (!shouldEmitSound || !soundsEnabled || profile.sound === 'none') return;
 
       if (profile.sound === 'click') {
         await playRetroClickSound();
         return;
       }
 
-      await playTonePattern(profile.sound);
+      await playFeedbackTone(profile.sound);
     },
     [hapticsEnabled, impact, notification, soundsEnabled]
   );

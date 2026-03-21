@@ -15,7 +15,7 @@ import type {
   ExerciseType,
   StabilityLevel
 } from '@/types/fitness';
-import { EXERCISE_DATABASE } from '@/data/exercises';
+import { getCachedExerciseDatabase } from '@/lib/exerciseRepository';
 import { sha256 } from '@/lib/hash';
 import { determineOptPhase } from '@/lib/phaseMapper';
 import { formatIdentifierLabel } from '@/lib/displayText';
@@ -145,7 +145,7 @@ function getWorkoutDayStructure(splitType: SplitType, daysPerWeek: number): { na
 }
 
 // Filter exercises by equipment and constraints
-function filterExercises(
+function filterAvailableExercises(
   exercises: Exercise[],
   equipment: Equipment[],
   constraints: Constraint[]
@@ -420,11 +420,19 @@ function buildWarmCoolSuggestions(
 }
 
 // Main generator function - DETERMINISTIC
-type PlanIdOptions = {
+export type PlanIdOptions = {
   appendTimestamp?: boolean;
 };
 
-export function generatePlan(selections: WizardSelections, options: PlanIdOptions = {}): Plan {
+export function generatePlanFromExercises(
+  exercises: Exercise[],
+  selections: WizardSelections,
+  options: PlanIdOptions = {}
+): Plan {
+  if (exercises.length === 0) {
+    throw new Error('Exercise catalog is not loaded');
+  }
+
   const {
     goal,
     experienceLevel,
@@ -447,7 +455,7 @@ export function generatePlan(selections: WizardSelections, options: PlanIdOption
   const dayStructures = getWorkoutDayStructure(splitType, daysPerWeek);
 
   // Filter available exercises
-  const availableExercises = filterExercises(EXERCISE_DATABASE, equipment, constraints);
+  const availableExercises = filterAvailableExercises(exercises, equipment, constraints);
 
   // Get rep range for goal
   // Get rep range for goal (Legacy support but Phase logic overrides)
@@ -574,6 +582,17 @@ export function generatePlan(selections: WizardSelections, options: PlanIdOption
     rirProgression: RIR_PROGRESSION,
     notes,
   };
+}
+
+export function generatePlan(
+  selections: WizardSelections,
+  options: PlanIdOptions = {}
+): Plan {
+  return generatePlanFromExercises(
+    getCachedExerciseDatabase(),
+    selections,
+    options
+  );
 }
 
 // Validate wizard inputs before generation

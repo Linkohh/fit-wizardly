@@ -12,6 +12,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "sync:exercise-assets": "node --experimental-strip-types scripts/export-exercise-assets.mjs",
     "sync:exercise-library": "node scripts/sync-wger-snapshot.mjs",
     "test": "vitest",
     "test:run": "vitest run",

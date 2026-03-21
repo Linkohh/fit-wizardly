@@ -101,12 +101,39 @@ function createJsonResponse(body: unknown) {
   );
 }
 
+function createSnapshotPayload(recordCount = 205) {
+  return {
+    generatedAt: '2025-01-03T00:00:00.000Z',
+    records: Array.from({ length: recordCount }, (_, index) =>
+      buildNormalizedRecord({
+        id: `wger:${index + 1}`,
+        name: `Snapshot Exercise ${index + 1}`,
+        sourceId: index + 1,
+        sourceUuid: `snapshot-${index + 1}`,
+      })
+    ),
+  };
+}
+
 describe('exercise-library service', () => {
   beforeEach(() => {
     resetExerciseLibraryServiceForTests();
     window.localStorage.clear();
     setNavigatorOnline(false);
     fetchMock.mockReset();
+    fetchMock.mockImplementation((input) => {
+      const url = typeof input === 'string' ? input : input.url;
+      if (url.includes('wger-snapshot.v1.json')) {
+        return createJsonResponse(createSnapshotPayload());
+      }
+
+      return createJsonResponse({
+        count: 0,
+        next: null,
+        previous: null,
+        results: [],
+      });
+    });
     vi.stubGlobal('fetch', fetchMock);
   });
 
@@ -150,12 +177,25 @@ describe('exercise-library service', () => {
     const state = resolveBootExerciseLibraryState();
 
     expect(state.source).toBe('snapshot');
-    expect(state.records.length).toBeGreaterThan(200);
+    expect(state.records).toHaveLength(0);
   });
 
-  it('falls back to the bundled snapshot when no cache is present', () => {
+  it('starts empty and defers snapshot loading when no cache is present', () => {
     const state = resolveBootExerciseLibraryState();
 
+    expect(state.source).toBe('snapshot');
+    expect(state.records).toHaveLength(0);
+  });
+
+  it('loads the snapshot asset when no cache is present', async () => {
+    const state = await loadExerciseLibrary();
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('wger-snapshot.v1.json'),
+      expect.objectContaining({
+        cache: 'force-cache',
+      })
+    );
     expect(state.source).toBe('snapshot');
     expect(state.records.length).toBeGreaterThan(200);
   });

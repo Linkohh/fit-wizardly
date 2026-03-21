@@ -1,5 +1,9 @@
 import { useParams, Link } from 'react-router-dom';
-import { getExerciseById, getCategoryById } from '@/lib/exercise-utils';
+import {
+    getCategoryByIdFromCatalog,
+    getExerciseByIdFromCatalog,
+} from '@/lib/exercise-utils';
+import { useExerciseDatabase } from '@/lib/exerciseRepository';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Dumbbell, Activity, AlertCircle, CheckCircle2, User } from 'lucide-react';
 import { Card } from '@/components/ui/card';
@@ -8,8 +12,17 @@ import { formatIdentifierLabel } from '@/lib/displayText';
 
 export default function ExerciseDetail() {
     const { categoryId, exerciseId } = useParams();
-    const exercise = exerciseId ? getExerciseById(exerciseId) : undefined;
-    const category = categoryId ? getCategoryById(categoryId) : undefined;
+    const { exercises, isLoading } = useExerciseDatabase();
+    const exercise = exerciseId ? getExerciseByIdFromCatalog(exercises, exerciseId) : undefined;
+    const category = categoryId ? getCategoryByIdFromCatalog(exercises, categoryId) : undefined;
+
+    if (isLoading && exercises.length === 0) {
+        return (
+            <div className="container py-20 text-center fade-in">
+                <h2 className="text-2xl font-bold mb-4">Loading Exercise</h2>
+            </div>
+        );
+    }
 
     if (!exercise || !category) return (
         <div className="container py-20 text-center fade-in">

@@ -259,7 +259,16 @@
         "noplan": {
             "title": "Aún No Has Generado un Plan",
             "description": "Crea tu plan de entrenamiento personalizado usando el asistente.",
-            "cta": "Iniciar Asistente"
+            "cta": "Iniciar Asistente",
+            "kicker": "TU CAMINO FITNESS",
+            "headline": "Tu plan empieza aquí",
+            "coach_copy": "Tu entrenador está listo. Responde algunas preguntas y obtén un plan diseñado para tus objetivos, horario y equipo.",
+            "cta_primary": "Crear Mi Plan",
+            "cta_exercises": "Explorar Ejercicios",
+            "cta_guide": "Cómo Funciona",
+            "benefit_split": "Rutina personalizada",
+            "benefit_timing": "Duración adaptada",
+            "benefit_equipment": "Según tu equipo"
         },
         "exercise": {
             "sets": "{{count}} series",

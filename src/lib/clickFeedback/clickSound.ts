@@ -1,5 +1,15 @@
 const CLICK_DURATION_SECONDS = 0.04;
 const DEFAULT_CLICK_VOLUME = 0.22;
+const FEEDBACK_TONE_VOLUME = 0.09;
+
+export type FeedbackTone = 'brand' | 'success' | 'warning' | 'error';
+
+const FEEDBACK_TONE_PATTERNS: Record<FeedbackTone, number[]> = {
+  brand: [523.25, 659.25],
+  success: [587.33, 783.99],
+  warning: [440, 349.23],
+  error: [329.63, 246.94],
+};
 
 type WebkitWindow = Window & {
   webkitAudioContext?: typeof AudioContext;
@@ -98,3 +108,28 @@ export async function playRetroClickSound(options?: { volume?: number }): Promis
   sourceNode.stop(now + CLICK_DURATION_SECONDS + 0.01);
 }
 
+export async function playFeedbackTone(type: FeedbackTone): Promise<void> {
+  const context = await ensureReady();
+  if (!context) return;
+
+  const pattern = FEEDBACK_TONE_PATTERNS[type];
+  const start = context.currentTime;
+
+  pattern.forEach((frequency, index) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const toneStart = start + index * 0.085;
+    const toneEnd = toneStart + 0.08;
+
+    oscillator.type = 'sine';
+    oscillator.frequency.setValueAtTime(frequency, toneStart);
+    gain.gain.setValueAtTime(0.0001, toneStart);
+    gain.gain.exponentialRampToValueAtTime(FEEDBACK_TONE_VOLUME, toneStart + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, toneEnd);
+
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(toneStart);
+    oscillator.stop(toneEnd + 0.01);
+  });
+}

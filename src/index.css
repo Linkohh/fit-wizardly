@@ -707,48 +707,6 @@
   }
 }
 
-@utility page-transition-enter {
-  /* Page transition wrapper */
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-@utility page-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@utility page-transition-exit {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-@utility page-transition-exit-active {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@utility checkmark-animated {
-  /* Success checkmark animation */
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-}
-
-@utility gradient-text-animated {
-  /* Gradient text with animation */
-  background: linear-gradient(135deg,
-      hsl(var(--primary)) 0%,
-      hsl(var(--secondary)) 50%,
-      hsl(var(--primary)) 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradient-shift 3s ease infinite;
-}
-
 /* FitWizard Design System - Purple/Pink Professional Gradient Theme */
 
 @layer base {
@@ -1015,18 +973,6 @@
 }
 
 /* Animation keyframes for gradient effects */
-@keyframes gradient-shift {
-
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
 @keyframes confetti-fall {
   0% {
     transform: translateY(-10px) rotate(0deg);
@@ -1058,6 +1004,18 @@
 
   50% {
     box-shadow: 0 0 20px hsl(262 83% 66% / 0.5), 0 0 40px hsl(330 81% 60% / 0.3);
+  }
+}
+
+@keyframes gradient-shift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
   }
 }
 
@@ -1125,231 +1083,6 @@
    Polyrhythmic timing ensures blobs never sync up.
    Each blob: translate drift + opacity ghost + hue-rotate color shift
    ===================================================== */
-
-@keyframes blob-drift-1 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.8;
-    filter: hue-rotate(0deg);
-  }
-
-  20% {
-    opacity: 1;
-  }
-
-  33% {
-    transform: translate(15vw, -10vh) scale(1.1);
-    filter: hue-rotate(20deg);
-  }
-
-  55% {
-    opacity: 0.3;
-  }
-
-  66% {
-    transform: translate(-10vw, 15vh) scale(0.95);
-    filter: hue-rotate(45deg);
-  }
-
-  80% {
-    opacity: 0;
-    filter: hue-rotate(60deg);
-  }
-}
-
-@keyframes blob-drift-2 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0;
-    filter: hue-rotate(0deg);
-  }
-
-  15% {
-    opacity: 0.6;
-  }
-
-  30% {
-    transform: translate(-12vw, 8vh) scale(1.15);
-    filter: hue-rotate(15deg);
-  }
-
-  50% {
-    opacity: 1;
-  }
-
-  65% {
-    transform: translate(8vw, -12vh) scale(0.9);
-    filter: hue-rotate(40deg);
-  }
-
-  85% {
-    opacity: 0.3;
-    filter: hue-rotate(55deg);
-  }
-}
-
-@keyframes blob-drift-3 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.5;
-    filter: hue-rotate(0deg);
-  }
-
-  25% {
-    transform: translate(18vw, 5vh) scale(1.05);
-    opacity: 0;
-    filter: hue-rotate(10deg);
-  }
-
-  45% {
-    opacity: 0.9;
-  }
-
-  60% {
-    transform: translate(-5vw, -18vh) scale(1.1);
-    filter: hue-rotate(35deg);
-  }
-
-  80% {
-    opacity: 0.3;
-    filter: hue-rotate(50deg);
-  }
-}
-
-@keyframes blob-drift-4 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.3;
-    filter: hue-rotate(0deg);
-  }
-
-  20% {
-    opacity: 0.8;
-    filter: hue-rotate(12deg);
-  }
-
-  40% {
-    transform: translate(-15vw, 12vh) scale(0.95);
-    filter: hue-rotate(25deg);
-  }
-
-  60% {
-    opacity: 0;
-  }
-
-  75% {
-    transform: translate(10vw, -8vh) scale(1.08);
-    filter: hue-rotate(45deg);
-  }
-
-  90% {
-    opacity: 1;
-    filter: hue-rotate(60deg);
-  }
-}
-
-@keyframes blob-drift-5 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.7;
-    filter: hue-rotate(0deg);
-  }
-
-  18% {
-    opacity: 0;
-  }
-
-  35% {
-    transform: translate(10vw, -15vh) scale(1.12);
-    opacity: 0.9;
-    filter: hue-rotate(20deg);
-  }
-
-  55% {
-    filter: hue-rotate(40deg);
-  }
-
-  70% {
-    transform: translate(-12vw, 6vh) scale(0.92);
-    opacity: 0.4;
-    filter: hue-rotate(50deg);
-  }
-
-  88% {
-    opacity: 1;
-    filter: hue-rotate(60deg);
-  }
-}
-
-@keyframes blob-drift-6 {
-
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0;
-    filter: hue-rotate(0deg);
-  }
-
-  12% {
-    opacity: 0.7;
-  }
-
-  28% {
-    transform: translate(-8vw, -10vh) scale(1.06);
-    filter: hue-rotate(18deg);
-  }
-
-  45% {
-    opacity: 1;
-    filter: hue-rotate(30deg);
-  }
-
-  62% {
-    transform: translate(14vw, 8vh) scale(0.94);
-    opacity: 0.2;
-    filter: hue-rotate(48deg);
-  }
-
-  82% {
-    opacity: 0.6;
-    filter: hue-rotate(60deg);
-  }
-}
-
-/* Animation classes with polyrhythmic prime-adjacent durations */
-.animate-blob-drift-1 {
-  animation: blob-drift-1 25s ease-in-out infinite;
-}
-
-.animate-blob-drift-2 {
-  animation: blob-drift-2 28s ease-in-out infinite;
-}
-
-.animate-blob-drift-3 {
-  animation: blob-drift-3 29s ease-in-out infinite;
-}
-
-.animate-blob-drift-4 {
-  animation: blob-drift-4 31s ease-in-out infinite;
-}
-
-.animate-blob-drift-5 {
-  animation: blob-drift-5 32s ease-in-out infinite;
-}
-
-.animate-blob-drift-6 {
-  animation: blob-drift-6 37s ease-in-out infinite;
-}
 
 /* =====================================================
    BODY OUTLINE STYLES
@@ -1434,32 +1167,7 @@
     inset 0 1px 0 0 hsl(255 100% 100% / 0.05);
 }
 
-/* 3. Hero Ambient Bloom */
-.hero-bloom {
-  background: radial-gradient(circle at center,
-      hsl(270 80% 60% / 0.08) 0%,
-      transparent 60%);
-}
-
-/* 4. Quote Container Specifics - Adaptive */
-.quote-container {
-  /* Light Mode Default */
-  background: linear-gradient(180deg, hsl(260 20% 98% / 0.9) 0%, hsl(260 20% 95% / 0.9) 100%);
-  border: 1px solid hsl(var(--primary) / 0.1);
-  box-shadow:
-    0 8px 32px -8px hsl(var(--primary) / 0.1),
-    inset 0 1px 0 hsl(0 0% 100% / 0.8);
-}
-
-:is(.dark .quote-container) {
-  background: linear-gradient(180deg, hsl(260 30% 8% / 0.8) 0%, hsl(260 30% 6% / 0.8) 100%);
-  border: 1px solid hsl(var(--primary) / 0.15);
-  box-shadow:
-    0 8px 32px -8px hsl(0 0% 0% / 0.4),
-    inset 0 1px 0 hsl(255 100% 100% / 0.08);
-}
-
-/* 5. Icon Glow - Restrained */
+/* 3. Icon Glow - Restrained */
 .icon-glow-soft {
   filter: drop-shadow(0 0 8px hsl(var(--secondary) / 0.4));
 }
@@ -1509,131 +1217,6 @@
 
 .animate-error-in {
   animation: slide-down 0.2s ease-out;
-}
-
-/* Premium Horizon Glow - Smooth Color Cycling with @property */
-/* Cycles through: Electric Violet → Neon Cyan → Hot Pink → Golden Amber */
-/* Uses CSS @property for smooth color interpolation (no snapping) */
-
-/* Define animatable color properties */
-/* Optimized Horizon Glow - Uses localized hue rotation for performance */
-
-@keyframes horizon-spin-primary {
-  from {
-    filter: blur(28px) hue-rotate(0deg);
-  }
-
-  to {
-    filter: blur(28px) hue-rotate(360deg);
-  }
-}
-
-@keyframes horizon-spin-secondary {
-  from {
-    filter: blur(40px) hue-rotate(0deg);
-  }
-
-  to {
-    filter: blur(40px) hue-rotate(360deg);
-  }
-}
-
-@keyframes horizon-spin-tertiary {
-  from {
-    filter: blur(50px) hue-rotate(0deg);
-  }
-
-  to {
-    filter: blur(50px) hue-rotate(360deg);
-  }
-}
-
-/* Breathing animation - Opacity only to avoid layout shifts */
-@keyframes horizon-breathe {
-
-  0%,
-  100% {
-    opacity: 0.8;
-  }
-
-  50% {
-    opacity: 1.0;
-  }
-}
-
-.animate-horizon-glow {
-  background: radial-gradient(ellipse 40% 50% at 50% 50%,
-      rgba(168, 85, 247, 0.5) 0%,
-      rgba(168, 85, 247, 0.4) 25%,
-      rgba(168, 85, 247, 0.1) 45%,
-      transparent 70%);
-  background-size: 100% 100%;
-  background-position: center;
-  filter: blur(28px);
-  opacity: 1;
-  will-change: opacity, transform;
-  animation:
-    horizon-breathe 8s ease-in-out infinite;
-}
-
-.animate-horizon-glow-secondary {
-  background: radial-gradient(ellipse 45% 45% at 50% 50%,
-      rgba(6, 182, 212, 0.4) 0%,
-      rgba(6, 182, 212, 0.2) 30%,
-      transparent 65%);
-  background-size: 100% 100%;
-  background-position: center;
-  filter: blur(40px);
-  opacity: 0.8;
-  will-change: opacity, transform;
-  animation:
-    horizon-breathe 10s ease-in-out infinite reverse;
-}
-
-.animate-horizon-glow-tertiary {
-  background: radial-gradient(ellipse 50% 40% at 50% 50%,
-      rgba(236, 72, 153, 0.3) 0%,
-      rgba(236, 72, 153, 0.15) 40%,
-      transparent 70%);
-  background-size: 100% 100%;
-  background-position: center;
-  filter: blur(50px);
-  opacity: 0.6;
-  will-change: auto;
-  animation: none;
-}
-
-/* Sharp Horizon Line with Electric Core - White Hot Center */
-.horizon-line-sharp {
-  background: linear-gradient(90deg,
-      transparent 0%,
-      rgba(147, 51, 234, 0) 10%,
-      rgba(255, 255, 255, 0.8) 40%,
-      #ffffff 50%,
-      rgba(255, 255, 255, 0.8) 60%,
-      rgba(147, 51, 234, 0) 90%,
-      transparent 100%);
-  height: 2px;
-  /* Slightly thicker */
-  filter: blur(0.5px) drop-shadow(0 0 4px white);
-  opacity: 0.9;
-  z-index: 20;
-}
-
-.horizon-glow-wrapper {
-  /* WIDER MASK - 80% Width for true horizon feel */
-  mask-image: radial-gradient(ellipse 80% 100% at 50% 50%,
-      black 0%,
-      black 40%,
-      rgba(0, 0, 0, 0.2) 70%,
-      transparent 85%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 100% at 50% 50%,
-      black 0%,
-      black 40%,
-      rgba(0, 0, 0, 0.2) 70%,
-      transparent 85%);
-  mix-blend-mode: normal;
-  /* Handle blending on children */
 }
 
 /* =====================================================
@@ -1749,19 +1332,6 @@
 
   .menu-item-interactive::before {
     display: none;
-  }
-
-  /* Freeze liquid blob background to static color wash */
-  .animate-blob-drift-1,
-  .animate-blob-drift-2,
-  .animate-blob-drift-3,
-  .animate-blob-drift-4,
-  .animate-blob-drift-5,
-  .animate-blob-drift-6 {
-    animation: none !important;
-    opacity: 0.4 !important;
-    filter: none !important;
-    transform: none !important;
   }
 }
 

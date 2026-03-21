@@ -1,5 +1,4 @@
-import { NutritionSkeleton } from "@/components/nutrition/NutritionSkeleton";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNutritionStore } from "@/stores/nutritionStore";
 import { Link } from "react-router-dom";
 import {
@@ -24,16 +23,16 @@ import { useHaptics } from "@/hooks/useHaptics";
 
 export default function NutritionPage() {
     // Store Integration
-    const { profile, targets, getCurrentLog, selectedDate, changeDate, setProfile, logMeal, removeMeal } = useNutritionStore();
+    const profile = useNutritionStore((state) => state.profile);
+    const targets = useNutritionStore((state) => state.targets);
+    const getCurrentLog = useNutritionStore((state) => state.getCurrentLog);
+    const selectedDate = useNutritionStore((state) => state.selectedDate);
+    const changeDate = useNutritionStore((state) => state.changeDate);
+    const setProfile = useNutritionStore((state) => state.setProfile);
+    const logMeal = useNutritionStore((state) => state.logMeal);
+    const removeMeal = useNutritionStore((state) => state.removeMeal);
     const [isEditingCalculator, setIsEditingCalculator] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
     const { impact, notification } = useHaptics();
-
-    useEffect(() => {
-        // Simulate initial load for smooth transition
-        const timer = setTimeout(() => setIsLoading(false), 500);
-        return () => clearTimeout(timer);
-    }, []);
 
     // Get the log for the currently selected date
     const dailyLog = getCurrentLog();
@@ -72,10 +71,6 @@ export default function NutritionPage() {
     };
 
     // ... (handlers)
-
-    if (isLoading) {
-        return <NutritionSkeleton />;
-    }
 
     return (
         <div className="container-full py-8 space-y-8 animate-in fade-in duration-500">

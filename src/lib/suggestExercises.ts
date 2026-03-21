@@ -1,118 +1,161 @@
-import type { Exercise, MuscleGroup, Equipment } from '@/types/fitness';
-import { EXERCISE_DATABASE } from '@/data/exercises';
+import type { Equipment, Exercise, MuscleGroup } from '@/types/fitness';
+import { getCachedExerciseDatabase } from '@/lib/exerciseRepository';
 
-interface SuggestionOptions {
-    muscles: MuscleGroup[];
-    equipment: Equipment[];
-    limit?: number;
-    experienceLevel?: 'beginner' | 'intermediate' | 'advanced';
+export interface SuggestionOptions {
+  muscles: MuscleGroup[];
+  equipment: Equipment[];
+  limit?: number;
+  experienceLevel?: 'beginner' | 'intermediate' | 'advanced';
 }
 
-/**
- * Suggests exercises based on selected muscles and equipment.
- * Prioritizes compound movements and matches equipment availability.
- */
-export function suggestExercises({
+const COMPOUND_PATTERNS = [
+  'squat',
+  'hinge',
+  'horizontal_push',
+  'horizontal_pull',
+  'vertical_push',
+  'vertical_pull',
+];
+
+const DIFFICULTY_MAP: Record<string, number> = {
+  'All Levels': 2,
+  Advanced: 3,
+  Beginner: 1,
+  Elite: 3,
+  Intermediate: 2,
+};
+
+function getTargetDifficulty(
+  experienceLevel: SuggestionOptions['experienceLevel']
+) {
+  switch (experienceLevel) {
+    case 'beginner':
+      return 1;
+    case 'advanced':
+      return 3;
+    default:
+      return 2;
+  }
+}
+
+export function suggestExercisesFromExercises(
+  exercises: Exercise[],
+  {
     muscles,
     equipment,
     limit = 5,
     experienceLevel = 'intermediate',
-}: SuggestionOptions): Exercise[] {
-    if (muscles.length === 0 || equipment.length === 0) {
-        return [];
-    }
+  }: SuggestionOptions
+): Exercise[] {
+  if (muscles.length === 0 || equipment.length === 0 || exercises.length === 0) {
+    return [];
+  }
 
-    // Filter exercises that match muscles and equipment
-    const matched = EXERCISE_DATABASE.filter((ex) => {
-        const matchesMuscle = muscles.some(
-            (m) => ex.primaryMuscles.includes(m) || ex.secondaryMuscles.includes(m)
-        );
-        const matchesEquipment = ex.equipment.some(
-            (eq) => equipment.includes(eq) || eq === 'bodyweight'
-        );
-        return matchesMuscle && matchesEquipment;
-    });
+  const targetDifficulty = getTargetDifficulty(experienceLevel);
 
-    // Score exercises for relevance
-    const scored = matched.map((ex) => {
-        let score = 0;
+  return exercises
+    .filter((exercise) => {
+      const matchesMuscle = muscles.some(
+        (muscle) =>
+          exercise.primaryMuscles.includes(muscle) ||
+          exercise.secondaryMuscles.includes(muscle)
+      );
+      const matchesEquipment = exercise.equipment.some(
+        (item) => equipment.includes(item) || item === 'bodyweight'
+      );
 
-        // Primary muscle match is worth more
-        const primaryMatches = muscles.filter((m) => ex.primaryMuscles.includes(m)).length;
-        score += primaryMatches * 10;
+      return matchesMuscle && matchesEquipment;
+    })
+    .map((exercise) => {
+      const primaryMatches = muscles.filter((muscle) =>
+        exercise.primaryMuscles.includes(muscle)
+      ).length;
+      const secondaryMatches = muscles.filter((muscle) =>
+        exercise.secondaryMuscles.includes(muscle)
+      ).length;
+      const exerciseDifficulty =
+        DIFFICULTY_MAP[exercise.difficulty || 'Intermediate'] || 2;
+      const isCompound = exercise.patterns?.some((pattern) =>
+        COMPOUND_PATTERNS.includes(pattern)
+      );
 
-        // Secondary muscle matches
-        const secondaryMatches = muscles.filter((m) => ex.secondaryMuscles.includes(m)).length;
-        score += secondaryMatches * 3;
+      let score = primaryMatches * 10;
+      score += secondaryMatches * 3;
 
-        // Compound exercises get bonus (check movement patterns)
-        const compoundPatterns = ['squat', 'hinge', 'horizontal_push', 'horizontal_pull', 'vertical_push', 'vertical_pull'];
-        if (ex.patterns?.some(p => compoundPatterns.includes(p))) {
-            score += 5;
-        }
+      if (isCompound) {
+        score += 5;
+      }
 
-        // Difficulty adjustment based on experience
-        const difficultyMap: Record<string, number> = {
-            'Beginner': 1,
-            'Intermediate': 2,
-            'Advanced': 3,
-            'Elite': 3,
-            'All Levels': 2
-        };
-        const targetDifficulty = experienceLevel === 'beginner' ? 1 : experienceLevel === 'intermediate' ? 2 : 3;
-        const exerciseDifficulty = difficultyMap[ex.difficulty || 'Intermediate'] || 2;
-        if (exerciseDifficulty === targetDifficulty) {
-            score += 3;
-        } else if (Math.abs(exerciseDifficulty - targetDifficulty) === 1) {
-            score += 1;
-        }
+      if (exerciseDifficulty === targetDifficulty) {
+        score += 3;
+      } else if (Math.abs(exerciseDifficulty - targetDifficulty) === 1) {
+        score += 1;
+      }
 
-        return { exercise: ex, score };
-    });
-
-    // Sort by score descending and take top N
-    return scored
-        .sort((a, b) => b.score - a.score)
-        .slice(0, limit)
-        .map((item) => item.exercise);
+      return { exercise, score };
+    })
+    .sort((left, right) => right.score - left.score)
+    .slice(0, limit)
+    .map((entry) => entry.exercise);
 }
 
-/**
- * Get a preview of what exercises might be included for given muscles.
- * Returns a summary object with counts and sample exercises.
- */
-export function getExercisePreview(
-    muscles: MuscleGroup[],
-    equipment: Equipment[]
+export function suggestExercises(options: SuggestionOptions): Exercise[] {
+  return suggestExercisesFromExercises(getCachedExerciseDatabase(), options);
+}
+
+export function getExercisePreviewFromExercises(
+  exercises: Exercise[],
+  muscles: MuscleGroup[],
+  equipment: Equipment[]
 ): {
-    totalAvailable: number;
-    byMuscle: Record<string, number>;
-    samples: Exercise[];
+  totalAvailable: number;
+  byMuscle: Record<string, number>;
+  samples: Exercise[];
 } {
-    const suggestions = suggestExercises({
-        muscles,
-        equipment,
-        limit: 3,
-    });
+  const suggestions = suggestExercisesFromExercises(exercises, {
+    muscles,
+    equipment,
+    limit: 3,
+  });
 
-    const byMuscle: Record<string, number> = {};
-    muscles.forEach((muscle) => {
-        byMuscle[muscle] = EXERCISE_DATABASE.filter(
-            (ex) =>
-                (ex.primaryMuscles.includes(muscle) || ex.secondaryMuscles.includes(muscle)) &&
-                ex.equipment.some((eq) => equipment.includes(eq) || eq === 'bodyweight')
-        ).length;
-    });
-
-    const totalAvailable = EXERCISE_DATABASE.filter(
-        (ex) =>
-            muscles.some((m) => ex.primaryMuscles.includes(m) || ex.secondaryMuscles.includes(m)) &&
-            ex.equipment.some((eq) => equipment.includes(eq) || eq === 'bodyweight')
+  const byMuscle: Record<string, number> = {};
+  muscles.forEach((muscle) => {
+    byMuscle[muscle] = exercises.filter(
+      (exercise) =>
+        (exercise.primaryMuscles.includes(muscle) ||
+          exercise.secondaryMuscles.includes(muscle)) &&
+        exercise.equipment.some(
+          (item) => equipment.includes(item) || item === 'bodyweight'
+        )
     ).length;
+  });
 
-    return {
-        totalAvailable,
-        byMuscle,
-        samples: suggestions,
-    };
+  const totalAvailable = exercises.filter(
+    (exercise) =>
+      muscles.some(
+        (muscle) =>
+          exercise.primaryMuscles.includes(muscle) ||
+          exercise.secondaryMuscles.includes(muscle)
+      ) &&
+      exercise.equipment.some(
+        (item) => equipment.includes(item) || item === 'bodyweight'
+      )
+  ).length;
+
+  return {
+    totalAvailable,
+    byMuscle,
+    samples: suggestions,
+  };
+}
+
+export function getExercisePreview(
+  muscles: MuscleGroup[],
+  equipment: Equipment[]
+) {
+  return getExercisePreviewFromExercises(
+    getCachedExerciseDatabase(),
+    muscles,
+    equipment
+  );
 }

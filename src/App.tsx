@@ -1,5 +1,5 @@
 import { AnimatePresence } from "framer-motion";
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,10 +19,10 @@ import { usePlanStore } from "@/stores/planStore";
 import { useGlobalClickFeedback } from "@/hooks/useGlobalClickFeedback";
 import { Footer } from "@/components/Footer";
 import { ConsentModal } from "@/components/legal/ConsentModal";
-import { LivingBackground } from "@/components/ui/living-background";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
+import { MOBILE_BREAKPOINT } from "@/hooks/use-mobile";
 import { AuthModal } from "@/components/auth/AuthModal";
 
 const Index = lazy(() => import("./pages/Index"));
@@ -44,6 +44,12 @@ const Analytics = lazy(() => import("./pages/Analytics"));
 const ProfilePage = lazy(() =>
   import("./pages/Profile").then((module) => ({
     default: module.Profile,
+  }))
+);
+
+const LivingBackground = lazy(() =>
+  import("@/components/ui/living-background").then((module) => ({
+    default: module.LivingBackground,
   }))
 );
 
@@ -247,11 +253,24 @@ const App = () => {
   useNetworkStatus();
   useGlobalClickFeedback();
   const nativeApp = isNativeApp();
+  const [shouldRenderLivingBackground, setShouldRenderLivingBackground] = useState(false);
 
   // Handle post-login redirects for invites
   const { user, isLoading } = useAuthStore();
   const syncWithBackend = usePlanStore((state) => state.syncWithBackend);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.innerWidth < MOBILE_BREAKPOINT) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      setShouldRenderLivingBackground(true);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -272,10 +291,7 @@ const App = () => {
   useEffect(() => {
     const handleOnline = () => {
       if (user) {
-        console.log('Back online, triggering sync...');
         syncWithBackend(user.id);
-        // Toast is handled by useNetworkStatus, but we can add a specific sync toast if needed
-        // toast.success("Syncing data..."); 
       }
     };
 
@@ -299,7 +315,9 @@ const App = () => {
                   ? "pt-[calc(env(safe-area-inset-top,0px)+3.25rem)] md:pt-[calc(env(safe-area-inset-top,0px)+4rem)]"
                   : "pt-16",
               )}>
-                <LivingBackground />
+                <Suspense fallback={null}>
+                  {shouldRenderLivingBackground && <LivingBackground />}
+                </Suspense>
                 <Header />
                 <ConsentModal />
                 <div id="main-content" className="flex-1 overflow-x-hidden">

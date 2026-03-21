@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 import { formatIdentifierLabel } from '@/lib/displayText';
 
 export function PeriodizationTimeline() {
-    const { currentPlan, currentWeek } = usePlanStore();
+    const currentPlan = usePlanStore((state) => state.currentPlan);
+    const currentWeek = usePlanStore((state) => state.currentWeek);
 
     if (!currentPlan) {
         return (

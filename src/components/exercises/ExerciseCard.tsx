@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Activity, Dumbbell, Flame, Heart, Sparkles, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { useExerciseInteraction } from '@/hooks/useExerciseInteraction';
 import { useHaptics } from '@/hooks/useHaptics';

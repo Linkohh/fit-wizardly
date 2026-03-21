@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePlanStore } from '@/stores/planStore';
 import { type ExercisePrescription } from '@/types/fitness';
-import { Calendar, Clock, Target, Download, Wand2, ShieldAlert, Calculator, Sparkles, Save } from 'lucide-react';
+import { Calendar, Clock, Target, Download, ShieldAlert, Calculator, Save } from 'lucide-react';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { OneRepMaxCalculator } from '@/components/tools/OneRepMaxCalculator';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -15,45 +15,52 @@ import { Label } from '@/components/ui/label';
 import { ExerciseSwapModal } from '@/components/plan/ExerciseSwapModal';
 import { WisdomBubble } from '@/components/wisdom/WisdomBubble';
 import { useWisdomStore } from '@/stores/wisdomStore';
-import { PlanSkeleton } from '@/components/plan/PlanSkeleton';
 import { WorkoutDayCard } from '@/components/plan/WorkoutDayCard';
 import { useWizardStore } from '@/stores/wizardStore';
 import { PlanNavigation } from '@/components/plan/PlanNavigation';
 import { SaveTemplateDialog } from '@/components/plan/SaveTemplateDialog';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { PeriodizationTimeline } from '@/components/plan/PeriodizationTimeline';
+import { NoPlanEmptyState } from '@/components/plan/NoPlanEmptyState';
 import { detectMRVWarnings, suggestSplitAdjustment } from '@/lib/progressionEngine';
 import { formatIdentifierLabel } from '@/lib/displayText';
 
 export default function PlanPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { currentPlan, currentWeek, workoutLogs, swapExercise, clearCurrentPlan } = usePlanStore();
-  const { isTrainerMode } = useTrainerStore();
-  const { resetWizard } = useWizardStore();
+  const currentPlan = usePlanStore((state) => state.currentPlan);
+  const currentWeek = usePlanStore((state) => state.currentWeek);
+  const workoutLogs = usePlanStore((state) => state.workoutLogs);
+  const planHistory = usePlanStore((state) => state.planHistory);
+  const setCurrentPlan = usePlanStore((state) => state.setCurrentPlan);
+  const swapExercise = usePlanStore((state) => state.swapExercise);
+  const clearCurrentPlan = usePlanStore((state) => state.clearCurrentPlan);
+  const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
+  const resetWizard = useWizardStore((state) => state.resetWizard);
   const [redactSensitive, setRedactSensitive] = useState(true);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; exerciseIndex: number; exercise: ExercisePrescription } | null>(null);
-  // Sync loading state directly with store (no artificial delay)
-  const [isLoadingPlan, setIsLoadingPlan] = useState(!currentPlan);
-  const { setContext } = useWisdomStore();
+  const setContext = useWisdomStore((state) => state.setContext);
+  const activePlan = currentPlan ?? planHistory[0] ?? null;
 
   useEffect(() => {
-    setIsLoadingPlan(!currentPlan);
-  }, [currentPlan]);
+    if (!currentPlan && planHistory.length > 0) {
+      setCurrentPlan(planHistory[0]);
+    }
+  }, [currentPlan, planHistory, setCurrentPlan]);
 
   // Set Wisdom AI context when plan changes
   useEffect(() => {
-    if (currentPlan) {
+    if (activePlan) {
       setContext({
-        planId: currentPlan.id,
+        planId: activePlan.id,
         exerciseId: null,
         weekNumber: 1,
-        phase: currentPlan.selections.optPhase,
+        phase: activePlan.selections.optPhase,
       });
     }
-  }, [currentPlan, setContext]);
+  }, [activePlan, setContext]);
 
   const handleStartOver = () => {
     clearCurrentPlan();
@@ -62,50 +69,28 @@ export default function PlanPage() {
   };
 
   const planLogs = useMemo(
-    () => (currentPlan ? workoutLogs.filter((log) => log.planId === currentPlan.id) : []),
-    [workoutLogs, currentPlan]
+    () => (activePlan ? workoutLogs.filter((log) => log.planId === activePlan.id) : []),
+    [workoutLogs, activePlan]
   );
 
   const mrvWarnings = useMemo(
-    () => (currentPlan ? detectMRVWarnings(planLogs, currentPlan, 7) : []),
-    [planLogs, currentPlan]
+    () => (activePlan ? detectMRVWarnings(planLogs, activePlan, 7) : []),
+    [planLogs, activePlan]
   );
 
   const splitSuggestion = useMemo(
-    () => (currentPlan ? suggestSplitAdjustment(planLogs, currentPlan, 28) : null),
-    [planLogs, currentPlan]
+    () => (activePlan ? suggestSplitAdjustment(planLogs, activePlan, 28) : null),
+    [planLogs, activePlan]
   );
 
-  // Show skeleton while loading
-  if (isLoadingPlan && !currentPlan) {
-    return <PlanSkeleton />;
-  }
-
-  if (!currentPlan) {
-    return (
-      <main className="container-content py-20 text-center">
-        <div className="relative w-32 h-32 mx-auto mb-8">
-          <div className="absolute inset-0 gradient-primary opacity-20 blur-2xl rounded-full animate-pulse" />
-          <div className="relative w-full h-full rounded-full gradient-primary flex items-center justify-center shadow-glow animate-float border-4 border-background">
-            <Wand2 className="h-16 w-16 text-primary-foreground" />
-          </div>
-        </div>
-        <h1 className="text-3xl font-bold mb-4">{t('plan.noplan.title')}</h1>
-        <p className="text-xl text-muted-foreground mb-10 max-w-lg mx-auto leading-relaxed">{t('plan.noplan.description')}</p>
-        <Link to="/wizard">
-          <Button size="lg" className="gradient-primary text-lg h-14 px-8 shadow-lg hover:shadow-xl transition-all hover:scale-105">
-            <Sparkles className="mr-2 h-5 w-5" />
-            {t('plan.noplan.cta')}
-          </Button>
-        </Link>
-      </main>
-    );
+  if (!activePlan) {
+    return <NoPlanEmptyState />;
   }
 
   const handleExportPDF = async () => {
-    if (!currentPlan) return;
+    if (!activePlan) return;
     const { exportPlanToPDF } = await import('@/lib/pdfExport');
-    exportPlanToPDF(currentPlan, redactSensitive);
+    exportPlanToPDF(activePlan, redactSensitive);
   };
 
   return (
@@ -199,9 +184,9 @@ export default function PlanPage() {
       {/* Summary */}
       <Card className="mb-6 border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
         <CardContent className="p-6 flex flex-wrap gap-6">
-          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Calendar className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.selections.daysPerWeek} {t('plan.summary.days_week')}</span></div>
-          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Clock className="h-4 w-4 text-primary-foreground" /></div><span>{currentPlan.selections.sessionDuration} {t('plan.summary.min_sessions')}</span></div>
-          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Target className="h-4 w-4 text-primary-foreground" /></div><span>{formatIdentifierLabel(currentPlan.splitType)}</span></div>
+          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Calendar className="h-4 w-4 text-primary-foreground" /></div><span>{activePlan.selections.daysPerWeek} {t('plan.summary.days_week')}</span></div>
+          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Clock className="h-4 w-4 text-primary-foreground" /></div><span>{activePlan.selections.sessionDuration} {t('plan.summary.min_sessions')}</span></div>
+          <div className="flex items-center gap-2"><div className="p-2 rounded-full gradient-primary"><Target className="h-4 w-4 text-primary-foreground" /></div><span>{formatIdentifierLabel(activePlan.splitType)}</span></div>
         </CardContent>
       </Card>
 
@@ -227,21 +212,21 @@ export default function PlanPage() {
         </Card>
       )}
 
-      {currentPlan.rirProgression.length > 0 && (
+      {activePlan.rirProgression.length > 0 && (
         <Card className="mb-6">
           <CardContent className="p-6 space-y-4">
             <div className="space-y-1">
               <h2 className="text-base font-semibold">{t('plan.progression.title')}</h2>
               <p className="text-sm text-muted-foreground">{t('plan.progression.subtitle')}</p>
             </div>
-            <PeriodizationTimeline progression={currentPlan.rirProgression} currentWeek={currentWeek} />
+            <PeriodizationTimeline progression={activePlan.rirProgression} currentWeek={currentWeek} />
           </CardContent>
         </Card>
       )}
 
       {/* Workout Days */}
       <div className="space-y-6">
-        {currentPlan.workoutDays.map((day, index) => (
+        {activePlan.workoutDays.map((day, index) => (
           <motion.div
             key={day.dayIndex}
             initial={{ opacity: 0, y: 16 }}
@@ -250,7 +235,7 @@ export default function PlanPage() {
           >
             <WorkoutDayCard
               day={day}
-              planId={currentPlan.id}
+              planId={activePlan.id}
               onSwap={(target) => {
                 setSwapTarget(target);
                 setSwapModalOpen(true);
@@ -277,7 +262,7 @@ export default function PlanPage() {
           onSwap={(newExercise) => {
             swapExercise(swapTarget.dayIndex, swapTarget.exerciseIndex, newExercise);
           }}
-          allowedEquipment={currentPlan.selections.equipment}
+          allowedEquipment={activePlan.selections.equipment}
         />
       )}
 

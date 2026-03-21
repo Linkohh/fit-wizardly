@@ -1,8 +1,12 @@
 
 import { describe, it, expect } from 'vitest';
 import { EXERCISE_DATABASE } from '@/data/exercises';
-import { filterExercises, getRecommendedExercises, getExerciseStats } from '@/lib/exercise-utils';
-import { Exercise, MuscleGroup, Equipment } from '@/types/fitness';
+import {
+    filterExercisesFromCatalog,
+    getExerciseStatsFromCatalog,
+    getRecommendedExercisesFromCatalog,
+} from '@/lib/exercise-utils';
+import { MuscleGroup, Equipment } from '@/types/fitness';
 
 describe('Exercise Data Integrity', () => {
     it('should have unique IDs for all exercises', () => {
@@ -37,7 +41,7 @@ describe('Exercise Data Integrity', () => {
 
 describe('Exercise Utilities', () => {
     it('should filter by muscle correctly', () => {
-        const results = filterExercises({ muscle: 'chest' });
+        const results = filterExercisesFromCatalog(EXERCISE_DATABASE, { muscle: 'chest' });
         expect(results.length).toBeGreaterThan(0);
         results.forEach(ex => {
             const hasMuscle = ex.primaryMuscles.includes('chest') || ex.secondaryMuscles.includes('chest');
@@ -46,11 +50,17 @@ describe('Exercise Utilities', () => {
     });
 
     it('should search by name', () => {
-        const results = filterExercises({ search: 'Bench' });
+        const results = filterExercisesFromCatalog(EXERCISE_DATABASE, { search: 'Bench' });
         expect(results.length).toBeGreaterThan(0);
         results.forEach(ex => {
             expect(ex.name.toLowerCase()).toContain('bench');
         });
+    });
+
+    it('should calculate exercise stats', () => {
+        const stats = getExerciseStatsFromCatalog(EXERCISE_DATABASE);
+        expect(stats.total).toBe(EXERCISE_DATABASE.length);
+        expect(stats.byCategory.strength).toBeGreaterThan(0);
     });
 });
 
@@ -63,7 +73,7 @@ describe('Recommendation Engine', () => {
             targetMuscles: ['chest', 'biceps'] as MuscleGroup[]
         };
 
-        const recs = getRecommendedExercises(profile);
+        const recs = getRecommendedExercisesFromCatalog(EXERCISE_DATABASE, profile);
         expect(recs.length).toBeGreaterThan(0);
         recs.forEach(ex => {
             // Should match dumbbells OR bodyweight

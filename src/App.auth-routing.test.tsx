@@ -286,7 +286,7 @@ describe('App auth routing', () => {
   it('redirects guests away from auth-backed circle routes and opens auth modal', async () => {
     renderAt('/circles/circle-1/feed');
 
-    expect(await screen.findByText('Index Page')).toBeInTheDocument();
+    expect(await screen.findByText('Index Page', {}, { timeout: 3000 })).toBeInTheDocument();
     expect(await screen.findByText('Auth Modal Open')).toBeInTheDocument();
     expect(mocks.authState.setRedirectUrl).toHaveBeenCalledWith(
       `${window.location.origin}/circles/circle-1/feed`
@@ -296,7 +296,7 @@ describe('App auth routing', () => {
   it('redirects guests away from trainer routes and opens auth modal', async () => {
     renderAt('/clients');
 
-    expect(await screen.findByText('Index Page')).toBeInTheDocument();
+    expect(await screen.findByText('Index Page', {}, { timeout: 3000 })).toBeInTheDocument();
     expect(await screen.findByText('Auth Modal Open')).toBeInTheDocument();
   });
 

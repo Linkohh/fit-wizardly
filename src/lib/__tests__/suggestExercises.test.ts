@@ -1,9 +1,10 @@
-import { suggestExercises } from '../suggestExercises';
+import { EXERCISE_DATABASE } from '@/data/exercises';
+import { suggestExercisesFromExercises } from '../suggestExercises';
 import { describe, it, expect } from 'vitest';
 
 describe('suggestExercises', () => {
     it('returns empty array if no muscles selected', () => {
-        const result = suggestExercises({
+        const result = suggestExercisesFromExercises(EXERCISE_DATABASE, {
             muscles: [],
             equipment: ['dumbbells']
         });
@@ -11,7 +12,7 @@ describe('suggestExercises', () => {
     });
 
     it('filters by equipment', () => {
-        const result = suggestExercises({
+        const result = suggestExercisesFromExercises(EXERCISE_DATABASE, {
             muscles: ['chest'],
             equipment: ['bodyweight'] // Only bodyweight
         });
@@ -22,7 +23,7 @@ describe('suggestExercises', () => {
     });
 
     it('filters by muscle', () => {
-        const result = suggestExercises({
+        const result = suggestExercisesFromExercises(EXERCISE_DATABASE, {
             muscles: ['quads'],
             equipment: ['bodyweight']
         });
@@ -33,7 +34,7 @@ describe('suggestExercises', () => {
     });
 
     it('respects limit', () => {
-        const result = suggestExercises({
+        const result = suggestExercisesFromExercises(EXERCISE_DATABASE, {
             muscles: ['chest', 'triceps'],
             equipment: ['dumbbells', 'bodyweight'],
             limit: 2

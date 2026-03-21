@@ -33,7 +33,16 @@
         "noplan": {
             "title": "Nenhum Plano Gerado Ainda",
             "description": "Crie seu plano de treino personalizado usando o assistente.",
-            "cta": "Iniciar Assistente"
+            "cta": "Iniciar Assistente",
+            "kicker": "SUA JORNADA FITNESS",
+            "headline": "Seu plano começa aqui",
+            "coach_copy": "Seu coach está pronto. Responda algumas perguntas e receba um plano de treino feito para seus objetivos, horário e equipamentos.",
+            "cta_primary": "Criar Meu Plano",
+            "cta_exercises": "Explorar Exercícios",
+            "cta_guide": "Como Funciona",
+            "benefit_split": "Divisão personalizada",
+            "benefit_timing": "Duração adaptada",
+            "benefit_equipment": "Baseado em equipamentos"
         },
         "exercise": {
             "sets": "{{count}} séries",

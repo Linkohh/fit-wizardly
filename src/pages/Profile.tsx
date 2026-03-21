@@ -39,10 +39,12 @@ export function Profile() {
     const { t, i18n } = useTranslation();
 
     // Theme Store
-    const { mode, setMode } = useThemeStore();
+    const mode = useThemeStore((state) => state.mode);
+    const setMode = useThemeStore((state) => state.setMode);
 
     // Preferences Store
-    const { settings, updateSettings } = usePreferencesStore();
+    const settings = usePreferencesStore((state) => state.settings);
+    const updateSettings = usePreferencesStore((state) => state.updateSettings);
     const { shouldReduceMotion } = useMotionPreferences();
     const {
         status: motionTiltStatus,
@@ -52,13 +54,16 @@ export function Profile() {
     } = useMotionTiltStatus();
 
     // Trainer Store
-    const { isTrainerMode, toggleTrainerMode } = useTrainerStore();
+    const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
+    const toggleTrainerMode = useTrainerStore((state) => state.toggleTrainerMode);
 
     // Plan/Fitness Store
-    const { preferredWeightUnit, setPreferredWeightUnit } = usePlanStore();
+    const preferredWeightUnit = usePlanStore((state) => state.preferredWeightUnit);
+    const setPreferredWeightUnit = usePlanStore((state) => state.setPreferredWeightUnit);
 
     // Auth Store
-    const { user, signOut } = useAuthStore();
+    const user = useAuthStore((state) => state.user);
+    const signOut = useAuthStore((state) => state.signOut);
 
     const handleExportData = () => {
         try {

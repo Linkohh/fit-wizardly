@@ -16,7 +16,16 @@
         "noplan": {
             "title": "Noch kein Plan erstellt",
             "description": "Erstelle deinen personalisierten Trainingsplan mit dem Assistenten.",
-            "cta": "Assistent starten"
+            "cta": "Assistent starten",
+            "kicker": "DEINE FITNESS-REISE",
+            "headline": "Dein Plan beginnt hier",
+            "coach_copy": "Dein Coach ist bereit. Beantworte ein paar Fragen und erhalte einen Trainingsplan, der auf deine Ziele, deinen Zeitplan und dein Equipment abgestimmt ist.",
+            "cta_primary": "Meinen Plan erstellen",
+            "cta_exercises": "Übungen entdecken",
+            "cta_guide": "So funktioniert's",
+            "benefit_split": "Personalisierter Split",
+            "benefit_timing": "Angepasste Dauer",
+            "benefit_equipment": "Equipment-bewusst"
         },
         "exercise": {
             "sets": "{{count}} Sätze",

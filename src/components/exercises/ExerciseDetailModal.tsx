@@ -196,20 +196,20 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                         <div className="md:col-span-2">
                             <Tabs defaultValue="instructions" className="w-full">
                                 <TabsList className="grid w-full grid-cols-4 bg-white/[0.04] border border-white/[0.06] rounded-lg p-0.5">
-                                    <TabsTrigger value="instructions" className="text-xs data-[state=active]:bg-white/10 rounded-md">
+                                    <TabsTrigger value="instructions" className="min-h-9 text-xs data-[state=active]:bg-white/10 rounded-md">
                                         {t('exercises.detail.instructions', 'Instructions')}
                                     </TabsTrigger>
                                     <TabsTrigger
                                         value="variations"
                                         disabled={!exercise.variations?.length}
-                                        className="text-xs data-[state=active]:bg-white/10 rounded-md"
+                                        className="min-h-9 text-xs data-[state=active]:bg-white/10 rounded-md"
                                     >
                                         {t('exercises.detail.variations', 'Variations')}
                                     </TabsTrigger>
-                                    <TabsTrigger value="related" className="text-xs data-[state=active]:bg-white/10 rounded-md">
+                                    <TabsTrigger value="related" className="min-h-9 text-xs data-[state=active]:bg-white/10 rounded-md">
                                         {t('exercises.detail.related', 'Related')}
                                     </TabsTrigger>
-                                    <TabsTrigger value="history" className="text-xs data-[state=active]:bg-white/10 rounded-md">
+                                    <TabsTrigger value="history" className="min-h-9 text-xs data-[state=active]:bg-white/10 rounded-md">
                                         {t('exercises.detail.history', 'History')}
                                     </TabsTrigger>
                                 </TabsList>
@@ -217,7 +217,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                 <TabsContent value="instructions" className="mt-5 space-y-5">
                                     {/* Description */}
                                     <div>
-                                        <p className="text-[15px] leading-[1.7] text-white/80">
+                                        <p className="break-words text-[15px] leading-[1.7] text-white/80">
                                             {exercise.description}
                                         </p>
                                     </div>
@@ -231,7 +231,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                             </h5>
                                             <ul className="space-y-2">
                                                 {exercise.cues.map((c) => (
-                                                    <li key={c} className="flex items-start gap-2 text-sm text-blue-100/70">
+                                                    <li key={c} className="break-words flex items-start gap-2 text-sm text-blue-100/70">
                                                         <span className="w-1 h-1 rounded-full bg-blue-400/50 mt-2 shrink-0" />
                                                         {c}
                                                     </li>
@@ -285,7 +285,7 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                                         {v.type}
                                                     </Badge>
                                                 </div>
-                                                <p className="text-xs text-white/45 leading-relaxed">{v.description}</p>
+                                                <p className="break-words text-xs text-white/45 leading-relaxed">{v.description}</p>
                                             </div>
                                         ))}
                                     </div>

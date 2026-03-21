@@ -66,6 +66,24 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          if (id.includes("/src/data/exercises.ts")) {
+            return "exercise-data";
+          }
+
+          if (id.includes("/src/features/exercise-library/data/wger-snapshot.json")) {
+            return "exercise-snapshot";
+          }
+
+          if (
+            id.includes("/src/features/exercise-library/") ||
+            id.includes("/src/components/exercises/") ||
+            id.includes("/src/lib/exerciseRepository.ts") ||
+            id.includes("/src/lib/exercise-utils.ts") ||
+            id.includes("/src/lib/suggestExercises.ts")
+          ) {
+            return "feature-exercises";
+          }
+
           if (id.includes("node_modules")) {
             // Core React ecosystem (Critical)
             if (
@@ -119,14 +137,17 @@ export default defineConfig(({ mode }) => ({
     modulePreload: {
       resolveDependencies: (filename, deps, { hostId, hostType }) => {
         // Don't preload heavy/lazy chunks
-        return deps.filter((dep) => {
-          return (
-            !dep.includes("vendor-pdf") &&
-            !dep.includes("vendor-charts") &&
-            !dep.includes("vendor-auth")
-          );
-        });
-      },
+          return deps.filter((dep) => {
+            return (
+              !dep.includes("vendor-pdf") &&
+              !dep.includes("vendor-charts") &&
+              !dep.includes("vendor-auth") &&
+              !dep.includes("exercise-data") &&
+              !dep.includes("exercise-snapshot") &&
+              !dep.includes("feature-exercises")
+            );
+          });
+        },
     },
   },
 }));

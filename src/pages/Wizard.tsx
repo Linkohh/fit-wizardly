@@ -14,7 +14,8 @@ import { ScheduleStep } from '@/components/wizard/steps/ScheduleStep';
 import { ReviewStep } from '@/components/wizard/steps/ReviewStep';
 import { useWizardStore } from '@/stores/wizardStore';
 import { usePlanStore } from '@/stores/planStore';
-import { generatePlan } from '@/lib/planGenerator';
+import { generatePlanFromExercises } from '@/lib/planGenerator';
+import { loadExerciseDatabase, useExerciseDatabase } from '@/lib/exerciseRepository';
 import { useToast } from '@/hooks/use-toast';
 import { createFunnelTracker, trackWizardComplete, trackPlanGenerated } from '@/lib/analytics';
 
@@ -44,6 +45,7 @@ export default function WizardPage() {
 
   const setCurrentPlan = usePlanStore((state) => state.setCurrentPlan);
   const savePlanToHistory = usePlanStore((state) => state.savePlanToHistory);
+  const { exercises: cachedExercises } = useExerciseDatabase();
 
   // Ref for focus management
   const stepContainerRef = useRef<HTMLDivElement>(null);
@@ -127,7 +129,9 @@ export default function WizardPage() {
     setIsGenerating(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 800));
-      const plan = generatePlan(selections);
+      const exercises =
+        cachedExercises.length > 0 ? cachedExercises : await loadExerciseDatabase();
+      const plan = generatePlanFromExercises(exercises, selections);
       setCurrentPlan(plan);
       savePlanToHistory(plan);
 
@@ -156,7 +160,7 @@ export default function WizardPage() {
     } finally {
       setIsGenerating(false);
     }
-  }, [navigate, savePlanToHistory, selections, setCurrentPlan, setIsGenerating, t, toast]);
+  }, [cachedExercises, navigate, savePlanToHistory, selections, setCurrentPlan, setIsGenerating, t, toast]);
 
   // Keyboard navigation
   useEffect(() => {

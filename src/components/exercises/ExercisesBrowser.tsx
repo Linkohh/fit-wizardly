@@ -1,10 +1,15 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Plus, Search, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { useWizardStore } from '@/stores/wizardStore';
 import { useCustomExerciseStore } from '@/stores/customExerciseStore';
 import { useExerciseDatabase } from '@/lib/exerciseRepository';
+import {
+    createExerciseCatalogIndex,
+    filterExercisesFromIndex,
+} from '@/lib/exerciseCatalogIndex';
+import { getRecommendedExercisesFromCatalog } from '@/lib/exercise-utils';
 import { Exercise, Equipment, MuscleGroup, ExerciseCategory, EQUIPMENT_OPTIONS, MUSCLE_DATA } from '@/types/fitness';
 import { ExerciseCard } from './ExerciseCard';
 import { ExerciseFilters } from './ExerciseFilters';
@@ -30,87 +35,6 @@ interface ExerciseFilterOptions {
     search: string;
 }
 
-function filterExerciseList(exercises: Exercise[], options: ExerciseFilterOptions): Exercise[] {
-    let results = exercises;
-
-    if (options.category !== 'all') {
-        results = results.filter((exercise) => exercise.category === options.category);
-    }
-
-    if (options.muscle !== 'all') {
-        results = results.filter(
-            (exercise) =>
-                exercise.primaryMuscles.includes(options.muscle as MuscleGroup) ||
-                exercise.secondaryMuscles.includes(options.muscle as MuscleGroup)
-        );
-    }
-
-    if (options.equipment !== 'all') {
-        results = results.filter((exercise) =>
-            exercise.equipment.includes(options.equipment as Equipment)
-        );
-    }
-
-    if (options.difficulty !== 'all') {
-        results = results.filter((exercise) => exercise.difficulty === options.difficulty);
-    }
-
-    if (options.search.trim() !== '') {
-        const query = options.search.toLowerCase();
-        results = results.filter((exercise) =>
-            exercise.name.toLowerCase().includes(query) ||
-            exercise.primaryMuscles.some((muscle) => muscle.includes(query))
-        );
-    }
-
-    return results;
-}
-
-function getRecommendedExercisesForSelections(exercises: Exercise[], selections: {
-    goal?: 'strength' | 'hypertrophy' | 'general';
-    experienceLevel?: 'beginner' | 'intermediate' | 'advanced';
-    equipment: Equipment[];
-    targetMuscles: MuscleGroup[];
-}) {
-    const availableEquipment = new Set<Equipment>(['bodyweight', ...selections.equipment]);
-
-    let candidates = exercises.filter((exercise) =>
-        exercise.equipment.some((equipment) => availableEquipment.has(equipment))
-    );
-
-    if (selections.experienceLevel === 'beginner') {
-        candidates = candidates.filter(
-            (exercise) => exercise.difficulty !== 'Advanced' && exercise.difficulty !== 'Elite'
-        );
-    }
-
-    const scored = candidates.map((exercise) => {
-        let score = 0;
-
-        if (exercise.primaryMuscles.some((muscle) => selections.targetMuscles.includes(muscle))) {
-            score += 10;
-        }
-        if (exercise.secondaryMuscles.some((muscle) => selections.targetMuscles.includes(muscle))) {
-            score += 5;
-        }
-
-        if ((selections.goal === 'strength' || selections.goal === 'hypertrophy') && exercise.category === 'strength') {
-            score += 5;
-        }
-        if (selections.goal === 'general' && exercise.category === 'cardio') {
-            score += 3;
-        }
-
-        return { exercise, score };
-    });
-
-    return scored
-        .filter((entry) => entry.score > 0)
-        .sort((a, b) => b.score - a.score)
-        .map((entry) => entry.exercise)
-        .slice(0, 12);
-}
-
 export function ExercisesBrowser() {
     const [filters, setFilters] = useState<ExerciseFilterOptions>({
         category: 'all',
@@ -132,28 +56,37 @@ export function ExercisesBrowser() {
     const { customExercises, addCustomExercise } = useCustomExerciseStore();
     const { exercises: loadedExercises, isLoading } = useExerciseDatabase();
     const railRef = useRef<HTMLDivElement>(null);
+    const deferredSearch = useDeferredValue(filters.search);
 
     const hasWizardData = selections.targetMuscles.length > 0 || selections.equipment.length > 0;
-    const exerciseDatabase = useMemo(
+    const exerciseDatabase = useMemo<Exercise[]>(
         () => [...customExercises, ...loadedExercises],
         [customExercises, loadedExercises]
+    );
+    const indexedDatabase = useMemo(
+        () => createExerciseCatalogIndex(exerciseDatabase),
+        [exerciseDatabase]
+    );
+    const effectiveFilters = useMemo(
+        () => ({ ...filters, search: deferredSearch }),
+        [deferredSearch, filters]
     );
 
     const recommendedExercises = useMemo(() => {
         if (!hasWizardData) return [];
-        return getRecommendedExercisesForSelections(exerciseDatabase, {
+        return getRecommendedExercisesFromCatalog(indexedDatabase, {
             goal: selections.goal,
             experienceLevel: selections.experienceLevel,
             equipment: selections.equipment,
             targetMuscles: selections.targetMuscles,
         });
-    }, [exerciseDatabase, hasWizardData, selections]);
+    }, [hasWizardData, indexedDatabase, selections]);
 
     const recommendedForRail = useMemo(() => recommendedExercises.slice(0, 10), [recommendedExercises]);
 
     const filteredExercises = useMemo(() => {
-        return filterExerciseList(exerciseDatabase, filters);
-    }, [exerciseDatabase, filters]);
+        return filterExercisesFromIndex(indexedDatabase, effectiveFilters);
+    }, [effectiveFilters, indexedDatabase]);
 
     const displayedExercises = useMemo(() => {
         return filteredExercises.slice(0, page * ITEMS_PER_PAGE);

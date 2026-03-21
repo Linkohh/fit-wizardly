@@ -1,176 +1,231 @@
-import { Exercise, MuscleGroup, Equipment, ExerciseCategory } from '@/types/fitness';
-import { EXERCISE_DATABASE } from '@/data/exercises';
+import type {
+  Equipment,
+  Exercise,
+  ExerciseCategory,
+  MuscleGroup,
+} from '@/types/fitness';
+import {
+  createExerciseCatalogIndex,
+  filterExercisesFromIndex,
+  getExerciseByIdFromIndex,
+  getExercisesByCategoryFromIndex,
+  getExerciseStatsFromIndex,
+  type ExerciseCatalogIndex,
+  type ExerciseCatalogFilterOptions,
+} from '@/lib/exerciseCatalogIndex';
+import { getCachedExerciseCatalog } from '@/lib/exerciseRepository';
 
-// --- Search & Filter ---
+export type ExerciseFilterOptions = ExerciseCatalogFilterOptions;
 
-export interface ExerciseFilterOptions {
-    search?: string;
-    category?: ExerciseCategory | 'all';
-    muscle?: MuscleGroup | 'all';
-    equipment?: Equipment | Equipment[] | 'all'; // If array, match ANY
-    difficulty?: 'Beginner' | 'Intermediate' | 'Advanced' | 'all';
+export interface ExerciseCategoryInfo {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  iconKey: string;
+  subcategories?: { id: string; title: string; exerciseIds: string[] }[];
+}
+
+interface WizardData {
+  goal: 'strength' | 'hypertrophy' | 'general';
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced';
+  equipment: Equipment[];
+  targetMuscles: MuscleGroup[];
+}
+
+function getIndex(exercises: Exercise[] | ExerciseCatalogIndex) {
+  return Array.isArray(exercises)
+    ? createExerciseCatalogIndex(exercises)
+    : exercises;
+}
+
+export function filterExercisesFromCatalog(
+  exercises: Exercise[] | ExerciseCatalogIndex,
+  options: ExerciseFilterOptions
+) {
+  return filterExercisesFromIndex(getIndex(exercises), options);
 }
 
 export function filterExercises(options: ExerciseFilterOptions): Exercise[] {
-    let results = EXERCISE_DATABASE;
-
-    if (options.category && options.category !== 'all') {
-        results = results.filter(ex => ex.category === options.category);
-    }
-
-    if (options.muscle && options.muscle !== 'all') {
-        results = results.filter(ex =>
-            ex.primaryMuscles.includes(options.muscle as MuscleGroup) ||
-            ex.secondaryMuscles.includes(options.muscle as MuscleGroup)
-        );
-    }
-
-    if (options.equipment && options.equipment !== 'all') {
-        const requiredEq = Array.isArray(options.equipment) ? options.equipment : [options.equipment];
-        results = results.filter(ex =>
-            ex.equipment.some(eq => requiredEq.includes(eq))
-        );
-    }
-
-    if (options.difficulty && options.difficulty !== 'all') {
-        results = results.filter(ex => ex.difficulty === options.difficulty);
-    }
-
-    if (options.search) {
-        const query = options.search.toLowerCase();
-        results = results.filter(ex =>
-            ex.name.toLowerCase().includes(query) ||
-            ex.primaryMuscles.some(m => m.includes(query))
-        );
-    }
-
-    return results;
+  const index = getCachedExerciseCatalog();
+  if (!index) return [];
+  return filterExercisesFromCatalog(index, options);
 }
 
-export function getRelatedExercises(exerciseId: string): Exercise[] {
-    const current = EXERCISE_DATABASE.find(e => e.id === exerciseId);
-    if (!current) return [];
+export function getRelatedExercisesFromCatalog(
+  exercises: Exercise[] | ExerciseCatalogIndex,
+  exerciseId: string
+) {
+  const index = getIndex(exercises);
+  const current = getExerciseByIdFromIndex(index, exerciseId);
+  if (!current) return [];
 
-    // Simple recommendation logic: Same muscle group, same category, excluding self
-    return EXERCISE_DATABASE.filter(ex =>
-        ex.id !== exerciseId &&
-        ex.category === current.category &&
-        ex.primaryMuscles.some(m => current.primaryMuscles.includes(m))
-    ).slice(0, 3); // Return top 3
+  return index.exercises
+    .filter(
+      (exercise) =>
+        exercise.id !== exerciseId &&
+        exercise.category === current.category &&
+        exercise.primaryMuscles.some((muscle) =>
+          current.primaryMuscles.includes(muscle)
+        )
+    )
+    .slice(0, 3);
 }
 
-// --- Validation / Stats ---
+export function getRelatedExercises(exerciseId: string) {
+  const index = getCachedExerciseCatalog();
+  if (!index) return [];
+  return getRelatedExercisesFromCatalog(index, exerciseId);
+}
+
+export function getExerciseStatsFromCatalog(
+  exercises: Exercise[] | ExerciseCatalogIndex
+) {
+  return getExerciseStatsFromIndex(getIndex(exercises));
+}
 
 export function getExerciseStats() {
+  const index = getCachedExerciseCatalog();
+  if (!index) {
     return {
-        total: EXERCISE_DATABASE.length,
-        byCategory: EXERCISE_DATABASE.reduce((acc, ex) => {
-            const cat = ex.category || 'other';
-            acc[cat] = (acc[cat] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>),
-        byMuscle: EXERCISE_DATABASE.reduce((acc, ex) => {
-            ex.primaryMuscles.forEach(m => {
-                acc[m] = (acc[m] || 0) + 1;
-            });
-            return acc;
-        }, {} as Record<string, number>)
+      total: 0,
+      byCategory: {} as Record<string, number>,
+      byMuscle: {} as Record<string, number>,
     };
+  }
+
+  return getExerciseStatsFromCatalog(index);
 }
 
-// --- Recommendations ---
+export function getRecommendedExercisesFromCatalog(
+  exercises: Exercise[] | ExerciseCatalogIndex,
+  userProfile: WizardData
+) {
+  const index = getIndex(exercises);
+  const availableEquipment = new Set(['bodyweight', ...userProfile.equipment]);
 
-// Mocking the store type here to avoid circular dependency or import issues if using store directly
-interface WizardData {
-    goal: 'strength' | 'hypertrophy' | 'general';
-    experienceLevel: 'beginner' | 'intermediate' | 'advanced';
-    equipment: Equipment[];
-    targetMuscles: MuscleGroup[];
-}
+  let candidates = index.exercises.filter((exercise) =>
+    exercise.equipment.some((equipment) => availableEquipment.has(equipment))
+  );
 
-export function getRecommendedExercises(userProfile: WizardData): Exercise[] {
-    // 1. Filter by Equipment (must match at least one available piece, or be bodyweight)
-    const availableEquipment = new Set(['bodyweight', ...userProfile.equipment]);
-
-    let candidates = EXERCISE_DATABASE.filter(ex =>
-        ex.equipment.some(eq => availableEquipment.has(eq))
+  if (userProfile.experienceLevel === 'beginner') {
+    candidates = candidates.filter(
+      (exercise) =>
+        exercise.difficulty !== 'Advanced' && exercise.difficulty !== 'Elite'
     );
+  }
 
-    // 2. Filter by Experience Level
-    if (userProfile.experienceLevel === 'beginner') {
-        // Beginners should mostly see Beginner/Intermediate
-        candidates = candidates.filter(ex => ex.difficulty !== 'Advanced' && ex.difficulty !== 'Elite');
-    } else if (userProfile.experienceLevel === 'advanced') {
-        // Advanced users see everything, but maybe we prioritize harder stuff? 
-        // For now, keep all.
+  return candidates
+    .map((exercise) => {
+      let score = 0;
+
+      if (
+        exercise.primaryMuscles.some((muscle) =>
+          userProfile.targetMuscles.includes(muscle)
+        )
+      ) {
+        score += 10;
+      }
+
+      if (
+        exercise.secondaryMuscles.some((muscle) =>
+          userProfile.targetMuscles.includes(muscle)
+        )
+      ) {
+        score += 5;
+      }
+
+      if (userProfile.goal === 'strength' && exercise.category === 'strength') {
+        score += 5;
+      }
+
+      if (
+        userProfile.goal === 'hypertrophy' &&
+        exercise.category === 'strength'
+      ) {
+        score += 5;
+      }
+
+      if (userProfile.goal === 'general' && exercise.category === 'cardio') {
+        score += 3;
+      }
+
+      return { exercise, score };
+    })
+    .filter((entry) => entry.score > 0)
+    .sort((left, right) => right.score - left.score)
+    .map((entry) => entry.exercise)
+    .slice(0, 12);
+}
+
+export function getRecommendedExercises(userProfile: WizardData) {
+  const index = getCachedExerciseCatalog();
+  if (!index) return [];
+  return getRecommendedExercisesFromCatalog(index, userProfile);
+}
+
+export function getAllCategoriesFromCatalog(
+  exercises: Exercise[] | ExerciseCatalogIndex
+): ExerciseCategoryInfo[] {
+  const index = getIndex(exercises);
+  const categories = new Set<ExerciseCategory>();
+
+  index.exercises.forEach((exercise) => {
+    if (exercise.category) {
+      categories.add(exercise.category);
     }
+  });
 
-    // 3. Score based on Goal & Target Muscles
-    const scored = candidates.map(ex => {
-        let score = 0;
-
-        // Muscle match
-        const primaryMatch = ex.primaryMuscles.some(m => userProfile.targetMuscles.includes(m));
-        const secondaryMatch = ex.secondaryMuscles.some(m => userProfile.targetMuscles.includes(m));
-
-        if (primaryMatch) score += 10;
-        if (secondaryMatch) score += 5;
-
-        // Goal match (heuristic)
-        if (userProfile.goal === 'strength' && ex.category === 'strength') score += 5;
-        if (userProfile.goal === 'hypertrophy' && ex.category === 'strength') score += 5;
-        if (userProfile.goal === 'general' && ex.category === 'cardio') score += 3;
-
-        return { ex, score };
-    });
-
-    // 4. Sort and return top results
-    return scored
-        .filter(item => item.score > 0) // Only relevant items
-        .sort((a, b) => b.score - a.score)
-        .map(item => item.ex)
-        .slice(0, 12); // Top 12 recommendations
+  return Array.from(categories).map((category) => ({
+    id: category,
+    name: category.charAt(0).toUpperCase() + category.slice(1),
+    title: category.charAt(0).toUpperCase() + category.slice(1),
+    description: `${category} exercises`,
+    iconKey: category,
+  }));
 }
 
-// --- Category/Exercise Lookup ---
-
-export interface ExerciseCategoryInfo {
-    id: string;
-    name: string;
-    title: string;
-    description: string;
-    iconKey: string;
-    subcategories?: { id: string; title: string; exerciseIds: string[] }[];
+export function getAllCategories() {
+  const index = getCachedExerciseCatalog();
+  if (!index) return [];
+  return getAllCategoriesFromCatalog(index);
 }
 
-// Get all unique categories from the exercise database
-export function getAllCategories(): ExerciseCategoryInfo[] {
-    const categories = new Set<ExerciseCategory>();
-    EXERCISE_DATABASE.forEach(ex => {
-        if (ex.category) categories.add(ex.category);
-    });
-    
-    return Array.from(categories).map(cat => ({
-        id: cat,
-        name: cat.charAt(0).toUpperCase() + cat.slice(1),
-        title: cat.charAt(0).toUpperCase() + cat.slice(1),
-        description: `${cat} exercises`,
-        iconKey: cat,
-    }));
+export function getCategoryByIdFromCatalog(
+  exercises: Exercise[] | ExerciseCatalogIndex,
+  id: string
+) {
+  return getAllCategoriesFromCatalog(exercises).find((category) => category.id === id);
 }
 
-// Get a category by ID
-export function getCategoryById(id: string): ExerciseCategoryInfo | undefined {
-    const categories = getAllCategories();
-    return categories.find(cat => cat.id === id);
+export function getCategoryById(id: string) {
+  const index = getCachedExerciseCatalog();
+  if (!index) return undefined;
+  return getCategoryByIdFromCatalog(index, id);
 }
 
-// Get a single exercise by ID
-export function getExerciseById(id: string): Exercise | undefined {
-    return EXERCISE_DATABASE.find(ex => ex.id === id);
+export function getExerciseByIdFromCatalog(
+  exercises: Exercise[] | ExerciseCatalogIndex,
+  id: string
+) {
+  return getExerciseByIdFromIndex(getIndex(exercises), id);
 }
 
-// Get exercises by category
-export function getExercisesByCategory(categoryId: string): Exercise[] {
-    return EXERCISE_DATABASE.filter(ex => ex.category === categoryId as ExerciseCategory);
+export function getExerciseById(id: string) {
+  const index = getCachedExerciseCatalog();
+  if (!index) return undefined;
+  return getExerciseByIdFromCatalog(index, id);
+}
+
+export function getExercisesByCategoryFromCatalog(
+  exercises: Exercise[] | ExerciseCatalogIndex,
+  categoryId: string
+) {
+  return getExercisesByCategoryFromIndex(getIndex(exercises), categoryId);
+}
+
+export function getExercisesByCategory(categoryId: string) {
+  const index = getCachedExerciseCatalog();
+  if (!index) return [];
+  return getExercisesByCategoryFromCatalog(index, categoryId);
 }

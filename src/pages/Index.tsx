@@ -1,18 +1,57 @@
 import { useNavigate } from 'react-router-dom';
-import { PeriodizationTimeline } from '@/components/analytics/PeriodizationTimeline';
 import { ArrowRight, Dumbbell, Target, FileText, Users, Zap, Crown } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { StreakTracker, GoalVisualization, WelcomeHero, DailyQuote } from '@/components/motivation';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useTrainerStore } from '@/stores/trainerStore';
-import { TrainerDashboard } from '@/components/motivation/TrainerDashboard';
+import { Suspense, lazy, useEffect, useRef, useMemo, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { useRef, useMemo, useState } from 'react';
 import { FeatureCard, type FeatureCardFeature } from '@/components/landing/FeatureCard';
-import { FeatureDetailModal, type Feature } from '@/components/landing/FeatureDetailModal';
+import type { Feature } from '@/components/landing/FeatureDetailModal';
 import { useTranslation, Trans } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { isNativeApp } from '@/lib/platform';
+
+const PeriodizationTimeline = lazy(() =>
+  import('@/components/analytics/PeriodizationTimeline').then((module) => ({
+    default: module.PeriodizationTimeline,
+  }))
+);
+
+const WelcomeHero = lazy(() =>
+  import('@/components/motivation/WelcomeHero').then((module) => ({
+    default: module.WelcomeHero,
+  }))
+);
+
+const DailyQuote = lazy(() =>
+  import('@/components/motivation/DailyQuote').then((module) => ({
+    default: module.DailyQuote,
+  }))
+);
+
+const TrainerDashboard = lazy(() =>
+  import('@/components/motivation/TrainerDashboard').then((module) => ({
+    default: module.TrainerDashboard,
+  }))
+);
+
+const StreakTracker = lazy(() =>
+  import('@/components/motivation/StreakTracker').then((module) => ({
+    default: module.StreakTracker,
+  }))
+);
+
+const GoalVisualization = lazy(() =>
+  import('@/components/motivation/GoalVisualization').then((module) => ({
+    default: module.GoalVisualization,
+  }))
+);
+
+const FeatureDetailModal = lazy(() =>
+  import('@/components/landing/FeatureDetailModal').then((module) => ({
+    default: module.FeatureDetailModal,
+  }))
+);
 
 export default function Index() {
   const navigate = useNavigate();
@@ -23,6 +62,7 @@ export default function Index() {
   const hasActivity = totalPlansGenerated > 0;
 
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
+  const [quoteReady, setQuoteReady] = useState(false);
 
   const features: FeatureCardFeature[] = useMemo(() => [
     { key: 'smart_goals', icon: Target, title: t('features.smart_goals.title'), description: t('features.smart_goals.description'), variant: 'strength' as const, gradient: 'from-orange-500 to-red-500' },
@@ -35,23 +75,43 @@ export default function Index() {
   const statsRef = useRef(null);
   const trainerRef = useRef(null);
   const featuresRef = useRef(null);
+  const quoteRef = useRef(null);
 
+  const quoteInView = useInView(quoteRef, { once: true, margin: "0px 0px -20% 0px" });
   const statsInView = useInView(statsRef, { once: true, margin: "-100px" });
   const trainerInView = useInView(trainerRef, { once: true, margin: "-100px" });
   const featuresInView = useInView(featuresRef, { once: true, margin: "-100px" });
 
+  useEffect(() => {
+    if (!quoteInView) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setQuoteReady(true);
+    }, 120);
+
+    return () => window.clearTimeout(timer);
+  }, [quoteInView]);
+
   return (
     <main>
       {/* Hero */}
-      <WelcomeHero />
+      <Suspense fallback={<div className="min-h-[62dvh]" />}>
+        <WelcomeHero />
+      </Suspense>
 
       {/* Domain Intelligence: Periodization Timeline */}
-      <div className={cn(
-        "container-content pb-4 lg:py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200",
-        nativeApp ? "pt-10" : "pt-8"
-      )}>
-        <PeriodizationTimeline />
-      </div>
+      <Suspense fallback={<div className={cn("container-content", nativeApp ? "pt-10" : "pt-8")}>
+        <div className="h-40 rounded-2xl bg-muted/20 animate-pulse" />
+      </div>}>
+        <div className={cn(
+          "container-content pb-4 lg:py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200",
+          nativeApp ? "pt-10" : "pt-8"
+        )}>
+          <PeriodizationTimeline />
+        </div>
+      </Suspense>
 
       {/* BRIDGE: Enhanced Cosmic Transition */}
       <section
@@ -104,15 +164,21 @@ export default function Index() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none opacity-50 dark:opacity-30" />
 
         {/* Quote sits comfortably inside the dark background */}
-        <div className="container-content mb-20 pt-12 sm:pt-16 md:pt-20 relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <DailyQuote />
-          </motion.div>
+        <div ref={quoteRef} className="container-content mb-20 pt-12 sm:pt-16 md:pt-20 relative">
+          <Suspense fallback={<div className="min-h-[180px]" />}>
+            {quoteReady ? (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <DailyQuote />
+              </motion.div>
+            ) : (
+              <div className="min-h-[180px]" />
+            )}
+          </Suspense>
         </div>
 
         {/* Stats Section */}
@@ -139,22 +205,26 @@ export default function Index() {
                 }}
                 className="grid md:grid-cols-2 gap-6"
               >
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, y: 30 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-                  }}
-                >
-                  <StreakTracker />
-                </motion.div>
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, y: 30 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-                  }}
-                >
-                  <GoalVisualization />
-                </motion.div>
+                <Suspense fallback={<div className="h-48 rounded-2xl bg-muted/20 animate-pulse" />}>
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+                    }}
+                  >
+                    <StreakTracker />
+                  </motion.div>
+                </Suspense>
+                <Suspense fallback={<div className="h-48 rounded-2xl bg-muted/20 animate-pulse" />}>
+                  <motion.div
+                    variants={{
+                      hidden: { opacity: 0, y: 30 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+                    }}
+                  >
+                    <GoalVisualization />
+                  </motion.div>
+                </Suspense>
               </motion.div>
             </div>
           </motion.section>
@@ -170,7 +240,9 @@ export default function Index() {
             className="px-responsive mb-20"
           >
             <div className="container-content">
-              <TrainerDashboard />
+              <Suspense fallback={<div className="min-h-[240px]" />}>
+                <TrainerDashboard />
+              </Suspense>
             </div>
           </motion.section>
         )}
@@ -235,11 +307,15 @@ export default function Index() {
             </motion.div>
 
             {/* Feature Detail Modal */}
-            <FeatureDetailModal
-              feature={selectedFeature}
-              isOpen={!!selectedFeature}
-              onClose={() => setSelectedFeature(null)}
-            />
+            {selectedFeature ? (
+              <Suspense fallback={null}>
+                <FeatureDetailModal
+                  feature={selectedFeature}
+                  isOpen={true}
+                  onClose={() => setSelectedFeature(null)}
+                />
+              </Suspense>
+            ) : null}
 
             {/* CTA after features */}
             <motion.div

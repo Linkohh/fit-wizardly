@@ -2,6 +2,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Quote, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useMotionPreferences } from "@/hooks/use-motion-preferences";
 
 const QUOTES = [
     // Original quotes
@@ -791,6 +793,9 @@ const QUOTES = [
 
 export function DailyQuote({ className }: { className?: string }) {
     const [quoteIndex, setQuoteIndex] = useState(0);
+    const isMobile = useIsMobile();
+    const { shouldReduceMotion } = useMotionPreferences();
+    const staticMode = isMobile || shouldReduceMotion;
 
     useEffect(() => {
         // Start with a deterministic quote based on date
@@ -798,12 +803,16 @@ export function DailyQuote({ className }: { className?: string }) {
         const startIndex = (today.getDate() + today.getMonth()) % QUOTES.length;
         setQuoteIndex(startIndex);
 
+        if (staticMode) {
+            return;
+        }
+
         const interval = setInterval(() => {
             setQuoteIndex((prev) => (prev + 1) % QUOTES.length);
         }, 12000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [staticMode]);
 
     return (
         <div className={cn("relative p-8 rounded-2xl bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-primary/20 overflow-hidden group hover:shadow-glow hover:border-primary/30 transition-all duration-500", className)}>
@@ -813,28 +822,38 @@ export function DailyQuote({ className }: { className?: string }) {
 
             <div className="relative z-10 flex flex-col items-center text-center">
                 <div className="mb-4 p-2 rounded-full bg-primary/10 text-primary">
-                    <Sparkles className="w-5 h-5 animate-pulse" />
+                    <Sparkles className={staticMode ? "w-5 h-5" : "w-5 h-5 animate-pulse"} />
                 </div>
 
                 <div className="min-h-[100px] flex items-center justify-center">
-                    <AnimatePresence mode="wait">
-                        <motion.p
-                            key={quoteIndex}
-                            initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
-                            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                            exit={{ opacity: 0, y: -20, scale: 0.95, filter: "blur(10px)" }}
-                            transition={{ duration: 0.5, ease: "easeOut" }}
-                            className="text-xl md:text-2xl font-medium italic text-foreground/90 leading-relaxed max-w-2xl"
-                        >
+                    {staticMode ? (
+                        <p className="text-xl md:text-2xl font-medium italic text-foreground/90 leading-relaxed max-w-2xl">
                             "{QUOTES[quoteIndex]}"
-                        </motion.p>
-                    </AnimatePresence>
+                        </p>
+                    ) : (
+                        <AnimatePresence mode="wait">
+                            <motion.p
+                                key={quoteIndex}
+                                initial={{ opacity: 0, y: 20, scale: 0.95, filter: "blur(10px)" }}
+                                animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                                exit={{ opacity: 0, y: -20, scale: 0.95, filter: "blur(10px)" }}
+                                transition={{ duration: 0.5, ease: "easeOut" }}
+                                className="text-xl md:text-2xl font-medium italic text-foreground/90 leading-relaxed max-w-2xl"
+                            >
+                                "{QUOTES[quoteIndex]}"
+                            </motion.p>
+                        </AnimatePresence>
+                    )}
                 </div>
 
-                <motion.div
-                    layoutId="quote-underline"
-                    className="mt-4 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary"
-                />
+                {staticMode ? (
+                    <div className="mt-4 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary" />
+                ) : (
+                    <motion.div
+                        layoutId="quote-underline"
+                        className="mt-4 h-1 w-12 rounded-full bg-gradient-to-r from-primary to-secondary"
+                    />
+                )}
 
                 <p className="mt-2 text-sm text-muted-foreground font-medium uppercase tracking-wider">
                     Daily Motivation

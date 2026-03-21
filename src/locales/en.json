@@ -259,7 +259,16 @@
         "noplan": {
             "title": "No Plan Generated Yet",
             "description": "Create your personalized workout plan using the wizard.",
-            "cta": "Start Wizard"
+            "cta": "Start Wizard",
+            "kicker": "YOUR FITNESS JOURNEY",
+            "headline": "Your plan starts here",
+            "coach_copy": "Your coach is ready. Answer a few questions and get a workout plan built around your goals, schedule, and equipment.",
+            "cta_primary": "Create My Plan",
+            "cta_exercises": "Browse Exercises",
+            "cta_guide": "How It Works",
+            "benefit_split": "Personalized split",
+            "benefit_timing": "Session timing",
+            "benefit_equipment": "Equipment-aware"
         },
         "exercise": {
             "sets": "{{count}} sets",
