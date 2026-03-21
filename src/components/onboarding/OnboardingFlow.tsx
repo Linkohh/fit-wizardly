@@ -97,14 +97,14 @@ export function OnboardingFlow() {
     }
 
     return (
-        <div className="relative app-shell-page-min-height overflow-hidden px-4 py-6 sm:px-6 sm:py-8">
+        <div className="relative app-shell-page-min-height overflow-hidden px-4 pt-4 pb-6 sm:px-6 sm:py-8">
             {/* Background gradient orbs */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-pulse" />
                 <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/20 rounded-full blur-3xl animate-pulse delay-1000" />
             </div>
 
-            <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-6 sm:gap-8">
+            <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col gap-4 sm:gap-6 lg:gap-8">
                 <div
                     data-testid="onboarding-top-row"
                     className="flex items-start justify-between gap-4 sm:items-center"

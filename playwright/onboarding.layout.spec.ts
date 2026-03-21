@@ -1,8 +1,9 @@
-import { expect, test, type Page } from '@playwright/test';
+import { devices, expect, test, type Page } from '@playwright/test';
 
 const ONBOARDING_STORAGE_KEY = 'fitwizard-onboarding';
 const CONSENT_STORAGE_KEY = 'fitwizard_consent_v1';
 const ANALYTICS_CONSENT_STORAGE_KEY = 'fitwizard_analytics_consent';
+const iPhone13 = devices['iPhone 13'];
 
 async function seedOnboardingWelcome(page: Page) {
   await page.addInitScript(
@@ -44,6 +45,7 @@ async function openOnboarding(page: Page) {
 
 async function expectTopRowBelowHeader(page: Page) {
   const header = page.locator('header');
+  const appShell = page.getByTestId('app-shell');
   const topRow = page.getByTestId('onboarding-top-row');
   const skipButton = page.getByRole('button', { name: /skip for now/i });
   const progressCounter = topRow.getByText(/^1\/3$/);
@@ -56,9 +58,14 @@ async function expectTopRowBelowHeader(page: Page) {
 
   const headerBox = await header.boundingBox();
   const topRowBox = await topRow.boundingBox();
+  const shellPaddingTop = await appShell.evaluate((element) =>
+    Number.parseFloat(window.getComputedStyle(element).paddingTop),
+  );
 
   expect(headerBox).not.toBeNull();
   expect(topRowBox).not.toBeNull();
+  expect(shellPaddingTop).toBeGreaterThan(0);
+  expect(Math.abs(shellPaddingTop - headerBox!.height)).toBeLessThanOrEqual(2);
   expect(topRowBox!.y).toBeGreaterThanOrEqual(headerBox!.y + headerBox!.height - 1);
 }
 
@@ -99,9 +106,11 @@ test.describe('onboarding layout regression', () => {
   test.describe('phone webkit', () => {
     test.skip(({ browserName }) => browserName !== 'webkit', 'WebKit-only phone coverage');
     test.use({
-      viewport: { width: 390, height: 844 },
-      hasTouch: true,
-      isMobile: true,
+      viewport: iPhone13.viewport,
+      userAgent: iPhone13.userAgent,
+      deviceScaleFactor: iPhone13.deviceScaleFactor,
+      isMobile: iPhone13.isMobile,
+      hasTouch: iPhone13.hasTouch,
     });
 
     test('keeps onboarding controls below the shared header and allows skipping immediately', async ({ page }) => {
