@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { FloatingElement } from "@/components/ui/page-transition";
 import { motion } from "framer-motion";
 import { InteractiveWord } from "./InteractiveWord";
-import { useRef, memo, useEffect, useState, useCallback } from "react";
+import { useRef, memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
