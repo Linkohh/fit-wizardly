@@ -4,11 +4,12 @@ import { Link } from "react-router-dom";
 import { FloatingElement } from "@/components/ui/page-transition";
 import { motion } from "framer-motion";
 import { InteractiveWord } from "./InteractiveWord";
-import { useRef, memo, useEffect, useState } from "react";
+import { useRef, memo, useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
 import { wasMotionPermissionGranted, requestMotionTiltPermission } from "@/lib/motion-tilt";
+import { toast } from "sonner";
 import { useMotionPreferences } from "@/hooks/use-motion-preferences";
 import { usePreferencesStore } from "@/hooks/useUserPreferences";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -175,6 +176,7 @@ export function WelcomeHero() {
         handlePointerUp,
         handlePointerCancel,
         enableMotion,
+        sensorStatus,
     } = useHeroTilt({
         containerRef,
         isEnabled: tiltEnabled,
@@ -212,6 +214,15 @@ export function WelcomeHero() {
 
         void enableMotion({ userInitiated: false });
     }, [enableMotion, isMobileContext, mobileMotionEnabled, motionTiltEnabled, shouldReduceMotion]);
+
+    // Notify user when their device doesn't support motion tilt.
+    const hasShownUnsupportedRef = useRef(false);
+    useEffect(() => {
+        if (sensorStatus === 'unsupported' && isMobileContext && !hasShownUnsupportedRef.current) {
+            hasShownUnsupportedRef.current = true;
+            toast.info(t('hero.motion_tilt_unsupported', 'Motion tilt is not supported on this device'));
+        }
+    }, [sensorStatus, isMobileContext, t]);
 
     return (
         <section
@@ -361,7 +372,7 @@ export function WelcomeHero() {
                             </Button>
                         </motion.div>
                     </Link>
-                    {isMobileContext && motionTiltEnabled && !shouldReduceMotion && !mobileMotionEnabled && (
+                    {isMobileContext && motionTiltEnabled && !shouldReduceMotion && !mobileMotionEnabled && sensorStatus !== 'unsupported' && (
                         <Button
                             type="button"
                             size="xl"
@@ -373,6 +384,8 @@ export function WelcomeHero() {
                                     .then((status) => {
                                         if (status.permission === 'granted') {
                                             setMobileMotionEnabled(true);
+                                        } else {
+                                            toast.error(t('hero.motion_tilt_denied', 'Motion tilt access was denied'));
                                         }
                                     })
                                     .finally(() => setIsRequestingPermission(false));
