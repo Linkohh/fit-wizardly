@@ -196,13 +196,21 @@ export function WelcomeHero() {
         return () => clearTimeout(timer);
     }, [staticMode]);
 
-    // Auto-activate sensor if permission was previously granted this session.
+    // Auto-activate sensor if permission was previously granted (localStorage).
+    // Only attempt once per mount to avoid an infinite retry loop on iOS where
+    // the browser-level permission is session-scoped and expires on app kill.
+    const hasAttemptedAutoActivation = useRef(false);
     useEffect(() => {
         if (!isMobileContext || !motionTiltEnabled || shouldReduceMotion || mobileMotionEnabled) {
             return;
         }
 
+        if (hasAttemptedAutoActivation.current) {
+            return;
+        }
+
         if (wasMotionPermissionGranted()) {
+            hasAttemptedAutoActivation.current = true;
             setMobileMotionEnabled(true);
         }
     }, [isMobileContext, motionTiltEnabled, shouldReduceMotion, mobileMotionEnabled, setMobileMotionEnabled]);

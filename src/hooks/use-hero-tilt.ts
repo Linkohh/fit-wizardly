@@ -6,6 +6,7 @@ import {
   MotionTilt,
   isNativeMotionTiltSupported,
   markMotionPermissionGranted,
+  wasMotionPermissionGranted,
   publishMotionTiltStatus,
   refreshMotionTiltStatus,
   subscribeToMotionTiltStatus,
@@ -483,12 +484,17 @@ export function useHeroTilt({
 
         setSensorStatus('enabled');
         setIsTouchFallbackActive(false);
-        if (userInitiated || !hasExplicitPermissionApi) {
+        // Treat the permission as granted if: the user explicitly initiated this
+        // call, the platform has no explicit permission API (Android), or the
+        // permission was already granted earlier this session (e.g. via Header).
+        const isEffectivelyGranted =
+          userInitiated || !hasExplicitPermissionApi || wasMotionPermissionGranted();
+        if (isEffectivelyGranted) {
           markMotionPermissionGranted();
         }
         publishMotionTiltStatus({
           available: true,
-          permission: userInitiated || !hasExplicitPermissionApi ? 'granted' : 'prompt',
+          permission: isEffectivelyGranted ? 'granted' : 'prompt',
           source: 'web',
         });
 
