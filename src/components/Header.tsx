@@ -440,6 +440,9 @@ export function Header() {
                         variant="outline"
                         size="sm"
                         onClick={() => {
+                          // Reset first to ensure a false→true transition triggers
+                          // the WelcomeHero effect even if the flag was stale.
+                          usePreferencesStore.getState().setMotionTiltActivatedThisSession(false);
                           void requestMotionTiltPermission().then((status) => {
                             if (status.permission === 'granted') {
                               usePreferencesStore.getState().setMotionTiltActivatedThisSession(true);

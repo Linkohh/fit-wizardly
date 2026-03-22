@@ -192,6 +192,10 @@ export async function requestMotionTiltPermission() {
   }
 
   if (!canRequestWebMotionPermission()) {
+    // On platforms without an explicit permission API (e.g., Android Chrome),
+    // orientation events are available by default. Mark as granted so
+    // auto-activation works on subsequent visits / page reloads.
+    markMotionPermissionGranted();
     return notifyStatus(webStatus);
   }
 

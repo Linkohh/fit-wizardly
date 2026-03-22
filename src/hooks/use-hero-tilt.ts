@@ -11,6 +11,7 @@ import {
   subscribeToMotionTiltStatus,
   type MotionTiltSample,
 } from '@/lib/motion-tilt';
+import { usePreferencesStore } from '@/hooks/useUserPreferences';
 
 const MAX_POINTER_DISTANCE = 300;
 const DESKTOP_MAX_ROTATION_DEGREES = 5;
@@ -342,7 +343,14 @@ export function useHeroTilt({
     async (options?: { userInitiated?: boolean }): Promise<MotionPermissionResult> => {
       const userInitiated = options?.userInitiated ?? true;
 
-      if (!isEnabled || !isMobileContext) {
+      if (!isMobileContext) {
+        return 'unsupported';
+      }
+
+      // Auto-activation (not user-initiated) respects the full isEnabled preference gate.
+      // User-initiated calls bypass it because the UI already enforces preference checks
+      // and the caller needs enableMotion to actually request permission.
+      if (!userInitiated && !isEnabled) {
         return 'unsupported';
       }
 
@@ -383,6 +391,7 @@ export function useHeroTilt({
               void stopNativeMotion();
               setSensorStatus('unsupported');
               resetTilt();
+              usePreferencesStore.getState().setMotionTiltActivatedThisSession(false);
               publishMotionTiltStatus({
                 available: false,
                 permission: 'granted',
@@ -486,6 +495,10 @@ export function useHeroTilt({
         sensorStartupTimeoutRef.current = window.setTimeout(() => {
           if (!sensorDataReceivedRef.current) {
             detachWebSensorListener();
+            // Reset the shared activation flag so the enable button reappears
+            // and a fresh user-gesture-driven activation can be triggered.
+            usePreferencesStore.getState().setMotionTiltActivatedThisSession(false);
+
             if (!userInitiated && hasExplicitPermissionApi) {
               setSensorStatus('idle');
               setIsTouchFallbackActive(true);

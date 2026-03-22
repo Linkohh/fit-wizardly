@@ -8,7 +8,7 @@ import { useRef, memo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
-import { wasMotionPermissionGranted } from "@/lib/motion-tilt";
+import { wasMotionPermissionGranted, requestMotionTiltPermission } from "@/lib/motion-tilt";
 import { useMotionPreferences } from "@/hooks/use-motion-preferences";
 import { usePreferencesStore } from "@/hooks/useUserPreferences";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -155,6 +155,7 @@ export function WelcomeHero() {
     const { t, i18n } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const [showBackground, setShowBackground] = useState(false);
+    const [isRequestingPermission, setIsRequestingPermission] = useState(false);
     const nativeApp = isNativeApp();
     const isMobile = useIsMobile();
     const { shouldReduceMotion } = useMotionPreferences();
@@ -174,7 +175,6 @@ export function WelcomeHero() {
         handlePointerUp,
         handlePointerCancel,
         enableMotion,
-        isEnablingMotion,
     } = useHeroTilt({
         containerRef,
         isEnabled: tiltEnabled,
@@ -368,16 +368,19 @@ export function WelcomeHero() {
                             variant="secondary"
                             className="h-14 px-8 text-lg rounded-full"
                             onClick={() => {
-                                void enableMotion({ userInitiated: true }).then((result) => {
-                                    if (result === 'granted') {
-                                        setMobileMotionEnabled(true);
-                                    }
-                                });
+                                setIsRequestingPermission(true);
+                                void requestMotionTiltPermission()
+                                    .then((status) => {
+                                        if (status.permission === 'granted') {
+                                            setMobileMotionEnabled(true);
+                                        }
+                                    })
+                                    .finally(() => setIsRequestingPermission(false));
                             }}
-                            disabled={isEnablingMotion}
+                            disabled={isRequestingPermission}
                             aria-label={t('hero.enable_motion', 'Enable motion tilt')}
                         >
-                            {isEnablingMotion
+                            {isRequestingPermission
                                 ? t('hero.enabling_motion', 'Enabling motion...')
                                 : t('hero.enable_motion', 'Enable motion tilt')}
                         </Button>
