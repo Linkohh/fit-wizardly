@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { FloatingElement } from "@/components/ui/page-transition";
 import { motion } from "framer-motion";
 import { InteractiveWord } from "./InteractiveWord";
-import { useRef, memo, useEffect, useState } from "react";
+import { useRef, memo, useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
@@ -223,6 +223,37 @@ export function WelcomeHero() {
         void enableMotion({ userInitiated: false });
     }, [enableMotion, isMobileContext, mobileMotionEnabled, motionTiltEnabled, shouldReduceMotion]);
 
+    // Detect returning user who needs to re-authorize on iOS.
+    // iOS Safari revokes DeviceOrientation permission when the app is killed from
+    // the multitask tray, so returning users (who have a valid localStorage grant)
+    // need to re-grant via a user gesture. Instead of showing a full "Enable" button,
+    // we let them tap anywhere on the hero to trigger the re-authorization dialog.
+    const isReturningUser = isMobileContext && wasMotionPermissionGranted();
+    const showMotionButton = isMobileContext && motionTiltEnabled && !shouldReduceMotion && !mobileMotionEnabled && sensorStatus !== 'unsupported';
+    const needsReGrant = showMotionButton && isReturningUser;
+
+    const handleHeroReGrant = useCallback(
+        (e: React.MouseEvent) => {
+            if (!needsReGrant || isRequestingPermission) return;
+
+            // Don't intercept taps on buttons or links — let those navigate normally.
+            const target = e.target as HTMLElement;
+            if (target.closest('button, a, [role="button"]')) return;
+
+            setIsRequestingPermission(true);
+            void requestMotionTiltPermission()
+                .then((status) => {
+                    if (status.permission === 'granted') {
+                        setMobileMotionEnabled(true);
+                    } else {
+                        toast.error(t('hero.motion_tilt_denied', 'Motion tilt access was denied'));
+                    }
+                })
+                .finally(() => setIsRequestingPermission(false));
+        },
+        [needsReGrant, isRequestingPermission, setMobileMotionEnabled, t],
+    );
+
     // Notify user when their device doesn't support motion tilt.
     const hasShownUnsupportedRef = useRef(false);
     useEffect(() => {
@@ -235,6 +266,7 @@ export function WelcomeHero() {
     return (
         <section
             ref={containerRef}
+            onClick={handleHeroReGrant}
             onPointerMove={handlePointerMove}
             onPointerLeave={handlePointerLeave}
             onPointerUp={handlePointerUp}
@@ -380,31 +412,47 @@ export function WelcomeHero() {
                             </Button>
                         </motion.div>
                     </Link>
-                    {isMobileContext && motionTiltEnabled && !shouldReduceMotion && !mobileMotionEnabled && sensorStatus !== 'unsupported' && (
-                        <Button
-                            type="button"
-                            size="xl"
-                            variant="secondary"
-                            className="h-14 px-8 text-lg rounded-full"
-                            onClick={() => {
-                                setIsRequestingPermission(true);
-                                void requestMotionTiltPermission()
-                                    .then((status) => {
-                                        if (status.permission === 'granted') {
-                                            setMobileMotionEnabled(true);
-                                        } else {
-                                            toast.error(t('hero.motion_tilt_denied', 'Motion tilt access was denied'));
-                                        }
-                                    })
-                                    .finally(() => setIsRequestingPermission(false));
-                            }}
-                            disabled={isRequestingPermission}
-                            aria-label={t('hero.enable_motion', 'Enable motion tilt')}
-                        >
-                            {isRequestingPermission
-                                ? t('hero.enabling_motion', 'Enabling motion...')
-                                : t('hero.enable_motion', 'Enable motion tilt')}
-                        </Button>
+                    {showMotionButton && (
+                        needsReGrant ? (
+                            // Returning user on iOS: tap-anywhere is active on the hero,
+                            // show a subtle hint instead of the full button.
+                            <motion.p
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.4, delay: 1.8 }}
+                                className="text-sm text-muted-foreground/70 mt-1"
+                            >
+                                {isRequestingPermission
+                                    ? t('hero.enabling_motion', 'Enabling motion...')
+                                    : t('hero.tap_to_resume_tilt', 'Tap to resume tilt effect')}
+                            </motion.p>
+                        ) : (
+                            // First-time user: show the explicit enable button.
+                            <Button
+                                type="button"
+                                size="xl"
+                                variant="secondary"
+                                className="h-14 px-8 text-lg rounded-full"
+                                onClick={() => {
+                                    setIsRequestingPermission(true);
+                                    void requestMotionTiltPermission()
+                                        .then((status) => {
+                                            if (status.permission === 'granted') {
+                                                setMobileMotionEnabled(true);
+                                            } else {
+                                                toast.error(t('hero.motion_tilt_denied', 'Motion tilt access was denied'));
+                                            }
+                                        })
+                                        .finally(() => setIsRequestingPermission(false));
+                                }}
+                                disabled={isRequestingPermission}
+                                aria-label={t('hero.enable_motion', 'Enable motion tilt')}
+                            >
+                                {isRequestingPermission
+                                    ? t('hero.enabling_motion', 'Enabling motion...')
+                                    : t('hero.enable_motion', 'Enable motion tilt')}
+                            </Button>
+                        )
                     )}
                 </motion.div>
 
