@@ -13,7 +13,7 @@ import { TrainerGuard } from "./components/TrainerGuard";
 import { OnboardingGuard } from "./components/OnboardingGuard";
 import { useAuthStore } from "./stores/authStore";
 import { CommandPalette } from "@/components/CommandPalette";
-import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { OfflineBanner } from "@/components/ui/offline-banner";
 import { RequireAuth } from "@/components/RequireAuth";
 import { usePlanStore } from "@/stores/planStore";
 import { useGlobalClickFeedback } from "@/hooks/useGlobalClickFeedback";
@@ -249,8 +249,7 @@ function AnimatedRoutes() {
 }
 
 const App = () => {
-  // Monitor network status and show notifications
-  useNetworkStatus();
+  // Network status handled by OfflineBanner component
   useGlobalClickFeedback();
   const nativeApp = isNativeApp();
   const [shouldRenderLivingBackground, setShouldRenderLivingBackground] = useState(false);
@@ -307,6 +306,7 @@ const App = () => {
             <AuthProvider>
               <Toaster />
               <Sonner />
+              <OfflineBanner />
               <AuthModal />
               <CommandPalette />
               <div

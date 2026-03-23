@@ -6,6 +6,11 @@
   pointer-events: none;
 }
 
+.rootMobile {
+  /* Ensure mobile rendering doesn't interfere with touch targets */
+  will-change: auto;
+}
+
 .blurLayer {
   position: absolute;
   inset: 0;
@@ -13,11 +18,44 @@
   will-change: filter;
 }
 
+.blurLayerMobile {
+  filter: blur(50px);
+}
+
 .blob {
   position: absolute;
   border-radius: 9999px;
   will-change: transform, opacity, filter;
 }
+
+.blobMobile {
+  /* Simpler compositing on mobile — no per-blob filter cost */
+  will-change: transform;
+}
+
+/* ── Grain texture overlay ── */
+.grain {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-size: 256px 256px;
+  background-repeat: repeat;
+}
+
+/* ── Atmospheric vignette ── */
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════
+   Blob Animations — Desktop (8 blobs)
+   Background layer: blobs 1, 2, 4 (slower, atmospheric)
+   Midground layer:  blobs 3, 5, 6 (faster, accents)
+   Fill layer:       blobs 7, 8 (gentle, gap-fillers)
+   ═══════════════════════════════════════════════ */
 
 .blob1 {
   animation: blob-drift-1 25s ease-in-out infinite;
@@ -43,84 +81,17 @@
   animation: blob-drift-6 37s ease-in-out infinite;
 }
 
+.blob7 {
+  animation: blob-drift-7 34s ease-in-out infinite;
+}
+
+.blob8 {
+  animation: blob-drift-8 36s ease-in-out infinite;
+}
+
+/* ── Background layer: atmospheric wash ── */
+
 @keyframes blob-drift-1 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.8;
-    filter: hue-rotate(0deg);
-  }
-
-  33% {
-    transform: translate(15vw, -10vh) scale(1.1);
-    filter: hue-rotate(20deg);
-  }
-
-  66% {
-    transform: translate(-10vw, 15vh) scale(0.95);
-    filter: hue-rotate(45deg);
-  }
-}
-
-@keyframes blob-drift-2 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0;
-    filter: hue-rotate(0deg);
-  }
-
-  30% {
-    transform: translate(-12vw, 8vh) scale(1.15);
-    filter: hue-rotate(15deg);
-  }
-
-  65% {
-    transform: translate(8vw, -12vh) scale(0.9);
-    filter: hue-rotate(40deg);
-  }
-}
-
-@keyframes blob-drift-3 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.5;
-    filter: hue-rotate(0deg);
-  }
-
-  25% {
-    transform: translate(18vw, 5vh) scale(1.05);
-    opacity: 0;
-    filter: hue-rotate(10deg);
-  }
-
-  60% {
-    transform: translate(-5vw, -18vh) scale(1.1);
-    filter: hue-rotate(35deg);
-  }
-}
-
-@keyframes blob-drift-4 {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-    opacity: 0.3;
-    filter: hue-rotate(0deg);
-  }
-
-  40% {
-    transform: translate(-15vw, 12vh) scale(0.95);
-    filter: hue-rotate(25deg);
-  }
-
-  75% {
-    transform: translate(10vw, -8vh) scale(1.08);
-    filter: hue-rotate(45deg);
-  }
-}
-
-@keyframes blob-drift-5 {
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -128,16 +99,102 @@
     filter: hue-rotate(0deg);
   }
 
+  33% {
+    transform: translate(15vw, -10vh) scale(1.1);
+    opacity: 0.6;
+    filter: hue-rotate(15deg);
+  }
+
+  66% {
+    transform: translate(-10vw, 15vh) scale(0.95);
+    opacity: 0.5;
+    filter: hue-rotate(30deg);
+  }
+}
+
+@keyframes blob-drift-2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+    filter: hue-rotate(0deg);
+  }
+
+  30% {
+    transform: translate(-12vw, 8vh) scale(1.15);
+    opacity: 0.7;
+    filter: hue-rotate(-8deg);
+  }
+
+  65% {
+    transform: translate(8vw, -12vh) scale(0.9);
+    opacity: 0.5;
+    filter: hue-rotate(-15deg);
+  }
+}
+
+@keyframes blob-drift-4 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+    filter: hue-rotate(0deg);
+  }
+
+  40% {
+    transform: translate(-15vw, 12vh) scale(0.95);
+    opacity: 0.6;
+    filter: hue-rotate(18deg);
+  }
+
+  75% {
+    transform: translate(10vw, -8vh) scale(1.08);
+    opacity: 0.5;
+    filter: hue-rotate(30deg);
+  }
+}
+
+/* ── Midground layer: color accents ── */
+
+@keyframes blob-drift-3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.7;
+    filter: hue-rotate(0deg);
+  }
+
+  25% {
+    transform: translate(18vw, 5vh) scale(1.05);
+    opacity: 0.9;
+    filter: hue-rotate(10deg);
+  }
+
+  60% {
+    transform: translate(-5vw, -18vh) scale(1.1);
+    opacity: 0.6;
+    filter: hue-rotate(20deg);
+  }
+}
+
+@keyframes blob-drift-5 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+    filter: hue-rotate(0deg);
+  }
+
   35% {
     transform: translate(10vw, -15vh) scale(1.12);
     opacity: 0.9;
-    filter: hue-rotate(20deg);
+    filter: hue-rotate(-12deg);
   }
 
   70% {
     transform: translate(-12vw, 6vh) scale(0.92);
-    opacity: 0.4;
-    filter: hue-rotate(50deg);
+    opacity: 0.6;
+    filter: hue-rotate(-25deg);
   }
 }
 
@@ -145,21 +202,172 @@
   0%,
   100% {
     transform: translate(0, 0) scale(1);
-    opacity: 0;
+    opacity: 0.6;
     filter: hue-rotate(0deg);
   }
 
   28% {
     transform: translate(-8vw, -10vh) scale(1.06);
-    filter: hue-rotate(18deg);
+    opacity: 0.8;
+    filter: hue-rotate(-8deg);
   }
 
   62% {
     transform: translate(14vw, 8vh) scale(0.94);
-    opacity: 0.2;
-    filter: hue-rotate(48deg);
+    opacity: 0.7;
+    filter: hue-rotate(-15deg);
   }
 }
+
+/* ── Fill layer: gentle gap-fillers ── */
+
+@keyframes blob-drift-7 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+    filter: hue-rotate(0deg);
+  }
+
+  38% {
+    transform: translate(8vw, -6vh) scale(1.04);
+    opacity: 0.6;
+    filter: hue-rotate(12deg);
+  }
+
+  72% {
+    transform: translate(-6vw, 8vh) scale(0.97);
+    opacity: 0.4;
+    filter: hue-rotate(22deg);
+  }
+}
+
+@keyframes blob-drift-8 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.45;
+    filter: hue-rotate(0deg);
+  }
+
+  42% {
+    transform: translate(-7vw, 5vh) scale(1.03);
+    opacity: 0.55;
+    filter: hue-rotate(-10deg);
+  }
+
+  68% {
+    transform: translate(6vw, -4vh) scale(0.96);
+    opacity: 0.4;
+    filter: hue-rotate(-18deg);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Mobile: Simplified animations for GPU performance
+   - Slower durations reduce composite frequency
+   - No hue-rotate filter (saves per-blob filter cost)
+   - Smaller translate ranges
+   ═══════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .blurLayer {
+    filter: blur(50px);
+  }
+
+  .blob {
+    will-change: transform;
+  }
+
+  .blob1 {
+    animation: blob-drift-mobile-1 30s ease-in-out infinite;
+  }
+
+  .blob2 {
+    animation: blob-drift-mobile-2 33s ease-in-out infinite;
+  }
+
+  .blob3 {
+    animation: blob-drift-mobile-3 35s ease-in-out infinite;
+  }
+
+  .blob4 {
+    animation: blob-drift-mobile-4 37s ease-in-out infinite;
+  }
+
+  .blob5 {
+    animation: blob-drift-mobile-5 39s ease-in-out infinite;
+  }
+}
+
+@keyframes blob-drift-mobile-1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: translate(8vw, -6vh) scale(1.05);
+    opacity: 0.6;
+  }
+}
+
+@keyframes blob-drift-mobile-2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+
+  50% {
+    transform: translate(-6vw, 5vh) scale(1.08);
+    opacity: 0.7;
+  }
+}
+
+@keyframes blob-drift-mobile-3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.7;
+  }
+
+  50% {
+    transform: translate(10vw, 4vh) scale(1.04);
+    opacity: 0.8;
+  }
+}
+
+@keyframes blob-drift-mobile-4 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: translate(-8vw, 7vh) scale(0.96);
+    opacity: 0.6;
+  }
+}
+
+@keyframes blob-drift-mobile-5 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translate(5vw, -8vh) scale(1.06);
+    opacity: 0.7;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   Accessibility: Disable all animations
+   ═══════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {
   .blob1,
@@ -167,7 +375,9 @@
   .blob3,
   .blob4,
   .blob5,
-  .blob6 {
+  .blob6,
+  .blob7,
+  .blob8 {
     animation: none;
   }
 }

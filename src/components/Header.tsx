@@ -189,7 +189,7 @@ export function Header() {
         {/* Desktop Navigation */}
         <nav
           ref={navRef}
-          className="hidden md:flex items-center gap-1 relative"
+          className="hidden xl:flex items-center gap-1 relative"
           role="navigation"
           aria-label="Main navigation"
         >
@@ -229,7 +229,7 @@ export function Header() {
                   variant="ghost"
                   size="sm"
                   className={cn(
-                    "relative z-10 touch-target transition-colors duration-200 text-sm lg:text-base lg:px-4 lg:py-2",
+                    "relative z-10 touch-target transition-colors duration-200 text-sm xl:text-base xl:px-3 xl:py-2",
                     active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -241,7 +241,7 @@ export function Header() {
         </nav>
 
         {/* Right Side Controls */}
-        <div className="hidden md:flex items-center gap-2 ml-4">
+        <div className="hidden xl:flex items-center gap-2 ml-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="touch-target">
@@ -294,7 +294,7 @@ export function Header() {
 
         {/* Mobile Menu */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild className="md:hidden">
+          <SheetTrigger asChild className="xl:hidden">
             <motion.div
               whileTap={{ scale: 0.92 }}
               whileHover={{ scale: 1.05 }}

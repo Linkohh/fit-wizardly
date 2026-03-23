@@ -273,24 +273,20 @@ export function WelcomeHero() {
             onPointerCancel={handlePointerCancel}
             className={cn(
                 styles.hero,
-                "relative pb-4 lg:pt-24 lg:pb-20 px-4 bg-gradient-to-b from-[#F8F5FC]/90 via-[#EDE4F5]/80 to-[#F0E8F8]/70 dark:from-[#1a0a2e]/85 dark:via-[#2D1548]/75 dark:to-[#1a0a2e]/60 lg:min-h-[100dvh] flex flex-col justify-center",
+                "relative pb-4 lg:pt-24 lg:pb-12 px-4 bg-gradient-to-b from-[#F8F5FC]/20 via-[#EDE4F5]/15 to-transparent dark:from-[#1a0a2e]/15 dark:via-[#2D1548]/10 dark:to-transparent lg:min-h-[82dvh] flex flex-col justify-center",
                 nativeApp ? "pt-12 min-h-[58dvh]" : "pt-14 min-h-[62dvh]"
             )}
         >
-            {/* Animated Background Elements - Deferred */}
+            {/* Animated Background Elements - Deferred (FloatingOrbs removed — LivingBackground blobs visible through transparent hero) */}
             {showBackground && !staticMode && (
-                <>
-                    <FloatingOrbs />
-                    <Particles />
-                </>
+                <Particles />
             )}
 
-            {/* Mesh gradient overlay */}
-            <div className={cn(styles.heroBloom, "absolute inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.25),transparent)] pointer-events-none")} />
+            {/* Mesh gradient overlay — reduced to let blobs show through */}
+            <div className={cn(styles.heroBloom, "absolute inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.06),transparent)] pointer-events-none")} />
 
             {/* Premium Layered Horizon Glow - 3D Depth with Aurora Color Cycling */}
             <div className={cn(styles.horizonGlowWrapper, "absolute inset-0 pointer-events-none overflow-hidden -z-10")}>
-
 
                 {/* Primary Layer - Hot Additive Core */}
                 <div className={cn(styles.horizonGlowPrimary, "absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[60%] w-[90%] mix-blend-plus-lighter")} />
@@ -311,7 +307,7 @@ export function WelcomeHero() {
                 </FloatingElement>
 
                 <h1
-                    className="font-display text-5xl md:text-7xl lg:text-8xl font-black text-foreground mb-6 leading-tight flex flex-col items-center justify-center"
+                    className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[5.5rem] font-black text-foreground mb-6 leading-[1.1] flex flex-col items-center justify-center w-full overflow-visible drop-shadow-[0_2px_6px_rgba(255,255,255,0.9)] dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]"
                 >
                     <div
                         className="flex items-center justify-center flex-wrap gap-2 md:gap-4"
@@ -341,7 +337,7 @@ export function WelcomeHero() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.6 }}
-                    className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
+                    className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed drop-shadow-[0_2px_4px_rgba(255,255,255,0.85)] dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
                 >
                     {t('hero.description')}
                     <motion.span
@@ -430,9 +426,9 @@ export function WelcomeHero() {
                             // First-time user: show the explicit enable button.
                             <Button
                                 type="button"
-                                size="xl"
-                                variant="secondary"
-                                className="h-14 px-8 text-lg rounded-full"
+                                size="sm"
+                                variant="ghost"
+                                className="h-10 px-6 text-sm rounded-full text-muted-foreground/70 hover:text-foreground border border-white/10 hover:border-white/20 backdrop-blur-sm transition-all duration-300"
                                 onClick={() => {
                                     setIsRequestingPermission(true);
                                     void requestMotionTiltPermission()

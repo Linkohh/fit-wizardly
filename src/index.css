@@ -609,6 +609,35 @@
   transition: all 0.2s ease-out;
 }
 
+@utility glass-card-hero {
+  /* iOS 26-style glassmorphism — heavy blur, low opacity, blob-visible */
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+  .dark & {
+    background: rgba(15, 5, 24, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 4px 30px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .glass-card-hero {
+    background: hsl(var(--card) / 0.88);
+    border: 1px solid hsl(var(--border) / 0.5);
+    background-image: linear-gradient(135deg, hsl(var(--primary) / 0.04) 0%, transparent 60%);
+    box-shadow: 0 2px 16px hsl(var(--primary) / 0.06), 0 1px 3px rgba(0,0,0,0.08);
+  }
+}
+
 @utility glass-card {
   /* Glassmorphism card - frosted glass effect */
   background: hsl(var(--card) / 0.7);

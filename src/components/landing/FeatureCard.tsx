@@ -95,10 +95,13 @@ export function FeatureCard({ feature, onClick }: FeatureCardProps) {
         >
             <Card
                 variant="interactive"
-                className="relative text-center h-full bg-card/60 backdrop-blur-xl border border-border/50 hover:border-primary/40 rounded-2xl shadow-lg hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 overflow-hidden cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                className="relative text-center h-full bg-white/12 dark:bg-[rgba(15,5,24,0.12)] backdrop-blur-[40px] backdrop-saturate-[180%] border border-white/15 dark:border-white/8 hover:border-primary/40 rounded-3xl shadow-[0_4px_30px_rgba(0,0,0,0.05),inset_0_1px_0_rgba(255,255,255,0.2)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.05)] hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 overflow-hidden cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
+                {/* Per-card gradient tint — blob color bleeds through */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-[0.04] dark:opacity-[0.06]`} />
+
                 {/* Gradient overlay on hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-500`} />
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-8 transition-opacity duration-500`} />
 
                 {/* Glow effect */}
                 <motion.div
