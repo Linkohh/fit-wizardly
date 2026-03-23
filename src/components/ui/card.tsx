@@ -12,6 +12,8 @@ const cardVariants = cva(
         interactive: 
           "shadow-sm transition-all duration-300 ease-out hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1 hover:scale-[1.02] cursor-pointer",
         glass:
+          "glass-card shadow-lg",
+        "glass-hero":
           "glass-card-hero shadow-lg",
         gradient: 
           "gradient-border shadow-md hover:shadow-lg transition-shadow duration-300",

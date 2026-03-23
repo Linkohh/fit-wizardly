@@ -101,7 +101,7 @@ export function FeatureCard({ feature, onClick }: FeatureCardProps) {
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-[0.04] dark:opacity-[0.06]`} />
 
                 {/* Gradient overlay on hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-8 transition-opacity duration-500`} />
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500`} />
 
                 {/* Glow effect */}
                 <motion.div

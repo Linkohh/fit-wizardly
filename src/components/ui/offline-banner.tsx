@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WifiOff } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function OfflineBanner() {
+  const { t } = useTranslation();
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [visible, setVisible] = useState(false);
 
@@ -29,17 +31,19 @@ export function OfflineBanner() {
     };
   }, []);
 
-  // Auto-dismiss after 4 seconds
+  // Auto-dismiss after 4 seconds, but re-show if still offline on next offline event
   useEffect(() => {
-    if (!visible) return;
+    if (!visible || !isOffline) return;
     const timer = setTimeout(() => setVisible(false), 4000);
     return () => clearTimeout(timer);
-  }, [visible]);
+  }, [visible, isOffline]);
 
   return (
     <AnimatePresence>
       {visible && isOffline && (
         <motion.div
+          role="alert"
+          aria-live="assertive"
           initial={{ y: -48, opacity: 0, filter: "blur(8px)" }}
           animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
           exit={{
@@ -72,10 +76,10 @@ export function OfflineBanner() {
               }}
             >
               <WifiOff className="h-3.5 w-3.5 text-red-300" />
-              <span>You're offline</span>
+              <span>{t('offline.title', "You're offline")}</span>
               <span className="text-white/50 text-xs">·</span>
               <span className="text-white/60 text-xs">
-                Some features may be limited
+                {t('offline.description', 'Some features may be limited')}
               </span>
             </div>
           </div>
