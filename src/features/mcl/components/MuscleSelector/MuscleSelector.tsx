@@ -236,7 +236,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
       <div className="flex-1 flex flex-col min-w-0 min-h-0" data-testid="muscle-selector-main">
         {/* Header / Controls */}
         {showHeader && (
-          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-white/10 overflow-hidden">
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border/30 dark:border-white/10 overflow-hidden">
             <div className="flex items-center gap-4">
               {/* View Switcher */}
               <ViewSwitcher
@@ -259,15 +259,15 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
             {!isMobile && (
               <div className="flex items-center gap-2">
                 {/* Undo/Redo */}
-                <div className="flex items-center gap-2 border-l border-white/10 pl-2 ml-2">
+                <div className="flex items-center gap-2 border-l border-border/30 dark:border-white/10 pl-2 ml-2">
                   <button
                     onClick={undo}
                     disabled={!canUndo}
                     className={`
                       p-2 rounded-lg transition-colors
                       ${canUndo
-                        ? 'bg-white/5 text-white hover:bg-white/10'
-                        : 'bg-white/5 text-white/20 cursor-not-allowed'
+                        ? 'bg-muted/30 dark:bg-white/5 text-foreground hover:bg-muted/50 dark:hover:bg-white/10'
+                        : 'bg-muted/30 dark:bg-white/5 text-foreground/20 cursor-not-allowed'
                       }
                     `}
                     title="Undo (Ctrl+Z)"
@@ -280,8 +280,8 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                     className={`
                       p-2 rounded-lg transition-colors
                       ${canRedo
-                        ? 'bg-white/5 text-white hover:bg-white/10'
-                        : 'bg-white/5 text-white/20 cursor-not-allowed'
+                        ? 'bg-muted/30 dark:bg-white/5 text-foreground hover:bg-muted/50 dark:hover:bg-white/10'
+                        : 'bg-muted/30 dark:bg-white/5 text-foreground/20 cursor-not-allowed'
                       }
                     `}
                     title="Redo (Ctrl+Shift+Z)"
@@ -297,7 +297,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                     p-2 rounded-lg transition-colors
                     ${colorByGroup
                       ? 'bg-primary/20 text-primary-300 ring-1 ring-primary/50'
-                      : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'
+                      : 'bg-muted/30 dark:bg-white/5 text-muted-foreground hover:bg-muted/50 dark:hover:bg-white/10 hover:text-foreground'
                     }
                   `}
                   title={colorByGroup ? 'Disable color by group' : 'Enable color by group'}
@@ -308,7 +308,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 {/* Theme toggle */}
                 <button
                   onClick={toggleTheme}
-                  className="p-2 rounded-lg bg-white/5 text-white/50 hover:bg-white/10 hover:text-white transition-colors"
+                  className="p-2 rounded-lg bg-muted/30 dark:bg-white/5 text-muted-foreground hover:bg-muted/50 dark:hover:bg-white/10 hover:text-foreground transition-colors"
                   title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
                 >
                   {resolvedTheme === 'dark' ? (

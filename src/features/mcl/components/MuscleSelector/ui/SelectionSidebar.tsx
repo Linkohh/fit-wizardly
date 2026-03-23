@@ -46,9 +46,9 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
       className={`h-full flex flex-col surface-premium-strong surface-premium-stroke border-t md:border-t-0 md:border-l relative z-20 ${mobileSheetMode ? 'rounded-t-2xl' : ''}`}
       data-testid={mobileSheetMode ? 'muscle-selector-sheet-sidebar' : 'muscle-selector-inline-sidebar'}
     >
-      <div className={`${mobileSheetMode ? 'p-4 pb-3' : 'p-4'} border-b border-white/10 space-y-3`}>
+      <div className={`${mobileSheetMode ? 'p-4 pb-3' : 'p-4'} border-b border-border/30 dark:border-white/10 space-y-3`}>
         <div className="flex items-center justify-between">
-          <h3 className="text-fluid-lg font-semibold text-white">
+          <h3 className="text-fluid-lg font-semibold text-foreground">
             Selected Muscles
           </h3>
           <span className="px-2 py-0.5 bg-primary/20 text-primary-300 text-fluid-sm rounded-full tabular-nums">
@@ -69,7 +69,7 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
           {selectedMuscles.length > 0 ? (
             <button
               onClick={onClearAll}
-              className="min-h-[44px] min-w-[44px] p-2.5 text-white/50 hover:text-red-400 hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-white/5"
+              className="min-h-[44px] min-w-[44px] p-2.5 text-muted-foreground hover:text-red-400 hover:bg-muted/30 dark:hover:bg-white/5 rounded-lg transition-colors border border-transparent hover:border-border/20 dark:hover:border-white/5"
               title="Clear all"
               data-click-feedback="off"
               data-interaction-feedback="explicit"
@@ -155,7 +155,7 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
       </div>
 
       {selectedMuscles.length > 0 ? (
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-border/30 dark:border-white/10">
           <button
             className="w-full min-h-[44px] py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white text-fluid-sm font-medium rounded-lg transition-colors tabular-nums"
             data-click-feedback="off"

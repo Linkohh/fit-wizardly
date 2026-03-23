@@ -152,14 +152,14 @@ function SourceStatus({
         variant={isOfflineSource ? 'empty' : 'success'}
       />
 
-      <Card className="border-white/10 bg-black/20">
+      <Card className="border-border/50 bg-muted/50 dark:border-white/10 dark:bg-black/20">
         <CardHeader className="pb-4">
           <CardTitle className="text-base">Catalog source</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4 text-sm text-white/70">
+        <CardContent className="space-y-4 text-sm text-muted-foreground">
           <div className="flex items-center justify-between">
             <span>Active source</span>
-            <span className="uppercase tracking-[0.18em] text-white/45">{source}</span>
+            <span className="uppercase tracking-[0.18em] text-muted-foreground/60">{source}</span>
           </div>
           <div className="flex items-center justify-between">
             <span>Stale</span>
@@ -175,7 +175,7 @@ function SourceStatus({
           </div>
           <Button
             variant="outline"
-            className="w-full border-white/10 bg-white/5 text-white hover:bg-white/10"
+            className="w-full"
             onClick={onRefresh}
             disabled={isRefreshing}
           >
@@ -297,19 +297,19 @@ export function ExerciseLibraryPage() {
               Exercise system
             </p>
             <div>
-              <h1 className="bg-gradient-to-r from-white via-white to-white/65 bg-clip-text text-4xl font-black tracking-tight text-transparent sm:text-5xl">
+              <h1 className="bg-gradient-to-r from-foreground via-foreground to-foreground/65 bg-clip-text text-4xl font-black tracking-tight text-transparent sm:text-5xl">
                 Premium exercise library
               </h1>
-              <p className="mt-3 max-w-3xl text-base leading-relaxed text-white/62">
+              <p className="mt-3 max-w-3xl text-base leading-relaxed text-muted-foreground">
                 Image-first exercise browsing backed by a resilient local-first boot sequence. The library upgrades from backup sources to live wger content only after validation passes.
               </p>
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-white/10 bg-black/20 p-5 text-left backdrop-blur-xl sm:text-right">
-            <p className="text-xs uppercase tracking-[0.18em] text-white/40">Catalog visibility</p>
-            <p className="mt-2 text-3xl font-black text-white">{pagedRecords.length}</p>
-            <p className="mt-1 text-sm text-white/55">
+          <div className="rounded-[28px] border border-border/50 bg-muted/50 p-5 text-left backdrop-blur-xl dark:border-white/10 dark:bg-black/20 sm:text-right">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/60">Catalog visibility</p>
+            <p className="mt-2 text-3xl font-black text-foreground">{pagedRecords.length}</p>
+            <p className="mt-1 text-sm text-muted-foreground">
               Showing {pagedRecords.length} of {filteredRecords.length} catalog exercises
             </p>
           </div>
@@ -337,8 +337,8 @@ export function ExerciseLibraryPage() {
         <section className="space-y-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-white">Aligned with your setup</h2>
-              <p className="text-sm text-white/55">
+              <h2 className="text-2xl font-bold text-foreground">Aligned with your setup</h2>
+              <p className="text-sm text-muted-foreground">
                 Suggested from the current catalog using your selected muscles and equipment.
               </p>
             </div>
@@ -371,8 +371,8 @@ export function ExerciseLibraryPage() {
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-white">Verified catalog</h2>
-            <p className="text-sm text-white/55">
+            <h2 className="text-2xl font-bold text-foreground">Verified catalog</h2>
+            <p className="text-sm text-muted-foreground">
               Real exercise photos when available, muscle-map visuals when they are not, and branded fallback only as the last resort.
             </p>
           </div>
@@ -396,7 +396,6 @@ export function ExerciseLibraryPage() {
               <div className="flex justify-center pt-2">
                 <Button
                   variant="outline"
-                  className="border-white/10 bg-white/5 text-white hover:bg-white/10"
                   onClick={() => setPage((value) => value + 1)}
                 >
                   Load more exercises
@@ -414,11 +413,11 @@ export function ExerciseLibraryPage() {
         )}
       </section>
 
-      <section className="rounded-[28px] border border-white/10 bg-black/20 p-5 backdrop-blur-xl">
+      <section className="rounded-[28px] border border-border/50 bg-muted/50 p-5 backdrop-blur-xl dark:border-white/10 dark:bg-black/20">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-white">My exercises</h2>
-            <p className="text-sm text-white/55">
+            <h2 className="text-2xl font-bold text-foreground">My exercises</h2>
+            <p className="text-sm text-muted-foreground">
               Your local exercises stay separate from the synced catalog and remain available offline.
             </p>
           </div>
@@ -442,7 +441,7 @@ export function ExerciseLibraryPage() {
                   value={customName}
                   onChange={(event) => setCustomName(event.target.value)}
                   placeholder="Kettlebell anti-rotation row"
-                  className="border-white/10 bg-white/5 text-white"
+                  className="border-border/50 bg-muted/30 text-foreground dark:border-white/10 dark:bg-white/5"
                 />
               </div>
               <div className="space-y-2">
@@ -452,7 +451,7 @@ export function ExerciseLibraryPage() {
                   value={customDescription}
                   onChange={(event) => setCustomDescription(event.target.value)}
                   placeholder="Short coaching note"
-                  className="border-white/10 bg-white/5 text-white"
+                  className="border-border/50 bg-muted/30 text-foreground dark:border-white/10 dark:bg-white/5"
                 />
               </div>
             </div>
@@ -464,7 +463,7 @@ export function ExerciseLibraryPage() {
                   value={customPrimaryMuscle}
                   onValueChange={(value) => setCustomPrimaryMuscle(value as MuscleGroup)}
                 >
-                  <SelectTrigger className="border-white/10 bg-white/5 text-white">
+                  <SelectTrigger className="border-border/50 bg-muted/30 text-foreground dark:border-white/10 dark:bg-white/5">
                     <SelectValue placeholder="Select a muscle" />
                   </SelectTrigger>
                   <SelectContent>
@@ -483,7 +482,7 @@ export function ExerciseLibraryPage() {
                   value={customEquipment}
                   onValueChange={(value) => setCustomEquipment(value as Equipment)}
                 >
-                  <SelectTrigger className="border-white/10 bg-white/5 text-white">
+                  <SelectTrigger className="border-border/50 bg-muted/30 text-foreground dark:border-white/10 dark:bg-white/5">
                     <SelectValue placeholder="Select equipment" />
                   </SelectTrigger>
                   <SelectContent>
@@ -503,13 +502,13 @@ export function ExerciseLibraryPage() {
                   value={customCues}
                   onChange={(event) => setCustomCues(event.target.value)}
                   placeholder="Brace core, keep elbow tucked"
-                  className="border-white/10 bg-white/5 text-white"
+                  className="border-border/50 bg-muted/30 text-foreground dark:border-white/10 dark:bg-white/5"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.18em] text-white/38">
+              <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/50">
                 Custom exercises stay local to this device and remain available even if the live catalog is unavailable.
               </p>
             </div>
@@ -534,11 +533,11 @@ export function ExerciseLibraryPage() {
             ))}
           </div>
         ) : customRecords.length === 0 ? (
-          <p className="mt-6 text-sm text-white/50">
+          <p className="mt-6 text-sm text-muted-foreground">
             You have not created any custom exercises yet.
           </p>
         ) : (
-          <p className="mt-6 text-sm text-white/50">
+          <p className="mt-6 text-sm text-muted-foreground">
             No custom exercises match the current filters yet.
           </p>
         )}

@@ -79,16 +79,16 @@ export const ExerciseLibraryCard = memo(function ExerciseLibraryCard({
       tabIndex={0}
       aria-label={`Open ${displayContent.name}`}
     >
-      <div className="relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(17,10,27,0.96),rgba(25,13,32,0.96))] shadow-[0_18px_60px_rgba(5,4,10,0.35)] sm:min-h-[328px]">
-        <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.14),transparent_35%),linear-gradient(180deg,transparent,rgba(255,255,255,0.02))]" />
+      <div className="relative flex h-full min-h-[312px] flex-col overflow-hidden rounded-[28px] border border-border/40 bg-card shadow-lg dark:border-white/10 dark:bg-[linear-gradient(180deg,rgba(17,10,27,0.96),rgba(25,13,32,0.96))] dark:shadow-[0_18px_60px_rgba(5,4,10,0.35)] sm:min-h-[328px]">
+        <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.06),transparent_35%)] dark:bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.14),transparent_35%),linear-gradient(180deg,transparent,rgba(255,255,255,0.02))]" />
 
-        <div className="relative h-48 border-b border-white/10 sm:h-56">
+        <div className="relative h-48 border-b border-border/30 dark:border-white/10 sm:h-56">
           <ExerciseLibraryMedia exercise={exercise} className="h-full w-full" />
 
           <div className="absolute inset-x-4 top-4 flex items-center justify-between gap-2">
             <Badge
               variant="outline"
-              className="rounded-full border-white/15 bg-black/40 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white/80 backdrop-blur-md"
+              className="rounded-full border-border/40 bg-background/70 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-foreground/80 backdrop-blur-md dark:border-white/15 dark:bg-black/40 dark:text-white/80"
             >
               {exercise.category.name}
             </Badge>
@@ -97,7 +97,7 @@ export const ExerciseLibraryCard = memo(function ExerciseLibraryCard({
               type="button"
               onClick={handleFavoriteToggle}
               className={cn(
-                'inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/35 text-white/70 backdrop-blur-md transition',
+                'inline-flex h-11 w-11 items-center justify-center rounded-full border border-border/40 bg-background/60 text-muted-foreground backdrop-blur-md transition dark:border-white/15 dark:bg-black/35 dark:text-white/70',
                 favorite && 'border-rose-300/35 text-rose-300'
               )}
               aria-label={favorite ? 'Remove from favorites' : 'Add to favorites'}
@@ -117,10 +117,10 @@ export const ExerciseLibraryCard = memo(function ExerciseLibraryCard({
 
         <div className="relative flex flex-1 flex-col gap-4 p-5">
           <div className="space-y-2">
-            <h3 className="line-clamp-2 text-[1.2rem] font-extrabold leading-[1.15] text-white transition-colors group-hover:text-primary">
+            <h3 className="line-clamp-2 text-[1.2rem] font-extrabold leading-[1.15] text-foreground transition-colors group-hover:text-primary">
               {displayContent.name}
             </h3>
-            <p className="line-clamp-2 text-sm leading-relaxed text-white/60">
+            <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
               {displayContent.description || 'Open this exercise to view verified movement details and source metadata.'}
             </p>
           </div>
@@ -129,19 +129,19 @@ export const ExerciseLibraryCard = memo(function ExerciseLibraryCard({
             {exercise.equipment.slice(0, 2).map((item, index) => (
               <span
                 key={`${item}-${index}`}
-                className="inline-flex items-center rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/75"
+                className="inline-flex items-center rounded-full border border-border/30 bg-muted/50 px-3 py-1.5 text-foreground/75 dark:border-white/12 dark:bg-white/6 dark:text-white/75"
               >
                 {item}
               </span>
             ))}
             {exercise.secondaryMuscles[0] ? (
-              <span className="inline-flex items-center rounded-full border border-white/12 bg-white/6 px-3 py-1.5 text-white/55">
+              <span className="inline-flex items-center rounded-full border border-border/30 bg-muted/50 px-3 py-1.5 text-muted-foreground dark:border-white/12 dark:bg-white/6 dark:text-white/55">
                 + {exercise.secondaryMuscles[0]}
               </span>
             ) : null}
           </div>
 
-          <div className="mt-auto flex items-center justify-between border-t border-white/10 pt-4 text-[11px] uppercase tracking-[0.18em] text-white/45">
+          <div className="mt-auto flex items-center justify-between border-t border-border/30 pt-4 text-[11px] uppercase tracking-[0.18em] text-muted-foreground/60 dark:border-white/10 dark:text-white/45">
             <span>{exercise.source === 'wger' ? 'wger content' : 'local backup'}</span>
             <span>Open details</span>
           </div>

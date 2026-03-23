@@ -57,7 +57,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
           flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 border
           ${activePreset
                         ? 'bg-primary/20 text-primary-300 border-primary/30 shadow-[0_0_15px_-5px_rgba(168,85,247,0.3)]'
-                        : 'bg-white/5 text-white/80 border-white/10 hover:bg-white/10 hover:text-white hover:border-white/20'
+                        : 'bg-muted/30 dark:bg-white/5 text-foreground/80 border-border/20 dark:border-white/10 hover:bg-muted/50 dark:hover:bg-white/10 hover:text-foreground hover:border-border/40 dark:hover:border-white/20'
                     }
         `}
             >
@@ -93,7 +93,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                             className="absolute top-full left-0 mt-2 w-72 bg-[#0f0518]/95 backdrop-blur-xl rounded-xl border border-white/10 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5),0_0_15px_-5px_rgba(168,85,247,0.2)] overflow-hidden z-50 max-h-[450px] overflow-y-auto custom-scrollbar ring-1 ring-white/5"
                         >
                             <div className="p-2 space-y-1">
-                                <div className="px-3 py-2 text-[10px] font-bold text-white/30 uppercase tracking-widest">
+                                <div className="px-3 py-2 text-[10px] font-bold text-foreground/30 uppercase tracking-widest">
                                     Quick Select
                                 </div>
                                 {presets.map((preset) => (
@@ -123,7 +123,7 @@ export const PresetSelector: React.FC<PresetSelectorProps> = ({
                                                     {preset.category}
                                                 </span>
                                             </div>
-                                            <p className="text-xs text-white/40 group-hover:text-white/60 transition-colors">
+                                            <p className="text-xs text-foreground/40 group-hover:text-foreground/60 transition-colors">
                                                 {preset.description}
                                             </p>
                                         </div>

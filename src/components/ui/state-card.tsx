@@ -56,17 +56,17 @@ export function StateCard({
       role={variant === 'error' ? 'alert' : 'status'}
     >
       <div className="mx-auto flex max-w-xl flex-col items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-foreground/10">
           <Icon
             className={cn(
-              'h-6 w-6 text-white/85',
+              'h-6 w-6 text-foreground/85',
               isLoading && !shouldReduceMotion && 'animate-spin'
             )}
           />
         </div>
-        <h3 className="text-fluid-lg font-semibold text-white">{title}</h3>
+        <h3 className="text-fluid-lg font-semibold text-foreground">{title}</h3>
         {description ? (
-          <p className="text-fluid-sm text-white/70 max-w-[32rem]">{description}</p>
+          <p className="text-fluid-sm text-muted-foreground max-w-[32rem]">{description}</p>
         ) : null}
         {action ? (
           <Button
