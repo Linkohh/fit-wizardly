@@ -106,65 +106,101 @@ export default function Index() {
         <div className="h-40 rounded-2xl bg-muted/20 animate-pulse" />
       </div>}>
         <div className={cn(
-          "container-content pb-4 lg:py-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200",
-          nativeApp ? "pt-10" : "pt-8"
+          "container-content pb-4 lg:py-6 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200",
+          nativeApp ? "pt-4" : "pt-2 lg:pt-4"
         )}>
           <PeriodizationTimeline />
         </div>
       </Suspense>
 
-      {/* BRIDGE: Enhanced Cosmic Transition */}
+      {/* BRIDGE: Premium Luminous Seam — connects workout card to motivation zone */}
       <section
-        className="relative h-48 w-full -mt-[2px] z-30 pointer-events-none overflow-hidden"
+        className="relative h-28 sm:h-32 w-full -mt-[2px] z-30 pointer-events-none overflow-hidden"
         style={{
-          maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%)',
+          maskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%)',
         }}
       >
-        {/* Animated gradient layers */}
-        <motion.div
-          className="absolute inset-0 w-[150%] left-1/2 -translate-x-1/2"
-          animate={{
-            background: [
-              'radial-gradient(ellipse 80% 40% at 50% 50%, rgba(139,92,246,0.15) 0%, transparent 70%)',
-              'radial-gradient(ellipse 90% 45% at 50% 50%, rgba(139,92,246,0.2) 0%, transparent 70%)',
-              'radial-gradient(ellipse 80% 40% at 50% 50%, rgba(139,92,246,0.15) 0%, transparent 70%)',
-            ]
-          }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        />
+        {/* Light mode: all-purple palette, toned down.  Dark mode: full intensity with white core. */}
 
-        {/* Core bloom */}
-        <motion.div
-          className="absolute inset-0 w-[100%] left-1/2 -translate-x-1/2"
-          style={{ background: 'radial-gradient(ellipse 70% 35% at 50% 50%, rgba(236,72,153,0.25) 0%, transparent 60%)' }}
-          animate={{ opacity: [0.8, 1, 0.8], scale: [1, 1.05, 1] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        />
+        {/* Light-mode layers — purple-only, softer intensity */}
+        <div className="absolute inset-0 dark:hidden">
+          <div
+            className="absolute inset-0 w-[130%] left-1/2 -translate-x-1/2"
+            style={{ background: 'radial-gradient(ellipse 50% 12% at 50% 50%, rgba(157,78,255,0.25) 0%, rgba(157,78,255,0.06) 50%, transparent 100%)' }}
+          />
+          <motion.div
+            className="absolute inset-0 w-[75%] left-1/2 -translate-x-1/2"
+            animate={{ opacity: [0.6, 0.9, 0.6], scaleX: [1, 1.02, 1] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            style={{ background: 'radial-gradient(ellipse 40% 3px at 50% 50%, rgba(139,92,246,0.8) 0%, rgba(139,92,246,0.3) 30%, transparent 70%)' }}
+          />
+          <motion.div
+            className="absolute inset-0 w-[75%] left-1/2 -translate-x-1/2"
+            animate={{ x: ['-100%', '100%'], opacity: [0, 0.45, 0.45, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: [0.4, 0, 0.2, 1], repeatDelay: 2 }}
+            style={{ background: 'radial-gradient(ellipse 10% 4px at 50% 50%, rgba(139,92,246,0.6) 0%, rgba(139,92,246,0.15) 40%, transparent 100%)' }}
+          />
+        </div>
 
-        {/* Bright horizon line */}
-        <motion.div
-          className="absolute inset-0 w-[80%] h-full left-1/2 -translate-x-1/2"
-          style={{ background: 'radial-gradient(ellipse 60% 3px at 50% 50%, rgba(255,255,255,0.9) 0%, transparent 70%)' }}
-          animate={{ opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        />
-
-        {/* Secondary glow */}
-        <div
-          className="absolute inset-0 w-[120%] left-1/2 -translate-x-1/2"
-          style={{ background: 'radial-gradient(ellipse 50% 25% at 50% 50%, rgba(168,85,247,0.1) 0%, transparent 60%)' }}
-        />
+        {/* Dark-mode layers — full chromatic depth with luminous white core */}
+        <div className="absolute inset-0 hidden dark:block">
+          {/* Atmospheric haze */}
+          <div
+            className="absolute inset-0 w-[140%] left-1/2 -translate-x-1/2"
+            style={{ background: 'radial-gradient(ellipse 60% 80% at 50% 50%, rgba(157,78,255,0.06) 0%, transparent 70%)' }}
+          />
+          {/* Diffuse blob — wide warm bloom behind everything for atmosphere */}
+          <motion.div
+            className="absolute inset-0 w-[120%] left-1/2 -translate-x-1/2"
+            animate={{ opacity: [0.7, 1, 0.7], scale: [1, 1.05, 1] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            style={{ background: 'radial-gradient(ellipse 70% 40% at 50% 50%, rgba(236,72,153,0.22) 0%, rgba(168,85,247,0.08) 50%, transparent 65%)' }}
+          />
+          {/* Primary bloom */}
+          <motion.div
+            className="absolute inset-0 w-[130%] left-1/2 -translate-x-1/2"
+            animate={{ opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            style={{ background: 'radial-gradient(ellipse 50% 12% at 50% 50%, rgba(157,78,255,0.4) 0%, rgba(157,78,255,0.1) 50%, transparent 100%)' }}
+          />
+          {/* Warm chromatic fringe */}
+          <motion.div
+            className="absolute inset-0 w-[110%] left-1/2 -translate-x-1/2"
+            animate={{ opacity: [0.6, 0.85, 0.6] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            style={{ background: 'radial-gradient(ellipse 45% 8% at 50% 53%, rgba(255,77,204,0.2) 0%, transparent 70%)' }}
+          />
+          {/* Cool chromatic fringe */}
+          <div
+            className="absolute inset-0 w-[110%] left-1/2 -translate-x-1/2 opacity-50"
+            style={{ background: 'radial-gradient(ellipse 40% 7% at 50% 47%, rgba(0,255,204,0.12) 0%, transparent 70%)' }}
+          />
+          {/* Razor core — luminous white edge */}
+          <motion.div
+            className="absolute inset-0 w-[75%] left-1/2 -translate-x-1/2"
+            animate={{ opacity: [0.75, 1, 0.75], scaleX: [1, 1.02, 1] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            style={{ background: 'radial-gradient(ellipse 40% 3px at 50% 50%, rgba(220,200,255,0.9) 0%, rgba(157,78,255,0.5) 30%, transparent 70%)' }}
+          />
+          {/* Traveling shimmer */}
+          <motion.div
+            className="absolute inset-0 w-[75%] left-1/2 -translate-x-1/2"
+            animate={{ x: ['-100%', '100%'], opacity: [0, 0.7, 0.7, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: [0.4, 0, 0.2, 1], repeatDelay: 2 }}
+            style={{ background: 'radial-gradient(ellipse 10% 4px at 50% 50%, rgba(255,255,255,0.5) 0%, rgba(220,200,255,0.2) 40%, transparent 100%)' }}
+          />
+        </div>
       </section>
 
       {/* Zone 2: Middle Content - Feature Cards & Motivation */}
-      <div className="bg-gradient-to-b from-background/80 via-purple-50/10 to-background/70 dark:from-[#0F0518]/80 dark:via-[#0a0210]/60 dark:to-[#05010a]/70 pb-10 pt-8 sm:pt-12 relative z-20 w-full -mt-12 sm:-mt-16 md:-mt-20 transition-colors duration-500">
+      <div className="bg-gradient-to-b from-background/15 via-transparent to-background/20 dark:from-[#0F0518]/15 dark:via-transparent dark:to-[#05010a]/12 pb-10 pt-8 sm:pt-12 relative z-20 w-full -mt-8 sm:-mt-10 md:-mt-14 transition-colors duration-500" style={{ contentVisibility: 'auto', containIntrinsicSize: '0 800px' }}>
 
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 bg-[linear-gradient(rgba(139,92,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(139,92,246,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none opacity-50 dark:opacity-30" />
 
         {/* Quote sits comfortably inside the dark background */}
-        <div ref={quoteRef} className="container-content mb-20 pt-12 sm:pt-16 md:pt-20 relative">
+        <div ref={quoteRef} className="container-content mb-20 pt-8 sm:pt-10 md:pt-14 relative">
           <Suspense fallback={<div className="min-h-[180px]" />}>
             {quoteReady ? (
               <motion.div
@@ -172,6 +208,7 @@ export default function Index() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
+                className="glass-card-hero rounded-3xl p-1"
               >
                 <DailyQuote />
               </motion.div>
@@ -203,7 +240,7 @@ export default function Index() {
                     }
                   }
                 }}
-                className="grid md:grid-cols-2 gap-6"
+                className="grid md:grid-cols-2 gap-6 [&>div]:glass-card-hero [&>div]:rounded-3xl [&>div]:p-1"
               >
                 <Suspense fallback={<div className="h-48 rounded-2xl bg-muted/20 animate-pulse" />}>
                   <motion.div
@@ -260,7 +297,7 @@ export default function Index() {
               initial={{ opacity: 0, y: 20 }}
               animate={featuresInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5 }}
-              className="text-center mb-16"
+              className="text-center mb-16 glass-card-hero rounded-3xl px-8 py-10"
             >
               <motion.div
                 initial={{ scale: 0 }}
@@ -334,7 +371,7 @@ export default function Index() {
                 {t('features.cta')}
                 <ArrowRight className="h-5 w-5" />
               </motion.button>
-              <p className="mt-4 text-sm text-muted-foreground">
+              <p className="mt-4 text-sm text-muted-foreground dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]">
                 {t('features.no_credit_card')}
               </p>
             </motion.div>

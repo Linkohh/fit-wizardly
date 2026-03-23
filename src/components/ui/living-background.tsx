@@ -1,92 +1,157 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useThemeStore } from "@/stores/themeStore";
 import { useIsMobile } from "@/hooks/use-mobile";
 import styles from "./living-background.module.css";
 
 const BLOBS = [
   {
-    // Purple — matches primary
-    color: "rgba(150, 110, 225, 0.8)",
-    size: "55vmax",
+    // Purple — aligned with primary HSL(270,90%,65%)
+    color: "rgba(138, 92, 246, 0.75)",
+    size: { desktop: "55vmax", mobile: "33vmax" },
     position: { top: "-15%", left: "-10%" },
   },
   {
-    // Blue/Cyan — matches accent
-    color: "rgba(130, 190, 255, 0.8)",
-    size: "50vmax",
+    // Cyan — true accent cyan-400
+    color: "rgba(34, 211, 238, 0.6)",
+    size: { desktop: "50vmax", mobile: "30vmax" },
     position: { bottom: "-10%", right: "-15%" },
   },
   {
-    // Pink — matches secondary
-    color: "rgba(230, 147, 218, 0.8)",
-    size: "45vmax",
+    // Pink — aligned with secondary HSL(330)
+    color: "rgba(244, 114, 182, 0.65)",
+    size: { desktop: "45vmax", mobile: "27vmax" },
     position: { top: "30%", left: "5%" },
   },
   {
-    // Purple Rose — deep variant
-    color: "rgba(180, 80, 160, 0.75)",
-    size: "40vmax",
+    // Violet — deep depth variant
+    color: "rgba(126, 34, 206, 0.6)",
+    size: { desktop: "40vmax", mobile: "24vmax" },
     position: { top: "10%", right: "5%" },
   },
   {
-    // Rose Pink — vibrant variant
-    color: "rgba(255, 100, 160, 0.75)",
-    size: "48vmax",
+    // Amber — warm anchor (screen-blended with purple = gold shimmer)
+    color: "rgba(251, 146, 60, 0.45)",
+    size: { desktop: "48vmax", mobile: "29vmax" },
     position: { bottom: "5%", left: "20%" },
   },
   {
-    // Indigo — balancing cool tone
-    color: "rgba(90, 100, 240, 0.75)",
-    size: "42vmax",
+    // Teal — cool balance
+    color: "rgba(6, 182, 212, 0.55)",
+    size: { desktop: "42vmax", mobile: "25vmax" },
     position: { top: "50%", left: "45%" },
+  },
+  {
+    // Soft Lavender — midtone fill (desktop only)
+    color: "rgba(196, 167, 255, 0.4)",
+    size: { desktop: "38vmax", mobile: "23vmax" },
+    position: { top: "25%", right: "25%" },
+  },
+  {
+    // Deep Teal — cool counterweight (desktop only)
+    color: "rgba(20, 184, 166, 0.35)",
+    size: { desktop: "36vmax", mobile: "22vmax" },
+    position: { bottom: "20%", right: "10%" },
   },
 ] as const;
 
-const BLOB_CLASSES = [styles.blob1, styles.blob2, styles.blob3, styles.blob4, styles.blob5, styles.blob6] as const;
+const BLOB_CLASSES = [
+  styles.blob1, styles.blob2, styles.blob3, styles.blob4,
+  styles.blob5, styles.blob6, styles.blob7, styles.blob8,
+] as const;
+
+// SVG noise texture for film grain effect (~0.5KB inline)
+const NOISE_SVG = `data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E`;
 
 export function LivingBackground() {
   const { getEffectiveTheme } = useThemeStore();
   const [mounted, setMounted] = useState(false);
   const isMobile = useIsMobile();
   const theme = getEffectiveTheme();
+  const blurLayerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted || isMobile) return null;
+  // Scroll-driven opacity fade (desktop only)
+  useEffect(() => {
+    if (!mounted || isMobile) return;
+
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        const opacity = Math.max(0.3, 0.65 - scrollY / 2500);
+        if (blurLayerRef.current) {
+          blurLayerRef.current.style.opacity = String(opacity);
+        }
+        ticking = false;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [mounted, isMobile]);
+
+  if (!mounted) return null;
 
   const isDark = theme === "dark";
 
+  // Mobile: render 5 blobs; Desktop: render all 8
+  const blobCount = isMobile ? 5 : BLOBS.length;
+  const visibleBlobs = BLOBS.slice(0, blobCount);
+
   return (
     <div
-      className={styles.root}
+      className={`${styles.root} ${isMobile ? styles.rootMobile : ""}`}
       aria-hidden="true"
     >
       {/* Container-level blur: overlapping blobs blend into liquid */}
       <div
-        className={styles.blurLayer}
+        ref={blurLayerRef}
+        className={`${styles.blurLayer} ${isMobile ? styles.blurLayerMobile : ""}`}
         style={{
-          filter: "blur(80px)",
           mixBlendMode: isDark ? "screen" : "normal",
-          opacity: isDark ? 0.5 : 0.55,
-          willChange: "filter",
+          opacity: isMobile
+            ? (isDark ? 0.45 : 0.5)
+            : (isDark ? 0.6 : 0.65),
         }}
       >
-        {BLOBS.map((blob, index) => (
+        {visibleBlobs.map((blob, index) => (
           <div
             key={index}
-            className={`${styles.blob} ${BLOB_CLASSES[index]}`}
+            className={`${styles.blob} ${BLOB_CLASSES[index]} ${isMobile ? styles.blobMobile : ""}`}
             style={{
-              width: blob.size,
-              height: blob.size,
+              width: isMobile ? blob.size.mobile : blob.size.desktop,
+              height: isMobile ? blob.size.mobile : blob.size.desktop,
               backgroundColor: blob.color,
               ...blob.position,
-              willChange: "transform, opacity, filter",
             }}
           />
         ))}
       </div>
+
+      {/* Film grain texture — adds analog depth */}
+      <div
+        className={styles.grain}
+        style={{
+          opacity: isDark ? 0.045 : 0.03,
+          backgroundImage: `url("${NOISE_SVG}")`,
+        }}
+      />
+
+      {/* Atmospheric vignette — focuses attention toward center */}
+      <div
+        className={styles.vignette}
+        style={{
+          background: `radial-gradient(ellipse 70% 60% at 50% 45%, transparent 50%, rgba(0,0,0,${isDark ? 0.25 : 0.12}) 100%)`,
+        }}
+      />
     </div>
   );
 }

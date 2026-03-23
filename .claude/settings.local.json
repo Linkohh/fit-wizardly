@@ -42,7 +42,10 @@
       "Skill(ralph-loop:ralph-loop:*)",
       "mcp__Claude_Preview__preview_start",
       "Skill(commit-commands:commit-push-pr)",
-      "Skill(commit-commands:commit-push-pr:*)"
+      "Skill(commit-commands:commit-push-pr:*)",
+      "mcp__plugin_context-mode_context-mode__ctx_execute_file",
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_execute"
     ]
   },
   "askBeforeRunningTool": false
