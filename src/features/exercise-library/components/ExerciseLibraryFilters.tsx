@@ -31,8 +31,8 @@ export function ExerciseLibraryFilters({
   onClear,
 }: ExerciseLibraryFiltersProps) {
   return (
-    <section className="rounded-[28px] border border-white/10 bg-black/20 p-5 backdrop-blur-xl">
-      <div className="mb-4 flex items-center gap-2 text-white/70">
+    <section className="rounded-[28px] border border-border/50 bg-muted/50 p-5 backdrop-blur-xl dark:border-white/10 dark:bg-black/20">
+      <div className="mb-4 flex items-center gap-2 text-muted-foreground">
         <Filter className="h-4 w-4 text-primary" />
         <p className="text-xs font-semibold uppercase tracking-[0.18em]">Filter the library</p>
       </div>
@@ -42,20 +42,20 @@ export function ExerciseLibraryFilters({
         className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[1.4fr_repeat(3,minmax(0,1fr))_auto]"
       >
         <label className="relative block sm:col-span-2 xl:col-span-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
           <Input
             value={filters.search}
             onChange={(event) => onChange('search', event.target.value)}
             placeholder="Search exercises, muscles, or equipment"
             aria-label="Search exercise library"
-            className="h-11 border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/35"
+            className="h-11 pl-10"
           />
         </label>
 
         <Select value={filters.category} onValueChange={(value) => onChange('category', value)}>
           <SelectTrigger
             aria-label="Filter by category"
-            className="h-11 border-white/10 bg-white/5 text-white"
+            className="h-11"
           >
             <SelectValue placeholder="Category" />
           </SelectTrigger>
@@ -72,7 +72,7 @@ export function ExerciseLibraryFilters({
         <Select value={filters.muscle} onValueChange={(value) => onChange('muscle', value)}>
           <SelectTrigger
             aria-label="Filter by muscle"
-            className="h-11 border-white/10 bg-white/5 text-white"
+            className="h-11"
           >
             <SelectValue placeholder="Primary muscle" />
           </SelectTrigger>
@@ -89,7 +89,7 @@ export function ExerciseLibraryFilters({
         <Select value={filters.equipment} onValueChange={(value) => onChange('equipment', value)}>
           <SelectTrigger
             aria-label="Filter by equipment"
-            className="h-11 border-white/10 bg-white/5 text-white"
+            className="h-11"
           >
             <SelectValue placeholder="Equipment" />
           </SelectTrigger>
@@ -105,7 +105,7 @@ export function ExerciseLibraryFilters({
 
         <Button
           variant="outline"
-          className="h-11 border-white/10 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white sm:col-span-2 xl:col-span-1"
+          className="h-11 sm:col-span-2 xl:col-span-1"
           onClick={onClear}
           aria-label="Clear exercise library filters"
         >
@@ -114,7 +114,7 @@ export function ExerciseLibraryFilters({
         </Button>
       </div>
 
-      <div className="mt-4 flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-white/40">
+      <div className="mt-4 flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground/60">
         <SlidersHorizontal className="h-3.5 w-3.5" />
         Live filters are generated only from verified fields in the active library source.
       </div>

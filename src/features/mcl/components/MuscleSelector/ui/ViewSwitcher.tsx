@@ -35,8 +35,8 @@ export const ViewSwitcher: React.FC<ViewSwitcherProps> = ({
             focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2
             focus:ring-offset-black/50
             ${currentView === view.id
-              ? 'text-white'
-              : 'text-white/50 hover:text-white'
+              ? 'text-foreground'
+              : 'text-muted-foreground hover:text-foreground'
             }
           `}
           aria-pressed={currentView === view.id}

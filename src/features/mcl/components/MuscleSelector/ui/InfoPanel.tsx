@@ -81,11 +81,11 @@ export const InfoPanel: React.FC<InfoPanelProps> = ({
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={getSpringTransition('snappy', reduceMotion)}
-            className="fixed right-0 top-0 h-full w-full max-w-md surface-premium-strong surface-premium-stroke z-50 overflow-y-auto border-l border-white/10"
+            className="fixed right-0 top-0 h-full w-full max-w-md surface-premium-strong surface-premium-stroke z-50 overflow-y-auto border-l border-border/30 dark:border-white/10"
           >
             {/* Header with gradient accent */}
             <div
-              className="sticky top-0 z-10 p-6 pb-4 border-b border-white/10 dark:border-white/5"
+              className="sticky top-0 z-10 p-6 pb-4 border-b border-border/30 dark:border-white/5"
               style={{
                 background: `linear-gradient(135deg, ${groupColor}25 0%, ${groupColor}05 50%, transparent 100%)`,
               }}

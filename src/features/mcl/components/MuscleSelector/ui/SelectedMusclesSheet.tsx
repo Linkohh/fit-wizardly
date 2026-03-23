@@ -36,7 +36,7 @@ export function SelectedMusclesSheet({
         data-testid="muscle-selector-sheet-trigger"
         data-click-feedback="off"
         data-interaction-feedback="explicit"
-        className="fixed right-4 bottom-[calc(env(safe-area-inset-bottom,0px)+5.75rem)] z-40 min-h-[44px] px-4 py-2.5 rounded-full surface-premium-strong surface-premium-stroke text-fluid-sm font-semibold text-white tabular-nums shadow-[var(--elevation-floating)] transition-colors hover:bg-white/15"
+        className="fixed right-4 bottom-[calc(env(safe-area-inset-bottom,0px)+5.75rem)] z-40 min-h-[44px] px-4 py-2.5 rounded-full surface-premium-strong surface-premium-stroke text-fluid-sm font-semibold text-foreground tabular-nums shadow-[var(--elevation-floating)] transition-colors hover:bg-muted/50 dark:hover:bg-white/15"
       >
         Selected ({selectedCount})
       </button>
@@ -54,7 +54,7 @@ export function SelectedMusclesSheet({
       >
         <DrawerContent
           data-testid="muscle-selector-selection-sheet"
-          className="max-h-[88dvh] border-white/10 bg-[#0b0714]/95 text-white backdrop-blur-xl pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)]"
+          className="max-h-[88dvh] border-border/30 dark:border-white/10 bg-background/95 dark:bg-[#0b0714]/95 text-foreground backdrop-blur-xl pb-[calc(env(safe-area-inset-bottom,0px)+0.5rem)]"
         >
           <DrawerTitle className="sr-only">Selected muscles</DrawerTitle>
           {children}

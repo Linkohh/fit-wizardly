@@ -815,12 +815,12 @@
     --gradient-primary: linear-gradient(135deg, hsl(270 80% 60%), hsl(330 85% 60%));
     --gradient-hero: linear-gradient(135deg, hsl(270 80% 60% / 0.1), hsl(330 85% 60% / 0.1));
 
-    /* Premium surfaces */
-    --surface-glass-soft: hsl(270 35% 12% / 0.58);
-    --surface-glass-strong: hsl(268 40% 10% / 0.8);
-    --surface-stroke: hsl(0 0% 100% / 0.16);
-    --elevation-soft: 0 10px 30px -16px hsl(265 75% 15% / 0.55);
-    --elevation-floating: 0 16px 40px -20px hsl(265 75% 12% / 0.72);
+    /* Premium surfaces — light mode */
+    --surface-glass-soft: hsl(270 30% 97% / 0.75);
+    --surface-glass-strong: hsl(270 25% 95% / 0.88);
+    --surface-stroke: hsl(270 20% 80% / 0.3);
+    --elevation-soft: 0 10px 30px -16px hsl(270 30% 50% / 0.08);
+    --elevation-floating: 0 16px 40px -20px hsl(270 30% 50% / 0.12);
 
   }
 
