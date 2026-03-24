@@ -1,9 +1,11 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Header } from '@/components/Header';
 
 const mocks = vi.hoisted(() => ({
+  themeMode: 'system' as 'light' | 'dark' | 'system',
+  resolvedTheme: 'light' as 'light' | 'dark',
   setMode: vi.fn(),
   setMotionTiltActivatedThisSession: vi.fn(),
   toggleTrainerMode: vi.fn(),
@@ -25,10 +27,19 @@ vi.mock('@/lib/platform', () => ({
 }));
 
 vi.mock('@/stores/themeStore', () => ({
-  useThemeStore: () => ({
-    mode: 'dark',
-    setMode: mocks.setMode,
-  }),
+  useThemeStore: (selector?: (state: {
+    mode: 'light' | 'dark' | 'system';
+    setMode: (mode: 'light' | 'dark' | 'system') => void;
+    getEffectiveTheme: () => 'light' | 'dark';
+  }) => unknown) => {
+    const state = {
+      mode: mocks.themeMode,
+      setMode: mocks.setMode,
+      getEffectiveTheme: () => mocks.resolvedTheme,
+    };
+
+    return selector ? selector(state) : state;
+  },
 }));
 
 vi.mock('@/stores/authStore', () => ({
@@ -155,14 +166,24 @@ vi.mock('@/components/ui/sheet', async () => {
   const SheetContent = ({
     className,
     children,
+    glassEffect: _glassEffect,
+    enableGestures: _enableGestures,
+    showDragHandle: _showDragHandle,
+    onGestureClose: _onGestureClose,
+    ...props
   }: {
     className?: string;
     children: React.ReactNode;
+    glassEffect?: boolean;
+    enableGestures?: boolean;
+    showDragHandle?: boolean;
+    onGestureClose?: () => void;
+    [key: string]: unknown;
   }) => {
     const { open } = React.useContext(SheetContext);
     if (!open) return null;
     return (
-      <div data-testid="mobile-sheet-content" className={className}>
+      <div data-testid="mobile-sheet-content" className={className} {...props}>
         {children}
       </div>
     );
@@ -176,6 +197,11 @@ vi.mock('@/components/ui/sheet', async () => {
 });
 
 describe('Header mobile menu layout', () => {
+  beforeEach(() => {
+    mocks.themeMode = 'system';
+    mocks.resolvedTheme = 'light';
+  });
+
   it('tags the brand logo and menu trigger with explicit mobile feedback events', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
@@ -204,19 +230,28 @@ describe('Header mobile menu layout', () => {
 
     const sheetContent = screen.getByTestId('mobile-sheet-content');
     expect(sheetContent).toHaveClass('flex', 'flex-col', 'overflow-hidden');
+    expect(sheetContent.className).toContain('overflow-x-hidden');
     expect(sheetContent.className).toContain('h-[100svh]');
     expect(sheetContent.className).toContain('supports-[height:100dvh]:h-[100dvh]');
     expect(sheetContent.className).toContain('max-h-[100dvh]');
     expect(sheetContent.className).toContain('pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]');
+    expect(sheetContent).toHaveAttribute('data-theme-mode', 'system');
+    expect(sheetContent).toHaveAttribute('data-resolved-theme', 'light');
 
     const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
-    expect(mobileNav).toHaveClass('flex-1', 'min-h-0', 'overflow-y-auto', 'overscroll-contain');
+    expect(mobileNav).toHaveClass('overscroll-contain', 'overflow-x-hidden');
+    expect(screen.getByTestId('mobile-drawer-scroll-area')).toHaveClass(
+      'flex-1',
+      'min-h-0',
+      'overflow-hidden',
+    );
 
     const profile = within(sheetContent).getByTestId('mobile-drawer-profile');
     expect(within(profile).getByText('Coach Nova')).toBeInTheDocument();
     expect(within(profile).getByText('Coach control surface')).toBeInTheDocument();
     expect(within(profile).getByText('Pro Trainer Mode')).toBeInTheDocument();
     expect(within(profile).getByText('⚡')).toBeInTheDocument();
+    expect(within(profile).getByText('System • Light')).toBeInTheDocument();
 
     expect(within(sheetContent).getByText('Clients')).toBeInTheDocument();
     expect(within(sheetContent).getByText('Trainer tools')).toBeInTheDocument();
@@ -242,5 +277,26 @@ describe('Header mobile menu layout', () => {
     });
     expect(mocks.requestPermission).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: /close menu/i })).toBeInTheDocument();
+  });
+
+  it('switches the drawer chrome to dark aetheric mode when the resolved theme is dark', () => {
+    mocks.themeMode = 'dark';
+    mocks.resolvedTheme = 'dark';
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Header />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
+
+    const sheetContent = screen.getByTestId('mobile-sheet-content');
+    expect(sheetContent).toHaveAttribute('data-theme-mode', 'dark');
+    expect(sheetContent).toHaveAttribute('data-resolved-theme', 'dark');
+
+    const profile = within(sheetContent).getByTestId('mobile-drawer-profile');
+    expect(within(profile).getByText('Dark')).toBeInTheDocument();
+    expect(within(profile).getByText('Pro Trainer Mode')).toBeInTheDocument();
   });
 });

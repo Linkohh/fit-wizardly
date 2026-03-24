@@ -43,6 +43,8 @@ describe('mobile drawer model', () => {
       buildDrawerProfileViewModel({
         t,
         isTrainerMode: true,
+        themeMode: 'system',
+        resolvedTheme: 'dark',
         user: {
           email: 'alex@fitwizard.test',
           user_metadata: {
@@ -67,6 +69,8 @@ describe('mobile drawer model', () => {
       subtitle: 'Elite Level • Strength',
       avatarUrl: 'https://cdn.fitwizard.test/alex.png',
       badge: 'Pro Trainer Mode',
+      modeChipLabel: 'Pro Trainer Mode',
+      themeChipLabel: 'System • Dark',
       initials: 'AR',
       avatarEmoji: null,
     });
@@ -75,6 +79,8 @@ describe('mobile drawer model', () => {
       buildDrawerProfileViewModel({
         t,
         isTrainerMode: false,
+        themeMode: 'light',
+        resolvedTheme: 'light',
         user: null,
         profile: null,
         onboarding: {
@@ -88,6 +94,8 @@ describe('mobile drawer model', () => {
       subtitle: 'Personal training mode',
       avatarUrl: null,
       badge: null,
+      modeChipLabel: 'Personal Mode',
+      themeChipLabel: 'Light',
       initials: 'N',
       avatarEmoji: '⚡',
     });
@@ -96,6 +104,8 @@ describe('mobile drawer model', () => {
       buildDrawerProfileViewModel({
         t,
         isTrainerMode: false,
+        themeMode: 'dark',
+        resolvedTheme: 'dark',
         user: null,
         profile: null,
         onboarding: {
@@ -108,6 +118,8 @@ describe('mobile drawer model', () => {
       displayName: 'Guest User',
       subtitle: 'Local Account',
       badge: null,
+      modeChipLabel: 'Personal Mode',
+      themeChipLabel: 'Dark',
       initials: 'GU',
       avatarEmoji: '💪',
     });

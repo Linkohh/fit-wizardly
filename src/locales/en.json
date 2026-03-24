@@ -446,6 +446,7 @@
         "mobile_drawer": {
             "guest_name": "Guest User",
             "guest_subtitle": "Local Account",
+            "personal_mode": "Personal Mode",
             "trainer_badge": "Pro Trainer Mode",
             "trainer_hint": "Switch client tools on or off",
             "trainer_section": "Trainer tools",

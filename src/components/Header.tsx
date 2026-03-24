@@ -5,6 +5,7 @@ import { Moon, Monitor, Smartphone, Sun, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
@@ -59,7 +60,9 @@ export function Header() {
   const profile = useAuthStore((state) => state.profile);
   const onboardingUserData = useOnboardingStore((state) => state.userData);
   const { isTrainerMode } = useTrainerStore();
-  const { mode, setMode } = useThemeStore();
+  const mode = useThemeStore((state) => state.mode);
+  const setMode = useThemeStore((state) => state.setMode);
+  const getEffectiveTheme = useThemeStore((state) => state.getEffectiveTheme);
   const { shouldReduceMotion } = useMotionPreferences();
   const motionTiltEnabled = usePreferencesStore((state) => state.settings.motionTilt !== false);
   const {
@@ -72,6 +75,7 @@ export function Header() {
   const navRef = useRef<HTMLElement>(null);
   const navItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => getEffectiveTheme());
 
   const navItems = useMemo(
     () => buildMobileNavItems({ isTrainerMode, t }),
@@ -84,10 +88,12 @@ export function Header() {
         isTrainerMode,
         onboarding: onboardingUserData,
         profile,
+        resolvedTheme,
         t,
+        themeMode: mode,
         user,
       }),
-    [isTrainerMode, onboardingUserData, profile, t, user],
+    [isTrainerMode, mode, onboardingUserData, profile, resolvedTheme, t, user],
   );
 
   const activeNavPath = useMemo(
@@ -154,6 +160,39 @@ export function Header() {
     (path: string) => isMobileNavPathActive(location.pathname, path),
     [location.pathname],
   );
+
+  useEffect(() => {
+    const applyResolvedTheme = () => {
+      setResolvedTheme(getEffectiveTheme());
+    };
+
+    applyResolvedTheme();
+
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleThemeChange = () => {
+      if (mode === 'system') {
+        applyResolvedTheme();
+      }
+    };
+
+    if ('addEventListener' in mediaQuery) {
+      mediaQuery.addEventListener('change', handleThemeChange);
+    } else {
+      mediaQuery.addListener(handleThemeChange);
+    }
+
+    return () => {
+      if ('removeEventListener' in mediaQuery) {
+        mediaQuery.removeEventListener('change', handleThemeChange);
+      } else {
+        mediaQuery.removeListener(handleThemeChange);
+      }
+    };
+  }, [getEffectiveTheme, mode]);
 
   useEffect(() => {
     const updateIndicator = () => {
@@ -376,13 +415,15 @@ export function Header() {
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="aetheric-drawer w-[20rem] max-w-[92vw] h-[100svh] supports-[height:100dvh]:h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden p-0 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]"
+            className="aetheric-drawer w-[20rem] max-w-[92vw] h-[100svh] supports-[height:100dvh]:h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden overflow-x-hidden p-0 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]"
+            data-theme-mode={mode}
+            data-resolved-theme={resolvedTheme}
             glassEffect
             enableGestures
             showDragHandle
             onGestureClose={() => setMobileOpen(false)}
           >
-            <div className="aetheric-drawer__inner flex min-h-0 flex-1 flex-col px-4 pb-2 pt-10">
+            <div className="aetheric-drawer__inner flex min-h-0 flex-1 flex-col px-4 pb-2 pt-5">
               <motion.section
                 data-testid="mobile-drawer-profile"
                 className="aetheric-drawer__profile shrink-0"
@@ -390,120 +431,129 @@ export function Header() {
                 animate={mobileOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
                 transition={{ duration: 0.28, ease: 'easeOut' }}
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3.5">
                   <div className="aetheric-drawer__avatar-shell shrink-0">
                     <div className="aetheric-drawer__avatar-core">
-                      {renderAvatar('h-full w-full', 'text-2xl font-semibold text-white')}
+                      {renderAvatar('h-full w-full', 'aetheric-drawer__avatar-fallback text-xl font-semibold')}
                     </div>
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="aetheric-drawer__eyebrow">FitWizard</p>
                     <h2 className="aetheric-drawer__title">{drawerProfile.displayName}</h2>
-                    {drawerProfile.badge ? (
-                      <div className="mt-3 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
-                        <span className="aetheric-drawer__badge">{drawerProfile.badge}</span>
-                      </div>
-                    ) : null}
+                    <div
+                      data-testid="mobile-drawer-profile-chips"
+                      className="aetheric-drawer__chip-row"
+                    >
+                      <span className="aetheric-drawer__profile-chip aetheric-drawer__profile-chip--accent">
+                        <span className="aetheric-drawer__badge">{drawerProfile.modeChipLabel}</span>
+                      </span>
+                      <span className="aetheric-drawer__profile-chip">{drawerProfile.themeChipLabel}</span>
+                    </div>
                     <p className="aetheric-drawer__subtitle">{drawerProfile.subtitle}</p>
                   </div>
                 </div>
               </motion.section>
 
-              <motion.nav
-                data-testid="mobile-drawer-nav"
-                className="mt-5 flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1"
-                role="navigation"
-                aria-label="Mobile navigation"
-                initial="hidden"
-                animate={mobileOpen ? 'visible' : 'hidden'}
-                variants={mobileNavVariants}
+              <ScrollArea
+                data-testid="mobile-drawer-scroll-area"
+                className="aetheric-drawer__scroll-area mt-1.5 flex-1 min-h-0 overflow-hidden"
               >
-                <div className="space-y-2 pb-6">
-                  {primaryNavItems.map((item) => {
-                    const active = isActive(item.path);
-                    const Icon = item.icon;
+                <motion.nav
+                  data-testid="mobile-drawer-nav"
+                  className="aetheric-drawer__nav-region flex min-h-full flex-col overflow-x-hidden overscroll-contain pr-1.5"
+                  role="navigation"
+                  aria-label="Mobile navigation"
+                  initial="hidden"
+                  animate={mobileOpen ? 'visible' : 'hidden'}
+                  variants={mobileNavVariants}
+                >
+                  <div className="space-y-1.5 pb-3">
+                    {primaryNavItems.map((item) => {
+                      const active = isActive(item.path);
+                      const Icon = item.icon;
 
-                    return (
-                      <motion.div
-                        key={item.path}
-                        variants={mobileNavItemVariants}
-                        whileTap={{ scale: 0.985, x: -2 }}
-                        whileHover={{ x: 3 }}
-                        className="relative"
-                      >
-                        {active ? (
-                          <motion.div
-                            layoutId="mobile-nav-indicator"
-                            className="nav-indicator absolute left-0 top-1/2 z-10 h-11 w-1 -translate-y-1/2 rounded-full"
-                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                          />
-                        ) : null}
-                        <Link
-                          to={item.path}
-                          aria-current={active ? 'page' : undefined}
-                          className={cn('aetheric-drawer__nav-link', active && 'is-active')}
-                          data-click-feedback-event="navigation"
-                          onClick={() => setMobileOpen(false)}
+                      return (
+                        <motion.div
+                          key={item.path}
+                          variants={mobileNavItemVariants}
+                          whileTap={{ scale: 0.985, x: -2 }}
+                          whileHover={{ x: 3 }}
+                          className="relative"
                         >
-                          <span className={cn('aetheric-drawer__nav-icon', active && 'is-active')}>
-                            <Icon className="h-5 w-5" />
-                          </span>
-                          <span className="min-w-0 flex-1">
-                            <span className="aetheric-drawer__nav-label">{item.label}</span>
-                          </span>
-                        </Link>
-                      </motion.div>
-                    );
-                  })}
-
-                  {trainerNavItems.length > 0 ? (
-                    <motion.section className="pt-4" variants={mobileNavItemVariants}>
-                      <div className="aetheric-drawer__section-label">
-                        <span className="aetheric-drawer__section-line" />
-                        <span>{t('header.mobile_drawer.trainer_section', 'Trainer tools')}</span>
-                      </div>
-                      <div className="mt-3 space-y-2">
-                        {trainerNavItems.map((item) => {
-                          const active = isActive(item.path);
-                          const Icon = item.icon;
-
-                          return (
+                          {active ? (
                             <motion.div
-                              key={item.path}
-                              variants={mobileNavItemVariants}
-                              whileTap={{ scale: 0.985, x: -2 }}
-                              whileHover={{ x: 3 }}
-                              className="relative"
-                            >
-                              {active ? (
-                                <motion.div
-                                  layoutId="mobile-nav-indicator"
-                                  className="nav-indicator absolute left-0 top-1/2 z-10 h-11 w-1 -translate-y-1/2 rounded-full"
-                                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                                />
-                              ) : null}
-                              <Link
-                                to={item.path}
-                                aria-current={active ? 'page' : undefined}
-                                className={cn('aetheric-drawer__nav-link', active && 'is-active')}
-                                data-click-feedback-event="navigation"
-                                onClick={() => setMobileOpen(false)}
+                              layoutId="mobile-nav-indicator"
+                              className="nav-indicator absolute left-0 top-1/2 z-10 h-11 w-1 -translate-y-1/2 rounded-full"
+                              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                            />
+                          ) : null}
+                          <Link
+                            to={item.path}
+                            aria-current={active ? 'page' : undefined}
+                            className={cn('aetheric-drawer__nav-link', active && 'is-active')}
+                            data-click-feedback-event="navigation"
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            <span className={cn('aetheric-drawer__nav-icon', active && 'is-active')}>
+                              <Icon className="h-5 w-5" />
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="aetheric-drawer__nav-label">{item.label}</span>
+                            </span>
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
+
+                    {trainerNavItems.length > 0 ? (
+                      <motion.section className="pt-3" variants={mobileNavItemVariants}>
+                        <div className="aetheric-drawer__section-label">
+                          <span className="aetheric-drawer__section-line" />
+                          <span>{t('header.mobile_drawer.trainer_section', 'Trainer tools')}</span>
+                        </div>
+                        <div className="mt-2.5 space-y-1.5">
+                          {trainerNavItems.map((item) => {
+                            const active = isActive(item.path);
+                            const Icon = item.icon;
+
+                            return (
+                              <motion.div
+                                key={item.path}
+                                variants={mobileNavItemVariants}
+                                whileTap={{ scale: 0.985, x: -2 }}
+                                whileHover={{ x: 3 }}
+                                className="relative"
                               >
-                                <span className={cn('aetheric-drawer__nav-icon', active && 'is-active')}>
-                                  <Icon className="h-5 w-5" />
-                                </span>
-                                <span className="min-w-0 flex-1">
-                                  <span className="aetheric-drawer__nav-label">{item.label}</span>
-                                </span>
-                              </Link>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
-                    </motion.section>
-                  ) : null}
-                </div>
-              </motion.nav>
+                                {active ? (
+                                  <motion.div
+                                    layoutId="mobile-nav-indicator"
+                                    className="nav-indicator absolute left-0 top-1/2 z-10 h-11 w-1 -translate-y-1/2 rounded-full"
+                                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                                  />
+                                ) : null}
+                                <Link
+                                  to={item.path}
+                                  aria-current={active ? 'page' : undefined}
+                                  className={cn('aetheric-drawer__nav-link', active && 'is-active')}
+                                  data-click-feedback-event="navigation"
+                                  onClick={() => setMobileOpen(false)}
+                                >
+                                  <span className={cn('aetheric-drawer__nav-icon', active && 'is-active')}>
+                                    <Icon className="h-5 w-5" />
+                                  </span>
+                                  <span className="min-w-0 flex-1">
+                                    <span className="aetheric-drawer__nav-label">{item.label}</span>
+                                  </span>
+                                </Link>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      </motion.section>
+                    ) : null}
+                  </div>
+                </motion.nav>
+              </ScrollArea>
 
               <motion.div
                 data-testid="mobile-drawer-footer"
@@ -514,45 +564,60 @@ export function Header() {
               >
                 <div className="aetheric-drawer__utility-card">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                       <p className="aetheric-drawer__eyebrow text-xs">
                         {t('header.mobile_drawer.footer_caption', 'Aetheric controls')}
                       </p>
-                      <p className="text-sm font-semibold text-white/88">
+                      <p className="aetheric-drawer__utility-label">
                         {t('header.theme.label', 'Theme')}
                       </p>
                     </div>
-                    <div className="aetheric-drawer__theme-toggle">
-                      <Button
-                        variant={mode === 'light' ? 'default' : 'ghost'}
-                        size="sm"
-                        aria-label={t('header.theme.light', 'Light')}
-                        aria-pressed={mode === 'light'}
-                        onClick={() => setMode('light')}
-                        className="aetheric-drawer__theme-button"
-                      >
-                        <Sun className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant={mode === 'dark' ? 'default' : 'ghost'}
-                        size="sm"
-                        aria-label={t('header.theme.dark', 'Dark')}
-                        aria-pressed={mode === 'dark'}
-                        onClick={() => setMode('dark')}
-                        className="aetheric-drawer__theme-button"
-                      >
-                        <Moon className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant={mode === 'system' ? 'default' : 'ghost'}
-                        size="sm"
-                        aria-label={t('header.theme.system', 'System')}
-                        aria-pressed={mode === 'system'}
-                        onClick={() => setMode('system')}
-                        className="aetheric-drawer__theme-button"
-                      >
-                        <Monitor className="h-4 w-4" />
-                      </Button>
+                    <div className="flex items-center gap-2">
+                      <div className="aetheric-drawer__theme-toggle">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label={t('header.theme.light', 'Light')}
+                          aria-pressed={mode === 'light'}
+                          onClick={() => setMode('light')}
+                          className="aetheric-drawer__theme-button"
+                          data-selected={mode === 'light'}
+                        >
+                          <Sun className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label={t('header.theme.dark', 'Dark')}
+                          aria-pressed={mode === 'dark'}
+                          onClick={() => setMode('dark')}
+                          className="aetheric-drawer__theme-button"
+                          data-selected={mode === 'dark'}
+                        >
+                          <Moon className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          aria-label={t('header.theme.system', 'System')}
+                          aria-pressed={mode === 'system'}
+                          onClick={() => setMode('system')}
+                          className="aetheric-drawer__theme-button"
+                          data-selected={mode === 'system'}
+                        >
+                          <Monitor className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="aetheric-drawer__trainer-switch-cluster">
+                        <Label className="aetheric-drawer__trainer-switch-label">
+                          {t('header.trainer_mode', 'Trainer Mode')}
+                        </Label>
+                        <Switch
+                          checked={isTrainerMode}
+                          aria-label={t('header.trainer_mode', 'Trainer Mode')}
+                          onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -562,10 +627,10 @@ export function Header() {
                         <Smartphone className="h-4 w-4" />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-white/92">
+                        <p className="aetheric-drawer__status-title">
                           {t('profile.motion_tilt', 'Motion Tilt')}
                         </p>
-                        <p className="text-xs text-white/60">{motionTiltStatusLabel}</p>
+                        <p className="aetheric-drawer__status-copy">{motionTiltStatusLabel}</p>
                       </div>
                     </div>
 
@@ -580,7 +645,7 @@ export function Header() {
                       >
                         {isRequestingMotionTiltPermission
                           ? t('profile.motion_tilt_enabling', 'Enabling...')
-                          : `${motionTiltActionLabel} motion tilt`}
+                          : motionTiltActionLabel}
                       </Button>
                     ) : null}
                   </div>
@@ -595,22 +660,6 @@ export function Header() {
                       {t('profile.title', 'Settings & Profile')}
                     </Link>
                   </Button>
-
-                  <div className="mt-4 flex items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <Label className="text-base text-white/82">
-                        {t('header.trainer_mode', 'Trainer Mode')}
-                      </Label>
-                      <p className="text-xs text-white/52">
-                        {t('header.mobile_drawer.trainer_hint', 'Switch client tools on or off')}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={isTrainerMode}
-                      aria-label={t('header.trainer_mode', 'Trainer Mode')}
-                      onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
-                    />
-                  </div>
                 </div>
               </motion.div>
             </div>

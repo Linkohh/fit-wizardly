@@ -47,7 +47,9 @@ export interface DrawerProfileViewModel {
   badge: string | null;
   displayName: string;
   initials: string;
+  modeChipLabel: string;
   subtitle: string;
+  themeChipLabel: string;
 }
 
 interface BuildMobileNavItemsOptions {
@@ -59,7 +61,9 @@ interface BuildDrawerProfileOptions {
   isTrainerMode: boolean;
   onboarding: DrawerOnboarding;
   profile: DrawerProfile;
+  resolvedTheme: 'light' | 'dark';
   t: TranslateFn;
+  themeMode: 'light' | 'dark' | 'system';
   user: DrawerUser;
 }
 
@@ -147,7 +151,9 @@ export function buildDrawerProfileViewModel({
   isTrainerMode,
   onboarding,
   profile,
+  resolvedTheme,
   t,
+  themeMode,
   user,
 }: BuildDrawerProfileOptions): DrawerProfileViewModel {
   const authName = trimText(user?.user_metadata?.full_name);
@@ -170,6 +176,17 @@ export function buildDrawerProfileViewModel({
 
   const avatarUrl = trimText(user?.user_metadata?.avatar_url) ?? trimText(profile?.avatar_url);
   const avatarEmoji = avatarUrl ? null : trimText(onboarding?.avatarEmoji);
+  const modeChipLabel = isTrainerMode
+    ? t('header.mobile_drawer.trainer_badge', 'Pro Trainer Mode')
+    : t('header.mobile_drawer.personal_mode', 'Personal Mode');
+  const resolvedThemeLabel =
+    resolvedTheme === 'dark'
+      ? t('header.theme.dark', 'Dark')
+      : t('header.theme.light', 'Light');
+  const themeChipLabel =
+    themeMode === 'system'
+      ? `${t('header.theme.system', 'System')} • ${resolvedThemeLabel}`
+      : resolvedThemeLabel;
 
   return {
     avatarEmoji,
@@ -177,6 +194,8 @@ export function buildDrawerProfileViewModel({
     badge: isTrainerMode ? t('header.mobile_drawer.trainer_badge', 'Pro Trainer Mode') : null,
     displayName,
     initials: getInitials(displayName),
+    modeChipLabel,
     subtitle,
+    themeChipLabel,
   };
 }

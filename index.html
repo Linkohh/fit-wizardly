@@ -42,7 +42,7 @@
   <script>
     (function () {
       try {
-        const storage = localStorage.getItem('theme-storage');
+        const storage = localStorage.getItem('fitwizard-theme') || localStorage.getItem('theme-storage');
         if (storage) {
           const theme = JSON.parse(storage).state.mode;
           const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
