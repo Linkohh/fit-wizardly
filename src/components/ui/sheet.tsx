@@ -84,15 +84,54 @@ const SheetContent = React.forwardRef<
   showDragHandle = false,
   ...props
 }, ref) => {
-  const _contentRef = React.useRef<HTMLDivElement>(null);
+  const contentRef = React.useRef<HTMLDivElement | null>(null);
   const [dragOffset, setDragOffset] = React.useState(0);
   const [isDragging, setIsDragging] = React.useState(false);
+  const [sheetWidth, setSheetWidth] = React.useState(320);
   const startXRef = React.useRef(0);
   const startYRef = React.useRef(0);
+  const setRefs = React.useCallback((node: HTMLDivElement | null) => {
+    contentRef.current = node;
 
-  // Sheet dimensions for calculations
-  const SHEET_WIDTH = 288;
-  const SNAP_THRESHOLD = SHEET_WIDTH * 0.35;
+    if (typeof ref === "function") {
+      ref(node);
+      return;
+    }
+
+    if (ref) {
+      ref.current = node;
+    }
+  }, [ref]);
+
+  React.useEffect(() => {
+    const node = contentRef.current;
+
+    if (!node) {
+      return undefined;
+    }
+
+    const updateWidth = () => {
+      const nextWidth = node.getBoundingClientRect().width;
+      if (nextWidth > 0) {
+        setSheetWidth(nextWidth);
+      }
+    };
+
+    updateWidth();
+
+    if (typeof ResizeObserver === "undefined") {
+      return undefined;
+    }
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  const snapThreshold = sheetWidth * 0.35;
 
   // Handle touch/pointer events for swipe-to-close
   const handlePointerDown = React.useCallback((e: React.PointerEvent) => {
@@ -119,11 +158,11 @@ const SheetContent = React.forwardRef<
 
     // Only allow swiping in the close direction (right for right-side sheet)
     if (side === "right" && deltaX > 0) {
-      setDragOffset(Math.min(deltaX, SHEET_WIDTH));
+      setDragOffset(Math.min(deltaX, sheetWidth));
     } else if (side === "left" && deltaX < 0) {
-      setDragOffset(Math.max(deltaX, -SHEET_WIDTH));
+      setDragOffset(Math.max(deltaX, -sheetWidth));
     }
-  }, [isDragging, enableGestures, side, SHEET_WIDTH]);
+  }, [isDragging, enableGestures, side, sheetWidth]);
 
   const handlePointerUp = React.useCallback((e: React.PointerEvent) => {
     if (!isDragging) return;
@@ -131,7 +170,7 @@ const SheetContent = React.forwardRef<
     (e.target as HTMLElement).releasePointerCapture(e.pointerId);
     setIsDragging(false);
 
-    const shouldClose = Math.abs(dragOffset) > SNAP_THRESHOLD;
+    const shouldClose = Math.abs(dragOffset) > snapThreshold;
 
     if (shouldClose && onGestureClose) {
       onGestureClose();
@@ -139,7 +178,7 @@ const SheetContent = React.forwardRef<
 
     // Reset drag offset
     setDragOffset(0);
-  }, [isDragging, dragOffset, SNAP_THRESHOLD, onGestureClose]);
+  }, [isDragging, dragOffset, snapThreshold, onGestureClose]);
 
   // Calculate transform based on drag
   const getTransformStyle = (): React.CSSProperties => {
@@ -155,7 +194,7 @@ const SheetContent = React.forwardRef<
   const getOpacityStyle = (): React.CSSProperties => {
     if (!enableGestures || dragOffset === 0) return {};
 
-    const opacity = 1 - (Math.abs(dragOffset) / SHEET_WIDTH) * 0.4;
+    const opacity = 1 - (Math.abs(dragOffset) / sheetWidth) * 0.4;
     return { opacity };
   };
 
@@ -163,7 +202,7 @@ const SheetContent = React.forwardRef<
     <SheetPortal>
       <SheetOverlay enableBlur={enableBlur} />
       <SheetPrimitive.Content
-        ref={ref}
+        ref={setRefs}
         className={cn(
           sheetVariants({ side }),
           glassEffect && "sheet-glass sheet-inner-glow",

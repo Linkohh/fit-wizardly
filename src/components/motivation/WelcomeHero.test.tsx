@@ -21,13 +21,21 @@ type HeroTiltResult = {
 const mocks = vi.hoisted(() => ({
   shouldReduceMotion: false,
   motionTilt: true,
+  motionTiltActivatedThisSession: false,
   nativeApp: false,
   isMobile: false,
+  setMotionTiltActivatedThisSession: vi.fn(),
   handlePointerMove: vi.fn(),
   handlePointerLeave: vi.fn(),
   handlePointerUp: vi.fn(),
   handlePointerCancel: vi.fn(),
   enableMotion: vi.fn(async () => 'granted' as const),
+  requestMotionTiltPermission: vi.fn(async () => ({
+    available: true,
+    permission: 'granted' as const,
+    source: 'web' as const,
+  })),
+  wasMotionPermissionGranted: vi.fn(() => false),
   override: {} as Partial<HeroTiltResult>,
   lastUseHeroTiltArgs: null as unknown,
 }));
@@ -70,11 +78,17 @@ vi.mock('@/hooks/use-motion-preferences', () => ({
 }));
 
 vi.mock('@/hooks/useUserPreferences', () => ({
-  usePreferencesStore: (selector: (state: { settings: { motionTilt?: boolean } }) => unknown) =>
+  usePreferencesStore: (selector: (state: {
+    settings: { motionTilt?: boolean };
+    motionTiltActivatedThisSession: boolean;
+    setMotionTiltActivatedThisSession: (value: boolean) => void;
+  }) => unknown) =>
     selector({
       settings: {
         motionTilt: mocks.motionTilt,
       },
+      motionTiltActivatedThisSession: mocks.motionTiltActivatedThisSession,
+      setMotionTiltActivatedThisSession: mocks.setMotionTiltActivatedThisSession,
     }),
 }));
 
@@ -84,6 +98,11 @@ vi.mock('@/hooks/use-mobile', () => ({
 
 vi.mock('@/lib/platform', () => ({
   isNativeApp: () => mocks.nativeApp,
+}));
+
+vi.mock('@/lib/motion-tilt', () => ({
+  requestMotionTiltPermission: () => mocks.requestMotionTiltPermission(),
+  wasMotionPermissionGranted: () => mocks.wasMotionPermissionGranted(),
 }));
 
 vi.mock('./InteractiveWord', () => ({
@@ -107,10 +126,12 @@ describe('WelcomeHero tilt integration', () => {
     vi.clearAllMocks();
     mocks.shouldReduceMotion = false;
     mocks.motionTilt = true;
+    mocks.motionTiltActivatedThisSession = false;
     mocks.nativeApp = false;
     mocks.isMobile = false;
     mocks.override = {};
     mocks.lastUseHeroTiltArgs = null;
+    mocks.wasMotionPermissionGranted.mockReturnValue(false);
   });
 
   it('keeps the hero static on mobile until the user opts in', async () => {
@@ -127,7 +148,8 @@ describe('WelcomeHero tilt integration', () => {
     fireEvent.click(optInButton);
 
     await waitFor(() => {
-      expect(mocks.enableMotion).toHaveBeenCalledWith({ userInitiated: true });
+      expect(mocks.requestMotionTiltPermission).toHaveBeenCalledTimes(1);
+      expect(mocks.setMotionTiltActivatedThisSession).toHaveBeenCalledWith(true);
     });
   });
 

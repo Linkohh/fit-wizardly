@@ -1,10 +1,11 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it, vi } from 'vitest';
 import { Header } from '@/components/Header';
 
 const mocks = vi.hoisted(() => ({
   setMode: vi.fn(),
+  setMotionTiltActivatedThisSession: vi.fn(),
   toggleTrainerMode: vi.fn(),
   requestPermission: vi.fn(async () => ({
     available: true,
@@ -30,13 +31,59 @@ vi.mock('@/stores/themeStore', () => ({
   }),
 }));
 
-vi.mock('@/hooks/useUserPreferences', () => ({
-  usePreferencesStore: (selector: (state: { settings: { motionTilt?: boolean } }) => unknown) =>
+vi.mock('@/stores/authStore', () => ({
+  useAuthStore: (selector: (state: {
+    user: {
+      email: string | null;
+      user_metadata?: {
+        full_name?: string | null;
+        avatar_url?: string | null;
+      } | null;
+    } | null;
+    profile: {
+      display_name: string | null;
+      avatar_url: string | null;
+      experience_level: string | null;
+      primary_goal: string | null;
+    } | null;
+  }) => unknown) =>
     selector({
-      settings: {
-        motionTilt: true,
+      user: null,
+      profile: null,
+    }),
+}));
+
+vi.mock('@/stores/onboardingStore', () => ({
+  useOnboardingStore: (selector: (state: {
+    userData: {
+      displayName: string;
+      avatarEmoji: string;
+      role: 'user' | 'coach';
+    };
+  }) => unknown) =>
+    selector({
+      userData: {
+        displayName: 'Coach Nova',
+        avatarEmoji: '⚡',
+        role: 'coach',
       },
     }),
+}));
+
+vi.mock('@/hooks/useUserPreferences', () => ({
+  usePreferencesStore: Object.assign(
+    (selector: (state: { settings: { motionTilt?: boolean } }) => unknown) =>
+      selector({
+        settings: {
+          motionTilt: true,
+        },
+      }),
+    {
+      getState: () => ({
+        setMotionTiltActivatedThisSession: mocks.setMotionTiltActivatedThisSession,
+      }),
+    },
+  ),
 }));
 
 vi.mock('@/hooks/use-motion-preferences', () => ({
@@ -146,7 +193,7 @@ describe('Header mobile menu layout', () => {
     );
   });
 
-  it('applies viewport-safe sheet sizing and makes the mobile menu scrollable', () => {
+  it('renders the aetheric drawer shell with profile header, trainer section, and sticky footer controls', async () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <Header />
@@ -165,11 +212,34 @@ describe('Header mobile menu layout', () => {
     const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
     expect(mobileNav).toHaveClass('flex-1', 'min-h-0', 'overflow-y-auto', 'overscroll-contain');
 
-    expect(within(sheetContent).getByText('nav.clients')).toBeInTheDocument();
+    const profile = within(sheetContent).getByTestId('mobile-drawer-profile');
+    expect(within(profile).getByText('Coach Nova')).toBeInTheDocument();
+    expect(within(profile).getByText('Coach control surface')).toBeInTheDocument();
+    expect(within(profile).getByText('Pro Trainer Mode')).toBeInTheDocument();
+    expect(within(profile).getByText('⚡')).toBeInTheDocument();
+
+    expect(within(sheetContent).getByText('Clients')).toBeInTheDocument();
+    expect(within(sheetContent).getByText('Trainer tools')).toBeInTheDocument();
     expect(within(sheetContent).getByText('Motion Tilt')).toBeInTheDocument();
     expect(within(sheetContent).getByText('Tap to enable motion tilt')).toBeInTheDocument();
-    expect(within(sheetContent).queryByRole('button', { name: 'Retry' })).not.toBeInTheDocument();
-    fireEvent.click(within(sheetContent).getByRole('button', { name: 'Enable' }));
+    expect(within(sheetContent).getByText('Theme')).toBeInTheDocument();
+
+    const footer = within(sheetContent).getByTestId('mobile-drawer-footer');
+    expect(within(footer).getByText('Settings & Profile')).toBeInTheDocument();
+    expect(within(footer).getByText('Trainer Mode')).toBeInTheDocument();
+    expect(within(footer).getByText('Aetheric controls')).toBeInTheDocument();
+    expect(within(footer).getByRole('switch', { name: 'Trainer Mode' })).toBeChecked();
+
+    const trainerLinks = ['Clients', 'Templates', 'Revenue'];
+    for (const label of trainerLinks) {
+      expect(within(mobileNav).getByRole('link', { name: label })).toBeInTheDocument();
+    }
+
+    fireEvent.click(within(footer).getByRole('button', { name: 'Enable motion tilt' }));
+    await waitFor(() => {
+      expect(mocks.setMotionTiltActivatedThisSession).toHaveBeenNthCalledWith(1, false);
+      expect(mocks.setMotionTiltActivatedThisSession).toHaveBeenNthCalledWith(2, true);
+    });
     expect(mocks.requestPermission).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: /close menu/i })).toBeInTheDocument();
   });

@@ -19,6 +19,8 @@ const mocks = vi.hoisted(() => {
       permission: 'granted' as 'granted' | 'denied',
       source: 'native' as const,
     },
+    markMotionPermissionGranted: vi.fn(),
+    wasMotionPermissionGranted: vi.fn(() => false),
     refreshMotionTiltStatus: vi.fn(async () => state.nativeStatus),
     publishMotionTiltStatus: vi.fn(),
     subscribeToMotionTiltStatus: vi.fn(() => () => {}),
@@ -40,6 +42,8 @@ vi.mock('@/lib/motion-tilt', () => ({
     stop: () => mocks.stop(),
   },
   isNativeMotionTiltSupported: () => mocks.nativeSupported,
+  markMotionPermissionGranted: () => mocks.markMotionPermissionGranted(),
+  wasMotionPermissionGranted: () => mocks.wasMotionPermissionGranted(),
   publishMotionTiltStatus: (...args: unknown[]) => (mocks.publishMotionTiltStatus as (...a: unknown[]) => unknown)(...args),
   refreshMotionTiltStatus: () => mocks.refreshMotionTiltStatus(),
   subscribeToMotionTiltStatus: (...args: unknown[]) => (mocks.subscribeToMotionTiltStatus as (...a: unknown[]) => unknown)(...args),
@@ -72,6 +76,7 @@ describe('useHeroTilt', () => {
       permission: 'granted',
       source: 'native',
     };
+    mocks.wasMotionPermissionGranted.mockReturnValue(false);
   });
 
   afterEach(() => {

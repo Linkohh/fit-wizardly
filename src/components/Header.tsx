@@ -1,31 +1,63 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { useTrainerStore } from '@/stores/trainerStore';
-import { useThemeStore } from '@/stores/themeStore';
-import { usePreferencesStore } from '@/hooks/useUserPreferences';
-import { useMotionPreferences } from '@/hooks/use-motion-preferences';
-import { useMotionTiltStatus } from '@/hooks/use-motion-tilt-status';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { cn, debounce } from '@/lib/utils';
+import { Moon, Monitor, Smartphone, Sun, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
-import { Users, Sun, Moon, Monitor, Smartphone } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
+import { useAuthStore } from '@/stores/authStore';
+import { useOnboardingStore } from '@/stores/onboardingStore';
+import { useTrainerStore } from '@/stores/trainerStore';
+import { useThemeStore } from '@/stores/themeStore';
+import { usePreferencesStore } from '@/hooks/useUserPreferences';
+import { useMotionPreferences } from '@/hooks/use-motion-preferences';
+import { useMotionTiltStatus } from '@/hooks/use-motion-tilt-status';
+import { cn, debounce } from '@/lib/utils';
+import {
+  buildDrawerProfileViewModel,
+  buildMobileNavItems,
+  isMobileNavPathActive,
+} from '@/components/header/mobile-drawer-model';
+
+const mobileNavVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.06,
+      delayChildren: 0.12,
+    },
+  },
+};
+
+const mobileNavItemVariants = {
+  hidden: { opacity: 0, x: -24, scale: 0.96, filter: 'blur(4px)' },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    filter: 'blur(0px)',
+    transition: { type: 'spring', stiffness: 400, damping: 28 },
+  },
+};
 
 export function Header() {
   const location = useLocation();
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const user = useAuthStore((state) => state.user);
+  const profile = useAuthStore((state) => state.profile);
+  const onboardingUserData = useOnboardingStore((state) => state.userData);
   const { isTrainerMode } = useTrainerStore();
   const { mode, setMode } = useThemeStore();
   const { shouldReduceMotion } = useMotionPreferences();
@@ -37,58 +69,41 @@ export function Header() {
     requestPermission: requestMotionTiltPermission,
   } = useMotionTiltStatus();
 
-  // Refs for tracking nav item positions for the sliding indicator
   const navRef = useRef<HTMLElement>(null);
   const navItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
 
-  /* Navigation items with translations - Memoized to prevent re-creation on every render */
-  const navItems = useMemo(() => {
-    const items = [{
-      path: '/',
-      label: t('nav.home')
-    }, {
-      path: '/wizard',
-      label: t('nav.create_plan')
-    }, {
-      path: '/plan',
-      label: t('nav.view_plan')
-    }, {
-      path: '/exercises',
-      label: t('nav.exercises')
-    }, {
-      path: '/history',
-      label: t('nav.history', 'History')
-    }, {
-      path: '/analytics',
-      label: 'Analytics'
-    }, {
-      path: '/circles',
-      label: t('nav.circles')
-    }, {
-      path: '/nutrition',
-      label: 'Nutrition'
-    }];
+  const navItems = useMemo(
+    () => buildMobileNavItems({ isTrainerMode, t }),
+    [isTrainerMode, t],
+  );
 
-    if (isTrainerMode) {
-      items.push({
-        path: '/clients',
-        label: t('nav.clients')
-      });
-      items.push({
-        path: '/templates',
-        label: t('nav.templates', 'Templates')
-      });
-      items.push({
-        path: '/revenue',
-        label: t('nav.revenue', 'Revenue')
-      });
-    }
+  const drawerProfile = useMemo(
+    () =>
+      buildDrawerProfileViewModel({
+        isTrainerMode,
+        onboarding: onboardingUserData,
+        profile,
+        t,
+        user,
+      }),
+    [isTrainerMode, onboardingUserData, profile, t, user],
+  );
 
-    return items;
-  }, [t, isTrainerMode]);
+  const activeNavPath = useMemo(
+    () => navItems.find((item) => isMobileNavPathActive(location.pathname, item.path))?.path ?? null,
+    [location.pathname, navItems],
+  );
 
-  const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
+  const primaryNavItems = useMemo(
+    () => navItems.filter((item) => item.section === 'primary'),
+    [navItems],
+  );
+
+  const trainerNavItems = useMemo(
+    () => navItems.filter((item) => item.section === 'trainer'),
+    [navItems],
+  );
 
   const motionTiltStatusLabel = useMemo(() => {
     if (shouldReduceMotion) {
@@ -112,7 +127,13 @@ export function Header() {
     }
 
     return t('profile.motion_tilt_status_unavailable', 'Unavailable on this device');
-  }, [motionTiltEnabled, motionTiltStatus.available, motionTiltStatus.permission, shouldReduceMotion, t]);
+  }, [
+    motionTiltEnabled,
+    motionTiltStatus.available,
+    motionTiltStatus.permission,
+    shouldReduceMotion,
+    t,
+  ]);
 
   const canRequestMotionTilt =
     motionTiltStatus.available &&
@@ -129,27 +150,36 @@ export function Header() {
       ? t('profile.motion_tilt_retry', 'Retry')
       : t('profile.motion_tilt_enable', 'Enable');
 
-  // Update indicator position when route changes
+  const isActive = useCallback(
+    (path: string) => isMobileNavPathActive(location.pathname, path),
+    [location.pathname],
+  );
+
   useEffect(() => {
     const updateIndicator = () => {
-      const activeItem = navItemRefs.current.get(location.pathname);
+      if (!activeNavPath) {
+        setIndicatorStyle({ left: 0, width: 0 });
+        return;
+      }
+
+      const activeItem = navItemRefs.current.get(activeNavPath);
       const navElement = navRef.current;
 
-      if (activeItem && navElement) {
-        const navRect = navElement.getBoundingClientRect();
-        const itemRect = activeItem.getBoundingClientRect();
-
-        setIndicatorStyle({
-          left: itemRect.left - navRect.left,
-          width: itemRect.width,
-        });
+      if (!activeItem || !navElement) {
+        setIndicatorStyle({ left: 0, width: 0 });
+        return;
       }
+
+      const navRect = navElement.getBoundingClientRect();
+      const itemRect = activeItem.getBoundingClientRect();
+
+      setIndicatorStyle({
+        left: itemRect.left - navRect.left,
+        width: itemRect.width,
+      });
     };
 
-    // Small delay to ensure DOM is updated after route change
     const timeoutId = setTimeout(updateIndicator, 10);
-
-    // Debounced resize handler to prevent layout thrashing
     const handleResize = debounce(updateIndicator, 100);
     window.addEventListener('resize', handleResize);
 
@@ -157,16 +187,45 @@ export function Header() {
       clearTimeout(timeoutId);
       window.removeEventListener('resize', handleResize);
     };
-  }, [location.pathname]);
+  }, [activeNavPath]);
+
+  const handleMotionTiltRequest = () => {
+    usePreferencesStore.getState().setMotionTiltActivatedThisSession(false);
+
+    void requestMotionTiltPermission().then((status) => {
+      if (status.permission === 'granted') {
+        usePreferencesStore.getState().setMotionTiltActivatedThisSession(true);
+      }
+    });
+  };
+
+  const renderAvatar = (sizeClassName: string, fallbackClassName: string) => {
+    if (drawerProfile.avatarUrl) {
+      return (
+        <img
+          src={drawerProfile.avatarUrl}
+          alt={`${drawerProfile.displayName} avatar`}
+          className={cn(sizeClassName, 'h-full w-full object-cover')}
+        />
+      );
+    }
+
+    if (drawerProfile.avatarEmoji) {
+      return <span className={fallbackClassName}>{drawerProfile.avatarEmoji}</span>;
+    }
+
+    return <span className={fallbackClassName}>{drawerProfile.initials}</span>;
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top">
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[100] px-4 py-2 bg-background border border-primary text-primary rounded-md shadow-lg">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[100] px-4 py-2 bg-background border border-primary text-primary rounded-md shadow-lg"
+      >
         {t('a11y.skip_to_content', 'Skip to content')}
       </a>
       <div className="container app-shell-header-height flex items-center justify-between px-4">
-        {/* Logo */}
-        {/* NOTE: Tooltip removed here to prevent potential interference/looping with Link logic */}
         <Link
           to="/"
           className="flex items-center gap-3 touch-target group"
@@ -174,26 +233,28 @@ export function Header() {
         >
           <motion.div
             className="app-shell-header-square flex shrink-0 items-center justify-center overflow-hidden"
-            whileHover={{
-              scale: 1.1,
-              rotate: 0,
-            }}
+            whileHover={{ scale: 1.1, rotate: 0 }}
             whileTap={{ scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 15 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 15 }}
           >
-            <img alt="FitWizard Logo" fetchPriority="high" width="64" height="64" className="h-full w-full object-contain" src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png" />
+            <img
+              alt="FitWizard Logo"
+              fetchPriority="high"
+              width="64"
+              height="64"
+              className="h-full w-full object-contain"
+              src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png"
+            />
           </motion.div>
           <span className="text-3xl font-bold gradient-text hidden lg:inline">FitWizard</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <nav
           ref={navRef}
           className="hidden xl:flex items-center gap-1 relative"
           role="navigation"
           aria-label="Main navigation"
         >
-          {/* Persistent sliding indicator - always mounted, animates position */}
           <motion.div
             className="absolute h-full bg-primary/10 rounded-md pointer-events-none"
             initial={false}
@@ -203,22 +264,24 @@ export function Header() {
               opacity: indicatorStyle.width > 0 ? 1 : 0,
             }}
             transition={{
-              type: "spring",
+              type: 'spring',
               stiffness: 350,
               damping: 30,
             }}
           />
 
-          {navItems.map(item => {
+          {navItems.map((item) => {
             const active = isActive(item.path);
+
             return (
               <Link
                 key={item.path}
                 to={item.path}
+                aria-current={active ? 'page' : undefined}
                 data-click-feedback-event="navigation"
-                ref={(el) => {
-                  if (el) {
-                    navItemRefs.current.set(item.path, el);
+                ref={(element) => {
+                  if (element) {
+                    navItemRefs.current.set(item.path, element);
                   } else {
                     navItemRefs.current.delete(item.path);
                   }
@@ -229,8 +292,8 @@ export function Header() {
                   variant="ghost"
                   size="sm"
                   className={cn(
-                    "relative z-10 touch-target transition-colors duration-200 text-sm xl:text-base xl:px-3 xl:py-2",
-                    active ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"
+                    'relative z-10 touch-target transition-colors duration-200 text-sm xl:text-base xl:px-3 xl:py-2',
+                    active ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground',
                   )}
                 >
                   {item.label}
@@ -240,25 +303,24 @@ export function Header() {
           })}
         </nav>
 
-        {/* Right Side Controls */}
         <div className="hidden xl:flex items-center gap-2 ml-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="touch-target">
                 <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                 <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">Toggle theme</span>
+                <span className="sr-only">{t('header.theme.label', 'Theme')}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setMode("light")}>
-                <Sun className="mr-2 h-4 w-4" /> Light
+              <DropdownMenuItem onClick={() => setMode('light')}>
+                <Sun className="mr-2 h-4 w-4" /> {t('header.theme.light', 'Light')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode("dark")}>
-                <Moon className="mr-2 h-4 w-4" /> Dark
+              <DropdownMenuItem onClick={() => setMode('dark')}>
+                <Moon className="mr-2 h-4 w-4" /> {t('header.theme.dark', 'Dark')}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode("system")}>
-                <Monitor className="mr-2 h-4 w-4" /> System
+              <DropdownMenuItem onClick={() => setMode('system')}>
+                <Monitor className="mr-2 h-4 w-4" /> {t('header.theme.system', 'System')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -266,16 +328,17 @@ export function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="touch-target" aria-label="Profile">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20">
-                  <span className="text-sm font-medium text-primary">U</span>
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20 overflow-hidden">
+                  {renderAvatar('h-full w-full', 'text-xs font-semibold text-primary')}
                 </div>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <div className="flex items-center justify-between px-2 py-2">
-                <span className="text-sm font-medium">Trainer Mode</span>
+                <span className="text-sm font-medium">{t('header.trainer_mode', 'Trainer Mode')}</span>
                 <Switch
                   checked={isTrainerMode}
+                  aria-label={t('header.trainer_mode', 'Trainer Mode')}
                   onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
                 />
               </div>
@@ -285,27 +348,26 @@ export function Header() {
                   className="cursor-pointer w-full"
                   data-click-feedback-event="navigation"
                 >
-                  Settings & Profile
+                  {t('profile.title', 'Settings & Profile')}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        {/* Mobile Menu */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild className="xl:hidden">
             <motion.div
               whileTap={{ scale: 0.92 }}
               whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             >
               <Button
                 variant="ghost"
                 size="icon"
                 className="touch-target"
                 data-click-feedback-event="navigation"
-                aria-label={mobileOpen ? "Close menu" : "Open menu"}
+                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={mobileOpen}
               >
                 <AnimatedMenuIcon isOpen={mobileOpen} size={24} strokeWidth={2} />
@@ -314,174 +376,244 @@ export function Header() {
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="w-72 h-[100svh] supports-[height:100dvh]:h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]"
+            className="aetheric-drawer w-[20rem] max-w-[92vw] h-[100svh] supports-[height:100dvh]:h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden p-0 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]"
             glassEffect
             enableGestures
             showDragHandle
             onGestureClose={() => setMobileOpen(false)}
           >
-            <motion.nav
-              className="flex flex-col gap-2 mt-8 flex-1 min-h-0 overflow-y-auto overscroll-contain"
-              role="navigation"
-              aria-label="Mobile navigation"
-              initial="hidden"
-              animate={mobileOpen ? "visible" : "hidden"}
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.06,
-                    delayChildren: 0.12
-                  }
-                }
-              }}
-            >
-              {navItems.map((item) => {
-                const active = isActive(item.path);
-                return (
-                  <motion.div
-                    key={item.path}
-                    variants={{
-                      hidden: { opacity: 0, x: -24, scale: 0.96, filter: "blur(4px)" },
-                      visible: {
-                        opacity: 1,
-                        x: 0,
-                        scale: 1,
-                        filter: "blur(0px)",
-                        transition: { type: "spring", stiffness: 400, damping: 28 }
-                      }
-                    }}
-                    whileTap={{ scale: 0.97, x: -4 }}
-                    whileHover={{ x: 4 }}
-                    className="relative"
-                  >
-                    {/* Active indicator bar */}
-                    {active && (
-                      <motion.div
-                        layoutId="mobile-nav-indicator"
-                        className="nav-indicator absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full"
-                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      />
-                    )}
-                    <Link
-                      to={item.path}
-                      onClick={() => setMobileOpen(false)}
-                      data-click-feedback-event="navigation"
-                    >
-                      <Button
-                        variant={active ? 'default' : 'ghost'}
-                        className={cn(
-                          "w-full justify-start touch-target menu-item-interactive pl-4",
-                          active && "bg-primary/10 text-primary font-medium"
-                        )}
-                      >
-                        {item.label}
-                      </Button>
-                    </Link>
-                  </motion.div>
-                );
-              })}
-
-              {/* Mobile Theme Selection & Settings */}
-              <motion.div
-                className="mt-4 p-3 rounded-lg bg-secondary/50 backdrop-blur-sm"
-                variants={{
-                  hidden: { opacity: 0, y: 10 },
-                  visible: { opacity: 1, y: 0 }
-                }}
+            <div className="aetheric-drawer__inner flex min-h-0 flex-1 flex-col px-4 pb-2 pt-10">
+              <motion.section
+                data-testid="mobile-drawer-profile"
+                className="aetheric-drawer__profile shrink-0"
+                initial={{ opacity: 0, y: -10 }}
+                animate={mobileOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
+                transition={{ duration: 0.28, ease: 'easeOut' }}
               >
-                <div className="flex items-center justify-between mb-3 px-1">
-                  <span className="text-sm font-medium text-muted-foreground">{t('header.theme.label', 'Theme')}</span>
-                  <div className="flex bg-background/50 rounded-lg p-1">
-                    <Button
-                      variant={mode === 'light' ? 'default' : 'ghost'}
-                      size="sm"
-                      onClick={() => setMode('light')}
-                      className="h-7 w-7 p-0"
-                    >
-                      <Sun className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant={mode === 'dark' ? 'default' : 'ghost'}
-                      size="sm"
-                      onClick={() => setMode('dark')}
-                      className="h-7 w-7 p-0"
-                    >
-                      <Moon className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant={mode === 'system' ? 'default' : 'ghost'}
-                      size="sm"
-                      onClick={() => setMode('system')}
-                      className="h-7 w-7 p-0"
-                    >
-                      <Monitor className="h-3.5 w-3.5" />
-                    </Button>
+                <div className="flex items-start gap-4">
+                  <div className="aetheric-drawer__avatar-shell shrink-0">
+                    <div className="aetheric-drawer__avatar-core">
+                      {renderAvatar('h-full w-full', 'text-2xl font-semibold text-white')}
+                    </div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="aetheric-drawer__eyebrow">FitWizard</p>
+                    <h2 className="aetheric-drawer__title">{drawerProfile.displayName}</h2>
+                    {drawerProfile.badge ? (
+                      <div className="mt-3 inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1">
+                        <span className="aetheric-drawer__badge">{drawerProfile.badge}</span>
+                      </div>
+                    ) : null}
+                    <p className="aetheric-drawer__subtitle">{drawerProfile.subtitle}</p>
                   </div>
                 </div>
+              </motion.section>
 
-                <div className="rounded-xl border border-border/60 bg-background/50 px-3 py-2.5">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-2">
-                      <Smartphone className="mt-0.5 h-4 w-4 text-primary" />
-                      <div className="space-y-0.5">
-                        <p className="text-sm font-medium">
+              <motion.nav
+                data-testid="mobile-drawer-nav"
+                className="mt-5 flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1"
+                role="navigation"
+                aria-label="Mobile navigation"
+                initial="hidden"
+                animate={mobileOpen ? 'visible' : 'hidden'}
+                variants={mobileNavVariants}
+              >
+                <div className="space-y-2 pb-6">
+                  {primaryNavItems.map((item) => {
+                    const active = isActive(item.path);
+                    const Icon = item.icon;
+
+                    return (
+                      <motion.div
+                        key={item.path}
+                        variants={mobileNavItemVariants}
+                        whileTap={{ scale: 0.985, x: -2 }}
+                        whileHover={{ x: 3 }}
+                        className="relative"
+                      >
+                        {active ? (
+                          <motion.div
+                            layoutId="mobile-nav-indicator"
+                            className="nav-indicator absolute left-0 top-1/2 z-10 h-11 w-1 -translate-y-1/2 rounded-full"
+                            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                          />
+                        ) : null}
+                        <Link
+                          to={item.path}
+                          aria-current={active ? 'page' : undefined}
+                          className={cn('aetheric-drawer__nav-link', active && 'is-active')}
+                          data-click-feedback-event="navigation"
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <span className={cn('aetheric-drawer__nav-icon', active && 'is-active')}>
+                            <Icon className="h-5 w-5" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="aetheric-drawer__nav-label">{item.label}</span>
+                          </span>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+
+                  {trainerNavItems.length > 0 ? (
+                    <motion.section className="pt-4" variants={mobileNavItemVariants}>
+                      <div className="aetheric-drawer__section-label">
+                        <span className="aetheric-drawer__section-line" />
+                        <span>{t('header.mobile_drawer.trainer_section', 'Trainer tools')}</span>
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        {trainerNavItems.map((item) => {
+                          const active = isActive(item.path);
+                          const Icon = item.icon;
+
+                          return (
+                            <motion.div
+                              key={item.path}
+                              variants={mobileNavItemVariants}
+                              whileTap={{ scale: 0.985, x: -2 }}
+                              whileHover={{ x: 3 }}
+                              className="relative"
+                            >
+                              {active ? (
+                                <motion.div
+                                  layoutId="mobile-nav-indicator"
+                                  className="nav-indicator absolute left-0 top-1/2 z-10 h-11 w-1 -translate-y-1/2 rounded-full"
+                                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                                />
+                              ) : null}
+                              <Link
+                                to={item.path}
+                                aria-current={active ? 'page' : undefined}
+                                className={cn('aetheric-drawer__nav-link', active && 'is-active')}
+                                data-click-feedback-event="navigation"
+                                onClick={() => setMobileOpen(false)}
+                              >
+                                <span className={cn('aetheric-drawer__nav-icon', active && 'is-active')}>
+                                  <Icon className="h-5 w-5" />
+                                </span>
+                                <span className="min-w-0 flex-1">
+                                  <span className="aetheric-drawer__nav-label">{item.label}</span>
+                                </span>
+                              </Link>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    </motion.section>
+                  ) : null}
+                </div>
+              </motion.nav>
+
+              <motion.div
+                data-testid="mobile-drawer-footer"
+                className="aetheric-drawer__footer sticky bottom-0 mt-auto shrink-0"
+                initial={{ opacity: 0, y: 10 }}
+                animate={mobileOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                transition={{ delay: 0.08, duration: 0.24, ease: 'easeOut' }}
+              >
+                <div className="aetheric-drawer__utility-card">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <p className="aetheric-drawer__eyebrow text-xs">
+                        {t('header.mobile_drawer.footer_caption', 'Aetheric controls')}
+                      </p>
+                      <p className="text-sm font-semibold text-white/88">
+                        {t('header.theme.label', 'Theme')}
+                      </p>
+                    </div>
+                    <div className="aetheric-drawer__theme-toggle">
+                      <Button
+                        variant={mode === 'light' ? 'default' : 'ghost'}
+                        size="sm"
+                        aria-label={t('header.theme.light', 'Light')}
+                        aria-pressed={mode === 'light'}
+                        onClick={() => setMode('light')}
+                        className="aetheric-drawer__theme-button"
+                      >
+                        <Sun className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={mode === 'dark' ? 'default' : 'ghost'}
+                        size="sm"
+                        aria-label={t('header.theme.dark', 'Dark')}
+                        aria-pressed={mode === 'dark'}
+                        onClick={() => setMode('dark')}
+                        className="aetheric-drawer__theme-button"
+                      >
+                        <Moon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant={mode === 'system' ? 'default' : 'ghost'}
+                        size="sm"
+                        aria-label={t('header.theme.system', 'System')}
+                        aria-pressed={mode === 'system'}
+                        onClick={() => setMode('system')}
+                        className="aetheric-drawer__theme-button"
+                      >
+                        <Monitor className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="aetheric-drawer__status-card">
+                    <div className="flex items-start gap-3">
+                      <span className="aetheric-drawer__status-icon">
+                        <Smartphone className="h-4 w-4" />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-white/92">
                           {t('profile.motion_tilt', 'Motion Tilt')}
                         </p>
-                        <p className="text-xs text-muted-foreground">
-                          {motionTiltStatusLabel}
-                        </p>
+                        <p className="text-xs text-white/60">{motionTiltStatusLabel}</p>
                       </div>
                     </div>
 
-                    {showMotionTiltAction && (
+                    {showMotionTiltAction ? (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // Reset first to ensure a false→true transition triggers
-                          // the WelcomeHero effect even if the flag was stale.
-                          usePreferencesStore.getState().setMotionTiltActivatedThisSession(false);
-                          void requestMotionTiltPermission().then((status) => {
-                            if (status.permission === 'granted') {
-                              usePreferencesStore.getState().setMotionTiltActivatedThisSession(true);
-                            }
-                          });
-                        }}
+                        aria-label={`${motionTiltActionLabel} motion tilt`}
+                        className="aetheric-drawer__motion-button"
                         disabled={isRequestingMotionTiltPermission}
-                        className="h-8 rounded-full px-3 text-xs"
+                        onClick={handleMotionTiltRequest}
                       >
                         {isRequestingMotionTiltPermission
                           ? t('profile.motion_tilt_enabling', 'Enabling...')
-                          : motionTiltActionLabel}
+                          : `${motionTiltActionLabel} motion tilt`}
                       </Button>
-                    )}
+                    ) : null}
                   </div>
-                </div>
 
-                <Link
-                  to="/profile"
-                  onClick={() => setMobileOpen(false)}
-                  data-click-feedback-event="navigation"
-                >
-                  <Button variant="default" className="w-full justify-start gap-2">
-                    <Users className="h-4 w-4" />
-                    {t('profile.title', 'Settings & Profile')}
+                  <Button asChild variant="gradient" className="aetheric-drawer__profile-cta">
+                    <Link
+                      to="/profile"
+                      data-click-feedback-event="navigation"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      <Users className="h-4 w-4" />
+                      {t('profile.title', 'Settings & Profile')}
+                    </Link>
                   </Button>
-                </Link>
 
-                <div className="flex items-center justify-between mb-3 px-1 mt-4">
-                  <div className="space-y-0.5">
-                    <Label className="text-base text-muted-foreground">{t('header.trainer_mode', 'Trainer Mode')}</Label>
+                  <div className="mt-4 flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-base text-white/82">
+                        {t('header.trainer_mode', 'Trainer Mode')}
+                      </Label>
+                      <p className="text-xs text-white/52">
+                        {t('header.mobile_drawer.trainer_hint', 'Switch client tools on or off')}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={isTrainerMode}
+                      aria-label={t('header.trainer_mode', 'Trainer Mode')}
+                      onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
+                    />
                   </div>
-                  <Switch
-                    checked={isTrainerMode}
-                    onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
-                  />
                 </div>
               </motion.div>
-            </motion.nav>
+            </div>
           </SheetContent>
         </Sheet>
       </div>

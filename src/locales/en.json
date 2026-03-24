@@ -11,6 +11,10 @@
         "exercises": "Exercises",
         "circles": "Circles",
         "clients": "Clients",
+        "analytics": "Analytics",
+        "nutrition": "Nutrition",
+        "templates": "Templates",
+        "revenue": "Revenue",
         "create_plan": "Create Plan",
         "view_plan": "View Plan"
     },
@@ -438,7 +442,17 @@
             "system": "System",
             "label": "Theme"
         },
-        "trainer_mode": "Trainer Mode"
+        "trainer_mode": "Trainer Mode",
+        "mobile_drawer": {
+            "guest_name": "Guest User",
+            "guest_subtitle": "Local Account",
+            "trainer_badge": "Pro Trainer Mode",
+            "trainer_hint": "Switch client tools on or off",
+            "trainer_section": "Trainer tools",
+            "trainer_subtitle": "Coach control surface",
+            "user_subtitle": "Personal training mode",
+            "footer_caption": "Aetheric controls"
+        }
     },
     "footer": {
         "copyright": "© {{year}} FitWizard. Built with",
