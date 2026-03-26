@@ -48,5 +48,8 @@
       "mcp__plugin_context-mode_context-mode__ctx_execute"
     ]
   },
-  "askBeforeRunningTool": false
+  "askBeforeRunningTool": false,
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
 }
