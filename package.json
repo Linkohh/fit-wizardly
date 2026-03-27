@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:ios": "expo run:ios",
+    "dev:ios": "npm run build && npm run ios:dev",
     "server:dev": "npm --prefix server run dev",
     "server:build": "npm --prefix server run build",
     "server:start": "npm --prefix server run start",
@@ -21,7 +21,7 @@
     "test:playwright": "playwright test",
     "test:playwright:headed": "playwright test --headed",
     "ios:dev": "npx cap run ios",
-    "ios:live": "npx cap run ios -l --host=0.0.0.0 --port=8080",
+    "ios:live": "npx cap run ios -l --host=localhost --port=8080",
     "ios:open": "npx cap open ios",
     "ios:sync": "npx cap sync ios"
   },
