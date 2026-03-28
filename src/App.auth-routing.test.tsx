@@ -140,6 +140,10 @@ vi.mock('@/components/ui/tooltip', () => ({
   TooltipProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+vi.mock('@vercel/analytics/react', () => ({
+  Analytics: () => <div data-testid="vercel-analytics" />,
+}));
+
 vi.mock('./components/OnboardingGuard', () => ({
   OnboardingGuard: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -328,6 +332,13 @@ describe('App auth routing', () => {
     expect(screen.getByText('Header')).toBeInTheDocument();
     expect(screen.getByText('Footer')).toBeInTheDocument();
     expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
+  });
+
+  it('mounts Vercel Analytics once at the app root', async () => {
+    renderAt('/onboarding');
+
+    expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
+    expect(screen.getAllByTestId('vercel-analytics')).toHaveLength(1);
   });
 
   it('uses the native shell offset contract when running inside the app shell', async () => {

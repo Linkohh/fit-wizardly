@@ -1,5 +1,6 @@
 import { AnimatePresence } from "framer-motion";
 import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -459,6 +460,7 @@ const App = () => {
                 </div>
                 <Footer />
               </div>
+              <VercelAnalytics />
             </AuthProvider>
           </ThemeProvider>
         </TooltipProvider>
