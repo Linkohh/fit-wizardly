@@ -177,31 +177,37 @@ export function Profile() {
                                             {mode === 'system' ? 'System' : mode === 'dark' ? 'Dark' : 'Light'}
                                         </p>
                                     </div>
-                                    <div className="flex bg-secondary rounded-lg p-1">
-                                        <Button
-                                            variant={mode === 'light' ? 'default' : 'ghost'}
-                                            size="sm"
+                                    <div className="profile-theme-toggle" data-testid="profile-theme-toggle">
+                                        <button
+                                            type="button"
+                                            aria-label={t('header.theme.light', 'Light')}
+                                            aria-pressed={mode === 'light'}
                                             onClick={() => setMode('light')}
-                                            className="h-8 w-8 p-0"
+                                            className="profile-theme-button"
+                                            data-selected={mode === 'light'}
                                         >
                                             <Sun className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant={mode === 'dark' ? 'default' : 'ghost'}
-                                            size="sm"
+                                        </button>
+                                        <button
+                                            type="button"
+                                            aria-label={t('header.theme.dark', 'Dark')}
+                                            aria-pressed={mode === 'dark'}
                                             onClick={() => setMode('dark')}
-                                            className="h-8 w-8 p-0"
+                                            className="profile-theme-button"
+                                            data-selected={mode === 'dark'}
                                         >
                                             <Moon className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant={mode === 'system' ? 'default' : 'ghost'}
-                                            size="sm"
+                                        </button>
+                                        <button
+                                            type="button"
+                                            aria-label={t('header.theme.system', 'System')}
+                                            aria-pressed={mode === 'system'}
                                             onClick={() => setMode('system')}
-                                            className="h-8 w-8 p-0"
+                                            className="profile-theme-button"
+                                            data-selected={mode === 'system'}
                                         >
                                             <Monitor className="h-4 w-4" />
-                                        </Button>
+                                        </button>
                                     </div>
                                 </div>
 

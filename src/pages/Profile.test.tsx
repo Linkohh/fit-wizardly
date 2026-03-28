@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Profile } from './Profile';
 
 const mocks = vi.hoisted(() => ({
+  themeMode: 'system' as 'light' | 'dark' | 'system',
+  setMode: vi.fn(),
   updateSettings: vi.fn(),
   requestPermission: vi.fn(async () => ({
     available: true,
@@ -22,10 +24,17 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('@/stores/themeStore', () => ({
-  useThemeStore: () => ({
-    mode: 'system',
-    setMode: vi.fn(),
-  }),
+  useThemeStore: (selector?: (state: {
+    mode: 'light' | 'dark' | 'system';
+    setMode: (mode: 'light' | 'dark' | 'system') => void;
+  }) => unknown) => {
+    const state = {
+      mode: mocks.themeMode,
+      setMode: mocks.setMode,
+    };
+
+    return selector ? selector(state) : state;
+  },
 }));
 
 vi.mock('@/hooks/useUserPreferences', () => ({
@@ -104,6 +113,7 @@ vi.mock('sonner', () => ({
 describe('Profile motion tilt controls', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.themeMode = 'system';
   });
 
   it('keeps the motion tilt switch and shows the enable affordance outside the hero', () => {
@@ -117,5 +127,30 @@ describe('Profile motion tilt controls', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Enable' }));
 
     expect(mocks.requestPermission).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the shared aetheric theme icon pill in app settings and dispatches theme changes', () => {
+    render(<Profile />);
+
+    const themeToggle = screen.getByTestId('profile-theme-toggle');
+    const lightButton = screen.getByRole('button', { name: 'Light' });
+    const darkButton = screen.getByRole('button', { name: 'Dark' });
+    const systemButton = screen.getByRole('button', { name: 'System' });
+
+    expect(themeToggle).toHaveClass('profile-theme-toggle');
+    expect(lightButton).toHaveClass('profile-theme-button');
+    expect(darkButton).toHaveClass('profile-theme-button');
+    expect(systemButton).toHaveClass('profile-theme-button');
+    expect(systemButton).toHaveAttribute('data-selected', 'true');
+    expect(lightButton).toHaveAttribute('data-selected', 'false');
+    expect(darkButton).toHaveAttribute('data-selected', 'false');
+
+    fireEvent.click(lightButton);
+    fireEvent.click(darkButton);
+    fireEvent.click(systemButton);
+
+    expect(mocks.setMode).toHaveBeenNthCalledWith(1, 'light');
+    expect(mocks.setMode).toHaveBeenNthCalledWith(2, 'dark');
+    expect(mocks.setMode).toHaveBeenNthCalledWith(3, 'system');
   });
 });
