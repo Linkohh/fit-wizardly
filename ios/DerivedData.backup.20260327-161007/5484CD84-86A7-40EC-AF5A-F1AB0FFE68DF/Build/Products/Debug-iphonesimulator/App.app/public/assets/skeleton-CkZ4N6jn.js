@@ -1,1 +1,0 @@
-import{j as s}from"./vendor-react-DQNoqMdu.js";import{e as i}from"./index-CgZFlqug.js";function n({className:m,variant:e="shimmer",...r}){return s.jsx("div",{className:i("rounded-md",e==="shimmer"?"shimmer-purple animate-shimmer":"animate-pulse bg-muted",m),...r})}export{n as S};
