@@ -198,6 +198,7 @@ vi.mock('@/components/ui/sheet', async () => {
 
 describe('Header mobile menu layout', () => {
   beforeEach(() => {
+    vi.clearAllMocks();
     mocks.themeMode = 'system';
     mocks.resolvedTheme = 'light';
   });
@@ -248,22 +249,37 @@ describe('Header mobile menu layout', () => {
 
     const profile = within(sheetContent).getByTestId('mobile-drawer-profile');
     expect(within(profile).getByText('Coach Nova')).toBeInTheDocument();
-    expect(within(profile).getByText('Coach control surface')).toBeInTheDocument();
-    expect(within(profile).getByText('Pro Trainer Mode')).toBeInTheDocument();
+    expect(within(profile).getByText('Coach workspace')).toBeInTheDocument();
+    expect(within(profile).getByText('Coach Mode')).toBeInTheDocument();
     expect(within(profile).getByText('⚡')).toBeInTheDocument();
-    expect(within(profile).getByText('System • Light')).toBeInTheDocument();
+    expect(within(profile).queryByText('System • Light')).not.toBeInTheDocument();
 
     expect(within(sheetContent).getByText('Clients')).toBeInTheDocument();
-    expect(within(sheetContent).getByText('Trainer tools')).toBeInTheDocument();
+    expect(within(sheetContent).getByText('Coach Tools')).toBeInTheDocument();
     expect(within(sheetContent).getByText('Motion Tilt')).toBeInTheDocument();
     expect(within(sheetContent).getByText('Tap to enable motion tilt')).toBeInTheDocument();
-    expect(within(sheetContent).getByText('Theme')).toBeInTheDocument();
 
     const footer = within(sheetContent).getByTestId('mobile-drawer-footer');
+    const utilityCard = within(footer).getByTestId('mobile-drawer-utility-card');
+    expect(utilityCard).toHaveClass('aetheric-drawer__utility-card');
+
+    const utilityTopRow = within(utilityCard).getByTestId('mobile-drawer-utility-top-row');
+    expect(utilityTopRow).toHaveClass('aetheric-drawer__utility-top-row');
+
+    const utilityActions = within(utilityTopRow).getByTestId('mobile-drawer-utility-actions');
+    expect(utilityActions).toHaveClass('aetheric-drawer__utility-actions');
+
+    const trainerCluster = within(utilityActions).getByTestId('mobile-drawer-trainer-cluster');
+    expect(trainerCluster).toHaveClass('aetheric-drawer__trainer-switch-cluster');
+
     expect(within(footer).getByText('Settings & Profile')).toBeInTheDocument();
-    expect(within(footer).getByText('Trainer Mode')).toBeInTheDocument();
-    expect(within(footer).getByText('Aetheric controls')).toBeInTheDocument();
-    expect(within(footer).getByRole('switch', { name: 'Trainer Mode' })).toBeChecked();
+    expect(within(footer).getByText('Coach Mode')).toBeInTheDocument();
+    expect(within(footer).getByText('FitWizard')).toBeInTheDocument();
+    expect(within(footer).getByText('Quick Controls')).toBeInTheDocument();
+    expect(within(trainerCluster).getByRole('switch', { name: 'Coach Mode' })).toBeChecked();
+    expect(within(footer).getByRole('button', { name: 'Light' })).toBeInTheDocument();
+    expect(within(footer).getByRole('button', { name: 'Dark' })).toBeInTheDocument();
+    expect(within(footer).getByRole('button', { name: 'System' })).toBeInTheDocument();
 
     const trainerLinks = ['Clients', 'Templates', 'Revenue'];
     for (const label of trainerLinks) {
@@ -277,6 +293,26 @@ describe('Header mobile menu layout', () => {
     });
     expect(mocks.requestPermission).toHaveBeenCalledTimes(1);
     expect(screen.getByRole('button', { name: /close menu/i })).toBeInTheDocument();
+  });
+
+  it('dispatches direct theme mode changes from the quick controls buttons', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Header />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
+
+    const footer = screen.getByTestId('mobile-drawer-footer');
+
+    fireEvent.click(within(footer).getByRole('button', { name: 'Light' }));
+    fireEvent.click(within(footer).getByRole('button', { name: 'Dark' }));
+    fireEvent.click(within(footer).getByRole('button', { name: 'System' }));
+
+    expect(mocks.setMode).toHaveBeenNthCalledWith(1, 'light');
+    expect(mocks.setMode).toHaveBeenNthCalledWith(2, 'dark');
+    expect(mocks.setMode).toHaveBeenNthCalledWith(3, 'system');
   });
 
   it('switches the drawer chrome to dark aetheric mode when the resolved theme is dark', () => {
@@ -296,7 +332,7 @@ describe('Header mobile menu layout', () => {
     expect(sheetContent).toHaveAttribute('data-resolved-theme', 'dark');
 
     const profile = within(sheetContent).getByTestId('mobile-drawer-profile');
-    expect(within(profile).getByText('Dark')).toBeInTheDocument();
-    expect(within(profile).getByText('Pro Trainer Mode')).toBeInTheDocument();
+    expect(within(profile).getByText('Coach Mode')).toBeInTheDocument();
+    expect(within(profile).queryByText('System • Dark')).not.toBeInTheDocument();
   });
 });

@@ -49,7 +49,6 @@ export interface DrawerProfileViewModel {
   initials: string;
   modeChipLabel: string;
   subtitle: string;
-  themeChipLabel: string;
 }
 
 interface BuildMobileNavItemsOptions {
@@ -61,9 +60,7 @@ interface BuildDrawerProfileOptions {
   isTrainerMode: boolean;
   onboarding: DrawerOnboarding;
   profile: DrawerProfile;
-  resolvedTheme: 'light' | 'dark';
   t: TranslateFn;
-  themeMode: 'light' | 'dark' | 'system';
   user: DrawerUser;
 }
 
@@ -151,9 +148,7 @@ export function buildDrawerProfileViewModel({
   isTrainerMode,
   onboarding,
   profile,
-  resolvedTheme,
   t,
-  themeMode,
   user,
 }: BuildDrawerProfileOptions): DrawerProfileViewModel {
   const authName = trimText(user?.user_metadata?.full_name);
@@ -169,7 +164,7 @@ export function buildDrawerProfileViewModel({
     detailedSubtitle ||
     trimText(user?.email) ||
     (isTrainerMode
-      ? t('header.mobile_drawer.trainer_subtitle', 'Coach control surface')
+      ? t('header.mobile_drawer.trainer_subtitle', 'Coach workspace')
       : onboardingName
         ? t('header.mobile_drawer.user_subtitle', 'Personal training mode')
         : t('header.mobile_drawer.guest_subtitle', 'Local Account'));
@@ -177,25 +172,16 @@ export function buildDrawerProfileViewModel({
   const avatarUrl = trimText(user?.user_metadata?.avatar_url) ?? trimText(profile?.avatar_url);
   const avatarEmoji = avatarUrl ? null : trimText(onboarding?.avatarEmoji);
   const modeChipLabel = isTrainerMode
-    ? t('header.mobile_drawer.trainer_badge', 'Pro Trainer Mode')
+    ? t('header.mobile_drawer.trainer_badge', 'Coach Mode')
     : t('header.mobile_drawer.personal_mode', 'Personal Mode');
-  const resolvedThemeLabel =
-    resolvedTheme === 'dark'
-      ? t('header.theme.dark', 'Dark')
-      : t('header.theme.light', 'Light');
-  const themeChipLabel =
-    themeMode === 'system'
-      ? `${t('header.theme.system', 'System')} • ${resolvedThemeLabel}`
-      : resolvedThemeLabel;
 
   return {
     avatarEmoji,
     avatarUrl,
-    badge: isTrainerMode ? t('header.mobile_drawer.trainer_badge', 'Pro Trainer Mode') : null,
+    badge: isTrainerMode ? t('header.mobile_drawer.trainer_badge', 'Coach Mode') : null,
     displayName,
     initials: getInitials(displayName),
     modeChipLabel,
     subtitle,
-    themeChipLabel,
   };
 }

@@ -88,12 +88,10 @@ export function Header() {
         isTrainerMode,
         onboarding: onboardingUserData,
         profile,
-        resolvedTheme,
         t,
-        themeMode: mode,
         user,
       }),
-    [isTrainerMode, mode, onboardingUserData, profile, resolvedTheme, t, user],
+    [isTrainerMode, onboardingUserData, profile, t, user],
   );
 
   const activeNavPath = useMemo(
@@ -447,7 +445,6 @@ export function Header() {
                       <span className="aetheric-drawer__profile-chip aetheric-drawer__profile-chip--accent">
                         <span className="aetheric-drawer__badge">{drawerProfile.modeChipLabel}</span>
                       </span>
-                      <span className="aetheric-drawer__profile-chip">{drawerProfile.themeChipLabel}</span>
                     </div>
                     <p className="aetheric-drawer__subtitle">{drawerProfile.subtitle}</p>
                   </div>
@@ -509,7 +506,7 @@ export function Header() {
                       <motion.section className="pt-3" variants={mobileNavItemVariants}>
                         <div className="aetheric-drawer__section-label">
                           <span className="aetheric-drawer__section-line" />
-                          <span>{t('header.mobile_drawer.trainer_section', 'Trainer tools')}</span>
+                          <span>{t('header.mobile_drawer.trainer_section', 'Coach Tools')}</span>
                         </div>
                         <div className="mt-2.5 space-y-1.5">
                           {trainerNavItems.map((item) => {
@@ -562,21 +559,20 @@ export function Header() {
                 animate={mobileOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
                 transition={{ delay: 0.08, duration: 0.24, ease: 'easeOut' }}
               >
-                <div className="aetheric-drawer__utility-card">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="space-y-0.5">
+                <div className="aetheric-drawer__utility-card" data-testid="mobile-drawer-utility-card">
+                  <div className="aetheric-drawer__utility-top-row" data-testid="mobile-drawer-utility-top-row">
+                    <div className="aetheric-drawer__utility-copy space-y-0.5">
                       <p className="aetheric-drawer__eyebrow text-xs">
-                        {t('header.mobile_drawer.footer_caption', 'Aetheric controls')}
+                        {t('header.mobile_drawer.footer_brand', 'FitWizard')}
                       </p>
-                      <p className="aetheric-drawer__utility-label">
-                        {t('header.theme.label', 'Theme')}
+                      <p className="aetheric-drawer__eyebrow aetheric-drawer__eyebrow--body text-xs">
+                        {t('header.mobile_drawer.footer_caption', 'Quick Controls')}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="aetheric-drawer__utility-actions" data-testid="mobile-drawer-utility-actions">
                       <div className="aetheric-drawer__theme-toggle">
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        <button
+                          type="button"
                           aria-label={t('header.theme.light', 'Light')}
                           aria-pressed={mode === 'light'}
                           onClick={() => setMode('light')}
@@ -584,10 +580,9 @@ export function Header() {
                           data-selected={mode === 'light'}
                         >
                           <Sun className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        </button>
+                        <button
+                          type="button"
                           aria-label={t('header.theme.dark', 'Dark')}
                           aria-pressed={mode === 'dark'}
                           onClick={() => setMode('dark')}
@@ -595,10 +590,9 @@ export function Header() {
                           data-selected={mode === 'dark'}
                         >
                           <Moon className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
+                        </button>
+                        <button
+                          type="button"
                           aria-label={t('header.theme.system', 'System')}
                           aria-pressed={mode === 'system'}
                           onClick={() => setMode('system')}
@@ -606,15 +600,19 @@ export function Header() {
                           data-selected={mode === 'system'}
                         >
                           <Monitor className="h-4 w-4" />
-                        </Button>
+                        </button>
                       </div>
-                      <div className="aetheric-drawer__trainer-switch-cluster">
+                      <div
+                        className="aetheric-drawer__trainer-switch-cluster"
+                        data-testid="mobile-drawer-trainer-cluster"
+                      >
                         <Label className="aetheric-drawer__trainer-switch-label">
-                          {t('header.trainer_mode', 'Trainer Mode')}
+                          {t('header.mobile_drawer.trainer_toggle_label', 'Coach Mode')}
                         </Label>
                         <Switch
+                          className="aetheric-drawer__trainer-switch"
                           checked={isTrainerMode}
-                          aria-label={t('header.trainer_mode', 'Trainer Mode')}
+                          aria-label={t('header.mobile_drawer.trainer_toggle_label', 'Coach Mode')}
                           onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
                         />
                       </div>

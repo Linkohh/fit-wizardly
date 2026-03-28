@@ -1,0 +1,1 @@
+import{r as e}from"./vendor-react-DQNoqMdu.js";const r=e.createContext(null);function n(){const t=e.useContext(r);if(!t)throw new Error("useCircle must be used within a CircleLayout");return t}export{r as C,n as u};

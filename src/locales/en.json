@@ -447,12 +447,14 @@
             "guest_name": "Guest User",
             "guest_subtitle": "Local Account",
             "personal_mode": "Personal Mode",
-            "trainer_badge": "Pro Trainer Mode",
+            "trainer_badge": "Coach Mode",
             "trainer_hint": "Switch client tools on or off",
-            "trainer_section": "Trainer tools",
-            "trainer_subtitle": "Coach control surface",
+            "trainer_section": "Coach Tools",
+            "trainer_subtitle": "Coach workspace",
+            "trainer_toggle_label": "Coach Mode",
             "user_subtitle": "Personal training mode",
-            "footer_caption": "Aetheric controls"
+            "footer_brand": "FitWizard",
+            "footer_caption": "Quick Controls"
         }
     },
     "footer": {

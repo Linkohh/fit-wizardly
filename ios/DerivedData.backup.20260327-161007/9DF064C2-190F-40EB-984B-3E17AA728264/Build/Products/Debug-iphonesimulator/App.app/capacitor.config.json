@@ -1,0 +1,11 @@
+{
+	"appId": "com.fitwizardly.app",
+	"appName": "Fit Wizardly",
+	"webDir": "dist",
+	"server": {
+		"url": "http://10.0.0.123:3000"
+	},
+	"packageClassList": [
+		"HapticsPlugin"
+	]
+}

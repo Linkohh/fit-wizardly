@@ -121,8 +121,8 @@ test.describe('mobile header drawer flow', () => {
 
     await expect(page.getByTestId('mobile-drawer-profile')).toBeVisible();
     await expect(page.getByTestId('mobile-drawer-profile').getByText('Codex')).toBeVisible();
-    await expect(page.getByTestId('mobile-drawer-profile').getByText('Pro Trainer Mode')).toBeVisible();
-    await expect(page.getByTestId('mobile-drawer-profile').getByText('System • Light')).toBeVisible();
+    await expect(page.getByTestId('mobile-drawer-profile').getByText('Coach Mode')).toBeVisible();
+    await expect(page.getByTestId('mobile-drawer-profile').getByText('System • Light')).toHaveCount(0);
 
     const lightThemeTokens = await drawer.evaluate((element) => {
       const styles = getComputedStyle(element);
@@ -147,15 +147,18 @@ test.describe('mobile header drawer flow', () => {
     await expect(historyLink).toBeInViewport();
     await expect(analyticsLink).toBeInViewport();
 
-    await expect(drawer.getByText('Trainer tools')).toBeVisible();
+    await expect(drawer.getByText('Coach Tools')).toBeVisible();
 
     const footer = page.getByTestId('mobile-drawer-footer');
-    await expect(footer.getByText('Theme')).toBeVisible();
+    await expect(footer.getByText('FitWizard')).toBeVisible();
     await expect(footer.getByText('Motion Tilt')).toBeVisible();
     await expect(footer.getByText('Settings & Profile')).toBeVisible();
-    await expect(footer.getByText('Trainer Mode')).toBeVisible();
-    await expect(footer.getByText('Aetheric controls')).toBeVisible();
-    await expect(footer.getByRole('switch', { name: /trainer mode/i })).toBeChecked();
+    await expect(footer.getByText('Coach Mode')).toBeVisible();
+    await expect(footer.getByText('Quick Controls')).toBeVisible();
+    await expect(footer.getByRole('button', { name: 'Light' })).toBeVisible();
+    await expect(footer.getByRole('button', { name: 'Dark' })).toBeVisible();
+    await expect(footer.getByRole('button', { name: 'System' })).toBeVisible();
+    await expect(footer.getByRole('switch', { name: /coach mode/i })).toBeChecked();
 
     await page.keyboard.press('Escape');
     await expect(drawer).toHaveCount(0);
@@ -169,6 +172,39 @@ test.describe('mobile header drawer flow', () => {
     await expect(page.getByRole('button', { name: /open menu/i })).toBeVisible();
   });
 
+  test('applies direct quick-controls theme selections without misrouting taps', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await seedMobileDrawerState(page, { themeMode: 'system' });
+    await page.goto('/');
+
+    await page.getByRole('button', { name: /open menu/i }).click();
+
+    const drawer = page.getByRole('dialog');
+    const footer = page.getByTestId('mobile-drawer-footer');
+    const lightButton = footer.getByRole('button', { name: 'Light' });
+    const darkButton = footer.getByRole('button', { name: 'Dark' });
+    const systemButton = footer.getByRole('button', { name: 'System' });
+
+    await expect(drawer).toHaveAttribute('data-theme-mode', 'system');
+    await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
+    await expect(systemButton).toHaveAttribute('data-selected', 'true');
+
+    await lightButton.tap();
+    await expect(drawer).toHaveAttribute('data-theme-mode', 'light');
+    await expect(drawer).toHaveAttribute('data-resolved-theme', 'light');
+    await expect(lightButton).toHaveAttribute('data-selected', 'true');
+
+    await darkButton.tap();
+    await expect(drawer).toHaveAttribute('data-theme-mode', 'dark');
+    await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
+    await expect(darkButton).toHaveAttribute('data-selected', 'true');
+
+    await systemButton.tap();
+    await expect(drawer).toHaveAttribute('data-theme-mode', 'system');
+    await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
+    await expect(systemButton).toHaveAttribute('data-selected', 'true');
+  });
+
   test('switches the drawer to dark aetheric styling when the theme resolves dark', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await seedMobileDrawerState(page, { themeMode: 'system' });
@@ -179,7 +215,8 @@ test.describe('mobile header drawer flow', () => {
     const drawer = page.getByRole('dialog');
     await expect(drawer).toHaveAttribute('data-theme-mode', 'system');
     await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
-    await expect(page.getByTestId('mobile-drawer-profile').getByText('System • Dark')).toBeVisible();
+    await expect(page.getByTestId('mobile-drawer-profile').getByText('System • Dark')).toHaveCount(0);
+    await expect(page.getByTestId('mobile-drawer-profile').getByText('Coach Mode')).toBeVisible();
 
     const themeTokens = await drawer.evaluate((element) => {
       const styles = getComputedStyle(element);

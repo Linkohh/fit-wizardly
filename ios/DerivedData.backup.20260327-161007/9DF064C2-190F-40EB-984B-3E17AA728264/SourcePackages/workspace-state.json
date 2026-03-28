@@ -1,0 +1,97 @@
+{
+  "object" : {
+    "artifacts" : [
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "capacitor-swift-pm",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
+          "name" : "capacitor-swift-pm"
+        },
+        "path" : "/Users/lincoggy/Documents/GitHub/fit-wizardly/ios/DerivedData/9DF064C2-190F-40EB-984B-3E17AA728264/SourcePackages/artifacts/capacitor-swift-pm/Capacitor/Capacitor.xcframework",
+        "source" : {
+          "checksum" : "733f538d25f68fdd26952a84a195ee7e5fae66f46b4724dfdabafa9ce88c6e1b",
+          "type" : "remote",
+          "url" : "https://github.com/ionic-team/capacitor-swift-pm/releases/download/8.0.2/Capacitor.xcframework.zip"
+        },
+        "targetName" : "Capacitor"
+      },
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "capacitor-swift-pm",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
+          "name" : "capacitor-swift-pm"
+        },
+        "path" : "/Users/lincoggy/Documents/GitHub/fit-wizardly/ios/DerivedData/9DF064C2-190F-40EB-984B-3E17AA728264/SourcePackages/artifacts/capacitor-swift-pm/Cordova/Cordova.xcframework",
+        "source" : {
+          "checksum" : "356b5d2737629e8083fe15b66ef49260cf8f8b183b152269eab4e5e5e5690f4f",
+          "type" : "remote",
+          "url" : "https://github.com/ionic-team/capacitor-swift-pm/releases/download/8.0.2/Cordova.xcframework.zip"
+        },
+        "targetName" : "Cordova"
+      }
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "capacitor-swift-pm",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/ionic-team/capacitor-swift-pm.git",
+          "name" : "capacitor-swift-pm"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "13a39179b3df796f3bb2e70c47ccdd92593f34d2",
+            "version" : "8.0.2"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "capacitor-swift-pm"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "capapp-spm",
+          "kind" : "fileSystem",
+          "location" : "/Users/lincoggy/Documents/GitHub/fit-wizardly/ios/App/CapApp-SPM",
+          "name" : "CapApp-SPM"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/lincoggy/Documents/GitHub/fit-wizardly/ios/App/CapApp-SPM"
+        },
+        "subpath" : "capapp-spm"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "haptics",
+          "kind" : "fileSystem",
+          "location" : "/Users/lincoggy/Documents/GitHub/fit-wizardly/node_modules/@capacitor/haptics",
+          "name" : "haptics"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/lincoggy/Documents/GitHub/fit-wizardly/node_modules/@capacitor/haptics"
+        },
+        "subpath" : "haptics"
+      }
+    ],
+    "prebuilts" : [
+
+    ]
+  },
+  "version" : 7
+}

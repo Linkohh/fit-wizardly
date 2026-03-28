@@ -1543,6 +1543,10 @@
   text-transform: uppercase;
 }
 
+.aetheric-drawer__eyebrow--body {
+  color: var(--aetheric-text);
+}
+
 .aetheric-drawer__title {
   margin-top: 0.2rem;
   font-size: clamp(1.18rem, 3vw, 1.45rem);
@@ -1779,23 +1783,79 @@
 }
 
 .aetheric-drawer__footer {
-  padding-top: 0.28rem;
-  background: linear-gradient(180deg, rgba(246, 240, 255, 0), rgba(246, 240, 255, 0.8) 24%, rgba(246, 240, 255, 0.97) 100%);
+  position: relative;
+  isolation: isolate;
+  padding: 0.28rem 0.08rem 0.06rem;
+  background: transparent;
+}
+
+.aetheric-drawer__footer::before {
+  content: '';
+  position: absolute;
+  inset: -1.2rem 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(246, 240, 255, 0) 0%,
+    rgba(246, 240, 255, 0.34) 38%,
+    rgba(246, 240, 255, 0.72) 68%,
+    rgba(246, 240, 255, 0) 100%
+  );
 }
 
 .dark .aetheric-drawer__footer {
-  background: linear-gradient(180deg, rgba(12, 12, 31, 0), rgba(12, 12, 31, 0.82) 24%, rgba(12, 12, 31, 0.98) 100%);
+  background: transparent;
+}
+
+.dark .aetheric-drawer__footer::before {
+  background: linear-gradient(
+    180deg,
+    rgba(12, 12, 31, 0) 0%,
+    rgba(18, 11, 33, 0.38) 38%,
+    rgba(18, 11, 33, 0.72) 68%,
+    rgba(18, 11, 33, 0) 100%
+  );
 }
 
 .aetheric-drawer__utility-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   border-radius: 24px;
-  padding: 0.48rem 0.54rem 0.54rem;
+  padding: 0.5rem 0.54rem 0.54rem;
   background:
     linear-gradient(180deg, rgba(255, 208, 241, 0.48), rgba(249, 242, 255, 0.96) 40%, rgba(240, 233, 252, 0.98));
   border: 1px solid rgba(113, 78, 162, 0.14);
   box-shadow:
     0 18px 40px rgba(72, 46, 118, 0.16),
     0 0 36px rgba(255, 131, 211, 0.12);
+}
+
+.aetheric-drawer__utility-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at top right, rgba(255, 131, 211, 0.22), transparent 54%);
+}
+
+.aetheric-drawer__utility-card::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -1.8rem;
+  height: 3.6rem;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 999px;
+  background: radial-gradient(circle at center, rgba(189, 0, 255, 0.2), rgba(189, 0, 255, 0) 72%);
+  filter: blur(16px);
 }
 
 .dark .aetheric-drawer__utility-card {
@@ -1807,11 +1867,44 @@
     0 0 40px rgba(255, 131, 211, 0.12);
 }
 
+.dark .aetheric-drawer__utility-card::before {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0) 34%),
+    radial-gradient(circle at top right, rgba(208, 111, 255, 0.24), transparent 58%);
+}
+
+.dark .aetheric-drawer__utility-card::after {
+  background: radial-gradient(circle at center, rgba(162, 92, 255, 0.24), rgba(162, 92, 255, 0) 72%);
+}
+
+.aetheric-drawer__utility-top-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.5rem;
+}
+
+.aetheric-drawer__utility-copy {
+  min-width: 0;
+}
+
+.aetheric-drawer__utility-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  justify-self: end;
+  gap: 0.38rem;
+  min-width: 0;
+  max-width: min(100%, 11.9rem);
+}
+
 .aetheric-drawer__theme-toggle {
   display: flex;
   align-items: center;
-  gap: 0.24rem;
-  padding: 0.2rem;
+  flex-shrink: 0;
+  gap: 0.14rem;
+  padding: 0.14rem;
   border-radius: 999px;
   background: rgba(87, 61, 126, 0.08);
   border: 1px solid rgba(87, 61, 126, 0.12);
@@ -1823,18 +1916,38 @@
 }
 
 .aetheric-drawer__theme-button {
-  min-height: 1.72rem !important;
-  width: 1.72rem;
-  height: 1.72rem;
+  appearance: none;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 1.92rem;
+  min-height: 1.92rem !important;
+  width: 1.92rem;
+  height: 1.92rem;
   padding: 0;
   border-radius: 999px;
   position: relative;
-  overflow: visible !important;
+  overflow: hidden;
+  touch-action: manipulation;
+  cursor: pointer;
+  background: transparent;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
   color: rgba(32, 21, 50, 0.66) !important;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
 }
 
 .dark .aetheric-drawer__theme-button {
   color: rgba(255, 255, 255, 0.66) !important;
+}
+
+.aetheric-drawer__theme-button svg {
+  pointer-events: none;
 }
 
 .aetheric-drawer__theme-button:hover {
@@ -1854,8 +1967,14 @@
     0 10px 20px rgba(132, 88, 255, 0.18);
 }
 
+.aetheric-drawer__theme-button:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(132, 88, 255, 0.24),
+    0 0 0 4px rgba(255, 255, 255, 0.7);
+}
+
 /* Extend the touch area to 44px without increasing the compact visual footprint. */
-.aetheric-drawer__theme-button::after,
 .aetheric-drawer__motion-button::after,
 .aetheric-drawer__profile-cta::after {
   content: '';
@@ -1869,35 +1988,49 @@
 }
 
 .aetheric-drawer__trainer-switch-cluster {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: minmax(0, auto) auto;
   align-items: center;
   gap: 0.42rem;
-  padding: 0.18rem 0.22rem 0.18rem 0.5rem;
+  min-height: 2.12rem;
+  min-width: 6.75rem;
+  max-width: 100%;
+  padding: 0.2rem 0.28rem 0.2rem 0.52rem;
   border-radius: 999px;
+  overflow: hidden;
   background: rgba(255, 255, 255, 0.42);
   border: 1px solid rgba(97, 65, 140, 0.12);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
 .dark .aetheric-drawer__trainer-switch-cluster {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .aetheric-drawer__trainer-switch-label {
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.04em;
+  line-height: 0.92;
+  text-align: right;
+  white-space: normal;
   color: var(--aetheric-text);
+}
+
+.aetheric-drawer__trainer-switch {
+  flex-shrink: 0;
 }
 
 .aetheric-drawer__status-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 0.42rem;
-  padding: 0.36rem 0.42rem;
-  border-radius: 14px;
+  gap: 0.42rem;
+  margin-top: 0.38rem;
+  padding: 0.34rem 0.42rem;
+  border-radius: 15px;
   background: rgba(255, 255, 255, 0.56);
   border: 1px solid rgba(97, 65, 140, 0.1);
 }
@@ -1912,22 +2045,22 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 1.55rem;
-  height: 1.55rem;
+  width: 1.44rem;
+  height: 1.44rem;
   border-radius: 999px;
   color: var(--aetheric-secondary);
   background: rgba(255, 131, 211, 0.18);
 }
 
 .aetheric-drawer__utility-label {
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   color: var(--aetheric-text);
 }
 
 .aetheric-drawer__status-title {
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
   line-height: 1.15;
   color: var(--aetheric-text);
@@ -1935,16 +2068,16 @@
 
 .aetheric-drawer__status-copy {
   margin-top: 0.08rem;
-  font-size: 0.64rem;
+  font-size: 0.6rem;
   line-height: 1.1;
   color: var(--aetheric-muted);
 }
 
 .aetheric-drawer__motion-button {
-  min-height: 1.75rem !important;
+  min-height: 1.64rem !important;
   border-radius: 999px !important;
-  padding-inline: 0.48rem !important;
-  font-size: 0.66rem !important;
+  padding-inline: 0.42rem !important;
+  font-size: 0.62rem !important;
   position: relative;
   overflow: visible !important;
   color: var(--aetheric-text) !important;
@@ -1964,15 +2097,15 @@
 
 .aetheric-drawer__profile-cta {
   width: 100%;
-  min-height: 2.24rem !important;
-  margin-top: 0.42rem;
-  border-radius: 16px !important;
+  min-height: 2.08rem !important;
+  margin-top: 0.38rem;
+  border-radius: 18px !important;
   position: relative;
-  overflow: visible !important;
+  overflow: hidden !important;
   justify-content: flex-start !important;
-  gap: 0.48rem !important;
-  padding-inline: 0.72rem !important;
-  box-shadow: 0 8px 20px rgba(189, 0, 255, 0.22);
+  gap: 0.44rem !important;
+  padding-inline: 0.66rem !important;
+  box-shadow: 0 10px 22px rgba(189, 0, 255, 0.18);
 }
 
 .aetheric-drawer__toggle-label {

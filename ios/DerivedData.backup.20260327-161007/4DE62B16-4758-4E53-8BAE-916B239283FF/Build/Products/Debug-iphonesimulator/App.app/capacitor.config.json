@@ -1,0 +1,11 @@
+{
+	"appId": "com.fitwizardly.app",
+	"appName": "Fit Wizardly",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	},
+	"packageClassList": [
+		"HapticsPlugin"
+	]
+}
