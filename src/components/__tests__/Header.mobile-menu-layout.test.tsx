@@ -324,6 +324,36 @@ describe('Header mobile menu layout', () => {
     expect(mocks.setMode).toHaveBeenNthCalledWith(3, 'dark');
   });
 
+  it('uses the shared compact theme pill in the desktop header and dispatches theme changes in light-system-dark order', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Header />
+      </MemoryRouter>,
+    );
+
+    const desktopThemeToggle = screen.getByTestId('desktop-header-theme-toggle');
+    const [lightButton, systemButton, darkButton] = within(desktopThemeToggle).getAllByRole('button');
+
+    expect(desktopThemeToggle).toHaveClass('header-theme-toggle');
+    expect([lightButton, systemButton, darkButton].map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Light',
+      'System',
+      'Dark',
+    ]);
+    expect(lightButton).toHaveClass('header-theme-button');
+    expect(systemButton).toHaveClass('header-theme-button');
+    expect(darkButton).toHaveClass('header-theme-button');
+    expect(systemButton).toHaveAttribute('data-selected', 'true');
+
+    fireEvent.click(lightButton);
+    fireEvent.click(systemButton);
+    fireEvent.click(darkButton);
+
+    expect(mocks.setMode).toHaveBeenNthCalledWith(1, 'light');
+    expect(mocks.setMode).toHaveBeenNthCalledWith(2, 'system');
+    expect(mocks.setMode).toHaveBeenNthCalledWith(3, 'dark');
+  });
+
   it('switches the drawer chrome to dark aetheric mode when the resolved theme is dark', () => {
     mocks.themeMode = 'dark';
     mocks.resolvedTheme = 'dark';

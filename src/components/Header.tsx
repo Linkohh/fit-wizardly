@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Monitor, Moon, Smartphone, Sun, Users } from 'lucide-react';
+import { Smartphone, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -342,26 +342,13 @@ export function Header() {
         </nav>
 
         <div className="hidden xl:flex items-center gap-2 ml-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="touch-target">
-                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">{t('header.theme.label', 'Theme')}</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setMode('light')}>
-                <Sun className="mr-2 h-4 w-4" /> {t('header.theme.light', 'Light')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode('dark')}>
-                <Moon className="mr-2 h-4 w-4" /> {t('header.theme.dark', 'Dark')}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setMode('system')}>
-                <Monitor className="mr-2 h-4 w-4" /> {t('header.theme.system', 'System')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ThemeModePill
+            mode={mode}
+            onChange={setMode}
+            containerClassName="header-theme-toggle"
+            buttonClassName="header-theme-button"
+            testId="desktop-header-theme-toggle"
+          />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

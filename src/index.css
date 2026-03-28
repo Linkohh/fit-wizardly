@@ -2187,7 +2187,8 @@
 }
 
 .aetheric-drawer__theme-toggle,
-.profile-theme-toggle {
+.profile-theme-toggle,
+.header-theme-toggle {
   display: flex;
   align-items: center;
   flex-shrink: 0;
@@ -2199,13 +2200,29 @@
 }
 
 .dark .aetheric-drawer__theme-toggle,
-.dark .profile-theme-toggle {
+.dark .profile-theme-toggle,
+.dark .header-theme-toggle {
   background: rgba(20, 14, 37, 0.55);
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+.header-theme-toggle {
+  gap: 0.12rem;
+  padding: 0.12rem;
+  background: rgba(87, 61, 126, 0.06);
+  border-color: rgba(87, 61, 126, 0.1);
+  box-shadow: 0 10px 24px rgba(34, 19, 58, 0.06);
+}
+
+.dark .header-theme-toggle {
+  background: rgba(16, 12, 31, 0.56);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.22);
+}
+
 .aetheric-drawer__theme-button,
-.profile-theme-button {
+.profile-theme-button,
+.header-theme-button {
   appearance: none;
   border: 0;
   display: inline-flex;
@@ -2233,28 +2250,33 @@
 }
 
 .dark .aetheric-drawer__theme-button,
-.dark .profile-theme-button {
+.dark .profile-theme-button,
+.dark .header-theme-button {
   color: rgba(255, 255, 255, 0.66) !important;
 }
 
 .aetheric-drawer__theme-button svg,
-.profile-theme-button svg {
+.profile-theme-button svg,
+.header-theme-button svg {
   pointer-events: none;
 }
 
 .aetheric-drawer__theme-button:hover,
-.profile-theme-button:hover {
+.profile-theme-button:hover,
+.header-theme-button:hover {
   background: rgba(255, 255, 255, 0.42) !important;
   color: var(--aetheric-text) !important;
 }
 
 .dark .aetheric-drawer__theme-button:hover,
-.dark .profile-theme-button:hover {
+.dark .profile-theme-button:hover,
+.dark .header-theme-button:hover {
   background: rgba(255, 255, 255, 0.08) !important;
 }
 
 .aetheric-drawer__theme-button[data-selected='true'],
-.profile-theme-button[data-selected='true'] {
+.profile-theme-button[data-selected='true'],
+.header-theme-button[data-selected='true'] {
   background: linear-gradient(135deg, rgba(255, 131, 211, 0.9), rgba(132, 88, 255, 0.88)) !important;
   color: #fff !important;
   box-shadow:
@@ -2263,11 +2285,26 @@
 }
 
 .aetheric-drawer__theme-button:focus-visible,
-.profile-theme-button:focus-visible {
+.profile-theme-button:focus-visible,
+.header-theme-button:focus-visible {
   outline: none;
   box-shadow:
     0 0 0 2px rgba(132, 88, 255, 0.24),
     0 0 0 4px rgba(255, 255, 255, 0.7);
+}
+
+.header-theme-button {
+  flex-basis: 1.76rem;
+  min-height: 1.76rem !important;
+  width: 1.76rem;
+  height: 1.76rem;
+  color: rgba(32, 21, 50, 0.6) !important;
+  box-shadow: none;
+}
+
+.header-theme-button svg {
+  width: 0.92rem;
+  height: 0.92rem;
 }
 
 /* Extend the touch area to 44px without increasing the compact visual footprint. */

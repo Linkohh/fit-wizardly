@@ -70,6 +70,52 @@ async function seedMobileDrawerState(
   );
 }
 
+test.describe('desktop header theme controls', () => {
+  test('uses the shared compact theme pill and triggers the global theme transition path', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 980 });
+    await page.emulateMedia({ colorScheme: 'light' });
+    await seedMobileDrawerState(page, { themeMode: 'system' });
+    await page.goto('/');
+
+    const themeToggle = page.getByTestId('desktop-header-theme-toggle');
+    await expect(themeToggle).toBeVisible();
+
+    const themePillOrder = await themeToggle
+      .getByRole('button')
+      .evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label')));
+    expect(themePillOrder).toEqual(['Light', 'System', 'Dark']);
+
+    const lightButton = themeToggle.getByRole('button', { name: 'Light' });
+    const systemButton = themeToggle.getByRole('button', { name: 'System' });
+    const darkButton = themeToggle.getByRole('button', { name: 'Dark' });
+
+    await expect(systemButton).toHaveAttribute('data-selected', 'true');
+
+    const transitionToDark = page.waitForFunction(
+      () => document.documentElement.getAttribute('data-theme-transition') === 'to-dark',
+    );
+    await darkButton.click();
+    await transitionToDark;
+
+    await expect(darkButton).toHaveAttribute('data-selected', 'true');
+    await expect(lightButton).toHaveAttribute('data-selected', 'false');
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.getAttribute('data-theme-transition-context')))
+      .toBeNull();
+
+    await page.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
+
+    const transitionToLight = page.waitForFunction(
+      () => document.documentElement.getAttribute('data-theme-transition') === 'to-light',
+    );
+    await lightButton.click();
+    await transitionToLight;
+
+    await expect(lightButton).toHaveAttribute('data-selected', 'true');
+    await expect(systemButton).toHaveAttribute('data-selected', 'false');
+  });
+});
+
 test.describe('mobile header drawer flow', () => {
   test.use({
     viewport: iPhone13.viewport,
