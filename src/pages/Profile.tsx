@@ -3,9 +3,6 @@ import { motion } from 'framer-motion';
 import {
     User,
     Settings,
-    Moon,
-    Sun,
-    Monitor,
     Volume2,
     VolumeX,
     Vibrate,
@@ -25,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { ThemeModePill } from '@/components/theme/ThemeModePill';
 import { useThemeStore } from '@/stores/themeStore';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { useMotionPreferences } from '@/hooks/use-motion-preferences';
@@ -177,38 +175,13 @@ export function Profile() {
                                             {mode === 'system' ? 'System' : mode === 'dark' ? 'Dark' : 'Light'}
                                         </p>
                                     </div>
-                                    <div className="profile-theme-toggle" data-testid="profile-theme-toggle">
-                                        <button
-                                            type="button"
-                                            aria-label={t('header.theme.light', 'Light')}
-                                            aria-pressed={mode === 'light'}
-                                            onClick={() => setMode('light')}
-                                            className="profile-theme-button"
-                                            data-selected={mode === 'light'}
-                                        >
-                                            <Sun className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            aria-label={t('header.theme.dark', 'Dark')}
-                                            aria-pressed={mode === 'dark'}
-                                            onClick={() => setMode('dark')}
-                                            className="profile-theme-button"
-                                            data-selected={mode === 'dark'}
-                                        >
-                                            <Moon className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            aria-label={t('header.theme.system', 'System')}
-                                            aria-pressed={mode === 'system'}
-                                            onClick={() => setMode('system')}
-                                            className="profile-theme-button"
-                                            data-selected={mode === 'system'}
-                                        >
-                                            <Monitor className="h-4 w-4" />
-                                        </button>
-                                    </div>
+                                    <ThemeModePill
+                                        mode={mode}
+                                        onChange={setMode}
+                                        containerClassName="profile-theme-toggle"
+                                        buttonClassName="profile-theme-button"
+                                        testId="profile-theme-toggle"
+                                    />
                                 </div>
 
                                 <Separator />

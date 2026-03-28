@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:ios": "npm run build && npm run ios:dev",
+    "dev:ios": "node scripts/dev-ios-live.mjs",
     "server:dev": "npm --prefix server run dev",
     "server:build": "npm --prefix server run build",
     "server:start": "npm --prefix server run start",

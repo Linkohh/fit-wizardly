@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Profile } from './Profile';
 
@@ -133,24 +133,27 @@ describe('Profile motion tilt controls', () => {
     render(<Profile />);
 
     const themeToggle = screen.getByTestId('profile-theme-toggle');
-    const lightButton = screen.getByRole('button', { name: 'Light' });
-    const darkButton = screen.getByRole('button', { name: 'Dark' });
-    const systemButton = screen.getByRole('button', { name: 'System' });
+    const [lightButton, systemButton, darkButton] = within(themeToggle).getAllByRole('button');
 
     expect(themeToggle).toHaveClass('profile-theme-toggle');
+    expect([lightButton, systemButton, darkButton].map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Light',
+      'System',
+      'Dark',
+    ]);
     expect(lightButton).toHaveClass('profile-theme-button');
-    expect(darkButton).toHaveClass('profile-theme-button');
     expect(systemButton).toHaveClass('profile-theme-button');
+    expect(darkButton).toHaveClass('profile-theme-button');
     expect(systemButton).toHaveAttribute('data-selected', 'true');
     expect(lightButton).toHaveAttribute('data-selected', 'false');
     expect(darkButton).toHaveAttribute('data-selected', 'false');
 
     fireEvent.click(lightButton);
-    fireEvent.click(darkButton);
     fireEvent.click(systemButton);
+    fireEvent.click(darkButton);
 
     expect(mocks.setMode).toHaveBeenNthCalledWith(1, 'light');
-    expect(mocks.setMode).toHaveBeenNthCalledWith(2, 'dark');
-    expect(mocks.setMode).toHaveBeenNthCalledWith(3, 'system');
+    expect(mocks.setMode).toHaveBeenNthCalledWith(2, 'system');
+    expect(mocks.setMode).toHaveBeenNthCalledWith(3, 'dark');
   });
 });

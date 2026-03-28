@@ -1,5 +1,5 @@
 import { MemoryRouter, Outlet } from 'react-router-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 
@@ -39,14 +39,16 @@ const mocks = vi.hoisted(() => {
   };
 
   const themeState = {
-    mode: 'light' as const,
-    getEffectiveTheme: () => 'light',
+    mode: 'light' as 'light' | 'dark' | 'system',
+    resolvedTheme: 'light' as 'light' | 'dark',
+    getEffectiveTheme: () => themeState.resolvedTheme,
   };
 
   return {
     authState,
     trainerState,
     themeState,
+    mediaQueryListeners: new Map<string, Set<(event: MediaQueryListEvent) => void>>(),
     platformState: {
       nativeApp: false,
     },
@@ -269,7 +271,10 @@ function resetState() {
   mocks.authState.showAuthModal = false;
   mocks.authState.redirectUrl = null;
   mocks.trainerState.isTrainerMode = false;
+  mocks.themeState.mode = 'light';
+  mocks.themeState.resolvedTheme = 'light';
   mocks.platformState.nativeApp = false;
+  mocks.mediaQueryListeners.clear();
   window.sessionStorage.clear();
   vi.unstubAllEnvs();
   vi.clearAllMocks();
@@ -278,6 +283,34 @@ function resetState() {
 describe('App auth routing', () => {
   beforeEach(() => {
     resetState();
+    vi.useRealTimers();
+
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => {
+        const listeners = mocks.mediaQueryListeners.get(query) ?? new Set<(event: MediaQueryListEvent) => void>();
+        mocks.mediaQueryListeners.set(query, listeners);
+
+        return {
+          matches: query === '(prefers-color-scheme: dark)' ? mocks.themeState.resolvedTheme === 'dark' : false,
+          media: query,
+          onchange: null,
+          addEventListener: vi.fn((_type: string, listener: (event: MediaQueryListEvent) => void) => {
+            listeners.add(listener);
+          }),
+          removeEventListener: vi.fn((_type: string, listener: (event: MediaQueryListEvent) => void) => {
+            listeners.delete(listener);
+          }),
+          addListener: vi.fn((listener: (event: MediaQueryListEvent) => void) => {
+            listeners.add(listener);
+          }),
+          removeListener: vi.fn((listener: (event: MediaQueryListEvent) => void) => {
+            listeners.delete(listener);
+          }),
+          dispatchEvent: vi.fn(),
+        };
+      }),
+    });
   });
 
   it('keeps demo routes available to guests', async () => {
@@ -304,6 +337,310 @@ describe('App auth routing', () => {
 
     expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
     expect(screen.getByTestId('app-shell')).toHaveClass('app-shell-native', 'app-shell-main-offset');
+  });
+
+  it('applies a temporary theme transition hook when the effective theme changes', async () => {
+    vi.useFakeTimers();
+    mocks.themeState.mode = 'system';
+    mocks.themeState.resolvedTheme = 'light';
+
+    render(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(document.documentElement).not.toHaveAttribute('data-theme-transition');
+
+    mocks.themeState.resolvedTheme = 'dark';
+    const listeners = mocks.mediaQueryListeners.get('(prefers-color-scheme: dark)');
+    expect(listeners?.size).toBeGreaterThan(0);
+    act(() => {
+      listeners?.forEach((listener) =>
+        listener({
+          matches: true,
+          media: '(prefers-color-scheme: dark)',
+        } as MediaQueryListEvent),
+      );
+    });
+
+    expect(document.documentElement).toHaveAttribute('data-theme-transition', 'to-dark');
+    expect(screen.getByTestId('app-shell')).toHaveAttribute('data-theme-transition', 'to-dark');
+
+    act(() => {
+      vi.advanceTimersByTime(920);
+    });
+
+    expect(document.documentElement).not.toHaveAttribute('data-theme-transition');
+    expect(screen.getByTestId('app-shell')).not.toHaveAttribute('data-theme-transition');
+  });
+
+  it('uses the root view-transition path when available and no drawer is open', async () => {
+    const finished = new Promise<void>(() => {});
+    const startViewTransition = vi.fn((callback: () => void) => {
+      callback();
+      return { finished };
+    });
+
+    Object.defineProperty(document, 'startViewTransition', {
+      configurable: true,
+      value: startViewTransition,
+    });
+
+    mocks.themeState.mode = 'system';
+    mocks.themeState.resolvedTheme = 'light';
+
+    render(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    mocks.themeState.resolvedTheme = 'dark';
+    const listeners = mocks.mediaQueryListeners.get('(prefers-color-scheme: dark)');
+    act(() => {
+      listeners?.forEach((listener) =>
+        listener({
+          matches: true,
+          media: '(prefers-color-scheme: dark)',
+        } as MediaQueryListEvent),
+      );
+    });
+
+    expect(startViewTransition).toHaveBeenCalledTimes(1);
+    expect(document.documentElement).toHaveAttribute('data-theme-transition', 'to-dark');
+    expect(document.documentElement).not.toHaveAttribute('data-theme-transition-context');
+  });
+
+  it('keeps newer root theme transitions active when an older completion resolves late', async () => {
+    const resolveFinishedTransitions: Array<() => void> = [];
+    const startViewTransition = vi.fn((callback: () => void) => {
+      callback();
+      return {
+        finished: new Promise<void>((resolve) => {
+          resolveFinishedTransitions.push(resolve);
+        }),
+      };
+    });
+
+    Object.defineProperty(document, 'startViewTransition', {
+      configurable: true,
+      value: startViewTransition,
+    });
+
+    mocks.themeState.mode = 'light';
+    mocks.themeState.resolvedTheme = 'light';
+
+    const { rerender } = render(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    mocks.themeState.mode = 'dark';
+    mocks.themeState.resolvedTheme = 'dark';
+
+    rerender(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(document.documentElement).toHaveAttribute('data-theme-transition', 'to-dark');
+
+    mocks.themeState.mode = 'light';
+    mocks.themeState.resolvedTheme = 'light';
+
+    rerender(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(startViewTransition).toHaveBeenCalledTimes(2);
+    expect(document.documentElement).toHaveAttribute('data-theme-transition', 'to-light');
+
+    await act(async () => {
+      resolveFinishedTransitions[0]?.();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(document.documentElement).toHaveAttribute('data-theme-transition', 'to-light');
+
+    await act(async () => {
+      resolveFinishedTransitions[1]?.();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(document.documentElement).not.toHaveAttribute('data-theme-transition');
+    });
+  });
+
+  it('switches to drawer-open transition context and skips root view transitions when the drawer is open', async () => {
+    vi.useFakeTimers();
+    const startViewTransition = vi.fn((callback: () => void) => {
+      callback();
+      return { finished: Promise.resolve() };
+    });
+
+    Object.defineProperty(document, 'startViewTransition', {
+      configurable: true,
+      value: startViewTransition,
+    });
+
+    const drawer = document.createElement('div');
+    drawer.className = 'aetheric-drawer';
+    drawer.setAttribute('data-state', 'open');
+    document.body.appendChild(drawer);
+
+    mocks.themeState.mode = 'system';
+    mocks.themeState.resolvedTheme = 'light';
+
+    render(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    mocks.themeState.resolvedTheme = 'dark';
+    const listeners = mocks.mediaQueryListeners.get('(prefers-color-scheme: dark)');
+    act(() => {
+      listeners?.forEach((listener) =>
+        listener({
+          matches: true,
+          media: '(prefers-color-scheme: dark)',
+        } as MediaQueryListEvent),
+      );
+    });
+
+    expect(startViewTransition).not.toHaveBeenCalled();
+    expect(document.documentElement).toHaveAttribute('data-theme-transition-context', 'drawer-open');
+    expect(screen.getByTestId('app-shell')).toHaveAttribute('data-theme-transition-context', 'drawer-open');
+
+    act(() => {
+      vi.advanceTimersByTime(920);
+    });
+
+    expect(document.documentElement).not.toHaveAttribute('data-theme-transition-context');
+    expect(screen.getByTestId('app-shell')).not.toHaveAttribute('data-theme-transition-context');
+
+    drawer.remove();
+  });
+
+  it('clears the drawer-open transition context as soon as the drawer unmounts', async () => {
+    const startViewTransition = vi.fn((callback: () => void) => {
+      callback();
+      return { finished: Promise.resolve() };
+    });
+
+    Object.defineProperty(document, 'startViewTransition', {
+      configurable: true,
+      value: startViewTransition,
+    });
+
+    const drawer = document.createElement('div');
+    drawer.className = 'aetheric-drawer';
+    drawer.setAttribute('data-state', 'open');
+    document.body.appendChild(drawer);
+
+    mocks.themeState.mode = 'system';
+    mocks.themeState.resolvedTheme = 'light';
+
+    render(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    mocks.themeState.resolvedTheme = 'dark';
+    const listeners = mocks.mediaQueryListeners.get('(prefers-color-scheme: dark)');
+    act(() => {
+      listeners?.forEach((listener) =>
+        listener({
+          matches: true,
+          media: '(prefers-color-scheme: dark)',
+        } as MediaQueryListEvent),
+      );
+    });
+
+    expect(document.documentElement).toHaveAttribute('data-theme-transition-context', 'drawer-open');
+
+    act(() => {
+      drawer.remove();
+    });
+
+    await waitFor(() => {
+      expect(document.documentElement).not.toHaveAttribute('data-theme-transition-context');
+      expect(screen.getByTestId('app-shell')).not.toHaveAttribute('data-theme-transition-context');
+    });
+
+    expect(startViewTransition).not.toHaveBeenCalled();
+  });
+
+  it('skips the global transition hook when system mode resolves to the same effective theme', async () => {
+    mocks.themeState.mode = 'system';
+    mocks.themeState.resolvedTheme = 'light';
+
+    const { rerender } = render(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    mocks.themeState.mode = 'system';
+    mocks.themeState.resolvedTheme = 'light';
+
+    rerender(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(document.documentElement).not.toHaveAttribute('data-theme-transition');
+    expect(screen.getByTestId('app-shell')).not.toHaveAttribute('data-theme-transition');
+  });
+
+  it('respects reduced motion by disabling the animated theme transition hook', async () => {
+    vi.useFakeTimers();
+    mocks.themeState.mode = 'light';
+    mocks.themeState.resolvedTheme = 'light';
+
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches:
+        query === '(prefers-reduced-motion: reduce)'
+          ? true
+          : query === '(prefers-color-scheme: dark)'
+            ? mocks.themeState.resolvedTheme === 'dark'
+            : false,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    const { rerender } = render(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    mocks.themeState.mode = 'dark';
+    mocks.themeState.resolvedTheme = 'dark';
+
+    rerender(
+      <MemoryRouter initialEntries={['/onboarding']}>
+        <App />
+      </MemoryRouter>
+    );
+
+    expect(document.documentElement).not.toHaveAttribute('data-theme-transition');
+    expect(screen.getByTestId('app-shell')).not.toHaveAttribute('data-theme-transition');
   });
 
   it('redirects guests away from auth-backed circle routes and opens auth modal', async () => {

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 const THEME_STORAGE_KEY = 'fitwizard-theme';
 const LEGACY_THEME_STORAGE_KEY = 'theme-storage';

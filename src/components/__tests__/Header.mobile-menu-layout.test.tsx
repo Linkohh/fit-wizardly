@@ -230,7 +230,7 @@ describe('Header mobile menu layout', () => {
     fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
 
     const sheetContent = screen.getByTestId('mobile-sheet-content');
-    expect(sheetContent).toHaveClass('flex', 'flex-col', 'overflow-hidden');
+    expect(sheetContent).toHaveClass('aetheric-drawer--scooped', 'flex', 'flex-col', 'overflow-hidden');
     expect(sheetContent.className).toContain('overflow-x-hidden');
     expect(sheetContent.className).toContain('h-[100svh]');
     expect(sheetContent.className).toContain('supports-[height:100dvh]:h-[100dvh]');
@@ -248,6 +248,12 @@ describe('Header mobile menu layout', () => {
     );
 
     const profile = within(sheetContent).getByTestId('mobile-drawer-profile');
+    const profileLayout = profile.firstElementChild as HTMLElement | null;
+    expect(profileLayout).not.toBeNull();
+    expect(profileLayout).toHaveClass('aetheric-drawer__profile-layout');
+    const profileBody = profileLayout?.lastElementChild as HTMLElement | null;
+    expect(profileBody).not.toBeNull();
+    expect(profileBody).toHaveClass('aetheric-drawer__profile-body');
     expect(within(profile).getByText('Coach Nova')).toBeInTheDocument();
     expect(within(profile).getByText('Coach workspace')).toBeInTheDocument();
     expect(within(profile).getByText('Coach Mode')).toBeInTheDocument();
@@ -277,9 +283,12 @@ describe('Header mobile menu layout', () => {
     expect(within(footer).getByText('FitWizard')).toBeInTheDocument();
     expect(within(footer).getByText('Quick Controls')).toBeInTheDocument();
     expect(within(trainerCluster).getByRole('switch', { name: 'Coach Mode' })).toBeChecked();
-    expect(within(footer).getByRole('button', { name: 'Light' })).toBeInTheDocument();
-    expect(within(footer).getByRole('button', { name: 'Dark' })).toBeInTheDocument();
-    expect(within(footer).getByRole('button', { name: 'System' })).toBeInTheDocument();
+    const themeButtons = within(screen.getByTestId('mobile-drawer-theme-toggle')).getAllByRole('button');
+    expect(themeButtons.map((button) => button.getAttribute('aria-label'))).toEqual([
+      'Light',
+      'System',
+      'Dark',
+    ]);
 
     const trainerLinks = ['Clients', 'Templates', 'Revenue'];
     for (const label of trainerLinks) {
@@ -307,12 +316,12 @@ describe('Header mobile menu layout', () => {
     const footer = screen.getByTestId('mobile-drawer-footer');
 
     fireEvent.click(within(footer).getByRole('button', { name: 'Light' }));
-    fireEvent.click(within(footer).getByRole('button', { name: 'Dark' }));
     fireEvent.click(within(footer).getByRole('button', { name: 'System' }));
+    fireEvent.click(within(footer).getByRole('button', { name: 'Dark' }));
 
     expect(mocks.setMode).toHaveBeenNthCalledWith(1, 'light');
-    expect(mocks.setMode).toHaveBeenNthCalledWith(2, 'dark');
-    expect(mocks.setMode).toHaveBeenNthCalledWith(3, 'system');
+    expect(mocks.setMode).toHaveBeenNthCalledWith(2, 'system');
+    expect(mocks.setMode).toHaveBeenNthCalledWith(3, 'dark');
   });
 
   it('switches the drawer chrome to dark aetheric mode when the resolved theme is dark', () => {

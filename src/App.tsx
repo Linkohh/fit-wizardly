@@ -1,5 +1,5 @@
 import { AnimatePresence } from "framer-motion";
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -106,31 +106,164 @@ const CircleDashboardTab = lazy(() =>
 );
 
 const queryClient = new QueryClient();
+const THEME_TRANSITION_DURATION_MS = 920;
+type ThemeTransitionDocument = Document & {
+  startViewTransition?: (callback: () => void) => {
+    finished: Promise<void>;
+  };
+};
+
+const getSystemTheme = (mediaQuery: MediaQueryList): 'light' | 'dark' =>
+  mediaQuery.matches ? 'dark' : 'light';
 
 // Auth initialization wrapper
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   const mode = useThemeStore((state) => state.mode);
-  const getEffectiveTheme = useThemeStore((state) => state.getEffectiveTheme);
+  const location = useLocation();
+  const previousEffectiveThemeRef = useRef<'light' | 'dark' | null>(null);
+  const transitionTimeoutRef = useRef<number | null>(null);
+  const activeTransitionIdRef = useRef(0);
+  const activeTransitionContextRef = useRef<'drawer-open' | null>(null);
+
+  const getAppShell = useCallback(
+    () => document.querySelector<HTMLElement>('[data-testid="app-shell"]'),
+    [],
+  );
+
+  const isDrawerOpen = useCallback(
+    () => Boolean(document.querySelector('.aetheric-drawer[data-state="open"]')),
+    [],
+  );
+
+  const clearTransitionAttributes = useCallback(() => {
+    document.documentElement.removeAttribute('data-theme-transition');
+    document.documentElement.removeAttribute('data-theme-transition-context');
+    getAppShell()?.removeAttribute('data-theme-transition');
+    getAppShell()?.removeAttribute('data-theme-transition-context');
+  }, [getAppShell]);
+
+  const clearTransitionTimer = useCallback(() => {
+    if (transitionTimeoutRef.current !== null) {
+      window.clearTimeout(transitionTimeoutRef.current);
+      transitionTimeoutRef.current = null;
+    }
+  }, []);
+
+  const beginTransitionCycle = useCallback(() => {
+    clearTransitionTimer();
+    activeTransitionContextRef.current = null;
+    clearTransitionAttributes();
+    activeTransitionIdRef.current += 1;
+    return activeTransitionIdRef.current;
+  }, [clearTransitionAttributes, clearTransitionTimer]);
+
+  const clearPendingTransition = useCallback((transitionId?: number) => {
+    if (transitionId !== undefined && activeTransitionIdRef.current !== transitionId) {
+      return;
+    }
+
+    clearTransitionTimer();
+    activeTransitionContextRef.current = null;
+    clearTransitionAttributes();
+  }, [clearTransitionAttributes, clearTransitionTimer]);
 
   useEffect(() => {
-    const applyTheme = () => {
-      const effectiveTheme = getEffectiveTheme();
-      document.documentElement.classList.toggle('dark', effectiveTheme === 'dark');
+    const root = document.documentElement;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const applyTheme = (effectiveTheme: 'light' | 'dark') => {
+      const previousTheme = previousEffectiveThemeRef.current;
+      const shouldAnimate =
+        previousTheme !== null &&
+        previousTheme !== effectiveTheme &&
+        !prefersReducedMotion.matches;
+      const themeDocument = document as ThemeTransitionDocument;
+      const drawerOpen = isDrawerOpen();
+      const transitionId = beginTransitionCycle();
+      const commitTheme = () => {
+        root.classList.toggle('dark', effectiveTheme === 'dark');
+        previousEffectiveThemeRef.current = effectiveTheme;
+      };
+
+      if (shouldAnimate) {
+        const transitionValue = effectiveTheme === 'dark' ? 'to-dark' : 'to-light';
+        root.setAttribute('data-theme-transition', transitionValue);
+        getAppShell()?.setAttribute('data-theme-transition', transitionValue);
+
+        if (drawerOpen) {
+          root.setAttribute('data-theme-transition-context', 'drawer-open');
+          getAppShell()?.setAttribute('data-theme-transition-context', 'drawer-open');
+          activeTransitionContextRef.current = 'drawer-open';
+        }
+      }
+
+      if (shouldAnimate && themeDocument.startViewTransition && !drawerOpen) {
+        const transition = themeDocument.startViewTransition(() => {
+          commitTheme();
+        });
+        transition.finished.finally(() => {
+          clearPendingTransition(transitionId);
+        });
+      } else {
+        commitTheme();
+      }
+
+      if (shouldAnimate && (drawerOpen || !themeDocument.startViewTransition)) {
+        transitionTimeoutRef.current = window.setTimeout(() => {
+          clearPendingTransition(transitionId);
+        }, THEME_TRANSITION_DURATION_MS);
+      }
     };
 
-    applyTheme();
+    const resolveTheme = () => (mode === 'system' ? getSystemTheme(mediaQuery) : mode);
+
+    applyTheme(resolveTheme());
 
     // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
+    const handleChange = (event: MediaQueryListEvent) => {
       if (mode === 'system') {
-        applyTheme();
+        applyTheme(event.matches ? 'dark' : 'light');
       }
     };
 
     mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [mode, getEffectiveTheme]);
+    return () => {
+      clearPendingTransition(activeTransitionIdRef.current);
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, [beginTransitionCycle, clearPendingTransition, getAppShell, isDrawerOpen, mode]);
+
+  useEffect(() => {
+    if (activeTransitionContextRef.current !== 'drawer-open') {
+      return;
+    }
+
+    clearPendingTransition(activeTransitionIdRef.current);
+  }, [clearPendingTransition, location.key]);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      if (activeTransitionContextRef.current !== 'drawer-open') {
+        return;
+      }
+
+      if (!isDrawerOpen()) {
+        clearPendingTransition(activeTransitionIdRef.current);
+      }
+    });
+
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['data-state'],
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [clearPendingTransition, isDrawerOpen]);
 
   return <>{children}</>;
 }
@@ -312,7 +445,7 @@ const App = () => {
               <div
                 data-testid="app-shell"
                 className={cn(
-                  "min-h-screen flex flex-col transition-colors duration-300 relative app-shell-main-offset",
+                  "theme-transition-shell min-h-screen flex flex-col transition-colors duration-300 relative app-shell-main-offset",
                   nativeApp ? "app-shell-native" : "app-shell-web",
                 )}
               >

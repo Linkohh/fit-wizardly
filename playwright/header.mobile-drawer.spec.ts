@@ -99,12 +99,20 @@ test.describe('mobile header drawer flow', () => {
       return {
         position: styles.position,
         right: styles.right,
+        borderTopLeftRadius: styles.borderTopLeftRadius,
+        borderBottomLeftRadius: styles.borderBottomLeftRadius,
+        borderTopRightRadius: styles.borderTopRightRadius,
+        borderBottomRightRadius: styles.borderBottomRightRadius,
       };
     });
     expect(drawerBox).not.toBeNull();
     expect(drawerBox!.y).toBeLessThan(2);
     expect(drawerPosition.position).toBe('fixed');
     expect(drawerPosition.right).toBe('0px');
+    expect(drawerPosition.borderTopLeftRadius).not.toBe('0px');
+    expect(drawerPosition.borderBottomLeftRadius).not.toBe('0px');
+    expect(drawerPosition.borderTopRightRadius).toBe('0px');
+    expect(drawerPosition.borderBottomRightRadius).toBe('0px');
 
     const scrollViewport = drawer
       .getByTestId('mobile-drawer-scroll-area')
@@ -118,6 +126,16 @@ test.describe('mobile header drawer flow', () => {
         scrollWidth: element.scrollWidth,
       }));
     expect(navOverflow.scrollWidth).toBeLessThanOrEqual(navOverflow.clientWidth + 1);
+    const scrollViewportChrome = await scrollViewport.evaluate((element) => {
+      const styles = getComputedStyle(element);
+      return {
+        maskImage: styles.maskImage,
+        webkitMaskImage: styles.getPropertyValue('-webkit-mask-image'),
+      };
+    });
+    expect(scrollViewportChrome.maskImage === 'none' && scrollViewportChrome.webkitMaskImage === 'none').toBe(
+      false,
+    );
 
     await expect(page.getByTestId('mobile-drawer-profile')).toBeVisible();
     await expect(page.getByTestId('mobile-drawer-profile').getByText('Codex')).toBeVisible();
@@ -155,9 +173,11 @@ test.describe('mobile header drawer flow', () => {
     await expect(footer.getByText('Settings & Profile')).toBeVisible();
     await expect(footer.getByText('Coach Mode')).toBeVisible();
     await expect(footer.getByText('Quick Controls')).toBeVisible();
-    await expect(footer.getByRole('button', { name: 'Light' })).toBeVisible();
-    await expect(footer.getByRole('button', { name: 'Dark' })).toBeVisible();
-    await expect(footer.getByRole('button', { name: 'System' })).toBeVisible();
+    const themePillOrder = await footer
+      .getByTestId('mobile-drawer-theme-toggle')
+      .getByRole('button')
+      .evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label')));
+    expect(themePillOrder).toEqual(['Light', 'System', 'Dark']);
     await expect(footer.getByRole('switch', { name: /coach mode/i })).toBeChecked();
 
     await page.keyboard.press('Escape');
@@ -182,27 +202,154 @@ test.describe('mobile header drawer flow', () => {
     const drawer = page.getByRole('dialog');
     const footer = page.getByTestId('mobile-drawer-footer');
     const lightButton = footer.getByRole('button', { name: 'Light' });
-    const darkButton = footer.getByRole('button', { name: 'Dark' });
     const systemButton = footer.getByRole('button', { name: 'System' });
+    const darkButton = footer.getByRole('button', { name: 'Dark' });
+
+    const readBlurState = async () =>
+      page.evaluate(() => {
+        const drawerElement = document.querySelector('[role="dialog"]');
+        const overlayElement = document.querySelector('[data-state="open"].backdrop-premium');
+
+        if (!drawerElement || !overlayElement) {
+          return null;
+        }
+
+        const drawerStyles = getComputedStyle(drawerElement);
+        const overlayStyles = getComputedStyle(overlayElement);
+
+        return {
+          drawerBlur:
+            drawerStyles.backdropFilter || drawerStyles.getPropertyValue('-webkit-backdrop-filter'),
+          overlayBlur:
+            overlayStyles.backdropFilter || overlayStyles.getPropertyValue('-webkit-backdrop-filter'),
+          drawerOpenContext:
+            document.documentElement.getAttribute('data-theme-transition-context') === 'drawer-open',
+        };
+      });
 
     await expect(drawer).toHaveAttribute('data-theme-mode', 'system');
     await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
     await expect(systemButton).toHaveAttribute('data-selected', 'true');
 
+    const initialBlurState = await readBlurState();
+    expect(initialBlurState).not.toBeNull();
+    expect(initialBlurState?.drawerBlur).not.toBe('none');
+    expect(initialBlurState?.overlayBlur).not.toBe('none');
+
+    const transitionToLight = page.waitForFunction(
+      () => document.documentElement.getAttribute('data-theme-transition') === 'to-light',
+    );
+    const drawerOpenContext = page.waitForFunction(
+      () => document.documentElement.getAttribute('data-theme-transition-context') === 'drawer-open',
+    );
     await lightButton.tap();
+    await drawerOpenContext;
+    await transitionToLight;
+
+    await page.waitForFunction(() => {
+      const drawerElement = document.querySelector('[role="dialog"]');
+      const overlayElement = document.querySelector('[data-state="open"].backdrop-premium');
+
+      if (!drawerElement || !overlayElement) {
+        return false;
+      }
+
+      const drawerStyles = getComputedStyle(drawerElement);
+      const overlayStyles = getComputedStyle(overlayElement);
+      const drawerBlur =
+        drawerStyles.backdropFilter || drawerStyles.getPropertyValue('-webkit-backdrop-filter');
+      const overlayBlur =
+        overlayStyles.backdropFilter || overlayStyles.getPropertyValue('-webkit-backdrop-filter');
+
+      return (
+        document.documentElement.getAttribute('data-theme-transition-context') === 'drawer-open' &&
+        drawerBlur !== 'none' &&
+        overlayBlur !== 'none'
+      );
+    });
+
+    await page.waitForTimeout(460);
+
+    const midTransitionBlurState = await readBlurState();
+    expect(midTransitionBlurState).not.toBeNull();
+    expect(midTransitionBlurState?.drawerBlur).not.toBe('none');
+    expect(midTransitionBlurState?.overlayBlur).not.toBe('none');
+
     await expect(drawer).toHaveAttribute('data-theme-mode', 'light');
     await expect(drawer).toHaveAttribute('data-resolved-theme', 'light');
     await expect(lightButton).toHaveAttribute('data-selected', 'true');
+
+    await page.waitForFunction(
+      () => !document.documentElement.hasAttribute('data-theme-transition-context'),
+    );
+
+    await page.waitForFunction(() => {
+      const drawerElement = document.querySelector('[role="dialog"]');
+      const overlayElement = document.querySelector('[data-state="open"].backdrop-premium');
+
+      if (!drawerElement || !overlayElement) {
+        return false;
+      }
+
+      const drawerStyles = getComputedStyle(drawerElement);
+      const overlayStyles = getComputedStyle(overlayElement);
+      const drawerBlur =
+        drawerStyles.backdropFilter || drawerStyles.getPropertyValue('-webkit-backdrop-filter');
+      const overlayBlur =
+        overlayStyles.backdropFilter || overlayStyles.getPropertyValue('-webkit-backdrop-filter');
+
+      return drawerBlur !== 'none' && overlayBlur !== 'none';
+    });
+
+    const finalBlurState = await readBlurState();
+    expect(finalBlurState).not.toBeNull();
+    expect(finalBlurState?.drawerOpenContext).toBe(false);
+    expect(finalBlurState?.drawerBlur).not.toBe('none');
+    expect(finalBlurState?.overlayBlur).not.toBe('none');
+
+    const transitionToDark = page.waitForFunction(
+      () => document.documentElement.getAttribute('data-theme-transition') === 'to-dark',
+    );
+    await systemButton.tap();
+    await transitionToDark;
+    await expect(drawer).toHaveAttribute('data-theme-mode', 'system');
+    await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
+    await expect(systemButton).toHaveAttribute('data-selected', 'true');
 
     await darkButton.tap();
     await expect(drawer).toHaveAttribute('data-theme-mode', 'dark');
     await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
     await expect(darkButton).toHaveAttribute('data-selected', 'true');
+  });
 
-    await systemButton.tap();
-    await expect(drawer).toHaveAttribute('data-theme-mode', 'system');
-    await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
-    await expect(systemButton).toHaveAttribute('data-selected', 'true');
+  test('clears drawer transition context when navigating away during a theme switch', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await seedMobileDrawerState(page, { themeMode: 'system' });
+    await page.goto('/');
+
+    await page.getByRole('button', { name: /open menu/i }).click();
+
+    const drawer = page.getByRole('dialog');
+    const footer = page.getByTestId('mobile-drawer-footer');
+    const lightButton = footer.getByRole('button', { name: 'Light' });
+    const settingsLink = footer.getByRole('link', { name: /settings & profile/i });
+
+    const drawerOpenContext = page.waitForFunction(
+      () => document.documentElement.getAttribute('data-theme-transition-context') === 'drawer-open',
+    );
+
+    await lightButton.tap();
+    await drawerOpenContext;
+    await settingsLink.click();
+
+    await page.waitForURL((url) => url.pathname === '/profile');
+    await expect(drawer).toHaveCount(0);
+    await page.waitForFunction(
+      () =>
+        !document.documentElement.hasAttribute('data-theme-transition-context') &&
+        !document.documentElement.hasAttribute('data-theme-transition'),
+    );
+    await expect(page.getByTestId('profile-theme-toggle')).toBeVisible();
   });
 
   test('switches the drawer to dark aetheric styling when the theme resolves dark', async ({ page }) => {

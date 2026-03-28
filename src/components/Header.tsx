@@ -1,13 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Moon, Monitor, Smartphone, Sun, Users } from 'lucide-react';
+import { Monitor, Moon, Smartphone, Sun, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ThemeModePill } from '@/components/theme/ThemeModePill';
 import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
 import {
   DropdownMenu,
@@ -413,7 +414,7 @@ export function Header() {
           </SheetTrigger>
           <SheetContent
             side="right"
-            className="aetheric-drawer w-[20rem] max-w-[92vw] h-[100svh] supports-[height:100dvh]:h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden overflow-x-hidden p-0 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]"
+            className="aetheric-drawer aetheric-drawer--scooped w-[20rem] max-w-[92vw] h-[100svh] supports-[height:100dvh]:h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden overflow-x-hidden p-0 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]"
             data-theme-mode={mode}
             data-resolved-theme={resolvedTheme}
             glassEffect
@@ -429,13 +430,13 @@ export function Header() {
                 animate={mobileOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
                 transition={{ duration: 0.28, ease: 'easeOut' }}
               >
-                <div className="flex items-start gap-3.5">
+                <div className="aetheric-drawer__profile-layout flex items-start gap-3.5">
                   <div className="aetheric-drawer__avatar-shell shrink-0">
                     <div className="aetheric-drawer__avatar-core">
                       {renderAvatar('h-full w-full', 'aetheric-drawer__avatar-fallback text-xl font-semibold')}
                     </div>
                   </div>
-                  <div className="min-w-0 flex-1">
+                  <div className="aetheric-drawer__profile-body min-w-0 flex-1">
                     <p className="aetheric-drawer__eyebrow">FitWizard</p>
                     <h2 className="aetheric-drawer__title">{drawerProfile.displayName}</h2>
                     <div
@@ -562,7 +563,7 @@ export function Header() {
                 <div className="aetheric-drawer__utility-card" data-testid="mobile-drawer-utility-card">
                   <div className="aetheric-drawer__utility-top-row" data-testid="mobile-drawer-utility-top-row">
                     <div className="aetheric-drawer__utility-copy space-y-0.5">
-                      <p className="aetheric-drawer__eyebrow text-xs">
+                      <p className="aetheric-drawer__eyebrow aetheric-drawer__footer-brand text-xs">
                         {t('header.mobile_drawer.footer_brand', 'FitWizard')}
                       </p>
                       <p className="aetheric-drawer__eyebrow aetheric-drawer__eyebrow--body text-xs">
@@ -570,38 +571,13 @@ export function Header() {
                       </p>
                     </div>
                     <div className="aetheric-drawer__utility-actions" data-testid="mobile-drawer-utility-actions">
-                      <div className="aetheric-drawer__theme-toggle">
-                        <button
-                          type="button"
-                          aria-label={t('header.theme.light', 'Light')}
-                          aria-pressed={mode === 'light'}
-                          onClick={() => setMode('light')}
-                          className="aetheric-drawer__theme-button"
-                          data-selected={mode === 'light'}
-                        >
-                          <Sun className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={t('header.theme.dark', 'Dark')}
-                          aria-pressed={mode === 'dark'}
-                          onClick={() => setMode('dark')}
-                          className="aetheric-drawer__theme-button"
-                          data-selected={mode === 'dark'}
-                        >
-                          <Moon className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={t('header.theme.system', 'System')}
-                          aria-pressed={mode === 'system'}
-                          onClick={() => setMode('system')}
-                          className="aetheric-drawer__theme-button"
-                          data-selected={mode === 'system'}
-                        >
-                          <Monitor className="h-4 w-4" />
-                        </button>
-                      </div>
+                      <ThemeModePill
+                        mode={mode}
+                        onChange={setMode}
+                        containerClassName="aetheric-drawer__theme-toggle"
+                        buttonClassName="aetheric-drawer__theme-button"
+                        testId="mobile-drawer-theme-toggle"
+                      />
                       <div
                         className="aetheric-drawer__trainer-switch-cluster"
                         data-testid="mobile-drawer-trainer-cluster"
