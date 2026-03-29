@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Smartphone, Users } from 'lucide-react';
+import { Download, Smartphone, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -24,6 +24,7 @@ import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { useMotionPreferences } from '@/hooks/use-motion-preferences';
 import { useMotionTiltStatus } from '@/hooks/use-motion-tilt-status';
 import { cn, debounce } from '@/lib/utils';
+import { useInstallCoachStore } from '@/stores/installCoachStore';
 import {
   buildDrawerProfileViewModel,
   buildMobileNavItems,
@@ -67,6 +68,12 @@ export function Header() {
   const getEffectiveTheme = useThemeStore((state) => state.getEffectiveTheme);
   const { shouldReduceMotion } = useMotionPreferences();
   const motionTiltEnabled = usePreferencesStore((state) => state.settings.motionTilt !== false);
+  const installCoachPlatform = useInstallCoachStore((state) => state.platform);
+  const installCoachDismissed = useInstallCoachStore((state) => state.dismissed);
+  const installCoachInstalled = useInstallCoachStore((state) => state.installed);
+  const installCoachStandalone = useInstallCoachStore((state) => state.isStandalone);
+  const installCoachOpen = useInstallCoachStore((state) => state.isOpen);
+  const installCoachHydrated = useInstallCoachStore((state) => state.hasHydrated);
   const {
     status: motionTiltStatus,
     isRefreshing: isRefreshingMotionTiltStatus,
@@ -155,6 +162,15 @@ export function Header() {
     motionTiltStatus.permission === 'denied'
       ? t('profile.motion_tilt_retry', 'Retry')
       : t('profile.motion_tilt_enable', 'Enable');
+
+  const showInstallCoachEntry =
+    location.pathname === '/' &&
+    installCoachHydrated &&
+    installCoachDismissed &&
+    installCoachPlatform !== 'unsupported' &&
+    !installCoachInstalled &&
+    !installCoachStandalone &&
+    !installCoachOpen;
 
   const isActive = useCallback(
     (path: string) => isMobileNavPathActive(location.pathname, path),
@@ -641,6 +657,21 @@ export function Header() {
                       </Button>
                     ) : null}
                   </div>
+
+                  {showInstallCoachEntry ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="aetheric-drawer__motion-button border-primary/25 bg-primary/10 text-foreground hover:bg-primary/15"
+                      onClick={() => {
+                        useInstallCoachStore.getState().openCoach();
+                        setMobileOpen(false);
+                      }}
+                    >
+                      <Download className="h-4 w-4" />
+                      {t('install_coach.drawer_cta', 'Install FitWizard')}
+                    </Button>
+                  ) : null}
 
                   <Button asChild variant="gradient" className="aetheric-drawer__profile-cta">
                     <Link

@@ -9,6 +9,17 @@ const mocks = vi.hoisted(() => ({
   setMode: vi.fn(),
   setMotionTiltActivatedThisSession: vi.fn(),
   toggleTrainerMode: vi.fn(),
+  openInstallCoach: vi.fn(),
+  installCoachState: {
+    platform: 'unsupported',
+    isStandalone: false,
+    canNativeInstall: false,
+    hasSeenCoach: false,
+    dismissed: false,
+    installed: false,
+    isOpen: false,
+    hasHydrated: true,
+  },
   requestPermission: vi.fn(async () => ({
     available: true,
     permission: 'granted' as const,
@@ -24,6 +35,17 @@ vi.mock('react-i18next', () => ({
 
 vi.mock('@/lib/platform', () => ({
   isNativeApp: () => false,
+}));
+
+vi.mock('@/stores/installCoachStore', () => ({
+  useInstallCoachStore: Object.assign(
+    (selector: (state: typeof mocks.installCoachState) => unknown) => selector(mocks.installCoachState),
+    {
+      getState: () => ({
+        openCoach: mocks.openInstallCoach,
+      }),
+    },
+  ),
 }));
 
 vi.mock('@/stores/themeStore', () => ({
@@ -201,6 +223,16 @@ describe('Header mobile menu layout', () => {
     vi.clearAllMocks();
     mocks.themeMode = 'system';
     mocks.resolvedTheme = 'light';
+    mocks.installCoachState = {
+      platform: 'unsupported',
+      isStandalone: false,
+      canNativeInstall: false,
+      hasSeenCoach: false,
+      dismissed: false,
+      installed: false,
+      isOpen: false,
+      hasHydrated: true,
+    };
   });
 
   it('tags the brand logo and menu trigger with explicit mobile feedback events', () => {
@@ -218,6 +250,34 @@ describe('Header mobile menu layout', () => {
       'data-click-feedback-event',
       'navigation',
     );
+  });
+
+  it('shows a manual install action in the home drawer after the install coach was dismissed', async () => {
+    mocks.installCoachState = {
+      platform: 'ios-safari',
+      isStandalone: false,
+      canNativeInstall: false,
+      hasSeenCoach: true,
+      dismissed: true,
+      installed: false,
+      isOpen: false,
+      hasHydrated: true,
+    };
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Header />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByTestId('sheet-trigger'));
+
+    const drawer = await screen.findByTestId('mobile-sheet-content');
+    const installButton = within(drawer).getByRole('button', { name: /install fitwizard/i });
+
+    fireEvent.click(installButton);
+
+    expect(mocks.openInstallCoach).toHaveBeenCalledTimes(1);
   });
 
   it('renders the aetheric drawer shell with profile header, trainer section, and sticky footer controls', async () => {

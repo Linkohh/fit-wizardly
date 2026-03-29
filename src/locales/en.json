@@ -34,6 +34,75 @@
         "enabling_motion": "Enabling motion...",
         "tilt_fallback_hint": "Motion tilt unavailable. Drag to tilt instead."
     },
+    "install_coach": {
+        "eyebrow_safari": "Safari Web App",
+        "eyebrow_chrome": "Chrome Shortcut",
+        "eyebrow_android": "Install FitWizard",
+        "title": "Add FitWizard to your Home Screen",
+        "description": "Save FitWizard like a real app so it launches faster, feels cleaner, and stays one tap away from your training flow.",
+        "app_icon_alt": "FitWizard app icon",
+        "step_badge": "Step",
+        "open_as_app_chip": "Open as Web App",
+        "helper_title": "Quick note:",
+        "helper_copy": "If you close this now, you can reopen the guide from the mobile menu on the home screen any time.",
+        "close": "Close install guide",
+        "primary_install": "Install FitWizard",
+        "primary_complete": "I added it",
+        "secondary_dismiss": "Maybe later",
+        "drawer_cta": "Install FitWizard",
+        "safari": {
+            "steps": {
+                "share": {
+                    "title": "Tap the Share button in Safari",
+                    "detail": "Use Safari’s share control for this page so you can save FitWizard to your Home Screen."
+                },
+                "add_home": {
+                    "title": "Choose Add to Home Screen",
+                    "detail": "Scroll through the action list until Add to Home Screen appears, then select it."
+                },
+                "open_as_app": {
+                    "title": "Keep Open as Web App enabled, then tap Add",
+                    "detail": "Leave the app-style toggle on so FitWizard launches as a full-screen web app from your Home Screen."
+                }
+            }
+        },
+        "chrome": {
+            "steps": {
+                "open_menu": {
+                    "title": "Open Chrome’s share menu",
+                    "detail": "Tap the share control in Chrome, then open the browser options for this page."
+                },
+                "choose_add": {
+                    "title": "Pick Add to Home Screen",
+                    "detail": "Scroll through the action list until you see Add to Home Screen, then select it."
+                },
+                "confirm": {
+                    "title": "Confirm the FitWizard icon",
+                    "detail": "Keep the FitWizard title you want, then tap Add so it lands on your Home Screen."
+                }
+            }
+        },
+        "android": {
+            "steps": {
+                "native": {
+                    "title": "Install FitWizard directly",
+                    "detail": "Your browser can install FitWizard like an app. Tap the install button below to continue."
+                },
+                "menu": {
+                    "title": "Open the browser menu",
+                    "detail": "If the direct install prompt is unavailable, open the browser menu for this page."
+                },
+                "choose_add": {
+                    "title": "Choose Install app or Add to Home screen",
+                    "detail": "Use the browser option that installs FitWizard or saves it to your Home Screen."
+                },
+                "confirm": {
+                    "title": "Confirm the install",
+                    "detail": "Approve the install and launch FitWizard from your Home Screen like a real app."
+                }
+            }
+        }
+    },
     "features": {
         "badge": "Powerful Features",
         "title": "How <1>FitWizard</1> Works",

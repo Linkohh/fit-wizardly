@@ -10,6 +10,7 @@ import type { Feature } from '@/components/landing/FeatureDetailModal';
 import { useTranslation, Trans } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { isNativeApp } from '@/lib/platform';
+import { InstallCoachSheet } from '@/components/install/InstallCoachSheet';
 
 const PeriodizationTimeline = lazy(() =>
   import('@/components/analytics/PeriodizationTimeline').then((module) => ({
@@ -100,6 +101,7 @@ export default function Index() {
       <Suspense fallback={<div className="min-h-[62dvh]" />}>
         <WelcomeHero />
       </Suspense>
+      <InstallCoachSheet />
 
       {/* Domain Intelligence: Periodization Timeline */}
       <Suspense fallback={<div className={cn("container-content", nativeApp ? "pt-10" : "pt-8")}>
