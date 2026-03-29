@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/components/ui/button';
 import { WizardStepper } from '@/components/wizard/WizardStepper';
 import { WizardNavigation } from '@/components/wizard/WizardNavigation';
 import { WizardProgressBar } from '@/components/wizard/WizardProgressBar';
@@ -18,6 +17,7 @@ import { generatePlanFromExercises } from '@/lib/planGenerator';
 import { loadExerciseDatabase, useExerciseDatabase } from '@/lib/exerciseRepository';
 import { useToast } from '@/hooks/use-toast';
 import { createFunnelTracker, trackWizardComplete, trackPlanGenerated } from '@/lib/analytics';
+import { cn } from '@/lib/utils';
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 60 : -60, opacity: 0, scale: 0.98 }),
@@ -56,6 +56,7 @@ export default function WizardPage() {
 
   // Hydration guard - wait for store to load from localStorage
   const [hydrated, setHydrated] = useState(false);
+  const totalSteps = 6;
 
 
   useEffect(() => {
@@ -74,9 +75,9 @@ export default function WizardPage() {
   // Step names for screen reader announcements and analytics
   const stepNames = useMemo(() => ({
     goal: t('wizard.steps.goal'),
+    constraints: t('wizard.steps.constraints'),
     equipment: t('wizard.steps.equipment'),
     anatomy: t('wizard.steps.anatomy'),
-    constraints: t('wizard.steps.constraints'),
     schedule: t('wizard.steps.schedule'),
     review: t('wizard.steps.review'),
   }), [t]);
@@ -215,34 +216,51 @@ export default function WizardPage() {
   }
 
   return (
-    <div className="container-content py-8 pb-32">
+    <div className="container-content py-6 md:py-8 pb-32">
       <div id="wizard-live-region" className="sr-only" aria-live="polite"></div>
 
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold font-display bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-            {t('wizard.title')}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            {t('app.tagline')}
-          </p>
+      <div className="mb-8 space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">
+            {t('wizard.eyebrow', 'Coach-built intake')}
+          </span>
+          <span className="inline-flex items-center rounded-full border border-border/70 bg-background/24 px-3 py-1 text-sm text-muted-foreground backdrop-blur-md md:bg-background/40">
+            {t('wizard.estimate', 'About 2 minutes')}
+          </span>
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium font-display text-muted-foreground hidden sm:inline-block mr-2">
-            {t('wizard.progress', { percent: Math.round(((currentStepIndex + 1) / 6) * 100) })}
-          </span>
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="max-w-2xl">
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              {t('wizard.title')}
+            </h1>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              {t('wizard.subtitle', 'Answer six focused questions and we will shape a realistic training plan around your goals, schedule, equipment, and limitations.')}
+            </p>
+          </div>
+
+          <p className="text-sm font-medium text-muted-foreground">
+            {t('wizard.step_counter', 'Step {{current}} of {{total}}', { current: currentStepIndex + 1, total: totalSteps })}
+          </p>
         </div>
       </div>
 
+      <div className="md:hidden space-y-3">
+        <div className="flex items-center justify-between text-sm">
+          <span className="font-medium text-foreground">
+            {stepNames[currentStep]}
+          </span>
+          <span className="text-muted-foreground">
+            {t('wizard.step_counter', 'Step {{current}} of {{total}}', { current: currentStepIndex + 1, total: totalSteps })}
+          </span>
+        </div>
+        <WizardProgressBar currentStepIndex={currentStepIndex} />
+      </div>
 
-      {/* Pass translated step labels implicitly via WizardStepper if we update it, or let it handle itself. For now just standard usage. */}
-      <WizardStepper currentStep={currentStep} currentStepIndex={currentStepIndex} onStepClick={setStep} />
+      <div className="hidden md:block">
+        <WizardStepper currentStep={currentStep} currentStepIndex={currentStepIndex} onStepClick={setStep} />
+      </div>
 
-      {/* Animated Progress Bar */}
-      <WizardProgressBar currentStepIndex={currentStepIndex} className="mt-4" />
-
-      {/* Step Content with simple fade transition */}
       <div
         ref={stepContainerRef}
         tabIndex={-1}
@@ -259,7 +277,11 @@ export default function WizardPage() {
             animate="center"
             exit="exit"
             transition={{ type: 'spring', stiffness: 420, damping: 34, mass: 0.85 }}
-            className="glass-premium rounded-2xl p-4 sm:p-6"
+            className={cn(
+              currentStep === 'anatomy'
+                ? ''
+                : 'rounded-[2rem] border border-border/60 bg-background/24 p-4 shadow-[0_22px_60px_-32px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:p-6 md:bg-background/40 md:p-8',
+            )}
           >
             {renderStep()}
           </motion.div>

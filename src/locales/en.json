@@ -102,11 +102,15 @@
     },
     "wizard": {
         "title": "Create Your Workout Plan",
+        "eyebrow": "Coach-built intake",
+        "estimate": "About 2 minutes",
+        "subtitle": "Answer six focused questions and we will shape a realistic training plan around your goals, schedule, equipment, and limitations.",
+        "step_counter": "Step {{current}} of {{total}}",
         "steps": {
             "goal": "Training Goal",
             "equipment": "Equipment",
             "anatomy": "Target Muscles",
-            "constraints": "Constraints",
+            "constraints": "Limitations",
             "schedule": "Schedule",
             "review": "Review"
         },
@@ -123,7 +127,7 @@
             "error_description": "Failed to generate plan. Please try again."
         },
         "goal": {
-            "personalize_badge": "Personalize Your Plan",
+            "personalize_badge": "Coach-guided intake",
             "lets_know_you": "Let's get to know you",
             "name_on_plan": "Your name will appear on your personalized workout plan",
             "first_name": "First Name",
@@ -140,10 +144,14 @@
             "coach_notes_placeholder": "Add private notes about this client's goals, limitations, preferences...",
             "coach_notes_hint": "These notes are for your reference only and won't appear on the client's plan",
             "training_goal_title": "What's your training goal?",
-            "training_goal_subtitle": "This helps us optimize your program structure",
+            "training_goal_subtitle": "Start with the outcome you want most so the program can bias volume, split, and exercise selection correctly.",
             "reset_recommended": "Reset to Recommended",
             "experience_title": "Your experience level",
-            "experience_subtitle": "This determines training volume and complexity",
+            "experience_subtitle": "We use this to match recovery demand, weekly volume, and how advanced the plan should feel.",
+            "selected_label": "Selected",
+            "personalize_title": "Make it personal",
+            "personalize_helper": "Add your name, a short goal note, or coach notes without crowding the core training decisions.",
+            "personalize_toggle": "Add personal details",
             "options": {
                 "strength": {
                     "label": "Strength",
@@ -207,26 +215,40 @@
         "review": {
             "title": "Review Your Plan",
             "subtitle": "Confirm your selections before generating",
+            "coach_summary": "Coach summary",
+            "coach_summary_copy": "Scan the prescription like a coach would: confirm the goal, weekly commitment, equipment, muscle focus, and any guardrails before the plan is generated.",
             "personalized_plan": "Personalized Workout Plan",
             "goal_experience": "Goal & Experience",
+            "goal_experience_detail": "This sets the training emphasis, recovery demand, and the phase we recommend first.",
             "training_goal": "Training Goal",
             "experience": "Experience",
             "schedule": "Schedule",
+            "weekly_commitment": "Weekly commitment",
             "days_per_week": "Days per Week",
             "session_length": "Session Length",
             "split_type": "Split Type",
             "equipment": "Equipment",
+            "equipment_detail": "Only exercises that fit this setup will be prioritized in the generated plan.",
             "target_muscles": "Target Muscles",
+            "target_muscles_detail": "These areas will shape weekly emphasis, exercise selection, and overall split balance.",
             "no_muscles": "No muscles selected",
             "constraints_applied": "Constraints Applied",
+            "restrictions": "Restrictions",
             "constraints_hint": "Exercises will be filtered to avoid these limitations",
+            "coach_notes_title": "Coach notes",
             "ready_message": "Ready to generate your personalized workout plan!",
             "days": "days",
             "min": "min"
         },
         "anatomy": {
             "title": "Select Target Muscles",
-            "subtitle": "Click on the diagram or list to choose the muscle groups you want to train."
+            "subtitle": "Click on the diagram or list to choose the muscle groups you want to train.",
+            "selected_title": "Selected focus",
+            "selected_count": "{{count}} muscle groups selected",
+            "selected_empty": "Choose at least one focus area to shape the split.",
+            "equipment_title": "Available tools",
+            "coaching_note_title": "Coach note",
+            "coaching_note_copy": "Your selections here drive exercise choice, weekly volume, and how each day in the split is balanced."
         },
         "equipment": {
             "title": "What equipment do you have?",
@@ -238,12 +260,12 @@
             "selected": "(selected)"
         },
         "constraints": {
-            "title": "Any limitations or constraints?",
-            "subtitle": "Select any that apply - this is optional",
+            "title": "Limitations & preferences",
+            "subtitle": "Flag anything that should shape the plan before we choose exercises or weekly volume.",
             "clear_selections": "Clear selections",
-            "no_constraints": "No constraints selected - all exercises will be available",
-            "count_one": "{{count}} constraint will be applied to filter exercises",
-            "count_other": "{{count}} constraints will be applied to filter exercises",
+            "no_constraints": "No restrictions selected yet. We can use the full exercise pool.",
+            "count_one": "{{count}} restriction will guide exercise filtering",
+            "count_other": "{{count}} restrictions will guide exercise filtering",
             "selected": "(selected)"
         },
         "stepper": {
@@ -253,6 +275,7 @@
             "short_limits": "Limits",
             "short_days": "Days",
             "short_review": "Review",
+            "progress_label": "Plan progress",
             "completed": "(completed)",
             "current": "(current)"
         }
@@ -264,15 +287,22 @@
             "title": "No Plan Generated Yet",
             "description": "Create your personalized workout plan using the wizard.",
             "cta": "Start Wizard",
-            "kicker": "YOUR FITNESS JOURNEY",
-            "headline": "Your plan starts here",
-            "coach_copy": "Your coach is ready. Answer a few questions and get a workout plan built around your goals, schedule, and equipment.",
+            "kicker": "PREMIUM COACH INTAKE",
+            "headline": "Build a plan that actually fits your life",
+            "coach_copy": "Answer a few focused questions and get a training plan shaped around your goal, weekly schedule, equipment, and limitations.",
+            "time_to_plan": "Takes about 2 minutes",
             "cta_primary": "Create My Plan",
             "cta_exercises": "Browse Exercises",
             "cta_guide": "How It Works",
             "benefit_split": "Personalized split",
             "benefit_timing": "Session timing",
-            "benefit_equipment": "Equipment-aware"
+            "benefit_equipment": "Equipment-aware",
+            "proof_personalized": "Personalized to your goal and training level",
+            "proof_personalized_detail": "Your split, volume, and exercise choices start from the outcome you actually want.",
+            "proof_schedule": "Sized to your weekly schedule",
+            "proof_schedule_detail": "We match the plan to the days and session length you can sustain in real life.",
+            "proof_safety": "Protective around limitations and equipment",
+            "proof_safety_detail": "Your equipment and constraints shape what gets recommended before the plan is built."
         },
         "progress": {
             "week_label": "Week {{week}}",

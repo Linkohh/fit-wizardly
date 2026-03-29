@@ -117,7 +117,7 @@ vi.mock('@/components/ErrorBoundary', () => ({
 }));
 
 vi.mock('@/components/ui/living-background', () => ({
-  LivingBackground: () => null,
+  LivingBackground: () => <div data-testid="living-background" />,
 }));
 
 vi.mock('@/components/ui/loading-screen', () => ({
@@ -348,6 +348,27 @@ describe('App auth routing', () => {
 
     expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
     expect(screen.getByTestId('app-shell')).toHaveClass('app-shell-native', 'app-shell-main-offset');
+  });
+
+  it('renders the shared living background on phone widths', async () => {
+    const requestAnimationFrameSpy = vi
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((callback: FrameRequestCallback) => {
+        callback(0);
+        return 1;
+      });
+
+    Object.defineProperty(window, 'innerWidth', {
+      configurable: true,
+      writable: true,
+      value: 390,
+    });
+
+    renderAt('/onboarding');
+
+    expect(await screen.findByTestId('living-background')).toBeInTheDocument();
+
+    requestAnimationFrameSpy.mockRestore();
   });
 
   it('applies a temporary theme transition hook when the effective theme changes', async () => {

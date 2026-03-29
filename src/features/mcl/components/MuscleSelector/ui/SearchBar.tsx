@@ -37,7 +37,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const showResults = isFocused && results.length > 0;
 
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {/* Search input */}
       <div
         className={`

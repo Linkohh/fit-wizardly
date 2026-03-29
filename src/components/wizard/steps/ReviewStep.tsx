@@ -1,111 +1,200 @@
+import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useWizardStore } from '@/stores/wizardStore';
-import { validatePlanBalance } from '@/lib/planValidation';
-import { ReviewGoalCard } from '@/components/wizard/review/ReviewGoalCard';
-import { ReviewScheduleCard } from '@/components/wizard/review/ReviewScheduleCard';
-import { ReviewEquipmentCard } from '@/components/wizard/review/ReviewEquipmentCard';
-import { ReviewMusclesCard } from '@/components/wizard/review/ReviewMusclesCard';
-import { ReviewConstraintsCard } from '@/components/wizard/review/ReviewConstraintsCard';
-import { ReviewCoachCard } from '@/components/wizard/review/ReviewCoachCard';
-import { AlertTriangle, AlertCircle, Check, Sparkles, User } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { AlertCircle, AlertTriangle, CheckCircle2, PencilLine, Sparkles, User } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { validatePlanBalance } from '@/lib/planValidation';
+import { formatIdentifierLabel } from '@/lib/displayText';
 import { cn } from '@/lib/utils';
+import { CONSTRAINT_OPTIONS, EQUIPMENT_OPTIONS } from '@/types/fitness';
+import { useWizardStore } from '@/stores/wizardStore';
+
+type ReviewRowProps = {
+  label: string;
+  value: ReactNode;
+  detail?: string;
+  onEdit: () => void;
+};
+
+function ReviewRow({ label, value, detail, onEdit }: ReviewRowProps) {
+  return (
+    <div className="grid gap-3 py-4 sm:grid-cols-[160px_minmax(0,1fr)_auto] sm:items-start">
+      <div className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        {label}
+      </div>
+      <div className="min-w-0">
+        <div className="text-sm font-medium leading-relaxed text-foreground">{value}</div>
+        {detail ? (
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            {detail}
+          </p>
+        ) : null}
+      </div>
+      <button
+        type="button"
+        onClick={onEdit}
+        className="inline-flex items-center gap-1 text-sm font-medium text-primary transition-colors hover:text-primary/80"
+      >
+        <PencilLine className="h-4 w-4" />
+        Edit
+      </button>
+    </div>
+  );
+}
 
 export function ReviewStep() {
   const { t } = useTranslation();
   const { selections, setStep } = useWizardStore();
-
-  // Validation Warnings
   const warnings = useMemo(() => validatePlanBalance(selections), [selections]);
 
   const hasPersonalInfo = selections.firstName || selections.lastName || selections.personalGoalNote;
+  const fullName = `${selections.firstName} ${selections.lastName}`.trim();
+  const weeklyHours = ((selections.daysPerWeek * selections.sessionDuration) / 60).toFixed(1);
+  const splitLabel =
+    selections.daysPerWeek <= 3
+      ? t('wizard.schedule.split_full_body')
+      : selections.daysPerWeek === 4
+        ? t('wizard.schedule.split_upper_lower')
+        : t('wizard.schedule.split_ppl');
+
+  const equipmentLabels = selections.equipment.map((equipment) =>
+    EQUIPMENT_OPTIONS.find((option) => option.id === equipment)?.name ?? formatIdentifierLabel(equipment),
+  );
+  const constraintLabels = selections.constraints.map((constraint) =>
+    CONSTRAINT_OPTIONS.find((option) => option.id === constraint)?.name ?? formatIdentifierLabel(constraint),
+  );
+  const targetMuscleLabels = selections.targetMuscles.map((muscle) => formatIdentifierLabel(muscle));
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-foreground">{t('wizard.review.title')}</h2>
-        <p className="text-muted-foreground mt-1">{t('wizard.review.subtitle')}</p>
+      <div className="max-w-2xl">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
+          {t('wizard.review.coach_summary', 'Coach summary')}
+        </p>
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          {t('wizard.review.title')}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
+          {t('wizard.review.coach_summary_copy', 'Scan the prescription like a coach would: confirm the goal, weekly commitment, equipment, muscle focus, and any guardrails before the plan is generated.')}
+        </p>
       </div>
 
-      {/* Validation Warnings */}
       {warnings.length > 0 && (
         <div className="space-y-3">
           {warnings.map((warning) => (
-            <Card key={warning.id} className={cn(
-              "border-l-4",
-              warning.type === 'warning' ? "border-l-destructive border-destructive/20 bg-destructive/5" : "border-l-blue-500 border-blue-500/20 bg-blue-500/5"
-            )}>
-              <CardContent className="p-4 flex gap-3">
+            <div
+              key={warning.id}
+              className={cn(
+                'rounded-[1.35rem] border px-4 py-4',
+                warning.type === 'warning'
+                  ? 'border-destructive/25 bg-destructive/6'
+                  : 'border-blue-500/25 bg-blue-500/6',
+              )}
+            >
+              <div className="flex gap-3">
                 {warning.type === 'warning' ? (
-                  <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-destructive" />
                 ) : (
-                  <AlertCircle className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-400" />
                 )}
                 <div>
-                  <h4 className={cn("font-medium", warning.type === 'warning' ? "text-destructive" : "text-blue-500")}>
+                  <h3
+                    className={cn(
+                      'font-medium',
+                      warning.type === 'warning' ? 'text-destructive' : 'text-blue-300',
+                    )}
+                  >
                     {warning.message}
-                  </h4>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {warning.context}
-                  </p>
+                  </h3>
+                  {warning.context ? (
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                      {warning.context}
+                    </p>
+                  ) : null}
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
       )}
 
-      {/* Personal Info Banner */}
-      {hasPersonalInfo && (
-        <Card className="border-primary/30 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 rounded-full bg-primary/20">
-                <User className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-foreground">
-                  {selections.firstName || selections.lastName
-                    ? `${selections.firstName} ${selections.lastName}`.trim()
-                    : 'Your Personal Plan'}
-                </h3>
-                <p className="text-sm text-muted-foreground">{t('wizard.review.personalized_plan')}</p>
-              </div>
+      <section className="rounded-[2rem] border border-border/60 bg-background/35 p-5 shadow-[0_24px_60px_-40px_rgba(0,0,0,0.55)] backdrop-blur-xl sm:p-7">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-3">
+            <div className="inline-flex items-center gap-2 text-primary/80">
+              <User className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                {hasPersonalInfo && fullName ? fullName : t('wizard.review.personalized_plan')}
+              </span>
             </div>
-            {selections.personalGoalNote && (
-              <div className="flex items-start gap-2 p-3 rounded-lg bg-background/50 border border-primary/10">
-                <Sparkles className="h-4 w-4 text-secondary mt-0.5 shrink-0" />
-                <p className="text-sm italic text-foreground/90">"{selections.personalGoalNote}"</p>
+
+            {selections.personalGoalNote ? (
+              <div className="max-w-2xl rounded-[1.5rem] border border-primary/20 bg-primary/8 px-4 py-4">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+                  <p className="text-sm italic leading-relaxed text-foreground/90">
+                    “{selections.personalGoalNote}”
+                  </p>
+                </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            ) : null}
+          </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <ReviewGoalCard selections={selections} onEdit={() => setStep('goal')} />
-        <ReviewScheduleCard selections={selections} onEdit={() => setStep('schedule')} />
-        <ReviewEquipmentCard selections={selections} onEdit={() => setStep('equipment')} />
-        <ReviewMusclesCard selections={selections} onEdit={() => setStep('anatomy')} />
-      </div>
-
-      <ReviewConstraintsCard selections={selections} onEdit={() => setStep('constraints')} />
-      <ReviewCoachCard selections={selections} />
-
-      {/* Ready message */}
-      <motion.div
-        className="p-4 rounded-lg bg-success/10 border border-success/20 text-center overflow-hidden"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <div className="flex items-center justify-center gap-2 text-success font-medium">
-          <Check className="h-5 w-5" />
-          <span>{t('wizard.review.ready_message')}</span>
+          <motion.div
+            className="inline-flex items-center gap-2 self-start rounded-full border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-300"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            {t('wizard.review.ready_message')}
+          </motion.div>
         </div>
-      </motion.div>
+
+        <div className="mt-8 divide-y divide-border/60">
+          <ReviewRow
+            label={t('wizard.review.goal_experience')}
+            value={`${t(`goals.${selections.goal}`)} • ${t(`experience.${selections.experienceLevel}`)}`}
+            detail={t('wizard.review.goal_experience_detail', 'This sets the training emphasis, recovery demand, and the phase we recommend first.')}
+            onEdit={() => setStep('goal')}
+          />
+          <ReviewRow
+            label={t('wizard.review.weekly_commitment', 'Weekly commitment')}
+            value={`${selections.daysPerWeek} ${t('wizard.review.days')} • ${selections.sessionDuration} ${t('wizard.review.min')} • ${weeklyHours} ${t('wizard.schedule.hours')}`}
+            detail={`${t('wizard.review.split_type')}: ${splitLabel}`}
+            onEdit={() => setStep('schedule')}
+          />
+          <ReviewRow
+            label={t('wizard.review.equipment')}
+            value={equipmentLabels.join(' • ')}
+            detail={t('wizard.review.equipment_detail', 'Only exercises that fit this setup will be prioritized in the generated plan.')}
+            onEdit={() => setStep('equipment')}
+          />
+          <ReviewRow
+            label={t('wizard.review.target_muscles')}
+            value={targetMuscleLabels.length > 0 ? targetMuscleLabels.join(' • ') : t('wizard.review.no_muscles')}
+            detail={t('wizard.review.target_muscles_detail', 'These areas will shape weekly emphasis, exercise selection, and overall split balance.')}
+            onEdit={() => setStep('anatomy')}
+          />
+          <ReviewRow
+            label={t('wizard.review.restrictions', 'Restrictions')}
+            value={constraintLabels.length > 0 ? constraintLabels.join(' • ') : t('wizard.constraints.no_constraints')}
+            detail={t('wizard.review.constraints_hint')}
+            onEdit={() => setStep('constraints')}
+          />
+        </div>
+
+        {selections.coachNotes ? (
+          <div className="mt-8 border-t border-border/60 pt-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              {t('wizard.review.coach_notes_title', 'Coach notes')}
+            </p>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              {selections.coachNotes}
+            </p>
+          </div>
+        ) : null}
+      </section>
     </div>
   );
 }

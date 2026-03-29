@@ -19,9 +19,9 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
 
   const steps = useMemo(() => [
     { id: 'goal', label: t('wizard.steps.goal'), shortLabel: t('wizard.stepper.short_goal') },
+    { id: 'constraints', label: t('wizard.steps.constraints'), shortLabel: t('wizard.stepper.short_limits') },
     { id: 'equipment', label: t('wizard.steps.equipment'), shortLabel: t('wizard.stepper.short_equip') },
     { id: 'anatomy', label: t('wizard.steps.anatomy'), shortLabel: t('wizard.stepper.short_muscles') },
-    { id: 'constraints', label: t('wizard.steps.constraints'), shortLabel: t('wizard.stepper.short_limits') },
     { id: 'schedule', label: t('wizard.steps.schedule'), shortLabel: t('wizard.stepper.short_days') },
     { id: 'review', label: t('wizard.steps.review'), shortLabel: t('wizard.stepper.short_review') },
   ] as const, [t]);
@@ -31,7 +31,7 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
       ref={ref}
       className="w-full py-4 px-2"
       role="navigation"
-      aria-label={t('wizard.stepper.progress_label')}
+      aria-label={t('wizard.stepper.progress_label', 'Plan progress')}
     >
       <ol className="flex items-center justify-between gap-0">
         {steps.map((step, index) => {
@@ -142,4 +142,3 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
     </nav>
   );
 }
-

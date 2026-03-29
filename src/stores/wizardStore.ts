@@ -5,7 +5,7 @@ import { determineOptPhase } from '@/lib/phaseMapper';
 
 export type WizardStep = 'goal' | 'equipment' | 'anatomy' | 'constraints' | 'schedule' | 'review';
 
-const WIZARD_STEPS: WizardStep[] = ['goal', 'equipment', 'anatomy', 'constraints', 'schedule', 'review'];
+const WIZARD_STEPS: WizardStep[] = ['goal', 'constraints', 'equipment', 'anatomy', 'schedule', 'review'];
 
 interface WizardState {
   currentStep: WizardStep;

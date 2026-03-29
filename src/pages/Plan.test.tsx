@@ -160,6 +160,10 @@ describe('PlanPage', () => {
 
     expect(screen.getByText('plan.noplan.headline')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /plan\.noplan\.cta_primary/i })).toBeInTheDocument();
+    expect(screen.getByText('Takes about 2 minutes')).toBeInTheDocument();
+    expect(screen.getByText('Personalized to your goal and training level')).toBeInTheDocument();
+    expect(screen.getByText('Sized to your weekly schedule')).toBeInTheDocument();
+    expect(screen.getByText('Protective around limitations and equipment')).toBeInTheDocument();
     expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
   });
 

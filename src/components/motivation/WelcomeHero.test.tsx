@@ -143,6 +143,8 @@ describe('WelcomeHero tilt integration', () => {
       isEnabled: false,
     });
     expect(mocks.enableMotion).not.toHaveBeenCalled();
+    expect(screen.getByTestId('hero-ambient-glow')).toBeInTheDocument();
+    expect(screen.queryByTestId('hero-particles')).not.toBeInTheDocument();
 
     const optInButton = screen.getByRole('button', { name: /enable motion tilt/i });
     fireEvent.click(optInButton);

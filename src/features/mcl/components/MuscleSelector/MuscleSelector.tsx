@@ -32,6 +32,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   showInfoPanel = true,
   showSelectionSidebar = true,
   showPresets = true,
+  headerControlsMode = 'full',
   colorByGroup: initialColorByGroup = true,
   theme: themeProp = 'system',
   accentColor = '#EF4444',
@@ -58,6 +59,8 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   const shouldUseAppleHaptics = isMobile && isAppleMobile;
   const showInlineMobileSidebar = showSelectionSidebar && isMobile && !isAppleMobile;
   const showDesktopSidebar = showSelectionSidebar && !isMobile;
+  const isEmbeddedHeader = headerControlsMode === 'embedded';
+  const showAppearanceControls = !isEmbeddedHeader;
 
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
@@ -236,18 +239,20 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
       <div className="flex-1 flex flex-col min-w-0 min-h-0" data-testid="muscle-selector-main">
         {/* Header / Controls */}
         {showHeader && (
-          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-border/30 dark:border-white/10 overflow-hidden">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between gap-3 p-3 sm:p-4 border-b border-border/30 dark:border-white/10 overflow-hidden">
+            <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
               {/* View Switcher */}
-              <ViewSwitcher
-                currentView={currentView}
-                showSideView={showSideView}
-                onViewChange={handleViewChange}
-              />
+              <div className="shrink-0">
+                <ViewSwitcher
+                  currentView={currentView}
+                  showSideView={showSideView}
+                  onViewChange={handleViewChange}
+                />
+              </div>
 
               {/* Search */}
               {showSearch && (
-                <div className="hidden md:block w-32 lg:w-64 transition-all duration-300">
+                <div className="hidden min-w-0 flex-1 md:block md:max-w-[13rem] lg:max-w-[16rem] transition-all duration-300">
                   <SearchBar
                     onMuscleSelect={handleSearchSelect}
                     onMuscleHover={(m) => setHoveredMuscle(m?.id || null)}
@@ -257,9 +262,9 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
             </div>
 
             {!isMobile && (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-shrink-0 items-center gap-2">
                 {/* Undo/Redo */}
-                <div className="flex items-center gap-2 border-l border-border/30 dark:border-white/10 pl-2 ml-2">
+                <div className="ml-1 flex flex-shrink-0 items-center gap-2 border-l border-border/30 dark:border-white/10 pl-2">
                   <button
                     onClick={undo}
                     disabled={!canUndo}
@@ -271,6 +276,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                       }
                     `}
                     title="Undo (Ctrl+Z)"
+                    aria-label="Undo"
                   >
                     <Undo2 className="w-4 h-4" />
                   </button>
@@ -285,38 +291,45 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                       }
                     `}
                     title="Redo (Ctrl+Shift+Z)"
+                    aria-label="Redo"
                   >
                     <Redo2 className="w-4 h-4" />
                   </button>
                 </div>
 
-                {/* Color mode toggle */}
-                <button
-                  onClick={() => setColorByGroup(!colorByGroup)}
-                  className={`
-                    p-2 rounded-lg transition-colors
-                    ${colorByGroup
-                      ? 'bg-primary/20 text-primary-300 ring-1 ring-primary/50'
-                      : 'bg-muted/30 dark:bg-white/5 text-muted-foreground hover:bg-muted/50 dark:hover:bg-white/10 hover:text-foreground'
-                    }
-                  `}
-                  title={colorByGroup ? 'Disable color by group' : 'Enable color by group'}
-                >
-                  <Palette className="w-4 h-4" />
-                </button>
+                {showAppearanceControls ? (
+                  <>
+                    {/* Color mode toggle */}
+                    <button
+                      onClick={() => setColorByGroup(!colorByGroup)}
+                      className={`
+                        p-2 rounded-lg transition-colors
+                        ${colorByGroup
+                          ? 'bg-primary/20 text-primary-300 ring-1 ring-primary/50'
+                          : 'bg-muted/30 dark:bg-white/5 text-muted-foreground hover:bg-muted/50 dark:hover:bg-white/10 hover:text-foreground'
+                        }
+                      `}
+                      title={colorByGroup ? 'Disable color by group' : 'Enable color by group'}
+                      aria-label="Toggle color by group"
+                    >
+                      <Palette className="w-4 h-4" />
+                    </button>
 
-                {/* Theme toggle */}
-                <button
-                  onClick={toggleTheme}
-                  className="p-2 rounded-lg bg-muted/30 dark:bg-white/5 text-muted-foreground hover:bg-muted/50 dark:hover:bg-white/10 hover:text-foreground transition-colors"
-                  title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-                >
-                  {resolvedTheme === 'dark' ? (
-                    <Sun className="w-4 h-4" />
-                  ) : (
-                    <Moon className="w-4 h-4" />
-                  )}
-                </button>
+                    {/* Theme toggle */}
+                    <button
+                      onClick={toggleTheme}
+                      className="p-2 rounded-lg bg-muted/30 dark:bg-white/5 text-muted-foreground hover:bg-muted/50 dark:hover:bg-white/10 hover:text-foreground transition-colors"
+                      title={resolvedTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                      aria-label="Toggle selector theme"
+                    >
+                      {resolvedTheme === 'dark' ? (
+                        <Sun className="w-4 h-4" />
+                      ) : (
+                        <Moon className="w-4 h-4" />
+                      )}
+                    </button>
+                  </>
+                ) : null}
               </div>
             )}
           </div>

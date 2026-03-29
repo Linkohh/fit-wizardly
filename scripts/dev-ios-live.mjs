@@ -9,7 +9,7 @@ const STARTUP_TIMEOUT_MS = 30_000;
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 if (process.argv.includes('--help')) {
-  console.log(`Usage: npm run dev:ios
+  console.log(`Usage: npm run ios:live
 
 Starts the Vite dev server if needed, waits for http://localhost:8080,
 then launches Capacitor iOS live reload.
@@ -17,7 +17,8 @@ then launches Capacitor iOS live reload.
 Notes:
 - Reuses an existing server on port 8080 if one is already running
 - Forwards Ctrl+C to both child processes when it started them
-- Under the hood this runs: npm run dev + npm run ios:live`);
+- Under the hood this runs: npm run dev + npm run ios:live:cap
+- npm run dev:ios is kept as an alias for the same workflow`);
   process.exit(0);
 }
 
@@ -153,7 +154,7 @@ async function main() {
   await ensureDevServerReady();
 
   console.log('Launching Capacitor iOS live reload...');
-  iosProcess = spawnNpm(['run', 'ios:live'], 'Capacitor iOS live reload');
+  iosProcess = spawnNpm(['run', 'ios:live:cap'], 'Capacitor iOS live reload');
 
   if (devProcess) {
     devProcess.once('exit', (code, signal) => {

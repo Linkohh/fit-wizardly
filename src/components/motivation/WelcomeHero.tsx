@@ -82,7 +82,7 @@ const STATIC_PARTICLES = Array.from({ length: 20 }, (_, i) => ({
 
 const Particles = memo(function Particles() {
     return (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div data-testid="hero-particles" className="absolute inset-0 overflow-hidden pointer-events-none">
             {STATIC_PARTICLES.map((p) => (
                 <motion.div
                     key={p.id}
@@ -165,8 +165,9 @@ export function WelcomeHero() {
     const setMobileMotionEnabled = usePreferencesStore((state) => state.setMotionTiltActivatedThisSession);
 
     const isMobileContext = nativeApp || isMobile;
-    const staticMode = shouldReduceMotion || (isMobileContext && !mobileMotionEnabled);
-    const tiltEnabled = motionTiltEnabled && !shouldReduceMotion && (!isMobileContext || mobileMotionEnabled);
+    const enhancedMotionEnabled = motionTiltEnabled && !shouldReduceMotion && (!isMobileContext || mobileMotionEnabled);
+    const atmosphereIsStatic = shouldReduceMotion || (isMobileContext && !mobileMotionEnabled);
+    const tiltEnabled = enhancedMotionEnabled;
 
     const {
         rotateX,
@@ -185,7 +186,7 @@ export function WelcomeHero() {
 
     // Defer heavy background animations to prioritize LCP.
     useEffect(() => {
-        if (staticMode) {
+        if (!enhancedMotionEnabled) {
             setShowBackground(false);
             return;
         }
@@ -194,7 +195,7 @@ export function WelcomeHero() {
             setShowBackground(true);
         }, 100); // Small delay to let the main content paint first
         return () => clearTimeout(timer);
-    }, [staticMode]);
+    }, [enhancedMotionEnabled]);
 
     // Auto-activate sensor if permission was previously granted (localStorage).
     // Only attempt once per mount to avoid an infinite retry loop on iOS where
@@ -278,7 +279,7 @@ export function WelcomeHero() {
             )}
         >
             {/* Animated Background Elements - Deferred (FloatingOrbs removed — LivingBackground blobs visible through transparent hero) */}
-            {showBackground && !staticMode && (
+            {showBackground && enhancedMotionEnabled && (
                 <Particles />
             )}
 
@@ -286,7 +287,7 @@ export function WelcomeHero() {
             <div className={cn(styles.heroBloom, "absolute inset-0 dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(120,119,198,0.06),transparent)] pointer-events-none")} />
 
             {/* Premium Layered Horizon Glow - 3D Depth with Aurora Color Cycling */}
-            <div className={cn(styles.horizonGlowWrapper, "absolute inset-0 pointer-events-none overflow-hidden -z-10")}>
+            <div data-testid="hero-ambient-glow" className={cn(styles.horizonGlowWrapper, "absolute inset-0 pointer-events-none overflow-hidden -z-10")}>
 
                 {/* Primary Layer - Hot Additive Core */}
                 <div className={cn(styles.horizonGlowPrimary, "absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 h-[60%] w-[90%] mix-blend-plus-lighter")} />
@@ -323,11 +324,17 @@ export function WelcomeHero() {
                             <InteractiveWord word={t('hero.potential')} type="potential" className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-secondary" />
                         </span>
                         {/* Glow effect behind text */}
-                        {!staticMode && (
+                        {enhancedMotionEnabled ? (
                             <motion.div
+                                data-testid="hero-text-bloom"
                                 className="absolute inset-0 bg-gradient-to-r from-primary/30 via-purple-400/30 to-secondary/30 blur-2xl -z-10"
                                 animate={{ opacity: [0.5, 0.8, 0.5], scale: [1, 1.05, 1] }}
                                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                            />
+                        ) : (
+                            <div
+                                data-testid="hero-text-bloom"
+                                className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/28 via-purple-400/24 to-secondary/28 blur-2xl opacity-70"
                             />
                         )}
                     </span>
@@ -370,7 +377,7 @@ export function WelcomeHero() {
                                 <span className="relative z-10 flex items-center gap-2">
                                     <Flame className="h-5 w-5 group-hover:animate-pulse" />
                                     {t('hero.start')}
-                                    {staticMode ? (
+                                    {!enhancedMotionEnabled ? (
                                         <ArrowRight className="h-5 w-5" />
                                     ) : (
                                         <motion.span
@@ -383,7 +390,7 @@ export function WelcomeHero() {
                                     )}
                                 </span>
                                 {/* Animated gradient overlay */}
-                                {!staticMode && (
+                                {enhancedMotionEnabled && (
                                     <motion.div
                                         className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0"
                                         animate={{ x: ["-100%", "200%"] }}
@@ -453,7 +460,7 @@ export function WelcomeHero() {
                 </motion.div>
 
                 {/* Decorative floating elements */}
-                {!staticMode && (
+                {showBackground && !atmosphereIsStatic && (
                     <>
                         <div className="absolute top-16 left-8 hidden lg:block pointer-events-none">
                             <motion.div

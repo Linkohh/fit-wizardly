@@ -56,6 +56,7 @@ export function Header() {
   const location = useLocation();
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isWizardRoute = location.pathname.startsWith('/wizard');
 
   const user = useAuthStore((state) => state.user);
   const profile = useAuthStore((state) => state.profile);
@@ -256,7 +257,12 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top">
+    <header
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top",
+        isWizardRoute && "border-white/5 bg-background/85 supports-[backdrop-filter]:bg-background/75",
+      )}
+    >
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[100] px-4 py-2 bg-background border border-primary text-primary rounded-md shadow-lg"
@@ -284,131 +290,156 @@ export function Header() {
               src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png"
             />
           </motion.div>
-          <span className="text-3xl font-bold gradient-text hidden lg:inline">FitWizard</span>
+          {isWizardRoute ? (
+            <span className="hidden sm:inline text-xs font-semibold uppercase tracking-[0.32em] text-muted-foreground">
+              {t('header.intake_mode', 'Coach Intake')}
+            </span>
+          ) : (
+            <span className="text-3xl font-bold gradient-text hidden lg:inline">FitWizard</span>
+          )}
         </Link>
 
-        <nav
-          ref={navRef}
-          className="hidden xl:flex items-center gap-1 relative"
-          role="navigation"
-          aria-label="Main navigation"
-        >
-          <motion.div
-            className="absolute h-full bg-primary/10 rounded-md pointer-events-none"
-            initial={false}
-            animate={{
-              left: indicatorStyle.left,
-              width: indicatorStyle.width,
-              opacity: indicatorStyle.width > 0 ? 1 : 0,
-            }}
-            transition={{
-              type: 'spring',
-              stiffness: 350,
-              damping: 30,
-            }}
-          />
-
-          {navItems.map((item) => {
-            const active = isActive(item.path);
-
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                aria-current={active ? 'page' : undefined}
-                data-click-feedback-event="navigation"
-                ref={(element) => {
-                  if (element) {
-                    navItemRefs.current.set(item.path, element);
-                  } else {
-                    navItemRefs.current.delete(item.path);
-                  }
-                }}
-                className="relative"
-              >
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    'relative z-10 touch-target transition-colors duration-200 text-sm xl:text-base xl:px-3 xl:py-2',
-                    active ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  {item.label}
-                </Button>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="hidden xl:flex items-center gap-2 ml-4">
-          <ThemeModePill
-            mode={mode}
-            onChange={setMode}
-            containerClassName="header-theme-toggle"
-            buttonClassName="header-theme-button"
-            testId="desktop-header-theme-toggle"
-          />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="touch-target" aria-label="Profile">
-                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20 overflow-hidden">
-                  {renderAvatar('h-full w-full', 'text-xs font-semibold text-primary')}
-                </div>
+        {isWizardRoute ? (
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex">
+              <ThemeModePill
+                mode={mode}
+                onChange={setMode}
+                containerClassName="header-theme-toggle"
+                buttonClassName="header-theme-button"
+                testId="desktop-header-theme-toggle"
+              />
+            </div>
+            <Link to="/plan" data-click-feedback-event="navigation">
+              <Button variant="ghost" size="sm" className="touch-target px-3 text-sm text-muted-foreground hover:text-foreground">
+                {t('header.leave_intake', 'Leave intake')}
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              <div className="flex items-center justify-between px-2 py-2">
-                <span className="text-sm font-medium">{t('header.trainer_mode', 'Trainer Mode')}</span>
-                <Switch
-                  checked={isTrainerMode}
-                  aria-label={t('header.trainer_mode', 'Trainer Mode')}
-                  onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
-                />
-              </div>
-              <DropdownMenuItem asChild>
-                <Link
-                  to="/profile"
-                  className="cursor-pointer w-full"
-                  data-click-feedback-event="navigation"
-                >
-                  {t('profile.title', 'Settings & Profile')}
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetTrigger asChild className="xl:hidden">
-            <motion.div
-              whileTap={{ scale: 0.92 }}
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            </Link>
+          </div>
+        ) : (
+          <>
+            <nav
+              ref={navRef}
+              className="hidden xl:flex items-center gap-1 relative"
+              role="navigation"
+              aria-label="Main navigation"
             >
-              <Button
-                variant="ghost"
-                size="icon"
-                className="touch-target"
-                data-click-feedback-event="navigation"
-                aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-                aria-expanded={mobileOpen}
+              <motion.div
+                className="absolute h-full bg-primary/10 rounded-md pointer-events-none"
+                initial={false}
+                animate={{
+                  left: indicatorStyle.left,
+                  width: indicatorStyle.width,
+                  opacity: indicatorStyle.width > 0 ? 1 : 0,
+                }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 350,
+                  damping: 30,
+                }}
+              />
+
+              {navItems.map((item) => {
+                const active = isActive(item.path);
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    aria-current={active ? 'page' : undefined}
+                    data-click-feedback-event="navigation"
+                    ref={(element) => {
+                      if (element) {
+                        navItemRefs.current.set(item.path, element);
+                      } else {
+                        navItemRefs.current.delete(item.path);
+                      }
+                    }}
+                    className="relative"
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className={cn(
+                        'relative z-10 touch-target transition-colors duration-200 text-sm xl:text-base xl:px-3 xl:py-2',
+                        active ? 'text-primary font-medium' : 'text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      {item.label}
+                    </Button>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="hidden xl:flex items-center gap-2 ml-4">
+              <ThemeModePill
+                mode={mode}
+                onChange={setMode}
+                containerClassName="header-theme-toggle"
+                buttonClassName="header-theme-button"
+                testId="desktop-header-theme-toggle"
+              />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="touch-target" aria-label="Profile">
+                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/20 overflow-hidden">
+                      {renderAvatar('h-full w-full', 'text-xs font-semibold text-primary')}
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="flex items-center justify-between px-2 py-2">
+                    <span className="text-sm font-medium">{t('header.trainer_mode', 'Trainer Mode')}</span>
+                    <Switch
+                      checked={isTrainerMode}
+                      aria-label={t('header.trainer_mode', 'Trainer Mode')}
+                      onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
+                    />
+                  </div>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/profile"
+                      className="cursor-pointer w-full"
+                      data-click-feedback-event="navigation"
+                    >
+                      {t('profile.title', 'Settings & Profile')}
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild className="xl:hidden">
+                <motion.div
+                  whileTap={{ scale: 0.92 }}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                >
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="touch-target"
+                    data-click-feedback-event="navigation"
+                    aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                    aria-expanded={mobileOpen}
+                  >
+                    <AnimatedMenuIcon isOpen={mobileOpen} size={24} strokeWidth={2} />
+                  </Button>
+                </motion.div>
+              </SheetTrigger>
+              <SheetContent
+                side="right"
+                className="aetheric-drawer aetheric-drawer--scooped w-[20rem] max-w-[92vw] h-[100svh] supports-[height:100dvh]:h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden overflow-x-hidden p-0 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]"
+                data-theme-mode={mode}
+                data-resolved-theme={resolvedTheme}
+                glassEffect
+                enableGestures
+                showDragHandle
+                onGestureClose={() => setMobileOpen(false)}
               >
-                <AnimatedMenuIcon isOpen={mobileOpen} size={24} strokeWidth={2} />
-              </Button>
-            </motion.div>
-          </SheetTrigger>
-          <SheetContent
-            side="right"
-            className="aetheric-drawer aetheric-drawer--scooped w-[20rem] max-w-[92vw] h-[100svh] supports-[height:100dvh]:h-[100dvh] max-h-[100dvh] flex flex-col overflow-hidden overflow-x-hidden p-0 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]"
-            data-theme-mode={mode}
-            data-resolved-theme={resolvedTheme}
-            glassEffect
-            enableGestures
-            showDragHandle
-            onGestureClose={() => setMobileOpen(false)}
-          >
             <div className="aetheric-drawer__inner flex min-h-0 flex-1 flex-col px-4 pb-2 pt-5">
               <motion.section
                 data-testid="mobile-drawer-profile"
@@ -624,8 +655,10 @@ export function Header() {
                 </div>
               </motion.div>
             </div>
-          </SheetContent>
-        </Sheet>
+              </SheetContent>
+            </Sheet>
+          </>
+        )}
       </div>
     </header>
   );

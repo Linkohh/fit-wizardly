@@ -70,6 +70,7 @@ export interface MuscleSelectorProps {
   colorByGroup?: boolean;
   showPresets?: boolean;  // Phase 1 enhancement
   hoverIntensity?: 'default' | 'strong';
+  headerControlsMode?: 'full' | 'embedded';
 
   // Theming
   theme?: 'light' | 'dark' | 'system';

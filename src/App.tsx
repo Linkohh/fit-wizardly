@@ -23,7 +23,6 @@ import { ConsentModal } from "@/components/legal/ConsentModal";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
-import { MOBILE_BREAKPOINT } from "@/hooks/use-mobile";
 import { AuthModal } from "@/components/auth/AuthModal";
 
 const Index = lazy(() => import("./pages/Index"));
@@ -394,7 +393,7 @@ const App = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (typeof window === 'undefined' || window.innerWidth < MOBILE_BREAKPOINT) {
+    if (typeof window === 'undefined') {
       return;
     }
 
