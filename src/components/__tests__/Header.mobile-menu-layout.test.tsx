@@ -14,11 +14,13 @@ const mocks = vi.hoisted(() => ({
     platform: 'unsupported',
     isStandalone: false,
     canNativeInstall: false,
+    canShareShortcut: false,
     hasSeenCoach: false,
     dismissed: false,
     installed: false,
     isOpen: false,
     hasHydrated: true,
+    view: 'chooser' as const,
   },
   requestPermission: vi.fn(async () => ({
     available: true,
@@ -227,11 +229,13 @@ describe('Header mobile menu layout', () => {
       platform: 'unsupported',
       isStandalone: false,
       canNativeInstall: false,
+      canShareShortcut: false,
       hasSeenCoach: false,
       dismissed: false,
       installed: false,
       isOpen: false,
       hasHydrated: true,
+      view: 'chooser',
     };
   });
 
@@ -257,11 +261,13 @@ describe('Header mobile menu layout', () => {
       platform: 'ios-safari',
       isStandalone: false,
       canNativeInstall: false,
+      canShareShortcut: true,
       hasSeenCoach: true,
       dismissed: true,
       installed: false,
       isOpen: false,
       hasHydrated: true,
+      view: 'chooser',
     };
 
     render(

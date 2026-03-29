@@ -96,11 +96,13 @@ function resetInstallCoachStore() {
     platform: 'unsupported',
     isStandalone: false,
     canNativeInstall: false,
+    canShareShortcut: false,
     hasSeenCoach: false,
     dismissed: false,
     installed: false,
     isOpen: false,
     hasHydrated: true,
+    view: 'chooser',
   });
 }
 
@@ -118,17 +120,22 @@ describe('InstallCoachSheet', () => {
     vi.useRealTimers();
   });
 
-  it('shows Safari install steps on the first eligible iPhone Safari visit', () => {
+  it('shows the chooser on the first eligible iPhone Safari visit', () => {
+    Object.defineProperty(window.navigator, 'share', {
+      value: vi.fn(async () => undefined),
+      configurable: true,
+    });
+
     render(<InstallCoachSheet />);
 
     act(() => {
       vi.advanceTimersByTime(1400);
     });
 
-    expect(screen.getByText('Add FitWizard to your Home Screen')).toBeInTheDocument();
-    expect(screen.getByText('Tap the Share button in Safari')).toBeInTheDocument();
-    expect(screen.getByText('Choose Add to Home Screen')).toBeInTheDocument();
-    expect(screen.getByText('Keep Open as Web App enabled, then tap Add')).toBeInTheDocument();
+    expect(screen.getByText('How do you want to open FitWizard?')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Stay in Browser/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Install Shortcut/i })).toBeInTheDocument();
+    expect(screen.queryByText('Tap the Share button in Safari')).not.toBeInTheDocument();
   });
 
   it('stays hidden in standalone mode', () => {
@@ -140,7 +147,7 @@ describe('InstallCoachSheet', () => {
       vi.advanceTimersByTime(1400);
     });
 
-    expect(screen.queryByText('Add FitWizard to your Home Screen')).not.toBeInTheDocument();
+    expect(screen.queryByText('How do you want to open FitWizard?')).not.toBeInTheDocument();
   });
 
   it('does not auto-reopen after dismissal but can reopen manually', () => {
@@ -150,37 +157,78 @@ describe('InstallCoachSheet', () => {
       vi.advanceTimersByTime(1400);
     });
 
-    fireEvent.click(screen.getByRole('button', { name: 'Maybe later' }));
-    expect(screen.queryByText('Add FitWizard to your Home Screen')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /Stay in Browser/i }));
+    expect(screen.queryByText('How do you want to open FitWizard?')).not.toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(1400);
     });
 
-    expect(screen.queryByText('Add FitWizard to your Home Screen')).not.toBeInTheDocument();
+    expect(screen.queryByText('How do you want to open FitWizard?')).not.toBeInTheDocument();
 
     act(() => {
       useInstallCoachStore.getState().openCoach();
     });
 
-    expect(screen.getByText('Add FitWizard to your Home Screen')).toBeInTheDocument();
+    expect(screen.getByText('How do you want to open FitWizard?')).toBeInTheDocument();
   });
 
-  it('marks the coach complete when the user confirms they added the app', () => {
+  it('opens the share flow on iPhone Safari and then shows the compact Safari nudge', async () => {
+    const share = vi.fn(async () => undefined);
+    Object.defineProperty(window.navigator, 'share', {
+      value: share,
+      configurable: true,
+    });
+
     render(<InstallCoachSheet />);
 
     act(() => {
       vi.advanceTimersByTime(1400);
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Install Shortcut/i }));
+      await Promise.resolve();
+    });
+
+    expect(share).toHaveBeenCalledTimes(1);
+    expect(screen.getAllByText('Finish in Safari').length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText(
+        'In Safari, choose Add to Home Screen, keep Open as Web App on, then tap Add.',
+      ).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it('marks the coach complete when the user confirms they added the app from the nudge', async () => {
+    Object.defineProperty(window.navigator, 'share', {
+      value: vi.fn(async () => undefined),
+      configurable: true,
+    });
+
+    render(<InstallCoachSheet />);
+
+    act(() => {
+      vi.advanceTimersByTime(1400);
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Install Shortcut/i }));
+      await Promise.resolve();
     });
 
     fireEvent.click(screen.getByRole('button', { name: 'I added it' }));
 
     expect(useInstallCoachStore.getState().installed).toBe(true);
-    expect(screen.queryByText('Add FitWizard to your Home Screen')).not.toBeInTheDocument();
+    expect(screen.queryByText('How do you want to open FitWizard?')).not.toBeInTheDocument();
   });
 
-  it('shows Chrome-specific copy on iPhone Chrome', () => {
+  it('shows Chrome-specific nudge copy on iPhone Chrome', async () => {
     setUserAgent(IOS_CHROME_UA);
+    Object.defineProperty(window.navigator, 'share', {
+      value: vi.fn(async () => undefined),
+      configurable: true,
+    });
 
     render(<InstallCoachSheet />);
 
@@ -188,8 +236,17 @@ describe('InstallCoachSheet', () => {
       vi.advanceTimersByTime(1400);
     });
 
-    expect(screen.getByText('Open Chrome’s share menu')).toBeInTheDocument();
-    expect(screen.getByText('Pick Add to Home Screen')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Install Shortcut/i }));
+      await Promise.resolve();
+    });
+
+    expect(screen.getAllByText('Finish in Chrome').length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText(
+        "In Chrome, open the share menu, choose Add to Home Screen, then confirm the FitWizard icon.",
+      ).length,
+    ).toBeGreaterThan(0);
   });
 
   it('uses the native Android install prompt when available', async () => {
@@ -214,7 +271,7 @@ describe('InstallCoachSheet', () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Install FitWizard' }));
+      fireEvent.click(screen.getByRole('button', { name: /Install Shortcut/i }));
       await Promise.resolve();
     });
 

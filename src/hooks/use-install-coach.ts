@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
+  canShareInstallShortcut,
   type DeferredInstallPromptEvent,
   getInstallCoachPlatform,
   INSTALL_COACH_OPEN_DELAY_MS,
@@ -16,16 +17,20 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
   const platform = useInstallCoachStore((state) => state.platform);
   const isStandalone = useInstallCoachStore((state) => state.isStandalone);
   const canNativeInstall = useInstallCoachStore((state) => state.canNativeInstall);
+  const canShareShortcut = useInstallCoachStore((state) => state.canShareShortcut);
   const hasSeenCoach = useInstallCoachStore((state) => state.hasSeenCoach);
   const dismissed = useInstallCoachStore((state) => state.dismissed);
   const installed = useInstallCoachStore((state) => state.installed);
   const isOpen = useInstallCoachStore((state) => state.isOpen);
   const hasHydrated = useInstallCoachStore((state) => state.hasHydrated);
+  const view = useInstallCoachStore((state) => state.view);
   const setRuntimeState = useInstallCoachStore((state) => state.setRuntimeState);
   const openCoach = useInstallCoachStore((state) => state.openCoach);
   const closeCoach = useInstallCoachStore((state) => state.closeCoach);
   const dismissCoach = useInstallCoachStore((state) => state.dismissCoach);
   const markInstalled = useInstallCoachStore((state) => state.markInstalled);
+  const showChooser = useInstallCoachStore((state) => state.showChooser);
+  const showNudge = useInstallCoachStore((state) => state.showNudge);
 
   const deferredPromptRef = useRef<DeferredInstallPromptEvent | null>(null);
 
@@ -41,6 +46,7 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
       setRuntimeState({
         platform: nextPlatform,
         isStandalone: standalone,
+        canShareShortcut: canShareInstallShortcut(),
       });
 
       if (standalone) {
@@ -63,6 +69,7 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
       setRuntimeState({
         platform: getInstallCoachPlatform(),
         isStandalone: isInstallCoachStandalone(),
+        canShareShortcut: canShareInstallShortcut(),
         canNativeInstall: true,
       });
     };
@@ -139,8 +146,26 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
     return false;
   }, [dismissCoach, markInstalled, setRuntimeState]);
 
+  const promptShareShortcut = useCallback(async () => {
+    if (!canShareInstallShortcut()) {
+      return false;
+    }
+
+    try {
+      await navigator.share({
+        title: 'FitWizard',
+        text: 'Save FitWizard to your Home Screen for a cleaner app-style launch.',
+        url: window.location.href,
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   return {
     canNativeInstall,
+    canShareShortcut,
     closeCoach,
     dismissCoach,
     hasHydrated,
@@ -152,6 +177,10 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
     markInstalled,
     openCoach,
     platform,
+    promptShareShortcut,
     promptNativeInstall,
+    showChooser,
+    showNudge,
+    view,
   };
 }

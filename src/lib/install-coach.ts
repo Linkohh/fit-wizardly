@@ -1,6 +1,7 @@
 import { isNativeApp } from '@/lib/platform';
 
 export type InstallCoachPlatform = 'ios-safari' | 'ios-chrome' | 'android-chrome' | 'unsupported';
+export type InstallCoachView = 'chooser' | 'nudge';
 
 export type DeferredInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -61,4 +62,15 @@ export function isInstallCoachStandalone() {
 
 export function isInstallCoachEligiblePlatform(platform: InstallCoachPlatform) {
   return platform !== 'unsupported';
+}
+
+export function canShareInstallShortcut() {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined' || isNativeApp()) {
+    return false;
+  }
+
+  const isSecureContext =
+    typeof window.isSecureContext === 'boolean' ? window.isSecureContext : true;
+
+  return isSecureContext && typeof navigator.share === 'function';
 }
