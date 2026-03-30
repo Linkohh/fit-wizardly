@@ -198,6 +198,7 @@ export function InstallCoachSheet() {
     >
       <SheetContent
         side="bottom"
+        showCloseButton={false}
         className={cn(
           'install-coach-sheet inset-x-0 mx-auto flex w-full max-w-[38rem] flex-col gap-0 overflow-hidden rounded-t-[2rem] border border-white/10 px-0 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] pt-0 shadow-[0_-30px_80px_rgba(7,2,20,0.65)]',
           'bg-[radial-gradient(circle_at_top,rgba(236,72,153,0.24),transparent_32%),linear-gradient(180deg,rgba(30,12,53,0.98)_0%,rgba(14,8,30,0.98)_48%,rgba(7,10,26,0.98)_100%)]',

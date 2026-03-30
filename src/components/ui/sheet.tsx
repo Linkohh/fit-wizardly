@@ -68,6 +68,8 @@ interface SheetContentProps
   onGestureClose?: () => void;
   /** Show drag handle indicator */
   showDragHandle?: boolean;
+  /** Show the built-in top-right close button */
+  showCloseButton?: boolean;
 }
 
 const SheetContent = React.forwardRef<
@@ -82,6 +84,7 @@ const SheetContent = React.forwardRef<
   enableBlur = true,
   onGestureClose,
   showDragHandle = false,
+  showCloseButton = true,
   ...props
 }, ref) => {
   const contentRef = React.useRef<HTMLDivElement | null>(null);
@@ -227,11 +230,12 @@ const SheetContent = React.forwardRef<
 
         {children}
 
-        {/* Enhanced Close Button */}
-        <SheetPrimitive.Close className="absolute right-4 top-4 rounded-lg p-1.5 opacity-70 ring-offset-background transition-all duration-200 hover:opacity-100 hover:bg-muted/50 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-          <X className="h-4 w-4" />
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
+        {showCloseButton ? (
+          <SheetPrimitive.Close className="absolute right-4 top-4 rounded-lg p-1.5 opacity-70 ring-offset-background transition-all duration-200 hover:opacity-100 hover:bg-muted/50 hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
+        ) : null}
       </SheetPrimitive.Content>
     </SheetPortal>
   );
