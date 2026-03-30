@@ -195,10 +195,32 @@ describe('InstallCoachSheet', () => {
     expect(screen.queryByText('Add FitWizard to your Home Screen')).not.toBeInTheDocument();
   });
 
-  it('reopens with steps expanded when the Safari share flow rejects', async () => {
+  it('keeps the coach dismissed when the Safari share flow is cancelled by the user', async () => {
     Object.defineProperty(window.navigator, 'share', {
       value: vi.fn(async () => {
         throw new DOMException('AbortError', 'AbortError');
+      }),
+      configurable: true,
+    });
+
+    render(<InstallCoachSheet />);
+
+    act(() => {
+      vi.advanceTimersByTime(1400);
+    });
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: /Open Safari Share/i }));
+      await Promise.resolve();
+    });
+
+    expect(screen.queryByText('Add FitWizard to your Home Screen')).not.toBeInTheDocument();
+  });
+
+  it('reopens with steps expanded when the Safari share flow fails', async () => {
+    Object.defineProperty(window.navigator, 'share', {
+      value: vi.fn(async () => {
+        throw new Error('Share failed');
       }),
       configurable: true,
     });
@@ -264,5 +286,23 @@ describe('InstallCoachSheet', () => {
     });
 
     expect(prompt).toHaveBeenCalledTimes(1);
+  });
+
+  it('waits for enableAutoPrompt before auto-opening', () => {
+    const { rerender } = render(<InstallCoachSheet enableAutoPrompt={false} />);
+
+    act(() => {
+      vi.advanceTimersByTime(1400);
+    });
+
+    expect(screen.queryByText('Add FitWizard to your Home Screen')).not.toBeInTheDocument();
+
+    rerender(<InstallCoachSheet enableAutoPrompt />);
+
+    act(() => {
+      vi.advanceTimersByTime(1400);
+    });
+
+    expect(screen.getByText('Add FitWizard to your Home Screen')).toBeInTheDocument();
   });
 });

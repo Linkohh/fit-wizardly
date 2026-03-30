@@ -129,7 +129,11 @@ function getInstallCoachContent(
   };
 }
 
-export function InstallCoachSheet() {
+type InstallCoachSheetProps = {
+  enableAutoPrompt?: boolean;
+};
+
+export function InstallCoachSheet({ enableAutoPrompt = true }: InstallCoachSheetProps) {
   const { t } = useTranslation();
   const {
     canNativeInstall,
@@ -142,7 +146,7 @@ export function InstallCoachSheet() {
     platform,
     promptNativeInstall,
     promptShareShortcut,
-  } = useInstallCoach();
+  } = useInstallCoach({ enableAutoPrompt });
   const [showHelp, setShowHelp] = useState(false);
 
   const isIos = platform === 'ios-safari' || platform === 'ios-chrome';
@@ -175,9 +179,9 @@ export function InstallCoachSheet() {
     }
 
     closeCoach();
-    const shareOpened = await promptShareShortcut();
+    const shareResult = await promptShareShortcut();
 
-    if (!shareOpened) {
+    if (shareResult === 'unsupported' || shareResult === 'error') {
       openCoach();
       setShowHelp(true);
     }
@@ -201,15 +205,16 @@ export function InstallCoachSheet() {
         showCloseButton={false}
         className={cn(
           'install-coach-sheet inset-x-0 mx-auto flex w-full max-w-[38rem] flex-col gap-0 overflow-hidden rounded-t-[2rem] border border-white/10 px-0 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] pt-0 shadow-[0_-30px_80px_rgba(7,2,20,0.65)]',
+          '[@media(max-height:760px)]:max-w-[36rem] [@media(max-height:760px)]:rounded-t-[1.75rem] [@media(max-height:760px)]:pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]',
           'bg-[radial-gradient(circle_at_top,rgba(236,72,153,0.24),transparent_32%),linear-gradient(180deg,rgba(30,12,53,0.98)_0%,rgba(14,8,30,0.98)_48%,rgba(7,10,26,0.98)_100%)]',
           'dark:border-white/10 dark:bg-[radial-gradient(circle_at_top,rgba(236,72,153,0.22),transparent_34%),linear-gradient(180deg,rgba(30,12,53,0.98)_0%,rgba(14,8,30,0.98)_48%,rgba(7,10,26,0.98)_100%)]',
           'border-primary/20 bg-[radial-gradient(circle_at_top,rgba(236,72,153,0.14),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.98)_0%,rgba(244,240,255,0.96)_42%,rgba(235,245,255,0.98)_100%)]',
         )}
         enableBlur
       >
-        <div className="mx-auto mt-3 h-1.5 w-14 rounded-full bg-white/20 dark:bg-white/20" />
+        <div className="mx-auto mt-3 h-1.5 w-14 rounded-full bg-white/20 dark:bg-white/20 [@media(max-height:760px)]:mt-2" />
 
-        <div className="px-5 pb-2 pt-5 sm:px-6">
+        <div className="px-5 pb-2 pt-5 sm:px-6 [@media(max-height:760px)]:px-4 [@media(max-height:760px)]:pt-4">
           <SheetHeader className="space-y-0 text-left">
             <div className="flex items-start justify-between gap-3">
               <div className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-primary">
@@ -228,7 +233,7 @@ export function InstallCoachSheet() {
               </Button>
             </div>
 
-            <div className="mt-4 flex items-start gap-4">
+            <div className="mt-4 flex items-start gap-4 [@media(max-height:760px)]:mt-3 [@media(max-height:760px)]:gap-3">
               <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.15rem] border border-white/10 bg-white/10 shadow-[0_18px_45px_rgba(180,60,255,0.25)] backdrop-blur">
                 <img
                   src="/app-icon-192.png"
@@ -237,20 +242,20 @@ export function InstallCoachSheet() {
                 />
               </div>
               <div className="min-w-0 space-y-2">
-                <SheetTitle className="text-left text-[1.7rem] font-black leading-[1.02] tracking-[-0.04em] text-foreground">
+                <SheetTitle className="text-left text-[1.7rem] font-black leading-[1.02] tracking-[-0.04em] text-foreground [@media(max-height:760px)]:text-[1.5rem]">
                   {content.title}
                 </SheetTitle>
-                <SheetDescription className="max-w-[32rem] text-left text-sm leading-6 text-muted-foreground">
+                <SheetDescription className="max-w-[32rem] text-left text-sm leading-6 text-muted-foreground [@media(max-height:760px)]:text-[13px] [@media(max-height:760px)]:leading-5">
                   {content.body}
                 </SheetDescription>
               </div>
             </div>
           </SheetHeader>
 
-          <div className="mt-6 space-y-3">
+          <div className="mt-6 space-y-3 [@media(max-height:760px)]:mt-5 [@media(max-height:760px)]:space-y-2.5">
             <Button
               type="button"
-              className="h-auto w-full justify-start rounded-[1.5rem] border border-primary/25 bg-gradient-to-r from-primary via-fuchsia-500 to-pink-500 px-4 py-4 text-left text-primary-foreground shadow-[0_22px_45px_rgba(192,76,255,0.28)] transition-transform duration-300 hover:-translate-y-0.5"
+              className="h-auto w-full justify-start rounded-[1.5rem] border border-primary/25 bg-gradient-to-r from-primary via-fuchsia-500 to-pink-500 px-4 py-4 text-left text-primary-foreground shadow-[0_22px_45px_rgba(192,76,255,0.28)] transition-transform duration-300 hover:-translate-y-0.5 [@media(max-height:760px)]:rounded-[1.35rem] [@media(max-height:760px)]:py-3.5"
               onClick={() => {
                 void handlePrimaryAction();
               }}
@@ -264,21 +269,21 @@ export function InstallCoachSheet() {
                   )}
                 </span>
                 <span className="min-w-0 space-y-1">
-                  <span className="block text-sm font-semibold text-primary-foreground">
+                  <span className="block text-sm font-semibold text-primary-foreground [@media(max-height:760px)]:text-[0.92rem]">
                     {content.primaryAction}
                   </span>
-                  <span className="block text-sm leading-5 text-primary-foreground/85">
+                  <span className="block text-sm leading-5 text-primary-foreground/85 [@media(max-height:760px)]:text-[0.84rem] [@media(max-height:760px)]:leading-4.5">
                     {content.helper}
                   </span>
                 </span>
               </div>
             </Button>
 
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-3 border-t border-primary/10 pt-3 dark:border-white/8 [@media(max-height:760px)]:pt-2.5">
               <Button
                 type="button"
                 variant="ghost"
-                className="h-auto rounded-full px-1 text-sm font-medium text-muted-foreground hover:bg-transparent hover:text-foreground"
+                className="h-auto rounded-full px-1 text-sm font-medium text-muted-foreground/80 hover:bg-transparent hover:text-foreground"
                 onClick={dismissCoach}
               >
                 {t('install_coach.dismiss', 'Not now')}
@@ -288,7 +293,7 @@ export function InstallCoachSheet() {
                 <Button
                   type="button"
                   variant="ghost"
-                  className="h-auto rounded-full px-1 text-sm font-medium text-primary hover:bg-transparent hover:text-primary/90"
+                  className="h-auto rounded-full px-1 text-sm font-medium text-primary/85 hover:bg-transparent hover:text-primary"
                   onClick={() => setShowHelp((current) => !current)}
                 >
                   {content.helpLabel}

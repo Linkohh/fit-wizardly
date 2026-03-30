@@ -13,8 +13,8 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { useAnalyticsStore } from '@/stores/analyticsStore';
+import { CONSENT_RESOLVED_EVENT, CONSENT_STORAGE_KEY } from '@/lib/consent';
 
-const CONSENT_STORAGE_KEY = 'fitwizard_consent_v1';
 const ANALYTICS_CONSENT_STORAGE_KEY = 'fitwizard_analytics_consent';
 
 export function ConsentModal() {
@@ -35,6 +35,7 @@ export function ConsentModal() {
 
   const handleAgree = () => {
     localStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
+    window.dispatchEvent(new Event(CONSENT_RESOLVED_EVENT));
     setConsent(analyticsOptIn);
 
     if (analyticsOptIn) {

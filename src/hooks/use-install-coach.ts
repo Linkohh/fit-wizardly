@@ -13,6 +13,28 @@ type UseInstallCoachOptions = {
   enableAutoPrompt?: boolean;
 };
 
+type InstallCoachShareResult = 'shared' | 'cancelled' | 'unsupported' | 'error';
+
+function getShareResult(error: unknown): InstallCoachShareResult {
+  if (
+    error instanceof DOMException
+    && error.name === 'AbortError'
+  ) {
+    return 'cancelled';
+  }
+
+  if (
+    typeof error === 'object'
+    && error !== null
+    && 'name' in error
+    && error.name === 'AbortError'
+  ) {
+    return 'cancelled';
+  }
+
+  return 'error';
+}
+
 export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOptions = {}) {
   const platform = useInstallCoachStore((state) => state.platform);
   const isStandalone = useInstallCoachStore((state) => state.isStandalone);
@@ -145,7 +167,7 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
 
   const promptShareShortcut = useCallback(async () => {
     if (!canShareInstallShortcut()) {
-      return false;
+      return 'unsupported' as const;
     }
 
     try {
@@ -154,9 +176,9 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
         text: 'Save FitWizard to your Home Screen for a cleaner app-style launch.',
         url: window.location.href,
       });
-      return true;
-    } catch {
-      return false;
+      return 'shared' as const;
+    } catch (error) {
+      return getShareResult(error);
     }
   }, []);
 
