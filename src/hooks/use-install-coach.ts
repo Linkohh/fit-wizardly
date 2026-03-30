@@ -23,14 +23,11 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
   const installed = useInstallCoachStore((state) => state.installed);
   const isOpen = useInstallCoachStore((state) => state.isOpen);
   const hasHydrated = useInstallCoachStore((state) => state.hasHydrated);
-  const view = useInstallCoachStore((state) => state.view);
   const setRuntimeState = useInstallCoachStore((state) => state.setRuntimeState);
   const openCoach = useInstallCoachStore((state) => state.openCoach);
   const closeCoach = useInstallCoachStore((state) => state.closeCoach);
   const dismissCoach = useInstallCoachStore((state) => state.dismissCoach);
   const markInstalled = useInstallCoachStore((state) => state.markInstalled);
-  const showChooser = useInstallCoachStore((state) => state.showChooser);
-  const showNudge = useInstallCoachStore((state) => state.showNudge);
 
   const deferredPromptRef = useRef<DeferredInstallPromptEvent | null>(null);
 
@@ -179,8 +176,5 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
     platform,
     promptShareShortcut,
     promptNativeInstall,
-    showChooser,
-    showNudge,
-    view,
   };
 }

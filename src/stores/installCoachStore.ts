@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-import type { InstallCoachPlatform, InstallCoachView } from '@/lib/install-coach';
+import type { InstallCoachPlatform } from '@/lib/install-coach';
 import { INSTALL_COACH_STORAGE_KEY } from '@/lib/install-coach';
 
 type InstallCoachRuntimeState = {
@@ -10,7 +10,6 @@ type InstallCoachRuntimeState = {
   canShareShortcut: boolean;
   isOpen: boolean;
   hasHydrated: boolean;
-  view: InstallCoachView;
 };
 
 type InstallCoachPersistedState = {
@@ -25,8 +24,6 @@ type InstallCoachState = InstallCoachRuntimeState &
     dismissCoach: () => void;
     markInstalled: () => void;
     openCoach: () => void;
-    showChooser: () => void;
-    showNudge: () => void;
     setHydrated: (value: boolean) => void;
     setRuntimeState: (runtime: Partial<InstallCoachRuntimeState>) => void;
   };
@@ -38,7 +35,6 @@ const initialRuntimeState: InstallCoachRuntimeState = {
   canShareShortcut: false,
   isOpen: false,
   hasHydrated: false,
-  view: 'chooser',
 };
 
 const initialPersistedState: InstallCoachPersistedState = {
@@ -54,13 +50,11 @@ export const useInstallCoachStore = create<InstallCoachState>()(
       ...initialPersistedState,
       setHydrated: (value) => set({ hasHydrated: value }),
       setRuntimeState: (runtime) => set(runtime),
-      openCoach: () => set({ isOpen: true, hasSeenCoach: true, view: 'chooser' }),
-      closeCoach: () => set({ isOpen: false, view: 'chooser' }),
-      dismissCoach: () => set({ isOpen: false, hasSeenCoach: true, dismissed: true, view: 'chooser' }),
+      openCoach: () => set({ isOpen: true, hasSeenCoach: true }),
+      closeCoach: () => set({ isOpen: false }),
+      dismissCoach: () => set({ isOpen: false, hasSeenCoach: true, dismissed: true }),
       markInstalled: () =>
-        set({ isOpen: false, hasSeenCoach: true, dismissed: false, installed: true, view: 'chooser' }),
-      showChooser: () => set({ isOpen: true, view: 'chooser' }),
-      showNudge: () => set({ isOpen: true, view: 'nudge' }),
+        set({ isOpen: false, hasSeenCoach: true, dismissed: false, installed: true }),
     }),
     {
       name: INSTALL_COACH_STORAGE_KEY,

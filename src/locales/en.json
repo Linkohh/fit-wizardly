@@ -39,83 +39,50 @@
         "eyebrow_chrome": "Chrome Shortcut",
         "eyebrow_android": "Install FitWizard",
         "app_icon_alt": "FitWizard app icon",
-        "close": "Close install guide",
-        "primary_complete": "I added it",
-        "secondary_back": "Back",
-        "drawer_cta": "Install FitWizard",
-        "chooser": {
-            "title": "How do you want to open FitWizard?",
-            "description": "Choose the smoother long-term launch path now, or keep moving in the browser and decide later.",
-            "browser_title": "Stay in Browser",
-            "browser_detail": "Keep moving in Safari or Chrome today and come back to the shortcut later from the menu.",
-            "install_title": "Install Shortcut",
-            "install_detail_ios": "Open the native share flow, then save FitWizard to your Home Screen for the app-style launch.",
-            "install_detail_android": "Install FitWizard like an app from this browser for a cleaner, one-tap launch.",
-            "note_title": "Shortcut benefits",
-            "note_detail": "The Home Screen shortcut opens faster, hides extra browser chrome, and keeps FitWizard closer to your workout flow."
-        },
+        "close": "Close add to Home Screen prompt",
+        "dismiss": "Not now",
+        "help_label": "Need the steps?",
+        "drawer_cta_ios": "Add to Home Screen",
+        "drawer_cta_android": "Install FitWizard",
         "safari": {
-            "nudge": {
-                "title": "Finish in Safari",
-                "detail": "In Safari, choose Add to Home Screen, keep Open as Web App on, then tap Add."
+            "handoff": {
+                "title": "Add FitWizard to your Home Screen",
+                "description": "Launch faster, keep the workout flow cleaner, and open FitWizard with less browser chrome.",
+                "primary": "Open Safari Share",
+                "helper": "Then choose Add to Home Screen in Safari."
             },
             "steps": {
-                "share": {
-                    "title": "Tap the Share button in Safari",
-                    "detail": "Use Safari’s share control for this page so you can save FitWizard to your Home Screen."
-                },
-                "add_home": {
-                    "title": "Choose Add to Home Screen",
-                    "detail": "Scroll through the action list until Add to Home Screen appears, then select it."
-                },
-                "open_as_app": {
-                    "title": "Keep Open as Web App enabled, then tap Add",
-                    "detail": "Leave the app-style toggle on so FitWizard launches as a full-screen web app from your Home Screen."
-                }
+                "view_more": "Tap View More if Add to Home Screen is not visible.",
+                "add_home": "Choose Add to Home Screen.",
+                "open_as_app": "Keep Open as Web App on, then tap Add."
             }
         },
         "chrome": {
-            "nudge": {
-                "title": "Finish in Chrome",
-                "detail": "In Chrome, open the share menu, choose Add to Home Screen, then confirm the FitWizard icon."
+            "handoff": {
+                "title": "Add FitWizard to your Home Screen",
+                "description": "Keep FitWizard one tap away without leaving the iPhone browser flow you already use.",
+                "primary": "Open Share Menu",
+                "helper": "Then choose Add to Home Screen."
             },
             "steps": {
-                "open_menu": {
-                    "title": "Open Chrome’s share menu",
-                    "detail": "Tap the share control in Chrome, then open the browser options for this page."
-                },
-                "choose_add": {
-                    "title": "Pick Add to Home Screen",
-                    "detail": "Scroll through the action list until you see Add to Home Screen, then select it."
-                },
-                "confirm": {
-                    "title": "Confirm the FitWizard icon",
-                    "detail": "Keep the FitWizard title you want, then tap Add so it lands on your Home Screen."
-                }
+                "open_menu": "Open the share menu.",
+                "choose_add": "Choose Add to Home Screen.",
+                "confirm": "Confirm the FitWizard icon."
             }
         },
         "android": {
-            "nudge": {
-                "title": "Finish in your browser",
-                "detail": "Open the browser menu and choose Install app or Add to Home screen to finish saving FitWizard."
+            "handoff": {
+                "title": "Install FitWizard like an app",
+                "description": "Save FitWizard to your Home Screen for a faster launch and a cleaner workout flow.",
+                "primary": "Install FitWizard",
+                "primary_fallback": "Show install steps",
+                "helper": "Approve the install prompt from your browser.",
+                "helper_fallback": "If the prompt does not appear, use the browser menu instead."
             },
             "steps": {
-                "native": {
-                    "title": "Install FitWizard directly",
-                    "detail": "Your browser can install FitWizard like an app. Tap the install button below to continue."
-                },
-                "menu": {
-                    "title": "Open the browser menu",
-                    "detail": "If the direct install prompt is unavailable, open the browser menu for this page."
-                },
-                "choose_add": {
-                    "title": "Choose Install app or Add to Home screen",
-                    "detail": "Use the browser option that installs FitWizard or saves it to your Home Screen."
-                },
-                "confirm": {
-                    "title": "Confirm the install",
-                    "detail": "Approve the install and launch FitWizard from your Home Screen like a real app."
-                }
+                "menu": "Open the browser menu.",
+                "choose_add": "Choose Install app or Add to Home screen.",
+                "confirm": "Confirm the install."
             }
         }
     },

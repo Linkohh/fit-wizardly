@@ -69,7 +69,7 @@ export function Header() {
   const { shouldReduceMotion } = useMotionPreferences();
   const motionTiltEnabled = usePreferencesStore((state) => state.settings.motionTilt !== false);
   const installCoachPlatform = useInstallCoachStore((state) => state.platform);
-  const installCoachDismissed = useInstallCoachStore((state) => state.dismissed);
+  const installCoachHasSeen = useInstallCoachStore((state) => state.hasSeenCoach);
   const installCoachInstalled = useInstallCoachStore((state) => state.installed);
   const installCoachStandalone = useInstallCoachStore((state) => state.isStandalone);
   const installCoachOpen = useInstallCoachStore((state) => state.isOpen);
@@ -166,11 +166,16 @@ export function Header() {
   const showInstallCoachEntry =
     location.pathname === '/' &&
     installCoachHydrated &&
-    installCoachDismissed &&
+    installCoachHasSeen &&
     installCoachPlatform !== 'unsupported' &&
     !installCoachInstalled &&
     !installCoachStandalone &&
     !installCoachOpen;
+
+  const installCoachEntryLabel =
+    installCoachPlatform === 'android-chrome'
+      ? t('install_coach.drawer_cta_android', 'Install FitWizard')
+      : t('install_coach.drawer_cta_ios', 'Add to Home Screen');
 
   const isActive = useCallback(
     (path: string) => isMobileNavPathActive(location.pathname, path),
@@ -669,7 +674,7 @@ export function Header() {
                       }}
                     >
                       <Download className="h-4 w-4" />
-                      {t('install_coach.drawer_cta', 'Install FitWizard')}
+                      {installCoachEntryLabel}
                     </Button>
                   ) : null}
 

@@ -1,7 +1,6 @@
 import { isNativeApp } from '@/lib/platform';
 
 export type InstallCoachPlatform = 'ios-safari' | 'ios-chrome' | 'android-chrome' | 'unsupported';
-export type InstallCoachView = 'chooser' | 'nudge';
 
 export type DeferredInstallPromptEvent = Event & {
   prompt: () => Promise<void>;

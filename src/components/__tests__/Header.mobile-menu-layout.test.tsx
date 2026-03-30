@@ -20,7 +20,6 @@ const mocks = vi.hoisted(() => ({
     installed: false,
     isOpen: false,
     hasHydrated: true,
-    view: 'chooser' as const,
   },
   requestPermission: vi.fn(async () => ({
     available: true,
@@ -235,7 +234,6 @@ describe('Header mobile menu layout', () => {
       installed: false,
       isOpen: false,
       hasHydrated: true,
-      view: 'chooser',
     };
   });
 
@@ -267,7 +265,6 @@ describe('Header mobile menu layout', () => {
       installed: false,
       isOpen: false,
       hasHydrated: true,
-      view: 'chooser',
     };
 
     render(
@@ -279,7 +276,7 @@ describe('Header mobile menu layout', () => {
     fireEvent.click(screen.getByTestId('sheet-trigger'));
 
     const drawer = await screen.findByTestId('mobile-sheet-content');
-    const installButton = within(drawer).getByRole('button', { name: /install fitwizard/i });
+    const installButton = within(drawer).getByRole('button', { name: /add to home screen/i });
 
     fireEvent.click(installButton);
 
