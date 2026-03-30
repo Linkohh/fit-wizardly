@@ -3,7 +3,7 @@ import { ArrowRight, Dumbbell, Target, FileText, Users, Zap, Crown } from 'lucid
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useTrainerStore } from '@/stores/trainerStore';
-import { Suspense, lazy, useEffect, useRef, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { FeatureCard, type FeatureCardFeature } from '@/components/landing/FeatureCard';
 import type { Feature } from '@/components/landing/FeatureDetailModal';
