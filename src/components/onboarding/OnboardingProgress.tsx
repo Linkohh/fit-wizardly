@@ -7,12 +7,16 @@ interface OnboardingProgressProps {
 }
 
 export function OnboardingProgress({ progress, currentStep, totalSteps }: OnboardingProgressProps) {
+    const safeTotalSteps = Math.max(totalSteps, 1);
+    const safeCurrentStep = Math.min(Math.max(currentStep, 1), safeTotalSteps);
+    const safeProgress = Math.min(Math.max(progress, 0), 100);
+
     // Circle SVG dimensions
     const size = 64;
     const strokeWidth = 4;
     const radius = (size - strokeWidth) / 2;
     const circumference = radius * 2 * Math.PI;
-    const offset = circumference - (progress / 100) * circumference;
+    const offset = circumference - (safeProgress / 100) * circumference;
 
     return (
         <div className="relative flex items-center justify-center">
@@ -58,12 +62,12 @@ export function OnboardingProgress({ progress, currentStep, totalSteps }: Onboar
             {/* Step counter in center */}
             <div className="absolute inset-0 flex items-center justify-center">
                 <motion.span
-                    key={currentStep}
+                    key={safeCurrentStep}
                     initial={{ scale: 0.5, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     className="text-sm font-bold text-foreground"
                 >
-                    {currentStep}/{totalSteps}
+                    {safeCurrentStep}/{safeTotalSteps}
                 </motion.span>
             </div>
         </div>

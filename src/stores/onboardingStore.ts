@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { useTrainerStore } from '@/stores/trainerStore';
 
 // Onboarding steps in order
-export type OnboardingStep = 'welcome' | 'role' | 'goals' | 'import' | 'complete';
+export type OnboardingStep = 'welcome' | 'role' | 'goals' | 'import';
 
 // User role determines feature access and UI branching
 export type UserRole = 'user' | 'coach';
@@ -54,8 +54,8 @@ interface OnboardingState {
 }
 
 // Step order - coach has extra step
-const USER_STEPS: OnboardingStep[] = ['welcome', 'role', 'goals', 'complete'];
-const COACH_STEPS: OnboardingStep[] = ['welcome', 'role', 'goals', 'import', 'complete'];
+const USER_STEPS: OnboardingStep[] = ['welcome', 'role', 'goals'];
+const COACH_STEPS: OnboardingStep[] = ['welcome', 'role', 'goals', 'import'];
 
 const getStepsForRole = (role: UserRole): OnboardingStep[] => {
     return role === 'coach' ? COACH_STEPS : USER_STEPS;
@@ -85,7 +85,7 @@ export const useOnboardingStore = create<OnboardingState>()(
                 const steps = getStepsForRole(userData.role);
                 const currentIndex = steps.indexOf(currentStep);
 
-                if (currentIndex < steps.length - 1) {
+                if (currentIndex >= 0 && currentIndex < steps.length - 1) {
                     set({ currentStep: steps[currentIndex + 1] });
                 }
             },
@@ -127,7 +127,6 @@ export const useOnboardingStore = create<OnboardingState>()(
 
             completeOnboarding: () => set({
                 isComplete: true,
-                currentStep: 'complete',
             }),
 
             resetOnboarding: () => set({
@@ -157,14 +156,13 @@ export const useOnboardingStore = create<OnboardingState>()(
             getStepIndex: () => {
                 const { currentStep, userData } = get();
                 const steps = getStepsForRole(userData.role);
-                return steps.indexOf(currentStep);
+                const currentIndex = steps.indexOf(currentStep);
+                return currentIndex >= 0 ? currentIndex : 0;
             },
 
             getTotalSteps: () => {
                 const { userData } = get();
-                const steps = getStepsForRole(userData.role);
-                // Don't count 'complete' as a step
-                return steps.length - 1;
+                return getStepsForRole(userData.role).length;
             },
         }),
         {

@@ -35,7 +35,6 @@ const STEP_COMPONENTS: Record<OnboardingStep, React.ComponentType> = {
     role: RoleStep,
     goals: GoalsPreviewStep,
     import: CoachImportStep,
-    complete: () => null, // Handled separately
 };
 
 export function OnboardingFlow() {
@@ -57,41 +56,44 @@ export function OnboardingFlow() {
     // Direction for slide animation
     const stepIndex = getStepIndex();
     const totalSteps = getTotalSteps();
-    const progress = ((stepIndex) / totalSteps) * 100;
+    const progress = (stepIndex / totalSteps) * 100;
 
-    // Navigate home when complete (with delay for confetti)
+    // Navigate home immediately once onboarding is marked complete.
     useEffect(() => {
         if (isComplete) {
-            // Small delay to let confetti show before navigation
-            const timer = setTimeout(() => {
-                navigate('/', { replace: true });
-            }, 1500);
-            return () => clearTimeout(timer);
+            navigate('/', { replace: true });
         }
     }, [isComplete, navigate]);
 
-    const handleComplete = useCallback(() => {
-        fireConfetti();
+    const finishOnboarding = useCallback((celebrate = false) => {
+        if (celebrate) {
+            fireConfetti();
+        }
+
         completeOnboarding();
     }, [fireConfetti, completeOnboarding]);
 
+    const isFinalActionStep =
+        (currentStep === 'goals' && userData.role === 'user') ||
+        currentStep === 'import';
+
     const handleNext = () => {
-        if (currentStep === 'goals' && userData.role === 'user') {
-            // Users skip import step - trigger celebration
-            handleComplete();
-        } else if (currentStep === 'import') {
-            handleComplete();
+        if (isFinalActionStep) {
+            finishOnboarding(true);
         } else {
             nextStep();
         }
     };
 
     const handleSkip = () => {
-        completeOnboarding();
+        finishOnboarding();
     };
 
-    const CurrentStepComponent = STEP_COMPONENTS[currentStep];
+    if (isComplete) {
+        return null;
+    }
 
+    const CurrentStepComponent = STEP_COMPONENTS[currentStep];
     if (!CurrentStepComponent) {
         return null;
     }
