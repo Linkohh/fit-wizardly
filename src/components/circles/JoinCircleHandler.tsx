@@ -76,6 +76,12 @@ export function JoinCircleHandler() {
                 return;
             }
 
+            if (!/^[A-Z0-9]{4,16}$/i.test(inviteCode)) {
+                setStatus('error');
+                setErrorMessage('Invalid invite link');
+                return;
+            }
+
             if (authLoading) {
                 return; // Wait for auth to complete
             }

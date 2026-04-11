@@ -31,7 +31,7 @@ export function ClientCard({ client, onClick }: ClientCardProps) {
             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border border-border">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${client.displayName}`} />
+                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(client.displayName)}`} />
                         <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
                     </Avatar>
                     <div className="space-y-1">

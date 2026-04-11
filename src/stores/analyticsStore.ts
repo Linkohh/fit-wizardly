@@ -67,6 +67,9 @@ export const useAnalyticsStore = create<AnalyticsState>()(
                 // Don't track without consent
                 if (!hasConsented) return;
 
+                // Cap queue to prevent unbounded memory growth (DoS via rapid event firing)
+                if (get().eventQueue.length >= 100) return;
+
                 const event: AnalyticsEvent = {
                     id: generateId(),
                     name,

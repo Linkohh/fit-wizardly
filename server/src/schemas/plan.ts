@@ -1,14 +1,14 @@
 import { z } from 'zod';
 
 // Minimal validation aligned to the frontend `Plan` shape.
-// This intentionally allows extra fields (passthrough) to avoid breaking when the client evolves.
+// Unknown fields are stripped to prevent prototype pollution and unexpected field injection.
 
 const ExerciseSchema = z
   .object({
     id: z.string().min(1).max(200),
     name: z.string().min(1).max(200),
   })
-  .passthrough();
+  .strip();
 
 const ExercisePrescriptionSchema = z
   .object({
@@ -22,7 +22,7 @@ const ExercisePrescriptionSchema = z
     notes: z.string().max(2000).optional(),
     rationale: z.string().max(5000).optional(),
   })
-  .passthrough();
+  .strip();
 
 const WorkoutDaySchema = z
   .object({
@@ -34,7 +34,7 @@ const WorkoutDaySchema = z
     warmUp: z.array(z.string().min(1).max(200)).max(50).optional(),
     coolDown: z.array(z.string().min(1).max(200)).max(50).optional(),
   })
-  .passthrough();
+  .strip();
 
 const WeeklyVolumeSchema = z
   .object({
@@ -42,7 +42,7 @@ const WeeklyVolumeSchema = z
     sets: z.number().int().min(0).max(200),
     isWithinCap: z.boolean(),
   })
-  .passthrough();
+  .strip();
 
 const RirProgressionSchema = z
   .object({
@@ -50,7 +50,7 @@ const RirProgressionSchema = z
     targetRIR: z.number().int().min(0).max(10),
     isDeload: z.boolean().optional(),
   })
-  .passthrough();
+  .strip();
 
 const WizardSelectionsSchema = z
   .object({
@@ -75,7 +75,7 @@ const WizardSelectionsSchema = z
     // Optional additions
     optPhase: z.string().max(100).optional(),
   })
-  .passthrough();
+  .strip();
 
 export const PlanPayloadSchema = z
   .object({
@@ -95,7 +95,7 @@ export const PlanPayloadSchema = z
     userId: z.string().uuid().optional(),
     updatedAt: z.string().datetime().optional(),
   })
-  .passthrough();
+  .strip();
 
 export type PlanPayload = z.infer<typeof PlanPayloadSchema>;
 

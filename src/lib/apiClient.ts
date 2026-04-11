@@ -7,6 +7,20 @@ import { supabase } from '@/lib/supabase';
 
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
+// Guard against misconfigured VITE_API_URL sending tokens to an attacker-controlled host.
+if (API_BASE && import.meta.env.PROD) {
+    const ALLOWED_API_HOSTS = ['localhost', 'fit-wizardly.vercel.app'];
+    try {
+        const { hostname } = new URL(API_BASE);
+        if (!ALLOWED_API_HOSTS.some(h => hostname === h || hostname.endsWith(`.${h}`))) {
+            throw new Error(`[FitWizard] VITE_API_URL points to untrusted host: ${hostname}`);
+        }
+    } catch (e) {
+        if (e instanceof TypeError) throw new Error('[FitWizard] VITE_API_URL is not a valid URL');
+        throw e;
+    }
+}
+
 // Feature flag for API usage
 const USE_API = import.meta.env.VITE_USE_API === 'true' || import.meta.env.DEV;
 
@@ -30,7 +44,11 @@ function normalizePlanDates(plan: unknown): Plan {
     if (typeof createdAt !== 'string') return plan as Plan;
 
     const createdAtDate = new Date(createdAt);
-    if (Number.isNaN(createdAtDate.getTime())) return plan as Plan;
+    if (Number.isNaN(createdAtDate.getTime())) {
+        // Invalid date string — strip the field rather than propagating a type lie.
+        const { createdAt: _drop, ...rest } = plan as Record<string, unknown>;
+        return rest as Plan;
+    }
 
     return { ...(plan as object), createdAt: createdAtDate } as Plan;
 }

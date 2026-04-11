@@ -26,6 +26,8 @@ export const supabase = createClient<Database>(
             autoRefreshToken: true,
             persistSession: true,
             detectSessionInUrl: true,
+            // Use sessionStorage instead of localStorage to prevent JWT theft via XSS.
+            storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
         },
     }
 );

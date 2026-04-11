@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -120,6 +121,12 @@ export function createApp(
   } = createRouteHandlers(configOverrides, dependencyOverrides);
   const app = express();
 
+  // Trust the first hop proxy so express-rate-limit reads real client IP from X-Forwarded-For
+  app.set('trust proxy', 1);
+
+  // Security headers — X-Frame-Options, X-Content-Type-Options, HSTS, etc.
+  app.use(helmet({ contentSecurityPolicy: false }));
+
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
@@ -131,7 +138,18 @@ export function createApp(
   app.use(
     cors({
       origin: (origin, callback) => {
-        if (!origin) return callback(null, true);
+        // Null origin (data: URIs, sandboxed iframes, file://) blocked in production
+        if (!origin) {
+          if (process.env.NODE_ENV === 'production') {
+            return callback(new Error('Null origin not permitted in production'));
+          }
+          return callback(null, true);
+        }
+
+        // Reject plain HTTP origins in production — prevents MitM token interception
+        if (process.env.NODE_ENV === 'production' && origin.startsWith('http://')) {
+          return callback(new Error('HTTP origins not permitted in production'));
+        }
 
         if (config.allowedOrigins.includes(origin)) {
           callback(null, true);
@@ -145,7 +163,8 @@ export function createApp(
     })
   );
   app.use(limiter);
-  app.use(express.json());
+  // Limit request body to 512 KB — prevents memory exhaustion via oversized payloads
+  app.use(express.json({ limit: '512kb' }));
 
   app.use((req, _res, next) => {
     const requestId = `req_${crypto.randomUUID()}`;
