@@ -226,5 +226,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // UI
     setShowAuthModal: (show) => set({ showAuthModal: show }),
-    setRedirectUrl: (url) => set({ redirectUrl: url }),
+    setRedirectUrl: (url) => {
+        if (url === null) { set({ redirectUrl: null }); return; }
+        try {
+            const parsed = new URL(url);
+            if (parsed.origin !== window.location.origin) {
+                if (import.meta.env.DEV) console.warn('[Auth] Rejected cross-origin redirect:', parsed.origin);
+                set({ redirectUrl: window.location.origin });
+                return;
+            }
+        } catch {
+            set({ redirectUrl: window.location.origin });
+            return;
+        }
+        set({ redirectUrl: url });
+    },
 }));

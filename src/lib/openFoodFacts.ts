@@ -17,11 +17,12 @@ export const searchProducts = async (query: string): Promise<OFFFoodProduct[]> =
     const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=10&fields=code,product_name,brands,image_url,nutriments`;
 
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
         if (!response.ok) throw new Error("Search failed");
 
-        const data = await response.json();
-        return data.products || [];
+        const data = await response.json() as { products?: unknown[] };
+        if (!Array.isArray(data.products)) return [];
+        return data.products as OFFFoodProduct[];
     } catch (error) {
         console.error("OpenFoodFacts search error:", error);
         return [];
@@ -31,7 +32,7 @@ export const searchProducts = async (query: string): Promise<OFFFoodProduct[]> =
 export const getProductByBarcode = async (barcode: string): Promise<OFFFoodProduct | null> => {
     const url = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json?fields=code,product_name,brands,image_url,nutriments`;
     try {
-        const response = await fetch(url);
+        const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
         if (!response.ok) return null;
         const data = await response.json();
         return data.product || null;

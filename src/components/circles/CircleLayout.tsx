@@ -42,13 +42,21 @@ export function CircleLayout() {
     // Fetch circle data
     const fetchCircle = useCallback(async () => {
         if (!circleId) {
-            console.log('debug: no circleId');
+            if (import.meta.env.DEV) console.log('debug: no circleId');
             setError('No circle ID provided');
             setIsLoading(false);
             return;
         }
 
-        console.log('debug: fetchCircle starting', { circleId, userId: user?.id });
+        // Validate UUID format before hitting Supabase — prevents unexpected queries
+        const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!UUID_REGEX.test(circleId)) {
+            setError('Circle not found');
+            setIsLoading(false);
+            return;
+        }
+
+        if (import.meta.env.DEV) console.log('debug: fetchCircle starting', { circleId, userId: user?.id });
 
         // Temporarily allow fetch even if user is not fully loaded to see error
         // But we need user for RLS usually.
@@ -58,10 +66,10 @@ export function CircleLayout() {
 
         try {
             const data = await fetchCircleById(circleId);
-            console.log('debug: fetchCircle result', { data });
+            if (import.meta.env.DEV) console.log('debug: fetchCircle result', { data });
 
             if (!data) {
-                console.error('debug: circle not found or RLS error');
+                if (import.meta.env.DEV) console.error('debug: circle not found or RLS error');
                 setError('Circle not found');
                 setIsLoading(false);
                 return;
@@ -69,7 +77,7 @@ export function CircleLayout() {
 
             // Check membership
             const memberCheck = data.members.some(m => m.user_id === user?.id);
-            console.log('debug: memberCheck', { memberCheck, members: data.members, userId: user?.id });
+            if (import.meta.env.DEV) console.log('debug: memberCheck', { memberCheck, members: data.members, userId: user?.id });
 
             if (!memberCheck) {
                 setError('You are not a member of this circle');
