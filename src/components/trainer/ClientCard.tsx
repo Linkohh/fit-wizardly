@@ -1,7 +1,7 @@
 import { Client } from '@/types/fitness';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, ChevronRight, MoreVertical, Trash2, User } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -12,6 +12,16 @@ interface ClientCardProps {
     client: Client;
     onClick?: () => void;
 }
+
+const getClientInitials = (displayName: string) =>
+    displayName
+        .trim()
+        .split(/\s+/)
+        .map((part) => part[0])
+        .filter((initial): initial is string => Boolean(initial))
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
 
 export function ClientCard({ client, onClick }: ClientCardProps) {
     const { deleteClient } = useTrainerStore();
@@ -31,8 +41,9 @@ export function ClientCard({ client, onClick }: ClientCardProps) {
             <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                 <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10 border border-border">
-                        <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(client.displayName)}`} />
-                        <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                        <AvatarFallback className="bg-muted text-muted-foreground">
+                            {getClientInitials(client.displayName) || <User className="h-4 w-4" />}
+                        </AvatarFallback>
                     </Avatar>
                     <div className="space-y-1">
                         <CardTitle className="text-base font-semibold leading-none">

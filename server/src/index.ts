@@ -34,6 +34,7 @@ type AppConfig = {
   supabaseUrl?: string;
   supabaseAnonKey?: string;
   allowedOrigins: string[];
+  trustProxy: number | boolean;
 };
 
 type AppDependencies = {
@@ -46,21 +47,73 @@ type AppDependencies = {
 };
 
 function loadConfig(overrides: Partial<AppConfig> = {}): AppConfig {
+  const supabaseUrlSource = overrides.supabaseUrl ?? process.env.VITE_SUPABASE_URL;
+  const validatedSupabaseUrl = validateRemoteEndpoint(supabaseUrlSource, 'VITE_SUPABASE_URL');
+
   return {
     port: Number(overrides.port ?? process.env.PORT ?? 3001),
-    supabaseUrl: overrides.supabaseUrl ?? process.env.VITE_SUPABASE_URL,
+    supabaseUrl: validatedSupabaseUrl ?? undefined,
     supabaseAnonKey: overrides.supabaseAnonKey ?? process.env.VITE_SUPABASE_ANON_KEY,
     allowedOrigins:
       overrides.allowedOrigins ??
-      process.env.ALLOWED_ORIGINS?.split(',') ?? [
+      process.env.ALLOWED_ORIGINS?.split(',').map((origin) => origin.trim()).filter(Boolean) ?? [
         'http://localhost:8080',
         'http://localhost:5173',
         'http://localhost:3000',
       ],
+    trustProxy: overrides.trustProxy ?? parseTrustProxy(process.env.TRUST_PROXY),
   };
 }
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function isLoopbackHost(hostname: string) {
+  const normalized = hostname.replace(/^\[/, '').replace(/\]$/, '');
+  return (
+    normalized === 'localhost' ||
+    normalized === '127.0.0.1' ||
+    normalized === '::1' ||
+    normalized.endsWith('.localhost')
+  );
+}
+
+function validateRemoteEndpoint(value: string | undefined, label: string) {
+  if (!value) {
+    return null;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`[FitWizard] ${label} is not a valid URL`);
+  }
+
+  if (parsed.protocol !== 'https:' && !isLoopbackHost(parsed.hostname)) {
+    throw new Error(
+      `[FitWizard] ${label} must use HTTPS outside localhost (received ${parsed.protocol}//${parsed.host})`
+    );
+  }
+
+  return parsed.toString().replace(/\/$/, '');
+}
+
+function parseTrustProxy(value: string | undefined): number | boolean {
+  if (value == null || value.trim() === '') {
+    return process.env.NODE_ENV === 'production' ? 1 : false;
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (normalized === 'true') return true;
+  if (normalized === 'false') return false;
+
+  const parsed = Number(normalized);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw new Error('[FitWizard] TRUST_PROXY must be false, true, or a non-negative integer');
+  }
+
+  return parsed;
+}
 
 async function verifySupabaseAuthToken(
   token: string,
@@ -121,8 +174,8 @@ export function createApp(
   } = createRouteHandlers(configOverrides, dependencyOverrides);
   const app = express();
 
-  // Trust the first hop proxy so express-rate-limit reads real client IP from X-Forwarded-For
-  app.set('trust proxy', 1);
+  // Trust proxy behavior is environment-specific so rate limiting uses the actual edge topology.
+  app.set('trust proxy', config.trustProxy);
 
   // Security headers — X-Frame-Options, X-Content-Type-Options, HSTS, etc.
   app.use(helmet({ contentSecurityPolicy: false }));

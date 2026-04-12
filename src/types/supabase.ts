@@ -237,8 +237,10 @@ export type Database = {
                     created_at: string | null
                     display_name: string | null
                     experience_level: string | null
+                    is_trainer: boolean
                     id: string
                     primary_goal: string | null
+                    role: string
                     timezone: string | null
                     username: string | null
                 }
@@ -247,8 +249,10 @@ export type Database = {
                     created_at?: string | null
                     display_name?: string | null
                     experience_level?: string | null
+                    is_trainer?: boolean
                     id: string
                     primary_goal?: string | null
+                    role?: string
                     timezone?: string | null
                     username?: string | null
                 }
@@ -257,8 +261,10 @@ export type Database = {
                     created_at?: string | null
                     display_name?: string | null
                     experience_level?: string | null
+                    is_trainer?: boolean
                     id?: string
                     primary_goal?: string | null
+                    role?: string
                     timezone?: string | null
                     username?: string | null
                 }

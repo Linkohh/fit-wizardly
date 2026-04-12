@@ -79,11 +79,18 @@ vi.mock('@/stores/authStore', () => ({
       avatar_url: string | null;
       experience_level: string | null;
       primary_goal: string | null;
+      is_trainer: boolean;
     } | null;
   }) => unknown) =>
     selector({
       user: null,
-      profile: null,
+      profile: {
+        display_name: null,
+        avatar_url: null,
+        experience_level: null,
+        primary_goal: null,
+        is_trainer: true,
+      },
     }),
 }));
 
@@ -144,12 +151,21 @@ vi.mock('@/hooks/use-motion-tilt-status', () => ({
 
 vi.mock('@/stores/trainerStore', () => {
   const useTrainerStore = Object.assign(
-    () => ({
-      isTrainerMode: true,
-    }),
+    (selector?: (state: {
+      isTrainerMode: boolean;
+      setTrainerMode: (enabled: boolean) => void;
+    }) => unknown) => {
+      const state = {
+        isTrainerMode: true,
+        setTrainerMode: mocks.toggleTrainerMode,
+      };
+
+      return selector ? selector(state) : state;
+    },
     {
       getState: () => ({
         toggleTrainerMode: mocks.toggleTrainerMode,
+        setTrainerMode: mocks.toggleTrainerMode,
       }),
     },
   );

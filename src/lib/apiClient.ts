@@ -3,26 +3,32 @@
 
 import type { Plan } from '@/types/fitness';
 
-import { supabase } from '@/lib/supabase';
+import { supabase, validateRemoteEndpoint } from '@/lib/supabase';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const USE_API = import.meta.env.VITE_USE_API === 'true' || import.meta.env.DEV;
+const API_BASE = validateRemoteEndpoint(
+    import.meta.env.VITE_API_URL,
+    'VITE_API_URL',
+    { allowRelative: true }
+) || '';
 
-// Guard against misconfigured VITE_API_URL sending tokens to an attacker-controlled host.
-if (API_BASE && import.meta.env.PROD) {
-    const ALLOWED_API_HOSTS = ['localhost', 'fit-wizardly.vercel.app'];
-    try {
-        const { hostname } = new URL(API_BASE);
-        if (!ALLOWED_API_HOSTS.some(h => hostname === h || hostname.endsWith(`.${h}`))) {
-            throw new Error(`[FitWizard] VITE_API_URL points to untrusted host: ${hostname}`);
-        }
-    } catch (e) {
-        if (e instanceof TypeError) throw new Error('[FitWizard] VITE_API_URL is not a valid URL');
-        throw e;
-    }
+function isLoopbackHost(hostname: string) {
+    const normalized = hostname.replace(/^\[/, '').replace(/\]$/, '');
+    return (
+        normalized === 'localhost' ||
+        normalized === '127.0.0.1' ||
+        normalized === '::1' ||
+        normalized.endsWith('.localhost')
+    );
 }
 
-// Feature flag for API usage
-const USE_API = import.meta.env.VITE_USE_API === 'true' || import.meta.env.DEV;
+if (USE_API && API_BASE.startsWith('http')) {
+    const apiHost = new URL(API_BASE).hostname;
+    const currentHost = typeof window !== 'undefined' ? window.location.hostname : '';
+    if (!isLoopbackHost(apiHost) && apiHost !== currentHost) {
+        throw new Error(`[FitWizard] VITE_API_URL must target the current host or localhost (received ${apiHost})`);
+    }
+}
 
 // Helper to get auth headers
 async function getAuthHeaders(): Promise<HeadersInit> {

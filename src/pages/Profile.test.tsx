@@ -71,32 +71,67 @@ vi.mock('@/hooks/use-motion-tilt-status', () => ({
 }));
 
 vi.mock('@/stores/trainerStore', () => ({
-  useTrainerStore: () => ({
-    isTrainerMode: false,
-    toggleTrainerMode: vi.fn(),
-  }),
+  useTrainerStore: (selector?: (state: {
+    isTrainerMode: boolean;
+    setTrainerMode: (enabled: boolean) => void;
+  }) => unknown) => {
+    const state = {
+      isTrainerMode: false,
+      setTrainerMode: vi.fn(),
+    };
+
+    return selector ? selector(state) : state;
+  },
 }));
 
 vi.mock('@/stores/planStore', () => ({
-  usePlanStore: () => ({
-    preferredWeightUnit: 'lbs',
-    setPreferredWeightUnit: vi.fn(),
-    planHistory: [],
-    workoutLogs: [],
-    personalRecords: [],
-  }),
+  usePlanStore: (selector?: (state: {
+    preferredWeightUnit: 'lbs' | 'kg';
+    setPreferredWeightUnit: (unit: 'lbs' | 'kg') => void;
+    planHistory: unknown[];
+    workoutLogs: unknown[];
+    personalRecords: unknown[];
+  }) => unknown) => {
+    const state = {
+      preferredWeightUnit: 'lbs' as const,
+      setPreferredWeightUnit: vi.fn(),
+      planHistory: [],
+      workoutLogs: [],
+      personalRecords: [],
+    };
+
+    return selector ? selector(state) : state;
+  },
 }));
 
 vi.mock('@/stores/authStore', () => ({
-  useAuthStore: () => ({
+  useAuthStore: (selector?: (state: {
     user: {
-      email: 'tester@example.com',
+      email: string;
       user_metadata: {
-        full_name: 'Test User',
+        full_name: string;
+      };
+    };
+    profile: {
+      is_trainer: boolean;
+    };
+    signOut: () => void;
+  }) => unknown) => {
+    const state = {
+      user: {
+        email: 'tester@example.com',
+        user_metadata: {
+          full_name: 'Test User',
+        },
       },
-    },
-    signOut: vi.fn(),
-  }),
+      profile: {
+        is_trainer: false,
+      },
+      signOut: vi.fn(),
+    };
+
+    return selector ? selector(state) : state;
+  },
 }));
 
 vi.mock('@/components/measurements/BodyTracker', () => ({

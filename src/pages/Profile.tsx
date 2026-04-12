@@ -53,7 +53,7 @@ export function Profile() {
 
     // Trainer Store
     const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
-    const toggleTrainerMode = useTrainerStore((state) => state.toggleTrainerMode);
+    const setTrainerMode = useTrainerStore((state) => state.setTrainerMode);
 
     // Plan/Fitness Store
     const preferredWeightUnit = usePlanStore((state) => state.preferredWeightUnit);
@@ -61,7 +61,10 @@ export function Profile() {
 
     // Auth Store
     const user = useAuthStore((state) => state.user);
+    const profile = useAuthStore((state) => state.profile);
     const signOut = useAuthStore((state) => state.signOut);
+    const isTrainerAuthorized = profile?.is_trainer === true;
+    const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
 
     const handleExportData = () => {
         try {
@@ -325,11 +328,14 @@ export function Profile() {
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-0.5">
                                         <Label className="text-base">{t('header.trainer_mode', 'Trainer Mode')}</Label>
-                                        <p className="text-sm text-muted-foreground">Manage clients and plans</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {isTrainerAuthorized ? 'Manage clients and plans' : 'Verified trainer accounts only'}
+                                        </p>
                                     </div>
                                     <Switch
-                                        checked={isTrainerMode}
-                                        onCheckedChange={toggleTrainerMode}
+                                        checked={isTrainerEnabled}
+                                        disabled={!isTrainerAuthorized}
+                                        onCheckedChange={setTrainerMode}
                                     />
                                 </div>
 

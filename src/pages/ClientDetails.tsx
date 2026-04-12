@@ -3,12 +3,11 @@ import { AssignPlanDialog } from '@/components/trainer/AssignPlanDialog';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, Calendar, Dumbbell, LineChart, Mail, MapPin, MoreVertical, Plus, User } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ArrowLeft, Calendar, Dumbbell, Mail, MapPin, MoreVertical, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { EmptyState } from '@/components/ui/empty-state';
 import { ClientProgress } from '@/components/trainer/ClientProgress';
 import { ClientMessages } from '@/components/trainer/ClientMessages';
 
@@ -34,6 +33,15 @@ export default function ClientDetails() {
         );
     }
 
+    const clientInitials = client.displayName
+        .trim()
+        .split(/\s+/)
+        .map((part) => part[0])
+        .filter((initial): initial is string => Boolean(initial))
+        .slice(0, 2)
+        .join('')
+        .toUpperCase();
+
     const handleUnassign = (assignmentId: string) => {
         if (confirm('Are you sure you want to unassign this plan?')) {
             unassignPlan(assignmentId);
@@ -54,11 +62,12 @@ export default function ClientDetails() {
                     <Button variant="ghost" size="icon" onClick={() => navigate('/clients')}>
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <div className="flex items-center gap-4">
-                        <Avatar className="h-16 w-16 border-2 border-border">
-                            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${client.displayName}`} />
-                            <AvatarFallback><User className="h-8 w-8" /></AvatarFallback>
-                        </Avatar>
+                <div className="flex items-center gap-4">
+                    <Avatar className="h-16 w-16 border-2 border-border">
+                        <AvatarFallback className="bg-muted text-muted-foreground">
+                            {clientInitials || <User className="h-8 w-8" />}
+                        </AvatarFallback>
+                    </Avatar>
                         <div>
                             <h2 className="text-3xl font-bold tracking-tight">{client.displayName}</h2>
                             <p className="text-muted-foreground flex items-center gap-2">

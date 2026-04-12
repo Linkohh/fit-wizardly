@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
 
 async function loadApiClient() {
   vi.doMock('@/lib/supabase', () => ({
+    validateRemoteEndpoint: (value: string | undefined) => value ?? null,
     supabase: {
       auth: {
         getSession: mocks.getSession,
@@ -21,6 +22,7 @@ describe('apiClient auth headers', () => {
     vi.resetModules();
     vi.clearAllMocks();
     vi.stubEnv('VITE_USE_API', 'true');
+    vi.stubEnv('VITE_API_URL', '/api');
   });
 
   it('attaches the Supabase bearer token to API requests when present', async () => {
@@ -75,6 +77,12 @@ describe('apiClient auth headers', () => {
     const headers = requestOptions?.headers as Record<string, string>;
     expect(headers?.Authorization).toBeUndefined();
   });
+
+  it('rejects an absolute API host that does not match the current origin', async () => {
+    vi.stubEnv('VITE_API_URL', 'https://evil.example.com');
+
+    await expect(loadApiClient()).rejects.toThrow(/must target the current host or localhost/i);
+  });
 });
 
 describe('apiClient retry behavior', () => {
@@ -83,6 +91,7 @@ describe('apiClient retry behavior', () => {
     vi.clearAllMocks();
     vi.useFakeTimers();
     vi.stubEnv('VITE_USE_API', 'true');
+    vi.stubEnv('VITE_API_URL', '/api');
   });
 
   afterEach(() => {

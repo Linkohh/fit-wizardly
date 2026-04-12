@@ -89,7 +89,7 @@ export const WeeklyProgressCard = memo(function WeeklyProgressCard({
 
     let count = 0;
     const now = new Date();
-    let checkDate = new Date(now);
+    const checkDate = new Date(now);
     checkDate.setHours(0, 0, 0, 0);
 
     for (let i = 0; i < 60; i++) {

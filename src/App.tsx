@@ -13,6 +13,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { TrainerGuard } from "./components/TrainerGuard";
 import { OnboardingGuard } from "./components/OnboardingGuard";
 import { useAuthStore } from "./stores/authStore";
+import { useTrainerStore } from "./stores/trainerStore";
 import { CommandPalette } from "@/components/CommandPalette";
 import { OfflineBanner } from "@/components/ui/offline-banner";
 import { RequireAuth } from "@/components/RequireAuth";
@@ -24,6 +25,7 @@ import { LoadingScreen } from "@/components/ui/loading-screen";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { useAnalyticsStore } from "@/stores/analyticsStore";
 
 const Index = lazy(() => import("./pages/Index"));
 const WizardPage = lazy(() => import("./pages/Wizard"));
@@ -271,10 +273,24 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 // Auth initialization wrapper
 function AuthProvider({ children }: { children: React.ReactNode }) {
   const initialize = useAuthStore((state) => state.initialize);
+  const user = useAuthStore((state) => state.user);
+  const profile = useAuthStore((state) => state.profile);
+  const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
+  const setTrainerMode = useTrainerStore((state) => state.setTrainerMode);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  useEffect(() => {
+    if (!isTrainerMode) {
+      return;
+    }
+
+    if (!user || profile?.is_trainer !== true) {
+      setTrainerMode(false);
+    }
+  }, [isTrainerMode, profile?.is_trainer, setTrainerMode, user]);
 
   return <>{children}</>;
 }
@@ -385,6 +401,7 @@ const App = () => {
   // Network status handled by OfflineBanner component
   useGlobalClickFeedback();
   const nativeApp = isNativeApp();
+  const hasAnalyticsConsent = useAnalyticsStore((state) => state.hasConsented);
   const [shouldRenderLivingBackground, setShouldRenderLivingBackground] = useState(false);
 
   // Handle post-login redirects for invites
@@ -459,7 +476,7 @@ const App = () => {
                 </div>
                 <Footer />
               </div>
-              <VercelAnalytics />
+              {hasAnalyticsConsent && <VercelAnalytics />}
             </AuthProvider>
           </ThemeProvider>
         </TooltipProvider>

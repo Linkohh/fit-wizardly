@@ -78,6 +78,7 @@ describe('planStore syncWithBackend', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
+    window.localStorage.clear();
     mocks.currentUser = { id: 'user-1' };
     mocks.isPlansRemoteEnabled.mockReturnValue(true);
   });
@@ -129,5 +130,30 @@ describe('planStore syncWithBackend', () => {
     const state = usePlanStore.getState();
     expect(state.planHistory).toEqual([remotePlan, localPlan]);
     expect(state.currentPlan).toEqual(remotePlan);
+  });
+
+  it('persists only non-sensitive preference fields', async () => {
+    const { usePlanStore } = await loadPlanStore();
+    const sensitivePlan = buildPlan('plan-5', 'Sensitive plan');
+
+    usePlanStore.setState({
+      currentPlan: sensitivePlan,
+      planHistory: [sensitivePlan],
+      workoutLogs: [{ planId: 'plan-5' } as never],
+      currentWeek: 3,
+      activeWorkout: { planId: 'plan-5' } as never,
+      personalRecords: [{ exerciseId: 'exercise-1' } as never],
+      preferredWeightUnit: 'kg',
+    });
+
+    const persisted = JSON.parse(window.localStorage.getItem('fitwizard-plans') ?? '{"state":{}}');
+
+    expect(persisted.state.currentWeek).toBe(3);
+    expect(persisted.state.preferredWeightUnit).toBe('kg');
+    expect(persisted.state.currentPlan).toBeUndefined();
+    expect(persisted.state.planHistory).toBeUndefined();
+    expect(persisted.state.workoutLogs).toBeUndefined();
+    expect(persisted.state.activeWorkout).toBeUndefined();
+    expect(persisted.state.personalRecords).toBeUndefined();
   });
 });

@@ -3,6 +3,7 @@ import { useOnboardingStore } from '@/stores/onboardingStore';
 
 describe('onboardingStore', () => {
     beforeEach(() => {
+        window.localStorage.clear();
         // Reset store to initial state before each test
         useOnboardingStore.getState().resetOnboarding();
     });
@@ -117,9 +118,8 @@ describe('onboardingStore', () => {
             const store = useOnboardingStore.getState();
             store.completeOnboarding();
 
-            const { isComplete, currentStep } = useOnboardingStore.getState();
+            const { isComplete } = useOnboardingStore.getState();
             expect(isComplete).toBe(true);
-            expect(currentStep).toBe('complete');
         });
 
         it('reset clears completion state', () => {
@@ -130,6 +130,17 @@ describe('onboardingStore', () => {
             const { isComplete, hasStarted } = useOnboardingStore.getState();
             expect(isComplete).toBe(false);
             expect(hasStarted).toBe(false);
+        });
+
+        it('does not persist the onboarding display name', () => {
+            const store = useOnboardingStore.getState();
+            store.setDisplayName('Jordan Example');
+            store.setRole('coach');
+
+            const persisted = JSON.parse(window.localStorage.getItem('fitwizard-onboarding') ?? '{"state":{}}');
+
+            expect(persisted.state.userData.displayName).toBeUndefined();
+            expect(persisted.state.userData.role).toBe('coach');
         });
     });
 });

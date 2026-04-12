@@ -19,6 +19,7 @@ const DEFAULT_PAGE_SIZE = 100;
 const MAX_PAGE_COUNT = 30;
 const REQUEST_TIMEOUT_MS = 12000;
 const WGER_API_URL = 'https://wger.de/api/v2/exerciseinfo/';
+const WGER_ALLOWED_ORIGINS = new Set(['https://wger.de', 'https://www.wger.de']);
 const SNAPSHOT_ASSET_VERSION = 'v1';
 const SNAPSHOT_ASSET_PATH = `${import.meta.env.BASE_URL}exercise-data/wger-snapshot.${SNAPSHOT_ASSET_VERSION}.json`;
 
@@ -142,6 +143,25 @@ function isInCooldown() {
   const cooldownUntil = new Date(meta.cooldownUntil).getTime();
   if (Number.isNaN(cooldownUntil)) return false;
   return cooldownUntil > Date.now();
+}
+
+function normalizeNextPageUrl(nextUrl: string | null, currentUrl: string) {
+  if (!nextUrl) {
+    return '';
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(nextUrl, currentUrl);
+  } catch {
+    throw new Error('Invalid wger pagination URL');
+  }
+
+  if (parsed.protocol !== 'https:' || !WGER_ALLOWED_ORIGINS.has(parsed.origin)) {
+    throw new Error(`Rejected wger pagination URL from untrusted origin: ${parsed.origin}`);
+  }
+
+  return parsed.toString();
 }
 
 function readPersistedCache() {
@@ -288,7 +308,7 @@ export async function fetchAllWgerExercises() {
     }
 
     results.push(...page.results);
-    url = page.next ?? '';
+    url = normalizeNextPageUrl(page.next, url);
   }
 
   if (url) {

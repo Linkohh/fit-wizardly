@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Dumbbell, Target, FileText, Users, Zap, Crown } from 'lucide-react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useAchievementStore } from '@/stores/achievementStore';
+import { useAuthStore } from '@/stores/authStore';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { Suspense, lazy, useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
@@ -74,8 +75,10 @@ export default function Index() {
   const { t } = useTranslation();
   const { totalPlansGenerated } = useAchievementStore();
   const { isTrainerMode } = useTrainerStore();
+  const isTrainerAuthorized = useAuthStore((state) => state.profile?.is_trainer === true);
   const nativeApp = isNativeApp();
   const hasActivity = totalPlansGenerated > 0;
+  const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
 
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [quoteReady, setQuoteReady] = useState(false);
@@ -292,7 +295,7 @@ export default function Index() {
         )}
 
         {/* Trainer Dashboard */}
-        {isTrainerMode && (
+        {isTrainerEnabled && (
           <motion.section
             ref={trainerRef}
             initial={{ opacity: 0, y: 40 }}

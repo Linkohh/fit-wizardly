@@ -17,6 +17,7 @@ import { useTrainerStore } from '@/stores/trainerStore';
 import { useWizardStore } from '@/stores/wizardStore';
 import type { ExperienceLevel, Goal } from '@/types/fitness';
 import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '@/stores/authStore';
 
 export function GoalStep() {
   const { t } = useTranslation();
@@ -30,6 +31,8 @@ export function GoalStep() {
     setPersonalGoalNote,
   } = useWizardStore();
   const { isTrainerMode, setTrainerMode } = useTrainerStore();
+  const isTrainerAuthorized = useAuthStore((state) => state.profile?.is_trainer === true);
+  const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
   const goals = getGoals(t);
   const experienceLevels = getExperienceLevels(t);
   const shouldStartPersonalizedOpen = Boolean(
@@ -37,7 +40,7 @@ export function GoalStep() {
     || selections.lastName
     || selections.personalGoalNote
     || selections.coachNotes
-    || isTrainerMode,
+    || isTrainerEnabled,
   );
   const [isPersonalizationOpen, setIsPersonalizationOpen] = useState(shouldStartPersonalizedOpen);
 
@@ -47,7 +50,7 @@ export function GoalStep() {
       firstName: selections.firstName || '',
       lastName: selections.lastName || '',
       personalGoalNote: selections.personalGoalNote || '',
-      isTrainer: isTrainerMode,
+      isTrainer: isTrainerEnabled,
       coachNotes: selections.coachNotes || '',
       goal: selections.goal,
       experienceLevel: selections.experienceLevel,
@@ -64,8 +67,8 @@ export function GoalStep() {
   });
 
   useEffect(() => {
-    setValue('isTrainer', isTrainerMode);
-  }, [isTrainerMode, setValue]);
+    setValue('isTrainer', isTrainerEnabled);
+  }, [isTrainerEnabled, setValue]);
 
   useEffect(() => {
     if (shouldStartPersonalizedOpen) {
@@ -427,7 +430,9 @@ export function GoalStep() {
                             {t('wizard.goal.im_trainer')}
                           </Label>
                           <p className="text-xs leading-relaxed text-muted-foreground">
-                            {t('wizard.goal.trainer_enable_notes')}
+                            {isTrainerAuthorized
+                              ? t('wizard.goal.trainer_enable_notes')
+                              : t('wizard.goal.trainer_verified_only', 'Available only to verified trainer accounts.')}
                           </p>
                         </div>
 
@@ -436,9 +441,18 @@ export function GoalStep() {
                           role="switch"
                           id="trainer-mode"
                           aria-checked={field.value}
-                          onClick={() => field.onChange(!field.value)}
+                          aria-disabled={!isTrainerAuthorized}
+                          disabled={!isTrainerAuthorized}
+                          onClick={() => {
+                            if (!isTrainerAuthorized) {
+                              return;
+                            }
+
+                            field.onChange(!field.value);
+                          }}
                           className={cn(
-                            'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                            'relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                            isTrainerAuthorized ? 'cursor-pointer' : 'cursor-not-allowed opacity-50',
                             field.value ? 'bg-accent' : 'bg-input',
                           )}
                           whileTap={{ scale: 0.95 }}

@@ -6,7 +6,6 @@
  */
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import type {
     WisdomMessage,
     WisdomResponse,
@@ -81,25 +80,23 @@ function calculateLearningLevel(questionsAsked: number, conceptsUnderstood: numb
 // STORE IMPLEMENTATION
 // ============================================
 
-export const useWisdomStore = create<WisdomState>()(
-    persist(
-        (set, get) => ({
-            // Initial state
-            conversationHistory: [],
-            isLoading: false,
-            learningProgress: {
-                topicsExplored: [],
-                questionsAsked: 0,
-                conceptsUnderstood: [],
-                learningLevel: 'novice',
-            },
-            currentContext: {
-                planId: null,
-                exerciseId: null,
-                weekNumber: 1,
-                phase: undefined,
-            },
-            isOpen: false,
+export const useWisdomStore = create<WisdomState>()((set, get) => ({
+    // Initial state
+    conversationHistory: [],
+    isLoading: false,
+    learningProgress: {
+        topicsExplored: [],
+        questionsAsked: 0,
+        conceptsUnderstood: [],
+        learningLevel: 'novice',
+    },
+    currentContext: {
+        planId: null,
+        exerciseId: null,
+        weekNumber: 1,
+        phase: undefined,
+    },
+    isOpen: false,
 
             // ========================================
             // CONVERSATION ACTIONS
@@ -306,9 +303,4 @@ export const useWisdomStore = create<WisdomState>()(
                 // Return unique suggestions (max 5)
                 return [...new Set(suggestions)].slice(0, 5);
             },
-        }),
-        {
-            name: 'fitwizard-wisdom',
-        }
-    )
-);
+}));

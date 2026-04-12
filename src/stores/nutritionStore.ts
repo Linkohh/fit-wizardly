@@ -37,6 +37,10 @@ interface NutritionState {
     getLastFullMeal: (type: string) => MealEntry[]; // New helper
 }
 
+const sanitizeNutritionPersistedState = (state: Partial<NutritionState> | undefined) => ({
+    selectedDate: typeof state?.selectedDate === 'string' ? state.selectedDate : new Date().toISOString().split('T')[0],
+});
+
 export const useNutritionStore = create<NutritionState>()(
     persist(
         (set, get) => ({
@@ -208,15 +212,11 @@ export const useNutritionStore = create<NutritionState>()(
         }),
         {
             name: 'fitwizard-nutrition-storage',
-            partialize: (state) => ({
-                profile: state.profile,
-                targets: state.targets,
-                history: state.history,
-                customFoods: state.customFoods,
-                favorites: state.favorites,
-                savedMeals: state.savedMeals
+            partialize: sanitizeNutritionPersistedState,
+            merge: (persistedState, currentState) => ({
+                ...currentState,
+                ...sanitizeNutritionPersistedState(persistedState as Partial<NutritionState> | undefined),
             }),
         }
     )
 );
-

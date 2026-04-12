@@ -16,12 +16,14 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
     const location = useLocation();
     const { startSession, trackPageView, flushEvents, hasConsented } = useAnalyticsStore();
 
-    // Start session on mount
+    // Start or reset the session only after consent is available.
     useEffect(() => {
-        startSession();
-    }, [startSession]);
+        if (hasConsented) {
+            startSession();
+        }
+    }, [hasConsented, startSession]);
 
-    // Track page views on route change
+    // Track page views on route change only after consent.
     useEffect(() => {
         if (hasConsented) {
             trackPageView(location.pathname);
@@ -31,13 +33,15 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
     // Flush events on visibility change (user leaving)
     useEffect(() => {
         const handleVisibilityChange = () => {
-            if (document.visibilityState === 'hidden') {
+            if (document.visibilityState === 'hidden' && hasConsented) {
                 flushEvents();
             }
         };
 
         const handleBeforeUnload = () => {
-            flushEvents();
+            if (hasConsented) {
+                flushEvents();
+            }
         };
 
         document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -47,7 +51,7 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
             window.removeEventListener('beforeunload', handleBeforeUnload);
         };
-    }, [flushEvents]);
+    }, [flushEvents, hasConsented]);
 
     return <>{children}</>;
 }

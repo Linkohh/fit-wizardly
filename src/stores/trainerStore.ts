@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Client, Assignment, Template, Plan, Message } from '@/types/fitness';
+import { useAuthStore } from '@/stores/authStore';
 import { useWizardStore } from '@/stores/wizardStore';
 
 interface TrainerState {
@@ -39,6 +40,12 @@ interface TrainerState {
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
+const sanitizeTrainerPersistedState = (state: Partial<TrainerState> | undefined) => ({
+  isTrainerMode: Boolean(state?.isTrainerMode),
+});
+
+const isTrainerAuthorized = () => useAuthStore.getState().profile?.is_trainer === true;
+
 export const useTrainerStore = create<TrainerState>()(
   persist(
     (set, get) => ({
@@ -50,7 +57,7 @@ export const useTrainerStore = create<TrainerState>()(
       messages: [],
 
       toggleTrainerMode: () => set((state) => {
-        const nextMode = !state.isTrainerMode;
+        const nextMode = state.isTrainerMode ? false : isTrainerAuthorized();
         useWizardStore.getState().setIsTrainer(nextMode);
         return {
           isTrainerMode: nextMode,
@@ -59,10 +66,11 @@ export const useTrainerStore = create<TrainerState>()(
       }),
 
       setTrainerMode: (enabled) => set((state) => {
-        useWizardStore.getState().setIsTrainer(enabled);
+        const nextMode = enabled && isTrainerAuthorized();
+        useWizardStore.getState().setIsTrainer(nextMode);
         return {
-          isTrainerMode: enabled,
-          selectedClientId: enabled ? state.selectedClientId : null,
+          isTrainerMode: nextMode,
+          selectedClientId: nextMode ? state.selectedClientId : null,
         };
       }),
 
@@ -151,6 +159,11 @@ export const useTrainerStore = create<TrainerState>()(
     }),
     {
       name: 'fitwizard-trainer',
+      partialize: sanitizeTrainerPersistedState,
+      merge: (persistedState, currentState) => ({
+        ...currentState,
+        ...sanitizeTrainerPersistedState(persistedState as Partial<TrainerState>),
+      }),
     }
   )
 );

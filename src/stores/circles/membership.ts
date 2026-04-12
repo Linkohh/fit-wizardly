@@ -2,6 +2,34 @@ import type { Circle, CircleWithMembers } from '@/types/supabase';
 import type { CircleStoreDeps } from './types';
 import { generateRandomCode } from './utils';
 
+type MemberIdentitySource = {
+    email?: string | null;
+    user_metadata?: Record<string, unknown> | null;
+};
+
+export function getMemberDisplayName(user: MemberIdentitySource): string {
+    const metadata = user.user_metadata;
+    const candidates = [
+        metadata?.display_name,
+        metadata?.full_name,
+        metadata?.name,
+        metadata?.preferred_username,
+    ];
+
+    for (const candidate of candidates) {
+        if (typeof candidate !== 'string') {
+            continue;
+        }
+
+        const trimmed = candidate.trim();
+        if (trimmed) {
+            return trimmed;
+        }
+    }
+
+    return 'A new member';
+}
+
 function mapCircleWithMembers(circle: Circle & { circle_members?: CircleWithMembers['members'] }) {
     return {
         ...circle,
@@ -180,7 +208,7 @@ export function createMembershipActions({ set, get, supabase, isSupabaseConfigur
             }
 
             await get().postActivity(circle.id, 'member_joined', {
-                memberName: user.email?.split('@')[0] || 'A new member',
+                memberName: getMemberDisplayName(user),
             });
 
             await get().fetchUserCircles(user.id);

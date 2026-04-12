@@ -6,6 +6,11 @@ import { MealEntry, MacroTargets } from "@/types/nutrition";
 import { cn } from "@/lib/utils";
 import { searchProducts, OFFFoodProduct } from "@/lib/openFoodFacts";
 import { useNutritionStore } from "@/stores/nutritionStore";
+import {
+    CONSENT_RESOLVED_EVENT,
+    hasNutritionLookupConsent,
+    requestConsentModal,
+} from "@/lib/consent";
 
 interface FoodLoggerProps {
     onLogMeal: (meal: MealEntry | MealEntry[]) => void;
@@ -13,9 +18,10 @@ interface FoodLoggerProps {
 }
 
 export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) {
-    const { addCustomFood, customFoods, favorites, toggleFavorite } = useNutritionStore();
+    const { addCustomFood, favorites, toggleFavorite } = useNutritionStore();
     const [mode, setMode] = useState<'view' | 'logging'>('view');
     const [activeTab, setActiveTab] = useState<'search' | 'favorites' | 'custom'>('search');
+    const [nutritionLookupConsent, setNutritionLookupConsent] = useState(() => hasNutritionLookupConsent());
 
     // Search State
     const [searchQuery, setSearchQuery] = useState("");
@@ -27,7 +33,11 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
 
     // Debounced Search
     useEffect(() => {
-        if (activeTab !== 'search') return;
+        if (activeTab !== 'search' || !nutritionLookupConsent) {
+            setSearchResults([]);
+            setIsLoading(false);
+            return;
+        }
 
         const delayDebounceFn = setTimeout(async () => {
             if (searchQuery.length >= 3) {
@@ -41,7 +51,14 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
         }, 600);
 
         return () => clearTimeout(delayDebounceFn);
-    }, [searchQuery, activeTab]);
+    }, [activeTab, nutritionLookupConsent, searchQuery]);
+
+    useEffect(() => {
+        const syncConsent = () => setNutritionLookupConsent(hasNutritionLookupConsent());
+
+        window.addEventListener(CONSENT_RESOLVED_EVENT, syncConsent);
+        return () => window.removeEventListener(CONSENT_RESOLVED_EVENT, syncConsent);
+    }, []);
 
 
     const handleAddProduct = (product: OFFFoodProduct) => {
@@ -174,6 +191,21 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                         {/* SEARCH TAB */}
                         {activeTab === 'search' && (
                             <div className="space-y-4">
+                                {!nutritionLookupConsent && (
+                                    <div className="rounded-2xl border border-amber-400/20 bg-amber-500/10 p-4 text-sm text-muted-foreground">
+                                        <p className="font-medium text-foreground">Third-party food search is off.</p>
+                                        <p className="mt-1">
+                                            OpenFoodFacts lookups are disabled until you explicitly allow them in the consent tray.
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={requestConsentModal}
+                                            className="mt-3 inline-flex items-center justify-center rounded-xl border border-amber-400/20 bg-background px-3 py-2 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                                        >
+                                            Review privacy choices
+                                        </button>
+                                    </div>
+                                )}
                                 <div className="relative">
                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <input
@@ -181,7 +213,8 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                                         placeholder="Search (e.g. 'Oats')..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        autoFocus
+                                        autoFocus={nutritionLookupConsent}
+                                        disabled={!nutritionLookupConsent}
                                         className="w-full bg-muted/30 border border-border rounded-xl py-3 pl-10 pr-4 outline-none focus:ring-2 ring-primary/50 transition-all font-medium"
                                     />
                                     {isLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />}

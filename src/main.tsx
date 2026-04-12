@@ -5,6 +5,30 @@ import App from "./App.tsx";
 import "./index.css";
 import "./lib/i18n"; // Initialize i18n
 
+function applyInitialTheme() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    const storage = window.localStorage.getItem("fitwizard-theme") || window.localStorage.getItem("theme-storage");
+    if (storage) {
+      const theme = JSON.parse(storage).state?.mode;
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const isDark = theme === "dark" || (theme === "system" && prefersDark);
+      document.documentElement.classList.toggle("dark", Boolean(isDark));
+      return;
+    }
+  } catch {
+    // Fall back to the system theme when storage is unavailable or malformed.
+  }
+
+  document.documentElement.classList.toggle(
+    "dark",
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
+}
+
 function registerAppServiceWorker() {
   const updateServiceWorker = registerSW({
     immediate: true,
@@ -32,6 +56,8 @@ function registerAppServiceWorker() {
 if (import.meta.env.PROD) {
   registerAppServiceWorker();
 }
+
+applyInitialTheme();
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>

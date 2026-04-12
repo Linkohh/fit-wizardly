@@ -16,6 +16,7 @@ import { ExerciseSwapModal } from '@/components/plan/ExerciseSwapModal';
 import { WisdomBubble } from '@/components/wisdom/WisdomBubble';
 import { useWisdomStore } from '@/stores/wisdomStore';
 import { WorkoutDayCard } from '@/components/plan/WorkoutDayCard';
+import { useAuthStore } from '@/stores/authStore';
 import { useWizardStore } from '@/stores/wizardStore';
 import { PlanNavigation } from '@/components/plan/PlanNavigation';
 import { SaveTemplateDialog } from '@/components/plan/SaveTemplateDialog';
@@ -37,6 +38,7 @@ export default function PlanPage() {
   const swapExercise = usePlanStore((state) => state.swapExercise);
   const clearCurrentPlan = usePlanStore((state) => state.clearCurrentPlan);
   const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
+  const isTrainerAuthorized = useAuthStore((state) => state.profile?.is_trainer === true);
   const resetWizard = useWizardStore((state) => state.resetWizard);
   const [redactSensitive, setRedactSensitive] = useState(true);
   const [swapModalOpen, setSwapModalOpen] = useState(false);
@@ -44,6 +46,7 @@ export default function PlanPage() {
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; exerciseIndex: number; exercise: ExercisePrescription } | null>(null);
   const setContext = useWisdomStore((state) => state.setContext);
   const activePlan = currentPlan ?? planHistory[0] ?? null;
+  const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
 
   useEffect(() => {
     if (!currentPlan && planHistory.length > 0) {
@@ -101,7 +104,7 @@ export default function PlanPage() {
 
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           {/* Trainer: Save as Template */}
-          {isTrainerMode && (
+          {isTrainerEnabled && (
             <>
               <Button
                 variant="outline"

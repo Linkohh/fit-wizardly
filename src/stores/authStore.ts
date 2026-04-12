@@ -13,6 +13,62 @@ import type { User, Session } from '@supabase/supabase-js';
 
 let authSubscription: { unsubscribe: () => void } | null = null;
 
+const SENSITIVE_LOCAL_STORAGE_KEYS = [
+    'fitwizard-trainer',
+    'fitwizard-plans',
+    'fitwizard-onboarding',
+    'fitwizard-wizard',
+    'fitwizard-nutrition-storage',
+    'measurements-storage',
+    'fitwizard-wisdom',
+];
+
+const SENSITIVE_SESSION_STORAGE_KEYS = [
+    'fitwizard-trainer-access-unlocked',
+    'pendingInviteCode',
+];
+
+function getDisplayNameForUser(user: User): string {
+    const metadata = user.user_metadata as Record<string, unknown> | undefined;
+    const candidates = [
+        metadata?.full_name,
+        metadata?.name,
+        metadata?.display_name,
+    ];
+
+    for (const candidate of candidates) {
+        if (typeof candidate !== 'string') {
+            continue;
+        }
+
+        const trimmed = candidate.trim();
+        if (trimmed) {
+            return trimmed;
+        }
+    }
+
+    return 'Member';
+}
+
+function stripTrainerFields(updates: Partial<Profile>): Partial<Profile> {
+    const { role: _role, is_trainer: _isTrainer, ...safeUpdates } = updates;
+    return safeUpdates;
+}
+
+function clearSensitiveStorage(): void {
+    if (typeof window === 'undefined') {
+        return;
+    }
+
+    for (const key of SENSITIVE_LOCAL_STORAGE_KEYS) {
+        window.localStorage.removeItem(key);
+    }
+
+    for (const key of SENSITIVE_SESSION_STORAGE_KEYS) {
+        window.sessionStorage.removeItem(key);
+    }
+}
+
 interface AuthState {
     // State
     user: User | null;
@@ -116,12 +172,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                             // Create new profile
                             const newProfile = {
                                 id: session.user.id,
-                                display_name: session.user.email?.split('@')[0] || 'User',
+                                display_name: getDisplayNameForUser(session.user),
                                 username: null,
                                 avatar_url: null,
                                 experience_level: null,
                                 primary_goal: null,
                                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                                role: 'client',
+                                is_trainer: false,
                             };
 
                             const { data: createdProfile, error: createError } = await supabase
@@ -145,10 +203,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                             showAuthModal: false,
                         });
                     } else if (event === 'SIGNED_OUT') {
+                        clearSensitiveStorage();
                         set({
                             user: null,
                             session: null,
                             profile: null,
+                            showAuthModal: false,
+                            redirectUrl: null,
                         });
                     }
                 } catch (error) {
@@ -182,6 +243,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // Sign out
     signOut: async () => {
+        clearSensitiveStorage();
+        set({
+            user: null,
+            session: null,
+            profile: null,
+            showAuthModal: false,
+            redirectUrl: null,
+        });
+
         if (!isSupabaseConfigured()) return;
 
         try {
@@ -195,12 +265,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             toast.error('Failed to sign out');
         }
 
-        // Clear state regardless of API result to ensure user can log out
-        set({
-            user: null,
-            session: null,
-            profile: null,
-        });
     },
 
     // Update profile
@@ -210,9 +274,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             return { error: new Error('Not authenticated') };
         }
 
+        const safeUpdates = stripTrainerFields(updates);
         const { data, error } = await supabase
             .from('profiles')
-            .update(updates)
+            .update(safeUpdates)
             .eq('id', user.id)
             .select()
             .single();

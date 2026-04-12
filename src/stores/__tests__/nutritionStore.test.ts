@@ -18,6 +18,7 @@ function buildMeal(overrides: Partial<MealEntry> = {}): MealEntry {
 
 describe('nutritionStore operations', () => {
     beforeEach(() => {
+        window.localStorage.clear();
         useNutritionStore.setState({
             profile: null,
             targets: null,
@@ -64,5 +65,33 @@ describe('nutritionStore operations', () => {
         expect(saved.totalProtein).toBe(40);
         expect(saved.totalCarbs).toBe(50);
         expect(saved.totalFats).toBe(15);
+    });
+
+    it('persists only the selected date', () => {
+        const store = useNutritionStore.getState();
+
+        store.setProfile(
+            {
+                weight: 70,
+                height: 170,
+                age: 29,
+                gender: 'female',
+                activityLevel: 'moderate',
+                goal: 'fat_loss',
+                dailyWaterGoal: 2500,
+            } as never,
+            { calories: 2200, protein: 150, carbs: 180, fats: 70 }
+        );
+        store.logMeal(buildMeal());
+
+        const persisted = JSON.parse(window.localStorage.getItem('fitwizard-nutrition-storage') ?? '{"state":{}}');
+
+        expect(persisted.state.selectedDate).toBe('2026-02-19');
+        expect(persisted.state.profile).toBeUndefined();
+        expect(persisted.state.targets).toBeUndefined();
+        expect(persisted.state.history).toBeUndefined();
+        expect(persisted.state.customFoods).toBeUndefined();
+        expect(persisted.state.favorites).toBeUndefined();
+        expect(persisted.state.savedMeals).toBeUndefined();
     });
 });

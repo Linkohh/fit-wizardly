@@ -56,6 +56,12 @@ const handleAsyncOperation = async <T>(
 // ACTIVE WORKOUT STATE
 // ============================================
 
+const sanitizePlanPersistedState = (state: Partial<PlanState> | undefined) => ({
+  currentWeek: typeof state?.currentWeek === 'number' ? state.currentWeek : 1,
+  preferredWeightUnit:
+    state?.preferredWeightUnit === 'kg' ? 'kg' : 'lbs',
+});
+
 // ============================================
 // PLAN STATE INTERFACE
 // ============================================
@@ -501,6 +507,11 @@ export const usePlanStore = create<PlanState>()(
     }),
     {
       name: 'fitwizard-plans',
+      partialize: sanitizePlanPersistedState,
+      merge: (persistedState, currentState) => ({
+        ...currentState,
+        ...sanitizePlanPersistedState(persistedState as Partial<PlanState>),
+      }),
     }
   )
 );

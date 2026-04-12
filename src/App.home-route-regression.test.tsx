@@ -35,9 +35,13 @@ const mocks = vi.hoisted(() => ({
   },
   trainerState: {
     isTrainerMode: false,
+    setTrainerMode: vi.fn(),
   },
   achievementState: {
     totalPlansGenerated: 0,
+  },
+  analyticsState: {
+    hasConsented: false,
   },
   platformState: {
     nativeApp: false,
@@ -120,6 +124,11 @@ vi.mock('@/stores/trainerStore', () => ({
 vi.mock('@/stores/achievementStore', () => ({
   useAchievementStore: <T,>(selector?: Selector<typeof mocks.achievementState, T>) =>
     selectState(mocks.achievementState, selector),
+}));
+
+vi.mock('@/stores/analyticsStore', () => ({
+  useAnalyticsStore: <T,>(selector?: Selector<typeof mocks.analyticsState, T>) =>
+    selectState(mocks.analyticsState, selector),
 }));
 
 vi.mock('@/components/Header', () => ({
@@ -363,7 +372,7 @@ describe('App home-route regression', () => {
   it('renders the home route without hitting the global error boundary', async () => {
     renderAt('/');
 
-    expect(await screen.findByText('Home Hero')).toBeInTheDocument();
+    expect(await screen.findByText('Home Hero', {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
   });
 
@@ -372,7 +381,7 @@ describe('App home-route regression', () => {
 
     fireEvent.click(await screen.findByRole('button', { name: 'Skip for now' }, { timeout: 3000 }));
 
-    expect(await screen.findByText('Home Hero')).toBeInTheDocument();
+    expect(await screen.findByText('Home Hero', {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
   });
 });

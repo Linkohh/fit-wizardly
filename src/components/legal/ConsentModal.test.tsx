@@ -3,6 +3,12 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConsentModal } from './ConsentModal';
 import { useAnalyticsStore } from '@/stores/analyticsStore';
+import {
+  ANALYTICS_CONSENT_STORAGE_KEY,
+  CONSENT_REQUEST_EVENT,
+  CONSENT_STORAGE_KEY,
+  NUTRITION_LOOKUP_CONSENT_STORAGE_KEY,
+} from '@/lib/consent';
 
 vi.mock('@/components/ui/sheet', async () => {
   const React = await import('react');
@@ -107,7 +113,7 @@ describe('ConsentModal', () => {
   });
 
   it('stays hidden when consent was already stored', () => {
-    localStorage.setItem('fitwizard_consent_v1', new Date().toISOString());
+    localStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
 
     renderConsentModal();
 
@@ -127,8 +133,8 @@ describe('ConsentModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
 
-    expect(localStorage.getItem('fitwizard_consent_v1')).toBeTruthy();
-    expect(localStorage.getItem('fitwizard_analytics_consent')).toBe('true');
+    expect(localStorage.getItem(CONSENT_STORAGE_KEY)).toBeTruthy();
+    expect(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY)).toBe('true');
     expect(useAnalyticsStore.getState().hasConsented).toBe(true);
     expect(screen.queryByTestId('consent-tray')).not.toBeInTheDocument();
   });
@@ -143,9 +149,22 @@ describe('ConsentModal', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: /Help improve FitWizard/i }));
     fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
 
-    expect(localStorage.getItem('fitwizard_consent_v1')).toBeTruthy();
-    expect(localStorage.getItem('fitwizard_analytics_consent')).toBeNull();
+    expect(localStorage.getItem(CONSENT_STORAGE_KEY)).toBeTruthy();
+    expect(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY)).toBeNull();
     expect(useAnalyticsStore.getState().hasConsented).toBe(false);
+  });
+
+  it('stores nutrition lookup consent separately when explicitly enabled', () => {
+    renderConsentModal();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /Third-party food search/i }));
+    fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
+
+    expect(localStorage.getItem(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY)).toBe('true');
   });
 
   it('does not close when the sheet requests dismissal', () => {
@@ -156,6 +175,18 @@ describe('ConsentModal', () => {
     });
 
     fireEvent.click(screen.getByTestId('sheet-dismiss'));
+
+    expect(screen.getByTestId('consent-tray')).toBeInTheDocument();
+  });
+
+  it('opens again when the app requests consent explicitly', () => {
+    localStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
+    renderConsentModal();
+
+    act(() => {
+      window.dispatchEvent(new Event(CONSENT_REQUEST_EVENT));
+      vi.advanceTimersByTime(500);
+    });
 
     expect(screen.getByTestId('consent-tray')).toBeInTheDocument();
   });

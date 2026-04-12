@@ -1,5 +1,5 @@
 import { MemoryRouter, Outlet } from 'react-router-dom';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 
@@ -13,7 +13,18 @@ const mocks = vi.hoisted(() => {
   const authState = {
     user: null as { id: string; email?: string } | null,
     session: null as { access_token: string } | null,
-    profile: null,
+    profile: null as {
+      id: string;
+      display_name: string | null;
+      username: string | null;
+      avatar_url: string | null;
+      experience_level: string | null;
+      primary_goal: string | null;
+      timezone: string | null;
+      created_at: string | null;
+      role: string;
+      is_trainer: boolean;
+    } | null,
     isLoading: false,
     isConfigured: true,
     showAuthModal: false,
@@ -44,10 +55,15 @@ const mocks = vi.hoisted(() => {
     getEffectiveTheme: () => themeState.resolvedTheme,
   };
 
+  const analyticsState = {
+    hasConsented: false,
+  };
+
   return {
     authState,
     trainerState,
     themeState,
+    analyticsState,
     mediaQueryListeners: new Map<string, Set<(event: MediaQueryListEvent) => void>>(),
     platformState: {
       nativeApp: false,
@@ -85,6 +101,11 @@ vi.mock('./stores/themeStore', () => ({
 vi.mock('@/stores/trainerStore', () => ({
   useTrainerStore: <T,>(selector?: Selector<typeof mocks.trainerState, T>) =>
     selectState(mocks.trainerState, selector),
+}));
+
+vi.mock('@/stores/analyticsStore', () => ({
+  useAnalyticsStore: <T,>(selector?: Selector<typeof mocks.analyticsState, T>) =>
+    selectState(mocks.analyticsState, selector),
 }));
 
 vi.mock('@/stores/planStore', () => ({
@@ -277,6 +298,7 @@ function resetState() {
   mocks.trainerState.isTrainerMode = false;
   mocks.themeState.mode = 'light';
   mocks.themeState.resolvedTheme = 'light';
+  mocks.analyticsState.hasConsented = false;
   mocks.platformState.nativeApp = false;
   mocks.mediaQueryListeners.clear();
   window.sessionStorage.clear();
@@ -335,6 +357,8 @@ describe('App auth routing', () => {
   });
 
   it('mounts Vercel Analytics once at the app root', async () => {
+    mocks.analyticsState.hasConsented = true;
+
     renderAt('/onboarding');
 
     expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
@@ -695,6 +719,18 @@ describe('App auth routing', () => {
   it('allows authenticated trainer users through trainer routes', async () => {
     mocks.authState.user = { id: 'user-1' };
     mocks.authState.session = { access_token: 'token-1' };
+    mocks.authState.profile = {
+      id: 'user-1',
+      display_name: 'Coach Alex',
+      username: 'coach-alex',
+      avatar_url: null,
+      experience_level: null,
+      primary_goal: null,
+      timezone: 'America/New_York',
+      created_at: null,
+      role: 'trainer',
+      is_trainer: true,
+    };
     mocks.trainerState.isTrainerMode = true;
 
     renderAt('/clients');
@@ -712,9 +748,21 @@ describe('App auth routing', () => {
     expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
   });
 
-  it('shows trainer mode required screen for authenticated users without trainer mode on trainer routes', async () => {
+  it('shows trainer mode required screen for authorized users without trainer mode on trainer routes', async () => {
     mocks.authState.user = { id: 'user-1' };
     mocks.authState.session = { access_token: 'token-1' };
+    mocks.authState.profile = {
+      id: 'user-1',
+      display_name: 'Coach Alex',
+      username: 'coach-alex',
+      avatar_url: null,
+      experience_level: null,
+      primary_goal: null,
+      timezone: 'America/New_York',
+      created_at: null,
+      role: 'trainer',
+      is_trainer: true,
+    };
     mocks.trainerState.isTrainerMode = false;
 
     renderAt('/clients');
@@ -724,34 +772,48 @@ describe('App auth routing', () => {
     expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
   });
 
-  it('shows a temporary trainer access form when trainer passcode env vars are configured', async () => {
-    vi.stubEnv('VITE_TRAINER_ACCESS_USERNAME', 'coach@example.com');
-    vi.stubEnv('VITE_TRAINER_ACCESS_PASSCODE', 'letmein');
+  it('shows trainer access restricted screen for authenticated users without trainer authorization on trainer routes', async () => {
     mocks.authState.user = { id: 'user-1', email: 'coach@example.com' };
     mocks.authState.session = { access_token: 'token-1' };
+    mocks.authState.profile = {
+      id: 'user-1',
+      display_name: 'Coach Alex',
+      username: 'coach-alex',
+      avatar_url: null,
+      experience_level: null,
+      primary_goal: null,
+      timezone: 'America/New_York',
+      created_at: null,
+      role: 'client',
+      is_trainer: false,
+    };
 
     renderAt('/clients');
 
-    expect(await screen.findByText('Trainer Access Verification')).toBeInTheDocument();
-    expect(screen.getByLabelText('Username')).toHaveValue('coach@example.com');
-    expect(screen.getByLabelText('Passcode')).toBeInTheDocument();
+    expect(await screen.findByText('Trainer Access Restricted')).toBeInTheDocument();
+    expect(screen.queryByText('Clients Page')).not.toBeInTheDocument();
+    expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
   });
 
-  it('unlocks trainer pages for the current session after entering the correct temporary credentials', async () => {
-    vi.stubEnv('VITE_TRAINER_ACCESS_USERNAME', 'coach@example.com');
-    vi.stubEnv('VITE_TRAINER_ACCESS_PASSCODE', 'letmein');
-    mocks.authState.user = { id: 'user-1', email: 'coach@example.com' };
-    mocks.authState.session = { access_token: 'token-1' };
+  it('clears stale trainer mode for users without trainer authorization', async () => {
+    mocks.authState.user = { id: 'user-1' };
+    mocks.authState.profile = {
+      id: 'user-1',
+      display_name: 'Member',
+      username: null,
+      avatar_url: null,
+      experience_level: null,
+      primary_goal: null,
+      timezone: 'America/New_York',
+      created_at: null,
+      role: 'client',
+      is_trainer: false,
+    };
+    mocks.trainerState.isTrainerMode = true;
 
-    renderAt('/clients');
+    renderAt('/');
 
-    fireEvent.change(await screen.findByLabelText('Passcode'), {
-      target: { value: 'letmein' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Unlock Trainer Access' }));
-
-    expect(await screen.findByText('Clients Page')).toBeInTheDocument();
-    expect(mocks.trainerState.setTrainerMode).toHaveBeenCalledWith(true);
-    expect(window.sessionStorage.getItem('fitwizard-trainer-access-unlocked')).toBe('true');
+    expect(await screen.findByText('Index Page')).toBeInTheDocument();
+    expect(mocks.trainerState.setTrainerMode).toHaveBeenCalledWith(false);
   });
 });

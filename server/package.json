@@ -1,6 +1,7 @@
 {
     "name": "fitwizard-server",
     "version": "1.0.0",
+    "packageManager": "npm@11.12.1",
     "type": "module",
     "scripts": {
         "dev": "tsx watch src/index.ts",

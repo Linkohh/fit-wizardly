@@ -68,6 +68,17 @@ const initialUserData: OnboardingUserData = {
     interestedGoals: [],
 };
 
+const sanitizeOnboardingPersistedState = (state: Partial<OnboardingState> | undefined) => ({
+    isComplete: Boolean(state?.isComplete),
+    hasStarted: Boolean(state?.hasStarted),
+    currentStep: state?.currentStep ?? 'welcome',
+    userData: {
+        avatarEmoji: state?.userData?.avatarEmoji ?? initialUserData.avatarEmoji,
+        role: state?.userData?.role ?? initialUserData.role,
+        interestedGoals: state?.userData?.interestedGoals ?? initialUserData.interestedGoals,
+    },
+});
+
 export const useOnboardingStore = create<OnboardingState>()(
     persist(
         (set, get) => ({
@@ -167,11 +178,10 @@ export const useOnboardingStore = create<OnboardingState>()(
         }),
         {
             name: 'fitwizard-onboarding',
-            partialize: (state) => ({
-                isComplete: state.isComplete,
-                hasStarted: state.hasStarted,
-                userData: state.userData,
-                // Don't persist currentStep - always restart from welcome if incomplete
+            partialize: sanitizeOnboardingPersistedState,
+            merge: (persistedState, currentState) => ({
+                ...currentState,
+                ...sanitizeOnboardingPersistedState(persistedState as Partial<OnboardingState>),
             }),
         }
     )

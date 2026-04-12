@@ -224,6 +224,19 @@ describe('exercise-library service', () => {
     );
   });
 
+  it('rejects pagination URLs from untrusted origins', async () => {
+    fetchMock.mockImplementationOnce(() =>
+      createJsonResponse({
+        count: 300,
+        next: 'https://evil.example.com/api/v1/exerciseinfo/?page=2',
+        previous: null,
+        results: [buildWgerRecord(1)],
+      })
+    );
+
+    await expect(fetchAllWgerExercises()).rejects.toThrow(/untrusted origin/i);
+  });
+
   it('keeps the current local source when live sync fails validation', async () => {
     await loadExerciseLibrary();
     fetchMock.mockImplementationOnce(() =>

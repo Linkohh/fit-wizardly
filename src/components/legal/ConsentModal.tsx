@@ -13,13 +13,18 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { useAnalyticsStore } from '@/stores/analyticsStore';
-import { CONSENT_RESOLVED_EVENT, CONSENT_STORAGE_KEY } from '@/lib/consent';
-
-const ANALYTICS_CONSENT_STORAGE_KEY = 'fitwizard_analytics_consent';
+import {
+  ANALYTICS_CONSENT_STORAGE_KEY,
+  CONSENT_REQUEST_EVENT,
+  CONSENT_RESOLVED_EVENT,
+  CONSENT_STORAGE_KEY,
+  NUTRITION_LOOKUP_CONSENT_STORAGE_KEY,
+} from '@/lib/consent';
 
 export function ConsentModal() {
   const [open, setOpen] = useState(false);
   const [analyticsOptIn, setAnalyticsOptIn] = useState(true);
+  const [nutritionLookupOptIn, setNutritionLookupOptIn] = useState(false);
   const { setConsent } = useAnalyticsStore();
 
   useEffect(() => {
@@ -33,6 +38,21 @@ export function ConsentModal() {
     return undefined;
   }, []);
 
+  useEffect(() => {
+    const openConsentTray = () => {
+      const hasStoredConsent = localStorage.getItem(CONSENT_STORAGE_KEY);
+      if (hasStoredConsent) {
+        setAnalyticsOptIn(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY) === 'true');
+        setNutritionLookupOptIn(localStorage.getItem(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY) === 'true');
+      }
+
+      setOpen(true);
+    };
+
+    window.addEventListener(CONSENT_REQUEST_EVENT, openConsentTray);
+    return () => window.removeEventListener(CONSENT_REQUEST_EVENT, openConsentTray);
+  }, []);
+
   const handleAgree = () => {
     localStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
     window.dispatchEvent(new Event(CONSENT_RESOLVED_EVENT));
@@ -40,6 +60,14 @@ export function ConsentModal() {
 
     if (analyticsOptIn) {
       localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
+    } else {
+      localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
+    }
+
+    if (nutritionLookupOptIn) {
+      localStorage.setItem(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY, 'true');
+    } else {
+      localStorage.removeItem(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY);
     }
 
     setOpen(false);
@@ -132,6 +160,28 @@ export function ConsentModal() {
                   </Label>
                   <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-[0.82rem]">
                     Share anonymous usage data to help us make the app better. No personal info is collected.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="rounded-[1.45rem] border border-primary/12 bg-white/58 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur dark:border-white/8 dark:bg-white/[0.055] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="nutrition-lookup-consent"
+                  checked={nutritionLookupOptIn}
+                  onCheckedChange={(checked) => setNutritionLookupOptIn(checked === true)}
+                  className="mt-1 h-5 w-5 rounded-md border-primary/50 bg-white/85 dark:bg-black/20"
+                />
+                <div className="min-w-0">
+                  <Label
+                    htmlFor="nutrition-lookup-consent"
+                    className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-foreground"
+                  >
+                    Third-party food search
+                  </Label>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-[0.82rem]">
+                    Allow OpenFoodFacts lookups when you search foods. Your query leaves this device to fetch results.
                   </p>
                 </div>
               </div>

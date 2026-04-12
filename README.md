@@ -63,9 +63,11 @@ The server verifies `Authorization: Bearer <token>` using Supabase and expects:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
+- optional: `VITE_API_URL` (must be the current host, localhost, or a relative same-origin path)
 - optional: `VITE_PLANS_PROVIDER` (`auto|supabase|api`)
 - optional: `VITE_USE_API=true` (only needed if you want the frontend to call the API outside dev)
 - optional: `ALLOWED_ORIGINS` (comma-separated)
+- optional: `TRUST_PROXY` (`false`, `true`, or a non-negative integer)
 
 **Edit a file directly in GitHub**
 

@@ -62,7 +62,8 @@ export function Header() {
   const user = useAuthStore((state) => state.user);
   const profile = useAuthStore((state) => state.profile);
   const onboardingUserData = useOnboardingStore((state) => state.userData);
-  const { isTrainerMode } = useTrainerStore();
+  const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
+  const setTrainerMode = useTrainerStore((state) => state.setTrainerMode);
   const mode = useThemeStore((state) => state.mode);
   const setMode = useThemeStore((state) => state.setMode);
   const getEffectiveTheme = useThemeStore((state) => state.getEffectiveTheme);
@@ -85,22 +86,24 @@ export function Header() {
   const navItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => getEffectiveTheme());
+  const isTrainerAuthorized = profile?.is_trainer === true;
+  const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
 
   const navItems = useMemo(
-    () => buildMobileNavItems({ isTrainerMode, t }),
-    [isTrainerMode, t],
+    () => buildMobileNavItems({ isTrainerMode: isTrainerEnabled, t }),
+    [isTrainerEnabled, t],
   );
 
   const drawerProfile = useMemo(
     () =>
       buildDrawerProfileViewModel({
-        isTrainerMode,
+        isTrainerMode: isTrainerEnabled,
         onboarding: onboardingUserData,
         profile,
         t,
         user,
       }),
-    [isTrainerMode, onboardingUserData, profile, t, user],
+    [isTrainerEnabled, onboardingUserData, profile, t, user],
   );
 
   const activeNavPath = useMemo(
@@ -414,9 +417,10 @@ export function Header() {
                   <div className="flex items-center justify-between px-2 py-2">
                     <span className="text-sm font-medium">{t('header.trainer_mode', 'Trainer Mode')}</span>
                     <Switch
-                      checked={isTrainerMode}
+                      checked={isTrainerEnabled}
                       aria-label={t('header.trainer_mode', 'Trainer Mode')}
-                      onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
+                      disabled={!isTrainerAuthorized}
+                      onCheckedChange={setTrainerMode}
                     />
                   </div>
                   <DropdownMenuItem asChild>
@@ -626,9 +630,10 @@ export function Header() {
                         </Label>
                         <Switch
                           className="aetheric-drawer__trainer-switch"
-                          checked={isTrainerMode}
+                          checked={isTrainerEnabled}
                           aria-label={t('header.mobile_drawer.trainer_toggle_label', 'Coach Mode')}
-                          onCheckedChange={useTrainerStore.getState().toggleTrainerMode}
+                          disabled={!isTrainerAuthorized}
+                          onCheckedChange={setTrainerMode}
                         />
                       </div>
                     </div>

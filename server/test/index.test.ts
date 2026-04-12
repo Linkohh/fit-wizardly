@@ -111,6 +111,20 @@ test('rejects requests without a bearer token', async () => {
   assert.equal(nextCalled, false);
 });
 
+test('rejects non-HTTPS Supabase endpoints outside localhost', () => {
+  assert.throws(
+    () =>
+      createRouteHandlers(
+        {
+          ...appConfig,
+          supabaseUrl: 'http://evil.example.com',
+        },
+        { logger: quietLogger }
+      ),
+    /must use HTTPS outside localhost/i
+  );
+});
+
 test('rejects invalid bearer tokens', async () => {
   const { requireAuth } = createRouteHandlers(appConfig, {
     logger: quietLogger,

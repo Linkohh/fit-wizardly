@@ -41,3 +41,4 @@ stats.html
 # System files
 nul
 .vercel
+.claude/worktrees
