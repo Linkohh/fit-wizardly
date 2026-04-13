@@ -42,3 +42,6 @@ stats.html
 nul
 .vercel
 .claude/worktrees
+
+# Graphify cache
+graphify-out/cache/
