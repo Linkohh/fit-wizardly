@@ -42,3 +42,9 @@ stats.html
 nul
 .vercel
 .claude/worktrees
+
+# Claude Code local machine settings (machine-specific, never commit)
+.claude/settings.local.json
+
+# Local scripts
+install.cmd
