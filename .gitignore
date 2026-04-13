@@ -43,5 +43,6 @@ nul
 .vercel
 .claude/worktrees
 
-# Graphify cache
-graphify-out/cache/
+# Graphify - ignore generated artifacts, keep report
+graphify-out/
+!graphify-out/GRAPH_REPORT.md
