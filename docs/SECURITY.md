@@ -717,12 +717,12 @@ function verifySignature(
 ```bash
 # .env.local (frontend)
 VITE_SUPABASE_URL=https://xxx.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJ...
+VITE_SUPABASE_ANON_KEY=your-publishable-or-legacy-anon-key
 
 # server/.env (backend)
 SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_KEY=eyJ...  # Server-only!
+SUPABASE_ANON_KEY=your-publishable-or-legacy-anon-key
+SUPABASE_SERVICE_KEY=your-server-only-secret-key
 ```
 
 ### Security Rules
