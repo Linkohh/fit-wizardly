@@ -46,3 +46,9 @@ nul
 # Graphify - ignore generated artifacts, keep report
 graphify-out/
 !graphify-out/GRAPH_REPORT.md
+
+# Claude Code local machine settings (machine-specific, never commit)
+.claude/settings.local.json
+
+# Local scripts
+install.cmd
