@@ -7,7 +7,7 @@ Use this runbook for the April 2026 Vercel security incident and future hosted-e
 - Vercel project: `lins-projects-d5791edf/fit-wizardly`
 - Vercel env names present at audit time: `ALLOWED_ORIGINS`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PLANS_PROVIDER`
 - Local `.env` values were moved to ignored `.env.local`; the tracked `.env` file must contain placeholders only.
-- Production, Preview, and Development currently use legacy JWT-format Supabase anon keys. Replace them with a fresh Supabase publishable key before revoking legacy key material.
+- Production, Preview, and Development were verified on 2026-04-27 to use Supabase publishable keys for `VITE_SUPABASE_ANON_KEY`.
 
 ## No-Downtime Rotation Order
 
@@ -22,6 +22,14 @@ Use this runbook for the April 2026 Vercel security incident and future hosted-e
 4. Verify login, Supabase reads/writes, plan sync, and any trainer access flow.
 5. Only after the new deployment is live and verified, revoke/deactivate the old Supabase key material.
 6. Delete local generated bundles that may still contain the old `VITE_SUPABASE_ANON_KEY`, then rebuild or run Capacitor sync from the rotated env.
+
+## Current Runtime Verification
+
+- Vercel Production, Preview, and Development all use `sb_publishable_...` format.
+- Supabase auth health is reachable.
+- Existing `profiles` and `circles` tables are reachable with the publishable key.
+- Anonymous writes to protected `profiles` and `circles` tables are blocked.
+- `public.plans` and `public.exercise_stats` were missing from the live schema cache; apply the corresponding migrations before relying on those features.
 
 ## Vercel CLI Checks
 
