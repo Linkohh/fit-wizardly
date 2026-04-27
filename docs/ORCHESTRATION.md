@@ -56,7 +56,7 @@ cp .env.example .env.local
 ```bash
 # Supabase Configuration
 VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_SUPABASE_ANON_KEY=your-publishable-or-legacy-anon-key
 
 # API Configuration (optional, defaults to /api)
 VITE_API_URL=http://localhost:3001/api

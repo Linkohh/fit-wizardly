@@ -62,12 +62,14 @@ npm run dev
 The server verifies `Authorization: Bearer <token>` using Supabase and expects:
 
 - `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
+- `VITE_SUPABASE_ANON_KEY` (Supabase publishable key preferred; legacy anon key also works)
 - optional: `VITE_API_URL` (must be the current host, localhost, or a relative same-origin path)
 - optional: `VITE_PLANS_PROVIDER` (`auto|supabase|api`)
 - optional: `VITE_USE_API=true` (only needed if you want the frontend to call the API outside dev)
 - optional: `ALLOWED_ORIGINS` (comma-separated)
 - optional: `TRUST_PROXY` (`false`, `true`, or a non-negative integer)
+
+Keep real values in `.env.local` for local development and in Vercel environment variables for deployments. Do not commit populated `.env` files.
 
 **Edit a file directly in GitHub**
 

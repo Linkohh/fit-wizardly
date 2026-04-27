@@ -17,7 +17,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const currentFilePath = fileURLToPath(import.meta.url);
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
-dotenv.config({ path: path.join(__dirname, '../../.env.local') });
+dotenv.config({ path: path.join(__dirname, '../../.env.local'), override: true });
 
 interface AuthRequest extends express.Request {
   user?: {
