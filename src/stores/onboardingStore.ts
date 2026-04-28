@@ -68,16 +68,57 @@ const initialUserData: OnboardingUserData = {
     interestedGoals: [],
 };
 
-const sanitizeOnboardingPersistedState = (state: Partial<OnboardingState> | undefined) => ({
-    isComplete: Boolean(state?.isComplete),
-    hasStarted: Boolean(state?.hasStarted),
-    currentStep: state?.currentStep ?? 'welcome',
-    userData: {
-        avatarEmoji: state?.userData?.avatarEmoji ?? initialUserData.avatarEmoji,
-        role: state?.userData?.role ?? initialUserData.role,
-        interestedGoals: state?.userData?.interestedGoals ?? initialUserData.interestedGoals,
-    },
-});
+const isOnboardingStepForRole = (value: unknown, role: UserRole): value is OnboardingStep =>
+    typeof value === 'string' &&
+    getStepsForRole(role).includes(value as OnboardingStep);
+
+const isAvatarEmoji = (value: unknown): value is AvatarEmoji =>
+    typeof value === 'string' && AVATAR_OPTIONS.includes(value as AvatarEmoji);
+
+const isUserRole = (value: unknown): value is UserRole =>
+    value === 'user' || value === 'coach';
+
+const isInterestGoal = (value: unknown): value is InterestGoal =>
+    value === 'strength' ||
+    value === 'muscle' ||
+    value === 'weight_loss' ||
+    value === 'endurance' ||
+    value === 'flexibility';
+
+const sanitizeOnboardingPersistedState = (state: Partial<OnboardingState> | undefined) => {
+    const role = isUserRole(state?.userData?.role) ? state.userData.role : initialUserData.role;
+
+    return {
+        isComplete: Boolean(state?.isComplete),
+        hasStarted: Boolean(state?.hasStarted),
+        currentStep: isOnboardingStepForRole(state?.currentStep, role)
+            ? state.currentStep
+            : 'welcome',
+        userData: {
+            displayName:
+                typeof state?.userData?.displayName === 'string'
+                    ? state.userData.displayName
+                    : initialUserData.displayName,
+            avatarEmoji: isAvatarEmoji(state?.userData?.avatarEmoji)
+                ? state.userData.avatarEmoji
+                : initialUserData.avatarEmoji,
+            role,
+            interestedGoals: Array.isArray(state?.userData?.interestedGoals)
+                ? state.userData.interestedGoals.filter(isInterestGoal)
+                : initialUserData.interestedGoals,
+        },
+    };
+};
+
+const partializeOnboardingState = (state: OnboardingState) => {
+    const sanitized = sanitizeOnboardingPersistedState(state);
+    const { displayName: _displayName, ...userData } = sanitized.userData;
+
+    return {
+        ...sanitized,
+        userData,
+    };
+};
 
 export const useOnboardingStore = create<OnboardingState>()(
     persist(
@@ -178,7 +219,7 @@ export const useOnboardingStore = create<OnboardingState>()(
         }),
         {
             name: 'fitwizard-onboarding',
-            partialize: sanitizeOnboardingPersistedState,
+            partialize: partializeOnboardingState,
             merge: (persistedState, currentState) => ({
                 ...currentState,
                 ...sanitizeOnboardingPersistedState(persistedState as Partial<OnboardingState>),

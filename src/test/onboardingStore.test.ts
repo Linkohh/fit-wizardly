@@ -142,5 +142,57 @@ describe('onboardingStore', () => {
             expect(persisted.state.userData.displayName).toBeUndefined();
             expect(persisted.state.userData.role).toBe('coach');
         });
+
+        it('hydrates legacy onboarding data with a safe display name fallback', async () => {
+            window.localStorage.setItem(
+                'fitwizard-onboarding',
+                JSON.stringify({
+                    state: {
+                        isComplete: false,
+                        hasStarted: true,
+                        currentStep: 'welcome',
+                        userData: {
+                            avatarEmoji: '💪',
+                            role: 'user',
+                            interestedGoals: [],
+                        },
+                    },
+                    version: 0,
+                }),
+            );
+
+            await useOnboardingStore.persist.rehydrate();
+
+            const state = useOnboardingStore.getState();
+            expect(state.userData.displayName).toBe('');
+            expect(state.canProceed()).toBe(false);
+        });
+
+        it('clamps a hydrated coach-only step when the persisted role is user', async () => {
+            window.localStorage.setItem(
+                'fitwizard-onboarding',
+                JSON.stringify({
+                    state: {
+                        isComplete: false,
+                        hasStarted: true,
+                        currentStep: 'import',
+                        userData: {
+                            displayName: '',
+                            avatarEmoji: '💪',
+                            role: 'user',
+                            interestedGoals: [],
+                        },
+                    },
+                    version: 0,
+                }),
+            );
+
+            await useOnboardingStore.persist.rehydrate();
+
+            const state = useOnboardingStore.getState();
+            expect(state.currentStep).toBe('welcome');
+            expect(state.userData.role).toBe('user');
+            expect(state.canProceed()).toBe(false);
+        });
     });
 });

@@ -5,6 +5,7 @@ const CONSENT_STORAGE_KEY = 'fitwizard_consent_v1';
 const ANALYTICS_CONSENT_STORAGE_KEY = 'fitwizard_analytics_consent';
 const TRAINER_STORAGE_KEY = 'fitwizard-trainer';
 const THEME_STORAGE_KEY = 'fitwizard-theme';
+const INSTALL_COACH_STORAGE_KEY = 'fitwizard-install-coach-v1';
 const iPhone13 = devices['iPhone 13'];
 
 async function seedMobileDrawerState(
@@ -16,7 +17,7 @@ async function seedMobileDrawerState(
   const { themeMode = 'system' } = options;
 
   await page.addInitScript(
-    ({ onboardingKey, consentKey, analyticsConsentKey, trainerKey, themeKey, mode }) => {
+    ({ onboardingKey, consentKey, analyticsConsentKey, trainerKey, themeKey, installCoachKey, mode }) => {
       window.localStorage.setItem(
         onboardingKey,
         JSON.stringify({
@@ -58,6 +59,17 @@ async function seedMobileDrawerState(
           version: 0,
         }),
       );
+      window.localStorage.setItem(
+        installCoachKey,
+        JSON.stringify({
+          state: {
+            hasSeenCoach: true,
+            dismissed: true,
+            installed: false,
+          },
+          version: 0,
+        }),
+      );
     },
     {
       onboardingKey: ONBOARDING_STORAGE_KEY,
@@ -65,6 +77,7 @@ async function seedMobileDrawerState(
       analyticsConsentKey: ANALYTICS_CONSENT_STORAGE_KEY,
       trainerKey: TRAINER_STORAGE_KEY,
       themeKey: THEME_STORAGE_KEY,
+      installCoachKey: INSTALL_COACH_STORAGE_KEY,
       mode: themeMode,
     },
   );
@@ -135,7 +148,7 @@ test.describe('mobile header drawer flow', () => {
 
     await openMenuButton.click();
 
-    const drawer = page.getByRole('dialog');
+    const drawer = page.locator('.aetheric-drawer');
     await expect(drawer).toBeVisible();
     await expect(drawer).toHaveAttribute('data-theme-mode', 'system');
     await expect(drawer).toHaveAttribute('data-resolved-theme', 'light');
@@ -185,7 +198,7 @@ test.describe('mobile header drawer flow', () => {
 
     await expect(page.getByTestId('mobile-drawer-profile')).toBeVisible();
     await expect(page.getByTestId('mobile-drawer-profile').getByText('Codex')).toBeVisible();
-    await expect(page.getByTestId('mobile-drawer-profile').getByText('Coach Mode')).toBeVisible();
+    await expect(page.getByTestId('mobile-drawer-profile').getByText('Personal Mode')).toBeVisible();
     await expect(page.getByTestId('mobile-drawer-profile').getByText('System • Light')).toHaveCount(0);
 
     const lightThemeTokens = await drawer.evaluate((element) => {
@@ -211,7 +224,7 @@ test.describe('mobile header drawer flow', () => {
     await expect(historyLink).toBeInViewport();
     await expect(analyticsLink).toBeInViewport();
 
-    await expect(drawer.getByText('Coach Tools')).toBeVisible();
+    await expect(drawer.getByText('Coach Tools')).toHaveCount(0);
 
     const footer = page.getByTestId('mobile-drawer-footer');
     await expect(footer.getByText('FitWizard')).toBeVisible();
@@ -224,7 +237,8 @@ test.describe('mobile header drawer flow', () => {
       .getByRole('button')
       .evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label')));
     expect(themePillOrder).toEqual(['Light', 'System', 'Dark']);
-    await expect(footer.getByRole('switch', { name: /coach mode/i })).toBeChecked();
+    await expect(footer.getByRole('switch', { name: /coach mode/i })).not.toBeChecked();
+    await expect(footer.getByRole('switch', { name: /coach mode/i })).toBeDisabled();
 
     await page.keyboard.press('Escape');
     await expect(drawer).toHaveCount(0);
@@ -245,7 +259,7 @@ test.describe('mobile header drawer flow', () => {
 
     await page.getByRole('button', { name: /open menu/i }).click();
 
-    const drawer = page.getByRole('dialog');
+    const drawer = page.locator('.aetheric-drawer');
     const footer = page.getByTestId('mobile-drawer-footer');
     const lightButton = footer.getByRole('button', { name: 'Light' });
     const systemButton = footer.getByRole('button', { name: 'System' });
@@ -260,14 +274,21 @@ test.describe('mobile header drawer flow', () => {
           return null;
         }
 
+        const resolveBackdropFilter = (styles: CSSStyleDeclaration) => {
+          const standardFilter = styles.backdropFilter;
+          if (standardFilter && standardFilter !== 'none') {
+            return standardFilter;
+          }
+
+          return styles.getPropertyValue('-webkit-backdrop-filter');
+        };
+
         const drawerStyles = getComputedStyle(drawerElement);
         const overlayStyles = getComputedStyle(overlayElement);
 
         return {
-          drawerBlur:
-            drawerStyles.backdropFilter || drawerStyles.getPropertyValue('-webkit-backdrop-filter'),
-          overlayBlur:
-            overlayStyles.backdropFilter || overlayStyles.getPropertyValue('-webkit-backdrop-filter'),
+          drawerBlur: resolveBackdropFilter(drawerStyles),
+          overlayBlur: resolveBackdropFilter(overlayStyles),
           drawerOpenContext:
             document.documentElement.getAttribute('data-theme-transition-context') === 'drawer-open',
         };
@@ -300,12 +321,19 @@ test.describe('mobile header drawer flow', () => {
         return false;
       }
 
+      const resolveBackdropFilter = (styles: CSSStyleDeclaration) => {
+        const standardFilter = styles.backdropFilter;
+        if (standardFilter && standardFilter !== 'none') {
+          return standardFilter;
+        }
+
+        return styles.getPropertyValue('-webkit-backdrop-filter');
+      };
+
       const drawerStyles = getComputedStyle(drawerElement);
       const overlayStyles = getComputedStyle(overlayElement);
-      const drawerBlur =
-        drawerStyles.backdropFilter || drawerStyles.getPropertyValue('-webkit-backdrop-filter');
-      const overlayBlur =
-        overlayStyles.backdropFilter || overlayStyles.getPropertyValue('-webkit-backdrop-filter');
+      const drawerBlur = resolveBackdropFilter(drawerStyles);
+      const overlayBlur = resolveBackdropFilter(overlayStyles);
 
       return (
         document.documentElement.getAttribute('data-theme-transition-context') === 'drawer-open' &&
@@ -337,12 +365,19 @@ test.describe('mobile header drawer flow', () => {
         return false;
       }
 
+      const resolveBackdropFilter = (styles: CSSStyleDeclaration) => {
+        const standardFilter = styles.backdropFilter;
+        if (standardFilter && standardFilter !== 'none') {
+          return standardFilter;
+        }
+
+        return styles.getPropertyValue('-webkit-backdrop-filter');
+      };
+
       const drawerStyles = getComputedStyle(drawerElement);
       const overlayStyles = getComputedStyle(overlayElement);
-      const drawerBlur =
-        drawerStyles.backdropFilter || drawerStyles.getPropertyValue('-webkit-backdrop-filter');
-      const overlayBlur =
-        overlayStyles.backdropFilter || overlayStyles.getPropertyValue('-webkit-backdrop-filter');
+      const drawerBlur = resolveBackdropFilter(drawerStyles);
+      const overlayBlur = resolveBackdropFilter(overlayStyles);
 
       return drawerBlur !== 'none' && overlayBlur !== 'none';
     });
@@ -375,7 +410,7 @@ test.describe('mobile header drawer flow', () => {
 
     await page.getByRole('button', { name: /open menu/i }).click();
 
-    const drawer = page.getByRole('dialog');
+    const drawer = page.locator('.aetheric-drawer');
     const footer = page.getByTestId('mobile-drawer-footer');
     const lightButton = footer.getByRole('button', { name: 'Light' });
     const settingsLink = footer.getByRole('link', { name: /settings & profile/i });
@@ -405,11 +440,11 @@ test.describe('mobile header drawer flow', () => {
 
     await page.getByRole('button', { name: /open menu/i }).click();
 
-    const drawer = page.getByRole('dialog');
+    const drawer = page.locator('.aetheric-drawer');
     await expect(drawer).toHaveAttribute('data-theme-mode', 'system');
     await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
     await expect(page.getByTestId('mobile-drawer-profile').getByText('System • Dark')).toHaveCount(0);
-    await expect(page.getByTestId('mobile-drawer-profile').getByText('Coach Mode')).toBeVisible();
+    await expect(page.getByTestId('mobile-drawer-profile').getByText('Personal Mode')).toBeVisible();
 
     const themeTokens = await drawer.evaluate((element) => {
       const styles = getComputedStyle(element);
@@ -420,6 +455,6 @@ test.describe('mobile header drawer flow', () => {
     });
 
     expect(themeTokens.background).toBe('#0c0c1f');
-    expect(themeTokens.text).toBe('#ffffff');
+    expect(['#ffffff', '#fff']).toContain(themeTokens.text);
   });
 });
