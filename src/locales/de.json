@@ -110,7 +110,7 @@
             }
         },
         "trainer_mode": {
-            "title": "Trainer-Modus",
+            "title": "Coach-Modus",
             "description": "Verwalte Kunden und weise individuelle Pläne zu",
             "detail": {
                 "benefits": [
@@ -118,7 +118,7 @@
                     "Erstelle und weise individuelle Pläne in Minuten zu",
                     "Verfolge den Kundenfortschritt und die Trainingseinhaltung"
                 ],
-                "how_it_works": "Wechsle in den Trainer-Modus, um das Coach-Dashboard freizuschalten. Füge Kunden hinzu, erstelle personalisierte Pläne basierend auf ihren individuellen Zielen und Ausrüstung, und überwache ihre Trainingsabschlüsse. Füge private Notizen hinzu, die nur du sehen kannst.",
+                "how_it_works": "Wechsle in den Coach-Modus, um das Coach-Dashboard freizuschalten. Füge Kunden hinzu, erstelle personalisierte Pläne basierend auf ihren individuellen Zielen und Ausrüstung, und überwache ihre Trainingsabschlüsse. Füge private Notizen hinzu, die nur du sehen kannst.",
                 "example": "10 Kunden verwalten? Erstelle einzigartige Programme für jeden basierend auf ihren Zielen — Kraft für Alex, Muskelaufbau für Sam, allgemeine Fitness für Jordan — alles von einer intuitiven Oberfläche."
             }
         },
@@ -265,5 +265,23 @@
         "save": "Speichern",
         "cancel": "Abbrechen",
         "confirm": "Bestätigen"
+    },
+    "recovery": {
+        "title": "Heutige Bereitschaft",
+        "check_in": "Einchecken",
+        "how_feeling": "Wie fühlst du dich?",
+        "log_readiness": "Bereitschaft speichern",
+        "sleep_quality": "Schlafqualität",
+        "muscle_soreness": "Muskelkater",
+        "energy_level": "Energieniveau",
+        "stress_level": "Stressniveau",
+        "band_ready": "Bereit",
+        "band_moderate": "Leichtes Training",
+        "band_rest": "Ruhetag",
+        "trend_title": "Bereitschaftstrend",
+        "days_7": "7T",
+        "days_14": "14T",
+        "days_30": "30T",
+        "no_data": "Noch keine Einträge. Checke täglich ein, um deinen Trend zu sehen."
     }
 }

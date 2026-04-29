@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "fit-wizardly-dev",
-      "runtimeExecutable": "/usr/local/bin/node",
-      "runtimeArgs": ["node_modules/.bin/vite"],
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
       "port": 8080
     }
   ]

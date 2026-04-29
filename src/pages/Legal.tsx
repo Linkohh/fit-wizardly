@@ -94,6 +94,19 @@ export default function LegalPage() {
                                     <p>
                                         {t('legal.privacy.analytics_text')}
                                     </p>
+
+                                    <h3>Third-Party Food Search</h3>
+                                    <p>
+                                        If you enable the optional food search feature, your search queries and IP address are sent to{' '}
+                                        <a href="https://world.openfoodfacts.org" target="_blank" rel="noopener noreferrer" className="underline text-primary">
+                                            OpenFoodFacts
+                                        </a>{' '}
+                                        — an open, non-profit food product database — to retrieve nutritional data. No account, identifier, or personal information beyond your IP address is transmitted. You can enable or disable this at any time via Privacy Settings in your profile. OpenFoodFacts'{' '}
+                                        <a href="https://world.openfoodfacts.org/privacy" target="_blank" rel="noopener noreferrer" className="underline text-primary">
+                                            privacy policy
+                                        </a>{' '}
+                                        governs their data practices.
+                                    </p>
                                 </div>
                             </CardContent>
                         </Card>

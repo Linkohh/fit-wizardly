@@ -31,7 +31,7 @@ export function GoalStep() {
     setPersonalGoalNote,
   } = useWizardStore();
   const { isTrainerMode, setTrainerMode } = useTrainerStore();
-  const isTrainerAuthorized = useAuthStore((state) => state.profile?.is_trainer === true);
+  const isTrainerAuthorized = useAuthStore((state) => !state.user || state.profile?.is_trainer === true);
   const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
   const goals = getGoals(t);
   const experienceLevels = getExperienceLevels(t);

@@ -127,7 +127,7 @@
             }
         },
         "trainer_mode": {
-            "title": "Modo Treinador",
+            "title": "Modo Coach",
             "description": "Gerencie clientes e atribua planos personalizados",
             "detail": {
                 "benefits": [
@@ -135,7 +135,7 @@
                     "Crie e atribua planos personalizados em minutos",
                     "Acompanhe o progresso do cliente e a aderência ao treino"
                 ],
-                "how_it_works": "Mude para o Modo Treinador para desbloquear o painel do coach. Adicione clientes, gere planos personalizados baseados em seus objetivos individuais e equipamentos, e monitore a conclusão de seus treinos. Adicione notas privadas que só você pode ver.",
+                "how_it_works": "Mude para o Modo Coach para desbloquear o painel do coach. Adicione clientes, gere planos personalizados baseados em seus objetivos individuais e equipamentos, e monitore a conclusão de seus treinos. Adicione notas privadas que só você pode ver.",
                 "example": "Gerenciando 10 clientes? Crie programas únicos para cada um baseados em seus objetivos — força para Alex, hipertrofia para Sam, condicionamento geral para Jordan — tudo de uma interface intuitiva."
             }
         },
@@ -267,5 +267,23 @@
         "save": "Salvar",
         "cancel": "Cancelar",
         "confirm": "Confirmar"
+    },
+    "recovery": {
+        "title": "Prontidão de Hoje",
+        "check_in": "Registrar",
+        "how_feeling": "Como você está se sentindo?",
+        "log_readiness": "Salvar Prontidão",
+        "sleep_quality": "Qualidade do Sono",
+        "muscle_soreness": "Dor Muscular",
+        "energy_level": "Nível de Energia",
+        "stress_level": "Nível de Estresse",
+        "band_ready": "Pronto",
+        "band_moderate": "Treino Leve",
+        "band_rest": "Dia de Descanso",
+        "trend_title": "Tendência de Prontidão",
+        "days_7": "7d",
+        "days_14": "14d",
+        "days_30": "30d",
+        "no_data": "Nenhum registro ainda. Faça o check-in diário para ver sua tendência."
     }
 }

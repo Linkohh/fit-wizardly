@@ -74,7 +74,7 @@
             }
         },
         "trainer_mode": {
-            "title": "Modo Entrenador",
+            "title": "Modo Coach",
             "description": "Gestiona clientes y asigna planes personalizados",
             "detail": {
                 "benefits": [
@@ -82,7 +82,7 @@
                     "Crea y asigna planes personalizados en minutos",
                     "Rastrea el progreso del cliente y la adherencia al entrenamiento"
                 ],
-                "how_it_works": "Cambia al Modo Entrenador para desbloquear el panel de control del coach. Agrega clientes, genera planes personalizados basados en sus objetivos individuales y equipamiento, y monitorea la finalización de sus entrenamientos. Agrega notas privadas que solo tú puedes ver.",
+                "how_it_works": "Cambia al Modo Coach para desbloquear el panel de control del coach. Agrega clientes, genera planes personalizados basados en sus objetivos individuales y equipamiento, y monitorea la finalización de sus entrenamientos. Agrega notas privadas que solo tú puedes ver.",
                 "example": "¿Gestionando 10 clientes? Crea programas únicos para cada uno basados en sus objetivos — fuerza para Alex, hipertrofia para Sam, fitness general para Jordan — todo desde una interfaz intuitiva."
             }
         },
@@ -360,7 +360,7 @@
             "system": "Sistema",
             "label": "Tema"
         },
-        "trainer_mode": "Modo Entrenador"
+        "trainer_mode": "Modo Coach"
     },
     "footer": {
         "copyright": "© {{year}} FitWizard. Hecho con",
@@ -581,5 +581,23 @@
             "copyright": "FitWizard. Todos los derechos reservados.",
             "educational": "Los planes generados son solo para fines educativos."
         }
+    },
+    "recovery": {
+        "title": "Preparación de Hoy",
+        "check_in": "Registrar",
+        "how_feeling": "¿Cómo te sientes?",
+        "log_readiness": "Guardar Preparación",
+        "sleep_quality": "Calidad del Sueño",
+        "muscle_soreness": "Dolor Muscular",
+        "energy_level": "Nivel de Energía",
+        "stress_level": "Nivel de Estrés",
+        "band_ready": "Listo",
+        "band_moderate": "Entrenamiento Ligero",
+        "band_rest": "Día de Descanso",
+        "trend_title": "Tendencia de Preparación",
+        "days_7": "7d",
+        "days_14": "14d",
+        "days_30": "30d",
+        "no_data": "Aún no hay registros. Haz el check-in diario para ver tu tendencia."
     }
 }

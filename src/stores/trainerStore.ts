@@ -44,7 +44,11 @@ const sanitizeTrainerPersistedState = (state: Partial<TrainerState> | undefined)
   isTrainerMode: Boolean(state?.isTrainerMode),
 });
 
-const isTrainerAuthorized = () => useAuthStore.getState().profile?.is_trainer === true;
+const isTrainerAuthorized = () => {
+  const { user, profile } = useAuthStore.getState();
+  if (!user) return true;
+  return profile?.is_trainer === true;
+};
 
 export const useTrainerStore = create<TrainerState>()(
   persist(

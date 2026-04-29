@@ -86,7 +86,7 @@ export function Header() {
   const navItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => getEffectiveTheme());
-  const isTrainerAuthorized = profile?.is_trainer === true;
+  const isTrainerAuthorized = !user || profile?.is_trainer === true;
   const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
 
   const navItems = useMemo(
@@ -415,10 +415,10 @@ export function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="flex items-center justify-between px-2 py-2">
-                    <span className="text-sm font-medium">{t('header.trainer_mode', 'Trainer Mode')}</span>
+                    <span className="text-sm font-medium">{t('header.trainer_mode', 'Coach Mode')}</span>
                     <Switch
                       checked={isTrainerEnabled}
-                      aria-label={t('header.trainer_mode', 'Trainer Mode')}
+                      aria-label={t('header.trainer_mode', 'Coach Mode')}
                       disabled={!isTrainerAuthorized}
                       onCheckedChange={setTrainerMode}
                     />

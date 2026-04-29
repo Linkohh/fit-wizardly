@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StrengthCurve } from '@/components/analytics/StrengthCurve';
 import { VolumeHealth } from '@/components/analytics/VolumeHealth';
+import { ReadinessTrend } from '@/components/recovery/ReadinessTrend';
 import { TrendingUp, Activity, BarChart2 } from 'lucide-react';
 
 export default function Analytics() {
@@ -45,13 +46,7 @@ export default function Analytics() {
                 <TabsContent value="volume" className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                         <VolumeHealth />
-                        {/* Placeholder for future analytics */}
-                        <Card variant="glass" className="flex items-center justify-center p-6 text-muted-foreground border-dashed">
-                            <div className="text-center">
-                                <Activity className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                                <p>Recovery insights coming soon...</p>
-                            </div>
-                        </Card>
+                        <ReadinessTrend />
                     </div>
                 </TabsContent>
             </Tabs>

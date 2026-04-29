@@ -59,8 +59,16 @@ describe('trainerStore persistence', () => {
     expect(persisted.state.messages).toBeUndefined();
   });
 
-  it('refuses to enable trainer mode for profiles without trainer authorization', () => {
+  it('allows local accounts to enable trainer mode without authorization', () => {
+    useTrainerStore.getState().setTrainerMode(true);
+
+    expect(useTrainerStore.getState().isTrainerMode).toBe(true);
+  });
+
+  it('refuses to enable trainer mode for authenticated profiles without trainer authorization', () => {
     useAuthStore.setState({
+      user: { id: 'user-1' } as import('@supabase/supabase-js').User,
+      session: {} as import('@supabase/supabase-js').Session,
       profile: {
         id: 'user-1',
         display_name: 'Member',
@@ -82,6 +90,8 @@ describe('trainerStore persistence', () => {
 
   it('allows verified trainer profiles to enable trainer mode', () => {
     useAuthStore.setState({
+      user: { id: 'user-1' } as import('@supabase/supabase-js').User,
+      session: {} as import('@supabase/supabase-js').Session,
       profile: {
         id: 'user-1',
         display_name: 'Coach Nova',

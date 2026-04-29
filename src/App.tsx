@@ -287,7 +287,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (!user || profile?.is_trainer !== true) {
+    if (user && profile?.is_trainer !== true) {
       setTrainerMode(false);
     }
   }, [isTrainerMode, profile?.is_trainer, setTrainerMode, user]);

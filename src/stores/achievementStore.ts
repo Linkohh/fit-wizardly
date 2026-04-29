@@ -35,7 +35,10 @@ export type BadgeId =
   | 'circle_founder'
   | 'team_player'
   | 'circle_champion'
-  | 'social_butterfly';
+  | 'social_butterfly'
+  // Recovery badges
+  | 'recovery_streak_3'
+  | 'recovery_streak_7';
 
 export interface Badge {
   id: BadgeId;
@@ -84,8 +87,8 @@ export const BADGES: Record<BadgeId, Omit<Badge, 'unlockedAt'>> = {
   },
   trainer_activated: {
     id: 'trainer_activated',
-    name: 'Trainer Mode',
-    description: 'Activated trainer mode',
+    name: 'Coach Mode',
+    description: 'Activated coach mode',
     icon: '🎓',
     tier: 'bronze',
   },
@@ -265,6 +268,21 @@ export const BADGES: Record<BadgeId, Omit<Badge, 'unlockedAt'>> = {
     name: 'Social Butterfly',
     description: 'Member of 3 or more circles',
     icon: '🦋',
+    tier: 'silver',
+  },
+  // Recovery badges
+  recovery_streak_3: {
+    id: 'recovery_streak_3',
+    name: 'Body Aware',
+    description: 'Logged readiness 3 days in a row',
+    icon: '🌡️',
+    tier: 'bronze',
+  },
+  recovery_streak_7: {
+    id: 'recovery_streak_7',
+    name: 'In Tune',
+    description: 'Logged readiness 7 days in a row',
+    icon: '🧘',
     tier: 'silver',
   },
 };

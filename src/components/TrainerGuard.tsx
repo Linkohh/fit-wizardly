@@ -6,8 +6,8 @@ import { useAuthStore } from "@/stores/authStore";
 
 export function TrainerGuard({ children }: { children: React.ReactNode }) {
   const { isTrainerMode, toggleTrainerMode } = useTrainerStore();
-  const { profile } = useAuthStore();
-  const isTrainerAuthorized = profile?.is_trainer === true;
+  const { user, profile } = useAuthStore();
+  const isTrainerAuthorized = !user || profile?.is_trainer === true;
 
   if (!isTrainerAuthorized) {
     return (
@@ -17,11 +17,11 @@ export function TrainerGuard({ children }: { children: React.ReactNode }) {
             <div className="mx-auto p-4 rounded-full bg-destructive/10 w-fit mb-4">
               <ShieldAlert className="w-8 h-8 text-destructive" />
             </div>
-            <CardTitle className="text-2xl">Trainer Access Restricted</CardTitle>
+            <CardTitle className="text-2xl">Coach Access Restricted</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              Only verified trainer accounts can access this page.
+              Only verified coach accounts can access this page.
             </p>
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
@@ -45,16 +45,16 @@ export function TrainerGuard({ children }: { children: React.ReactNode }) {
             <div className="mx-auto p-4 rounded-full bg-destructive/10 w-fit mb-4">
               <ShieldAlert className="w-8 h-8 text-destructive" />
             </div>
-            <CardTitle className="text-2xl">Trainer Mode Required</CardTitle>
+            <CardTitle className="text-2xl">Coach Mode Required</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              This page is restricted to trainers. Enable Trainer Mode to continue.
+              This page requires Coach Mode. Enable it to continue.
             </p>
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
             <Button className="w-full" onClick={toggleTrainerMode}>
-              Enable Trainer Mode
+              Enable Coach Mode
             </Button>
             <Button variant="ghost" className="w-full" onClick={() => window.history.back()}>
               Go Back

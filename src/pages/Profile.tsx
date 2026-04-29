@@ -32,6 +32,7 @@ import { usePlanStore } from '@/stores/planStore';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 import { BodyTracker } from '@/components/measurements/BodyTracker';
+import { requestConsentModal } from '@/lib/consent';
 
 export function Profile() {
     const { t, i18n } = useTranslation();
@@ -63,7 +64,7 @@ export function Profile() {
     const user = useAuthStore((state) => state.user);
     const profile = useAuthStore((state) => state.profile);
     const signOut = useAuthStore((state) => state.signOut);
-    const isTrainerAuthorized = profile?.is_trainer === true;
+    const isTrainerAuthorized = !user || profile?.is_trainer === true;
     const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
 
     const handleExportData = () => {
@@ -324,12 +325,12 @@ export function Profile() {
 
                                 <Separator />
 
-                                {/* Trainer Mode */}
+                                {/* Coach Mode */}
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-0.5">
-                                        <Label className="text-base">{t('header.trainer_mode', 'Trainer Mode')}</Label>
+                                        <Label className="text-base">{t('header.trainer_mode', 'Coach Mode')}</Label>
                                         <p className="text-sm text-muted-foreground">
-                                            {isTrainerAuthorized ? 'Manage clients and plans' : 'Verified trainer accounts only'}
+                                            {isTrainerAuthorized ? t('header.mobile_drawer.trainer_hint', 'Manage clients and plans') : t('profile.coach_mode_locked', 'Verified coach accounts only')}
                                         </p>
                                     </div>
                                     <Switch
@@ -363,6 +364,18 @@ export function Profile() {
                                     <span className="flex items-center gap-2">
                                         <Download className="h-4 w-4" />
                                         Export Data (JSON)
+                                    </span>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </Button>
+
+                                <Button
+                                    variant="outline"
+                                    className="w-full justify-between"
+                                    onClick={requestConsentModal}
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <Shield className="h-4 w-4" />
+                                        Privacy Settings
                                     </span>
                                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                                 </Button>

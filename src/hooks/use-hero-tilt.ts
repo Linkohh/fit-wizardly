@@ -508,9 +508,10 @@ export function useHeroTilt({
             if (!userInitiated && hasExplicitPermissionApi) {
               setSensorStatus('idle');
               setIsTouchFallbackActive(true);
+              const alreadyGranted = wasMotionPermissionGranted();
               publishMotionTiltStatus({
                 available: true,
-                permission: 'prompt',
+                permission: alreadyGranted ? 'granted' : 'prompt',
                 source: 'web',
               });
               return;

@@ -130,7 +130,7 @@
             }
         },
         "trainer_mode": {
-            "title": "Trainer Mode",
+            "title": "Coach Mode",
             "description": "Manage clients and assign customized plans",
             "detail": {
                 "benefits": [
@@ -138,7 +138,7 @@
                     "Create and assign customized plans in minutes",
                     "Track client progress and workout adherence over time"
                 ],
-                "how_it_works": "Switch to Trainer Mode to unlock the coach dashboard. Add clients, generate personalized plans based on their individual goals and equipment, and monitor their workout completion. Add private notes only you can see.",
+                "how_it_works": "Switch to Coach Mode to unlock the coach dashboard. Add clients, generate personalized plans based on their individual goals and equipment, and monitor their workout completion. Add private notes only you can see.",
                 "example": "Managing 10 clients? Create unique programs for each based on their goals — strength for Alex, hypertrophy for Sam, general fitness for Jordan — all from one intuitive interface."
             }
         },
@@ -524,7 +524,7 @@
             "system": "System",
             "label": "Theme"
         },
-        "trainer_mode": "Trainer Mode",
+        "trainer_mode": "Coach Mode",
         "mobile_drawer": {
             "guest_name": "Guest User",
             "guest_subtitle": "Local Account",
@@ -649,5 +649,23 @@
             "copyright": "FitWizard. All rights reserved.",
             "educational": "Generated plans are for educational purposes only."
         }
+    },
+    "recovery": {
+        "title": "Today's Readiness",
+        "check_in": "Check In",
+        "how_feeling": "How are you feeling?",
+        "log_readiness": "Log Readiness",
+        "sleep_quality": "Sleep Quality",
+        "muscle_soreness": "Muscle Soreness",
+        "energy_level": "Energy Level",
+        "stress_level": "Stress Level",
+        "band_ready": "Ready",
+        "band_moderate": "Train Light",
+        "band_rest": "Rest Day",
+        "trend_title": "Readiness Trend",
+        "days_7": "7d",
+        "days_14": "14d",
+        "days_30": "30d",
+        "no_data": "No readiness logs yet. Check in daily to see your trend."
     }
 }

@@ -124,7 +124,7 @@ describe('ConsentModal', () => {
     expect(screen.queryByTestId('consent-tray')).not.toBeInTheDocument();
   });
 
-  it('stores consent, keeps analytics opt-in by default, and closes the tray', () => {
+  it('stores consent, opts out of analytics by default, and closes the tray', () => {
     renderConsentModal();
 
     act(() => {
@@ -134,12 +134,12 @@ describe('ConsentModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
 
     expect(localStorage.getItem(CONSENT_STORAGE_KEY)).toBeTruthy();
-    expect(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY)).toBe('true');
-    expect(useAnalyticsStore.getState().hasConsented).toBe(true);
+    expect(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY)).toBeNull();
+    expect(useAnalyticsStore.getState().hasConsented).toBe(false);
     expect(screen.queryByTestId('consent-tray')).not.toBeInTheDocument();
   });
 
-  it('respects analytics opt-out without writing analytics consent storage', () => {
+  it('respects analytics opt-in when explicitly enabled', () => {
     renderConsentModal();
 
     act(() => {
@@ -150,8 +150,8 @@ describe('ConsentModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
 
     expect(localStorage.getItem(CONSENT_STORAGE_KEY)).toBeTruthy();
-    expect(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY)).toBeNull();
-    expect(useAnalyticsStore.getState().hasConsented).toBe(false);
+    expect(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY)).toBe('true');
+    expect(useAnalyticsStore.getState().hasConsented).toBe(true);
   });
 
   it('stores nutrition lookup consent separately when explicitly enabled', () => {
@@ -167,7 +167,7 @@ describe('ConsentModal', () => {
     expect(localStorage.getItem(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY)).toBe('true');
   });
 
-  it('does not close when the sheet requests dismissal', () => {
+  it('closes when the sheet requests dismissal', () => {
     renderConsentModal();
 
     act(() => {
@@ -176,7 +176,7 @@ describe('ConsentModal', () => {
 
     fireEvent.click(screen.getByTestId('sheet-dismiss'));
 
-    expect(screen.getByTestId('consent-tray')).toBeInTheDocument();
+    expect(screen.queryByTestId('consent-tray')).not.toBeInTheDocument();
   });
 
   it('opens again when the app requests consent explicitly', () => {

@@ -64,6 +64,12 @@ const GoalVisualization = lazy(() =>
   }))
 );
 
+const ReadinessCard = lazy(() =>
+  import('@/components/recovery/ReadinessCard').then((module) => ({
+    default: module.ReadinessCard,
+  }))
+);
+
 const FeatureDetailModal = lazy(() =>
   import('@/components/landing/FeatureDetailModal').then((module) => ({
     default: module.FeatureDetailModal,
@@ -75,7 +81,7 @@ export default function Index() {
   const { t } = useTranslation();
   const { totalPlansGenerated } = useAchievementStore();
   const { isTrainerMode } = useTrainerStore();
-  const isTrainerAuthorized = useAuthStore((state) => state.profile?.is_trainer === true);
+  const isTrainerAuthorized = useAuthStore((state) => !state.user || state.profile?.is_trainer === true);
   const nativeApp = isNativeApp();
   const hasActivity = totalPlansGenerated > 0;
   const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
@@ -97,11 +103,13 @@ export default function Index() {
   const trainerRef = useRef(null);
   const featuresRef = useRef(null);
   const quoteRef = useRef(null);
+  const readinessRef = useRef(null);
 
   const quoteInView = useInView(quoteRef, { once: true, margin: "0px 0px -20% 0px" });
   const statsInView = useInView(statsRef, { once: true, margin: "-100px" });
   const trainerInView = useInView(trainerRef, { once: true, margin: "-100px" });
   const featuresInView = useInView(featuresRef, { once: true, margin: "-100px" });
+  const readinessInView = useInView(readinessRef, { once: true, margin: "-50px" });
 
   useEffect(() => {
     if (!quoteInView) {
@@ -244,6 +252,21 @@ export default function Index() {
             )}
           </Suspense>
         </div>
+
+        {/* Readiness Check-In */}
+        <motion.div
+          ref={readinessRef}
+          initial={{ opacity: 0, y: 20 }}
+          animate={readinessInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="px-responsive mb-8"
+        >
+          <div className="container-content">
+            <Suspense fallback={<div className="h-16 rounded-3xl bg-muted/20 animate-pulse" />}>
+              <ReadinessCard />
+            </Suspense>
+          </div>
+        </motion.div>
 
         {/* Stats Section */}
         {hasActivity && (

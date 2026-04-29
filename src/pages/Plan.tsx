@@ -38,7 +38,7 @@ export default function PlanPage() {
   const swapExercise = usePlanStore((state) => state.swapExercise);
   const clearCurrentPlan = usePlanStore((state) => state.clearCurrentPlan);
   const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
-  const isTrainerAuthorized = useAuthStore((state) => state.profile?.is_trainer === true);
+  const isTrainerAuthorized = useAuthStore((state) => !state.user || state.profile?.is_trainer === true);
   const resetWizard = useWizardStore((state) => state.resetWizard);
   const [redactSensitive, setRedactSensitive] = useState(true);
   const [swapModalOpen, setSwapModalOpen] = useState(false);

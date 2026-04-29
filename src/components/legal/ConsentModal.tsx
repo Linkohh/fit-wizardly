@@ -23,7 +23,7 @@ import {
 
 export function ConsentModal() {
   const [open, setOpen] = useState(false);
-  const [analyticsOptIn, setAnalyticsOptIn] = useState(true);
+  const [analyticsOptIn, setAnalyticsOptIn] = useState(false);
   const [nutritionLookupOptIn, setNutritionLookupOptIn] = useState(false);
   const { setConsent } = useAnalyticsStore();
 
@@ -76,11 +76,7 @@ export function ConsentModal() {
   return (
     <Sheet
       open={open}
-      onOpenChange={(nextOpen) => {
-        if (nextOpen) {
-          setOpen(true);
-        }
-      }}
+      onOpenChange={setOpen}
     >
       <SheetContent
         side="bottom"
@@ -88,9 +84,7 @@ export function ConsentModal() {
         enableBlur
         data-testid="consent-tray"
         data-surface="consent-tray"
-        onEscapeKeyDown={(event) => event.preventDefault()}
-        onInteractOutside={(event) => event.preventDefault()}
-        onPointerDownOutside={(event) => event.preventDefault()}
+
         className="mx-auto w-[calc(100%-1rem)] max-w-[46rem] gap-0 overflow-hidden rounded-[2rem] border border-primary/15 bg-[radial-gradient(circle_at_top,rgba(236,72,153,0.16),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.97)_0%,rgba(246,239,255,0.96)_42%,rgba(236,244,255,0.97)_100%)] px-0 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] pt-0 shadow-[0_-16px_48px_rgba(77,38,129,0.22)] motion-reduce:duration-0 dark:border-white/10 dark:bg-[radial-gradient(circle_at_top,rgba(236,72,153,0.18),transparent_36%),linear-gradient(180deg,rgba(28,14,46,0.98)_0%,rgba(16,11,34,0.98)_46%,rgba(10,12,29,0.98)_100%)] dark:shadow-[0_-24px_72px_rgba(4,0,20,0.58)] sm:bottom-5 sm:w-[min(calc(100%-2rem),46rem)] sm:rounded-[2.15rem]"
       >
         <div className="pointer-events-none absolute inset-x-16 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent dark:via-white/20" />
@@ -181,7 +175,7 @@ export function ConsentModal() {
                     Third-party food search
                   </Label>
                   <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-[0.82rem]">
-                    Allow OpenFoodFacts lookups when you search foods. Your query leaves this device to fetch results.
+                    Allow OpenFoodFacts lookups when you search foods. Your search query and IP address are sent to OpenFoodFacts' servers to fetch results.
                   </p>
                 </div>
               </div>

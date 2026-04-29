@@ -767,7 +767,7 @@ describe('App auth routing', () => {
 
     renderAt('/clients');
 
-    expect(await screen.findByText('Trainer Mode Required')).toBeInTheDocument();
+    expect(await screen.findByText('Coach Mode Required')).toBeInTheDocument();
     expect(screen.queryByText('Clients Page')).not.toBeInTheDocument();
     expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
   });
@@ -790,7 +790,7 @@ describe('App auth routing', () => {
 
     renderAt('/clients');
 
-    expect(await screen.findByText('Trainer Access Restricted')).toBeInTheDocument();
+    expect(await screen.findByText('Coach Access Restricted')).toBeInTheDocument();
     expect(screen.queryByText('Clients Page')).not.toBeInTheDocument();
     expect(screen.queryByText('Auth Modal Open')).not.toBeInTheDocument();
   });
