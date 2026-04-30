@@ -277,20 +277,37 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   const profile = useAuthStore((state) => state.profile);
   const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
   const setTrainerMode = useTrainerStore((state) => state.setTrainerMode);
+  const clearTrainerSession = useTrainerStore((state) => state.clearTrainerSession);
+  const previousUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
   useEffect(() => {
+    const userId = user?.id ?? null;
+    const previousUserId = previousUserIdRef.current;
+    const didClearAuthenticatedSession = previousUserId !== null && userId === null;
+    const didSwitchAuthenticatedSession =
+      previousUserId !== null && userId !== null && previousUserId !== userId;
+
+    if (didClearAuthenticatedSession || didSwitchAuthenticatedSession) {
+      clearTrainerSession();
+      previousUserIdRef.current = userId;
+      return;
+    }
+
     if (!isTrainerMode) {
+      previousUserIdRef.current = userId;
       return;
     }
 
     if (user && profile?.is_trainer !== true) {
       setTrainerMode(false);
     }
-  }, [isTrainerMode, profile?.is_trainer, setTrainerMode, user]);
+
+    previousUserIdRef.current = userId;
+  }, [clearTrainerSession, isTrainerMode, profile?.is_trainer, setTrainerMode, user]);
 
   return <>{children}</>;
 }

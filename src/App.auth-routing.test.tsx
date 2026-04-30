@@ -47,6 +47,9 @@ const mocks = vi.hoisted(() => {
     setTrainerMode: vi.fn((enabled: boolean) => {
       trainerState.isTrainerMode = enabled;
     }),
+    clearTrainerSession: vi.fn(() => {
+      trainerState.isTrainerMode = false;
+    }),
   };
 
   const themeState = {
@@ -815,5 +818,41 @@ describe('App auth routing', () => {
 
     expect(await screen.findByText('Index Page')).toBeInTheDocument();
     expect(mocks.trainerState.setTrainerMode).toHaveBeenCalledWith(false);
+  });
+
+  it('clears in-memory trainer session data when an auth session is cleared', async () => {
+    mocks.authState.user = { id: 'trainer-1' };
+    mocks.authState.session = { access_token: 'token-1' };
+    mocks.authState.profile = {
+      id: 'trainer-1',
+      display_name: 'Coach Alex',
+      username: 'coach-alex',
+      avatar_url: null,
+      experience_level: null,
+      primary_goal: null,
+      timezone: 'America/New_York',
+      created_at: null,
+      role: 'trainer',
+      is_trainer: true,
+    };
+    mocks.trainerState.isTrainerMode = true;
+
+    const view = renderAt('/');
+    expect(await screen.findByText('Index Page')).toBeInTheDocument();
+
+    act(() => {
+      mocks.authState.user = null;
+      mocks.authState.session = null;
+      mocks.authState.profile = null;
+      view.rerender(
+        <MemoryRouter initialEntries={['/']}>
+          <App />
+        </MemoryRouter>
+      );
+    });
+
+    await waitFor(() => {
+      expect(mocks.trainerState.clearTrainerSession).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { filterReadinessLogsByRange, type ReadinessDayRange } from '@/lib/readinessRange';
 import type { ReadinessEntry, ReadinessRating } from '@/types/readiness';
 import { useAchievementStore } from '@/stores/achievementStore';
 
@@ -15,7 +16,7 @@ interface ReadinessState {
     hasLoggedToday: () => boolean;
     logReadiness: (entry: ReadinessInput) => ReadinessEntry;
     getTodayLog: () => ReadinessEntry | undefined;
-    getTrend: (days: 7 | 14 | 30) => ReadinessEntry[];
+    getTrend: (days: ReadinessDayRange) => ReadinessEntry[];
 }
 
 /** Count consecutive days logged up to and including today. */
@@ -78,12 +79,7 @@ export const useReadinessStore = create<ReadinessState>()(
             },
 
             getTrend: (days) => {
-                const cutoff = new Date();
-                cutoff.setDate(cutoff.getDate() - days);
-                cutoff.setHours(0, 0, 0, 0);
-                return get().logs
-                    .filter((e) => new Date(e.date) >= cutoff)
-                    .sort((a, b) => a.date.localeCompare(b.date));
+                return filterReadinessLogsByRange(get().logs, days);
             },
         }),
         {

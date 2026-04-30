@@ -14,9 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Activity } from 'lucide-react';
 import { useReadinessStore } from '@/stores/readinessStore';
+import { filterReadinessLogsByRange, type ReadinessDayRange } from '@/lib/readinessRange';
 import type { ReadinessEntry } from '@/types/readiness';
-
-type DayRange = 7 | 14 | 30;
 
 function getScoreColor(score: number): string {
   if (score < 2.5) return '#ef4444';
@@ -28,15 +27,6 @@ function getBandLabel(score: number, t: TFunction): string {
   if (score < 2.5) return t('recovery.band_rest');
   if (score < 3.5) return t('recovery.band_moderate');
   return t('recovery.band_ready');
-}
-
-function getFilteredLogs(logs: ReadinessEntry[], days: DayRange): ReadinessEntry[] {
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - days);
-  cutoff.setHours(0, 0, 0, 0);
-  return logs
-    .filter((e) => new Date(e.date) >= cutoff)
-    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function formatDate(dateStr: string, locale: string): string {
@@ -76,15 +66,15 @@ function CustomTooltip({
 export function ReadinessTrend() {
   const { t, i18n } = useTranslation();
   const { logs } = useReadinessStore();
-  const [range, setRange] = useState<DayRange>(7);
+  const [range, setRange] = useState<ReadinessDayRange>(7);
 
-  const filtered = getFilteredLogs(logs, range);
+  const filtered = filterReadinessLogsByRange(logs, range);
   const chartData = filtered.map((e) => ({
     ...e,
     displayScore: Math.round(e.overallScore * 20),
   }));
 
-  const ranges: DayRange[] = [7, 14, 30];
+  const ranges: ReadinessDayRange[] = [7, 14, 30];
 
   return (
     <Card variant="glass" className="h-full">

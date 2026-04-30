@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainerStore } from '@/stores/trainerStore';
+import { useWizardStore } from '@/stores/wizardStore';
 import type { Plan } from '@/types/fitness';
 
 const buildPlan = (): Plan =>
@@ -42,6 +43,7 @@ describe('trainerStore persistence', () => {
       templates: [],
       messages: [],
     });
+    useWizardStore.getState().setIsTrainer(false);
   });
 
   it('does not persist client, template, or message records', () => {
@@ -109,5 +111,28 @@ describe('trainerStore persistence', () => {
     useTrainerStore.getState().setTrainerMode(true);
 
     expect(useTrainerStore.getState().isTrainerMode).toBe(true);
+  });
+
+  it('clears in-memory trainer session data', () => {
+    const store = useTrainerStore.getState();
+    const client = store.addClient('Private Client', 'Sensitive notes');
+
+    store.setTrainerMode(true);
+    store.selectClient(client.id);
+    store.assignPlan(client.id, 'plan-1');
+    store.saveAsTemplate('Private Template', buildPlan(), ['strength']);
+    store.sendMessage(client.id, 'Secret message', 'trainer');
+    useWizardStore.getState().setIsTrainer(true);
+
+    store.clearTrainerSession();
+
+    const state = useTrainerStore.getState();
+    expect(state.isTrainerMode).toBe(false);
+    expect(state.clients).toEqual([]);
+    expect(state.selectedClientId).toBeNull();
+    expect(state.assignments).toEqual([]);
+    expect(state.templates).toEqual([]);
+    expect(state.messages).toEqual([]);
+    expect(useWizardStore.getState().selections.isTrainer).toBe(false);
   });
 });

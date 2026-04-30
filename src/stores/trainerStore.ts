@@ -15,6 +15,7 @@ interface TrainerState {
   // Mode actions
   toggleTrainerMode: () => void;
   setTrainerMode: (enabled: boolean) => void;
+  clearTrainerSession: () => void;
 
   // Client actions
   addClient: (name: string, notes?: string) => Client;
@@ -77,6 +78,18 @@ export const useTrainerStore = create<TrainerState>()(
           selectedClientId: nextMode ? state.selectedClientId : null,
         };
       }),
+
+      clearTrainerSession: () => {
+        useWizardStore.getState().setIsTrainer(false);
+        set({
+          isTrainerMode: false,
+          clients: [],
+          selectedClientId: null,
+          assignments: [],
+          templates: [],
+          messages: [],
+        });
+      },
 
       addClient: (displayName, notes) => {
         const client: Client = {
