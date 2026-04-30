@@ -666,6 +666,8 @@
         "days_7": "7d",
         "days_14": "14d",
         "days_30": "30d",
-        "no_data": "No readiness logs yet. Check in daily to see your trend."
+        "no_data": "No readiness logs yet. Check in daily to see your trend.",
+        "tooltip_score": "Score:",
+        "tooltip_status": "Status:"
     }
 }

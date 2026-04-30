@@ -598,6 +598,8 @@
         "days_7": "7d",
         "days_14": "14d",
         "days_30": "30d",
-        "no_data": "Aún no hay registros. Haz el check-in diario para ver tu tendencia."
+        "no_data": "Aún no hay registros. Haz el check-in diario para ver tu tendencia.",
+        "tooltip_score": "Puntuación:",
+        "tooltip_status": "Estado:"
     }
 }

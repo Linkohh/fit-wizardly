@@ -95,6 +95,11 @@ export default function LegalPage() {
                                         {t('legal.privacy.analytics_text')}
                                     </p>
 
+                                    <h3>Readiness &amp; Recovery Check-Ins</h3>
+                                    <p>
+                                        If you use the daily readiness check-in feature, your responses (sleep quality, muscle soreness, energy level, and stress level) are stored exclusively on your device in your browser's local storage. This data is never transmitted to any server or third party. You can export or delete this data at any time from your profile settings.
+                                    </p>
+
                                     <h3>Third-Party Food Search</h3>
                                     <p>
                                         If you enable the optional food search feature, your search queries and IP address are sent to{' '}

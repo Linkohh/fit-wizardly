@@ -30,6 +30,7 @@ import { useMotionTiltStatus } from '@/hooks/use-motion-tilt-status';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { usePlanStore } from '@/stores/planStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useReadinessStore } from '@/stores/readinessStore';
 import { toast } from 'sonner';
 import { BodyTracker } from '@/components/measurements/BodyTracker';
 import { requestConsentModal } from '@/lib/consent';
@@ -74,6 +75,7 @@ export function Profile() {
                 planHistory: usePlanStore.getState().planHistory,
                 workoutLogs: usePlanStore.getState().workoutLogs,
                 personalRecords: usePlanStore.getState().personalRecords,
+                readinessLogs: useReadinessStore.getState().logs,
             };
 
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

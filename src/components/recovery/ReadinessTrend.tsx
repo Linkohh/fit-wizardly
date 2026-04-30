@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import {
   BarChart,
   Bar,
@@ -23,10 +24,10 @@ function getScoreColor(score: number): string {
   return '#22c55e';
 }
 
-function getBandLabel(score: number): string {
-  if (score < 2.5) return 'Rest Day';
-  if (score < 3.5) return 'Train Light';
-  return 'Ready';
+function getBandLabel(score: number, t: TFunction): string {
+  if (score < 2.5) return t('recovery.band_rest');
+  if (score < 3.5) return t('recovery.band_moderate');
+  return t('recovery.band_ready');
 }
 
 function getFilteredLogs(logs: ReadinessEntry[], days: DayRange): ReadinessEntry[] {
@@ -38,9 +39,9 @@ function getFilteredLogs(logs: ReadinessEntry[], days: DayRange): ReadinessEntry
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string, locale: string): string {
   const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return d.toLocaleDateString(locale, { month: 'short', day: 'numeric' });
 }
 
 interface TooltipPayloadEntry {
@@ -54,24 +55,26 @@ function CustomTooltip({
   active?: boolean;
   payload?: TooltipPayloadEntry[];
 }) {
+  const { t, i18n } = useTranslation();
   if (!active || !payload?.length || !payload[0].payload) return null;
   const entry = payload[0].payload;
   return (
     <div className="bg-popover border border-border rounded-xl p-3 shadow-lg text-xs space-y-1">
-      <p className="font-semibold">{formatDate(entry.date)}</p>
+      <p className="font-semibold">{formatDate(entry.date, i18n.language)}</p>
       <p className="text-muted-foreground">
-        Score: <span className="text-foreground font-medium">{entry.displayScore}/100</span>
+        {t('recovery.tooltip_score', 'Score:')}{' '}
+        <span className="text-foreground font-medium">{entry.displayScore}/100</span>
       </p>
       <p className="text-muted-foreground">
-        Status:{' '}
-        <span className="text-foreground font-medium">{getBandLabel(entry.overallScore)}</span>
+        {t('recovery.tooltip_status', 'Status:')}{' '}
+        <span className="text-foreground font-medium">{getBandLabel(entry.overallScore, t)}</span>
       </p>
     </div>
   );
 }
 
 export function ReadinessTrend() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { logs } = useReadinessStore();
   const [range, setRange] = useState<DayRange>(7);
 
@@ -118,7 +121,7 @@ export function ReadinessTrend() {
             <BarChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
               <XAxis
                 dataKey="date"
-                tickFormatter={formatDate}
+                tickFormatter={(date) => formatDate(date, i18n.language)}
                 tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
                 axisLine={false}
                 tickLine={false}
