@@ -373,12 +373,16 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 ## Backlog / Next Steps
 
 ### Immediate (unblocked)
+- [ ] Merge PR #28 into `preview_b` — all code review issues resolved
+- [ ] Guard or remove `/mcl` dev route from production build — AUDIT-004 (`src/App.tsx:387`)
 - [ ] Rotate legacy Supabase anon JWT in Supabase dashboard (after confirming publishable-key deployment is live)
 - [ ] Delete local legacy JWT from `.env.local`, `dist/`, Capacitor assets
 - [ ] Apply Supabase migrations 002 and 004 to production
-- [ ] Merge PR #28 into `preview_b`
 
 ### Short-term features
+- [ ] Complete DE locale translation — 310 keys missing, ~35% complete — AUDIT-001 (`src/locales/de.json`)
+- [ ] Complete PT locale translation — 310 keys missing, ~33% complete — AUDIT-002 (`src/locales/pt.json`)
+- [ ] Fill ES locale gaps — 75 keys missing, investigate 27 orphaned keys — AUDIT-003 (`src/locales/es.json`)
 - [ ] Smart Meal Shortcuts — copy previous meal, saved meal templates (AUDIT_AND_IDEAS.md §3.6)
 - [ ] Energy Balance Trend — dual-axis calories vs. weight chart in NutritionInsights (§3.7)
 - [ ] CalendarHeatmap — deferred from History page initial implementation
