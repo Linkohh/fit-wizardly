@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
-  buildLiftMomentum,
+  buildLiftTruthMeter,
+  buildPlanFitReview,
+  buildSessionRescue,
   buildTrainingCompass,
   buildWeeklyCoachSummary,
 } from '@/lib/analyticsIntelligence';
 import type { ReadinessEntry } from '@/types/readiness';
-import type { PerceivedDifficulty, SetLog, WeightUnit, WorkoutLog } from '@/types/fitness';
+import type { Exercise, PerceivedDifficulty, Plan, SetLog, WeightUnit, WorkoutLog } from '@/types/fitness';
 
 const now = new Date('2026-04-30T12:00:00.000Z');
 
@@ -55,6 +57,8 @@ function workout(
     duration?: number;
     totalVolume?: number;
     planId?: string;
+    dayIndex?: number;
+    exerciseLogs?: WorkoutLog['exercises'];
     unit?: WeightUnit;
   } = {},
 ): WorkoutLog {
@@ -66,14 +70,14 @@ function workout(
   return {
     id: options.id ?? `log-${days}-${options.exerciseName ?? 'squat'}`,
     planId: options.planId ?? 'plan-1',
-    dayIndex: 0,
+    dayIndex: options.dayIndex ?? 0,
     dayName: 'Training Day',
     startedAt: new Date(completedAt.getTime() - (options.duration ?? 55) * 60_000),
     completedAt,
     duration: options.duration ?? 55,
     perceivedDifficulty: options.perceivedDifficulty ?? 'just_right',
     totalVolume,
-    exercises: [
+    exercises: options.exerciseLogs ?? [
       {
         exerciseId: options.exerciseId ?? 'squat',
         exerciseName: options.exerciseName ?? 'Back Squat',
@@ -81,6 +85,72 @@ function workout(
       },
     ],
   };
+}
+
+function exercise(id: string, name: string): Exercise {
+  return {
+    id,
+    name,
+    primaryMuscles: ['quads'],
+    secondaryMuscles: [],
+    equipment: ['barbell'],
+    patterns: ['squat'],
+    contraindications: [],
+    cues: [],
+  };
+}
+
+function plan(overrides: Partial<Plan> = {}): Plan {
+  return {
+    id: 'plan-1',
+    createdAt: daysAgo(20),
+    splitType: 'upper_lower',
+    selections: {
+      firstName: 'Test',
+      lastName: 'User',
+      personalGoalNote: '',
+      isTrainer: false,
+      coachNotes: '',
+      goal: 'strength',
+      experienceLevel: 'intermediate',
+      equipment: ['barbell'],
+      targetMuscles: ['quads'],
+      constraints: [],
+      daysPerWeek: 2,
+      sessionDuration: 60,
+    },
+    workoutDays: [
+      {
+        dayIndex: 0,
+        name: 'Lower A',
+        focusTags: ['Squat'],
+        estimatedDuration: 60,
+        exercises: [
+          { exercise: exercise('squat', 'Back Squat'), sets: 4, reps: '5', rir: 2, restSeconds: 150 },
+          { exercise: exercise('rdl', 'Romanian Deadlift'), sets: 3, reps: '8', rir: 2, restSeconds: 120 },
+        ],
+      },
+      {
+        dayIndex: 1,
+        name: 'Upper A',
+        focusTags: ['Press'],
+        estimatedDuration: 55,
+        exercises: [
+          { exercise: exercise('bench', 'Bench Press'), sets: 4, reps: '6', rir: 2, restSeconds: 150 },
+          { exercise: exercise('row', 'Barbell Row'), sets: 3, reps: '8', rir: 2, restSeconds: 120 },
+        ],
+      },
+    ],
+    weeklyVolume: [],
+    rirProgression: [],
+    notes: [],
+    ...overrides,
+  };
+}
+
+function expectNoBannedCopy(value: unknown) {
+  const serialized = JSON.stringify(value).toLowerCase();
+  expect(serialized).not.toMatch(/\b(injury|injured|medical|blame|fault|lazy|missed calendar days?)\b/);
 }
 
 describe('buildTrainingCompass', () => {
@@ -140,64 +210,6 @@ describe('buildTrainingCompass', () => {
   });
 });
 
-describe('buildLiftMomentum', () => {
-  it('marks lifts as needs_data until there are enough meaningful exposures', () => {
-    const [insight] = buildLiftMomentum({
-      workoutLogs: [workout(4), workout(1)],
-      preferredWeightUnit: 'lbs',
-      now,
-    });
-
-    expect(insight.status).toBe('needs_data');
-    expect(insight.confidence).toBe('low');
-  });
-
-  it('marks a lift climbing when e1RM improves with stable effort', () => {
-    const [insight] = buildLiftMomentum({
-      workoutLogs: [
-        workout(6, { sets: [setLog(100, 5, { rir: 2 })] }),
-        workout(3, { sets: [setLog(105, 5, { rir: 2 })] }),
-        workout(1, { sets: [setLog(110, 5, { rir: 2 })] }),
-      ],
-      preferredWeightUnit: 'lbs',
-      now,
-    });
-
-    expect(insight.status).toBe('climbing');
-    expect(insight.changePercent).toBeGreaterThan(3);
-  });
-
-  it('keeps a stable lift neutral instead of treating maintenance as failure', () => {
-    const [insight] = buildLiftMomentum({
-      workoutLogs: [
-        workout(8, { sets: [setLog(100, 5, { rir: 2 })] }),
-        workout(4, { sets: [setLog(101, 5, { rir: 2 })] }),
-        workout(1, { sets: [setLog(100, 5, { rir: 2 })] }),
-      ],
-      preferredWeightUnit: 'lbs',
-      now,
-    });
-
-    expect(insight.status).toBe('flat');
-    expect(insight.interpretation).toContain('maintenance');
-  });
-
-  it('marks a lift fatigued when performance drops while effort stress rises', () => {
-    const [insight] = buildLiftMomentum({
-      workoutLogs: [
-        workout(9, { sets: [setLog(120, 5, { rir: 3 })], perceivedDifficulty: 'just_right' }),
-        workout(5, { sets: [setLog(116, 5, { rir: 1 })], perceivedDifficulty: 'challenging' }),
-        workout(1, { sets: [setLog(108, 5, { rir: 0 })], perceivedDifficulty: 'too_hard' }),
-      ],
-      preferredWeightUnit: 'lbs',
-      now,
-    });
-
-    expect(insight.status).toBe('fatigued');
-    expect(insight.nextAction).toMatch(/Hold|reduce/);
-  });
-});
-
 describe('buildWeeklyCoachSummary', () => {
   it('returns a low-confidence starter note when the week has no logs', () => {
     const summary = buildWeeklyCoachSummary({
@@ -252,5 +264,238 @@ describe('buildWeeklyCoachSummary', () => {
 
     expect(summary.highlights.join(' ')).toContain('1 session completed');
     expect(summary.nextWeekFocus).toContain('repeatable');
+  });
+});
+
+describe('buildPlanFitReview', () => {
+  it('returns needs_data when the active plan or current-plan logs are missing', () => {
+    const insight = buildPlanFitReview({
+      workoutLogs: [workout(1, { planId: 'old-plan' })],
+      readinessLogs: [readiness(0)],
+      currentPlan: plan(),
+      now,
+    });
+
+    expect(insight.status).toBe('needs_data');
+    expect(insight.confidence).toBe('low');
+    expect(insight.metrics.completionRatio).toBe(0);
+    expectNoBannedCopy(insight);
+  });
+
+  it('ignores old-plan logs when judging plan fit', () => {
+    const insight = buildPlanFitReview({
+      workoutLogs: [
+        workout(1, { planId: 'old-plan', duration: 95, perceivedDifficulty: 'too_hard' }),
+        workout(2, { planId: 'old-plan', duration: 90, perceivedDifficulty: 'too_hard' }),
+      ],
+      readinessLogs: [readiness(0)],
+      currentPlan: plan(),
+      now,
+    });
+
+    expect(insight.status).toBe('needs_data');
+    expect(insight.metrics.currentPlanLogs).toBe(0);
+  });
+
+  it('marks a plan as fitting well when completion and recovery signals are steady', () => {
+    const insight = buildPlanFitReview({
+      workoutLogs: [workout(1), workout(3, { dayIndex: 1 }), workout(6), workout(8, { dayIndex: 1 })],
+      readinessLogs: [readiness(0), readiness(3), readiness(6)],
+      currentPlan: plan(),
+      now,
+    });
+
+    expect(insight.status).toBe('fits_well');
+    expect(insight.fitScore).toBeGreaterThanOrEqual(75);
+    expect(insight.metrics.dayIndexImbalance).toBeLessThanOrEqual(1);
+    expectNoBannedCopy(insight);
+  });
+
+  it('requires multiple friction signals before calling a plan too dense', () => {
+    const lightFriction = buildPlanFitReview({
+      workoutLogs: [workout(1, { duration: 90 }), workout(3, { dayIndex: 1, duration: 88 })],
+      readinessLogs: [readiness(0), readiness(2)],
+      currentPlan: plan(),
+      now,
+    });
+    const dense = buildPlanFitReview({
+      workoutLogs: [
+        workout(1, {
+          duration: 96,
+          perceivedDifficulty: 'challenging',
+          exerciseLogs: [
+            { exerciseId: 'squat', exerciseName: 'Back Squat', sets: [setLog(100, 5)] },
+            { exerciseId: 'rdl', exerciseName: 'Romanian Deadlift', sets: [], skipped: true },
+          ],
+        }),
+        workout(3, {
+          duration: 92,
+          perceivedDifficulty: 'too_hard',
+          exerciseLogs: [
+            { exerciseId: 'squat', exerciseName: 'Back Squat', sets: [setLog(100, 5)] },
+            { exerciseId: 'rdl', exerciseName: 'Romanian Deadlift', sets: [], skipped: true },
+          ],
+        }),
+        workout(6, { duration: 94, perceivedDifficulty: 'challenging' }),
+      ],
+      readinessLogs: [readiness(0), readiness(2)],
+      currentPlan: plan(),
+      now,
+    });
+
+    expect(lightFriction.status).not.toBe('too_dense');
+    expect(dense.status).toBe('too_dense');
+    expect(dense.metrics.leastLoggedDayIndex).toBe(1);
+    expect(dense.reasons.join(' ')).toContain('day pattern');
+    expectNoBannedCopy(dense);
+  });
+
+  it('detects recovery mismatch and under-dosed plans without false precision', () => {
+    const recoveryMismatch = buildPlanFitReview({
+      workoutLogs: [
+        workout(1, { perceivedDifficulty: 'too_hard', duration: 82 }),
+        workout(3, { dayIndex: 1, perceivedDifficulty: 'challenging', duration: 78 }),
+        workout(6, { perceivedDifficulty: 'too_hard', duration: 84 }),
+      ],
+      readinessLogs: [
+        readiness(0, { overallScore: 2.2, energyLevel: 2, stressLevel: 4 }),
+        readiness(4, { overallScore: 3.1 }),
+        readiness(8, { overallScore: 3.8 }),
+      ],
+      currentPlan: plan(),
+      now,
+    });
+    const underDosed = buildPlanFitReview({
+      workoutLogs: [
+        workout(1, { duration: 31, perceivedDifficulty: 'too_easy' }),
+        workout(3, { dayIndex: 1, duration: 34, perceivedDifficulty: 'too_easy' }),
+        workout(5, { duration: 32, perceivedDifficulty: 'just_right' }),
+        workout(7, { dayIndex: 1, duration: 33, perceivedDifficulty: 'too_easy' }),
+      ],
+      readinessLogs: [readiness(0, { overallScore: 4.8 }), readiness(2, { overallScore: 4.6 })],
+      currentPlan: plan(),
+      now,
+    });
+
+    expect(recoveryMismatch.status).toBe('recovery_mismatch');
+    expect(recoveryMismatch.confidence).not.toBe('high');
+    expect(underDosed.status).toBe('under_dosed');
+    expectNoBannedCopy(recoveryMismatch);
+    expectNoBannedCopy(underDosed);
+  });
+});
+
+describe('buildLiftTruthMeter', () => {
+  it('returns needs_data until lifts have enough meaningful exposures', () => {
+    const [insight] = buildLiftTruthMeter({
+      workoutLogs: [workout(4), workout(1)],
+      preferredWeightUnit: 'lbs',
+      now,
+    });
+
+    expect(insight.status).toBe('needs_data');
+    expect(insight.confidence).toBe('low');
+  });
+
+  it('distinguishes clean progress, grind debt, quiet progress, and technique checks', () => {
+    const workoutLogs = [
+      workout(12, { exerciseId: 'squat', exerciseName: 'Back Squat', sets: [setLog(100, 5, { rir: 2 })] }),
+      workout(8, { exerciseId: 'squat', exerciseName: 'Back Squat', sets: [setLog(105, 5, { rir: 2 })] }),
+      workout(2, { exerciseId: 'squat', exerciseName: 'Back Squat', sets: [setLog(110, 5, { rir: 2 })] }),
+      workout(12, { exerciseId: 'bench', exerciseName: 'Bench Press', sets: [setLog(100, 5, { rir: 3 })] }),
+      workout(8, { exerciseId: 'bench', exerciseName: 'Bench Press', sets: [setLog(108, 5, { rir: 1 })], perceivedDifficulty: 'challenging' }),
+      workout(2, { exerciseId: 'bench', exerciseName: 'Bench Press', sets: [setLog(114, 5, { rir: 0 })], perceivedDifficulty: 'too_hard' }),
+      workout(12, { exerciseId: 'row', exerciseName: 'Barbell Row', sets: [setLog(95, 8, { rir: 1 })], perceivedDifficulty: 'challenging' }),
+      workout(8, { exerciseId: 'row', exerciseName: 'Barbell Row', sets: [setLog(95, 8, { rir: 2 })] }),
+      workout(2, { exerciseId: 'row', exerciseName: 'Barbell Row', sets: [setLog(96, 8, { rir: 3 })], perceivedDifficulty: 'too_easy' }),
+      workout(12, { exerciseId: 'press', exerciseName: 'Overhead Press', sets: [setLog(90, 5, { rir: 1 })], perceivedDifficulty: 'challenging' }),
+      workout(8, { exerciseId: 'press', exerciseName: 'Overhead Press', sets: [setLog(84, 5, { rir: 0 })], perceivedDifficulty: 'too_hard' }),
+      workout(2, { exerciseId: 'press', exerciseName: 'Overhead Press', sets: [setLog(88, 5, { rir: 0 })], perceivedDifficulty: 'too_hard' }),
+    ];
+
+    const insights = buildLiftTruthMeter({ workoutLogs, preferredWeightUnit: 'lbs', now, limit: 4 });
+
+    expect(insights.find((item) => item.exerciseId === 'squat')?.status).toBe('clean_progress');
+    expect(insights.find((item) => item.exerciseId === 'bench')?.status).toBe('grind_debt');
+    expect(insights.find((item) => item.exerciseId === 'row')?.status).toBe('quiet_progress');
+    expect(insights.find((item) => item.exerciseId === 'press')?.status).toBe('technique_check');
+    insights.forEach(expectNoBannedCopy);
+  });
+});
+
+describe('buildSessionRescue', () => {
+  it('returns needs_plan when plan or target day is missing', () => {
+    const rescue = buildSessionRescue({
+      currentPlan: null,
+      targetDayIndex: null,
+      workoutLogs: [],
+      readinessLogs: [],
+      now,
+    });
+
+    expect(rescue.status).toBe('needs_plan');
+    expect(rescue.recommendations).toEqual([]);
+  });
+
+  it('chooses compact rescue durations from readiness and recent strain without mutating the plan', () => {
+    const currentPlan = plan();
+    const originalSetCount = currentPlan.workoutDays[0].exercises[0].sets;
+    const full = buildSessionRescue({
+      currentPlan,
+      targetDayIndex: 0,
+      workoutLogs: [workout(4)],
+      readinessLogs: [readiness(0, { overallScore: 4.5 })],
+      now,
+    });
+    const rescue15 = buildSessionRescue({
+      currentPlan,
+      targetDayIndex: 0,
+      workoutLogs: [
+        workout(1, { perceivedDifficulty: 'too_hard', duration: 95 }),
+        workout(3, { perceivedDifficulty: 'challenging', duration: 90 }),
+      ],
+      readinessLogs: [readiness(0, { overallScore: 2.1, energyLevel: 2, stressLevel: 5 })],
+      now,
+    });
+
+    expect(full.status).toBe('full_session_ok');
+    expect(full.recommendedDuration).toBeGreaterThanOrEqual(35);
+    expect(rescue15.status).toBe('rescue_15');
+    expect(rescue15.recommendedDuration).toBe(15);
+    expect(rescue15.recommendations).toHaveLength(2);
+    expect(new Set(rescue15.recommendations.map((item) => item.exerciseId)).size).toBe(rescue15.recommendations.length);
+    expect(currentPlan.workoutDays[0].exercises[0].sets).toBe(originalSetCount);
+    expectNoBannedCopy(rescue15);
+  });
+
+  it('does not duplicate exercises when the target day is shorter than the rescue template', () => {
+    const oneLiftPlan = plan({
+      workoutDays: [
+        {
+          dayIndex: 0,
+          name: 'Press',
+          focusTags: ['Press'],
+          estimatedDuration: 35,
+          exercises: [
+            { exercise: exercise('bench', 'Bench Press'), sets: 4, reps: '6', rir: 2, restSeconds: 150 },
+          ],
+        },
+      ],
+    });
+
+    const rescue = buildSessionRescue({
+      currentPlan: oneLiftPlan,
+      targetDayIndex: 0,
+      workoutLogs: [
+        workout(1, { perceivedDifficulty: 'too_hard', duration: 95 }),
+        workout(3, { perceivedDifficulty: 'challenging', duration: 90 }),
+      ],
+      readinessLogs: [readiness(0, { overallScore: 2.1, energyLevel: 2, stressLevel: 5 })],
+      now,
+    });
+
+    expect(rescue.status).toBe('rescue_15');
+    expect(rescue.recommendations).toHaveLength(1);
+    expect(rescue.recommendations[0].exerciseName).toBe('Bench Press');
   });
 });

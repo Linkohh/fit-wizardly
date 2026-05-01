@@ -1,10 +1,12 @@
 import { calculateOneRepMax, convertWeight } from '@/lib/progressionEngine';
 import type { ReadinessEntry } from '@/types/readiness';
-import type { PerceivedDifficulty, SetLog, WeightUnit, WorkoutLog } from '@/types/fitness';
+import type { ExercisePrescription, PerceivedDifficulty, Plan, SetLog, WeightUnit, WorkoutLog } from '@/types/fitness';
 
 export type AnalyticsConfidence = 'high' | 'medium' | 'low';
 export type TrainingCompassStatus = 'push' | 'hold' | 'dial_back' | 'needs_data';
-export type LiftMomentumStatus = 'climbing' | 'flat' | 'fatigued' | 'needs_data';
+export type PlanFitStatus = 'fits_well' | 'too_dense' | 'recovery_mismatch' | 'under_dosed' | 'needs_data';
+export type LiftTruthStatus = 'clean_progress' | 'grind_debt' | 'quiet_progress' | 'technique_check' | 'needs_data';
+export type SessionRescueStatus = 'full_session_ok' | 'rescue_35' | 'rescue_25' | 'rescue_15' | 'needs_plan';
 
 export interface TrainingCompassInsight {
   status: TrainingCompassStatus;
@@ -20,21 +22,6 @@ export interface TrainingCompassInsight {
     volumeChangePercent: number | null;
     readinessScore: number | null;
   };
-}
-
-export interface LiftMomentumInsight {
-  exerciseId: string;
-  exerciseName: string;
-  status: LiftMomentumStatus;
-  confidence: AnalyticsConfidence;
-  currentEstimate: number | null;
-  changePercent: number;
-  bestSetLabel: string;
-  recentVolume: number;
-  sessionsAnalyzed: number;
-  interpretation: string;
-  nextAction: string;
-  sparkline: Array<{ date: string; value: number }>;
 }
 
 export interface WeeklyCoachSummary {
@@ -53,13 +40,72 @@ export interface WeeklyCoachSummary {
   };
 }
 
+export interface PlanFitReviewInsight {
+  status: PlanFitStatus;
+  confidence: AnalyticsConfidence;
+  fitScore: number;
+  diagnosis: string;
+  reasons: string[];
+  frictionSignals: string[];
+  suggestedAdjustment: string;
+  metrics: {
+    currentPlanLogs: number;
+    expectedSessions: number;
+    completionRatio: number;
+    skippedExerciseRate: number;
+    avgDuration: number | null;
+    hardSessionRate: number;
+    readinessAverage: number | null;
+    readinessTrend: number | null;
+    volumeChangePercent: number | null;
+    dayIndexImbalance: number;
+    leastLoggedDayIndex: number | null;
+  };
+}
+
+export interface LiftTruthMeterInsight {
+  exerciseId: string;
+  exerciseName: string;
+  status: LiftTruthStatus;
+  confidence: AnalyticsConfidence;
+  currentEstimate: number | null;
+  changePercent: number;
+  bestSetLabel: string;
+  effortShift: number;
+  sessionsAnalyzed: number;
+  interpretation: string;
+  nextCue: string;
+  sparkline: Array<{ date: string; value: number }>;
+}
+
+export interface SessionRescueRecommendation {
+  exerciseId: string;
+  exerciseName: string;
+  sets: number;
+  reps: string;
+  rir: number;
+  restSeconds: number;
+  note: string;
+}
+
+export interface SessionRescueInsight {
+  status: SessionRescueStatus;
+  confidence: AnalyticsConfidence;
+  recommendedDuration: number;
+  targetDayName: string | null;
+  recommendations: SessionRescueRecommendation[];
+  skipList: string[];
+  reason: string;
+  nextAction: string;
+}
+
 interface AnalyticsInput {
   workoutLogs: WorkoutLog[];
   readinessLogs: ReadinessEntry[];
   now?: Date;
 }
 
-interface LiftMomentumInput {
+interface LiftTruthMeterInput {
   workoutLogs: WorkoutLog[];
   preferredWeightUnit: WeightUnit;
   now?: Date;
@@ -68,6 +114,15 @@ interface LiftMomentumInput {
 
 interface WeeklyCoachSummaryInput extends AnalyticsInput {
   preferredWeightUnit: WeightUnit;
+}
+
+interface PlanFitReviewInput extends AnalyticsInput {
+  currentPlan: Plan | null;
+}
+
+interface SessionRescueInput extends AnalyticsInput {
+  currentPlan: Plan | null;
+  targetDayIndex: number | null;
 }
 
 interface LiftExposure {
@@ -79,13 +134,13 @@ interface LiftExposure {
   reps: number;
   rir: number;
   difficulty: number;
-  volume: number;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const RECENT_WINDOW_DAYS = 7;
 const PREVIOUS_WINDOW_DAYS = 14;
 const MIN_LIFT_EXPOSURES = 3;
+const PLAN_REVIEW_WINDOW_DAYS = 14;
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
@@ -195,6 +250,20 @@ function getReadinessAverage(readinessLogs: ReadinessEntry[], now: Date) {
   return getAverage(recent.map((entry) => entry.overallScore));
 }
 
+function getReadinessTrend(readinessLogs: ReadinessEntry[], now: Date) {
+  const recentCutoff = cutoffDate(now, RECENT_WINDOW_DAYS);
+  const planCutoff = cutoffDate(now, PLAN_REVIEW_WINDOW_DAYS);
+  const recent = readinessLogs.filter((entry) => readinessDate(entry) >= recentCutoff);
+  const earlier = readinessLogs.filter((entry) => {
+    const date = readinessDate(entry);
+    return date >= planCutoff && date < recentCutoff;
+  });
+  const recentAverage = getAverage(recent.map((entry) => entry.overallScore));
+  const earlierAverage = getAverage(earlier.map((entry) => entry.overallScore));
+  if (recentAverage === null || earlierAverage === null) return null;
+  return recentAverage - earlierAverage;
+}
+
 function getBestSetEstimate(
   sets: SetLog[],
   preferredWeightUnit: WeightUnit,
@@ -238,10 +307,6 @@ function buildLiftExposures(workoutLogs: WorkoutLog[], preferredWeightUnit: Weig
         reps: best.set.reps,
         rir: avgRir,
         difficulty: getDifficultyScore(log.perceivedDifficulty),
-        volume: completedSets.reduce((sum, set) => {
-          const normalizedWeight = convertWeight(set.weight, set.weightUnit, preferredWeightUnit);
-          return sum + normalizedWeight * set.reps;
-        }, 0),
       };
 
       const current = exposures.get(exercise.exerciseId) ?? [];
@@ -262,59 +327,6 @@ function getLiftConfidence(exposures: LiftExposure[]): AnalyticsConfidence {
   if (exposures.length < MIN_LIFT_EXPOSURES) return 'low';
   if (exposures.length >= 5) return 'high';
   return 'medium';
-}
-
-function getLiftStatus(
-  exposures: LiftExposure[],
-  changePercent: number,
-): LiftMomentumStatus {
-  if (exposures.length < MIN_LIFT_EXPOSURES) return 'needs_data';
-
-  const recent = exposures.slice(-2);
-  const earlier = exposures.slice(0, -2);
-  const recentDifficulty = getAverage(recent.map((item) => item.difficulty)) ?? 1;
-  const earlierDifficulty = getAverage(earlier.map((item) => item.difficulty)) ?? 1;
-  const recentRir = getAverage(recent.map((item) => item.rir)) ?? 2;
-
-  if (changePercent <= -3 && (recentDifficulty >= 2 || recentRir <= 1 || recentDifficulty > earlierDifficulty + 0.5)) {
-    return 'fatigued';
-  }
-
-  if (changePercent >= 3 && recentDifficulty <= 2.2 && recentRir >= 1.5) {
-    return 'climbing';
-  }
-
-  return 'flat';
-}
-
-function getLiftInterpretation(status: LiftMomentumStatus, changePercent: number) {
-  switch (status) {
-    case 'climbing':
-      return `Up ${formatPercent(changePercent)} with manageable effort. This lift is climbing.`;
-    case 'fatigued':
-      return `Down ${formatPercent(changePercent)} while effort stress is rising. Treat this as fatigue, not failure.`;
-    case 'flat':
-      return 'Stable maintenance. Hold the pattern and look for cleaner reps before forcing load.';
-    case 'needs_data':
-      return `Needs ${MIN_LIFT_EXPOSURES} meaningful sessions before calling a trend.`;
-    default:
-      return 'Keep logging this lift to build a stronger signal.';
-  }
-}
-
-function getLiftNextAction(status: LiftMomentumStatus) {
-  switch (status) {
-    case 'climbing':
-      return 'Add 1 rep per set or 2.5-5 lb next time if RIR stays 2 or higher.';
-    case 'fatigued':
-      return 'Hold load steady or reduce 5% for one exposure, then reassess.';
-    case 'flat':
-      return 'Repeat the same load and aim for cleaner reps or one extra rep.';
-    case 'needs_data':
-      return 'Log one more loaded exposure for this lift.';
-    default:
-      return 'Keep the next session repeatable.';
-  }
 }
 
 export function buildTrainingCompass({
@@ -445,11 +457,227 @@ export function buildTrainingCompass({
   };
 }
 
-export function buildLiftMomentum({
+function buildPlanFitMetrics(workoutLogs: WorkoutLog[], readinessLogs: ReadinessEntry[], currentPlan: Plan | null, now: Date) {
+  const workoutDayIndexes = currentPlan?.workoutDays.map((day) => day.dayIndex) ?? [];
+  const expectedSessions = workoutDayIndexes.length * 2;
+  const currentPlanLogs = currentPlan
+    ? getRecentLogs(workoutLogs, now, PLAN_REVIEW_WINDOW_DAYS).filter((log) => log.planId === currentPlan.id)
+    : [];
+  const previousPlanLogs = currentPlan
+    ? workoutLogs.filter((log) => {
+        const completedAt = toDate(log.completedAt);
+        return log.planId === currentPlan.id && completedAt >= cutoffDate(now, 28) && completedAt < cutoffDate(now, 14);
+      })
+    : [];
+  const exerciseCount = currentPlanLogs.reduce((sum, log) => sum + log.exercises.length, 0);
+  const skippedCount = currentPlanLogs.reduce(
+    (sum, log) => sum + log.exercises.filter((exercise) => exercise.skipped).length,
+    0,
+  );
+  const dayCounts = new Map(workoutDayIndexes.map((dayIndex) => [dayIndex, 0]));
+  currentPlanLogs.forEach((log) => dayCounts.set(log.dayIndex, (dayCounts.get(log.dayIndex) ?? 0) + 1));
+  const counts = Array.from(dayCounts.values());
+  const minCount = counts.length ? Math.min(...counts) : 0;
+  const maxCount = counts.length ? Math.max(...counts) : 0;
+
+  return {
+    currentPlanLogs,
+    metrics: {
+      currentPlanLogs: currentPlanLogs.length,
+      expectedSessions,
+      completionRatio: expectedSessions > 0 ? clamp(currentPlanLogs.length / expectedSessions, 0, 1) : 0,
+      skippedExerciseRate: exerciseCount > 0 ? skippedCount / exerciseCount : 0,
+      avgDuration: getAverage(currentPlanLogs.map((log) => log.duration)),
+      hardSessionRate:
+        currentPlanLogs.length > 0
+          ? currentPlanLogs.filter((log) => log.perceivedDifficulty === 'challenging' || log.perceivedDifficulty === 'too_hard').length /
+            currentPlanLogs.length
+          : 0,
+      readinessAverage: getReadinessAverage(readinessLogs, now),
+      readinessTrend: getReadinessTrend(readinessLogs, now),
+      volumeChangePercent: getVolumeChangePercent(sumVolume(currentPlanLogs), sumVolume(previousPlanLogs)),
+      dayIndexImbalance: maxCount - minCount,
+      leastLoggedDayIndex:
+        workoutDayIndexes.length > 0
+          ? [...dayCounts.entries()].sort((a, b) => a[1] - b[1] || a[0] - b[0])[0][0]
+          : null,
+    },
+  };
+}
+
+function getPlanFitConfidence(logCount: number, readinessCount: number, status: PlanFitStatus): AnalyticsConfidence {
+  if (logCount < 2) return 'low';
+  if (status === 'recovery_mismatch') return readinessCount >= 2 ? 'medium' : 'low';
+  if (logCount >= 4 && readinessCount >= 2) return 'high';
+  return 'medium';
+}
+
+export function buildPlanFitReview({
+  workoutLogs,
+  readinessLogs,
+  currentPlan,
+  now = new Date(),
+}: PlanFitReviewInput): PlanFitReviewInsight {
+  const { currentPlanLogs, metrics } = buildPlanFitMetrics(workoutLogs, readinessLogs, currentPlan, now);
+
+  if (!currentPlan || currentPlan.workoutDays.length === 0 || currentPlanLogs.length < 2) {
+    return {
+      status: 'needs_data',
+      confidence: 'low',
+      fitScore: 45,
+      diagnosis: 'Plan Fit Review needs more current plan signal.',
+      reasons: ['Log at least two current plan sessions to compare the pattern.'],
+      frictionSignals: [],
+      suggestedAdjustment: 'Keep the next session simple and log exercise completion, effort, and readiness.',
+      metrics,
+    };
+  }
+
+  const frictionSignals: string[] = [];
+  if ((metrics.avgDuration ?? 0) >= 85) frictionSignals.push('Sessions are running longer than the plan target.');
+  if (metrics.skippedExerciseRate >= 0.2) frictionSignals.push('Exercise skips are clustering inside current plan sessions.');
+  if (metrics.dayIndexImbalance >= 2) frictionSignals.push('The training day pattern is uneven across the current plan.');
+  if (metrics.hardSessionRate >= 0.55) frictionSignals.push('Most recent current-plan sessions landed hard.');
+  if ((metrics.readinessAverage ?? 5) < 3 || (metrics.readinessTrend ?? 0) <= -0.8) {
+    frictionSignals.push('Readiness is trending below the workload pattern.');
+  }
+
+  const tooDenseSignals = [
+    (metrics.avgDuration ?? 0) >= 85,
+    metrics.skippedExerciseRate >= 0.2,
+    metrics.dayIndexImbalance >= 2,
+  ].filter(Boolean).length;
+  const recoverySignals = [
+    (metrics.readinessAverage ?? 5) < 3,
+    (metrics.readinessTrend ?? 0) <= -0.8,
+    metrics.hardSessionRate >= 0.55,
+    (metrics.avgDuration ?? 0) >= 75 || metrics.skippedExerciseRate >= 0.15,
+  ].filter(Boolean).length;
+
+  let status: PlanFitStatus = 'fits_well';
+  if (tooDenseSignals >= 2) status = 'too_dense';
+  else if (recoverySignals >= 3) status = 'recovery_mismatch';
+  else if (
+    metrics.completionRatio >= 0.85 &&
+    (metrics.avgDuration ?? 99) <= 40 &&
+    metrics.hardSessionRate <= 0.25 &&
+    (metrics.readinessAverage ?? 0) >= 4
+  ) {
+    status = 'under_dosed';
+  }
+
+  const fitScore = clamp(
+    Math.round(
+      55 +
+        metrics.completionRatio * 28 -
+        metrics.skippedExerciseRate * 26 -
+        metrics.dayIndexImbalance * 6 -
+        metrics.hardSessionRate * 14 +
+        ((metrics.readinessAverage ?? 3.5) - 3.5) * 8,
+    ),
+    0,
+    100,
+  );
+  const confidence = getPlanFitConfidence(currentPlanLogs.length, readinessLogs.length, status);
+
+  const copy: Record<PlanFitStatus, Pick<PlanFitReviewInsight, 'diagnosis' | 'reasons' | 'suggestedAdjustment'>> = {
+    fits_well: {
+      diagnosis: 'This plan is matching your current training rhythm.',
+      reasons: ['Completion is steady.', 'Exercise completion and effort look manageable.', 'Readiness is supporting the plan.'],
+      suggestedAdjustment: 'Keep the structure and make progressions small enough to repeat.',
+    },
+    too_dense: {
+      diagnosis: 'The plan may be packed tighter than your current rhythm supports.',
+      reasons: frictionSignals.slice(0, 3),
+      suggestedAdjustment: 'Trim one accessory block or rotate the under-logged day earlier in the week.',
+    },
+    recovery_mismatch: {
+      diagnosis: 'Workload and readiness are not lining up cleanly yet.',
+      reasons: frictionSignals.slice(0, 3),
+      suggestedAdjustment: 'Hold loads steady and keep the next session repeatable before adding work.',
+    },
+    under_dosed: {
+      diagnosis: 'The plan may have room for a little more productive work.',
+      reasons: ['Completion is high.', 'Sessions are short and controlled.', 'Readiness is consistently strong.'],
+      suggestedAdjustment: 'Add one focused set to the main lift or add a small rep target next week.',
+    },
+    needs_data: {
+      diagnosis: 'Plan Fit Review needs more current plan signal.',
+      reasons: ['Log at least two current plan sessions to compare the pattern.'],
+      suggestedAdjustment: 'Keep logging current-plan sessions.',
+    },
+  };
+
+  return {
+    status,
+    confidence,
+    fitScore,
+    frictionSignals,
+    metrics,
+    ...copy[status],
+  };
+}
+
+function getLiftTruthStatus(exposures: LiftExposure[], changePercent: number): LiftTruthStatus {
+  if (exposures.length < MIN_LIFT_EXPOSURES) return 'needs_data';
+
+  const first = exposures[0];
+  const recent = exposures.slice(-2);
+  const earlier = exposures.slice(0, -2);
+  const recentRir = getAverage(recent.map((item) => item.rir)) ?? first.rir;
+  const earlierRir = getAverage(earlier.map((item) => item.rir)) ?? first.rir;
+  const recentDifficulty = getAverage(recent.map((item) => item.difficulty)) ?? first.difficulty;
+  const earlierDifficulty = getAverage(earlier.map((item) => item.difficulty)) ?? first.difficulty;
+  const rirShift = recentRir - earlierRir;
+  const difficultyShift = recentDifficulty - earlierDifficulty;
+  const minDropPercent = Math.min(...exposures.map((item) => ((item.estimate - first.estimate) / first.estimate) * 100));
+
+  if ((changePercent < 0 || minDropPercent <= -5) && recentRir <= 1 && recentDifficulty >= 2) return 'technique_check';
+  if (changePercent >= 3 && (rirShift <= -1 || difficultyShift >= 0.75 || recentRir <= 1)) return 'grind_debt';
+  if (changePercent >= 3 && rirShift >= -0.5 && difficultyShift <= 0.5) return 'clean_progress';
+  if (Math.abs(changePercent) < 3 && (rirShift >= 0.75 || difficultyShift <= -0.75)) return 'quiet_progress';
+  return 'technique_check';
+}
+
+function getTruthInterpretation(status: LiftTruthStatus, changePercent: number) {
+  switch (status) {
+    case 'clean_progress':
+      return `Estimate is up ${formatPercent(changePercent)} while effort stays controlled.`;
+    case 'grind_debt':
+      return `Estimate is up ${formatPercent(changePercent)}, but the effort cost is rising.`;
+    case 'quiet_progress':
+      return 'Load is steady, but reps are costing less effort.';
+    case 'technique_check':
+      return 'Output is uneven while effort is high. Treat the next exposure as a quality check.';
+    case 'needs_data':
+      return `Needs ${MIN_LIFT_EXPOSURES} meaningful exposures before calling the pattern.`;
+    default:
+      return 'Keep logging this lift to sharpen the read.';
+  }
+}
+
+function getTruthNextCue(status: LiftTruthStatus) {
+  switch (status) {
+    case 'clean_progress':
+      return 'Add a small rep or load step only if warm-ups feel repeatable.';
+    case 'grind_debt':
+      return 'Hold load and win the same reps with one more rep in reserve.';
+    case 'quiet_progress':
+      return 'Keep the load and add one clean rep before increasing weight.';
+    case 'technique_check':
+      return 'Use the same or slightly lighter load and prioritize clean positions.';
+    case 'needs_data':
+      return 'Log one more loaded exposure for this lift.';
+    default:
+      return 'Keep the next exposure repeatable.';
+  }
+}
+
+export function buildLiftTruthMeter({
   workoutLogs,
   preferredWeightUnit,
   limit = 3,
-}: LiftMomentumInput): LiftMomentumInsight[] {
+}: LiftTruthMeterInput): LiftTruthMeterInsight[] {
   const exposureMap = buildLiftExposures(workoutLogs, preferredWeightUnit);
 
   return Array.from(exposureMap.entries())
@@ -458,8 +686,9 @@ export function buildLiftMomentum({
       const last = exposures[exposures.length - 1];
       const changePercent =
         first && last && first.estimate > 0 ? ((last.estimate - first.estimate) / first.estimate) * 100 : 0;
-      const status = getLiftStatus(exposures, changePercent);
-      const recentVolume = exposures.slice(-3).reduce((sum, exposure) => sum + exposure.volume, 0);
+      const status = getLiftTruthStatus(exposures, changePercent);
+      const recentRir = getAverage(exposures.slice(-2).map((item) => item.rir)) ?? 0;
+      const earlierRir = getAverage(exposures.slice(0, -2).map((item) => item.rir)) ?? recentRir;
 
       return {
         exerciseId,
@@ -469,21 +698,108 @@ export function buildLiftMomentum({
         currentEstimate: last ? Math.round(last.estimate) : null,
         changePercent,
         bestSetLabel: formatBestSet(last, preferredWeightUnit),
-        recentVolume,
+        effortShift: recentRir - earlierRir,
         sessionsAnalyzed: exposures.length,
-        interpretation: getLiftInterpretation(status, changePercent),
-        nextAction: getLiftNextAction(status),
+        interpretation: getTruthInterpretation(status, changePercent),
+        nextCue: getTruthNextCue(status),
         sparkline: exposures.map((exposure) => ({
           date: exposure.date.toISOString(),
           value: Math.round(exposure.estimate),
         })),
       };
     })
-    .sort((a, b) => {
-      const statusWeight = (status: LiftMomentumStatus) => (status === 'needs_data' ? 0 : 1);
-      return statusWeight(b.status) - statusWeight(a.status) || b.sessionsAnalyzed - a.sessionsAnalyzed;
-    })
+    .sort((a, b) => b.sessionsAnalyzed - a.sessionsAnalyzed)
     .slice(0, limit);
+}
+
+function compactPrescription(prescription: ExercisePrescription, status: SessionRescueStatus): SessionRescueRecommendation {
+  const setCaps: Record<SessionRescueStatus, number> = {
+    full_session_ok: prescription.sets,
+    rescue_35: 3,
+    rescue_25: 2,
+    rescue_15: 2,
+    needs_plan: 0,
+  };
+  return {
+    exerciseId: prescription.exercise.id,
+    exerciseName: prescription.exercise.name,
+    sets: Math.max(1, Math.min(prescription.sets, setCaps[status])),
+    reps: prescription.reps,
+    rir: Math.max(prescription.rir, status === 'full_session_ok' ? prescription.rir : 2),
+    restSeconds: Math.min(prescription.restSeconds, status === 'full_session_ok' ? prescription.restSeconds : 90),
+    note: status === 'full_session_ok' ? 'Run as planned.' : 'Keep this crisp and leave room to repeat.',
+  };
+}
+
+function getSessionRescueStatus(workoutLogs: WorkoutLog[], readinessLogs: ReadinessEntry[], now: Date): SessionRescueStatus {
+  const latestReadiness = getLatestReadiness(readinessLogs);
+  const recentLogs = getRecentLogs(workoutLogs, now);
+  const hardSessions = recentLogs.filter(
+    (log) => log.perceivedDifficulty === 'challenging' || log.perceivedDifficulty === 'too_hard',
+  ).length;
+  const avgDuration = getAverage(recentLogs.map((log) => log.duration)) ?? 0;
+  let strainScore = 0;
+  if (latestReadiness && latestReadiness.overallScore < 2.7) strainScore += 2;
+  if (latestReadiness && (latestReadiness.energyLevel <= 2 || latestReadiness.stressLevel >= 4)) strainScore += 1;
+  if (hardSessions >= 2) strainScore += 2;
+  else if (hardSessions === 1) strainScore += 1;
+  if (avgDuration >= 85) strainScore += 1;
+
+  if (strainScore >= 5) return 'rescue_15';
+  if (strainScore >= 3) return 'rescue_25';
+  if (strainScore >= 1) return 'rescue_35';
+  return 'full_session_ok';
+}
+
+export function buildSessionRescue({
+  currentPlan,
+  targetDayIndex,
+  workoutLogs,
+  readinessLogs,
+  now = new Date(),
+}: SessionRescueInput): SessionRescueInsight {
+  const targetDay = currentPlan?.workoutDays.find((day) => day.dayIndex === targetDayIndex);
+  if (!currentPlan || !targetDay) {
+    return {
+      status: 'needs_plan',
+      confidence: 'low',
+      recommendedDuration: 0,
+      targetDayName: null,
+      recommendations: [],
+      skipList: [],
+      reason: 'Choose an active plan day to build a rescue session.',
+      nextAction: 'Select a plan day, then log readiness and recent training effort.',
+    };
+  }
+
+  const status = getSessionRescueStatus(workoutLogs, readinessLogs, now);
+  const durationByStatus: Record<SessionRescueStatus, number> = {
+    full_session_ok: targetDay.estimatedDuration,
+    rescue_35: 35,
+    rescue_25: 25,
+    rescue_15: 15,
+    needs_plan: 0,
+  };
+  const targetCount = status === 'rescue_15' ? 3 : status === 'rescue_25' ? 4 : Math.min(5, targetDay.exercises.length);
+  const selected = targetDay.exercises.slice(0, targetCount);
+  const recommendations = selected.map((prescription) => compactPrescription(prescription, status));
+
+  return {
+    status,
+    confidence: readinessLogs.length > 0 || workoutLogs.length > 0 ? 'medium' : 'low',
+    recommendedDuration: durationByStatus[status],
+    targetDayName: targetDay.name,
+    recommendations,
+    skipList: targetDay.exercises.slice(recommendations.length).map((item) => item.exercise.name),
+    reason:
+      status === 'full_session_ok'
+        ? 'Recent readiness and effort support the planned session.'
+        : 'Recent readiness or effort signals favor a compact version today.',
+    nextAction:
+      status === 'full_session_ok'
+        ? 'Run the day as written and keep effort honest.'
+        : 'Start with the first lift, stop after the rescue list, and log how it felt.',
+  };
 }
 
 export function buildWeeklyCoachSummary({

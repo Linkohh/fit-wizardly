@@ -2,7 +2,9 @@ import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { StrengthCurve } from '@/components/analytics/StrengthCurve';
 import { VolumeHealth } from '@/components/analytics/VolumeHealth';
-import { LiftMomentumCard } from '@/components/analytics/LiftMomentumCard';
+import { LiftTruthMeterCard } from '@/components/analytics/LiftTruthMeterCard';
+import { PlanFitReviewCard } from '@/components/analytics/PlanFitReviewCard';
+import { SessionRescueCard } from '@/components/analytics/SessionRescueCard';
 import { TrainingCompassCard } from '@/components/analytics/TrainingCompassCard';
 import { WeeklyCoachSummaryCard } from '@/components/analytics/WeeklyCoachSummaryCard';
 import { ReadinessTrend } from '@/components/recovery/ReadinessTrend';
@@ -35,12 +37,14 @@ export default function Analytics() {
                 <TabsContent value="performance" className="space-y-6">
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                         <StrengthCurve />
-                        <LiftMomentumCard />
+                        <LiftTruthMeterCard />
                     </div>
                 </TabsContent>
 
                 <TabsContent value="volume" className="space-y-6">
                     <TrainingCompassCard />
+                    <PlanFitReviewCard />
+                    <SessionRescueCard />
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
                         <VolumeHealth />
                         <ReadinessTrend />
