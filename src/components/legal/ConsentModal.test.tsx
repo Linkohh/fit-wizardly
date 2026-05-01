@@ -41,9 +41,9 @@ vi.mock('@/components/ui/sheet', async () => {
     children,
     className,
     enableBlur: _enableBlur,
-    onEscapeKeyDown: _onEscapeKeyDown,
-    onInteractOutside: _onInteractOutside,
-    onPointerDownOutside: _onPointerDownOutside,
+    onEscapeKeyDown,
+    onInteractOutside,
+    onPointerDownOutside,
     showCloseButton: _showCloseButton,
     ...props
   }: React.HTMLAttributes<HTMLElement> & {
@@ -53,14 +53,51 @@ vi.mock('@/components/ui/sheet', async () => {
     onPointerDownOutside?: (event: Event) => void;
     showCloseButton?: boolean;
   }) => {
-    const { open } = React.useContext(SheetContext);
+    const { open, onOpenChange } = React.useContext(SheetContext);
 
     if (!open) {
       return null;
     }
 
+    const createDismissEvent = () => {
+      let defaultPrevented = false;
+      return {
+        get defaultPrevented() {
+          return defaultPrevented;
+        },
+        preventDefault: () => {
+          defaultPrevented = true;
+        },
+      } as Event;
+    };
+
+    const requestDismiss = (handler?: (event: Event) => void) => {
+      const event = createDismissEvent();
+      handler?.(event);
+      if (!event.defaultPrevented) {
+        onOpenChange?.(false);
+      }
+    };
+
     return (
       <section data-testid="consent-tray" className={className} {...props}>
+        <button type="button" data-testid="sheet-escape" onClick={() => requestDismiss(onEscapeKeyDown)}>
+          escape
+        </button>
+        <button
+          type="button"
+          data-testid="sheet-pointer-outside"
+          onClick={() => requestDismiss(onPointerDownOutside)}
+        >
+          pointer outside
+        </button>
+        <button
+          type="button"
+          data-testid="sheet-interact-outside"
+          onClick={() => requestDismiss(onInteractOutside)}
+        >
+          interact outside
+        </button>
         {children}
       </section>
     );
@@ -167,7 +204,7 @@ describe('ConsentModal', () => {
     expect(localStorage.getItem(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY)).toBe('true');
   });
 
-  it('closes when the sheet requests dismissal', () => {
+  it('does not close when the sheet requests dismissal before baseline consent', () => {
     renderConsentModal();
 
     act(() => {
@@ -176,7 +213,59 @@ describe('ConsentModal', () => {
 
     fireEvent.click(screen.getByTestId('sheet-dismiss'));
 
-    expect(screen.queryByTestId('consent-tray')).not.toBeInTheDocument();
+    expect(screen.getByTestId('consent-tray')).toBeInTheDocument();
+    expect(localStorage.getItem(CONSENT_STORAGE_KEY)).toBeNull();
+  });
+
+  it('does not close from Escape before baseline consent', () => {
+    renderConsentModal();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    fireEvent.click(screen.getByTestId('sheet-escape'));
+
+    expect(screen.getByTestId('consent-tray')).toBeInTheDocument();
+    expect(localStorage.getItem(CONSENT_STORAGE_KEY)).toBeNull();
+  });
+
+  it('does not close from outside pointer or interaction before baseline consent', () => {
+    renderConsentModal();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    fireEvent.click(screen.getByTestId('sheet-pointer-outside'));
+    fireEvent.click(screen.getByTestId('sheet-interact-outside'));
+
+    expect(screen.getByTestId('consent-tray')).toBeInTheDocument();
+    expect(localStorage.getItem(CONSENT_STORAGE_KEY)).toBeNull();
+  });
+
+  it('does not render a close button loophole', () => {
+    renderConsentModal();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(screen.queryByRole('button', { name: /^close$/i })).not.toBeInTheDocument();
+  });
+
+  it('keeps terms and privacy links from storing consent or dismissing the tray', () => {
+    renderConsentModal();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    fireEvent.click(screen.getByRole('link', { name: /Terms of Service/i }));
+    fireEvent.click(screen.getByRole('link', { name: /Privacy Policy/i }));
+
+    expect(localStorage.getItem(CONSENT_STORAGE_KEY)).toBeNull();
+    expect(screen.getByTestId('consent-tray')).toBeInTheDocument();
   });
 
   it('opens again when the app requests consent explicitly', () => {
