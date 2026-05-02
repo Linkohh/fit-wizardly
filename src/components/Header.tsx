@@ -36,22 +36,32 @@ const mobileNavVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.06,
-      delayChildren: 0.12,
+      staggerChildren: 0.022,
+      delayChildren: 0.11,
     },
   },
 };
 
 const mobileNavItemVariants = {
-  hidden: { opacity: 0, x: -24, scale: 0.96, filter: 'blur(4px)' },
+  hidden: { opacity: 0, x: -12 },
   visible: {
     opacity: 1,
     x: 0,
-    scale: 1,
-    filter: 'blur(0px)',
-    transition: { type: 'spring', stiffness: 400, damping: 28 },
+    transition: { duration: 0.2, ease: [0.32, 0.72, 0, 1] },
   },
 };
+
+const reducedMotionMobileNavVariants = {
+  hidden: { opacity: 1 },
+  visible: { opacity: 1, transition: { duration: 0 } },
+};
+
+const reducedMotionMobileNavItemVariants = {
+  hidden: { opacity: 1, x: 0 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0 } },
+};
+
+const MotionButton = motion.create(Button);
 
 export function Header() {
   const location = useLocation();
@@ -437,23 +447,24 @@ export function Header() {
             </div>
 
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-              <SheetTrigger asChild className="xl:hidden">
-                <motion.div
-                  whileTap={{ scale: 0.92 }}
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              <SheetTrigger asChild>
+                <MotionButton
+                  variant="ghost"
+                  size="icon"
+                  className="touch-target xl:hidden"
+                  data-click-feedback-event="navigation"
+                  aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+                  aria-expanded={mobileOpen}
+                  whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+                  whileHover={shouldReduceMotion ? undefined : { scale: 1.03 }}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : { type: 'spring', stiffness: 420, damping: 32, mass: 0.85 }
+                  }
                 >
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="touch-target"
-                    data-click-feedback-event="navigation"
-                    aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
-                    aria-expanded={mobileOpen}
-                  >
-                    <AnimatedMenuIcon isOpen={mobileOpen} size={24} strokeWidth={2} />
-                  </Button>
-                </motion.div>
+                  <AnimatedMenuIcon isOpen={mobileOpen} size={24} strokeWidth={2} />
+                </MotionButton>
               </SheetTrigger>
               <SheetContent
                 side="right"
@@ -462,16 +473,20 @@ export function Header() {
                 data-resolved-theme={resolvedTheme}
                 glassEffect
                 enableGestures
+                gestureMode="full-panel"
+                motionPreset="mobileDrawer"
                 showDragHandle
+                title={t('header.mobile_drawer.title', 'FitWizard menu')}
+                description={t('header.mobile_drawer.description', 'Navigation and quick controls')}
                 onGestureClose={() => setMobileOpen(false)}
               >
             <div className="aetheric-drawer__inner flex min-h-0 flex-1 flex-col px-4 pb-2 pt-5">
               <motion.section
                 data-testid="mobile-drawer-profile"
                 className="aetheric-drawer__profile shrink-0"
-                initial={{ opacity: 0, y: -10 }}
-                animate={mobileOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: -10 }}
-                transition={{ duration: 0.28, ease: 'easeOut' }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: -8 }}
+                animate={mobileOpen ? { opacity: 1, y: 0 } : { opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : -8 }}
+                transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.08, duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
               >
                 <div className="aetheric-drawer__profile-layout flex items-start gap-3.5">
                   <div className="aetheric-drawer__avatar-shell shrink-0">
@@ -506,7 +521,7 @@ export function Header() {
                   aria-label="Mobile navigation"
                   initial="hidden"
                   animate={mobileOpen ? 'visible' : 'hidden'}
-                  variants={mobileNavVariants}
+                  variants={shouldReduceMotion ? reducedMotionMobileNavVariants : mobileNavVariants}
                 >
                   <div className="space-y-1.5 pb-3">
                     {primaryNavItems.map((item) => {
@@ -516,9 +531,9 @@ export function Header() {
                       return (
                         <motion.div
                           key={item.path}
-                          variants={mobileNavItemVariants}
-                          whileTap={{ scale: 0.985, x: -2 }}
-                          whileHover={{ x: 3 }}
+                          variants={shouldReduceMotion ? reducedMotionMobileNavItemVariants : mobileNavItemVariants}
+                          whileTap={shouldReduceMotion ? undefined : { scale: 0.99, x: -1 }}
+                          whileHover={shouldReduceMotion ? undefined : { x: 2 }}
                           className="relative"
                         >
                           {active ? (
@@ -547,7 +562,7 @@ export function Header() {
                     })}
 
                     {trainerNavItems.length > 0 ? (
-                      <motion.section className="pt-3" variants={mobileNavItemVariants}>
+                      <motion.section className="pt-3" variants={shouldReduceMotion ? reducedMotionMobileNavItemVariants : mobileNavItemVariants}>
                         <div className="aetheric-drawer__section-label">
                           <span className="aetheric-drawer__section-line" />
                           <span>{t('header.mobile_drawer.trainer_section', 'Coach Tools')}</span>
@@ -560,9 +575,9 @@ export function Header() {
                             return (
                               <motion.div
                                 key={item.path}
-                                variants={mobileNavItemVariants}
-                                whileTap={{ scale: 0.985, x: -2 }}
-                                whileHover={{ x: 3 }}
+                                variants={shouldReduceMotion ? reducedMotionMobileNavItemVariants : mobileNavItemVariants}
+                                whileTap={shouldReduceMotion ? undefined : { scale: 0.99, x: -1 }}
+                                whileHover={shouldReduceMotion ? undefined : { x: 2 }}
                                 className="relative"
                               >
                                 {active ? (
@@ -599,9 +614,9 @@ export function Header() {
               <motion.div
                 data-testid="mobile-drawer-footer"
                 className="aetheric-drawer__footer sticky bottom-0 mt-auto shrink-0"
-                initial={{ opacity: 0, y: 10 }}
-                animate={mobileOpen ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                transition={{ delay: 0.08, duration: 0.24, ease: 'easeOut' }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                animate={mobileOpen ? { opacity: 1, y: 0 } : { opacity: shouldReduceMotion ? 1 : 0, y: shouldReduceMotion ? 0 : 8 }}
+                transition={shouldReduceMotion ? { duration: 0 } : { delay: 0.12, duration: 0.2, ease: [0.32, 0.72, 0, 1] }}
               >
                 <div className="aetheric-drawer__utility-card" data-testid="mobile-drawer-utility-card">
                   <div className="aetheric-drawer__utility-top-row" data-testid="mobile-drawer-utility-top-row">

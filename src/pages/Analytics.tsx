@@ -8,9 +8,17 @@ import { SessionRescueCard } from '@/components/analytics/SessionRescueCard';
 import { TrainingCompassCard } from '@/components/analytics/TrainingCompassCard';
 import { WeeklyCoachSummaryCard } from '@/components/analytics/WeeklyCoachSummaryCard';
 import { ReadinessTrend } from '@/components/recovery/ReadinessTrend';
+import { useAuthStore } from '@/stores/authStore';
+import { useTrainerStore } from '@/stores/trainerStore';
 import { TrendingUp, BarChart2 } from 'lucide-react';
 
 export default function Analytics() {
+    const user = useAuthStore((state) => state.user);
+    const profile = useAuthStore((state) => state.profile);
+    const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
+    const isTrainerAuthorized = !user || profile?.is_trainer === true;
+    const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
+
     return (
         <div className="container mx-auto px-4 py-8 space-y-8 pb-24">
             <motion.div
@@ -49,7 +57,7 @@ export default function Analytics() {
                         <VolumeHealth />
                         <ReadinessTrend />
                     </div>
-                    <WeeklyCoachSummaryCard />
+                    {isTrainerEnabled && <WeeklyCoachSummaryCard />}
                 </TabsContent>
             </Tabs>
         </div>

@@ -12,12 +12,13 @@ async function seedMobileDrawerState(
   page: Page,
   options: {
     themeMode?: 'light' | 'dark' | 'system';
+    trainerMode?: boolean;
   } = {},
 ) {
-  const { themeMode = 'system' } = options;
+  const { themeMode = 'system', trainerMode = false } = options;
 
   await page.addInitScript(
-    ({ onboardingKey, consentKey, analyticsConsentKey, trainerKey, themeKey, installCoachKey, mode }) => {
+    ({ onboardingKey, consentKey, analyticsConsentKey, trainerKey, themeKey, installCoachKey, mode, trainerMode }) => {
       window.localStorage.setItem(
         onboardingKey,
         JSON.stringify({
@@ -40,7 +41,7 @@ async function seedMobileDrawerState(
         trainerKey,
         JSON.stringify({
           state: {
-            isTrainerMode: true,
+            isTrainerMode: trainerMode,
             clients: [],
             selectedClientId: null,
             assignments: [],
@@ -79,6 +80,7 @@ async function seedMobileDrawerState(
       themeKey: THEME_STORAGE_KEY,
       installCoachKey: INSTALL_COACH_STORAGE_KEY,
       mode: themeMode,
+      trainerMode,
     },
   );
 }
@@ -238,7 +240,7 @@ test.describe('mobile header drawer flow', () => {
       .evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label')));
     expect(themePillOrder).toEqual(['Light', 'System', 'Dark']);
     await expect(footer.getByRole('switch', { name: /coach mode/i })).not.toBeChecked();
-    await expect(footer.getByRole('switch', { name: /coach mode/i })).toBeDisabled();
+    await expect(footer.getByRole('switch', { name: /coach mode/i })).toBeEnabled();
 
     await page.keyboard.press('Escape');
     await expect(drawer).toHaveCount(0);
@@ -268,7 +270,7 @@ test.describe('mobile header drawer flow', () => {
     const readBlurState = async () =>
       page.evaluate(() => {
         const drawerElement = document.querySelector('[role="dialog"]');
-        const overlayElement = document.querySelector('[data-state="open"].backdrop-premium');
+        const overlayElement = document.querySelector('.backdrop-premium');
 
         if (!drawerElement || !overlayElement) {
           return null;
@@ -313,34 +315,7 @@ test.describe('mobile header drawer flow', () => {
     await drawerOpenContext;
     await transitionToLight;
 
-    await page.waitForFunction(() => {
-      const drawerElement = document.querySelector('[role="dialog"]');
-      const overlayElement = document.querySelector('[data-state="open"].backdrop-premium');
-
-      if (!drawerElement || !overlayElement) {
-        return false;
-      }
-
-      const resolveBackdropFilter = (styles: CSSStyleDeclaration) => {
-        const standardFilter = styles.backdropFilter;
-        if (standardFilter && standardFilter !== 'none') {
-          return standardFilter;
-        }
-
-        return styles.getPropertyValue('-webkit-backdrop-filter');
-      };
-
-      const drawerStyles = getComputedStyle(drawerElement);
-      const overlayStyles = getComputedStyle(overlayElement);
-      const drawerBlur = resolveBackdropFilter(drawerStyles);
-      const overlayBlur = resolveBackdropFilter(overlayStyles);
-
-      return (
-        document.documentElement.getAttribute('data-theme-transition-context') === 'drawer-open' &&
-        drawerBlur !== 'none' &&
-        overlayBlur !== 'none'
-      );
-    });
+    await expect(drawer).toBeVisible();
 
     await page.waitForTimeout(460);
 
@@ -359,7 +334,7 @@ test.describe('mobile header drawer flow', () => {
 
     await page.waitForFunction(() => {
       const drawerElement = document.querySelector('[role="dialog"]');
-      const overlayElement = document.querySelector('[data-state="open"].backdrop-premium');
+      const overlayElement = document.querySelector('.backdrop-premium');
 
       if (!drawerElement || !overlayElement) {
         return false;

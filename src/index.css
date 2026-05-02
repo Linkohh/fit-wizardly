@@ -1594,6 +1594,109 @@
       hsl(270 50% 3% / 0.7) 100%);
 }
 
+.mobile-drawer-motion {
+  backface-visibility: hidden;
+  transform: translate3d(100%, 0, 0);
+  transform-origin: right center;
+}
+
+.mobile-drawer-motion[data-state='open'] {
+  animation: fitwizard-mobile-drawer-in 320ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.mobile-drawer-motion[data-state='closed'] {
+  animation: fitwizard-mobile-drawer-out 220ms cubic-bezier(0.32, 0, 0.67, 0) both;
+  pointer-events: none;
+}
+
+.mobile-drawer-motion[data-gesture-dragging='true'] {
+  animation: none;
+  cursor: grabbing;
+}
+
+.mobile-drawer-backdrop {
+  animation-duration: 180ms;
+  animation-fill-mode: both;
+  animation-timing-function: ease-out;
+}
+
+.mobile-drawer-backdrop[data-state='open'] {
+  animation-name: fitwizard-mobile-backdrop-in;
+}
+
+.mobile-drawer-backdrop[data-state='closed'] {
+  animation-name: fitwizard-mobile-backdrop-out;
+  animation-duration: 140ms;
+}
+
+@keyframes fitwizard-mobile-drawer-in {
+  from {
+    opacity: 0.88;
+    transform: translate3d(100%, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fitwizard-mobile-drawer-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0.78;
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+@keyframes fitwizard-mobile-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fitwizard-mobile-backdrop-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fitwizard-mobile-drawer-reduced-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fitwizard-mobile-drawer-reduced-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 /* Menu Item Interactive States */
 .menu-item-interactive {
   position: relative;
@@ -1668,6 +1771,7 @@
   background-color: var(--aetheric-bg);
   color: var(--aetheric-text);
   font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+  touch-action: pan-y;
 }
 
 .aetheric-drawer--scooped .drag-handle {
@@ -1885,6 +1989,7 @@
   --aetheric-scroll-fade-size: 0.9rem;
   position: relative;
   min-height: 0;
+  touch-action: pan-y;
 }
 
 .aetheric-drawer__scroll-area [data-radix-scroll-area-viewport] {
@@ -1991,6 +2096,7 @@
 
 .aetheric-drawer__nav-region {
   padding-bottom: 0.5rem;
+  touch-action: pan-y;
 }
 
 .aetheric-drawer__nav-link {
@@ -2496,6 +2602,8 @@
 
   .sheet-glass,
   .backdrop-premium,
+  .mobile-drawer-motion,
+  .mobile-drawer-backdrop,
   .menu-item-interactive,
   .menu-item-interactive::before,
   .drag-handle,
@@ -2504,6 +2612,19 @@
   .aetheric-drawer__nav-icon {
     transition: none !important;
     animation: none !important;
+  }
+
+  .mobile-drawer-motion[data-state='open'] {
+    animation: fitwizard-mobile-drawer-reduced-in 80ms ease-out both !important;
+  }
+
+  .mobile-drawer-motion[data-state='closed'] {
+    animation: fitwizard-mobile-drawer-reduced-out 80ms ease-out both !important;
+  }
+
+  .mobile-drawer-backdrop[data-state='open'],
+  .mobile-drawer-backdrop[data-state='closed'] {
+    animation-duration: 80ms !important;
   }
 
   .menu-item-interactive::before {

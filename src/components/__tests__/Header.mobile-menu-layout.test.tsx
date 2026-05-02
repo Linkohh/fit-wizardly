@@ -193,8 +193,27 @@ vi.mock('@/components/ui/sheet', async () => {
     children: React.ReactNode;
   }) => <SheetContext.Provider value={{ open, onOpenChange }}>{children}</SheetContext.Provider>;
 
-  const SheetTrigger = ({ children }: { children: React.ReactNode }) => {
+  const SheetTrigger = ({
+    asChild,
+    children,
+  }: {
+    asChild?: boolean;
+    children: React.ReactElement<{ onClick?: React.MouseEventHandler; 'data-testid'?: string }>;
+  }) => {
     const { onOpenChange } = React.useContext(SheetContext);
+
+    if (asChild && React.isValidElement(children)) {
+      const childOnClick = children.props.onClick;
+
+      return React.cloneElement(children, {
+        'data-testid': 'sheet-trigger',
+        onClick: (event: React.MouseEvent) => {
+          childOnClick?.(event);
+          onOpenChange?.(true);
+        },
+      });
+    }
+
     return (
       <div data-testid="sheet-trigger" onClick={() => onOpenChange?.(true)}>
         {children}
@@ -207,16 +226,24 @@ vi.mock('@/components/ui/sheet', async () => {
     children,
     glassEffect: _glassEffect,
     enableGestures: _enableGestures,
+    gestureMode: _gestureMode,
+    motionPreset: _motionPreset,
     showDragHandle: _showDragHandle,
     onGestureClose: _onGestureClose,
+    title: _title,
+    description: _description,
     ...props
   }: {
     className?: string;
     children: React.ReactNode;
     glassEffect?: boolean;
     enableGestures?: boolean;
+    gestureMode?: string;
+    motionPreset?: string;
     showDragHandle?: boolean;
     onGestureClose?: () => void;
+    title?: string;
+    description?: string;
     [key: string]: unknown;
   }) => {
     const { open } = React.useContext(SheetContext);
@@ -268,6 +295,7 @@ describe('Header mobile menu layout', () => {
       'data-click-feedback-event',
       'navigation',
     );
+    expect(screen.getByTestId('sheet-trigger').tagName).toBe('BUTTON');
   });
 
   it('shows a manual install action in the home drawer after the install coach was dismissed', async () => {
