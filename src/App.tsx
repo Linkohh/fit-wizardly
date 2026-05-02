@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAnalyticsStore } from "@/stores/analyticsStore";
+import { useScrollActivity } from "@/hooks/use-scroll-activity";
 
 const Index = lazy(() => import("./pages/Index"));
 const WizardPage = lazy(() => import("./pages/Wizard"));
@@ -417,6 +418,7 @@ function AnimatedRoutes() {
 const App = () => {
   // Network status handled by OfflineBanner component
   useGlobalClickFeedback();
+  useScrollActivity();
   const nativeApp = isNativeApp();
   const hasAnalyticsConsent = useAnalyticsStore((state) => state.hasConsented);
   const [shouldRenderLivingBackground, setShouldRenderLivingBackground] = useState(false);

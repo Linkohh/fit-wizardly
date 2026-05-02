@@ -262,6 +262,32 @@ vi.mock('@/components/ui/sheet', async () => {
   };
 });
 
+vi.mock('@/components/ui/scroll-area', async () => {
+  const React = await import('react');
+
+  type MockScrollAreaProps = React.HTMLAttributes<HTMLDivElement> & {
+    type?: string;
+    scrollHideDelay?: number;
+  };
+
+  const ScrollArea = React.forwardRef<HTMLDivElement, MockScrollAreaProps>(
+    ({ children, type, scrollHideDelay, ...props }, ref) => (
+      <div
+        ref={ref}
+        data-scroll-area-type={type}
+        data-scroll-hide-delay={scrollHideDelay}
+        {...props}
+      >
+        {children}
+      </div>
+    ),
+  );
+
+  ScrollArea.displayName = 'MockScrollArea';
+
+  return { ScrollArea };
+});
+
 describe('Header mobile menu layout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -352,6 +378,14 @@ describe('Header mobile menu layout', () => {
       'flex-1',
       'min-h-0',
       'overflow-hidden',
+    );
+    expect(screen.getByTestId('mobile-drawer-scroll-area')).toHaveAttribute(
+      'data-scroll-area-type',
+      'scroll',
+    );
+    expect(screen.getByTestId('mobile-drawer-scroll-area')).toHaveAttribute(
+      'data-scroll-hide-delay',
+      '3000',
     );
 
     const profile = within(sheetContent).getByTestId('mobile-drawer-profile');

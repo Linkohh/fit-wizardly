@@ -513,6 +513,8 @@ export function Header() {
               <ScrollArea
                 data-testid="mobile-drawer-scroll-area"
                 className="aetheric-drawer__scroll-area mt-1.5 flex-1 min-h-0 overflow-hidden"
+                type="scroll"
+                scrollHideDelay={3000}
               >
                 <motion.nav
                   data-testid="mobile-drawer-nav"
