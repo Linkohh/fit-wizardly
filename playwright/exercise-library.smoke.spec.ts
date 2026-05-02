@@ -90,6 +90,7 @@ test.describe('exercise library smoke', () => {
   });
 
   test.describe('mobile', () => {
+    test.skip(({ browserName }) => browserName === 'firefox', 'Firefox does not support mobile contexts');
     test.use({
       viewport: { width: 390, height: 844 },
       hasTouch: true,

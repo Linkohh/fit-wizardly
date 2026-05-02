@@ -52,11 +52,13 @@ vi.mock('@/stores/installCoachStore', () => ({
 vi.mock('@/stores/themeStore', () => ({
   useThemeStore: (selector?: (state: {
     mode: 'light' | 'dark' | 'system';
+    resolvedTheme: 'light' | 'dark';
     setMode: (mode: 'light' | 'dark' | 'system') => void;
     getEffectiveTheme: () => 'light' | 'dark';
   }) => unknown) => {
     const state = {
       mode: mocks.themeMode,
+      resolvedTheme: mocks.resolvedTheme,
       setMode: mocks.setMode,
       getEffectiveTheme: () => mocks.resolvedTheme,
     };

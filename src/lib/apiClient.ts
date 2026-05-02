@@ -53,10 +53,10 @@ function normalizePlanDates(plan: unknown): Plan {
     if (Number.isNaN(createdAtDate.getTime())) {
         // Invalid date string — strip the field rather than propagating a type lie.
         const { createdAt: _drop, ...rest } = plan as Record<string, unknown>;
-        return rest as Plan;
+        return rest as unknown as Plan;
     }
 
-    return { ...(plan as object), createdAt: createdAtDate } as Plan;
+    return { ...(plan as object), createdAt: createdAtDate } as unknown as Plan;
 }
 
 async function getErrorMessage(response: Response): Promise<string> {

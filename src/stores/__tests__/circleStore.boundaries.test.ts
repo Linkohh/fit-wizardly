@@ -79,7 +79,7 @@ describe('circleStore optimistic and realtime boundaries', () => {
       id: 'reaction-1',
       activity_id: 'activity-1',
       user_id: 'user-2',
-      reaction_type: 'fire',
+      reaction_type: 'fire' as const,
       created_at: '2026-03-20T00:00:00.000Z',
     };
 

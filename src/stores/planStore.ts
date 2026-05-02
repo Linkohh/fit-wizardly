@@ -56,10 +56,11 @@ const handleAsyncOperation = async <T>(
 // ACTIVE WORKOUT STATE
 // ============================================
 
-const sanitizePlanPersistedState = (state: Partial<PlanState> | undefined) => ({
+type PersistedPlanState = Pick<PlanState, 'currentWeek' | 'preferredWeightUnit'>;
+
+const sanitizePlanPersistedState = (state: Partial<PlanState> | undefined): PersistedPlanState => ({
   currentWeek: typeof state?.currentWeek === 'number' ? state.currentWeek : 1,
-  preferredWeightUnit:
-    state?.preferredWeightUnit === 'kg' ? 'kg' : 'lbs',
+  preferredWeightUnit: state?.preferredWeightUnit === 'kg' ? 'kg' : 'lbs',
 });
 
 // ============================================
@@ -123,7 +124,7 @@ interface PlanState {
 // ============================================
 
 export const usePlanStore = create<PlanState>()(
-  persist(
+  persist<PlanState, [], [], PersistedPlanState>(
     (set, get) => ({
       // Initial state
       currentPlan: null,
@@ -510,7 +511,7 @@ export const usePlanStore = create<PlanState>()(
       partialize: sanitizePlanPersistedState,
       merge: (persistedState, currentState) => ({
         ...currentState,
-        ...sanitizePlanPersistedState(persistedState as Partial<PlanState>),
+        ...sanitizePlanPersistedState(persistedState as Partial<PlanState> | undefined),
       }),
     }
   )

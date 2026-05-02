@@ -906,8 +906,8 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
     --surface-stroke: hsl(270 20% 80% / 0.3);
     --elevation-soft: 0 10px 30px -16px hsl(270 30% 50% / 0.08);
     --elevation-floating: 0 16px 40px -20px hsl(270 30% 50% / 0.12);
-    --theme-transition-duration: 920ms;
-    --theme-transition-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --theme-transition-duration: 50ms;
+    --theme-transition-ease: ease;
 
   }
 

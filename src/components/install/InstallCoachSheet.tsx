@@ -151,9 +151,13 @@ export function InstallCoachSheet({ enableAutoPrompt = true }: InstallCoachSheet
 
   const isIos = platform === 'ios-safari' || platform === 'ios-chrome';
   const isAndroid = platform === 'android-chrome';
+  const translate = useMemo(
+    () => (key: string, fallback?: string) => (fallback === undefined ? t(key) : t(key, fallback)),
+    [t],
+  );
   const content = useMemo(
-    () => getInstallCoachContent(platform, canNativeInstall, t),
-    [canNativeInstall, platform, t],
+    () => getInstallCoachContent(platform, canNativeInstall, translate),
+    [canNativeInstall, platform, translate],
   );
 
   useEffect(() => {

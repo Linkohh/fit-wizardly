@@ -21,7 +21,7 @@ const buildPlan = (): Plan =>
     weeklyVolume: [],
     rirProgression: [],
     notes: [],
-  }) as Plan;
+  }) as unknown as Plan;
 
 describe('trainerStore persistence', () => {
   beforeEach(() => {

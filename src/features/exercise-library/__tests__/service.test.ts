@@ -122,7 +122,7 @@ describe('exercise-library service', () => {
     setNavigatorOnline(false);
     fetchMock.mockReset();
     fetchMock.mockImplementation((input) => {
-      const url = typeof input === 'string' ? input : input.url;
+      const url = input instanceof Request ? input.url : input.toString();
       if (url.includes('wger-snapshot.v1.json')) {
         return createJsonResponse(createSnapshotPayload());
       }

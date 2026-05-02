@@ -75,8 +75,8 @@ export function Header() {
   const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
   const setTrainerMode = useTrainerStore((state) => state.setTrainerMode);
   const mode = useThemeStore((state) => state.mode);
+  const resolvedTheme = useThemeStore((state) => state.resolvedTheme);
   const setMode = useThemeStore((state) => state.setMode);
-  const getEffectiveTheme = useThemeStore((state) => state.getEffectiveTheme);
   const { shouldReduceMotion } = useMotionPreferences();
   const motionTiltEnabled = usePreferencesStore((state) => state.settings.motionTilt !== false);
   const installCoachPlatform = useInstallCoachStore((state) => state.platform);
@@ -95,13 +95,26 @@ export function Header() {
   const navRef = useRef<HTMLElement>(null);
   const navItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => getEffectiveTheme());
   const isTrainerAuthorized = !user || profile?.is_trainer === true;
   const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
+  const translate = useCallback(
+    (key: string, fallback?: string) => (fallback === undefined ? t(key) : t(key, fallback)),
+    [t],
+  );
+  const drawerUser = useMemo(
+    () =>
+      user
+        ? {
+            ...user,
+            email: user.email ?? null,
+          }
+        : null,
+    [user],
+  );
 
   const navItems = useMemo(
-    () => buildMobileNavItems({ isTrainerMode: isTrainerEnabled, t }),
-    [isTrainerEnabled, t],
+    () => buildMobileNavItems({ isTrainerMode: isTrainerEnabled, t: translate }),
+    [isTrainerEnabled, translate],
   );
 
   const drawerProfile = useMemo(
@@ -110,10 +123,10 @@ export function Header() {
         isTrainerMode: isTrainerEnabled,
         onboarding: onboardingUserData,
         profile,
-        t,
-        user,
+        t: translate,
+        user: drawerUser,
       }),
-    [isTrainerEnabled, onboardingUserData, profile, t, user],
+    [drawerUser, isTrainerEnabled, onboardingUserData, profile, translate],
   );
 
   const activeNavPath = useMemo(
@@ -194,39 +207,6 @@ export function Header() {
     (path: string) => isMobileNavPathActive(location.pathname, path),
     [location.pathname],
   );
-
-  useEffect(() => {
-    const applyResolvedTheme = () => {
-      setResolvedTheme(getEffectiveTheme());
-    };
-
-    applyResolvedTheme();
-
-    if (typeof window === 'undefined') {
-      return undefined;
-    }
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleThemeChange = () => {
-      if (mode === 'system') {
-        applyResolvedTheme();
-      }
-    };
-
-    if ('addEventListener' in mediaQuery) {
-      mediaQuery.addEventListener('change', handleThemeChange);
-    } else {
-      mediaQuery.addListener(handleThemeChange);
-    }
-
-    return () => {
-      if ('removeEventListener' in mediaQuery) {
-        mediaQuery.removeEventListener('change', handleThemeChange);
-      } else {
-        mediaQuery.removeListener(handleThemeChange);
-      }
-    };
-  }, [getEffectiveTheme, mode]);
 
   useEffect(() => {
     const updateIndicator = () => {

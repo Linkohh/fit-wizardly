@@ -29,6 +29,7 @@ const mocks = vi.hoisted(() => ({
     mode: 'light' as 'light' | 'dark' | 'system',
     resolvedTheme: 'light' as 'light' | 'dark',
     getEffectiveTheme: () => mocks.themeState.resolvedTheme,
+    syncSystemTheme: vi.fn(),
   },
   planState: {
     syncWithBackend: vi.fn(),
