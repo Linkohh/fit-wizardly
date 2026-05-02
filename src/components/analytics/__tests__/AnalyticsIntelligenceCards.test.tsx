@@ -4,6 +4,7 @@ import { LiftTruthMeterCard } from '@/components/analytics/LiftTruthMeterCard';
 import { PlanFitReviewCard } from '@/components/analytics/PlanFitReviewCard';
 import { SessionRescueCard } from '@/components/analytics/SessionRescueCard';
 import { TrainingCompassCard } from '@/components/analytics/TrainingCompassCard';
+import { WeeklyChangeBriefCard } from '@/components/analytics/WeeklyChangeBriefCard';
 import { WeeklyCoachSummaryCard } from '@/components/analytics/WeeklyCoachSummaryCard';
 import type { ReadinessEntry } from '@/types/readiness';
 import type { Exercise, Plan, SetLog, WorkoutLog } from '@/types/fitness';
@@ -24,6 +25,25 @@ const mocks = vi.hoisted(() => ({
   },
   readinessState: {
     logs: [] as ReadinessEntry[],
+  },
+}));
+
+vi.mock('framer-motion', () => ({
+  motion: {
+    div: ({
+      children,
+      initial: _initial,
+      animate: _animate,
+      transition: _transition,
+      whileHover: _whileHover,
+      ...props
+    }: {
+      children: React.ReactNode;
+      initial?: unknown;
+      animate?: unknown;
+      transition?: unknown;
+      whileHover?: unknown;
+    }) => <div {...props}>{children}</div>,
   },
 }));
 
@@ -176,6 +196,14 @@ describe('Analytics intelligence cards', () => {
     expect(screen.getByText('Weekly Coach Notes')).toBeInTheDocument();
     expect(screen.getAllByText(/3 sessions completed/).length).toBeGreaterThan(0);
     expect(screen.getByText(/Repeat the core lifts/)).toBeInTheDocument();
+  });
+
+  it('renders weekly change brief as a compact next-action card', () => {
+    render(<WeeklyChangeBriefCard now={now} />);
+
+    expect(screen.getByText('Weekly Change Brief')).toBeInTheDocument();
+    expect(screen.getByText(/Next adjustment/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/confidence/i).length).toBeGreaterThan(0);
   });
 
   it('renders plan fit review from the current plan only', () => {

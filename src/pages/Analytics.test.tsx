@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Analytics from './Analytics';
 
@@ -17,19 +17,70 @@ const mocks = vi.hoisted(() => ({
   trainerState: {
     isTrainerMode: false,
   },
+  tabsState: {
+    value: 'today',
+    onValueChange: undefined as ((value: string) => void) | undefined,
+  },
 }));
 
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: { children: ReactNode }) => <div {...props}>{children}</div>,
+    div: ({
+      children,
+      initial: _initial,
+      animate: _animate,
+      transition: _transition,
+      whileHover: _whileHover,
+      ...props
+    }: {
+      children: ReactNode;
+      initial?: unknown;
+      animate?: unknown;
+      transition?: unknown;
+      whileHover?: unknown;
+    }) => <div {...props}>{children}</div>,
+    section: ({
+      children,
+      initial: _initial,
+      animate: _animate,
+      transition: _transition,
+      whileHover: _whileHover,
+      ...props
+    }: {
+      children: ReactNode;
+      initial?: unknown;
+      animate?: unknown;
+      transition?: unknown;
+      whileHover?: unknown;
+    }) => <section {...props}>{children}</section>,
   },
 }));
 
 vi.mock('@/components/ui/tabs', () => ({
-  Tabs: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  Tabs: ({
+    children,
+    value,
+    onValueChange,
+  }: {
+    children: ReactNode;
+    value?: string;
+    onValueChange?: (value: string) => void;
+  }) => {
+    mocks.tabsState.value = value ?? 'today';
+    mocks.tabsState.onValueChange = onValueChange;
+    return <div>{children}</div>;
+  },
   TabsContent: ({ children }: { children: ReactNode }) => <section>{children}</section>,
   TabsList: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  TabsTrigger: ({ children }: { children: ReactNode }) => <button type="button">{children}</button>,
+  TabsTrigger: ({ children, value }: { children: ReactNode; value: string }) => (
+    <button
+      type="button"
+      aria-selected={mocks.tabsState.value === value}
+      onClick={() => mocks.tabsState.onValueChange?.(value)}
+    >
+      {children}
+    </button>
+  ),
 }));
 
 vi.mock('@/stores/authStore', () => ({
@@ -70,24 +121,45 @@ vi.mock('@/components/analytics/WeeklyCoachSummaryCard', () => ({
   WeeklyCoachSummaryCard: () => <div>Coach Notes</div>,
 }));
 
+vi.mock('@/components/analytics/WeeklyChangeBriefCard', () => ({
+  WeeklyChangeBriefCard: () => <div>Weekly Change Brief Card</div>,
+}));
+
 vi.mock('@/components/recovery/ReadinessTrend', () => ({
   ReadinessTrend: () => <div>Readiness Trend Card</div>,
 }));
 
-describe('Analytics page coach mode gating', () => {
+describe('Analytics page command center', () => {
   beforeEach(() => {
     mocks.authState.user = null;
     mocks.authState.profile = null;
     mocks.trainerState.isTrainerMode = false;
+    mocks.tabsState.value = 'today';
+    mocks.tabsState.onValueChange = undefined;
   });
 
-  it('hides Coach Notes when Coach Mode is off', () => {
+  it('uses intent-based tabs and leads with today signals', () => {
     render(<Analytics />);
 
-    expect(screen.queryByText('Coach Notes')).not.toBeInTheDocument();
+    expect(screen.getByText('Today')).toBeInTheDocument();
+    expect(screen.getByText('Strength')).toBeInTheDocument();
+    expect(screen.getByText('Load')).toBeInTheDocument();
+    expect(screen.queryByText('Performance')).not.toBeInTheDocument();
+    expect(screen.queryByText('Volume & Health')).not.toBeInTheDocument();
+    expect(screen.getByText('Weekly Change Brief Card')).toBeInTheDocument();
     expect(screen.getByText('Daily Training Compass Card')).toBeInTheDocument();
-    expect(screen.getByText('Plan Fit Review Card')).toBeInTheDocument();
     expect(screen.getByText('Session Rescue Card')).toBeInTheDocument();
+    expect(screen.queryByText('Strength Curve Card')).not.toBeInTheDocument();
+    expect(screen.queryByText('Volume Health Card')).not.toBeInTheDocument();
+  });
+
+  it('lazy-renders load analytics and hides Coach Notes when Coach Mode is off', () => {
+    render(<Analytics />);
+
+    fireEvent.click(screen.getByText('Load'));
+
+    expect(screen.queryByText('Coach Notes')).not.toBeInTheDocument();
+    expect(screen.queryByText('Daily Training Compass Card')).not.toBeInTheDocument();
     expect(screen.getByText('Volume Health Card')).toBeInTheDocument();
     expect(screen.getByText('Readiness Trend Card')).toBeInTheDocument();
   });
@@ -96,6 +168,8 @@ describe('Analytics page coach mode gating', () => {
     mocks.trainerState.isTrainerMode = true;
 
     render(<Analytics />);
+
+    fireEvent.click(screen.getByText('Load'));
 
     expect(screen.getByText('Coach Notes')).toBeInTheDocument();
   });
@@ -107,6 +181,8 @@ describe('Analytics page coach mode gating', () => {
 
     render(<Analytics />);
 
+    fireEvent.click(screen.getByText('Load'));
+
     expect(screen.queryByText('Coach Notes')).not.toBeInTheDocument();
   });
 
@@ -116,6 +192,8 @@ describe('Analytics page coach mode gating', () => {
     mocks.trainerState.isTrainerMode = true;
 
     render(<Analytics />);
+
+    fireEvent.click(screen.getByText('Load'));
 
     expect(screen.getByText('Coach Notes')).toBeInTheDocument();
   });

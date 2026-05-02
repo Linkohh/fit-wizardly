@@ -2,10 +2,10 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ClipboardList, Sparkles, Target, Zap } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { usePlanStore } from '@/stores/planStore';
 import { useReadinessStore } from '@/stores/readinessStore';
 import { buildWeeklyCoachSummary } from '@/lib/analyticsIntelligence';
+import { InsightQualityBadge } from './InsightQualityBadge';
 
 interface WeeklyCoachSummaryCardProps {
   now?: Date;
@@ -38,9 +38,7 @@ export function WeeklyCoachSummaryCard({ now }: WeeklyCoachSummaryCardProps) {
               </CardTitle>
               <CardDescription>A weekly readout in plain coaching language.</CardDescription>
             </div>
-            <Badge variant="outline" className="capitalize border-secondary/30 bg-secondary/10 text-secondary">
-              {summary.confidence} confidence
-            </Badge>
+            <InsightQualityBadge quality={summary.stats.sessionsThisWeek === 0 ? 'needs_data' : summary.confidence} />
           </div>
         </CardHeader>
 

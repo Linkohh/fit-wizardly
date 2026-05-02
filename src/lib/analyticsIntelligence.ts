@@ -7,6 +7,7 @@ export type TrainingCompassStatus = 'push' | 'hold' | 'dial_back' | 'needs_data'
 export type PlanFitStatus = 'fits_well' | 'too_dense' | 'recovery_mismatch' | 'under_dosed' | 'needs_data';
 export type LiftTruthStatus = 'clean_progress' | 'grind_debt' | 'quiet_progress' | 'technique_check' | 'needs_data';
 export type SessionRescueStatus = 'full_session_ok' | 'rescue_35' | 'rescue_25' | 'rescue_15' | 'needs_plan';
+export type WeeklyChangeStatus = 'steady' | 'watch_recovery' | 'rebuild_rhythm' | 'build_momentum' | 'needs_data';
 
 export interface TrainingCompassInsight {
   status: TrainingCompassStatus;
@@ -37,6 +38,24 @@ export interface WeeklyCoachSummary {
     previousWeekVolume: number;
     volumeChangePercent: number | null;
     avgReadiness: number | null;
+  };
+}
+
+export interface WeeklyChangeBrief {
+  status: WeeklyChangeStatus;
+  title: string;
+  confidence: AnalyticsConfidence;
+  summary: string;
+  keySignals: string[];
+  nextAction: string;
+  metrics: {
+    sessionsThisWeek: number;
+    previousWeekSessions: number;
+    volumeThisWeek: number;
+    previousWeekVolume: number;
+    volumeChangePercent: number | null;
+    readinessAverage: number | null;
+    readinessTrend: number | null;
   };
 }
 
@@ -880,5 +899,108 @@ export function buildWeeklyCoachSummary({
       volumeChangePercent,
       avgReadiness,
     },
+  };
+}
+
+export function buildWeeklyChangeBrief({
+  workoutLogs,
+  readinessLogs,
+  now = new Date(),
+}: AnalyticsInput): WeeklyChangeBrief {
+  const thisWeekLogs = getRecentLogs(workoutLogs, now);
+  const previousWeekLogs = getPreviousLogs(workoutLogs, now);
+  const volumeThisWeek = sumVolume(thisWeekLogs);
+  const previousWeekVolume = sumVolume(previousWeekLogs);
+  const volumeChangePercent = getVolumeChangePercent(volumeThisWeek, previousWeekVolume);
+  const readinessAverage = getReadinessAverage(readinessLogs, now);
+  const readinessTrend = getReadinessTrend(readinessLogs, now);
+
+  const metrics = {
+    sessionsThisWeek: thisWeekLogs.length,
+    previousWeekSessions: previousWeekLogs.length,
+    volumeThisWeek,
+    previousWeekVolume,
+    volumeChangePercent,
+    readinessAverage,
+    readinessTrend,
+  };
+
+  if (thisWeekLogs.length === 0) {
+    return {
+      status: 'needs_data',
+      title: 'Weekly Change Brief',
+      confidence: 'low',
+      summary: 'Log a workout and readiness check-in to compare this week against last week.',
+      keySignals: ['No completed sessions in the last 7 days.', 'Readiness trend needs more entries.'],
+      nextAction: 'Start with one repeatable session and record how ready you feel.',
+      metrics,
+    };
+  }
+
+  const confidence: AnalyticsConfidence =
+    thisWeekLogs.length >= 2 && readinessLogs.length >= 2 ? 'high' : thisWeekLogs.length >= 1 ? 'medium' : 'low';
+  const loadIsUp = volumeChangePercent !== null && volumeChangePercent >= 15;
+  const loadIsDown = volumeChangePercent !== null && volumeChangePercent <= -20;
+  const readinessIsDown = (readinessTrend ?? 0) <= -0.5 || (readinessAverage ?? 5) < 3;
+  const quieterWeek = loadIsDown || thisWeekLogs.length < previousWeekLogs.length;
+
+  if (loadIsUp && readinessIsDown) {
+    return {
+      status: 'watch_recovery',
+      title: 'Weekly Change Brief',
+      confidence,
+      summary: `Training load is up ${formatPercent(volumeChangePercent)}, while readiness is down. The priority is keeping progress repeatable.`,
+      keySignals: [
+        `Volume climbed from ${formatLoad(previousWeekVolume)} to ${formatLoad(volumeThisWeek)}.`,
+        readinessAverage === null ? 'Readiness entries are limited.' : `Readiness is averaging ${readinessAverage.toFixed(1)}/5.`,
+      ],
+      nextAction: 'Hold loads stable for the next session and add work only if reps stay clean.',
+      metrics,
+    };
+  }
+
+  if (quieterWeek) {
+    return {
+      status: 'rebuild_rhythm',
+      title: 'Weekly Change Brief',
+      confidence,
+      summary: 'This was a quieter training week. Treat the next step as rhythm-building, not catch-up work.',
+      keySignals: [
+        `${thisWeekLogs.length} ${pluralizeSession(thisWeekLogs.length)} completed this week.`,
+        volumeChangePercent === null ? 'Last-week volume is limited.' : `Volume is down ${formatPercent(volumeChangePercent)} from last week.`,
+      ],
+      nextAction: 'Book one repeatable session first, then rebuild volume gradually.',
+      metrics,
+    };
+  }
+
+  if (loadIsUp) {
+    return {
+      status: 'build_momentum',
+      title: 'Weekly Change Brief',
+      confidence,
+      summary: `Training load is up ${formatPercent(volumeChangePercent)} and recovery is holding well enough to build momentum.`,
+      keySignals: [
+        `${thisWeekLogs.length} ${pluralizeSession(thisWeekLogs.length)} completed this week.`,
+        readinessAverage === null ? 'Readiness trend is still forming.' : `Readiness is averaging ${readinessAverage.toFixed(1)}/5.`,
+      ],
+      nextAction: 'Repeat the core lifts and make only one small progression at a time.',
+      metrics,
+    };
+  }
+
+  return {
+    status: 'steady',
+    title: 'Weekly Change Brief',
+    confidence,
+    summary: 'Load and readiness look steady. This is the right window for controlled, boring progress.',
+    keySignals: [
+      `${thisWeekLogs.length} ${pluralizeSession(thisWeekLogs.length)} completed this week.`,
+      volumeChangePercent === null
+        ? `${formatLoad(volumeThisWeek)} logged volume this week.`
+        : `Volume changed ${formatPercent(volumeChangePercent)} from last week.`,
+    ],
+    nextAction: 'Repeat the plan and add a small rep or load step only where effort stays controlled.',
+    metrics,
   };
 }

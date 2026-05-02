@@ -9,17 +9,13 @@ import { getMRVForMuscle } from '@/lib/progressionEngine';
 import { formatIdentifierLabel } from '@/lib/displayText';
 
 export function VolumeHealth() {
-    const { workoutLogs, currentPlan, currentWeek } = usePlanStore();
+    const { workoutLogs, currentPlan } = usePlanStore();
 
-    // Calculate sets per muscle group for the CURRENT WEEK
     const data = useMemo(() => {
         if (!currentPlan) return [];
 
         const muscleSets = new Map<MuscleGroup, number>();
 
-        // Filter logs for current week
-        // Assuming logs have a clear way to determine week, or we filter by date relative to plan start
-        // For simplicity/robustness in this demo, let's look at the last 7 days of logs
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
@@ -29,10 +25,6 @@ export function VolumeHealth() {
             log.exercises.forEach(exLog => {
                 if (exLog.skipped) return;
 
-                // Find muscle group for this exercise
-                // We need to look up the exercise definition. 
-                // In a real app, exerciseLog might snapshot the muscle group, or we lookup.
-                // Fallback: try to find it in the current plan's days
                 let muscles: MuscleGroup[] = [];
 
                 for (const day of currentPlan.workoutDays) {
@@ -44,10 +36,8 @@ export function VolumeHealth() {
                 }
 
                 if (muscles.length > 0) {
-                    // Count completed sets
                     const completedSets = exLog.sets.filter(s => s.completed).length;
 
-                    // Distribute sets to primary muscles (fractional or full? usually full count for primary)
                     muscles.forEach(m => {
                         const current = muscleSets.get(m) || 0;
                         muscleSets.set(m, current + completedSets);
@@ -58,9 +48,8 @@ export function VolumeHealth() {
 
         // Convert to array and sort by volume
         return Array.from(muscleSets.entries())
-            .map(([name, sets]) => ({ name, sets }))
+            .map(([name, sets]) => ({ name, label: formatIdentifierLabel(name), sets }))
             .sort((a, b) => b.sets - a.sets)
-            // Top 8 active muscles to keep chart clean
             .slice(0, 8);
     }, [workoutLogs, currentPlan]);
 
@@ -94,26 +83,26 @@ export function VolumeHealth() {
                         <CardDescription>Target: 10-20 sets per muscle/week for growth.</CardDescription>
                     </div>
                     {hasOverreaching && (
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 text-xs font-bold animate-pulse">
+                        <div className="flex items-center gap-2 rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 text-xs font-semibold text-amber-200">
                             <AlertTriangle className="w-3 h-3" />
-                            High Systemic Fatigue
+                            Volume above target
                         </div>
                     )}
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="h-[300px] w-full mt-4">
+                <div className="h-[280px] w-full mt-4 sm:h-[320px]">
                     {data.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
+                            <BarChart data={data} layout="vertical" margin={{ top: 5, right: 24, left: 18, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="hsl(var(--border))" opacity={0.3} />
                                 <XAxis type="number" hide />
                                 <YAxis
-                                    dataKey="name"
+                                    dataKey="label"
                                     type="category"
                                     tickLine={false}
                                     axisLine={false}
-                                    width={80}
+                                    width={92}
                                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                                 />
                                 <Tooltip
@@ -143,9 +132,9 @@ export function VolumeHealth() {
                             </BarChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                        <div className="h-full flex flex-col items-center justify-center rounded-lg border border-dashed border-border/70 bg-background/25 px-6 text-center text-muted-foreground">
                             <Activity className="w-12 h-12 mb-2 opacity-20" />
-                            <p>No volume data for this week.</p>
+                            <p className="text-sm">Log current-plan sets to see which muscle groups are getting enough work.</p>
                         </div>
                     )}
                 </div>

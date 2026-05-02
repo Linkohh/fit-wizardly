@@ -4,6 +4,7 @@ import {
   buildPlanFitReview,
   buildSessionRescue,
   buildTrainingCompass,
+  buildWeeklyChangeBrief,
   buildWeeklyCoachSummary,
 } from '@/lib/analyticsIntelligence';
 import type { ReadinessEntry } from '@/types/readiness';
@@ -264,6 +265,87 @@ describe('buildWeeklyCoachSummary', () => {
 
     expect(summary.highlights.join(' ')).toContain('1 session completed');
     expect(summary.nextWeekFocus).toContain('repeatable');
+  });
+});
+
+describe('buildWeeklyChangeBrief', () => {
+  it('returns a starter brief when training and readiness data are missing', () => {
+    const brief = buildWeeklyChangeBrief({
+      workoutLogs: [],
+      readinessLogs: [],
+      now,
+    });
+
+    expect(brief.status).toBe('needs_data');
+    expect(brief.confidence).toBe('low');
+    expect(brief.title).toContain('Weekly Change Brief');
+    expect(brief.summary).toContain('Log');
+    expect(brief.keySignals).toHaveLength(2);
+    expectNoBannedCopy(brief);
+  });
+
+  it('flags higher load with lower readiness as the priority signal', () => {
+    const brief = buildWeeklyChangeBrief({
+      workoutLogs: [
+        workout(1, { totalVolume: 6_000, perceivedDifficulty: 'challenging' }),
+        workout(3, { totalVolume: 5_000, perceivedDifficulty: 'too_hard' }),
+        workout(9, { totalVolume: 3_000 }),
+      ],
+      readinessLogs: [
+        readiness(0, { overallScore: 2.5, energyLevel: 2, stressLevel: 4 }),
+        readiness(2, { overallScore: 2.7, energyLevel: 2 }),
+        readiness(10, { overallScore: 4.1 }),
+      ],
+      now,
+    });
+
+    expect(brief.status).toBe('watch_recovery');
+    expect(brief.summary).toMatch(/load.*up/i);
+    expect(brief.summary).toMatch(/readiness.*down/i);
+    expect(brief.nextAction).toMatch(/Hold|stable|repeatable/i);
+    expect(brief.metrics.volumeChangePercent).toBeGreaterThan(0);
+    expect(brief.metrics.readinessTrend).toBeLessThan(0);
+    expectNoBannedCopy(brief);
+  });
+
+  it('keeps the brief positive when load and readiness are stable', () => {
+    const brief = buildWeeklyChangeBrief({
+      workoutLogs: [
+        workout(1, { totalVolume: 4_000 }),
+        workout(3, { totalVolume: 3_800 }),
+        workout(8, { totalVolume: 4_100 }),
+        workout(11, { totalVolume: 3_900 }),
+      ],
+      readinessLogs: [
+        readiness(0, { overallScore: 4.1 }),
+        readiness(3, { overallScore: 4 }),
+        readiness(9, { overallScore: 4.2 }),
+      ],
+      now,
+    });
+
+    expect(brief.status).toBe('steady');
+    expect(brief.confidence).toBe('high');
+    expect(brief.summary).toContain('steady');
+    expect(brief.nextAction).toMatch(/Repeat|small/i);
+    expectNoBannedCopy(brief);
+  });
+
+  it('identifies a quieter week without shaming missed sessions', () => {
+    const brief = buildWeeklyChangeBrief({
+      workoutLogs: [
+        workout(2, { totalVolume: 1_500 }),
+        workout(8, { totalVolume: 3_000 }),
+        workout(11, { totalVolume: 3_200 }),
+      ],
+      readinessLogs: [readiness(0, { overallScore: 4.4 }), readiness(9, { overallScore: 3.8 })],
+      now,
+    });
+
+    expect(brief.status).toBe('rebuild_rhythm');
+    expect(brief.summary).toMatch(/quieter|down/i);
+    expect(brief.nextAction).toContain('repeatable');
+    expectNoBannedCopy(brief);
   });
 });
 

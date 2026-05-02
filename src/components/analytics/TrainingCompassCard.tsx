@@ -7,9 +7,11 @@ import { usePlanStore } from '@/stores/planStore';
 import { useReadinessStore } from '@/stores/readinessStore';
 import { buildTrainingCompass, type TrainingCompassStatus } from '@/lib/analyticsIntelligence';
 import { cn } from '@/lib/utils';
+import { InsightQualityBadge } from './InsightQualityBadge';
 
 interface TrainingCompassCardProps {
   now?: Date;
+  className?: string;
 }
 
 const statusMeta: Record<
@@ -57,7 +59,7 @@ function formatVolume(value: number) {
   return Math.round(value).toString();
 }
 
-export function TrainingCompassCard({ now }: TrainingCompassCardProps) {
+export function TrainingCompassCard({ now, className }: TrainingCompassCardProps) {
   const workoutLogs = usePlanStore((state) => state.workoutLogs);
   const readinessLogs = useReadinessStore((state) => state.logs);
   const analysisNow = useMemo(() => now ?? new Date(), [now]);
@@ -73,7 +75,7 @@ export function TrainingCompassCard({ now }: TrainingCompassCardProps) {
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-      className="col-span-full"
+      className={className}
     >
       <Card variant="glass" className="relative overflow-hidden border-primary/15">
         <div className={cn('absolute inset-0 bg-gradient-to-br opacity-80', meta.glow)} aria-hidden="true" />
@@ -87,9 +89,7 @@ export function TrainingCompassCard({ now }: TrainingCompassCardProps) {
               <CardDescription>Readiness and recent workload translated into today's training call.</CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className={cn('capitalize', meta.badge)}>
-                {insight.confidence} confidence
-              </Badge>
+              <InsightQualityBadge quality={insight.status === 'needs_data' ? 'needs_data' : insight.confidence} />
               <Badge variant="outline" className={cn('gap-1.5', meta.badge)}>
                 <StatusIcon className="h-3.5 w-3.5" />
                 {meta.label}

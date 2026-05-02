@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { usePlanStore } from '@/stores/planStore';
 import { useReadinessStore } from '@/stores/readinessStore';
 import type { Plan, WorkoutLog } from '@/types/fitness';
+import { InsightQualityBadge } from './InsightQualityBadge';
 
 interface SessionRescueCardProps {
   now?: Date;
@@ -80,10 +81,13 @@ export function SessionRescueCard({ now }: SessionRescueCardProps) {
               </CardTitle>
               <CardDescription>Today&apos;s compact plan if time or readiness is tight.</CardDescription>
             </div>
-            <Badge variant="outline" className={cn('gap-1.5', meta.badge)}>
-              <Signal className="h-3.5 w-3.5" />
-              {meta.label}
-            </Badge>
+            <div className="flex flex-wrap gap-2">
+              <InsightQualityBadge quality={rescue.status === 'needs_plan' ? 'needs_data' : rescue.confidence} />
+              <Badge variant="outline" className={cn('gap-1.5', meta.badge)}>
+                <Signal className="h-3.5 w-3.5" />
+                {meta.label}
+              </Badge>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -134,7 +138,9 @@ export function SessionRescueCard({ now }: SessionRescueCardProps) {
           )}
 
           {rescue.skipList.length > 0 && (
-            <p className="text-xs text-muted-foreground">Park for later: {rescue.skipList.join(', ')}</p>
+            <p className="rounded-lg border border-border/40 bg-background/20 px-3 py-2 text-xs text-muted-foreground">
+              Park for later: {rescue.skipList.join(', ')}
+            </p>
           )}
         </CardContent>
       </Card>

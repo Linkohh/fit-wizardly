@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { buildLiftTruthMeter, type LiftTruthMeterInsight, type LiftTruthStatus } from '@/lib/analyticsIntelligence';
 import { cn } from '@/lib/utils';
 import { usePlanStore } from '@/stores/planStore';
+import { InsightQualityBadge } from './InsightQualityBadge';
 
 interface LiftTruthMeterCardProps {
   now?: Date;
@@ -86,11 +87,18 @@ export function LiftTruthMeterCard({ now }: LiftTruthMeterCardProps) {
     >
       <Card variant="glass" className="h-full overflow-hidden border-primary/15">
         <CardHeader>
-          <CardTitle className="gradient-text flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5" />
-            Lift Truth Meter
-          </CardTitle>
-          <CardDescription>Progress separated from effort cost across your top loaded lifts.</CardDescription>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <CardTitle className="gradient-text flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5" />
+                Lift Truth Meter
+              </CardTitle>
+              <CardDescription>Progress separated from effort cost across your top loaded lifts.</CardDescription>
+            </div>
+            {insights[0] && (
+              <InsightQualityBadge quality={insights[0].status === 'needs_data' ? 'needs_data' : insights[0].confidence} />
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {insights.length === 0 ? (

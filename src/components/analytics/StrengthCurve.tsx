@@ -12,7 +12,6 @@ export function StrengthCurve() {
     const { workoutLogs, personalRecords } = usePlanStore();
     const [selectedExercise, setSelectedExercise] = useState<string>('');
 
-    // Extract unique exercise names from logs for the filter
     const availableExercises = useMemo(() => {
         const names = new Set<string>();
         workoutLogs.forEach(log => {
@@ -31,18 +30,15 @@ export function StrengthCurve() {
         }
     }, [availableExercises, selectedExercise]);
 
-    // Calculate 1RM history for the selected exercise
     const data = useMemo(() => {
         const history: { date: string; e1rm: number; weight: number; reps: number; isPR: boolean }[] = [];
         let runningBest = 0;
 
-        // Sort logs by date ascending
         const sortedLogs = [...workoutLogs].sort((a, b) => new Date(a.completedAt).getTime() - new Date(b.completedAt).getTime());
 
         sortedLogs.forEach(log => {
             log.exercises.forEach(ex => {
                 if (ex.exerciseName === selectedExercise) {
-                    // Find best set (highest 1RM) for this workout
                     let best1RM = 0;
                     let bestSet = { weight: 0, reps: 0 };
 
@@ -77,7 +73,6 @@ export function StrengthCurve() {
         return history;
     }, [workoutLogs, selectedExercise]);
 
-    // Find current PR for this exercise
     const currentPR = personalRecords.find(pr => pr.exerciseName === selectedExercise && pr.type === 'weight')?.newValue;
 
     return (
@@ -88,8 +83,8 @@ export function StrengthCurve() {
             whileHover={{ y: -2 }}
         >
         <Card variant="glass" className="col-span-1 lg:col-span-2">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div>
+            <CardHeader className="flex flex-col gap-4 pb-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
                     <CardTitle className="gradient-text flex items-center gap-2">
                         <TrendingUp className="w-5 h-5" />
                         Strength Curve
@@ -97,7 +92,7 @@ export function StrengthCurve() {
                     <CardDescription>Estimated 1 Rep Max (e1RM) progression.</CardDescription>
                 </div>
                 <Select value={selectedExercise || undefined} onValueChange={setSelectedExercise}>
-                    <SelectTrigger className="w-[180px] glass-card" disabled={availableExercises.length === 0}>
+                    <SelectTrigger className="glass-card w-full sm:w-[220px]" disabled={availableExercises.length === 0}>
                         <SelectValue placeholder="Select Exercise" />
                     </SelectTrigger>
                     <SelectContent>
@@ -109,10 +104,10 @@ export function StrengthCurve() {
                 </Select>
             </CardHeader>
             <CardContent>
-                <div className="h-[300px] w-full mt-4">
+                <div className="h-[280px] w-full mt-4 sm:h-[320px]">
                     {data.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                            <LineChart data={data} margin={{ top: 10, right: 8, left: -12, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="lineColor" x1="0" y1="0" x2="1" y2="0">
                                         <stop offset="0%" stopColor="hsl(var(--primary))" />
@@ -141,7 +136,11 @@ export function StrengthCurve() {
                                         backdropFilter: 'blur(8px)',
                                         borderRadius: '8px'
                                     }}
-                                    formatter={(value) => value != null ? [`${value} lbs`, 'e1RM'] : ['', 'e1RM']}
+                                    formatter={(value, _name, props) => {
+                                        const payload = props.payload as { weight?: number; reps?: number } | undefined;
+                                        const setLabel = payload?.weight && payload?.reps ? ` from ${payload.weight} x ${payload.reps}` : '';
+                                        return value != null ? [`${value} lbs${setLabel}`, 'Estimated 1RM'] : ['', 'Estimated 1RM'];
+                                    }}
                                     labelStyle={{ color: 'hsl(var(--foreground))' }}
                                 />
                                 {currentPR && (
@@ -181,9 +180,9 @@ export function StrengthCurve() {
                             </LineChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                        <div className="h-full flex flex-col items-center justify-center rounded-lg border border-dashed border-border/70 bg-background/25 px-6 text-center text-muted-foreground">
                             <Trophy className="w-12 h-12 mb-2 opacity-20" />
-                            <p>No log data for this exercise yet.</p>
+                            <p className="text-sm">Log completed weighted sets to draw this lift&apos;s strength curve.</p>
                         </div>
                     )}
                 </div>

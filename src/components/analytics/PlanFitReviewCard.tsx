@@ -7,6 +7,7 @@ import { buildPlanFitReview, type PlanFitStatus } from '@/lib/analyticsIntellige
 import { cn } from '@/lib/utils';
 import { usePlanStore } from '@/stores/planStore';
 import { useReadinessStore } from '@/stores/readinessStore';
+import { InsightQualityBadge } from './InsightQualityBadge';
 
 interface PlanFitReviewCardProps {
   now?: Date;
@@ -76,13 +77,19 @@ export function PlanFitReviewCard({ now }: PlanFitReviewCardProps) {
                 <BadgeCheck className="h-3.5 w-3.5" />
                 {meta.label}
               </Badge>
-              <Badge variant="outline" className={cn('capitalize', meta.badge)}>
-                {insight.confidence} confidence
-              </Badge>
+              <InsightQualityBadge quality={insight.status === 'needs_data' ? 'needs_data' : insight.confidence} />
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-5">
+          <div className="rounded-lg border border-primary/20 bg-primary/10 p-4">
+            <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-primary">
+              <Gauge className="h-4 w-4" />
+              Suggested adjustment
+            </div>
+            <p className="text-sm leading-relaxed">{insight.suggestedAdjustment}</p>
+          </div>
+
           <div className="space-y-2">
             <div className="flex items-end justify-between gap-3">
               <div>
@@ -127,13 +134,6 @@ export function PlanFitReviewCard({ now }: PlanFitReviewCardProps) {
             ))}
           </div>
 
-          <div className="rounded-lg border border-primary/20 bg-primary/10 p-4">
-            <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-primary">
-              <Gauge className="h-4 w-4" />
-              Suggested adjustment
-            </div>
-            <p className="text-sm leading-relaxed">{insight.suggestedAdjustment}</p>
-          </div>
         </CardContent>
       </Card>
     </motion.div>
