@@ -31,9 +31,12 @@ interface ExerciseFilterOptions {
     category: ExerciseCategory | 'all';
     muscle: MuscleGroup | 'all';
     difficulty: DifficultyFilter;
-    equipment: string;
+    equipment: Equipment | 'all';
     search: string;
 }
+
+const isEquipmentFilter = (value: string): value is Equipment | 'all' =>
+    value === 'all' || EQUIPMENT_OPTIONS.some((option) => option.id === value);
 
 export function ExercisesBrowser() {
     const [filters, setFilters] = useState<ExerciseFilterOptions>({
@@ -102,7 +105,22 @@ export function ExercisesBrowser() {
     const hasMore = displayedExercises.length < filteredExercises.length;
 
     const handleFilterChange = (key: string, value: string) => {
-        setFilters((previous) => ({ ...previous, [key]: value }));
+        setFilters((previous) => {
+            switch (key) {
+                case 'category':
+                    return { ...previous, category: value as ExerciseCategory | 'all' };
+                case 'muscle':
+                    return { ...previous, muscle: value as MuscleGroup | 'all' };
+                case 'difficulty':
+                    return { ...previous, difficulty: value as DifficultyFilter };
+                case 'equipment':
+                    return { ...previous, equipment: isEquipmentFilter(value) ? value : 'all' };
+                case 'search':
+                    return { ...previous, search: value };
+                default:
+                    return previous;
+            }
+        });
         setPage(1);
     };
 

@@ -41,7 +41,9 @@ interface TrainerState {
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
-const sanitizeTrainerPersistedState = (state: Partial<TrainerState> | undefined) => ({
+type PersistedTrainerState = Pick<TrainerState, 'isTrainerMode'>;
+
+const sanitizeTrainerPersistedState = (state: Partial<TrainerState> | undefined): PersistedTrainerState => ({
   isTrainerMode: Boolean(state?.isTrainerMode),
 });
 
@@ -52,7 +54,7 @@ const isTrainerAuthorized = () => {
 };
 
 export const useTrainerStore = create<TrainerState>()(
-  persist(
+  persist<TrainerState, [], [], PersistedTrainerState>(
     (set, get) => ({
       isTrainerMode: false,
       clients: [],
@@ -179,7 +181,7 @@ export const useTrainerStore = create<TrainerState>()(
       partialize: sanitizeTrainerPersistedState,
       merge: (persistedState, currentState) => ({
         ...currentState,
-        ...sanitizeTrainerPersistedState(persistedState as Partial<TrainerState>),
+        ...sanitizeTrainerPersistedState(persistedState as Partial<TrainerState> | undefined),
       }),
     }
   )

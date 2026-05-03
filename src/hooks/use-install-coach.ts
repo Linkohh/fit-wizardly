@@ -100,11 +100,7 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
     };
 
     if (mediaQuery) {
-      if ('addEventListener' in mediaQuery) {
-        mediaQuery.addEventListener('change', handleDisplayModeChange);
-      } else {
-        mediaQuery.addListener(handleDisplayModeChange);
-      }
+      mediaQuery.addEventListener('change', handleDisplayModeChange);
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
@@ -112,11 +108,7 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
 
     return () => {
       if (mediaQuery) {
-        if ('removeEventListener' in mediaQuery) {
-          mediaQuery.removeEventListener('change', handleDisplayModeChange);
-        } else {
-          mediaQuery.removeListener(handleDisplayModeChange);
-        }
+        mediaQuery.removeEventListener('change', handleDisplayModeChange);
       }
 
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);

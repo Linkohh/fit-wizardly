@@ -281,7 +281,7 @@ export const usePreferencesStore = create<PreferencesState>()(
         }
 
         const existingSettings = isRecord(persistedState.settings)
-          ? (persistedState.settings as ExerciseSettings)
+          ? (persistedState.settings as unknown as ExerciseSettings)
           : null;
         const { settings } = normalizeSettings(existingSettings);
 

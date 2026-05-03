@@ -18,7 +18,7 @@ interface FoodLoggerProps {
 }
 
 export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) {
-    const { addCustomFood, favorites, toggleFavorite } = useNutritionStore();
+    const { addCustomFood, customFoods, favorites, toggleFavorite } = useNutritionStore();
     const [mode, setMode] = useState<'view' | 'logging'>('view');
     const [activeTab, setActiveTab] = useState<'search' | 'favorites' | 'custom'>('search');
     const [nutritionLookupConsent, setNutritionLookupConsent] = useState(() => hasNutritionLookupConsent());

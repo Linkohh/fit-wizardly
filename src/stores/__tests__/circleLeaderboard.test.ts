@@ -17,7 +17,7 @@ describe('buildLeaderboard', () => {
                 { user_id: 'u2', profile: { display_name: 'Bob', avatar_url: null } },
             ],
             member_count: 2,
-        } as CircleWithMembers;
+        } as unknown as CircleWithMembers;
 
         const activities: ActivityWithProfile[] = [
             {
@@ -25,19 +25,19 @@ describe('buildLeaderboard', () => {
                 user_id: 'u1',
                 created_at: new Date().toISOString(),
                 payload: { totalVolume: 1000 },
-            } as ActivityWithProfile,
+            } as unknown as ActivityWithProfile,
             {
                 activity_type: 'workout_logged',
                 user_id: 'u1',
                 created_at: new Date().toISOString(),
                 payload: { totalVolume: 800 },
-            } as ActivityWithProfile,
+            } as unknown as ActivityWithProfile,
             {
                 activity_type: 'workout_logged',
                 user_id: 'u2',
                 created_at: new Date().toISOString(),
                 payload: { totalVolume: 1200 },
-            } as ActivityWithProfile,
+            } as unknown as ActivityWithProfile,
         ];
 
         const leaderboard = buildLeaderboard(circle, activities, 'all-time');

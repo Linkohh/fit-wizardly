@@ -18,6 +18,7 @@ dist
 dist-ssr
 *.local
 *.tsbuildinfo
+marketing/
 
 # Editor directories and files
 .vscode/*

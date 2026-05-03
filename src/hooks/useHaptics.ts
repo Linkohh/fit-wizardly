@@ -129,5 +129,7 @@ export function useHaptics() {
         }
     };
 
-    return { impact, notification, selection };
+    const favoriteToggle = () => impact('light');
+
+    return { favoriteToggle, impact, notification, selection };
 }

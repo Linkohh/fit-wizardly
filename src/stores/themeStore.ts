@@ -8,7 +8,9 @@ const LEGACY_THEME_STORAGE_KEY = 'theme-storage';
 
 interface ThemeState {
   mode: ThemeMode;
+  resolvedTheme: 'light' | 'dark';
   setMode: (mode: ThemeMode) => void;
+  syncSystemTheme: (matchesDark: boolean) => void;
   getEffectiveTheme: () => 'light' | 'dark';
 }
 
@@ -19,6 +21,9 @@ const getSystemTheme = (): 'light' | 'dark' => {
 
 const isThemeMode = (value: unknown): value is ThemeMode =>
   value === 'light' || value === 'dark' || value === 'system';
+
+const resolveTheme = (mode: ThemeMode): 'light' | 'dark' =>
+  mode === 'system' ? getSystemTheme() : mode;
 
 const migrateLegacyThemeStorage = () => {
   if (typeof window === 'undefined') {
@@ -59,17 +64,31 @@ export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
       mode: 'system',
-      setMode: (mode) => set({ mode }),
-      getEffectiveTheme: () => {
-        const { mode } = get();
-        if (mode === 'system') {
-          return getSystemTheme();
-        }
-        return mode;
-      },
+      resolvedTheme: resolveTheme('system'),
+      setMode: (mode) => set({ mode, resolvedTheme: resolveTheme(mode) }),
+      syncSystemTheme: (matchesDark) =>
+        set((state) => {
+          if (state.mode !== 'system') {
+            return state;
+          }
+
+          return { resolvedTheme: matchesDark ? 'dark' : 'light' };
+        }),
+      getEffectiveTheme: () => get().resolvedTheme,
     }),
     {
       name: THEME_STORAGE_KEY,
+      partialize: (state) => ({ mode: state.mode }),
+      merge: (persistedState, currentState) => {
+        const persistedMode = (persistedState as Partial<ThemeState> | undefined)?.mode;
+        const mode = isThemeMode(persistedMode) ? persistedMode : currentState.mode;
+
+        return {
+          ...currentState,
+          mode,
+          resolvedTheme: resolveTheme(mode),
+        };
+      },
     }
   )
 );

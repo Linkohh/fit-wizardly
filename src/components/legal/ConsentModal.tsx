@@ -73,15 +73,33 @@ export function ConsentModal() {
     setOpen(false);
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setOpen(true);
+      return;
+    }
+
+    if (localStorage.getItem(CONSENT_STORAGE_KEY)) {
+      setOpen(false);
+    }
+  };
+
+  const preventDismiss = (event: Event) => {
+    event.preventDefault();
+  };
+
   return (
     <Sheet
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
     >
       <SheetContent
         side="bottom"
         showCloseButton={false}
         enableBlur
+        onEscapeKeyDown={preventDismiss}
+        onInteractOutside={preventDismiss}
+        onPointerDownOutside={preventDismiss}
         data-testid="consent-tray"
         data-surface="consent-tray"
 

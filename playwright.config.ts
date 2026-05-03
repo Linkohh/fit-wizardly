@@ -18,7 +18,7 @@ export default defineConfig({
   webServer: useExistingServer
     ? undefined
     : {
-        command: `npm run build && python3 -m http.server ${PORT} --directory dist`,
+        command: `npm run build && npm run preview -- --host 127.0.0.1 --port ${PORT}`,
         port: PORT,
         reuseExistingServer: !process.env.CI,
         timeout: 120000,

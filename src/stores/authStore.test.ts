@@ -152,9 +152,8 @@ describe('authStore.initialize', () => {
         user_metadata: { full_name: 'Coach Alex' },
       },
     };
-    let authStateChangeHandler:
-      | ((event: string, session: typeof fakeSession | null) => Promise<void> | void)
-      | null = null;
+    type TestAuthHandler = (event: string, session: typeof fakeSession | null) => Promise<void> | void;
+    let authStateChangeHandler: TestAuthHandler | null = null;
 
     mocks.getSession.mockResolvedValue({ data: { session: fakeSession }, error: null });
     mocks.onAuthStateChange.mockImplementation(
@@ -187,7 +186,11 @@ describe('authStore.initialize', () => {
     });
 
     await useAuthStore.getState().initialize();
-    await authStateChangeHandler?.('SIGNED_IN', fakeSession);
+    const registeredHandler = mocks.onAuthStateChange.mock.calls[0]?.[0] as TestAuthHandler | undefined;
+    if (!registeredHandler) {
+      throw new Error('Expected auth state change handler to be registered');
+    }
+    await registeredHandler('SIGNED_IN', fakeSession);
 
     expect(profileQuery.insert).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -208,9 +211,8 @@ describe('authStore.initialize', () => {
         user_metadata: {},
       },
     };
-    let authStateChangeHandler:
-      | ((event: string, session: typeof fakeSession | null) => Promise<void> | void)
-      | null = null;
+    type TestAuthHandler = (event: string, session: typeof fakeSession | null) => Promise<void> | void;
+    let authStateChangeHandler: TestAuthHandler | null = null;
 
     mocks.getSession.mockResolvedValue({ data: { session: fakeSession }, error: null });
     mocks.onAuthStateChange.mockImplementation(
@@ -241,7 +243,11 @@ describe('authStore.initialize', () => {
     });
 
     await useAuthStore.getState().initialize();
-    await authStateChangeHandler?.('SIGNED_IN', fakeSession);
+    const registeredHandler = mocks.onAuthStateChange.mock.calls[0]?.[0] as TestAuthHandler | undefined;
+    if (!registeredHandler) {
+      throw new Error('Expected auth state change handler to be registered');
+    }
+    await registeredHandler('SIGNED_IN', fakeSession);
 
     const insertPayload = profileQuery.insert.mock.calls[0]?.[0] as Profile | undefined;
     expect(insertPayload).toBeDefined();

@@ -8,16 +8,28 @@ const THEME_STORAGE_KEY = 'fitwizard-theme';
 const INSTALL_COACH_STORAGE_KEY = 'fitwizard-install-coach-v1';
 const iPhone13 = devices['iPhone 13'];
 
+type ThemeProbeFrame = {
+  bodyBackground: string;
+  drawerMutationAt: number | null;
+  drawerResolvedTheme: string | null;
+  maxSyncDeltaMs: number | null;
+  rootMutationAt: number | null;
+  rootDark: boolean;
+  themeTransition: string | null;
+  themeTransitionContext: string | null;
+};
+
 async function seedMobileDrawerState(
   page: Page,
   options: {
     themeMode?: 'light' | 'dark' | 'system';
+    trainerMode?: boolean;
   } = {},
 ) {
-  const { themeMode = 'system' } = options;
+  const { themeMode = 'system', trainerMode = false } = options;
 
   await page.addInitScript(
-    ({ onboardingKey, consentKey, analyticsConsentKey, trainerKey, themeKey, installCoachKey, mode }) => {
+    ({ onboardingKey, consentKey, analyticsConsentKey, trainerKey, themeKey, installCoachKey, mode, trainerMode }) => {
       window.localStorage.setItem(
         onboardingKey,
         JSON.stringify({
@@ -40,7 +52,7 @@ async function seedMobileDrawerState(
         trainerKey,
         JSON.stringify({
           state: {
-            isTrainerMode: true,
+            isTrainerMode: trainerMode,
             clients: [],
             selectedClientId: null,
             assignments: [],
@@ -79,12 +91,84 @@ async function seedMobileDrawerState(
       themeKey: THEME_STORAGE_KEY,
       installCoachKey: INSTALL_COACH_STORAGE_KEY,
       mode: themeMode,
+      trainerMode,
     },
   );
 }
 
+async function armThemeSyncProbe(page: Page) {
+  await page.evaluate(() => {
+    const probeWindow = window as Window & { __fitWizardThemeProbe?: ThemeProbeFrame };
+    probeWindow.__fitWizardThemeProbe = undefined;
+
+    const drawer = document.querySelector('.aetheric-drawer');
+    const mutationTimes = {
+      drawer: null as number | null,
+      root: null as number | null,
+    };
+
+    const rootObserver = new MutationObserver(() => {
+      mutationTimes.root ??= performance.now();
+    });
+
+    rootObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+
+    const drawerObserver = drawer
+      ? new MutationObserver(() => {
+          mutationTimes.drawer ??= performance.now();
+        })
+      : null;
+
+    drawerObserver?.observe(drawer, {
+      attributes: true,
+      attributeFilter: ['data-resolved-theme'],
+    });
+
+    const readFrame = () => {
+      const drawer = document.querySelector('.aetheric-drawer');
+      const maxSyncDeltaMs =
+        mutationTimes.root !== null && mutationTimes.drawer !== null
+          ? Math.abs(mutationTimes.root - mutationTimes.drawer)
+          : null;
+
+      return {
+        bodyBackground: getComputedStyle(document.body).backgroundColor,
+        drawerMutationAt: mutationTimes.drawer,
+        drawerResolvedTheme: drawer?.getAttribute('data-resolved-theme') ?? null,
+        maxSyncDeltaMs,
+        rootMutationAt: mutationTimes.root,
+        rootDark: document.documentElement.classList.contains('dark'),
+        themeTransition: document.documentElement.getAttribute('data-theme-transition'),
+        themeTransitionContext: document.documentElement.getAttribute('data-theme-transition-context'),
+      };
+    };
+
+    document.addEventListener(
+      'click',
+      () => {
+        requestAnimationFrame(() => {
+          rootObserver.disconnect();
+          drawerObserver?.disconnect();
+          probeWindow.__fitWizardThemeProbe = readFrame();
+        });
+      },
+      { capture: true, once: true },
+    );
+  });
+}
+
+async function readThemeSyncProbe(page: Page) {
+  await page.waitForFunction(() => Boolean((window as Window & { __fitWizardThemeProbe?: ThemeProbeFrame }).__fitWizardThemeProbe));
+  return page.evaluate(
+    () => (window as Window & { __fitWizardThemeProbe: ThemeProbeFrame }).__fitWizardThemeProbe,
+  );
+}
+
 test.describe('desktop header theme controls', () => {
-  test('uses the shared compact theme pill and triggers the global theme transition path', async ({ page }) => {
+  test('uses the shared compact theme pill and applies root theme synchronously', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 980 });
     await page.emulateMedia({ colorScheme: 'light' });
     await seedMobileDrawerState(page, { themeMode: 'system' });
@@ -104,25 +188,16 @@ test.describe('desktop header theme controls', () => {
 
     await expect(systemButton).toHaveAttribute('data-selected', 'true');
 
-    const transitionToDark = page.waitForFunction(
-      () => document.documentElement.getAttribute('data-theme-transition') === 'to-dark',
-    );
     await darkButton.click();
-    await transitionToDark;
+    await expect.poll(() => page.evaluate(() => document.documentElement.classList.contains('dark'))).toBe(true);
 
     await expect(darkButton).toHaveAttribute('data-selected', 'true');
     await expect(lightButton).toHaveAttribute('data-selected', 'false');
-    await expect
-      .poll(() => page.evaluate(() => document.documentElement.getAttribute('data-theme-transition-context')))
-      .toBeNull();
+    await expect.poll(() => page.evaluate(() => document.documentElement.getAttribute('data-theme-transition'))).toBeNull();
+    await expect.poll(() => page.evaluate(() => document.documentElement.getAttribute('data-theme-transition-context'))).toBeNull();
 
-    await page.waitForFunction(() => !document.documentElement.hasAttribute('data-theme-transition'));
-
-    const transitionToLight = page.waitForFunction(
-      () => document.documentElement.getAttribute('data-theme-transition') === 'to-light',
-    );
     await lightButton.click();
-    await transitionToLight;
+    await expect.poll(() => page.evaluate(() => document.documentElement.classList.contains('dark'))).toBe(false);
 
     await expect(lightButton).toHaveAttribute('data-selected', 'true');
     await expect(systemButton).toHaveAttribute('data-selected', 'false');
@@ -130,6 +205,7 @@ test.describe('desktop header theme controls', () => {
 });
 
 test.describe('mobile header drawer flow', () => {
+  test.skip(({ browserName }) => browserName === 'firefox', 'Firefox does not support mobile contexts');
   test.use({
     viewport: iPhone13.viewport,
     userAgent: iPhone13.userAgent,
@@ -238,7 +314,7 @@ test.describe('mobile header drawer flow', () => {
       .evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label')));
     expect(themePillOrder).toEqual(['Light', 'System', 'Dark']);
     await expect(footer.getByRole('switch', { name: /coach mode/i })).not.toBeChecked();
-    await expect(footer.getByRole('switch', { name: /coach mode/i })).toBeDisabled();
+    await expect(footer.getByRole('switch', { name: /coach mode/i })).toBeEnabled();
 
     await page.keyboard.press('Escape');
     await expect(drawer).toHaveCount(0);
@@ -268,7 +344,7 @@ test.describe('mobile header drawer flow', () => {
     const readBlurState = async () =>
       page.evaluate(() => {
         const drawerElement = document.querySelector('[role="dialog"]');
-        const overlayElement = document.querySelector('[data-state="open"].backdrop-premium');
+        const overlayElement = document.querySelector('.backdrop-premium');
 
         if (!drawerElement || !overlayElement) {
           return null;
@@ -303,84 +379,22 @@ test.describe('mobile header drawer flow', () => {
     expect(initialBlurState?.drawerBlur).not.toBe('none');
     expect(initialBlurState?.overlayBlur).not.toBe('none');
 
-    const transitionToLight = page.waitForFunction(
-      () => document.documentElement.getAttribute('data-theme-transition') === 'to-light',
-    );
-    const drawerOpenContext = page.waitForFunction(
-      () => document.documentElement.getAttribute('data-theme-transition-context') === 'drawer-open',
-    );
+    const initialBodyBackground = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+    await armThemeSyncProbe(page);
     await lightButton.tap();
-    await drawerOpenContext;
-    await transitionToLight;
+    const lightProbe = await readThemeSyncProbe(page);
 
-    await page.waitForFunction(() => {
-      const drawerElement = document.querySelector('[role="dialog"]');
-      const overlayElement = document.querySelector('[data-state="open"].backdrop-premium');
-
-      if (!drawerElement || !overlayElement) {
-        return false;
-      }
-
-      const resolveBackdropFilter = (styles: CSSStyleDeclaration) => {
-        const standardFilter = styles.backdropFilter;
-        if (standardFilter && standardFilter !== 'none') {
-          return standardFilter;
-        }
-
-        return styles.getPropertyValue('-webkit-backdrop-filter');
-      };
-
-      const drawerStyles = getComputedStyle(drawerElement);
-      const overlayStyles = getComputedStyle(overlayElement);
-      const drawerBlur = resolveBackdropFilter(drawerStyles);
-      const overlayBlur = resolveBackdropFilter(overlayStyles);
-
-      return (
-        document.documentElement.getAttribute('data-theme-transition-context') === 'drawer-open' &&
-        drawerBlur !== 'none' &&
-        overlayBlur !== 'none'
-      );
-    });
-
-    await page.waitForTimeout(460);
-
-    const midTransitionBlurState = await readBlurState();
-    expect(midTransitionBlurState).not.toBeNull();
-    expect(midTransitionBlurState?.drawerBlur).not.toBe('none');
-    expect(midTransitionBlurState?.overlayBlur).not.toBe('none');
-
+    await expect(drawer).toBeVisible();
+    expect(lightProbe.maxSyncDeltaMs).not.toBeNull();
+    expect(lightProbe.maxSyncDeltaMs).toBeLessThan(50);
+    expect(lightProbe.rootDark).toBe(false);
+    expect(lightProbe.drawerResolvedTheme).toBe('light');
+    expect(lightProbe.themeTransition).toBeNull();
+    expect(lightProbe.themeTransitionContext).toBeNull();
+    expect(lightProbe.bodyBackground).not.toBe(initialBodyBackground);
     await expect(drawer).toHaveAttribute('data-theme-mode', 'light');
     await expect(drawer).toHaveAttribute('data-resolved-theme', 'light');
     await expect(lightButton).toHaveAttribute('data-selected', 'true');
-
-    await page.waitForFunction(
-      () => !document.documentElement.hasAttribute('data-theme-transition-context'),
-    );
-
-    await page.waitForFunction(() => {
-      const drawerElement = document.querySelector('[role="dialog"]');
-      const overlayElement = document.querySelector('[data-state="open"].backdrop-premium');
-
-      if (!drawerElement || !overlayElement) {
-        return false;
-      }
-
-      const resolveBackdropFilter = (styles: CSSStyleDeclaration) => {
-        const standardFilter = styles.backdropFilter;
-        if (standardFilter && standardFilter !== 'none') {
-          return standardFilter;
-        }
-
-        return styles.getPropertyValue('-webkit-backdrop-filter');
-      };
-
-      const drawerStyles = getComputedStyle(drawerElement);
-      const overlayStyles = getComputedStyle(overlayElement);
-      const drawerBlur = resolveBackdropFilter(drawerStyles);
-      const overlayBlur = resolveBackdropFilter(overlayStyles);
-
-      return drawerBlur !== 'none' && overlayBlur !== 'none';
-    });
 
     const finalBlurState = await readBlurState();
     expect(finalBlurState).not.toBeNull();
@@ -388,11 +402,14 @@ test.describe('mobile header drawer flow', () => {
     expect(finalBlurState?.drawerBlur).not.toBe('none');
     expect(finalBlurState?.overlayBlur).not.toBe('none');
 
-    const transitionToDark = page.waitForFunction(
-      () => document.documentElement.getAttribute('data-theme-transition') === 'to-dark',
-    );
+    await armThemeSyncProbe(page);
     await systemButton.tap();
-    await transitionToDark;
+    const systemProbe = await readThemeSyncProbe(page);
+    expect(systemProbe.maxSyncDeltaMs).not.toBeNull();
+    expect(systemProbe.maxSyncDeltaMs).toBeLessThan(50);
+    expect(systemProbe.rootDark).toBe(true);
+    expect(systemProbe.drawerResolvedTheme).toBe('dark');
+    expect(systemProbe.themeTransition).toBeNull();
     await expect(drawer).toHaveAttribute('data-theme-mode', 'system');
     await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
     await expect(systemButton).toHaveAttribute('data-selected', 'true');
@@ -403,7 +420,7 @@ test.describe('mobile header drawer flow', () => {
     await expect(darkButton).toHaveAttribute('data-selected', 'true');
   });
 
-  test('clears drawer transition context when navigating away during a theme switch', async ({ page }) => {
+  test('keeps theme sync transition-free when navigating away after a theme switch', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark' });
     await seedMobileDrawerState(page, { themeMode: 'system' });
     await page.goto('/');
@@ -415,21 +432,15 @@ test.describe('mobile header drawer flow', () => {
     const lightButton = footer.getByRole('button', { name: 'Light' });
     const settingsLink = footer.getByRole('link', { name: /settings & profile/i });
 
-    const drawerOpenContext = page.waitForFunction(
-      () => document.documentElement.getAttribute('data-theme-transition-context') === 'drawer-open',
-    );
-
     await lightButton.tap();
-    await drawerOpenContext;
+    await expect.poll(() => page.evaluate(() => document.documentElement.getAttribute('data-theme-transition-context'))).toBeNull();
+    await expect(drawer).toHaveAttribute('data-resolved-theme', 'light');
     await settingsLink.click();
 
     await page.waitForURL((url) => url.pathname === '/profile');
     await expect(drawer).toHaveCount(0);
-    await page.waitForFunction(
-      () =>
-        !document.documentElement.hasAttribute('data-theme-transition-context') &&
-        !document.documentElement.hasAttribute('data-theme-transition'),
-    );
+    await expect.poll(() => page.evaluate(() => document.documentElement.getAttribute('data-theme-transition'))).toBeNull();
+    await expect.poll(() => page.evaluate(() => document.documentElement.getAttribute('data-theme-transition-context'))).toBeNull();
     await expect(page.getByTestId('profile-theme-toggle')).toBeVisible();
   });
 

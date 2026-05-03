@@ -37,12 +37,14 @@ interface NutritionState {
     getLastFullMeal: (type: string) => MealEntry[]; // New helper
 }
 
-const sanitizeNutritionPersistedState = (state: Partial<NutritionState> | undefined) => ({
+type PersistedNutritionState = Pick<NutritionState, 'selectedDate'>;
+
+const sanitizeNutritionPersistedState = (state: Partial<NutritionState> | undefined): PersistedNutritionState => ({
     selectedDate: typeof state?.selectedDate === 'string' ? state.selectedDate : new Date().toISOString().split('T')[0],
 });
 
 export const useNutritionStore = create<NutritionState>()(
-    persist(
+    persist<NutritionState, [], [], PersistedNutritionState>(
         (set, get) => ({
             profile: null,
             targets: null,

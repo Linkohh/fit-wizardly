@@ -71,7 +71,7 @@ function buildPlan(id: string, label: string): Plan {
         exercises: [],
       },
     ],
-  } as Plan;
+  } as unknown as Plan;
 }
 
 describe('planStore syncWithBackend', () => {

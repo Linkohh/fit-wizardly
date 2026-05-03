@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useMotionPreferences } from "@/hooks/use-motion-preferences";
 
 interface AnimatedMenuIconProps {
   isOpen: boolean;
@@ -20,20 +21,23 @@ export function AnimatedMenuIcon({
   size = 24,
   strokeWidth = 2,
 }: AnimatedMenuIconProps) {
+  const { shouldReduceMotion } = useMotionPreferences();
   const barHeight = strokeWidth;
   const gap = 6; // Gap between bars when closed
 
-  // Spring configuration for smooth, bouncy animation
-  const springConfig = {
-    type: "spring" as const,
-    stiffness: 400,
-    damping: 17,
-  };
+  const motionTransition = shouldReduceMotion
+    ? { duration: 0 }
+    : {
+        type: "spring" as const,
+        stiffness: 360,
+        damping: 28,
+        mass: 0.8,
+      };
 
   // Calculate positions
   const centerY = size / 2;
-  const topBarY = centerY - gap;
-  const bottomBarY = centerY + gap;
+  const barCenterTop = centerY - barHeight / 2;
+  const barOffset = gap;
 
   return (
     <motion.div
@@ -49,18 +53,19 @@ export function AnimatedMenuIcon({
           width: size * 0.75,
           height: barHeight,
           left: size * 0.125,
+          top: barCenterTop,
         }}
         variants={{
           closed: {
-            top: topBarY - barHeight / 2,
+            y: -barOffset,
             rotate: 0,
           },
           open: {
-            top: centerY - barHeight / 2,
+            y: 0,
             rotate: 45,
           },
         }}
-        transition={springConfig}
+        transition={motionTransition}
       />
 
       {/* Middle bar - fades out and scales to 0 */}
@@ -70,7 +75,7 @@ export function AnimatedMenuIcon({
           width: size * 0.75,
           height: barHeight,
           left: size * 0.125,
-          top: centerY - barHeight / 2,
+          top: barCenterTop,
         }}
         variants={{
           closed: {
@@ -83,8 +88,8 @@ export function AnimatedMenuIcon({
           },
         }}
         transition={{
-          ...springConfig,
-          opacity: { duration: 0.15 },
+          ...motionTransition,
+          opacity: { duration: shouldReduceMotion ? 0 : 0.12 },
         }}
       />
 
@@ -95,18 +100,19 @@ export function AnimatedMenuIcon({
           width: size * 0.75,
           height: barHeight,
           left: size * 0.125,
+          top: barCenterTop,
         }}
         variants={{
           closed: {
-            top: bottomBarY - barHeight / 2,
+            y: barOffset,
             rotate: 0,
           },
           open: {
-            top: centerY - barHeight / 2,
+            y: 0,
             rotate: -45,
           },
         }}
-        transition={springConfig}
+        transition={motionTransition}
       />
     </motion.div>
   );
