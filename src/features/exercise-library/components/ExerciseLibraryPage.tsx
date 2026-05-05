@@ -33,6 +33,7 @@ import { normalizeFilterValue } from '../utils';
 import { ExerciseLibraryCard } from './ExerciseLibraryCard';
 import { ExerciseLibraryDetailModal } from './ExerciseLibraryDetailModal';
 import { ExerciseLibraryFilters } from './ExerciseLibraryFilters';
+import { ExerciseSearch } from '@/components/exercise/ExerciseSearch';
 
 const INITIAL_FILTERS: ExerciseLibraryFilterState = {
   search: '',
@@ -331,6 +332,10 @@ export function ExerciseLibraryPage() {
             variant="error"
           />
         ) : null}
+      </section>
+
+      <section className="border-t border-border/30 pt-8">
+        <ExerciseSearch />
       </section>
 
       {recommendedRecords.length > 0 ? (
