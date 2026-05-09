@@ -63,6 +63,26 @@ const reducedMotionMobileNavItemVariants = {
 
 const MotionButton = motion.create(Button);
 
+const mobileDrawerCloseButtonClassName = [
+  'right-[calc(env(safe-area-inset-right,0px)+0.875rem)]',
+  'top-[calc(env(safe-area-inset-top,0px)+0.125rem)]',
+  'sm:right-[calc(env(safe-area-inset-right,0px)+0.875rem)]',
+  'sm:top-[calc(env(safe-area-inset-top,0px)+0.125rem)]',
+  'border-white/70',
+  'bg-white/75',
+  'text-foreground/70',
+  'shadow-[0_10px_28px_rgba(72,46,118,0.18),inset_0_1px_0_rgba(255,255,255,0.84)]',
+  'backdrop-blur-xl',
+  'hover:bg-white/90',
+  'hover:text-foreground',
+  'dark:border-white/10',
+  'dark:bg-white/10',
+  'dark:text-white/80',
+  'dark:shadow-[0_12px_30px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.08)]',
+  'dark:hover:bg-white/20',
+  'dark:hover:text-white',
+].join(' ');
+
 export function Header() {
   const location = useLocation();
   const { t } = useTranslation();
@@ -456,11 +476,12 @@ export function Header() {
                 gestureMode="full-panel"
                 motionPreset="mobileDrawer"
                 showDragHandle
+                closeButtonClassName={mobileDrawerCloseButtonClassName}
                 title={t('header.mobile_drawer.title', 'FitWizard menu')}
                 description={t('header.mobile_drawer.description', 'Navigation and quick controls')}
                 onGestureClose={() => setMobileOpen(false)}
               >
-            <div className="aetheric-drawer__inner flex min-h-0 flex-1 flex-col px-4 pb-2 pt-5">
+            <div className="aetheric-drawer__inner flex min-h-0 flex-1 flex-col px-4 pb-2 pt-[calc(env(safe-area-inset-top,0px)+1.75rem)]">
               <motion.section
                 data-testid="mobile-drawer-profile"
                 className="aetheric-drawer__profile shrink-0"

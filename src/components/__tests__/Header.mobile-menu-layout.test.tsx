@@ -225,6 +225,7 @@ vi.mock('@/components/ui/sheet', async () => {
 
   const SheetContent = ({
     className,
+    closeButtonClassName,
     children,
     glassEffect: _glassEffect,
     enableGestures: _enableGestures,
@@ -237,6 +238,7 @@ vi.mock('@/components/ui/sheet', async () => {
     ...props
   }: {
     className?: string;
+    closeButtonClassName?: string;
     children: React.ReactNode;
     glassEffect?: boolean;
     enableGestures?: boolean;
@@ -251,7 +253,12 @@ vi.mock('@/components/ui/sheet', async () => {
     const { open } = React.useContext(SheetContext);
     if (!open) return null;
     return (
-      <div data-testid="mobile-sheet-content" className={className} {...props}>
+      <div
+        data-testid="mobile-sheet-content"
+        className={className}
+        data-close-button-class-name={closeButtonClassName}
+        {...props}
+      >
         {children}
       </div>
     );
@@ -371,8 +378,17 @@ describe('Header mobile menu layout', () => {
     expect(sheetContent.className).toContain('supports-[height:100dvh]:h-[100dvh]');
     expect(sheetContent.className).toContain('max-h-[100dvh]');
     expect(sheetContent.className).toContain('pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]');
+    const closeButtonClassName = sheetContent.getAttribute('data-close-button-class-name');
+    expect(closeButtonClassName).toContain('top-[calc(env(safe-area-inset-top,0px)+0.125rem)]');
+    expect(closeButtonClassName).toContain('right-[calc(env(safe-area-inset-right,0px)+0.875rem)]');
+    expect(closeButtonClassName).toContain('sm:top-[calc(env(safe-area-inset-top,0px)+0.125rem)]');
+    expect(closeButtonClassName).toContain('bg-white/75');
+    expect(closeButtonClassName).toContain('backdrop-blur-xl');
     expect(sheetContent).toHaveAttribute('data-theme-mode', 'system');
     expect(sheetContent).toHaveAttribute('data-resolved-theme', 'light');
+
+    const drawerInner = sheetContent.firstElementChild;
+    expect(drawerInner).toHaveClass('pt-[calc(env(safe-area-inset-top,0px)+1.75rem)]');
 
     const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
     expect(mobileNav).toHaveClass('overscroll-contain', 'overflow-x-hidden');

@@ -33,6 +33,24 @@ describe('SheetContent', () => {
     expect(closeButton.querySelector('svg')).toHaveClass('h-5', 'w-5');
   });
 
+  it('applies caller-provided close button classes without replacing the default affordance', () => {
+    render(
+      <Sheet open onOpenChange={vi.fn()}>
+        <SheetContent closeButtonClassName="top-[calc(env(safe-area-inset-top,0px)+0.75rem)] bg-white/75">
+          Drawer content
+        </SheetContent>
+      </Sheet>,
+    );
+
+    const closeButton = screen.getByRole('button', { name: 'Close menu' });
+
+    expect(closeButton).toHaveClass('min-h-[44px]', 'min-w-[44px]');
+    expect(closeButton).toHaveClass(
+      'top-[calc(env(safe-area-inset-top,0px)+0.75rem)]',
+      'bg-white/75',
+    );
+  });
+
   it('closes a right-side gesture drawer when swiped past the threshold', () => {
     const onGestureClose = vi.fn();
     render(

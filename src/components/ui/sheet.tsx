@@ -133,6 +133,8 @@ interface SheetContentProps
   showDragHandle?: boolean;
   /** Show the built-in top-right close button */
   showCloseButton?: boolean;
+  /** Additional classes for the built-in close button */
+  closeButtonClassName?: string;
   /** Motion style for enter/exit animation */
   motionPreset?: SheetMotionPreset;
   /** Accessible dialog title */
@@ -156,6 +158,7 @@ const SheetContent = React.forwardRef<
   onGestureClose,
   showDragHandle = false,
   showCloseButton = true,
+  closeButtonClassName,
   motionPreset = "default",
   title = "Sheet Content",
   description = "Sheet Description",
@@ -405,7 +408,12 @@ const SheetContent = React.forwardRef<
         {children}
 
         {showCloseButton ? (
-          <SheetPrimitive.Close className="absolute right-4 top-4 z-20 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-transparent bg-transparent text-foreground/55 ring-offset-background transition-all duration-200 hover:bg-muted/35 hover:text-foreground active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none sm:right-5 sm:top-5">
+          <SheetPrimitive.Close
+            className={cn(
+              "absolute right-4 top-4 z-20 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-transparent bg-transparent text-foreground/55 ring-offset-background transition-all duration-200 hover:bg-muted/35 hover:text-foreground active:scale-95 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none sm:right-5 sm:top-5",
+              closeButtonClassName,
+            )}
+          >
             <X className="h-5 w-5" aria-hidden="true" />
             <span className="sr-only">Close menu</span>
           </SheetPrimitive.Close>
