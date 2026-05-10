@@ -795,7 +795,8 @@ export function DailyQuote({ className }: { className?: string }) {
     const [quoteIndex, setQuoteIndex] = useState(0);
     const isMobile = useIsMobile();
     const { shouldReduceMotion } = useMotionPreferences();
-    const staticMode = isMobile || shouldReduceMotion;
+    const staticMode = shouldReduceMotion;
+    const rotateIntervalMs = isMobile ? 8000 : 12000;
 
     useEffect(() => {
         // Start with a deterministic quote based on date
@@ -809,10 +810,10 @@ export function DailyQuote({ className }: { className?: string }) {
 
         const interval = setInterval(() => {
             setQuoteIndex((prev) => (prev + 1) % QUOTES.length);
-        }, 12000);
+        }, rotateIntervalMs);
 
         return () => clearInterval(interval);
-    }, [staticMode]);
+    }, [rotateIntervalMs, staticMode]);
 
     return (
         <div className={cn("relative p-8 rounded-2xl bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-primary/20 overflow-hidden group hover:shadow-glow hover:border-primary/30 transition-all duration-500", className)}>
