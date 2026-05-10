@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { MemoryRouter, useLocation } from 'react-router-dom';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Header } from '@/components/Header';
 
 const mocks = vi.hoisted(() => ({
@@ -297,9 +297,35 @@ vi.mock('@/components/ui/scroll-area', async () => {
   return { ScrollArea };
 });
 
+function LocationProbe() {
+  const location = useLocation();
+
+  return <div data-testid="current-location">{location.pathname}</div>;
+}
+
+function renderHeader(initialPath = '/') {
+  return render(
+    <MemoryRouter initialEntries={[initialPath]}>
+      <Header />
+      <LocationProbe />
+    </MemoryRouter>,
+  );
+}
+
+function mockElementFromPoint(element: Element | null) {
+  const elementFromPoint = vi.fn(() => element);
+  Object.defineProperty(document, 'elementFromPoint', {
+    configurable: true,
+    value: elementFromPoint,
+  });
+
+  return elementFromPoint;
+}
+
 describe('Header mobile menu layout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useRealTimers();
     mocks.themeMode = 'system';
     mocks.resolvedTheme = 'light';
     mocks.installCoachState = {
@@ -315,12 +341,13 @@ describe('Header mobile menu layout', () => {
     };
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
   it('tags the brand logo and menu trigger with explicit mobile feedback events', () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <Header />
-      </MemoryRouter>,
-    );
+    renderHeader();
 
     expect(screen.getByAltText('FitWizard Logo').closest('a')).toHaveAttribute(
       'data-click-feedback-event',
@@ -346,11 +373,7 @@ describe('Header mobile menu layout', () => {
       hasHydrated: true,
     };
 
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <Header />
-      </MemoryRouter>,
-    );
+    renderHeader();
 
     fireEvent.click(screen.getByTestId('sheet-trigger'));
 
@@ -363,11 +386,7 @@ describe('Header mobile menu layout', () => {
   });
 
   it('renders the aetheric drawer shell with profile header, trainer section, and sticky footer controls', async () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <Header />
-      </MemoryRouter>,
-    );
+    renderHeader();
 
     fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
 
@@ -379,16 +398,14 @@ describe('Header mobile menu layout', () => {
     expect(sheetContent.className).toContain('max-h-[100dvh]');
     expect(sheetContent.className).toContain('pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]');
     const closeButtonClassName = sheetContent.getAttribute('data-close-button-class-name');
-    expect(closeButtonClassName).toContain('top-[calc(env(safe-area-inset-top,0px)+0.125rem)]');
-    expect(closeButtonClassName).toContain('right-[calc(env(safe-area-inset-right,0px)+0.875rem)]');
-    expect(closeButtonClassName).toContain('sm:top-[calc(env(safe-area-inset-top,0px)+0.125rem)]');
+    expect(closeButtonClassName).toContain('aetheric-drawer__close-button');
     expect(closeButtonClassName).toContain('bg-white/75');
     expect(closeButtonClassName).toContain('backdrop-blur-xl');
     expect(sheetContent).toHaveAttribute('data-theme-mode', 'system');
     expect(sheetContent).toHaveAttribute('data-resolved-theme', 'light');
 
     const drawerInner = sheetContent.firstElementChild;
-    expect(drawerInner).toHaveClass('pt-[calc(env(safe-area-inset-top,0px)+1.75rem)]');
+    expect(drawerInner).toHaveClass('pt-[calc(env(safe-area-inset-top,0px)+1rem)]');
 
     const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
     expect(mobileNav).toHaveClass('overscroll-contain', 'overflow-x-hidden');
@@ -464,11 +481,7 @@ describe('Header mobile menu layout', () => {
   });
 
   it('dispatches direct theme mode changes from the quick controls buttons', () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <Header />
-      </MemoryRouter>,
-    );
+    renderHeader();
 
     fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
 
@@ -484,11 +497,7 @@ describe('Header mobile menu layout', () => {
   });
 
   it('uses the shared compact theme pill in the desktop header and dispatches theme changes in light-system-dark order', () => {
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <Header />
-      </MemoryRouter>,
-    );
+    renderHeader();
 
     const desktopThemeToggle = screen.getByTestId('desktop-header-theme-toggle');
     const [lightButton, systemButton, darkButton] = within(desktopThemeToggle).getAllByRole('button');
@@ -517,11 +526,7 @@ describe('Header mobile menu layout', () => {
     mocks.themeMode = 'dark';
     mocks.resolvedTheme = 'dark';
 
-    render(
-      <MemoryRouter initialEntries={['/']}>
-        <Header />
-      </MemoryRouter>,
-    );
+    renderHeader();
 
     fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
 
@@ -532,5 +537,168 @@ describe('Header mobile menu layout', () => {
     const profile = within(sheetContent).getByTestId('mobile-drawer-profile');
     expect(within(profile).getByText('Coach Mode')).toBeInTheDocument();
     expect(within(profile).queryByText('System • Dark')).not.toBeInTheDocument();
+  });
+
+  it('keeps normal tap navigation unchanged in the mobile drawer', async () => {
+    renderHeader('/');
+
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
+
+    const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
+    fireEvent.click(within(mobileNav).getByRole('link', { name: 'View Plan' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('current-location')).toHaveTextContent('/plan');
+    });
+    expect(screen.queryByTestId('mobile-sheet-content')).not.toBeInTheDocument();
+  });
+
+  it('navigates to the drag-previewed nav item when long-press dragging releases on it', async () => {
+    vi.useFakeTimers();
+
+    renderHeader('/history');
+
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
+
+    const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
+    const homeLink = within(mobileNav).getByRole('link', { name: 'Home' });
+    const viewPlanLink = within(mobileNav).getByRole('link', { name: 'View Plan' });
+    const historyLink = within(mobileNav).getByRole('link', { name: 'History' });
+    const elementFromPoint = mockElementFromPoint(viewPlanLink);
+
+    fireEvent.pointerDown(homeLink, {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 300,
+      clientY: 360,
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(320);
+    });
+
+    fireEvent.pointerMove(mobileNav, {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 300,
+      clientY: 690,
+    });
+
+    expect(elementFromPoint).toHaveBeenCalledWith(300, 690);
+    expect(mobileNav).toHaveClass('is-drag-selecting');
+    expect(historyLink).toHaveClass('is-active');
+    expect(viewPlanLink).toHaveAttribute('data-drag-preview', 'true');
+    expect(viewPlanLink).toHaveClass('is-drag-preview');
+    expect(homeLink).not.toHaveAttribute('data-drag-preview', 'true');
+    expect(homeLink).not.toHaveClass('is-active', 'is-drag-preview');
+    expect(mobileNav.querySelectorAll('.aetheric-drawer__nav-link.is-active')).toHaveLength(1);
+    expect(mobileNav.querySelectorAll('.aetheric-drawer__nav-link.is-drag-preview')).toHaveLength(1);
+
+    fireEvent.pointerUp(mobileNav, {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 300,
+      clientY: 690,
+    });
+
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+    vi.useRealTimers();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('current-location')).toHaveTextContent('/plan');
+    });
+    expect(screen.queryByTestId('mobile-sheet-content')).not.toBeInTheDocument();
+  });
+
+  it('keeps the drawer open and route unchanged when drag selection releases without a target', () => {
+    vi.useFakeTimers();
+
+    renderHeader('/analytics');
+
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
+
+    const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
+    const analyticsLink = within(mobileNav).getByRole('link', { name: 'Analytics' });
+    mockElementFromPoint(null);
+
+    fireEvent.pointerDown(analyticsLink, {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 300,
+      clientY: 620,
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(320);
+    });
+
+    fireEvent.pointerMove(mobileNav, {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 16,
+      clientY: 16,
+    });
+
+    expect(analyticsLink).not.toHaveAttribute('data-drag-preview', 'true');
+
+    fireEvent.pointerUp(mobileNav, {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 16,
+      clientY: 16,
+    });
+
+    act(() => {
+      vi.runOnlyPendingTimers();
+    });
+    vi.useRealTimers();
+
+    expect(screen.getByTestId('current-location')).toHaveTextContent('/analytics');
+    expect(screen.getByTestId('mobile-sheet-content')).toBeInTheDocument();
+  });
+
+  it('moves the drag preview away from the initially pressed non-active item on touch drag', () => {
+    vi.useFakeTimers();
+
+    renderHeader('/');
+
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
+
+    const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
+    const homeLink = within(mobileNav).getByRole('link', { name: 'Home' });
+    const createPlanLink = within(mobileNav).getByRole('link', { name: 'Create Plan' });
+    const viewPlanLink = within(mobileNav).getByRole('link', { name: 'View Plan' });
+    const elementFromPoint = mockElementFromPoint(viewPlanLink);
+
+    fireEvent.pointerDown(createPlanLink, {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 300,
+      clientY: 470,
+    });
+
+    act(() => {
+      vi.advanceTimersByTime(320);
+    });
+
+    expect(homeLink).toHaveClass('is-active');
+    expect(createPlanLink).toHaveAttribute('data-drag-preview', 'true');
+
+    fireEvent.touchMove(mobileNav, {
+      touches: [{ clientX: 300, clientY: 565 }],
+    });
+
+    expect(elementFromPoint).toHaveBeenCalledWith(300, 565);
+    expect(homeLink).toHaveClass('is-active');
+    expect(createPlanLink).toHaveAttribute('data-drag-origin', 'true');
+    expect(createPlanLink).toHaveClass('is-drag-origin');
+    expect(createPlanLink).not.toHaveAttribute('data-drag-preview', 'true');
+    expect(createPlanLink).not.toHaveClass('is-drag-preview');
+    expect(viewPlanLink).toHaveAttribute('data-drag-preview', 'true');
+    expect(viewPlanLink).toHaveClass('is-drag-preview');
+    expect(mobileNav.querySelectorAll('.aetheric-drawer__nav-link.is-active')).toHaveLength(1);
+    expect(mobileNav.querySelectorAll('.aetheric-drawer__nav-link.is-drag-preview')).toHaveLength(1);
   });
 });

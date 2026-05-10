@@ -1,5 +1,10 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import type {
+  MouseEvent as ReactMouseEvent,
+  PointerEvent as ReactPointerEvent,
+  TouchEvent as ReactTouchEvent,
+} from 'react';
 import { motion } from 'framer-motion';
 import { Download, Smartphone, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +34,7 @@ import {
   buildDrawerProfileViewModel,
   buildMobileNavItems,
   isMobileNavPathActive,
+  type MobileNavItem,
 } from '@/components/header/mobile-drawer-model';
 
 const mobileNavVariants = {
@@ -62,12 +68,11 @@ const reducedMotionMobileNavItemVariants = {
 };
 
 const MotionButton = motion.create(Button);
+const MOBILE_DRAWER_DRAG_SELECT_DELAY_MS = 280;
+const MOBILE_DRAWER_SUPPRESS_CLICK_MS = 350;
 
 const mobileDrawerCloseButtonClassName = [
-  'right-[calc(env(safe-area-inset-right,0px)+0.875rem)]',
-  'top-[calc(env(safe-area-inset-top,0px)+0.125rem)]',
-  'sm:right-[calc(env(safe-area-inset-right,0px)+0.875rem)]',
-  'sm:top-[calc(env(safe-area-inset-top,0px)+0.125rem)]',
+  'aetheric-drawer__close-button',
   'border-white/70',
   'bg-white/75',
   'text-foreground/70',
@@ -85,8 +90,12 @@ const mobileDrawerCloseButtonClassName = [
 
 export function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isDragSelecting, setIsDragSelecting] = useState(false);
+  const [dragPreviewPath, setDragPreviewPath] = useState<string | null>(null);
+  const [dragOriginPath, setDragOriginPath] = useState<string | null>(null);
   const isWizardRoute = location.pathname.startsWith('/wizard');
 
   const user = useAuthStore((state) => state.user);
@@ -114,6 +123,10 @@ export function Header() {
 
   const navRef = useRef<HTMLElement>(null);
   const navItemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+  const dragSelectTimerRef = useRef<number | null>(null);
+  const dragSelectPointerIdRef = useRef<number | null>(null);
+  const dragPreviewPathRef = useRef<string | null>(null);
+  const dragSuppressNextClickRef = useRef(false);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const isTrainerAuthorized = !user || profile?.is_trainer === true;
   const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
@@ -228,6 +241,159 @@ export function Header() {
     [location.pathname],
   );
 
+  const setDragPreviewPathValue = useCallback((path: string | null) => {
+    dragPreviewPathRef.current = path;
+    setDragPreviewPath(path);
+  }, []);
+
+  const clearDragSelectTimer = useCallback(() => {
+    if (dragSelectTimerRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(dragSelectTimerRef.current);
+    dragSelectTimerRef.current = null;
+  }, []);
+
+  const resetDragSelection = useCallback(() => {
+    clearDragSelectTimer();
+    dragSelectPointerIdRef.current = null;
+    setIsDragSelecting(false);
+    setDragPreviewPathValue(null);
+    setDragOriginPath(null);
+  }, [clearDragSelectTimer, setDragPreviewPathValue]);
+
+  const getMobileNavPathFromPoint = useCallback((clientX: number, clientY: number) => {
+    const target = document.elementFromPoint?.(clientX, clientY);
+
+    if (!(target instanceof Element)) {
+      return null;
+    }
+
+    return target.closest<HTMLElement>('[data-mobile-drawer-nav-path]')?.dataset.mobileDrawerNavPath ?? null;
+  }, []);
+
+  const handleMobileNavPointerDown = useCallback(
+    (path: string, event: ReactPointerEvent<HTMLAnchorElement>) => {
+      if (event.pointerType === 'mouse' && event.button !== 0) {
+        return;
+      }
+
+      clearDragSelectTimer();
+      dragSelectPointerIdRef.current = event.pointerId;
+      dragPreviewPathRef.current = path;
+      setDragOriginPath(path);
+      dragSelectTimerRef.current = window.setTimeout(() => {
+        dragSelectTimerRef.current = null;
+        setIsDragSelecting(true);
+        setDragPreviewPathValue(path);
+      }, MOBILE_DRAWER_DRAG_SELECT_DELAY_MS);
+    },
+    [clearDragSelectTimer, setDragPreviewPathValue],
+  );
+
+  const handleMobileNavPointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      if (!isDragSelecting || dragSelectPointerIdRef.current !== event.pointerId) {
+        return;
+      }
+
+      event.preventDefault();
+      setDragPreviewPathValue(getMobileNavPathFromPoint(event.clientX, event.clientY));
+    },
+    [getMobileNavPathFromPoint, isDragSelecting, setDragPreviewPathValue],
+  );
+
+  const handleMobileNavPointerUp = useCallback(
+    (event: ReactPointerEvent<HTMLElement>) => {
+      if (dragSelectPointerIdRef.current !== event.pointerId) {
+        return;
+      }
+
+      clearDragSelectTimer();
+
+      if (!isDragSelecting) {
+        dragSelectPointerIdRef.current = null;
+        return;
+      }
+
+      event.preventDefault();
+      dragSuppressNextClickRef.current = true;
+      window.setTimeout(() => {
+        dragSuppressNextClickRef.current = false;
+      }, MOBILE_DRAWER_SUPPRESS_CLICK_MS);
+      const targetPath = dragPreviewPathRef.current;
+      resetDragSelection();
+
+      if (!targetPath) {
+        return;
+      }
+
+      navigate(targetPath);
+      setMobileOpen(false);
+    },
+    [clearDragSelectTimer, isDragSelecting, navigate, resetDragSelection],
+  );
+
+  const handleMobileNavTouchMove = useCallback(
+    (event: ReactTouchEvent<HTMLElement>) => {
+      if (!isDragSelecting) {
+        return;
+      }
+
+      const touch = event.touches[0];
+
+      if (!touch) {
+        return;
+      }
+
+      event.preventDefault();
+      setDragPreviewPathValue(getMobileNavPathFromPoint(touch.clientX, touch.clientY));
+    },
+    [getMobileNavPathFromPoint, isDragSelecting, setDragPreviewPathValue],
+  );
+
+  const handleMobileNavTouchEnd = useCallback(
+    (event: ReactTouchEvent<HTMLElement>) => {
+      if (!isDragSelecting) {
+        return;
+      }
+
+      event.preventDefault();
+      dragSuppressNextClickRef.current = true;
+      window.setTimeout(() => {
+        dragSuppressNextClickRef.current = false;
+      }, MOBILE_DRAWER_SUPPRESS_CLICK_MS);
+      const targetPath = dragPreviewPathRef.current;
+      resetDragSelection();
+
+      if (!targetPath) {
+        return;
+      }
+
+      navigate(targetPath);
+      setMobileOpen(false);
+    },
+    [isDragSelecting, navigate, resetDragSelection],
+  );
+
+  const handleMobileNavPointerCancel = useCallback(() => {
+    resetDragSelection();
+  }, [resetDragSelection]);
+
+  const handleMobileNavClick = useCallback(
+    (event: ReactMouseEvent<HTMLAnchorElement>) => {
+      if (!dragSuppressNextClickRef.current && !isDragSelecting) {
+        setMobileOpen(false);
+        return;
+      }
+
+      event.preventDefault();
+      dragSuppressNextClickRef.current = false;
+    },
+    [isDragSelecting],
+  );
+
   useEffect(() => {
     const updateIndicator = () => {
       if (!activeNavPath) {
@@ -262,6 +428,14 @@ export function Header() {
     };
   }, [activeNavPath]);
 
+  useEffect(() => () => clearDragSelectTimer(), [clearDragSelectTimer]);
+
+  useEffect(() => {
+    if (!mobileOpen) {
+      resetDragSelection();
+    }
+  }, [mobileOpen, resetDragSelection]);
+
   const handleMotionTiltRequest = () => {
     usePreferencesStore.getState().setMotionTiltActivatedThisSession(false);
 
@@ -288,6 +462,62 @@ export function Header() {
     }
 
     return <span className={fallbackClassName}>{drawerProfile.initials}</span>;
+  };
+
+  const renderMobileNavItem = (item: MobileNavItem) => {
+    const active = isActive(item.path);
+    const isDragPreview = dragPreviewPath === item.path;
+    const isDragOrigin = isDragSelecting && dragOriginPath === item.path && !active && !isDragPreview;
+    const Icon = item.icon;
+
+    return (
+      <motion.div
+        key={item.path}
+        variants={shouldReduceMotion ? reducedMotionMobileNavItemVariants : mobileNavItemVariants}
+        whileTap={shouldReduceMotion || isDragSelecting ? undefined : { scale: 0.99, x: -1 }}
+        whileHover={shouldReduceMotion || isDragSelecting ? undefined : { x: 2 }}
+        className="relative"
+      >
+        {active ? (
+          <motion.div
+            layoutId="mobile-nav-indicator"
+            className="nav-indicator absolute left-0 top-1/2 z-10 h-11 w-1 -translate-y-1/2 rounded-full"
+            transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 500, damping: 30 }}
+          />
+        ) : null}
+        {isDragPreview && !active ? (
+          <motion.div
+            className="aetheric-drawer__drag-indicator absolute left-0 top-1/2 z-10 h-9 w-1 -translate-y-1/2 rounded-full"
+            initial={shouldReduceMotion ? false : { opacity: 0, scaleY: 0.8 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 520, damping: 34 }}
+          />
+        ) : null}
+        <Link
+          to={item.path}
+          aria-current={active ? 'page' : undefined}
+          className={cn(
+            'aetheric-drawer__nav-link',
+            active && 'is-active',
+            isDragPreview && 'is-drag-preview',
+            isDragOrigin && 'is-drag-origin',
+          )}
+          data-click-feedback-event="navigation"
+          data-drag-origin={isDragOrigin ? 'true' : undefined}
+          data-drag-preview={isDragPreview ? 'true' : undefined}
+          data-mobile-drawer-nav-path={item.path}
+          onClick={handleMobileNavClick}
+          onPointerDown={(event) => handleMobileNavPointerDown(item.path, event)}
+        >
+          <span className={cn('aetheric-drawer__nav-icon', active && 'is-active')}>
+            <Icon className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="aetheric-drawer__nav-label">{item.label}</span>
+          </span>
+        </Link>
+      </motion.div>
+    );
   };
 
   return (
@@ -481,7 +711,7 @@ export function Header() {
                 description={t('header.mobile_drawer.description', 'Navigation and quick controls')}
                 onGestureClose={() => setMobileOpen(false)}
               >
-            <div className="aetheric-drawer__inner flex min-h-0 flex-1 flex-col px-4 pb-2 pt-[calc(env(safe-area-inset-top,0px)+1.75rem)]">
+            <div className="aetheric-drawer__inner flex min-h-0 flex-1 flex-col px-4 pb-2 pt-[calc(env(safe-area-inset-top,0px)+1rem)]">
               <motion.section
                 data-testid="mobile-drawer-profile"
                 className="aetheric-drawer__profile shrink-0"
@@ -519,50 +749,24 @@ export function Header() {
               >
                 <motion.nav
                   data-testid="mobile-drawer-nav"
-                  className="aetheric-drawer__nav-region flex min-h-full flex-col overflow-x-hidden overscroll-contain pr-1.5"
+                  className={cn(
+                    'aetheric-drawer__nav-region flex min-h-full flex-col overflow-x-hidden overscroll-contain pr-1.5',
+                    isDragSelecting && 'is-drag-selecting',
+                  )}
                   role="navigation"
                   aria-label="Mobile navigation"
+                  onPointerMove={handleMobileNavPointerMove}
+                  onPointerUp={handleMobileNavPointerUp}
+                  onPointerCancel={handleMobileNavPointerCancel}
+                  onTouchMove={handleMobileNavTouchMove}
+                  onTouchEnd={handleMobileNavTouchEnd}
+                  onTouchCancel={handleMobileNavPointerCancel}
                   initial="hidden"
                   animate={mobileOpen ? 'visible' : 'hidden'}
                   variants={shouldReduceMotion ? reducedMotionMobileNavVariants : mobileNavVariants}
                 >
                   <div className="space-y-1.5 pb-3">
-                    {primaryNavItems.map((item) => {
-                      const active = isActive(item.path);
-                      const Icon = item.icon;
-
-                      return (
-                        <motion.div
-                          key={item.path}
-                          variants={shouldReduceMotion ? reducedMotionMobileNavItemVariants : mobileNavItemVariants}
-                          whileTap={shouldReduceMotion ? undefined : { scale: 0.99, x: -1 }}
-                          whileHover={shouldReduceMotion ? undefined : { x: 2 }}
-                          className="relative"
-                        >
-                          {active ? (
-                            <motion.div
-                              layoutId="mobile-nav-indicator"
-                              className="nav-indicator absolute left-0 top-1/2 z-10 h-11 w-1 -translate-y-1/2 rounded-full"
-                              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                            />
-                          ) : null}
-                          <Link
-                            to={item.path}
-                            aria-current={active ? 'page' : undefined}
-                            className={cn('aetheric-drawer__nav-link', active && 'is-active')}
-                            data-click-feedback-event="navigation"
-                            onClick={() => setMobileOpen(false)}
-                          >
-                            <span className={cn('aetheric-drawer__nav-icon', active && 'is-active')}>
-                              <Icon className="h-5 w-5" />
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="aetheric-drawer__nav-label">{item.label}</span>
-                            </span>
-                          </Link>
-                        </motion.div>
-                      );
-                    })}
+                    {primaryNavItems.map(renderMobileNavItem)}
 
                     {trainerNavItems.length > 0 ? (
                       <motion.section className="pt-3" variants={shouldReduceMotion ? reducedMotionMobileNavItemVariants : mobileNavItemVariants}>
@@ -571,42 +775,7 @@ export function Header() {
                           <span>{t('header.mobile_drawer.trainer_section', 'Coach Tools')}</span>
                         </div>
                         <div className="mt-2.5 space-y-1.5">
-                          {trainerNavItems.map((item) => {
-                            const active = isActive(item.path);
-                            const Icon = item.icon;
-
-                            return (
-                              <motion.div
-                                key={item.path}
-                                variants={shouldReduceMotion ? reducedMotionMobileNavItemVariants : mobileNavItemVariants}
-                                whileTap={shouldReduceMotion ? undefined : { scale: 0.99, x: -1 }}
-                                whileHover={shouldReduceMotion ? undefined : { x: 2 }}
-                                className="relative"
-                              >
-                                {active ? (
-                                  <motion.div
-                                    layoutId="mobile-nav-indicator"
-                                    className="nav-indicator absolute left-0 top-1/2 z-10 h-11 w-1 -translate-y-1/2 rounded-full"
-                                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                                  />
-                                ) : null}
-                                <Link
-                                  to={item.path}
-                                  aria-current={active ? 'page' : undefined}
-                                  className={cn('aetheric-drawer__nav-link', active && 'is-active')}
-                                  data-click-feedback-event="navigation"
-                                  onClick={() => setMobileOpen(false)}
-                                >
-                                  <span className={cn('aetheric-drawer__nav-icon', active && 'is-active')}>
-                                    <Icon className="h-5 w-5" />
-                                  </span>
-                                  <span className="min-w-0 flex-1">
-                                    <span className="aetheric-drawer__nav-label">{item.label}</span>
-                                  </span>
-                                </Link>
-                              </motion.div>
-                            );
-                          })}
+                          {trainerNavItems.map(renderMobileNavItem)}
                         </div>
                       </motion.section>
                     ) : null}

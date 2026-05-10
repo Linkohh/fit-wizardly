@@ -1874,6 +1874,11 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
   z-index: 1;
 }
 
+.aetheric-drawer__close-button {
+  top: max(0.25rem, calc(env(safe-area-inset-top, 0px) - 0.125rem)) !important;
+  right: calc(env(safe-area-inset-right, 0px) + 0.875rem) !important;
+}
+
 .aetheric-drawer__profile {
   border-radius: 24px;
   padding: 0.5rem 0.58rem;
@@ -2160,6 +2165,12 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
   touch-action: pan-y;
 }
 
+.aetheric-drawer__nav-region.is-drag-selecting {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 .aetheric-drawer__nav-link {
   position: relative;
   display: flex;
@@ -2172,6 +2183,7 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
   color: rgba(32, 21, 50, 0.7);
   background: transparent;
   border: 1px solid transparent;
+  -webkit-tap-highlight-color: transparent;
   transition:
     transform 160ms ease,
     border-color 160ms ease,
@@ -2212,6 +2224,49 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
   opacity: 1;
 }
 
+.aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link:hover:not(.is-active):not(.is-drag-preview) {
+  transform: none;
+  color: rgba(32, 21, 50, 0.7);
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview),
+.aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview):hover,
+.aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview):active,
+.aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview):focus {
+  transform: none;
+  color: rgba(32, 21, 50, 0.7);
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.dark .aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link:hover:not(.is-active):not(.is-drag-preview) {
+  color: rgba(255, 255, 255, 0.74);
+  border-color: transparent;
+  background: transparent;
+}
+
+.dark .aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview),
+.dark .aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview):hover,
+.dark .aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview):active,
+.dark .aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview):focus {
+  color: rgba(255, 255, 255, 0.74);
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link:hover:not(.is-active):not(.is-drag-preview)::before {
+  opacity: 0;
+}
+
+.aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview)::before {
+  opacity: 0;
+}
+
 .aetheric-drawer__nav-link.is-active {
   color: var(--aetheric-text);
   background: linear-gradient(90deg, rgba(255, 131, 211, 0.16), rgba(189, 0, 255, 0.08) 58%, rgba(189, 0, 255, 0.03));
@@ -2225,6 +2280,30 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.08),
     0 14px 24px rgba(8, 6, 18, 0.26);
+}
+
+.aetheric-drawer__nav-link.is-drag-preview:not(.is-active) {
+  color: var(--aetheric-text);
+  background: linear-gradient(90deg, rgba(255, 131, 211, 0.11), rgba(189, 0, 255, 0.055) 58%, rgba(255, 255, 255, 0.03));
+  border-color: rgba(255, 131, 211, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 10px 20px rgba(72, 46, 118, 0.07);
+}
+
+.dark .aetheric-drawer__nav-link.is-drag-preview:not(.is-active) {
+  background: linear-gradient(90deg, rgba(255, 131, 211, 0.1), rgba(189, 0, 255, 0.07) 58%, rgba(255, 255, 255, 0.035));
+  border-color: rgba(255, 131, 211, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 12px 22px rgba(8, 6, 18, 0.24);
+}
+
+.aetheric-drawer__drag-indicator {
+  background: linear-gradient(180deg, rgba(255, 131, 211, 0.62), rgba(189, 0, 255, 0.5));
+  box-shadow:
+    0 0 12px rgba(255, 131, 211, 0.18),
+    0 0 20px rgba(189, 0, 255, 0.1);
 }
 
 .aetheric-drawer__nav-icon {
@@ -2252,7 +2331,41 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
   color: var(--aetheric-secondary);
 }
 
+.aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link:hover:not(.is-active):not(.is-drag-preview) .aetheric-drawer__nav-icon {
+  transform: none;
+  color: rgba(32, 21, 50, 0.58);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(87, 61, 126, 0.06);
+  box-shadow: none;
+}
+
+.aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview) .aetheric-drawer__nav-icon {
+  transform: none;
+  color: rgba(32, 21, 50, 0.58);
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(87, 61, 126, 0.06);
+  box-shadow: none;
+}
+
+.aetheric-drawer__nav-link.is-drag-preview:not(.is-active) .aetheric-drawer__nav-icon {
+  color: var(--aetheric-secondary);
+  background: rgba(255, 131, 211, 0.12);
+  border-color: rgba(255, 131, 211, 0.18);
+}
+
 .dark .aetheric-drawer__nav-icon {
+  color: rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link:hover:not(.is-active):not(.is-drag-preview) .aetheric-drawer__nav-icon {
+  color: rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .aetheric-drawer__nav-region.is-drag-selecting .aetheric-drawer__nav-link.is-drag-origin:not(.is-active):not(.is-drag-preview) .aetheric-drawer__nav-icon {
   color: rgba(255, 255, 255, 0.68);
   background: rgba(255, 255, 255, 0.03);
   border-color: rgba(255, 255, 255, 0.05);
