@@ -8,21 +8,14 @@ interface ExerciseResultsProps {
 }
 
 const SOURCE_COLORS: Record<
-  'wger' | 'exercisedb' | 'api-ninjas',
+  'wger',
   'default' | 'secondary' | 'destructive'
 > = {
   wger: 'default',
-  exercisedb: 'secondary',
-  'api-ninjas': 'destructive',
 };
 
-const SOURCE_LABELS: Record<
-  'wger' | 'exercisedb' | 'api-ninjas',
-  string
-> = {
+const SOURCE_LABELS: Record<'wger', string> = {
   wger: 'Wger',
-  exercisedb: 'ExerciseDB',
-  'api-ninjas': 'API Ninjas',
 };
 
 export function ExerciseResults({

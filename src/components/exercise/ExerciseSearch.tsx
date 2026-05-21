@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { useExerciseSearch } from '@/hooks/useExerciseSearch';
 import { ExerciseSearchInput } from './ExerciseSearchInput';
 import { ExerciseResults } from './ExerciseResults';
-import { ExerciseFallbackPrompt } from './ExerciseFallbackPrompt';
-import { RateLimitWarning } from './RateLimitWarning';
 
 interface ExerciseSearchProps {
   onSelectExercise?: (exerciseId: string, exerciseName: string) => void;
@@ -16,11 +14,7 @@ export function ExerciseSearch({ onSelectExercise }: ExerciseSearchProps) {
     error,
     currentQuery,
     hasEmptyResults,
-    remainingRequests,
-    rateLimitExceeded,
     searchPrimary,
-    searchFallback,
-    reset,
   } = useExerciseSearch();
 
   const [searchInput, setSearchInput] = useState('');
@@ -28,12 +22,6 @@ export function ExerciseSearch({ onSelectExercise }: ExerciseSearchProps) {
   const handleSearch = async (query: string) => {
     setSearchInput(query);
     await searchPrimary(query);
-  };
-
-  const handleFallbackSearch = async (
-    apiSource: 'exercisedb' | 'api-ninjas'
-  ) => {
-    await searchFallback(apiSource);
   };
 
   return (
@@ -52,10 +40,6 @@ export function ExerciseSearch({ onSelectExercise }: ExerciseSearchProps) {
         </div>
       )}
 
-      {rateLimitExceeded && (
-        <RateLimitWarning remainingRequests={remainingRequests} />
-      )}
-
       {isLoading && (
         <div className="flex items-center justify-center py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
@@ -63,12 +47,10 @@ export function ExerciseSearch({ onSelectExercise }: ExerciseSearchProps) {
       )}
 
       {hasEmptyResults && !isLoading && (
-        <ExerciseFallbackPrompt
-          query={currentQuery}
-          onSearchFallback={handleFallbackSearch}
-          remainingRequests={remainingRequests}
-          rateLimitExceeded={rateLimitExceeded}
-        />
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          No exercises found in wger for "{currentQuery}". The offline catalog
+          remains available for browsing and workout generation.
+        </div>
       )}
 
       {data.length > 0 && !isLoading && (

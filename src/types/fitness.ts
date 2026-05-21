@@ -171,6 +171,8 @@ export interface Exercise {
   difficulty?: 'Beginner' | 'Intermediate' | 'Advanced' | 'Elite' | 'All Levels';
   category?: ExerciseCategory;
   subcategory?: string;
+  source?: 'wger' | 'legacy' | 'custom';
+  sourceId?: string;
 }
 
 export interface ExercisePrescription {

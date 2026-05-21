@@ -114,9 +114,7 @@ vi.mock('@/hooks/useExerciseSearch', () => ({
     isLoading: false,
     error: null,
     hasEmptyResults: false,
-    remainingRequests: 10,
     searchPrimary: vi.fn(),
-    searchFallback: vi.fn(),
     reset: vi.fn(),
   }),
 }));

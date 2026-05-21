@@ -1,4 +1,3 @@
-// Normalized exercise type returned by all adapters
 export interface NormalizedExercise {
   id: string;
   name: string;
@@ -6,10 +5,9 @@ export interface NormalizedExercise {
   equipment?: string[];
   difficulty?: 'beginner' | 'intermediate' | 'advanced';
   description?: string;
-  source: 'wger' | 'exercisedb' | 'api-ninjas';
+  source: 'wger';
 }
 
-// API-specific response types
 export interface WgerExerciseResponse {
   count: number;
   next: string | null;
@@ -19,18 +17,24 @@ export interface WgerExerciseResponse {
 
 export interface WgerExercise {
   id: number;
-  name: string;
-  description: string;
+  name?: string;
+  description?: string;
   muscles: WgerMuscle[];
   muscles_secondary: WgerMuscle[];
   equipment: WgerEquipment[];
-  category: WgerCategory;
-  images: WgerImage[];
+  translations?: WgerTranslation[];
+}
+
+export interface WgerTranslation {
+  language: number;
+  name: string;
+  description: string;
 }
 
 export interface WgerMuscle {
   id: number;
   name: string;
+  name_en?: string;
 }
 
 export interface WgerEquipment {
@@ -38,39 +42,7 @@ export interface WgerEquipment {
   name: string;
 }
 
-export interface WgerCategory {
-  id: number;
-  name: string;
-}
-
-export interface WgerImage {
-  id: number;
-  image: string;
-  is_main: boolean;
-}
-
-// ExerciseDB API response types
-export interface ExerciseDbResponse {
-  name: string;
-  type: string;
-  muscle: string;
-  equipment: string;
-  difficulty?: string;
-  instructions?: string;
-}
-
-// API Ninjas response type
-export interface ApiNinjasExerciseResponse {
-  name: string;
-  type: string;
-  muscle: string;
-  difficulty: 'beginner' | 'intermediate' | 'expert';
-  instructions: string;
-  equipment?: string;
-}
-
-// Adapter interface
 export interface ExerciseApiAdapter {
   search(query: string): Promise<NormalizedExercise[]>;
-  getName(): 'wger' | 'exercisedb' | 'api-ninjas';
+  getName(): 'wger';
 }

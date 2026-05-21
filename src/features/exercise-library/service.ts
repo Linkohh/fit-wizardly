@@ -12,7 +12,6 @@ import type {
 const CACHE_KEY = 'fitwizard:exercise-library:last-known-good:v2';
 const FAILURE_META_KEY = 'fitwizard:exercise-library:failure-meta:v1';
 const CACHE_VERSION = 2;
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const COOLDOWN_MS = 60 * 60 * 1000;
 const MINIMUM_RECORD_COUNT = 200;
 const DEFAULT_PAGE_SIZE = 100;
@@ -28,7 +27,7 @@ interface PersistedExerciseLibraryCache {
   storedAt: string;
   source: ExerciseLibrarySource;
   lastSyncedAt: string | null;
-  records: ExerciseLibraryRecord[];
+  recordCount: number;
 }
 
 interface FailureMeta {
@@ -164,26 +163,17 @@ function normalizeNextPageUrl(nextUrl: string | null, currentUrl: string) {
   return parsed.toString();
 }
 
-function readPersistedCache() {
+function readPersistedCacheMetadata() {
   const parsed = parseJson<PersistedExerciseLibraryCache>(CACHE_KEY);
   if (
     !parsed ||
     parsed.version !== CACHE_VERSION ||
-    !Array.isArray(parsed.records) ||
-    !validateNormalizedRecords(parsed.records, 1)
+    typeof parsed.recordCount !== 'number'
   ) {
     return null;
   }
 
-  const storedAt = new Date(parsed.storedAt).getTime();
-  const isFresh = !Number.isNaN(storedAt) && Date.now() - storedAt <= CACHE_TTL_MS;
-
-  return {
-    records: parsed.records,
-    source: 'cache' as const,
-    isStale: !isFresh,
-    lastSyncedAt: parsed.lastSyncedAt,
-  };
+  return parsed;
 }
 
 function persistLastKnownGood(
@@ -196,7 +186,7 @@ function persistLastKnownGood(
     storedAt: new Date().toISOString(),
     source,
     lastSyncedAt,
-    records,
+    recordCount: records.length,
   };
 
   writeJson(CACHE_KEY, payload);
@@ -240,16 +230,13 @@ async function loadLegacyRecords() {
 }
 
 export function resolveBootExerciseLibraryState() {
-  const cached = readPersistedCache();
-  if (cached) {
-    return cached;
-  }
+  const metadata = readPersistedCacheMetadata();
 
   return {
     records: [],
     source: 'snapshot' as const,
     isStale: true,
-    lastSyncedAt: null,
+    lastSyncedAt: metadata?.lastSyncedAt ?? null,
   };
 }
 

@@ -34,6 +34,8 @@ export default defineConfig(({ mode }) => ({
         'app-icon-512.png',
         'apple-touch-icon.png',
         'favicon.png',
+        'exercise-data/legacy-exercises.v1.json',
+        'exercise-data/wger-snapshot.v1.json',
         'logo.png',
         'robots.txt',
       ],
@@ -75,14 +77,6 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes("/src/data/exercises.ts")) {
-            return "exercise-data";
-          }
-
-          if (id.includes("/src/features/exercise-library/data/wger-snapshot.json")) {
-            return "exercise-snapshot";
-          }
-
           if (
             id.includes("/src/features/exercise-library/") ||
             id.includes("/src/components/exercises/") ||
@@ -151,8 +145,6 @@ export default defineConfig(({ mode }) => ({
               !dep.includes("vendor-pdf") &&
               !dep.includes("vendor-charts") &&
               !dep.includes("vendor-auth") &&
-              !dep.includes("exercise-data") &&
-              !dep.includes("exercise-snapshot") &&
               !dep.includes("feature-exercises")
             );
           });

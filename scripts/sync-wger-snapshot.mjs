@@ -14,10 +14,6 @@ const WGER_LANGUAGE_BY_LOCALE = {
 };
 
 const ROOT_DIR = process.cwd();
-const SNAPSHOT_PATH = path.join(
-  ROOT_DIR,
-  'src/features/exercise-library/data/wger-snapshot.json'
-);
 const PUBLIC_SNAPSHOT_PATH = path.join(
   ROOT_DIR,
   'public/exercise-data/wger-snapshot.v1.json'
@@ -315,17 +311,16 @@ Last generated: ${new Date().toISOString()}
 - Records without an image: ${Math.max(recordCount - imageBackedCount, 0)}
 
 ## Integration flow
-1. Boot from persisted last-known-good normalized cache when available
-2. Fall back to the bundled normalized wger snapshot when cache is unavailable
-3. Fall back to the adapted curated local dataset when snapshot is unavailable
-4. Start a background live sync only after the UI is already usable
+1. Boot from the bundled normalized wger snapshot in \`public/exercise-data\`
+2. Backfill planner coverage from the curated legacy exercise asset
+3. Start a background live sync only after the UI is already usable
+4. Store only small last-known-good live-sync metadata in \`localStorage\`
 5. Promote live data only after pagination, normalization, and minimum-record validation succeed
 
 ## Boot sequence
-1. Persisted last-known-good normalized cache
-2. Bundled normalized wger snapshot
-3. Adapted current curated local dataset
-4. Background live sync after UI is already usable
+1. Bundled normalized wger snapshot
+2. Curated legacy planner backfill
+3. Background live sync after UI is already usable
 
 ## Risk notes
 - Licensing risk: exercise text and images must be reviewed per-record before commercial or closed-source launch
@@ -354,7 +349,6 @@ async function main() {
   };
 
   await fs.mkdir(path.dirname(PUBLIC_SNAPSHOT_PATH), { recursive: true });
-  await fs.writeFile(SNAPSHOT_PATH, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
   await fs.writeFile(PUBLIC_SNAPSHOT_PATH, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
   await writeReport(
     normalizedRecords.length,
@@ -362,7 +356,7 @@ async function main() {
   );
 
   console.log(
-    `Generated wger snapshot with ${normalizedRecords.length} records at ${SNAPSHOT_PATH} and ${PUBLIC_SNAPSHOT_PATH}`
+    `Generated wger snapshot with ${normalizedRecords.length} records at ${PUBLIC_SNAPSHOT_PATH}`
   );
 }
 
