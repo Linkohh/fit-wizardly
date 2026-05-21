@@ -23,32 +23,27 @@ function getBestTranslation(exercise: WgerExercise) {
 
 export class WgerAdapter implements ExerciseApiAdapter {
   async search(query: string): Promise<NormalizedExercise[]> {
-    try {
-      const response = await fetch(
-        `${WGER_BASE_URL}/exerciseinfo/?search=${encodeURIComponent(query)}`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-          },
-          signal: AbortSignal.timeout(12000),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Wger API error: ${response.statusText}`);
+    const response = await fetch(
+      `${WGER_BASE_URL}/exerciseinfo/?search=${encodeURIComponent(query)}`,
+      {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+        signal: AbortSignal.timeout(12000),
       }
+    );
 
-      const data = (await response.json()) as WgerExerciseResponse;
-      if (!Array.isArray(data.results) || data.results.length === 0) {
-        return [];
-      }
+    if (!response.ok) {
+      throw new Error(`Wger API error: ${response.statusText}`);
+    }
 
-      return data.results.map((exercise) => this.normalizeExercise(exercise));
-    } catch (error) {
-      console.error('Wger API error:', error);
+    const data = (await response.json()) as WgerExerciseResponse;
+    if (!Array.isArray(data.results) || data.results.length === 0) {
       return [];
     }
+
+    return data.results.map((exercise) => this.normalizeExercise(exercise));
   }
 
   private normalizeExercise(exercise: WgerExercise): NormalizedExercise {

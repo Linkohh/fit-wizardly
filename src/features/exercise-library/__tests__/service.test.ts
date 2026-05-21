@@ -271,6 +271,37 @@ describe('exercise-library service', () => {
     expect(state.records.length).toBeGreaterThan(200);
   });
 
+  it('keeps snapshot records available when the live refresh request fails to load', async () => {
+    await loadExerciseLibrary();
+    fetchMock.mockRejectedValueOnce(new Error('Load failed'));
+
+    const result = await syncExerciseLibrary({ force: true });
+    const state = getExerciseLibraryState();
+
+    expect(result).toBeNull();
+    expect(state.source).toBe('snapshot');
+    expect(state.records.length).toBeGreaterThan(200);
+    expect(state.syncStatus).toBe('error');
+    expect(state.error).toBe('Load failed');
+  });
+
+  it('does not immediately re-enter cooldown from stale failure metadata after a forced refresh', async () => {
+    await loadExerciseLibrary();
+    window.localStorage.setItem(
+      'fitwizard:exercise-library:failure-meta:v1',
+      JSON.stringify({
+        count: 3,
+        lastFailureAt: '2026-03-15T17:08:40.000Z',
+        cooldownUntil: '2099-03-15T18:08:40.000Z',
+      })
+    );
+    fetchMock.mockRejectedValueOnce(new Error('Load failed'));
+
+    await syncExerciseLibrary({ force: true });
+
+    expect(getExerciseLibraryState().syncStatus).toBe('error');
+  });
+
   it('enters cooldown after three consecutive sync failures', async () => {
     await loadExerciseLibrary();
     fetchMock.mockImplementation(() =>

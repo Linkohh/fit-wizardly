@@ -8,14 +8,16 @@ interface ExerciseResultsProps {
 }
 
 const SOURCE_COLORS: Record<
-  'wger',
+  NormalizedExercise['source'],
   'default' | 'secondary' | 'destructive'
 > = {
   wger: 'default',
+  catalog: 'secondary',
 };
 
-const SOURCE_LABELS: Record<'wger', string> = {
+const SOURCE_LABELS: Record<NormalizedExercise['source'], string> = {
   wger: 'Wger',
+  catalog: 'Catalog',
 };
 
 export function ExerciseResults({

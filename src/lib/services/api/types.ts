@@ -5,7 +5,7 @@ export interface NormalizedExercise {
   equipment?: string[];
   difficulty?: 'beginner' | 'intermediate' | 'advanced';
   description?: string;
-  source: 'wger';
+  source: 'wger' | 'catalog';
 }
 
 export interface WgerExerciseResponse {
