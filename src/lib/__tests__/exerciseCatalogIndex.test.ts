@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { EXERCISE_DATABASE } from '@/data/exercises';
+import { EXERCISE_DATABASE } from '@/test/fixtures/exercises';
 import {
   createExerciseCatalogIndex,
   filterExercisesFromIndex,

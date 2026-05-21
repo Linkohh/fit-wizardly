@@ -1,25 +1,25 @@
 import { useEffect, useSyncExternalStore } from 'react';
 import type { Exercise } from '@/types/fitness';
 import {
+  adaptExerciseLibraryRecordsToExercises,
+} from '@/features/exercise-library/exerciseAdapter';
+import {
+  getExerciseLibraryState,
+  loadExerciseLibrary,
+  subscribeToExerciseLibrary,
+} from '@/features/exercise-library/service';
+import { loadLegacyExercises } from '@/features/exercise-library/legacy';
+import {
   createExerciseCatalogIndex,
   type ExerciseCatalogIndex,
 } from '@/lib/exerciseCatalogIndex';
-
-const EXERCISE_ASSET_VERSION = 'v1';
-const EXERCISE_ASSET_PATH = `${import.meta.env.BASE_URL}exercise-data/legacy-exercises.${EXERCISE_ASSET_VERSION}.json`;
-const CACHE_KEY = `fitwizard:exercise-catalog:${EXERCISE_ASSET_VERSION}`;
-
-interface PersistedExerciseCatalog {
-  version: string;
-  exercises: Exercise[];
-}
 
 interface ExerciseRepositoryState {
   catalog: ExerciseCatalogIndex | null;
   error: string | null;
   exercises: Exercise[];
   isLoading: boolean;
-  source: 'asset' | 'empty' | 'memory' | 'storage';
+  source: 'empty' | 'library' | 'memory';
 }
 
 const EMPTY_STATE: ExerciseRepositoryState = {
@@ -30,68 +30,14 @@ const EMPTY_STATE: ExerciseRepositoryState = {
   source: 'empty',
 };
 
-let currentState = hydrateState(readPersistedExerciseCatalog(), 'storage');
+let currentState = hydrateState(
+  adaptExerciseLibraryRecordsToExercises(getExerciseLibraryState().records),
+  'library'
+);
 let loadPromise: Promise<ExerciseCatalogIndex> | null = null;
+let legacyExercisesCache: Exercise[] | null = null;
+let unsubscribeLibrary: (() => void) | null = null;
 const listeners = new Set<() => void>();
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isExercise(value: unknown): value is Exercise {
-  if (!isRecord(value)) return false;
-
-  return (
-    typeof value.id === 'string' &&
-    typeof value.name === 'string' &&
-    Array.isArray(value.primaryMuscles) &&
-    Array.isArray(value.secondaryMuscles) &&
-    Array.isArray(value.equipment)
-  );
-}
-
-function isExerciseArray(value: unknown): value is Exercise[] {
-  return Array.isArray(value) && value.every(isExercise);
-}
-
-function getStorage() {
-  if (typeof window === 'undefined') return null;
-  return window.localStorage;
-}
-
-function readPersistedExerciseCatalog() {
-  const storage = getStorage();
-  if (!storage) return null;
-
-  const raw = storage.getItem(CACHE_KEY);
-  if (!raw) return null;
-
-  try {
-    const parsed = JSON.parse(raw) as PersistedExerciseCatalog;
-    if (
-      parsed.version !== EXERCISE_ASSET_VERSION ||
-      !isExerciseArray(parsed.exercises)
-    ) {
-      return null;
-    }
-
-    return parsed.exercises;
-  } catch {
-    return null;
-  }
-}
-
-function persistExerciseCatalog(exercises: Exercise[]) {
-  const storage = getStorage();
-  if (!storage) return;
-
-  const payload: PersistedExerciseCatalog = {
-    version: EXERCISE_ASSET_VERSION,
-    exercises,
-  };
-
-  storage.setItem(CACHE_KEY, JSON.stringify(payload));
-}
 
 function emitChange() {
   listeners.forEach((listener) => listener());
@@ -103,40 +49,111 @@ function setState(state: ExerciseRepositoryState) {
 }
 
 function hydrateState(
-  exercises: Exercise[] | null,
-  source: ExerciseRepositoryState['source']
+  exercises: Exercise[],
+  source: ExerciseRepositoryState['source'],
+  error: string | null = null
 ): ExerciseRepositoryState {
-  if (!exercises || exercises.length === 0) {
-    return source === 'storage' ? EMPTY_STATE : { ...EMPTY_STATE, source };
+  if (exercises.length === 0) {
+    return {
+      ...EMPTY_STATE,
+      error,
+      source,
+    };
   }
 
   return {
     catalog: createExerciseCatalogIndex(exercises),
-    error: null,
+    error,
     exercises,
     isLoading: false,
     source,
   };
 }
 
-async function fetchExerciseCatalogAsset() {
-  const response = await fetch(EXERCISE_ASSET_PATH, {
-    cache: 'force-cache',
-    headers: {
-      Accept: 'application/json',
-    },
+function normalizeSignaturePart(value: string) {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+}
+
+function buildExerciseSignature(exercise: Exercise) {
+  const muscles = [...exercise.primaryMuscles, ...exercise.secondaryMuscles]
+    .sort()
+    .join(',');
+  const equipment = [...exercise.equipment].sort().join(',');
+
+  return [
+    normalizeSignaturePart(exercise.name),
+    muscles,
+    equipment,
+  ].join('|');
+}
+
+function withLegacySource(exercises: Exercise[]) {
+  return exercises.map((exercise) => ({
+    ...exercise,
+    source: 'legacy' as const,
+  }));
+}
+
+function mergePlannerExercises(
+  primaryExercises: Exercise[],
+  legacyExercises: Exercise[]
+) {
+  const merged = [...primaryExercises];
+  const signatures = new Set(primaryExercises.map(buildExerciseSignature));
+
+  withLegacySource(legacyExercises).forEach((exercise) => {
+    const signature = buildExerciseSignature(exercise);
+    if (signatures.has(signature)) {
+      return;
+    }
+
+    signatures.add(signature);
+    merged.push(exercise);
   });
 
-  if (!response.ok) {
-    throw new Error(`Failed to load exercise catalog asset: HTTP ${response.status}`);
+  return merged;
+}
+
+async function loadLegacyPlannerExercises() {
+  if (legacyExercisesCache) {
+    return legacyExercisesCache;
   }
 
-  const payload = (await response.json()) as unknown;
-  if (!isExerciseArray(payload)) {
-    throw new Error('Exercise catalog asset did not match the expected shape');
+  try {
+    legacyExercisesCache = await loadLegacyExercises();
+    return legacyExercisesCache;
+  } catch {
+    legacyExercisesCache = [];
+    return legacyExercisesCache;
+  }
+}
+
+function syncFromExerciseLibraryState() {
+  const libraryState = getExerciseLibraryState();
+  const exercises = mergePlannerExercises(
+    adaptExerciseLibraryRecordsToExercises(libraryState.records),
+    legacyExercisesCache ?? []
+  );
+
+  if (exercises.length === 0 && currentState.exercises.length > 0) {
+    setState({
+      ...currentState,
+      error: libraryState.error,
+      isLoading: libraryState.syncStatus === 'loading',
+    });
+    return;
   }
 
-  return payload;
+  setState({
+    ...hydrateState(exercises, 'library', libraryState.error),
+    isLoading: libraryState.syncStatus === 'loading',
+  });
+}
+
+function ensureLibrarySubscription() {
+  if (unsubscribeLibrary) return;
+
+  unsubscribeLibrary = subscribeToExerciseLibrary(syncFromExerciseLibraryState);
 }
 
 export async function loadExerciseCatalog(): Promise<ExerciseCatalogIndex> {
@@ -148,18 +165,31 @@ export async function loadExerciseCatalog(): Promise<ExerciseCatalogIndex> {
     return loadPromise;
   }
 
+  ensureLibrarySubscription();
+
   setState({
     ...currentState,
     error: null,
     isLoading: true,
   });
 
-  loadPromise = fetchExerciseCatalogAsset()
-    .then((exercises) => {
-      persistExerciseCatalog(exercises);
-      const nextState = hydrateState(exercises, 'asset');
+  loadPromise = Promise.all([
+    loadExerciseLibrary(),
+    loadLegacyPlannerExercises(),
+  ])
+    .then(([libraryState, legacyExercises]) => {
+      const exercises = mergePlannerExercises(
+        adaptExerciseLibraryRecordsToExercises(libraryState.records),
+        legacyExercises
+      );
+      const nextState = hydrateState(exercises, 'library', libraryState.error);
       setState(nextState);
-      return nextState.catalog as ExerciseCatalogIndex;
+
+      if (!nextState.catalog) {
+        throw new Error('Exercise library did not provide any planner-compatible exercises');
+      }
+
+      return nextState.catalog;
     })
     .catch((error) => {
       const message =
@@ -203,6 +233,7 @@ export function getExerciseRepositoryState() {
 }
 
 export function subscribeToExerciseRepository(listener: () => void) {
+  ensureLibrarySubscription();
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
@@ -240,6 +271,8 @@ export function primeExerciseRepositoryForTests(exercises: Exercise[]) {
 export function resetExerciseRepositoryForTests() {
   currentState = EMPTY_STATE;
   loadPromise = null;
+  legacyExercisesCache = null;
+  unsubscribeLibrary?.();
+  unsubscribeLibrary = null;
   listeners.clear();
-  getStorage()?.removeItem(CACHE_KEY);
 }

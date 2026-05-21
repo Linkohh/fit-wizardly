@@ -143,7 +143,7 @@ describe('exercise-library service', () => {
     vi.unstubAllGlobals();
   });
 
-  it('prefers the persisted cache during boot when it is valid', () => {
+  it('ignores metadata-only last-known-good state during boot', () => {
     window.localStorage.setItem(
       'fitwizard:exercise-library:last-known-good:v2',
       JSON.stringify({
@@ -151,15 +151,14 @@ describe('exercise-library service', () => {
         storedAt: new Date().toISOString(),
         source: 'live',
         lastSyncedAt: '2025-01-03T00:00:00.000Z',
-        records: [buildNormalizedRecord()],
+        recordCount: 205,
       })
     );
 
     const state = resolveBootExerciseLibraryState();
 
-    expect(state.source).toBe('cache');
-    expect(state.records).toHaveLength(1);
-    expect(state.records[0]?.name).toBe('Push-Up');
+    expect(state.source).toBe('snapshot');
+    expect(state.records).toHaveLength(0);
   });
 
   it('ignores the old v1 cache contract after the schema bump', () => {
@@ -198,6 +197,21 @@ describe('exercise-library service', () => {
     );
     expect(state.source).toBe('snapshot');
     expect(state.records.length).toBeGreaterThan(200);
+  });
+
+  it('stores only small last-known-good metadata in localStorage', async () => {
+    await loadExerciseLibrary();
+
+    const persisted = JSON.parse(
+      window.localStorage.getItem('fitwizard:exercise-library:last-known-good:v2') ?? '{}'
+    );
+
+    expect(persisted).toMatchObject({
+      version: 2,
+      source: 'snapshot',
+      recordCount: expect.any(Number),
+    });
+    expect(persisted.records).toBeUndefined();
   });
 
   it('rejects partial pagination results from the live API', async () => {

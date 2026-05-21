@@ -108,6 +108,17 @@ vi.mock('../ExerciseLibraryCard', () => ({
   }) => <div>{exercise.name}</div>,
 }));
 
+vi.mock('@/hooks/useExerciseSearch', () => ({
+  useExerciseSearch: () => ({
+    data: [],
+    isLoading: false,
+    error: null,
+    hasEmptyResults: false,
+    searchPrimary: vi.fn(),
+    reset: vi.fn(),
+  }),
+}));
+
 vi.mock('../ExerciseLibraryDetailModal', () => ({
   ExerciseLibraryDetailModal: () => null,
 }));
