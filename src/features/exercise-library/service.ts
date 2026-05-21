@@ -121,6 +121,13 @@ function resetFailureMeta() {
   });
 }
 
+function clearFailureMetaBeforeManualRetry() {
+  const meta = getFailureMeta();
+  if (meta.cooldownUntil) {
+    resetFailureMeta();
+  }
+}
+
 function recordSyncFailure() {
   const now = new Date();
   const current = getFailureMeta();
@@ -393,6 +400,10 @@ export async function syncExerciseLibrary(options?: { force?: boolean }) {
       syncStatus: status,
     });
     return null;
+  }
+
+  if (options?.force) {
+    clearFailureMetaBeforeManualRetry();
   }
 
   setState({

@@ -12,6 +12,7 @@ export function ExerciseSearch({ onSelectExercise }: ExerciseSearchProps) {
     data,
     isLoading,
     error,
+    warning,
     currentQuery,
     hasEmptyResults,
     searchPrimary,
@@ -40,16 +41,21 @@ export function ExerciseSearch({ onSelectExercise }: ExerciseSearchProps) {
         </div>
       )}
 
+      {warning && !error && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          {warning}
+        </div>
+      )}
+
       {isLoading && (
         <div className="flex items-center justify-center py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600" />
         </div>
       )}
 
-      {hasEmptyResults && !isLoading && (
+      {hasEmptyResults && !warning && !isLoading && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          No exercises found in wger for "{currentQuery}". The offline catalog
-          remains available for browsing and workout generation.
+          No exercises found for "{currentQuery}" in the current catalog.
         </div>
       )}
 

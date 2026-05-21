@@ -6,6 +6,14 @@ import type { ExerciseLibraryRecord } from '../../types';
 const mocks = vi.hoisted(() => ({
   refresh: vi.fn(),
   addCustomExercise: vi.fn(),
+  libraryState: {
+    records: [] as ExerciseLibraryRecord[],
+    source: 'snapshot',
+    isStale: true,
+    lastSyncedAt: '2025-01-03T00:00:00.000Z',
+    syncStatus: 'ready',
+    error: null as string | null,
+  },
 }));
 
 vi.mock('react-i18next', () => ({
@@ -59,12 +67,7 @@ const catalogRecord = buildExercise({
 
 vi.mock('../../useExerciseLibrary', () => ({
   useExerciseLibrary: () => ({
-    records: [catalogRecord],
-    source: 'snapshot',
-    isStale: true,
-    lastSyncedAt: '2025-01-03T00:00:00.000Z',
-    syncStatus: 'ready',
-    error: null,
+    ...mocks.libraryState,
     refresh: mocks.refresh,
   }),
 }));
@@ -124,6 +127,17 @@ vi.mock('../ExerciseLibraryDetailModal', () => ({
 }));
 
 describe('ExerciseLibraryPage', () => {
+  beforeEach(() => {
+    mocks.libraryState.records = [catalogRecord];
+    mocks.libraryState.source = 'snapshot';
+    mocks.libraryState.isStale = true;
+    mocks.libraryState.lastSyncedAt = '2025-01-03T00:00:00.000Z';
+    mocks.libraryState.syncStatus = 'ready';
+    mocks.libraryState.error = null;
+    mocks.refresh.mockReset();
+    mocks.addCustomExercise.mockReset();
+  });
+
   it('renders backup-state messaging and keeps custom exercises separate from catalog counts', () => {
     render(<ExerciseLibraryPage />);
 
@@ -165,5 +179,16 @@ describe('ExerciseLibraryPage', () => {
 
     expect(screen.getByText('Showing 1 of 1 catalog exercises')).toBeInTheDocument();
     expect(screen.getByText('Bench Press')).toBeInTheDocument();
+  });
+
+  it('downgrades live refresh errors when local catalog records remain available', () => {
+    mocks.libraryState.error = 'Load failed';
+    mocks.libraryState.syncStatus = 'error';
+
+    render(<ExerciseLibraryPage />);
+
+    expect(screen.queryByText('Catalog refresh issue')).not.toBeInTheDocument();
+    expect(screen.getByText('Live refresh unavailable')).toBeInTheDocument();
+    expect(screen.getByText(/local exercise catalog remains available/i)).toBeInTheDocument();
   });
 });

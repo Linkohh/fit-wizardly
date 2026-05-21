@@ -233,6 +233,7 @@ export function ExerciseLibraryPage() {
     [filteredRecords, page]
   );
   const hasMore = pagedRecords.length < filteredRecords.length;
+  const hasLocalCatalog = records.length > 0;
 
   const filteredCustomRecords = useMemo(() => filterCatalog(customRecords, filters), [customRecords, filters]);
   const recommendedRecords = useMemo(
@@ -324,7 +325,14 @@ export function ExerciseLibraryPage() {
           onRefresh={handleRefresh}
         />
 
-        {error ? (
+        {error && hasLocalCatalog ? (
+          <StateCard
+            title="Live refresh unavailable"
+            description="The local exercise catalog remains available. Live wger content will be used after a refresh succeeds."
+            icon={ShieldCheck}
+            variant="empty"
+          />
+        ) : error ? (
           <StateCard
             title="Catalog refresh issue"
             description={error}
