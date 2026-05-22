@@ -546,40 +546,104 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
 }
 
 @utility app-shell-web {
-  --app-shell-header-height: 4rem;
-  --app-shell-header-offset: calc(env(safe-area-inset-top, 0px) + var(--app-shell-header-height));
+  --app-shell-header-height: 3.5rem;
+  --app-shell-header-offset: calc(env(safe-area-inset-top, 0px) + 4.15rem);
 }
 
 @utility app-shell-native {
-  --app-shell-header-height: 3.25rem;
-  --app-shell-header-offset: calc(env(safe-area-inset-top, 0px) + var(--app-shell-header-height));
+  --app-shell-header-height: 3.5rem;
+  --app-shell-header-offset: calc(env(safe-area-inset-top, 0px) + 4.15rem);
 
   @media (width >= --theme(--breakpoint-md)) {
-    --app-shell-header-height: 4rem;
+    --app-shell-header-height: 3.5rem;
   }
 }
 
 @utility app-shell-main-offset {
-  padding-top: var(--app-shell-header-offset, 4rem);
+  padding-top: var(--app-shell-header-offset, 4.15rem);
 }
 
 @utility app-shell-sticky-offset {
-  top: var(--app-shell-header-offset, 4rem);
+  top: var(--app-shell-header-offset, 4.15rem);
 }
 
 @utility app-shell-page-min-height {
-  min-height: calc(100vh - var(--app-shell-header-offset, 4rem));
-  min-height: calc(100svh - var(--app-shell-header-offset, 4rem));
-  min-height: calc(100dvh - var(--app-shell-header-offset, 4rem));
+  min-height: calc(100vh - var(--app-shell-header-offset, 4.15rem));
+  min-height: calc(100svh - var(--app-shell-header-offset, 4.15rem));
+  min-height: calc(100dvh - var(--app-shell-header-offset, 4.15rem));
 }
 
 @utility app-shell-header-height {
-  height: var(--app-shell-header-height, 4rem);
+  height: var(--app-shell-header-height, 3.5rem);
 }
 
 @utility app-shell-header-square {
-  width: var(--app-shell-header-height, 4rem);
-  height: var(--app-shell-header-height, 4rem);
+  width: var(--app-shell-header-height, 3.5rem);
+  height: var(--app-shell-header-height, 3.5rem);
+}
+
+
+@utility header-capsule-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  width: 100%;
+  pointer-events: none;
+  
+  /* STATUS BAR CONFIGURATION SPACE:
+     Adjust the '+ 3px' mobile / '+ 10px' tablet offsets to configure the vertical empty space 
+     between the phone's native status bar/notch and the floating header capsule. */
+  padding-top: calc(env(safe-area-inset-top, 0px) + 3px);
+  padding-left: 12px;
+  padding-right: 12px;
+  
+  @media (width >= --theme(--breakpoint-md)) {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 10px);
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@utility header-capsule-inner {
+  pointer-events: auto;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1200px;
+  height: 3.5rem;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 
+    0 12px 32px -10px rgba(72, 46, 118, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  .dark & {
+    background: rgba(18, 10, 28, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 
+      0 20px 40px -15px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Interactive scale on hover/focus */
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 
+      0 16px 36px -8px rgba(72, 46, 118, 0.16),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    
+    .dark & {
+      box-shadow: 
+        0 24px 44px -12px rgba(0, 0, 0, 0.48),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+  }
 }
 
 @utility gradient-primary {

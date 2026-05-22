@@ -521,19 +521,22 @@ export function Header() {
   };
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-area-top",
-        isWizardRoute && "border-white/5 bg-background/85 supports-[backdrop-filter]:bg-background/75",
-      )}
-    >
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 z-[100] px-4 py-2 bg-background border border-primary text-primary rounded-md shadow-lg"
+    <header className="header-capsule-wrapper">
+      {/* Notch-safe top-fade overlay strictly behind status bar */}
+      <div className="fixed top-0 left-0 right-0 z-30 pointer-events-none h-[calc(env(safe-area-inset-top,0px)+1.5rem)] bg-gradient-to-b from-background via-background/70 to-transparent" />
+
+      <div
+        className={cn(
+          "header-capsule-inner flex items-center justify-between px-4 relative z-40",
+          isWizardRoute && "border-white/5 bg-background/85 supports-[backdrop-filter]:bg-background/75",
+        )}
       >
-        {t('a11y.skip_to_content', 'Skip to content')}
-      </a>
-      <div className="container app-shell-header-height flex items-center justify-between px-4">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-[calc(env(safe-area-inset-top,0px)+0.5rem)] focus:left-4 z-[100] px-4 py-2 bg-background border border-primary text-primary rounded-md shadow-lg pointer-events-auto"
+        >
+          {t('a11y.skip_to_content', 'Skip to content')}
+        </a>
         <Link
           to="/"
           className="flex items-center gap-3 touch-target group"
