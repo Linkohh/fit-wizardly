@@ -9,6 +9,11 @@ const config: CapacitorConfig = {
     // a temporary server URL automatically. No manual IP config needed.
     androidScheme: 'https',
   },
+  plugins: {
+    CapacitorHttp: {
+      enabled: true,
+    },
+  },
 };
 
 export default config;
