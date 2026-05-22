@@ -543,7 +543,7 @@ export function Header() {
           data-click-feedback-event="brandHome"
         >
           <motion.div
-            className="app-shell-header-square flex shrink-0 items-center justify-center overflow-hidden"
+            className="app-shell-header-square flex shrink-0 items-center justify-center overflow-visible"
             whileHover={{ scale: 1.1, rotate: 0 }}
             whileTap={{ scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 400, damping: 15 }}
@@ -553,7 +553,7 @@ export function Header() {
               fetchPriority="high"
               width="64"
               height="64"
-              className="h-full w-full object-contain"
+              className="h-full w-full object-contain scale-[1.22] origin-center"
               src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png"
             />
           </motion.div>
