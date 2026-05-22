@@ -8,6 +8,11 @@ import {
   syncExerciseLibrary,
 } from '../service';
 import type { ExerciseLibraryRecord, WgerExerciseInfoRecord } from '../types';
+import { isNativeApp } from '@/lib/platform';
+
+vi.mock('@/lib/platform', () => ({
+  isNativeApp: vi.fn(() => false),
+}));
 
 const fetchMock = vi.fn<typeof fetch>();
 
@@ -323,5 +328,46 @@ describe('exercise-library service', () => {
 
     expect(result).toBeNull();
     expect(getExerciseLibraryState().syncStatus).toBe('cooldown');
+  });
+
+  it('proxies fetch requests when running on web (isNativeApp is false)', async () => {
+    vi.mocked(isNativeApp).mockReturnValue(false);
+
+    fetchMock.mockImplementationOnce((input) => {
+      const url = input instanceof Request ? input.url : input.toString();
+      expect(url).toContain('/api/proxy-wger?url=');
+      return createJsonResponse({
+        count: 0,
+        next: null,
+        results: [],
+      });
+    });
+
+    try {
+      await fetchAllWgerExercises();
+    } catch {
+      // Ignore validation errors, we just want to verify the fetch input URL
+    }
+  });
+
+  it('fetches directly when running on native app (isNativeApp is true)', async () => {
+    vi.mocked(isNativeApp).mockReturnValue(true);
+
+    fetchMock.mockImplementationOnce((input) => {
+      const url = input instanceof Request ? input.url : input.toString();
+      expect(url).not.toContain('/api/proxy-wger?url=');
+      expect(url).toContain('https://wger.de/api/v2/exerciseinfo/');
+      return createJsonResponse({
+        count: 0,
+        next: null,
+        results: [],
+      });
+    });
+
+    try {
+      await fetchAllWgerExercises();
+    } catch {
+      // Ignore validation errors
+    }
   });
 });

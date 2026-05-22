@@ -6,6 +6,57 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
 import tailwindcss from "@tailwindcss/vite";
 
+const wgerProxyPlugin = () => ({
+  name: 'wger-proxy-plugin',
+  configureServer(server: any) {
+    server.middlewares.use(async (req: any, res: any, next: any) => {
+      if (req.url && req.url.startsWith('/api/proxy-wger')) {
+        try {
+          const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+          const targetUrl = urlObj.searchParams.get('url');
+          if (!targetUrl) {
+            res.statusCode = 400;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Missing url parameter' }));
+            return;
+          }
+
+          const targetUrlParsed = new URL(targetUrl);
+          const allowedHosts = ['wger.de', 'www.wger.de'];
+          if (!allowedHosts.includes(targetUrlParsed.hostname)) {
+            res.statusCode = 403;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: 'Forbidden: Host not allowed' }));
+            return;
+          }
+
+          const response = await fetch(targetUrl, {
+            headers: { 'Accept': 'application/json' }
+          });
+
+          if (!response.ok) {
+            res.statusCode = response.status;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(JSON.stringify({ error: `Wger API returned HTTP ${response.status}` }));
+            return;
+          }
+
+          const data = await response.json();
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(data));
+        } catch (err) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Internal Server Error' }));
+        }
+      } else {
+        next();
+      }
+    });
+  }
+});
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -18,6 +69,7 @@ export default defineConfig(({ mode }) => ({
     allowedHosts: true,
   },
   plugins: [
+    wgerProxyPlugin(),
     tailwindcss(),
     react(),
     mode === "development" && componentTagger(),

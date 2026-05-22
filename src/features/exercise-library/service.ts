@@ -1,5 +1,6 @@
 import { loadLegacyExerciseLibraryRecords } from './legacy';
 import { normalizeWgerExercise, validateNormalizedRecords } from './normalize';
+import { isNativeApp } from '@/lib/platform';
 import type {
   ExerciseLibraryRecord,
   ExerciseLibrarySnapshotPayload,
@@ -263,8 +264,12 @@ async function fetchWithTimeout(url: string) {
   const controller = new AbortController();
   const timeoutId = globalThis.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
+  const fetchUrl = isNativeApp()
+    ? url
+    : `/api/proxy-wger?url=${encodeURIComponent(url)}`;
+
   try {
-    const response = await fetch(url, {
+    const response = await fetch(fetchUrl, {
       signal: controller.signal,
       headers: {
         Accept: 'application/json',
