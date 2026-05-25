@@ -2,7 +2,7 @@
 
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import { cva, type VariantProps } from "class-variance-authority";
-import { X } from "lucide-react";
+import { X, ChevronRight } from "lucide-react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -17,12 +17,6 @@ const SheetPortal = SheetPrimitive.Portal;
 
 type SheetMotionPreset = "default" | "mobileDrawer";
 type SheetGestureMode = "none" | "right-edge" | "full-panel";
-
-const CLOSE_GESTURE_ACTIVATION_PX = 10;
-const CLOSE_GESTURE_EDGE_WIDTH_PX = 32;
-const CLOSE_GESTURE_VELOCITY_PX_PER_MS = 0.72;
-const MOBILE_DRAWER_CLOSE_MS = 220;
-const MOBILE_DRAWER_REBOUND_MS = 260;
 
 const INTERACTIVE_GESTURE_SELECTOR = [
   "a",
@@ -44,9 +38,6 @@ const isInteractiveGestureTarget = (target: EventTarget | null, container: HTMLE
 
   return Boolean(target.closest(INTERACTIVE_GESTURE_SELECTOR));
 };
-
-const getRightCloseOffset = (deltaX: number, sheetWidth: number) =>
-  Math.min(Math.max(deltaX, 0), sheetWidth);
 
 // Enhanced overlay with animated blur
 const SheetOverlay = React.forwardRef<
@@ -166,15 +157,13 @@ const SheetContent = React.forwardRef<
   ...props
 }, ref) => {
   const contentRef = React.useRef<HTMLDivElement | null>(null);
+  const [dragOffset, setDragOffset] = React.useState(0);
+  const [isDragging, setIsDragging] = React.useState(false);
   const [sheetWidth, setSheetWidth] = React.useState(320);
   const startXRef = React.useRef(0);
   const startYRef = React.useRef(0);
-  const startTimeRef = React.useRef(0);
-  const activePointerIdRef = React.useRef<number | null>(null);
-  const isTrackingGestureRef = React.useRef(false);
-  const isDraggingGestureRef = React.useRef(false);
-  const dragOffsetRef = React.useRef(0);
-  const resetMotionTimeoutRef = React.useRef<number | null>(null);
+  const isValidSwipeStartRef = React.useRef(false);
+
   const setRefs = React.useCallback((node: HTMLDivElement | null) => {
     contentRef.current = node;
 
@@ -218,38 +207,6 @@ const SheetContent = React.forwardRef<
 
   const snapThreshold = sheetWidth * 0.35;
 
-  const clearResetMotionTimeout = React.useCallback(() => {
-    if (resetMotionTimeoutRef.current !== null) {
-      window.clearTimeout(resetMotionTimeoutRef.current);
-      resetMotionTimeoutRef.current = null;
-    }
-  }, []);
-
-  const resetGestureState = React.useCallback(() => {
-    activePointerIdRef.current = null;
-    isTrackingGestureRef.current = false;
-    isDraggingGestureRef.current = false;
-    dragOffsetRef.current = 0;
-  }, []);
-
-  const resetInlineMotion = React.useCallback((delay = 0) => {
-    const node = contentRef.current;
-    if (!node) {
-      return;
-    }
-
-    clearResetMotionTimeout();
-    resetMotionTimeoutRef.current = window.setTimeout(() => {
-      node.style.transform = "";
-      node.style.opacity = "";
-      node.style.transition = "";
-      delete node.dataset.gestureDragging;
-      resetMotionTimeoutRef.current = null;
-    }, delay);
-  }, [clearResetMotionTimeout]);
-
-  React.useEffect(() => clearResetMotionTimeout, [clearResetMotionTimeout]);
-
   // Handle touch/pointer events for swipe-to-close
   const handlePointerDown = React.useCallback((e: React.PointerEvent) => {
     const node = contentRef.current;
@@ -263,124 +220,116 @@ const SheetContent = React.forwardRef<
       return;
     }
 
+    const rect = node.getBoundingClientRect();
+    // Validate edge start if in right-edge mode (within 45px of the left edge)
     if (gestureMode === "right-edge") {
-      const leftEdgeDistance = e.clientX - node.getBoundingClientRect().left;
-      if (leftEdgeDistance > CLOSE_GESTURE_EDGE_WIDTH_PX) {
+      const leftEdgeDistance = e.clientX - rect.left;
+      if (leftEdgeDistance > 45) {
         return;
       }
     }
 
-    clearResetMotionTimeout();
+    isValidSwipeStartRef.current = true;
     startXRef.current = e.clientX;
     startYRef.current = e.clientY;
-    startTimeRef.current = typeof performance === "undefined" ? Date.now() : performance.now();
-    activePointerIdRef.current = e.pointerId;
-    isTrackingGestureRef.current = true;
-    isDraggingGestureRef.current = false;
-    dragOffsetRef.current = 0;
-  }, [clearResetMotionTimeout, enableGestures, gestureMode, side]);
+    
+    // Capture pointer
+    if (typeof node.setPointerCapture === "function") {
+      node.setPointerCapture(e.pointerId);
+    }
+  }, [enableGestures, gestureMode, side]);
 
   const handlePointerMove = React.useCallback((e: React.PointerEvent) => {
-    const node = contentRef.current;
-    if (
-      !node ||
-      !enableGestures ||
-      !isTrackingGestureRef.current ||
-      activePointerIdRef.current !== e.pointerId
-    ) {
+    if (!enableGestures || !isValidSwipeStartRef.current) return;
+
+    const deltaX = e.clientX - startXRef.current;
+    const deltaY = e.clientY - startYRef.current;
+
+    // Check if we meet threshold to start dragging
+    if (!isDragging) {
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+
+      // Horizontal bias verification (ignore vertical scrolls)
+      if (absX > 10 && absX > absY * 1.6) {
+        if (side === "right" && deltaX > 0) {
+          setIsDragging(true);
+        }
+      }
       return;
     }
 
-    const deltaX = e.clientX - startXRef.current;
-    const deltaY = Math.abs(e.clientY - startYRef.current);
-    const absDeltaX = Math.abs(deltaX);
-
-    if (!isDraggingGestureRef.current) {
-      if (deltaY > absDeltaX && deltaY > CLOSE_GESTURE_ACTIVATION_PX) {
-        resetGestureState();
-        return;
-      }
-
-      if (absDeltaX < CLOSE_GESTURE_ACTIVATION_PX) {
-        return;
-      }
-
-      if (deltaX <= 0) {
-        resetGestureState();
-        return;
-      }
-
-      isDraggingGestureRef.current = true;
-      node.dataset.gestureDragging = "true";
-      node.style.transition = "none";
-      if (typeof node.setPointerCapture === "function") {
-        node.setPointerCapture(e.pointerId);
-      }
+    // Direct drag tracking
+    if (side === "right" && deltaX > 0) {
+      setDragOffset(Math.min(deltaX, sheetWidth));
     }
-
-    const nextOffset = getRightCloseOffset(deltaX, sheetWidth);
-    dragOffsetRef.current = nextOffset;
-    node.style.transform = `translate3d(${nextOffset}px, 0, 0)`;
-    node.style.opacity = String(1 - (nextOffset / sheetWidth) * 0.28);
-  }, [enableGestures, resetGestureState, sheetWidth]);
+  }, [isDragging, enableGestures, side, sheetWidth]);
 
   const handlePointerUp = React.useCallback((e: React.PointerEvent) => {
     const node = contentRef.current;
-    if (
-      !node ||
-      !enableGestures ||
-      !isTrackingGestureRef.current ||
-      activePointerIdRef.current !== e.pointerId
-    ) {
-      return;
-    }
+    if (!isValidSwipeStartRef.current || !node) return;
+
+    isValidSwipeStartRef.current = false;
 
     if (typeof node.hasPointerCapture !== "function" || node.hasPointerCapture(e.pointerId)) {
       node.releasePointerCapture?.(e.pointerId);
     }
 
-    if (!isDraggingGestureRef.current) {
-      resetGestureState();
-      return;
+    if (isDragging) {
+      setIsDragging(false);
+
+      const shouldClose = Math.abs(dragOffset) > snapThreshold;
+
+      if (shouldClose && onGestureClose) {
+        // Smoothly glide the sheet all the way out, then trigger callback
+        setDragOffset(sheetWidth);
+        setTimeout(() => {
+          onGestureClose();
+        }, 220);
+      } else {
+        // Bounce back using CSS spring curve
+        setDragOffset(0);
+      }
+    }
+  }, [isDragging, dragOffset, snapThreshold, onGestureClose, sheetWidth]);
+
+  // Calculate transform based on drag
+  const getTransformStyle = (): React.CSSProperties => {
+    if (!enableGestures || dragOffset === 0) return {};
+
+    let transition = "none";
+    if (!isDragging) {
+      const isClosing = Math.abs(dragOffset) >= sheetWidth;
+      // Spring elastic snapback curve
+      transition = isClosing
+        ? "transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease-out"
+        : "transform 0.42s cubic-bezier(0.25, 1.4, 0.5, 1), opacity 0.3s ease-out";
     }
 
-    const elapsedMs = Math.max(
-      (typeof performance === "undefined" ? Date.now() : performance.now()) - startTimeRef.current,
-      1,
-    );
-    const velocity = (e.clientX - startXRef.current) / elapsedMs;
-    const shouldClose =
-      dragOffsetRef.current > snapThreshold ||
-      (dragOffsetRef.current > sheetWidth * 0.18 && velocity > CLOSE_GESTURE_VELOCITY_PX_PER_MS);
+    return {
+      transform: `translateX(${dragOffset}px)`,
+      transition,
+    };
+  };
 
-    if (shouldClose) {
-      node.style.transition = `transform ${MOBILE_DRAWER_CLOSE_MS}ms cubic-bezier(0.32, 0, 0.67, 0), opacity 160ms ease-out`;
-      node.style.transform = `translate3d(${sheetWidth}px, 0, 0)`;
-      node.style.opacity = "0.72";
-      resetGestureState();
-      onGestureClose?.();
-      return;
+  // Calculate opacity based on drag
+  const getOpacityStyle = (): React.CSSProperties => {
+    if (!enableGestures || dragOffset === 0) return {};
+
+    const opacity = 1 - (Math.abs(dragOffset) / sheetWidth) * 0.4;
+    let transition = "none";
+    if (!isDragging) {
+      const isClosing = Math.abs(dragOffset) >= sheetWidth;
+      transition = isClosing
+        ? "opacity 0.22s ease-out"
+        : "opacity 0.3s ease-out";
     }
 
-    node.style.transition = `transform ${MOBILE_DRAWER_REBOUND_MS}ms cubic-bezier(0.32, 0.72, 0, 1), opacity 180ms ease-out`;
-    node.style.transform = "translate3d(0, 0, 0)";
-    node.style.opacity = "";
-    resetGestureState();
-    resetInlineMotion(MOBILE_DRAWER_REBOUND_MS);
-  }, [enableGestures, onGestureClose, resetGestureState, resetInlineMotion, sheetWidth, snapThreshold]);
-
-  const handlePointerCancel = React.useCallback((e: React.PointerEvent) => {
-    const node = contentRef.current;
-    if (!node || activePointerIdRef.current !== e.pointerId) {
-      return;
-    }
-
-    node.style.transition = `transform ${MOBILE_DRAWER_REBOUND_MS}ms cubic-bezier(0.32, 0.72, 0, 1), opacity 180ms ease-out`;
-    node.style.transform = "translate3d(0, 0, 0)";
-    node.style.opacity = "";
-    resetGestureState();
-    resetInlineMotion(MOBILE_DRAWER_REBOUND_MS);
-  }, [resetGestureState, resetInlineMotion]);
+    return {
+      opacity,
+      transition,
+    };
+  };
 
   return (
     <SheetPortal>
@@ -392,14 +341,70 @@ const SheetContent = React.forwardRef<
           glassEffect && "sheet-glass sheet-inner-glow",
           className
         )}
+        style={{
+          ...getTransformStyle(),
+          ...getOpacityStyle(),
+        }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerCancel}
+        onPointerCancel={handlePointerUp}
         {...props}
       >
         <SheetPrimitive.Title className="sr-only">{title}</SheetPrimitive.Title>
         <SheetPrimitive.Description className="sr-only">{description}</SheetPrimitive.Description>
+
+        {/* Dynamic Glow and Chevron Swipe Affordance */}
+        {enableGestures && side === "right" && (
+          <>
+            <style dangerouslySetInnerHTML={{ __html: `
+              @keyframes bounce-right {
+                0%, 100% { transform: translateX(0); opacity: 0.45; }
+                50% { transform: translateX(5px); opacity: 1; }
+              }
+              .animate-bounce-right {
+                animation: bounce-right 1.2s infinite ease-in-out;
+              }
+              .glow-edge-shimmer {
+                background: linear-gradient(180deg, #bd00ff 0%, #ff83d3 50%, #8ff5ff 100%);
+              }
+            ` }} />
+
+            {/* Glowing Left Edge Border */}
+            <div
+              className="pointer-events-none absolute left-0 top-0 bottom-0 w-[4px] z-50 transition-all duration-150 rounded-l-[32px]"
+              style={{
+                background: 'linear-gradient(to bottom, #bd00ff, #ff83d3, #8ff5ff)',
+                opacity: isDragging ? 0.95 : 0,
+                boxShadow: isDragging
+                  ? '0 0 20px 4px rgba(189, 0, 255, 0.65), 0 0 35px 8px rgba(255, 131, 211, 0.45)'
+                  : 'none',
+                transform: isDragging ? 'scaleX(1)' : 'scaleX(0)',
+                transformOrigin: 'left center',
+              }}
+            />
+
+            {/* Glowing Chevrons Overlay panel */}
+            <div
+              className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-2 z-40 bg-gradient-to-r from-purple-950/40 to-transparent pl-3 pr-8 py-4 rounded-r-2xl border-y border-r border-purple-500/20 backdrop-blur-md transition-all duration-300"
+              style={{
+                opacity: isDragging ? Math.min(dragOffset / 70, 0.95) : 0,
+                transform: `translateY(-50%) translateX(${Math.max(0, dragOffset * 0.16 - 16)}px)`,
+                boxShadow: '0 8px 32px -8px rgba(189, 0, 255, 0.3)',
+              }}
+            >
+              <div className="flex items-center gap-1.5 text-primary text-xs font-semibold uppercase tracking-[0.22em] text-white">
+                <span className="text-[10px] font-bold text-purple-300/90 tracking-[0.25em]">Dismiss</span>
+                <div className="flex items-center -space-x-1 ml-0.5">
+                  <ChevronRight className="h-4.5 w-4.5 text-purple-400 animate-bounce-right" style={{ animationDelay: '0ms' }} />
+                  <ChevronRight className="h-4.5 w-4.5 text-pink-400 animate-bounce-right" style={{ animationDelay: '150ms' }} />
+                  <ChevronRight className="h-4.5 w-4.5 text-cyan-400 animate-bounce-right" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
         {/* Drag Handle Indicator */}
         {showDragHandle && (side === "left" || side === "right") && (
           <div className="drag-handle absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full animate-pulse" />
