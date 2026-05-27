@@ -273,8 +273,8 @@ export default function PlanPage() {
         />
       )}
 
-      {/* Wisdom AI Floating Bubble */}
-      <WisdomBubble />
+      {/* Wisdom AI Floating Bubble (Disabled for the time being) */}
+      {/* <WisdomBubble /> */}
 
       {/* Navigation Footer */}
       <PlanNavigation onStartOver={handleStartOver} />
