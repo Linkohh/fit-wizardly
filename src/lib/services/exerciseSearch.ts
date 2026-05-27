@@ -10,7 +10,7 @@ interface SearchResult {
   results: NormalizedExercise[];
   hasEmptyResults: boolean;
   isFromFallback: boolean;
-  source: 'catalog' | 'wger' | 'catalog-fallback';
+  source: 'catalog' | 'wger' | 'api-ninjas' | 'catalog-fallback';
   warning?: string;
 }
 
@@ -71,22 +71,31 @@ export async function searchPrimary(query: string): Promise<SearchResult> {
     };
   }
 
-  try {
-    const results = await ADAPTERS.wger.search(query);
-
+  const wgerResults = await ADAPTERS.wger.search(query).catch(() => []);
+  if (wgerResults.length > 0) {
     return {
-      results,
-      hasEmptyResults: results.length === 0,
+      results: wgerResults,
+      hasEmptyResults: false,
       isFromFallback: false,
       source: 'wger',
     };
-  } catch {
+  }
+
+  const apiNinjasResults = await ADAPTERS.apiNinjas.search(query).catch(() => []);
+  if (apiNinjasResults.length > 0) {
     return {
-      results: [],
-      hasEmptyResults: true,
+      results: apiNinjasResults,
+      hasEmptyResults: false,
       isFromFallback: true,
-      source: 'catalog-fallback',
-      warning: 'Live exercise search is unavailable. The offline catalog remains available for browsing and workout generation.',
+      source: 'api-ninjas',
     };
   }
+
+  return {
+    results: [],
+    hasEmptyResults: true,
+    isFromFallback: true,
+    source: 'catalog-fallback',
+    warning: 'Live exercise search is unavailable. The offline catalog remains available for browsing and workout generation.',
+  };
 }

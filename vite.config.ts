@@ -1,15 +1,64 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
+import type { ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
 import tailwindcss from "@tailwindcss/vite";
+import { handleMotivationQuoteRequest } from "./src/lib/motivation/motivationQuoteEndpoint";
+import { handleApiNinjasExerciseSearchRequest } from "./src/lib/services/api/apiNinjasExerciseEndpoint";
 
 const wgerProxyPlugin = () => ({
   name: 'wger-proxy-plugin',
-  configureServer(server: any) {
-    server.middlewares.use(async (req: any, res: any, next: any) => {
+  configureServer(server: ViteDevServer) {
+    server.middlewares.use(async (req, res, next) => {
+      if (req.url && req.url.startsWith('/api/exercise-search-ninjas')) {
+        const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+        await handleApiNinjasExerciseSearchRequest(
+          {
+            method: req.method,
+            query: Object.fromEntries(url.searchParams.entries()),
+          },
+          {
+            setHeader: (key, value) => res.setHeader(key, value),
+            status(code) {
+              res.statusCode = code;
+              return this;
+            },
+            json(body) {
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify(body));
+            },
+            end() {
+              res.end();
+            },
+          }
+        );
+        return;
+      }
+
+      if (req.url && req.url.startsWith('/api/motivation-quote')) {
+        await handleMotivationQuoteRequest(
+          { method: req.method },
+          {
+            setHeader: (key, value) => res.setHeader(key, value),
+            status(code) {
+              res.statusCode = code;
+              return this;
+            },
+            json(body) {
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify(body));
+            },
+            end() {
+              res.end();
+            },
+          }
+        );
+        return;
+      }
+
       if (req.url && req.url.startsWith('/api/proxy-wger')) {
         try {
           const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
@@ -58,18 +107,25 @@ const wgerProxyPlugin = () => ({
 });
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-    proxy: {
-      "/plans": "http://localhost:3001",
-      "/health": "http://localhost:3001",
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+
+  if (env.API_NINJAS_API_KEY && !process.env.API_NINJAS_API_KEY) {
+    process.env.API_NINJAS_API_KEY = env.API_NINJAS_API_KEY;
+  }
+
+  return {
+    server: {
+      host: "::",
+      port: 8080,
+      proxy: {
+        "/plans": "http://localhost:3001",
+        "/health": "http://localhost:3001",
+      },
+      allowedHosts: true,
     },
-    allowedHosts: true,
-  },
-  plugins: [
-    wgerProxyPlugin(),
+    plugins: [
+      wgerProxyPlugin(),
     tailwindcss(),
     react(),
     mode === "development" && componentTagger(),
@@ -119,16 +175,16 @@ export default defineConfig(({ mode }) => ({
         ]
       }
     }),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    ].filter(Boolean),
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
     },
-  },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
           if (
             id.includes("/src/features/exercise-library/") ||
             id.includes("/src/components/exercises/") ||
@@ -186,12 +242,12 @@ export default defineConfig(({ mode }) => ({
               return "vendor-data";
             }
           }
+          },
         },
       },
-    },
-    modulePreload: {
-      resolveDependencies: (filename, deps, { hostId, hostType }) => {
-        // Don't preload heavy/lazy chunks
+      modulePreload: {
+        resolveDependencies: (filename, deps, { hostId, hostType }) => {
+          // Don't preload heavy/lazy chunks
           return deps.filter((dep) => {
             return (
               !dep.includes("vendor-pdf") &&
@@ -201,6 +257,7 @@ export default defineConfig(({ mode }) => ({
             );
           });
         },
+      },
     },
-  },
-}));
+  };
+});

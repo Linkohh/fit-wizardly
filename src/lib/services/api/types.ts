@@ -5,7 +5,8 @@ export interface NormalizedExercise {
   equipment?: string[];
   difficulty?: 'beginner' | 'intermediate' | 'advanced';
   description?: string;
-  source: 'wger' | 'catalog';
+  safetyInfo?: string;
+  source: 'wger' | 'catalog' | 'api-ninjas';
 }
 
 export interface WgerExerciseResponse {
@@ -44,5 +45,5 @@ export interface WgerEquipment {
 
 export interface ExerciseApiAdapter {
   search(query: string): Promise<NormalizedExercise[]>;
-  getName(): 'wger';
+  getName(): 'wger' | 'api-ninjas';
 }

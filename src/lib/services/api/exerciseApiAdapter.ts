@@ -69,8 +69,56 @@ export class WgerAdapter implements ExerciseApiAdapter {
   }
 }
 
-export function getAdapters(): Record<'wger', ExerciseApiAdapter> {
+function isApiNinjasExercise(value: unknown): value is NormalizedExercise {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const exercise = value as Partial<NormalizedExercise>;
+  return (
+    typeof exercise.id === 'string' &&
+    typeof exercise.name === 'string' &&
+    Array.isArray(exercise.targetMuscles) &&
+    exercise.source === 'api-ninjas'
+  );
+}
+
+export class ApiNinjasExerciseAdapter implements ExerciseApiAdapter {
+  async search(query: string): Promise<NormalizedExercise[]> {
+    const name = query.trim();
+    if (!name) {
+      return [];
+    }
+
+    try {
+      const params = new URLSearchParams({ name });
+      const response = await fetch(`/api/exercise-search-ninjas?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+        },
+        signal: AbortSignal.timeout(6000),
+      });
+
+      if (!response.ok) {
+        return [];
+      }
+
+      const payload = (await response.json()) as { results?: unknown };
+      return Array.isArray(payload.results) ? payload.results.filter(isApiNinjasExercise) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  getName(): 'api-ninjas' {
+    return 'api-ninjas';
+  }
+}
+
+export function getAdapters(): Record<'wger' | 'apiNinjas', ExerciseApiAdapter> {
   return {
     wger: new WgerAdapter(),
+    apiNinjas: new ApiNinjasExerciseAdapter(),
   };
 }

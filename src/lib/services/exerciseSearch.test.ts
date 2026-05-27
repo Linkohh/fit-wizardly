@@ -96,4 +96,121 @@ describe('exercise search', () => {
       }),
     ]);
   });
+
+  it('uses live wger results before API Ninjas fallback', async () => {
+    fetchMock.mockImplementation((input) => {
+      const url = String(input);
+      if (url.includes('wger-snapshot.v1.json')) {
+        return createJsonResponse({
+          generatedAt: '2026-03-15T17:08:40.000Z',
+          records: [],
+        });
+      }
+
+      if (url.includes('/exerciseinfo/?search=press')) {
+        return createJsonResponse({
+          count: 1,
+          next: null,
+          previous: null,
+          results: [
+            {
+              id: 77,
+              name: 'Bench Press',
+              description: '<p>Press the bar from the chest.</p>',
+              muscles: [{ id: 4, name: 'Chest', name_en: 'Chest' }],
+              muscles_secondary: [],
+              equipment: [{ id: 1, name: 'Barbell' }],
+              translations: [],
+            },
+          ],
+        });
+      }
+
+      if (url.includes('/api/exercise-search-ninjas')) {
+        throw new Error('API Ninjas should not be called when wger has matches');
+      }
+
+      return Promise.reject(new Error('Unexpected request'));
+    });
+
+    const result = await searchPrimary('press');
+
+    expect(result.source).toBe('wger');
+    expect(result.results).toEqual([
+      expect.objectContaining({
+        name: 'Bench Press',
+        source: 'wger',
+      }),
+    ]);
+  });
+
+  it('uses API Ninjas when local catalog and wger have no matches', async () => {
+    fetchMock.mockImplementation((input) => {
+      const url = String(input);
+      if (url.includes('wger-snapshot.v1.json')) {
+        return createJsonResponse({
+          generatedAt: '2026-03-15T17:08:40.000Z',
+          records: [],
+        });
+      }
+
+      if (url.includes('/exerciseinfo/?search=press')) {
+        return createJsonResponse({
+          count: 0,
+          next: null,
+          previous: null,
+          results: [],
+        });
+      }
+
+      if (url.includes('/api/exercise-search-ninjas?name=press')) {
+        return createJsonResponse({
+          results: [
+            {
+              id: 'api-ninjas:dumbbell-press',
+              name: 'Dumbbell Press',
+              targetMuscles: ['shoulders'],
+              equipment: ['dumbbell'],
+              difficulty: 'intermediate',
+              description: 'Press dumbbells overhead with control.',
+              source: 'api-ninjas',
+            },
+          ],
+        });
+      }
+
+      return Promise.reject(new Error(`Unexpected request: ${url}`));
+    });
+
+    const result = await searchPrimary('press');
+
+    expect(result.source).toBe('api-ninjas');
+    expect(result.hasEmptyResults).toBe(false);
+    expect(result.results).toEqual([
+      expect.objectContaining({
+        id: 'api-ninjas:dumbbell-press',
+        source: 'api-ninjas',
+      }),
+    ]);
+  });
+
+  it('returns the existing fallback warning when all live providers fail', async () => {
+    fetchMock.mockImplementation((input) => {
+      const url = String(input);
+      if (url.includes('wger-snapshot.v1.json')) {
+        return createJsonResponse({
+          generatedAt: '2026-03-15T17:08:40.000Z',
+          records: [],
+        });
+      }
+
+      return Promise.reject(new Error('Live provider failed'));
+    });
+
+    const result = await searchPrimary('unknown movement');
+
+    expect(result.source).toBe('catalog-fallback');
+    expect(result.hasEmptyResults).toBe(true);
+    expect(result.warning).toMatch(/offline catalog remains available/i);
+  });
 });

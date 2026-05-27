@@ -13,11 +13,13 @@ const SOURCE_COLORS: Record<
 > = {
   wger: 'default',
   catalog: 'secondary',
+  'api-ninjas': 'destructive',
 };
 
 const SOURCE_LABELS: Record<NormalizedExercise['source'], string> = {
   wger: 'Wger',
   catalog: 'Catalog',
+  'api-ninjas': 'API Ninjas',
 };
 
 export function ExerciseResults({
