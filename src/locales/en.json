@@ -335,6 +335,8 @@
     "plan": {
         "title": "Your Workout Plan",
         "export": "Export PDF",
+        "mrv_warning": "Volume warning: you may be above MRV this week.",
+        "split_recommendation": "Split recommendation: ",
         "noplan": {
             "title": "No Plan Generated Yet",
             "description": "Create your personalized workout plan using the wizard.",

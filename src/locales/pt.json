@@ -30,6 +30,8 @@
     "plan": {
         "title": "Seu Plano de Treino",
         "export": "Exportar PDF",
+        "mrv_warning": "Aviso de volume: você pode estar acima do MRV esta semana.",
+        "split_recommendation": "Recomendação de divisão: ",
         "noplan": {
             "title": "Nenhum Plano Gerado Ainda",
             "description": "Crie seu plano de treino personalizado usando o assistente.",

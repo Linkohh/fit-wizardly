@@ -13,6 +13,8 @@
     "plan": {
         "title": "Dein Trainingsplan",
         "export": "PDF exportieren",
+        "mrv_warning": "Volumenwarnung: Sie liegen diese Woche möglicherweise über dem MRV.",
+        "split_recommendation": "Empfehlung zur Aufteilung: ",
         "noplan": {
             "title": "Noch kein Plan erstellt",
             "description": "Erstelle deinen personalisierten Trainingsplan mit dem Assistenten.",

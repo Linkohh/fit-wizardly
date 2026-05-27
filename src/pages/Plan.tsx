@@ -200,7 +200,7 @@ export default function PlanPage() {
       {mrvWarnings.length > 0 && (
         <Card className="mb-6 border-orange-500/30 bg-orange-500/10">
           <CardContent className="p-4 text-sm">
-            <p className="font-semibold text-orange-200">Volume warning: you may be above MRV this week.</p>
+            <p className="font-semibold text-orange-200">{t('plan.mrv_warning')}</p>
             <p className="mt-1 text-orange-100/90">
               {mrvWarnings
                 .map((warning) => `${formatIdentifierLabel(warning.muscleGroup)}: ${warning.weeklySets} sets (MRV ${warning.mrv})`)
@@ -213,7 +213,7 @@ export default function PlanPage() {
       {splitSuggestion && (
         <Card className="mb-6 border-blue-500/30 bg-blue-500/10">
           <CardContent className="p-4 text-sm">
-            <p className="font-semibold text-blue-100">Split recommendation: {formatIdentifierLabel(splitSuggestion.recommendedSplit)}</p>
+            <p className="font-semibold text-blue-100">{t('plan.split_recommendation')}{formatIdentifierLabel(splitSuggestion.recommendedSplit)}</p>
             <p className="mt-1 text-blue-100/90">{splitSuggestion.rationale}</p>
           </CardContent>
         </Card>
