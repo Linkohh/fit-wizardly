@@ -623,6 +623,15 @@ export type Database = {
                     trend_score: number
                 }[]
             }
+            join_circle_by_invite: {
+                Args: {
+                    p_invite_code: string
+                }
+                Returns: {
+                    circle_id: string
+                    circle_name: string
+                }[]
+            }
         }
         Enums: {
             [_ in never]: never

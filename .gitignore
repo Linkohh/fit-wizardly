@@ -3,6 +3,7 @@
 .env.production
 .env.staging
 .env.local
+ngrok.local.yml
 
 # Logs
 logs

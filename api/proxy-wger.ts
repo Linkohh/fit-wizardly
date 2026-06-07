@@ -31,6 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const response = await fetch(url, {
+      redirect: 'manual',
       headers: {
         'Accept': 'application/json',
       },

@@ -164,52 +164,21 @@ export function createMembershipActions({ set, get, supabase, isSupabaseConfigur
                 return { error: new Error('Not authenticated') };
             }
 
-            const { data: circle } = await supabase
-                .from('circles')
-                .select('*')
-                .eq('invite_code', inviteCode.toUpperCase())
-                .single();
-
-            if (!circle) {
-                return { error: new Error('Invalid invite code') };
-            }
-
-            const { data: existing } = await supabase
-                .from('circle_members')
-                .select('id')
-                .eq('circle_id', circle.id)
-                .eq('user_id', user.id)
-                .single();
-
-            if (existing) {
-                return { error: new Error('Already a member of this circle') };
-            }
-
-            const { count } = await supabase
-                .from('circle_members')
-                .select('*', { count: 'exact', head: true })
-                .eq('circle_id', circle.id);
-
-            const maxMembers = circle.max_members;
-            if (typeof maxMembers === 'number' && typeof count === 'number' && count >= maxMembers) {
-                return { error: new Error('Circle is full') };
-            }
-
-            const { error } = await supabase
-                .from('circle_members')
-                .insert({
-                    circle_id: circle.id,
-                    user_id: user.id,
-                    role: 'member',
+            const { data, error } = await supabase
+                .rpc('join_circle_by_invite', {
+                    p_invite_code: inviteCode.toUpperCase(),
                 });
 
             if (error) {
                 return { error: error as Error };
             }
 
-            await get().postActivity(circle.id, 'member_joined', {
-                memberName: getMemberDisplayName(user),
-            });
+            const joinedCircle = Array.isArray(data) ? data[0] : null;
+            if (joinedCircle?.circle_id) {
+                await get().postActivity(joinedCircle.circle_id, 'member_joined', {
+                    memberName: getMemberDisplayName(user),
+                });
+            }
 
             await get().fetchUserCircles(user.id);
 
