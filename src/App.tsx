@@ -27,6 +27,7 @@ import { isNativeApp } from "@/lib/platform";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAnalyticsStore } from "@/stores/analyticsStore";
 import { useScrollActivity } from "@/hooks/use-scroll-activity";
+import { NavigationDirectionProvider } from "@/contexts/navigation-direction-context";
 
 const Index = lazy(() => import("./pages/Index"));
 const WizardPage = lazy(() => import("./pages/Wizard"));
@@ -193,99 +194,103 @@ function AnimatedRoutes() {
   // Onboarding keeps the shared shell but manages its own page content layout.
   if (location.pathname === '/onboarding') {
     return (
-      <AnimatePresence mode="wait" initial={false}>
-        <PageTransition key={location.pathname}>
-          <Suspense fallback={<LoadingScreen />}>
-            <Routes location={location}>
-              <Route path="/onboarding" element={<OnboardingPage />} />
-            </Routes>
-          </Suspense>
-        </PageTransition>
-      </AnimatePresence>
+      <NavigationDirectionProvider>
+        <AnimatePresence mode="wait" initial={false}>
+          <PageTransition key={location.pathname}>
+            <Suspense fallback={<LoadingScreen />}>
+              <Routes location={location}>
+                <Route path="/onboarding" element={<OnboardingPage />} />
+              </Routes>
+            </Suspense>
+          </PageTransition>
+        </AnimatePresence>
+      </NavigationDirectionProvider>
     );
   }
 
   return (
-    <OnboardingGuard>
-      <AnimatePresence mode="wait" initial={false}>
-        <PageTransition key={location.pathname}>
-          <Suspense fallback={<LoadingScreen />}>
-            <Routes location={location}>
-              <Route path="/" element={<Index />} />
-              <Route path="/wizard" element={<WizardPage />} />
+    <NavigationDirectionProvider>
+      <OnboardingGuard>
+        <AnimatePresence mode="wait" initial={false}>
+          <PageTransition key={location.pathname}>
+            <Suspense fallback={<LoadingScreen />}>
+              <Routes location={location}>
+                <Route path="/" element={<Index />} />
+                <Route path="/wizard" element={<WizardPage />} />
 
-              <Route path="/plan" element={<PlanPage />} />
-              <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
-              <Route path="/nutrition" element={<NutritionPage />} />
-              <Route path="/history" element={<HistoryPage />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/exercises" element={<ExerciseLibraryPage />} />
+                <Route path="/plan" element={<PlanPage />} />
+                <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
+                <Route path="/nutrition" element={<NutritionPage />} />
+                <Route path="/history" element={<HistoryPage />} />
+                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/exercises" element={<ExerciseLibraryPage />} />
 
-              {/* Auth-backed trainer routes */}
-              <Route path="/clients">
-                <Route index element={
-                  <RequireAuth>
-                    <TrainerGuard>
-                      <ClientsPage />
-                    </TrainerGuard>
-                  </RequireAuth>
-                } />
-                <Route path=":clientId" element={
-                  <RequireAuth>
-                    <TrainerGuard>
-                      <ClientDetailsPage />
-                    </TrainerGuard>
-                  </RequireAuth>
-                } />
-              </Route>
-              <Route path="/templates" element={
-                <RequireAuth>
-                  <TrainerGuard>
-                    <TemplateLibrary />
-                  </TrainerGuard>
-                </RequireAuth>
-              } />
-              <Route path="/revenue" element={
-                <RequireAuth>
-                  <TrainerGuard>
-                    <Revenue />
-                  </TrainerGuard>
-                </RequireAuth>
-              } />
-
-              {/* Demo landing + auth-backed circle membership routes */}
-              <Route path="/circles">
-                <Route index element={<CirclesPage />} />
-
-                <Route path="join/:inviteCode" element={
-                  <JoinCircleHandler />
-                } />
-
-                <Route path=":circleId" element={
-                  <RequireAuth>
-                    <CircleLayout />
-                  </RequireAuth>
-                }>
-                  <Route index element={<CircleDashboardTab />} />
-                  <Route path="feed" element={<CircleFeedTab />} />
-                  <Route path="leaderboard" element={<CircleLeaderboardTab />} />
-                  <Route path="challenges" element={<CircleChallengesTab />} />
-                  <Route path="members" element={<CircleMembersTab />} />
-                  <Route path="settings" element={<CircleSettingsTab />} />
+                {/* Auth-backed trainer routes */}
+                <Route path="/clients">
+                  <Route index element={
+                    <RequireAuth>
+                      <TrainerGuard>
+                        <ClientsPage />
+                      </TrainerGuard>
+                    </RequireAuth>
+                  } />
+                  <Route path=":clientId" element={
+                    <RequireAuth>
+                      <TrainerGuard>
+                        <ClientDetailsPage />
+                      </TrainerGuard>
+                    </RequireAuth>
+                  } />
                 </Route>
-              </Route>
+                <Route path="/templates" element={
+                  <RequireAuth>
+                    <TrainerGuard>
+                      <TemplateLibrary />
+                    </TrainerGuard>
+                  </RequireAuth>
+                } />
+                <Route path="/revenue" element={
+                  <RequireAuth>
+                    <TrainerGuard>
+                      <Revenue />
+                    </TrainerGuard>
+                  </RequireAuth>
+                } />
 
-              <Route path="/mcl" element={<MCLIntegrationTest />} />
+                {/* Demo landing + auth-backed circle membership routes */}
+                <Route path="/circles">
+                  <Route index element={<CirclesPage />} />
 
-              <Route path="/legal" element={<LegalPage />} />
-              <Route path="/guide" element={<UserGuide />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </PageTransition>
-      </AnimatePresence>
-    </OnboardingGuard>
+                  <Route path="join/:inviteCode" element={
+                    <JoinCircleHandler />
+                  } />
+
+                  <Route path=":circleId" element={
+                    <RequireAuth>
+                      <CircleLayout />
+                    </RequireAuth>
+                  }>
+                    <Route index element={<CircleDashboardTab />} />
+                    <Route path="feed" element={<CircleFeedTab />} />
+                    <Route path="leaderboard" element={<CircleLeaderboardTab />} />
+                    <Route path="challenges" element={<CircleChallengesTab />} />
+                    <Route path="members" element={<CircleMembersTab />} />
+                    <Route path="settings" element={<CircleSettingsTab />} />
+                  </Route>
+                </Route>
+
+                <Route path="/mcl" element={<MCLIntegrationTest />} />
+
+                <Route path="/legal" element={<LegalPage />} />
+                <Route path="/guide" element={<UserGuide />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </PageTransition>
+        </AnimatePresence>
+      </OnboardingGuard>
+    </NavigationDirectionProvider>
   );
 }
 

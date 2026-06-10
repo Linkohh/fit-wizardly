@@ -1,19 +1,70 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion, Transition } from "framer-motion";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useNavigationDirection } from "@/contexts/navigation-direction-context";
 
 interface PageTransitionProps {
   children: ReactNode;
   className?: string;
 }
 
+const entryTransition: Transition = {
+  type: "spring",
+  stiffness: 300,
+  damping: 28,
+  mass: 0.8,
+};
+
+const exitTransition: Transition = {
+  duration: 0.18,
+  ease: [0.4, 0, 1, 1],
+};
+
+const pageVariants = {
+  enter: (dir: string) => ({
+    x: dir === "forward" ? 28 : dir === "backward" ? -28 : 0,
+    opacity: 0,
+    scale: 0.97,
+  }),
+  center: () => ({
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    transition: entryTransition,
+  }),
+  exit: (dir: string) => ({
+    x: dir === "forward" ? -16 : dir === "backward" ? 16 : 0,
+    opacity: 0,
+    scale: 0.97,
+    transition: exitTransition,
+  }),
+};
+
+const reducedVariants = {
+  enter: { opacity: 0 },
+  center: { opacity: 1, transition: { duration: 0.15 } },
+  exit: { opacity: 0, transition: { duration: 0.12 } },
+};
+
 export function PageTransition({ children, className }: PageTransitionProps) {
+  const direction = useNavigationDirection();
+  const prefersReduced = useReducedMotion();
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      custom={direction}
+      variants={prefersReduced ? reducedVariants : pageVariants}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      onAnimationStart={() => {
+        if (!prefersReduced) {
+          document.documentElement.style.overflowX = "hidden";
+        }
+      }}
+      onAnimationComplete={() => {
+        document.documentElement.style.overflowX = "";
+      }}
       className={cn("w-full h-full", className)}
     >
       {children}

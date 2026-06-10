@@ -153,8 +153,14 @@ async function ensureDevServerReady() {
 async function main() {
   await ensureDevServerReady();
 
-  console.log('Launching Capacitor iOS live reload...');
-  iosProcess = spawnNpm(['run', 'ios:live:cap'], 'Capacitor iOS live reload');
+  const extraArgs = process.argv.slice(2).filter(arg => arg !== '--help');
+  const capArgs = ['run', 'ios:live:cap'];
+  if (extraArgs.length > 0) {
+    capArgs.push('--', ...extraArgs);
+  }
+
+  console.log(`Launching Capacitor iOS live reload with arguments: ${capArgs.join(' ')}`);
+  iosProcess = spawnNpm(capArgs, 'Capacitor iOS live reload');
 
   if (devProcess) {
     devProcess.once('exit', (code, signal) => {
