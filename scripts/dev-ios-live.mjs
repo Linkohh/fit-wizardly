@@ -134,7 +134,9 @@ async function ensureDevServerReady() {
 
   console.log(`Starting Vite dev server on http://localhost:${DEV_PORT}...`);
   startedDevServer = true;
-  devProcess = spawnNpm(['run', 'dev'], 'Vite dev server');
+  // --host :: exposes the dev server on the LAN so the iOS device can reach it;
+  // vite.config.ts deliberately defaults to localhost-only.
+  devProcess = spawnNpm(['run', 'dev', '--', '--host', '::'], 'Vite dev server');
 
   const devExitBeforeReady = new Promise((_, reject) => {
     devProcess.once('exit', (code, signal) => {

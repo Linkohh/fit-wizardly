@@ -358,19 +358,6 @@ const SheetContent = React.forwardRef<
         {/* Dynamic Glow and Chevron Swipe Affordance */}
         {enableGestures && side === "right" && (
           <>
-            <style dangerouslySetInnerHTML={{ __html: `
-              @keyframes bounce-right {
-                0%, 100% { transform: translateX(0); opacity: 0.45; }
-                50% { transform: translateX(5px); opacity: 1; }
-              }
-              .animate-bounce-right {
-                animation: bounce-right 1.2s infinite ease-in-out;
-              }
-              .glow-edge-shimmer {
-                background: linear-gradient(180deg, #bd00ff 0%, #ff83d3 50%, #8ff5ff 100%);
-              }
-            ` }} />
-
             {/* Glowing Left Edge Border */}
             <div
               className="pointer-events-none absolute left-0 top-0 bottom-0 w-[4px] z-50 transition-all duration-150 rounded-l-[32px]"
