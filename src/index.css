@@ -1027,17 +1027,6 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
     @apply border-border;
   }
 
-  html {
-    /* Paints the overscroll + safe-area regions (status bar under
-       black-translucent) so iOS chrome blends with the app background. */
-    background-color: hsl(var(--background));
-    color-scheme: light;
-  }
-
-  html.dark {
-    color-scheme: dark;
-  }
-
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
