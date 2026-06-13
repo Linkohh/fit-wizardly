@@ -24,6 +24,7 @@ import { ConsentModal } from "@/components/legal/ConsentModal";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
+import { syncThemeColor } from "@/lib/theme-color";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAnalyticsStore } from "@/stores/analyticsStore";
 import { useScrollActivity } from "@/hooks/use-scroll-activity";
@@ -118,6 +119,7 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useLayoutEffect(() => {
     document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
+    syncThemeColor(resolvedTheme === 'dark');
     document.documentElement.removeAttribute('data-theme-transition');
     document.documentElement.removeAttribute('data-theme-transition-context');
     document

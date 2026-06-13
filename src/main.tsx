@@ -4,6 +4,7 @@ import { registerSW } from "virtual:pwa-register";
 import App from "./App.tsx";
 import "./index.css";
 import "./lib/i18n"; // Initialize i18n
+import { syncThemeColor } from "./lib/theme-color";
 
 function applyInitialTheme() {
   if (typeof window === "undefined") {
@@ -17,16 +18,16 @@ function applyInitialTheme() {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const isDark = theme === "dark" || (theme === "system" && prefersDark);
       document.documentElement.classList.toggle("dark", Boolean(isDark));
+      syncThemeColor(Boolean(isDark));
       return;
     }
   } catch {
     // Fall back to the system theme when storage is unavailable or malformed.
   }
 
-  document.documentElement.classList.toggle(
-    "dark",
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  );
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  document.documentElement.classList.toggle("dark", prefersDark);
+  syncThemeColor(prefersDark);
 }
 
 function registerAppServiceWorker() {
