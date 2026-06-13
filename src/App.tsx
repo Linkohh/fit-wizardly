@@ -24,6 +24,7 @@ import { ConsentModal } from "@/components/legal/ConsentModal";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
+import { syncThemeColor } from "@/lib/theme-color";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAnalyticsStore } from "@/stores/analyticsStore";
 
@@ -185,6 +186,7 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
       const transitionId = beginTransitionCycle();
       const commitTheme = () => {
         root.classList.toggle('dark', effectiveTheme === 'dark');
+        syncThemeColor(effectiveTheme === 'dark');
         previousEffectiveThemeRef.current = effectiveTheme;
       };
 

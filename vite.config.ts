@@ -41,8 +41,8 @@ export default defineConfig(({ mode }) => ({
         name: 'FitWizard',
         short_name: 'FitWizard',
         description: 'Your AI-powered workout companion',
-        theme_color: '#8B5CF6',
-        background_color: '#0a0a0a',
+        theme_color: '#140A1F', // keep in sync with src/lib/theme-color.ts (DARK_CHROME_COLOR)
+        background_color: '#140A1F', // dark splash to match the app background
         display: 'standalone',
         orientation: 'portrait',
         icons: [
