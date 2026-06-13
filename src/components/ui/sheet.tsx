@@ -251,12 +251,13 @@ const SheetContent = React.forwardRef<
       const absY = Math.abs(deltaY);
 
       // Horizontal bias verification (ignore vertical scrolls)
-      if (absX > 10 && absX > absY * 1.6) {
-        if (side === "right" && deltaX > 0) {
-          setIsDragging(true);
-        }
+      if (!(absX > 10 && absX > absY * 1.6) || side !== "right" || deltaX <= 0) {
+        return;
       }
-      return;
+
+      // Fall through so this move's distance counts toward the drag —
+      // a fast flick can coalesce into a single pointermove event.
+      setIsDragging(true);
     }
 
     // Direct drag tracking

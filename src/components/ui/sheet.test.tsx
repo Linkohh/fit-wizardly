@@ -52,6 +52,7 @@ describe('SheetContent', () => {
   });
 
   it('closes a right-side gesture drawer when swiped past the threshold', () => {
+    vi.useFakeTimers();
     const onGestureClose = vi.fn();
     render(
       <Sheet open onOpenChange={vi.fn()}>
@@ -72,6 +73,10 @@ describe('SheetContent', () => {
     fireEvent.pointerDown(drawer, { pointerId: 1, clientX: 40, clientY: 120 });
     fireEvent.pointerMove(drawer, { pointerId: 1, clientX: 220, clientY: 124 });
     fireEvent.pointerUp(drawer, { pointerId: 1, clientX: 220, clientY: 124 });
+
+    // The close callback fires after the 220ms glide-out animation
+    vi.runAllTimers();
+    vi.useRealTimers();
 
     expect(onGestureClose).toHaveBeenCalledTimes(1);
   });
