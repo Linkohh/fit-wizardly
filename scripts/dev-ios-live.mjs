@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import net from 'node:net';
+import os from 'node:os';
 import process from 'node:process';
 import { setTimeout as delay } from 'node:timers/promises';
 
@@ -15,7 +16,8 @@ Starts the Vite dev server if needed, waits for http://localhost:8080,
 then launches Capacitor iOS live reload.
 
 Notes:
-- Reuses an existing server on port 8080 if one is already running
+- Reuses an existing server on port 8080 if one is already running, and warns
+  if it is localhost-only (physical devices need \`npm run dev -- --host ::\`)
 - Forwards Ctrl+C to both child processes when it started them
 - Under the hood this runs: npm run dev + npm run ios:live:cap
 - npm run dev:ios is kept as an alias for the same workflow`);
@@ -126,9 +128,39 @@ async function waitForPort(host, port, timeoutMs) {
 process.on('SIGINT', () => shutdown(130));
 process.on('SIGTERM', () => shutdown(143));
 
+function getLanAddress() {
+  for (const addresses of Object.values(os.networkInterfaces())) {
+    for (const address of addresses ?? []) {
+      if (address.family === 'IPv4' && !address.internal) {
+        return address.address;
+      }
+    }
+  }
+
+  return null;
+}
+
+async function isDevServerRunning() {
+  // vite.config.ts binds "localhost", which may resolve to ::1 rather than 127.0.0.1.
+  return (await isPortOpen(DEV_HOST, DEV_PORT)) || (await isPortOpen('::1', DEV_PORT));
+}
+
+async function warnIfNotLanAccessible() {
+  const lanAddress = getLanAddress();
+  if (!lanAddress || (await isPortOpen(lanAddress, DEV_PORT))) {
+    return;
+  }
+
+  console.warn(`Warning: the running Vite server is localhost-only (not reachable at http://${lanAddress}:${DEV_PORT}).
+  The iOS Simulator will work, but a physical device cannot connect.
+  For device live reload, stop that server and rerun \`npm run ios:live\`,
+  or start it with \`npm run dev -- --host ::\`.`);
+}
+
 async function ensureDevServerReady() {
-  if (await isPortOpen(DEV_HOST, DEV_PORT)) {
+  if (await isDevServerRunning()) {
     console.log(`Reusing existing Vite server on http://localhost:${DEV_PORT}`);
+    await warnIfNotLanAccessible();
     return;
   }
 
