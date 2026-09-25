@@ -41,6 +41,10 @@ npm run ios:dev
 
 Changes to your React code will automatically reload in the iOS Simulator.
 
+`npm run dev` is localhost-only, which is enough for the Simulator. For live reload on a
+physical device, start the server with `npm run dev -- --host ::` instead, or skip Terminal 1
+and run `npm run ios:live`, which starts a LAN-accessible server for you.
+
 ## Available Commands
 
 | Command | Description |

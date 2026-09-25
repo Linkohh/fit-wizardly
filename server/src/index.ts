@@ -360,9 +360,10 @@ export function createRouteHandlers(
 
       if (!plan) return res.status(404).json({ error: 'Plan not found' });
 
-      // Defense-in-depth: verify ownership even though RLS should already scope by auth.uid()
+      // Defense-in-depth: fail closed on ownership even though RLS already scopes by auth.uid().
+      // toApiPlan always populates userId from the row's user_id column.
       const planData = plan as unknown as Partial<PlanPayload>;
-      if (planData.userId && planData.userId !== userId) {
+      if (planData.userId !== userId) {
         return res.status(403).json({ error: 'Forbidden' });
       }
 
@@ -407,8 +408,8 @@ export function createRouteHandlers(
 
       const existingPlan = existing as unknown as Partial<PlanPayload>;
 
-      // Defense-in-depth: verify ownership even though RLS should already scope by auth.uid()
-      if (existingPlan.userId && existingPlan.userId !== req.user!.id) {
+      // Defense-in-depth: fail closed on ownership even though RLS already scopes by auth.uid()
+      if (existingPlan.userId !== req.user!.id) {
         return res.status(403).json({ error: 'Forbidden' });
       }
 
@@ -457,7 +458,8 @@ export function createRouteHandlers(
       if (!existing) return res.status(404).json({ error: 'Plan not found' });
 
       const existingPlan = existing as unknown as Partial<PlanPayload>;
-      if (existingPlan.userId && existingPlan.userId !== userId) {
+      // Fail closed: toApiPlan always populates userId from the row's user_id column.
+      if (existingPlan.userId !== userId) {
         return res.status(403).json({ error: 'Forbidden' });
       }
 

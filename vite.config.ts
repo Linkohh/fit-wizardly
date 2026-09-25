@@ -72,15 +72,18 @@ const wgerProxyPlugin = () => ({
 
           const targetUrlParsed = new URL(targetUrl);
           const allowedHosts = ['wger.de', 'www.wger.de'];
-          if (!allowedHosts.includes(targetUrlParsed.hostname)) {
+          if (targetUrlParsed.protocol !== 'https:' || !allowedHosts.includes(targetUrlParsed.hostname)) {
             res.statusCode = 403;
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ error: 'Forbidden: Host not allowed' }));
             return;
           }
 
+          // redirect: 'error' — the allowlist only checks the initial hostname,
+          // so following a 3xx would let the upstream pivot this fetch elsewhere
           const response = await fetch(targetUrl, {
-            headers: { 'Accept': 'application/json' }
+            headers: { 'Accept': 'application/json' },
+            redirect: 'error'
           });
 
           if (!response.ok) {
@@ -116,13 +119,15 @@ export default defineConfig(({ mode }) => {
 
   return {
     server: {
-      host: "::",
+      // Localhost-only by default. `npm run ios:live` passes `--host ::` so LAN
+      // devices can connect during Capacitor live reload. Vite's default host
+      // check (localhost + direct IPs) stays active to block DNS rebinding.
+      host: "localhost",
       port: 8080,
       proxy: {
         "/plans": "http://localhost:3001",
         "/health": "http://localhost:3001",
       },
-      allowedHosts: true,
     },
     plugins: [
       wgerProxyPlugin(),
