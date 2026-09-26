@@ -69,3 +69,30 @@ if (!window.matchMedia) {
     }),
   });
 }
+
+// jsdom lacks IntersectionObserver (used by framer-motion's useInView/whileInView).
+// This no-op never reports intersections; tests that need visibility stub their own.
+if (!('IntersectionObserver' in window)) {
+  class NoopIntersectionObserver {
+    readonly root = null;
+    readonly rootMargin = '';
+    readonly thresholds: ReadonlyArray<number> = [];
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+    takeRecords(): IntersectionObserverEntry[] {
+      return [];
+    }
+  }
+
+  Object.defineProperty(window, 'IntersectionObserver', {
+    writable: true,
+    configurable: true,
+    value: NoopIntersectionObserver,
+  });
+  Object.defineProperty(globalThis, 'IntersectionObserver', {
+    writable: true,
+    configurable: true,
+    value: NoopIntersectionObserver,
+  });
+}

@@ -34,6 +34,7 @@ import { useReadinessStore } from '@/stores/readinessStore';
 import { toast } from 'sonner';
 import { BodyTracker } from '@/components/measurements/BodyTracker';
 import { requestConsentModal } from '@/lib/consent';
+import { AboutSupportCard } from '@/components/about/AboutSupportCard';
 
 export function Profile() {
     const { t, i18n } = useTranslation();
@@ -388,12 +389,13 @@ export function Profile() {
                   Delete Account
                 </Button> */}
 
-                                <div className="pt-2 flex justify-center">
-                                    <p className="text-xs text-muted-foreground">App Version 1.2.0 • Build 2026.02</p>
-                                </div>
-
                             </CardContent>
                         </Card>
+                    </motion.div>
+
+                    {/* About & Support — deliberately last, below all functional settings */}
+                    <motion.div variants={itemVariants}>
+                        <AboutSupportCard />
                     </motion.div>
 
                 </motion.div>

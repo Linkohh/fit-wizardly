@@ -15,6 +15,8 @@ import { Switch } from '@/components/ui/switch';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeModePill } from '@/components/theme/ThemeModePill';
 import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
+import { DrawerQuickLinks } from '@/components/header/DrawerQuickLinks';
+import { isNativeApp } from '@/lib/platform';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -883,6 +885,9 @@ export function Header() {
                       {t('profile.title', 'Settings & Profile')}
                     </Link>
                   </Button>
+
+                  {/* Native only: the web footer already carries these links. */}
+                  {isNativeApp() && <DrawerQuickLinks onNavigate={() => setMobileOpen(false)} />}
                 </div>
               </motion.div>
             </div>

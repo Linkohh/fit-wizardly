@@ -7,6 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { EdgeSwipeBack } from "@/components/navigation/EdgeSwipeBack";
+import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
 import { useThemeStore } from "@/stores/themeStore";
 import { PageTransition } from "@/components/ui/page-transition";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -42,6 +44,7 @@ const HistoryPage = lazy(() => import("./pages/History"));
 const CirclesPage = lazy(() => import("./pages/Circles"));
 const UserGuide = lazy(() => import("./pages/UserGuide"));
 const LegalPage = lazy(() => import("./pages/Legal"));
+const AboutPage = lazy(() => import("./pages/About"));
 const TemplateLibrary = lazy(() => import("./pages/TemplateLibrary"));
 const Revenue = lazy(() => import("./pages/Revenue"));
 const Analytics = lazy(() => import("./pages/Analytics"));
@@ -284,6 +287,7 @@ function AnimatedRoutes() {
 
                 <Route path="/legal" element={<LegalPage />} />
                 <Route path="/guide" element={<UserGuide />} />
+                <Route path="/about" element={<AboutPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
@@ -298,6 +302,7 @@ const App = () => {
   // Network status handled by OfflineBanner component
   useGlobalClickFeedback();
   useScrollActivity();
+  useAndroidBackButton();
   const nativeApp = isNativeApp();
   const hasAnalyticsConsent = useAnalyticsStore((state) => state.hasConsented);
   const [shouldRenderLivingBackground, setShouldRenderLivingBackground] = useState(false);
@@ -368,11 +373,13 @@ const App = () => {
                   {shouldRenderLivingBackground && <LivingBackground />}
                 </Suspense>
                 <Header />
+                <EdgeSwipeBack />
                 <ConsentModal />
                 <div id="main-content" className="flex-1 overflow-x-hidden">
                   <AnimatedRoutes />
                 </div>
-                <Footer />
+                {/* Native apps surface About/Help/Legal via the menu drawer and Settings instead. */}
+                {!nativeApp && <Footer />}
               </div>
               {hasAnalyticsConsent && <VercelAnalytics />}
             </AuthProvider>

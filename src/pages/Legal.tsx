@@ -1,19 +1,39 @@
 import type { SVGProps } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
+import { BackButton } from "@/components/navigation/BackButton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ShieldAlert, Scale, Lock, FileText, Shield, Heart } from "lucide-react";
 
+const LEGAL_TABS = ['disclaimer', 'privacy', 'terms'] as const;
+type LegalTab = (typeof LEGAL_TABS)[number];
+
+function isLegalTab(value: string | null): value is LegalTab {
+    return value !== null && (LEGAL_TABS as readonly string[]).includes(value);
+}
+
 export default function LegalPage() {
     const { t } = useTranslation();
+    // `?tab=privacy|terms|disclaimer` deep-links to a section (footer, consent modal).
+    const [searchParams, setSearchParams] = useSearchParams();
+    const requestedTab = searchParams.get('tab');
+    const activeTab: LegalTab = isLegalTab(requestedTab) ? requestedTab : 'disclaimer';
+
+    const handleTabChange = (value: string) => {
+        if (isLegalTab(value)) {
+            setSearchParams({ tab: value }, { replace: true });
+        }
+    };
 
     return (
         <div className="container max-w-4xl mx-auto px-4 py-8 min-h-screen">
+            <BackButton className="mb-2" />
             <h1 className="text-3xl font-bold mb-6 gradient-text">{t('legal.page_title')}</h1>
 
-            <Tabs defaultValue="disclaimer" className="w-full">
+            <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
                 <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 h-auto glass-card border border-primary/15 p-1">
                     <TabsTrigger value="disclaimer" className="py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-secondary/10 data-[state=active]:text-foreground data-[state=active]:shadow-sm rounded-lg gap-1">
                         <ShieldAlert className="w-4 h-4 mr-2" />
@@ -147,10 +167,10 @@ export default function LegalPage() {
                 </div>
             </Tabs>
 
-            <div className="mt-12 text-center text-sm text-muted-foreground pb-8">
-                <p>© {new Date().getFullYear()} {t('legal.footer.copyright')}</p>
-                <p>{t('legal.footer.educational')}</p>
-            </div>
+            {/* Liability note for generated plans; the site footer carries the copyright. */}
+            <p className="mx-auto mt-12 max-w-md pb-8 text-center text-sm text-muted-foreground">
+                {t('legal.footer.guidance')}
+            </p>
         </div>
     );
 }

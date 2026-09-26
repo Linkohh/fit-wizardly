@@ -261,7 +261,61 @@
         }
     },
     "footer": {
-        "how_to_use": "Como usar"
+        "how_to_use": "Como usar",
+        "about": "Sobre",
+        "copyright_short": "© {{year}} FitWizard",
+        "made_with_before": "Feito com",
+        "made_with_after": "para quem treina",
+        "love": "amor",
+        "privacy_short": "Privacidade",
+        "terms_short": "Termos",
+        "guide_short": "Guia",
+        "disclaimer_short": "Aviso"
+    },
+    "about": {
+        "whats_new": {
+            "title": "Novidades",
+            "description": "Notas de versão de cada versão do FitWizard",
+            "pill": "Novidades",
+            "on_version_prefix": "Você está na",
+            "current": "Atual",
+            "new": "Novo",
+            "improved": "Melhorado",
+            "fixed": "Corrigido",
+            "pick_version": "Ir para uma versão",
+            "unread": "Novas notas de versão"
+        }
+    },
+    "legal": {
+        "footer": {
+            "guidance": "Os planos são orientações gerais de condicionamento físico, não conselhos médicos. Consulte um profissional de saúde antes de começar um novo programa."
+        }
+    },
+    "navigation": {
+        "back": "Voltar",
+        "back_home": "Voltar ao início",
+        "swipe_back": "Deslize para voltar"
+    },
+    "header": {
+        "quick_links": {
+            "label": "Sobre e ajuda",
+            "about": "Sobre",
+            "help": "Ajuda",
+            "legal": "Jurídico",
+            "new": "Novo"
+        }
+    },
+    "commands": {
+        "about": "Sobre o FitWizard"
+    },
+    "profile": {
+        "about_support": {
+            "title": "Sobre e suporte",
+            "about": "Sobre o FitWizard",
+            "guide": "Como usar",
+            "legal": "Jurídico e privacidade",
+            "version": "Versão"
+        }
     },
     "common": {
         "loading": "Carregando...",

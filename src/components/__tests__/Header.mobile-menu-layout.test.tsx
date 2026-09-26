@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Header } from '@/components/Header';
 
 const mocks = vi.hoisted(() => ({
+  isNative: false,
   themeMode: 'system' as 'light' | 'dark' | 'system',
   resolvedTheme: 'light' as 'light' | 'dark',
   setMode: vi.fn(),
@@ -35,7 +36,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 vi.mock('@/lib/platform', () => ({
-  isNativeApp: () => false,
+  isNativeApp: () => mocks.isNative,
 }));
 
 vi.mock('@/stores/installCoachStore', () => ({
@@ -326,6 +327,7 @@ describe('Header mobile menu layout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useRealTimers();
+    mocks.isNative = false;
     mocks.themeMode = 'system';
     mocks.resolvedTheme = 'light';
     mocks.installCoachState = {
@@ -344,6 +346,25 @@ describe('Header mobile menu layout', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+  });
+
+  it('omits the About · Help · Legal quick links on the web, where the footer carries them', () => {
+    renderHeader('/');
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
+
+    const footer = screen.getByTestId('mobile-drawer-footer');
+    expect(within(footer).queryByTestId('mobile-drawer-quick-links')).not.toBeInTheDocument();
+  });
+
+  it('shows the About · Help · Legal quick links in the native app drawer', () => {
+    mocks.isNative = true;
+    renderHeader('/');
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
+
+    const quickLinks = within(screen.getByTestId('mobile-drawer-footer')).getByTestId('mobile-drawer-quick-links');
+    expect(within(quickLinks).getByRole('link', { name: /About/ })).toHaveAttribute('href', '/about');
+    expect(within(quickLinks).getByRole('link', { name: 'Help' })).toHaveAttribute('href', '/guide');
+    expect(within(quickLinks).getByRole('link', { name: 'Legal' })).toHaveAttribute('href', '/legal');
   });
 
   it('tags the brand logo and menu trigger with explicit mobile feedback events', () => {

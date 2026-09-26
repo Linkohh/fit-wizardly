@@ -516,7 +516,8 @@
         "sign_in": "Sign In",
         "help_heading": "Help & Resources",
         "documentation": "Documentation",
-        "browse_exercises": "Browse Exercises"
+        "browse_exercises": "Browse Exercises",
+        "about": "About FitWizard"
     },
     "header": {
         "logo_tooltip": "Your path to peak fitness potential",
@@ -539,6 +540,13 @@
             "user_subtitle": "Personal training mode",
             "footer_brand": "FitWizard",
             "footer_caption": "Quick Controls"
+        },
+        "quick_links": {
+            "label": "About and help",
+            "about": "About",
+            "help": "Help",
+            "legal": "Legal",
+            "new": "New"
         }
     },
     "footer": {
@@ -547,7 +555,16 @@
         "terms": "Terms of Service",
         "how_to_use": "How to Use",
         "privacy": "Privacy Policy",
-        "medical": "Medical Disclaimer"
+        "medical": "Medical Disclaimer",
+        "about": "About",
+        "copyright_short": "© {{year}} FitWizard",
+        "made_with_before": "Made with",
+        "made_with_after": "for lifters",
+        "love": "love",
+        "privacy_short": "Privacy",
+        "terms_short": "Terms",
+        "guide_short": "Guide",
+        "disclaimer_short": "Disclaimer"
     },
     "notfound": {
         "title": "Looks Like You've Gone Off-Track",
@@ -648,8 +665,7 @@
             "use_text": "Permission is granted to use FitWizard for personal, non-commercial purposes. This license does not include the right to modify, distribute, or create derivative works."
         },
         "footer": {
-            "copyright": "FitWizard. All rights reserved.",
-            "educational": "Generated plans are for educational purposes only."
+            "guidance": "Plans are general fitness guidance, not medical advice. Check with a healthcare professional before starting a new program."
         }
     },
     "recovery": {
@@ -671,5 +687,94 @@
         "no_data": "No readiness logs yet. Check in daily to see your trend.",
         "tooltip_score": "Score:",
         "tooltip_status": "Status:"
+    },
+    "profile": {
+        "about_support": {
+            "title": "About & Support",
+            "about": "About FitWizard",
+            "guide": "How to Use",
+            "legal": "Legal & Privacy",
+            "version": "Version"
+        }
+    },
+    "about": {
+        "title": "About FitWizard",
+        "tagline": "Smarter training plans, built around you.",
+        "version_label": "Version {{version}}",
+        "easter_egg": "You found the wizard's secret 🧙",
+        "stats": {
+            "exercises": "exercises",
+            "languages": "languages",
+            "mission": "mission"
+        },
+        "story": {
+            "title": "Our Story",
+            "subtitle": "It started with the question every lifter has asked: “Am I even doing this right?”",
+            "spark_title": "The question",
+            "spark_body": "I'd stand in the gym staring at a plan full of exercise names — no picture, no clue which muscle I should feel. I wasn't short on effort. I was drowning in guesswork, and the guesswork was heavier than the weights.",
+            "build_title": "The fix",
+            "build_body": "So I stopped guessing and started building. Every exercise got a face. Every move got a target. And it all lived in my pocket, even with zero bars of signal in the back of the gym.",
+            "wizard_title": "The friend",
+            "wizard_body": "Then I thought about my best friend. What if they wanted to train with me — or I wanted to coach them? Progress hits different when someone's in your corner. So FitWizard grew to serve both sides of the rack: the lifter and the coach.",
+            "today_title": "Your turn",
+            "today_body": "Now it's yours. No more guessing, just showing up. Whether you're chasing your first PR or guiding someone to theirs, this is built for the long game: stronger body, clearer mind, and real pride in how far you've come."
+        },
+        "creator": {
+            "title": "Meet the Creator",
+            "name": "Lincoln “Linc” Ogden",
+            "role": "Founder & Developer · NASM-CPT",
+            "avatar_alt": "Portrait of Lincoln “Linc” Ogden",
+            "bio": "NASM Certified Personal Trainer. Lifting and pumping iron is in my blood.",
+            "flip_hint": "Tap the card to flip it",
+            "flip_back": "Tap to flip back",
+            "fact_title": "Why I lift",
+            "fact_body": "For longevity. I want my mind and body at their peak, even when I'm old. Lifting is what I love, and it brings tranquility into my world."
+        },
+        "cta": {
+            "eyebrow": "Your turn",
+            "title": "Ready to take the guesswork out?",
+            "body": "Answer a few quick questions and get a plan built around you, in minutes.",
+            "button": "Start your plan"
+        },
+        "mission": {
+            "title": "Our Mission",
+            "statement": "Take the guesswork out of getting stronger, so every lifter and every coach can train with clarity, confidence and the long game in mind.",
+            "tap_hint": "Tap a principle to see what it means",
+            "clarity_title": "Clarity over confusion",
+            "clarity_body": "Every exercise shows you what it looks like and which muscles it should hit. Your energy goes into the lift, not into figuring it out.",
+            "anywhere_title": "Train anywhere, own your data",
+            "anywhere_body": "Your plan lives on your device and works offline, even in the back corner of the gym with zero bars. Your data stays yours.",
+            "together_title": "Stronger together",
+            "together_body": "Built for both sides of the rack. Lifters and coaches share the same page, so accountability comes naturally and nobody trains alone.",
+            "longevity_title": "Built for the long game",
+            "longevity_body": "Smart progression and recovery check-ins keep you training for years, not weeks. Progress you can be proud of, in body and mind."
+        },
+        "credits": {
+            "title": "Credits & Thanks",
+            "exercises": "Exercise data and search powered by API Ninjas and our curated library.",
+            "open_source": "Built on open source: React, Vite, Tailwind CSS, shadcn/ui, Framer Motion and Capacitor."
+        },
+        "closing": {
+            "guide": "How to Use",
+            "legal": "Legal & Privacy",
+            "made_with": "Made with care for lifters everywhere."
+        },
+        "whats_new": {
+            "title": "What's new",
+            "description": "Release notes for every FitWizard version",
+            "pill": "What's new",
+            "on_version_prefix": "You're on",
+            "current": "Current",
+            "new": "New",
+            "improved": "Improved",
+            "fixed": "Fixed",
+            "pick_version": "Jump to a version",
+            "unread": "New release notes"
+        }
+    },
+    "navigation": {
+        "back": "Back",
+        "back_home": "Back to Home",
+        "swipe_back": "Swipe to go back"
     }
 }

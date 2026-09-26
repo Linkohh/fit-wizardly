@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from "vite";
 import type { ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import { readFileSync } from "fs";
 import { componentTagger } from "lovable-tagger";
 import { visualizer } from "rollup-plugin-visualizer";
 import { VitePWA } from "vite-plugin-pwa";
@@ -109,6 +110,10 @@ const wgerProxyPlugin = () => ({
   }
 });
 
+const appVersion: string = JSON.parse(
+  readFileSync(path.resolve(__dirname, "package.json"), "utf-8")
+).version;
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -118,12 +123,16 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
+    define: {
+      __APP_VERSION__: JSON.stringify(appVersion),
+    },
     server: {
       // Localhost-only by default. `npm run ios:live` passes `--host ::` so LAN
       // devices can connect during Capacitor live reload. Vite's default host
       // check (localhost + direct IPs) stays active to block DNS rebinding.
       host: "localhost",
-      port: 8080,
+      // 8080 stays the default (ngrok, ios:live, server CORS); PORT lets parallel worktrees run side by side.
+      port: Number(process.env.PORT) || 8080,
       proxy: {
         "/plans": "http://localhost:3001",
         "/health": "http://localhost:3001",
