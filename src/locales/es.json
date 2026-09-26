@@ -362,7 +362,14 @@
             "system": "Sistema",
             "label": "Tema"
         },
-        "trainer_mode": "Modo Coach"
+        "trainer_mode": "Modo Coach",
+        "quick_links": {
+            "label": "Información y ayuda",
+            "about": "Acerca de",
+            "help": "Ayuda",
+            "legal": "Legal",
+            "new": "Nuevo"
+        }
     },
     "footer": {
         "copyright": "© {{year}} FitWizard. Hecho con",
@@ -370,7 +377,16 @@
         "terms": "Términos de Servicio",
         "how_to_use": "Cómo usar",
         "privacy": "Política de Privacidad",
-        "medical": "Aviso Médico"
+        "medical": "Aviso Médico",
+        "about": "Acerca de",
+        "copyright_short": "© {{year}} FitWizard",
+        "made_with_before": "Hecho con",
+        "made_with_after": "para quienes entrenan",
+        "love": "amor",
+        "privacy_short": "Privacidad",
+        "terms_short": "Términos",
+        "guide_short": "Guía",
+        "disclaimer_short": "Aviso"
     },
     "exercises": {
         "filters": {
@@ -443,7 +459,8 @@
         "sign_in": "Iniciar Sesión",
         "help_heading": "Ayuda y Recursos",
         "documentation": "Documentación",
-        "browse_exercises": "Explorar Ejercicios"
+        "browse_exercises": "Explorar Ejercicios",
+        "about": "Acerca de FitWizard"
     },
     "circles": {
         "no_activity": "Sin actividad reciente",
@@ -580,8 +597,7 @@
             "use_text": "Se otorga permiso para usar FitWizard para fines personales y no comerciales. Esta licencia no incluye el derecho de modificar, distribuir o crear obras derivadas."
         },
         "footer": {
-            "copyright": "FitWizard. Todos los derechos reservados.",
-            "educational": "Los planes generados son solo para fines educativos."
+            "guidance": "Los planes son orientación general de fitness, no consejo médico. Consulta con un profesional de la salud antes de comenzar un nuevo programa."
         }
     },
     "recovery": {
@@ -603,5 +619,33 @@
         "no_data": "Aún no hay registros. Haz el check-in diario para ver tu tendencia.",
         "tooltip_score": "Puntuación:",
         "tooltip_status": "Estado:"
+    },
+    "profile": {
+        "about_support": {
+            "title": "Información y ayuda",
+            "about": "Acerca de FitWizard",
+            "guide": "Cómo usar",
+            "legal": "Legal y privacidad",
+            "version": "Versión"
+        }
+    },
+    "navigation": {
+        "back": "Atrás",
+        "back_home": "Volver al inicio",
+        "swipe_back": "Desliza para volver"
+    },
+    "about": {
+        "whats_new": {
+            "title": "Novedades",
+            "description": "Notas de versión de cada versión de FitWizard",
+            "pill": "Novedades",
+            "on_version_prefix": "Estás en",
+            "current": "Actual",
+            "new": "Nuevo",
+            "improved": "Mejorado",
+            "fixed": "Corregido",
+            "pick_version": "Ir a una versión",
+            "unread": "Nuevas notas de versión"
+        }
     }
 }

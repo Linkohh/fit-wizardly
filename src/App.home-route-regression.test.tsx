@@ -140,6 +140,10 @@ vi.mock('@/components/Footer', () => ({
   Footer: () => <div>Footer</div>,
 }));
 
+vi.mock('@/components/navigation/EdgeSwipeBack', () => ({
+  EdgeSwipeBack: () => null,
+}));
+
 vi.mock('@/components/auth/AuthModal', () => ({
   AuthModal: () => null,
 }));
@@ -180,8 +184,10 @@ vi.mock('@/hooks/useGlobalClickFeedback', () => ({
   useGlobalClickFeedback: () => undefined,
 }));
 
-vi.mock('@/lib/platform', () => ({
+vi.mock('@/lib/platform', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/platform')>()),
   isNativeApp: () => mocks.platformState.nativeApp,
+  getNativePlatform: () => (mocks.platformState.nativeApp ? 'ios' : 'web'),
 }));
 
 vi.mock('./components/TrainerGuard', () => ({

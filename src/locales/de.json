@@ -259,7 +259,16 @@
         }
     },
     "footer": {
-        "how_to_use": "Wie benutzen"
+        "how_to_use": "Wie benutzen",
+        "about": "Über uns",
+        "copyright_short": "© {{year}} FitWizard",
+        "made_with_before": "Mit",
+        "made_with_after": "für Athleten gemacht",
+        "love": "Liebe",
+        "privacy_short": "Datenschutz",
+        "terms_short": "AGB",
+        "guide_short": "Anleitung",
+        "disclaimer_short": "Hinweis"
     },
     "common": {
         "loading": "Wird geladen...",
@@ -287,5 +296,50 @@
         "no_data": "Noch keine Einträge. Checke täglich ein, um deinen Trend zu sehen.",
         "tooltip_score": "Wert:",
         "tooltip_status": "Status:"
+    },
+    "commands": {
+        "about": "Über FitWizard"
+    },
+    "profile": {
+        "about_support": {
+            "title": "Info & Hilfe",
+            "about": "Über FitWizard",
+            "guide": "Anleitung",
+            "legal": "Rechtliches & Datenschutz",
+            "version": "Version"
+        }
+    },
+    "header": {
+        "quick_links": {
+            "label": "Info und Hilfe",
+            "about": "Über uns",
+            "help": "Hilfe",
+            "legal": "Rechtliches",
+            "new": "Neu"
+        }
+    },
+    "navigation": {
+        "back": "Zurück",
+        "back_home": "Zurück zur Startseite",
+        "swipe_back": "Wischen, um zurückzugehen"
+    },
+    "legal": {
+        "footer": {
+            "guidance": "Die Pläne sind allgemeine Fitnessempfehlungen und keine medizinische Beratung. Sprich mit medizinischem Fachpersonal, bevor du ein neues Programm beginnst."
+        }
+    },
+    "about": {
+        "whats_new": {
+            "title": "Neuigkeiten",
+            "description": "Versionshinweise für jede FitWizard-Version",
+            "pill": "Neuigkeiten",
+            "on_version_prefix": "Du nutzt",
+            "current": "Aktuell",
+            "new": "Neu",
+            "improved": "Verbessert",
+            "fixed": "Behoben",
+            "pick_version": "Zu einer Version springen",
+            "unread": "Neue Versionshinweise"
+        }
     }
 }

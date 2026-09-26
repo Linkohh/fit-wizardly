@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MessageCircle, Trophy, Users, Dumbbell, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { BackButton } from '@/components/navigation/BackButton';
 
 export default function UserGuide() {
     return (
         <main className="container max-w-4xl mx-auto px-4 py-12">
+            <BackButton className="mb-4" />
             <div className="text-center mb-12">
                 <h1 className="text-4xl font-bold mb-4">How to Use FitWizardly</h1>
                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto">

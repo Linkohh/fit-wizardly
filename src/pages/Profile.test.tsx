@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { Profile } from './Profile';
 
 const mocks = vi.hoisted(() => ({
@@ -152,7 +153,7 @@ describe('Profile motion tilt controls', () => {
   });
 
   it('keeps the motion tilt switch and shows the enable affordance outside the hero', () => {
-    render(<Profile />);
+    render(<Profile />, { wrapper: MemoryRouter });
 
     expect(screen.getByText('Motion Tilt')).toBeInTheDocument();
     expect(screen.getByText('Motion tilt access')).toBeInTheDocument();
@@ -165,7 +166,7 @@ describe('Profile motion tilt controls', () => {
   });
 
   it('uses the shared aetheric theme icon pill in app settings and dispatches theme changes', () => {
-    render(<Profile />);
+    render(<Profile />, { wrapper: MemoryRouter });
 
     const themeToggle = screen.getByTestId('profile-theme-toggle');
     const [lightButton, systemButton, darkButton] = within(themeToggle).getAllByRole('button');
@@ -190,5 +191,23 @@ describe('Profile motion tilt controls', () => {
     expect(mocks.setMode).toHaveBeenNthCalledWith(1, 'light');
     expect(mocks.setMode).toHaveBeenNthCalledWith(2, 'system');
     expect(mocks.setMode).toHaveBeenNthCalledWith(3, 'dark');
+  });
+});
+
+describe('Profile about & support group', () => {
+  it('links to About, Guide and Legal and shows the build version', () => {
+    render(<Profile />, { wrapper: MemoryRouter });
+
+    expect(screen.getByRole('link', { name: 'profile.about_support.about' })).toHaveAttribute('href', '/about');
+    expect(screen.getByRole('link', { name: 'profile.about_support.guide' })).toHaveAttribute('href', '/guide');
+    expect(screen.getByRole('link', { name: 'profile.about_support.legal' })).toHaveAttribute('href', '/legal');
+    expect(screen.getByTestId('profile-app-version')).toHaveTextContent('0.0.0-test');
+  });
+
+  it("opens the What's new release notes from the version row", () => {
+    render(<Profile />, { wrapper: MemoryRouter });
+
+    fireEvent.click(screen.getByTestId('profile-version-row'));
+    expect(screen.getByRole('dialog', { name: 'about.whats_new.title' })).toBeInTheDocument();
   });
 });

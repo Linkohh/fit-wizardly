@@ -15,6 +15,7 @@ import {
   Dumbbell,
   User,
   BookOpen,
+  Info,
   Settings,
   LogOut,
   Home,
@@ -211,6 +212,13 @@ export function CommandPalette() {
           >
             <Dumbbell className="mr-2 h-4 w-4" />
             <span>{t('commands.browse_exercises')}</span>
+          </CommandItem>
+
+          <CommandItem
+            onSelect={() => handleCommand(() => navigate('/about'))}
+          >
+            <Info className="mr-2 h-4 w-4" />
+            <span>{t('commands.about')}</span>
           </CommandItem>
         </CommandGroup>
       </CommandList>

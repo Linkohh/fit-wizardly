@@ -2,7 +2,7 @@
 
 > Read this file at the start of every session before touching any code.
 > Update it at session end using `/after-report`.
-> Last updated: 2026-04-30
+> Last updated: 2026-09-26
 
 ---
 
@@ -95,7 +95,8 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 | `/clients/:clientId` | `ClientDetails.tsx` | Yes |
 | `/templates` | `TemplateLibrary.tsx` | Yes |
 | `/revenue` | `Revenue.tsx` | Yes |
-| `/legal` | `Legal.tsx` | No |
+| `/legal` | `Legal.tsx` (supports `?tab=` disclaimer / privacy / terms) | No |
+| `/about` | `About.tsx` (see `docs/ABOUT_PAGE.md`) | No |
 | `/guide` | `UserGuide.tsx` | No |
 | `/onboarding` | `Onboarding.tsx` | No |
 | `/mcl` | `MCLIntegrationTest.tsx` | No |
@@ -143,6 +144,78 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 ---
 
 ## Session History
+
+### 2026-09-26 — About Page, What's New, Back Navigation
+
+- **What was done:**
+  - Built a new `/about` page. Its hero shows the app icon (with a long-press confetti easter egg), and the version pill opens "What's new". The page also has an "Our Story" timeline, a creator card (`CreatorCard`, with photo, glowing aura and flip), mission principles, credits and a "Start your plan" CTA to `/wizard`. Components are in `src/components/about/`.
+  - Added `WhatsNewPanel` for release notes. It opens as a Drawer on phones, a Sheet on tablets and a Dialog on desktop, via `useViewportTier`. Notes come from `src/data/changelog.ts`, with versions v0.1.0–v0.7.0 grouped retroactively from git history.
+  - Made About discoverable without featuring it:
+    - an `AboutSupportCard` at the bottom of Profile
+    - a redesigned `Footer`, hidden in native builds
+    - native-only `DrawerQuickLinks` in the Header drawer
+    - a ⌘K command
+  - Added back navigation on every platform: `BackButton` + `useGoBack`, a global `EdgeSwipeBack` + `useEdgeSwipeBack` for touch devices (deduplicated against browser gestures), and `useAndroidBackButton` via the new `@capacitor/app` dependency.
+  - Bumped `package.json` 0.0.0 → 1.0.0 to match the native builds, exposed as `__APP_VERSION__`.
+  - Legal page: added `?tab=` deep links and reworded the disclaimer.
+  - Documentation: added `docs/ABOUT_PAGE.md`.
+- **Commits:**
+  - `bfda39b` feat(about): About FitWizard page, What's new notes, and back navigation
+  - *(plus the docs commit containing this entry and `docs/ABOUT_PAGE.md`)*
+  - *Gap note:* 43 earlier commits since the last log update (2026-04-30 → 2026-09-25, from `1e8c9cb` to `62219f7`) were made in sessions that did not run `/after-report`. They are not summarized here; see `git log 4edb1b0..62219f7`. Highlights from their commit titles: exercise search and catalog fallbacks, page transitions, iOS status bar work, the security hardening PR #35, and the dependency refresh (#31, #33).
+- **Files changed** (64 vs `preview_b`):
+  - `src/pages/About.tsx`, `src/components/about/*` (12 files) — the About page and What's new
+  - `src/data/changelog.ts` — release-notes data. A test enforces that its top entry equals the `package.json` version.
+  - `src/components/navigation/{BackButton,EdgeSwipeBack}.tsx`, `src/hooks/{useGoBack,useEdgeSwipeBack,useAndroidBackButton,useLongPress}.ts` — back navigation and gestures
+  - `src/components/Footer.tsx` — rebuilt: 5 short links, deep links to the Legal tabs, heartbeat animation, hidden when `isNativeApp()`
+  - `src/components/Header.tsx` + `src/components/header/DrawerQuickLinks.tsx` — native-only About · Help · Legal row with a one-time "New" dot
+  - `src/pages/Profile.tsx` — the About & Support card replaces the hardcoded fake "App Version 1.2.0" string
+  - `src/pages/Legal.tsx`, `src/components/legal/ConsentModal.tsx` — `?tab=` deep links, guidance wording, duplicate © removed
+  - `src/pages/UserGuide.tsx` — Back button
+  - `src/App.tsx` — `/about` route (unguarded, demo-first), `EdgeSwipeBack` and `useAndroidBackButton` mounted, footer hidden in native builds
+  - `src/lib/{appInfo,aboutSeen,changelogSeen}.ts` — version constant and localStorage UI flags
+  - `src/locales/{en,es,pt,de}.json` — new `about.*`, `navigation.*`, `footer.*`, `header.quick_links.*`, `profile.about_support.*`, `legal.footer.guidance` keys
+  - `vite.config.ts` / `vitest.config.ts` / `src/vite-env.d.ts` — `__APP_VERSION__`; Vite honors `PORT` (default 8080)
+  - `package.json` / `package-lock.json` — version 1.0.0 and `@capacitor/app`
+  - `android/*.gradle`, `ios/App/CapApp-SPM/Package.swift` — `npx cap sync` plugin registration
+  - `public/creator-avatar.jpg` (480px), `public/app-icon-384.png`
+  - `src/test/setup.ts` — no-op `IntersectionObserver` for jsdom
+  - `src/App.*.test.tsx` — platform mock now spreads the real module
+  - `docs/ABOUT_PAGE.md`, `CLAUDE.md` — maintenance guide plus an index link
+- **Issues fixed this session:**
+  - (unlisted): the Profile page showed a hardcoded, fake "App Version 1.2.0 • Build 2026.02". It now shows the real version.
+  - (unlisted): all 3 Legal footer links opened the same tab. They now deep-link to Privacy, Terms and Disclaimer.
+  - (unlisted): secondary pages had no way back, and the Android system back button had no in-app handling. Both now route through app history.
+- **New issues found this session:**
+  - DEBT-010: duplicate `config 2.xml` / `config 3.xml` files are tracked in git — LOW — `ios/App/App/`, `android/app/src/main/res/xml/` (committed in `ff07994`)
+  - DEBT-011: long-form About copy and release notes are English-only (es/pt/de fall back to en) — LOW — `src/locales/*.json`, `src/data/changelog.ts`
+  - DEBT-012: swipe-back, haptics and the Android back button are not yet verified on a real device or simulator — MEDIUM — `src/hooks/useEdgeSwipeBack.ts`, `useAndroidBackButton.ts`
+  - DEBT-013: "Get in Touch" is hidden until public social links (Instagram/LinkedIn) are provided; a personal email was intentionally not published — LOW — `src/pages/About.tsx`
+  - DEBT-014: this log was not updated for 43 commits (May–Sep 2026) — LOW — `docs/SESSION_LOG.md`
+- **TODO/FIXME introduced:** none (pre-existing TODOs unchanged)
+- **Test status:** All passing: 455 tests across 107 files, up from the 301/73 baseline. Lint: 0 errors and the 4 pre-existing warnings. App `tsc`: only the 5 errors inherited from `preview_b` (see DEBT-001). Server `tsc`: clean. `npm run build`: passes.
+- **Legal/compliance notes:**
+  - `Legal.tsx`: the footer line "Generated plans are for educational purposes only." became "Plans are general fitness guidance, not medical advice. Check with a healthcare professional before starting a new program." The duplicate © line was removed. `?tab=` deep links were added.
+  - `ConsentModal.tsx`: the Terms and Privacy links now deep-link to their tabs. The consent logic is unchanged.
+  - `Profile.tsx`: UI only (About & Support card). Data export is unchanged.
+  - **No new external data services and no new personal data types.**
+    - The new `localStorage` keys `fitwizard-about-seen` and `fitwizard-changelog-seen` store only UI "seen" flags (non-personal), so no Art. 13/20 changes are needed.
+    - `@capacitor/app` is used only for back-button events.
+    - The creator photo is a public, author-supplied asset.
+  - The guidance wording should get a qualified legal review before store release.
+- **Key decisions made:**
+  - About is "discoverable, not featured". Web: footer + Settings + ⌘K. Native: drawer quick links (with a one-time "New" dot) + Settings, and the footer is hidden. Never in primary nav.
+  - Responsive modal surfaces follow the `ExerciseLibraryDetailModal` split: phone Drawer, tablet Sheet, desktop Dialog.
+  - Release notes live in `src/data/changelog.ts`. CI enforces that its top entry equals the `package.json` version. Earlier versions are retroactive milestones.
+  - Back navigation: `useGoBack` falls back to Home when there is no in-app history. The edge swipe waits 350ms and skips if the browser already fired `popstate`. Android back goes history → Home → minimize.
+  - Stray numbered duplicate files (Finder/iCloud) keep appearing locally. Always check `find . -name '* [0-9].*'` before committing.
+- **Open issues carried forward:** SEC-001, SEC-003, SEC-004, SEC-005, DEBT-001 through DEBT-009, AUDIT-001 through AUDIT-006, and the new DEBT-010 through DEBT-014
+- **Next steps:**
+  1. Verify swipe-back, haptics and Android back on the iOS Simulator and an Android emulator (DEBT-012).
+  2. Add the Instagram/LinkedIn "Get in Touch" section once the handles are provided (DEBT-013).
+  3. Remove the tracked duplicate `config {2,3}.xml` files (DEBT-010).
+  4. Tag releases in git from now on (`git tag v1.0.0` on the merge commit) so release notes and history stay aligned.
+  5. Get a legal review of the Legal page guidance wording before App Store / Play submission.
 
 ### 2026-04-30 — Full App Code Audit + i18n/GDPR Fixes
 
@@ -288,7 +361,8 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | ID | Issue | File(s) | Notes |
 |----|-------|---------|-------|
 | SEC-005 | Supabase migrations 002 + 004 may be missing from live schema | `supabase/migrations/` | Plan sync and exercise community stats fail in prod until applied. |
-| DEBT-001 | Pre-existing TypeScript errors in 6 files | ExercisesBrowser, RestTimer, media.ts, use-hero-tilt.test.ts, useUserPreferences, Nutrition.tsx | Compilation fails with `--noEmit` for these files. Not blocking tests currently. |
+| DEBT-001 | Pre-existing TypeScript errors | As of 2026-09-26 on `preview_b`: `ExerciseLibraryPage.test.tsx:130`, `useCountUp.ts:19`, `apiNinjasExercises.test.ts:72,107`, `exerciseSearch.test.ts:77` (5 errors) | `tsc -p tsconfig.app.json --noEmit` fails on these. The 2026-04-30 file list is outdated. 4 of the 5 are test-only (missing vitest globals types, fetch mock typing). Not blocking build or tests. |
+| DEBT-012 | Swipe-back / haptics / Android back not device-verified | `src/hooks/useEdgeSwipeBack.ts`, `src/hooks/useAndroidBackButton.ts` | Unit-tested, and browser-tested with simulated touch. Needs a pass on the iOS Simulator and an Android emulator. |
 | AUDIT-001 | DE locale only ~35% complete — 310 keys missing vs `en.json` | `src/locales/de.json` | Entire sections absent: `commands.*`, `error.*`, `exercises.*`, `footer.*`, `header.*`, `hero.*`, `install_coach.*`, `legal.*`, `notfound.*`, `onboarding.*`, `wizard.*`. German users see raw i18n key strings in most of the UI. |
 | AUDIT-002 | PT locale only ~33% complete — 310 keys missing vs `en.json` | `src/locales/pt.json` | Same large gaps as DE. Portuguese users see raw i18n key strings in most of the UI. |
 
@@ -315,6 +389,10 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-008 | Energy balance trend chart not implemented | — | AUDIT_AND_IDEAS.md §3.7 (dual-axis calories vs. weight). |
 | AUDIT-005 | 25+ `.map()` calls in components flagged as possibly missing `key=` props | `confetti.tsx:71`, `form-field.tsx:131,161`, `living-background.tsx:156`, `SupernovaIcon.tsx:59`, `PlateCalculator.tsx:138,180`, `OneRepMaxCalculator.tsx:98`, `InstallCoachSheet.tsx:30`, `CommandPalette.tsx:144`, `CircleFeed.tsx:171`, `CircleLayout.tsx:143,150,237`, `CircleLeaderboardTab.tsx:59`, `CircleChallengesTab.tsx:143`, `ChallengeCard.tsx:147`, `CircleCard.tsx:52`, `JoinCircleModal.tsx:121`, `CreateChallengeModal.tsx:190,208`, `ReactionButton.tsx:173`, `ExerciseSwapModal.tsx:217,238` | React will warn and reconciliation may degrade. Verify each — most likely have key on child element not visible from single-line grep. |
 | AUDIT-006 | `(window as any).__lastTrendingError` global hack | `src/hooks/useExerciseInteraction.ts:180,183` | Module-level variable would be safer and avoids `window as any`. Pre-existing lint warning. |
+| DEBT-010 | Duplicate `config 2.xml` / `config 3.xml` tracked in git | `ios/App/App/`, `android/app/src/main/res/xml/` | Finder/iCloud copies committed in `ff07994` (2026-02-23). Safe to `git rm` after confirming `config.xml` is the real one. |
+| DEBT-011 | About long-form copy + release notes English-only | `src/locales/{es,pt,de}.json`, `src/data/changelog.ts` | UI labels are translated; story/mission/creator/changelog bodies fall back to `en`. |
+| DEBT-013 | About "Get in Touch" hidden | `src/pages/About.tsx` | Waiting for public Instagram/LinkedIn handles. Personal email intentionally not published. See `docs/ABOUT_PAGE.md` §3. |
+| DEBT-014 | SESSION_LOG gap May–Sep 2026 | `docs/SESSION_LOG.md` | 43 commits (`4edb1b0..62219f7`) were never logged. Backfill if the history matters. |
 
 ---
 
@@ -340,7 +418,9 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | Data deletion on request | Not implemented | Profile page has placeholder. Backend deletion endpoint missing. |
 | Supabase key rotated in Vercel | Done | 2026-04-27 |
 | Legacy key revoked in Supabase dashboard | PENDING | Must happen after new deployment verified live (SEC-001) |
-| Medical disclaimer | Done | Prominent disclaimer tab in Legal.tsx |
+| Medical disclaimer | Done | Prominent disclaimer tab in Legal.tsx. Since 2026-09-26 it is also directly linked from the footer (`/legal?tab=disclaimer`). |
+| Generated-plan guidance wording ("not medical advice") | Partial | Reworded 2026-09-26 in all 4 locales (`legal.footer.guidance`). Needs qualified legal review before store submission. |
+| New localStorage UI flags (`fitwizard-about-seen`, `fitwizard-changelog-seen`) | Done | Non-personal UI state only; no Art. 13/20 disclosure or export needed. |
 
 ---
 
@@ -379,7 +459,15 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 - [ ] Delete local legacy JWT from `.env.local`, `dist/`, Capacitor assets
 - [ ] Apply Supabase migrations 002 and 004 to production
 
+- [ ] Verify swipe-back, haptics and Android back on the iOS Simulator and an Android emulator — DEBT-012
+- [ ] Tag releases in git (`v1.0.0` on the PR #36 merge commit); keep `src/data/changelog.ts` in sync each release
+- [ ] Legal review of the `/legal` guidance wording before store submission
+
 ### Short-term features
+- [x] About FitWizard page + What's new release notes + back navigation (PR #36, 2026-09-26)
+- [ ] About "Get in Touch" with Instagram/LinkedIn links — DEBT-013
+- [ ] Remove tracked duplicate `config {2,3}.xml` files — DEBT-010
+- [ ] Translate About long-form copy + release notes to es/pt/de — DEBT-011
 - [ ] Complete DE locale translation — 310 keys missing, ~35% complete — AUDIT-001 (`src/locales/de.json`)
 - [ ] Complete PT locale translation — 310 keys missing, ~33% complete — AUDIT-002 (`src/locales/pt.json`)
 - [ ] Fill ES locale gaps — 75 keys missing, investigate 27 orphaned keys — AUDIT-003 (`src/locales/es.json`)

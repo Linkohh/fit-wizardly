@@ -74,6 +74,7 @@ These files represent the **canonical patterns** for this codebase. Study them b
 | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | Common issues and solutions |
 | [docs/MIGRATION.md](docs/MIGRATION.md) | Version upgrades and breaking changes |
 | [docs/AI_GUIDELINES.md](docs/AI_GUIDELINES.md) | AI-specific code generation rules |
+| [docs/ABOUT_PAGE.md](docs/ABOUT_PAGE.md) | About page, What's new release notes, back navigation — how to ship a release |
 
 ---
 

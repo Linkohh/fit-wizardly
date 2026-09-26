@@ -204,7 +204,7 @@ export function ConsentModal() {
             <p className="text-center text-xs leading-5 text-muted-foreground sm:text-[0.82rem]">
               By clicking &quot;I Agree&quot;, you accept our{' '}
               <Link
-                to="/legal"
+                to="/legal?tab=terms"
                 className="font-medium text-primary underline-offset-4 transition-colors hover:underline"
                 onClick={(event) => event.stopPropagation()}
               >
@@ -212,7 +212,7 @@ export function ConsentModal() {
               </Link>{' '}
               and{' '}
               <Link
-                to="/legal"
+                to="/legal?tab=privacy"
                 className="font-medium text-primary underline-offset-4 transition-colors hover:underline"
                 onClick={(event) => event.stopPropagation()}
               >
