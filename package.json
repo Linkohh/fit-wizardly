@@ -16,6 +16,7 @@
     "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "preview": "vite preview",
     "sync:exercise-library": "node scripts/sync-wger-snapshot.mjs",
+    "bundle:report": "node scripts/bundle-report.mjs",
     "test": "vitest",
     "test:run": "vitest run",
     "test:exercise-library": "vitest run src/features/exercise-library src/hooks/use-mobile.test.tsx",
