@@ -6,6 +6,7 @@ import { MealEntry, MacroTargets } from "@/types/nutrition";
 import { cn } from "@/lib/utils";
 import { searchProducts, OFFFoodProduct } from "@/lib/openFoodFacts";
 import { useNutritionStore } from "@/stores/nutritionStore";
+import { templateFromMeal } from "@/lib/mealShortcuts";
 import {
     CONSENT_RESOLVED_EVENT,
     hasNutritionLookupConsent,
@@ -18,7 +19,7 @@ interface FoodLoggerProps {
 }
 
 export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) {
-    const { addCustomFood, customFoods, favorites, toggleFavorite } = useNutritionStore();
+    const { addCustomFood, customFoods, favorites, toggleFavorite, saveMealTemplate } = useNutritionStore();
     const [mode, setMode] = useState<'view' | 'logging'>('view');
     const [activeTab, setActiveTab] = useState<'search' | 'favorites' | 'custom'>('search');
     const [nutritionLookupConsent, setNutritionLookupConsent] = useState(() => hasNutritionLookupConsent());
@@ -141,7 +142,7 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
                     {/* Smart Actions */}
                     <SmartActions
                         onLog={handleLogSavedItem}
-                        onSaveTemplate={(meal) => console.log('Save template not supported from here yet')}
+                        onSaveTemplate={(meals, name) => saveMealTemplate(templateFromMeal(meals, name))}
                     />
 
                     {/* Quick Favorites Mini-List (Top 3) */}

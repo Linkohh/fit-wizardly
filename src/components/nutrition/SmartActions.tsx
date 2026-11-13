@@ -1,5 +1,8 @@
-import { Copy, Save, Trash2, Utensils } from "lucide-react";
+import { useMemo, useState } from "react";
+import { CalendarDays, Copy, Save, Trash2, Utensils } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useNutritionStore } from "@/stores/nutritionStore";
+import { copyableMeals, previousDate } from "@/lib/mealShortcuts";
 import { MealEntry } from "@/types/nutrition";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -7,11 +10,33 @@ import { toast } from "sonner";
 
 interface SmartActionsProps {
     onLog: (meal: MealEntry | MealEntry[]) => void;
-    onSaveTemplate: (meal: MealEntry) => void;
+    onSaveTemplate: (meals: MealEntry[], name: string) => void;
 }
 
 export function SmartActions({ onLog, onSaveTemplate }: SmartActionsProps) {
-    const { getLastFullMeal, savedMeals, deleteMealTemplate } = useNutritionStore();
+    const { t } = useTranslation();
+    const { getLastFullMeal, savedMeals, deleteMealTemplate, history, selectedDate, copyMealsFromDate } = useNutritionStore();
+    const [isNamingTemplate, setIsNamingTemplate] = useState(false);
+    const [templateName, setTemplateName] = useState("");
+
+    // "Yesterday" is relative to the day being viewed, not the wall clock.
+    const yesterday = previousDate(selectedDate);
+    const yesterdayMealCount = useMemo(
+        () => copyableMeals(history, yesterday).length,
+        [history, yesterday]
+    );
+
+    const handleCopyYesterday = () => {
+        const added = copyMealsFromDate(yesterday);
+        if (added > 0) {
+            toast.success(t('nutrition.shortcuts.copied_toast', { count: added }));
+        }
+    };
+
+    const closeTemplateForm = () => {
+        setIsNamingTemplate(false);
+        setTemplateName("");
+    };
 
     // Smart Suggestion Logic based on time of day
     const hour = new Date().getHours();
@@ -45,6 +70,15 @@ export function SmartActions({ onLog, onSaveTemplate }: SmartActionsProps) {
         }
     };
 
+    const handleSaveTemplate = () => {
+        const name = templateName.trim();
+        if (!name || lastMealGroup.length === 0) return;
+
+        onSaveTemplate(lastMealGroup, name);
+        toast.success(t('nutrition.shortcuts.template_saved'));
+        closeTemplateForm();
+    };
+
     return (
         <div className="grid grid-cols-2 gap-3">
             {/* Copy Previous Button */}
@@ -56,6 +90,55 @@ export function SmartActions({ onLog, onSaveTemplate }: SmartActionsProps) {
                 <Copy className="w-4 h-4" />
                 <span>Copy {getGroupName()}</span>
             </button>
+
+            {/* Copy Yesterday Button */}
+            <button
+                onClick={handleCopyYesterday}
+                disabled={yesterdayMealCount === 0}
+                title={yesterdayMealCount === 0 ? t('nutrition.shortcuts.copy_yesterday_empty') : undefined}
+                className="col-span-2 p-3 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center gap-2 text-primary hover:bg-primary/20 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                <CalendarDays className="w-4 h-4" />
+                <span>
+                    {yesterdayMealCount === 0
+                        ? t('nutrition.shortcuts.copy_yesterday')
+                        : t('nutrition.shortcuts.copy_yesterday_count', { count: yesterdayMealCount })}
+                </span>
+            </button>
+
+            {/* Save the last meal as a template */}
+            {lastMealGroup.length > 0 && !isNamingTemplate && (
+                <button
+                    onClick={() => setIsNamingTemplate(true)}
+                    className="col-span-2 text-xs text-muted-foreground hover:text-foreground flex items-center justify-center gap-1.5 py-1 transition-colors"
+                >
+                    <Save className="w-3 h-3" />
+                    <span>{t('nutrition.shortcuts.save_template')}</span>
+                </button>
+            )}
+
+            {lastMealGroup.length > 0 && isNamingTemplate && (
+                <form
+                    className="col-span-2 flex items-center gap-2"
+                    onSubmit={(event) => { event.preventDefault(); handleSaveTemplate(); }}
+                >
+                    <input
+                        autoFocus
+                        value={templateName}
+                        onChange={(event) => setTemplateName(event.target.value)}
+                        aria-label={t('nutrition.shortcuts.template_name')}
+                        placeholder={t('nutrition.shortcuts.template_name')}
+                        maxLength={60}
+                        className="flex-1 min-w-0 bg-muted/50 border border-border/50 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                    <Button type="submit" size="sm" disabled={templateName.trim() === ""}>
+                        {t('nutrition.shortcuts.save')}
+                    </Button>
+                    <Button type="button" size="sm" variant="ghost" onClick={closeTemplateForm}>
+                        {t('nutrition.shortcuts.cancel')}
+                    </Button>
+                </form>
+            )}
 
             {/* Saved Templates List */}
             {savedMeals.length > 0 && (

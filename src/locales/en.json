@@ -776,5 +776,18 @@
         "back": "Back",
         "back_home": "Back to Home",
         "swipe_back": "Swipe to go back"
+    },
+    "nutrition": {
+        "shortcuts": {
+            "copy_yesterday": "Copy yesterday",
+            "copy_yesterday_count": "Copy yesterday ({{count}})",
+            "copy_yesterday_empty": "No meals were logged yesterday",
+            "copied_toast": "Copied from yesterday: {{count}}",
+            "save_template": "Save as template",
+            "template_name": "Template name",
+            "save": "Save",
+            "cancel": "Cancel",
+            "template_saved": "Template saved"
+        }
     }
 }

@@ -341,5 +341,18 @@
             "pick_version": "Zu einer Version springen",
             "unread": "Neue Versionshinweise"
         }
+    },
+    "nutrition": {
+        "shortcuts": {
+            "copy_yesterday": "Gestern kopieren",
+            "copy_yesterday_count": "Gestern kopieren ({{count}})",
+            "copy_yesterday_empty": "Gestern wurden keine Mahlzeiten erfasst",
+            "copied_toast": "Von gestern kopiert: {{count}}",
+            "save_template": "Als Vorlage speichern",
+            "template_name": "Name der Vorlage",
+            "save": "Speichern",
+            "cancel": "Abbrechen",
+            "template_saved": "Vorlage gespeichert"
+        }
     }
 }

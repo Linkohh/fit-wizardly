@@ -647,5 +647,18 @@
             "pick_version": "Ir a una versión",
             "unread": "Nuevas notas de versión"
         }
+    },
+    "nutrition": {
+        "shortcuts": {
+            "copy_yesterday": "Copiar ayer",
+            "copy_yesterday_count": "Copiar ayer ({{count}})",
+            "copy_yesterday_empty": "No se registraron comidas ayer",
+            "copied_toast": "Copiado de ayer: {{count}}",
+            "save_template": "Guardar como plantilla",
+            "template_name": "Nombre de la plantilla",
+            "save": "Guardar",
+            "cancel": "Cancelar",
+            "template_saved": "Plantilla guardada"
+        }
     }
 }

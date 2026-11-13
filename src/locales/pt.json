@@ -343,5 +343,18 @@
         "no_data": "Nenhum registro ainda. Faça o check-in diário para ver sua tendência.",
         "tooltip_score": "Pontuação:",
         "tooltip_status": "Estado:"
+    },
+    "nutrition": {
+        "shortcuts": {
+            "copy_yesterday": "Copiar ontem",
+            "copy_yesterday_count": "Copiar ontem ({{count}})",
+            "copy_yesterday_empty": "Nenhuma refeição registrada ontem",
+            "copied_toast": "Copiado de ontem: {{count}}",
+            "save_template": "Salvar como modelo",
+            "template_name": "Nome do modelo",
+            "save": "Salvar",
+            "cancel": "Cancelar",
+            "template_saved": "Modelo salvo"
+        }
     }
 }
