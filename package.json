@@ -13,6 +13,7 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit",
     "preview": "vite preview",
     "sync:exercise-library": "node scripts/sync-wger-snapshot.mjs",
     "test": "vitest",

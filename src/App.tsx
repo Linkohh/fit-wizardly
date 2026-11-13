@@ -37,7 +37,11 @@ const PlanPage = lazy(() => import("./pages/Plan"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const ClientsPage = lazy(() => import("./pages/Clients"));
 const ClientDetailsPage = lazy(() => import("./pages/ClientDetails"));
-const MCLIntegrationTest = lazy(() => import("./pages/MCLIntegrationTest"));
+// Dev-only integration test page. Vite replaces import.meta.env.DEV with `false`
+// in production builds, so this chunk is dropped from the bundle entirely.
+const MCLIntegrationTest = import.meta.env.DEV
+  ? lazy(() => import("./pages/MCLIntegrationTest"))
+  : null;
 const OnboardingPage = lazy(() => import("./pages/Onboarding"));
 const NutritionPage = lazy(() => import("./pages/Nutrition"));
 const HistoryPage = lazy(() => import("./pages/History"));
@@ -283,7 +287,9 @@ function AnimatedRoutes() {
                   </Route>
                 </Route>
 
-                <Route path="/mcl" element={<MCLIntegrationTest />} />
+                {MCLIntegrationTest && (
+                  <Route path="/mcl" element={<MCLIntegrationTest />} />
+                )}
 
                 <Route path="/legal" element={<LegalPage />} />
                 <Route path="/guide" element={<UserGuide />} />

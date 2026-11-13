@@ -71,54 +71,66 @@ ALTER TABLE user_streaks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE exercise_badges ENABLE ROW LEVEL SECURITY;
 
 -- Exercise Interactions: Users can read/write their own
+DROP POLICY IF EXISTS "Users can view own interactions" ON exercise_interactions;
 CREATE POLICY "Users can view own interactions"
   ON exercise_interactions FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can create own interactions" ON exercise_interactions;
 CREATE POLICY "Users can create own interactions"
   ON exercise_interactions FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete own interactions" ON exercise_interactions;
 CREATE POLICY "Users can delete own interactions"
   ON exercise_interactions FOR DELETE
   USING (auth.uid() = user_id);
 
 -- User Preferences: Users can read/write their own
+DROP POLICY IF EXISTS "Users can view own preferences" ON user_exercise_preferences;
 CREATE POLICY "Users can view own preferences"
   ON user_exercise_preferences FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own preferences" ON user_exercise_preferences;
 CREATE POLICY "Users can insert own preferences"
   ON user_exercise_preferences FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own preferences" ON user_exercise_preferences;
 CREATE POLICY "Users can update own preferences"
   ON user_exercise_preferences FOR UPDATE
   USING (auth.uid() = user_id);
 
 -- Exercise Stats: Public read (for community pulse)
+DROP POLICY IF EXISTS "Exercise stats are public" ON exercise_stats;
 CREATE POLICY "Exercise stats are public"
   ON exercise_stats FOR SELECT
   USING (true);
 
 -- User Streaks: Users can read/write their own
+DROP POLICY IF EXISTS "Users can view own streaks" ON user_streaks;
 CREATE POLICY "Users can view own streaks"
   ON user_streaks FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own streaks" ON user_streaks;
 CREATE POLICY "Users can insert own streaks"
   ON user_streaks FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own streaks" ON user_streaks;
 CREATE POLICY "Users can update own streaks"
   ON user_streaks FOR UPDATE
   USING (auth.uid() = user_id);
 
 -- Exercise Badges: Users can read their own, public read for leaderboards
+DROP POLICY IF EXISTS "Users can view own badges" ON exercise_badges;
 CREATE POLICY "Users can view own badges"
   ON exercise_badges FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own badges" ON exercise_badges;
 CREATE POLICY "Users can insert own badges"
   ON exercise_badges FOR INSERT
   WITH CHECK (auth.uid() = user_id);
@@ -245,6 +257,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
+DROP TRIGGER IF EXISTS on_exercise_interaction ON exercise_interactions;
 CREATE TRIGGER on_exercise_interaction
   AFTER INSERT ON exercise_interactions
   FOR EACH ROW

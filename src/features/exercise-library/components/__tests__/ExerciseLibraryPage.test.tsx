@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ExerciseLibraryPage } from '../ExerciseLibraryPage';
 import type { ExerciseLibraryRecord } from '../../types';
 
