@@ -1,3 +1,5 @@
+import { devLog } from '@/lib/devLog';
+
 /**
  * Performance profiling utilities for plan generation
  */
@@ -70,7 +72,7 @@ function recordMetric(
     if (duration > 100) {
         console.warn(`[Perf] Slow operation: ${operation} took ${duration.toFixed(2)}ms`, metadata);
     } else if (import.meta.env.DEV) {
-        console.log(`[Perf] ${operation}: ${duration.toFixed(2)}ms`);
+        devLog(`[Perf] ${operation}: ${duration.toFixed(2)}ms`);
     }
 }
 

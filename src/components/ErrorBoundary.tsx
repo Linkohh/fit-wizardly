@@ -2,6 +2,7 @@ import { Component, type ReactNode, type ErrorInfo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { devLog } from '@/lib/devLog';
 
 interface Props {
     children: ReactNode;
@@ -98,6 +99,6 @@ export function logError(error: Error, context?: Record<string, unknown>) {
 
     // Track with analytics
     if (typeof window !== 'undefined' && import.meta.env.DEV) {
-        console.log('[Error Logged]', { error: error.message, context });
+        devLog('[Error Logged]', { error: error.message, context });
     }
 }
