@@ -788,6 +788,17 @@
             "save": "Save",
             "cancel": "Cancel",
             "template_saved": "Template saved"
-        }
+        },
+            "energyBalance": {
+                "title": "Energy Balance",
+                "subtitle": "Calories eaten against body weight",
+                "window_label": "Days shown",
+                "empty": "Log meals and weigh-ins to see how your intake and weight move together",
+                "avg_intake": "Average intake: {{value}} kcal/day",
+                "weight_change": "Weight change: {{value}} {{unit}}",
+                "need_weigh_ins": "Add two weigh-ins in this period to see your weight trend",
+                "intake_series": "Calories",
+                "weight_series": "Weight ({{unit}})"
+            }
     }
 }

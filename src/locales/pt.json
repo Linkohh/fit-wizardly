@@ -355,6 +355,17 @@
             "save": "Salvar",
             "cancel": "Cancelar",
             "template_saved": "Modelo salvo"
-        }
+        },
+            "energyBalance": {
+                "title": "Balanço energético",
+                "subtitle": "Calorias consumidas em relação ao peso corporal",
+                "window_label": "Dias exibidos",
+                "empty": "Registre refeições e pesagens para ver como seu consumo e seu peso evoluem juntos",
+                "avg_intake": "Consumo médio: {{value}} kcal/dia",
+                "weight_change": "Variação de peso: {{value}} {{unit}}",
+                "need_weigh_ins": "Adicione duas pesagens neste período para ver sua tendência de peso",
+                "intake_series": "Calorias",
+                "weight_series": "Peso ({{unit}})"
+            }
     }
 }

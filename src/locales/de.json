@@ -353,6 +353,17 @@
             "save": "Speichern",
             "cancel": "Abbrechen",
             "template_saved": "Vorlage gespeichert"
-        }
+        },
+            "energyBalance": {
+                "title": "Energiebilanz",
+                "subtitle": "Aufgenommene Kalorien im Vergleich zum Körpergewicht",
+                "window_label": "Angezeigte Tage",
+                "empty": "Erfasse Mahlzeiten und Wiegungen, um zu sehen, wie sich Kalorienaufnahme und Gewicht gemeinsam entwickeln",
+                "avg_intake": "Durchschnittliche Aufnahme: {{value}} kcal/Tag",
+                "weight_change": "Gewichtsveränderung: {{value}} {{unit}}",
+                "need_weigh_ins": "Füge in diesem Zeitraum zwei Wiegungen hinzu, um deinen Gewichtstrend zu sehen",
+                "intake_series": "Kalorien",
+                "weight_series": "Gewicht ({{unit}})"
+            }
     }
 }
