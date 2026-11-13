@@ -2,7 +2,7 @@
 
 > Read this file at the start of every session before touching any code.
 > Update it at session end using `/after-report`.
-> Last updated: 2026-09-27
+> Last updated: 2026-11-13
 
 ---
 
@@ -144,6 +144,20 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 ---
 
 ## Session History
+
+### 2026-11-13 — Quality-of-Life Pass (branch `LinC/quality-of-life`, from `preview_b` @ `09e0921`)
+
+Plan: `docs/superpowers/plans/2026-11-13-quality-of-life.md`. Verified at the end: lint 0 errors (4 warnings, unchanged), typecheck clean, 119 test files / 517 tests pass (was 110 / 466), `npm run build` OK, server `npm test` 14 pass and `npm run build` OK.
+
+- **Bundle report (Task 1).** `npm run bundle:report` lists what `dist/index.html` loads up front. Baseline and after numbers are in `docs/PERFORMANCE_BASELINE.md`. `vitest.config.ts` now also picks up `scripts/**/*.test.ts`. The Lighthouse run is still pending (owner).
+- **Debug logging (Task 2).** `src/lib/devLog.ts` replaces `console.log` in `analyticsStore`, `analytics`, `performance`, `planMigrations` and `ErrorBoundary`. Only the `planMigrations` log was reaching production before; the rest were already DEV-gated.
+- **Lazy charts (Task 3): skipped.** `vendor-charts` was not in the initial load, so the plan's condition was not met.
+- **Smart Meal Shortcuts (Task 4, §3.6).** "Copy yesterday" (relative to the day being viewed) and an inline "Save as template" name field in `SmartActions`; pure logic in `src/lib/mealShortcuts.ts`; store action `copyMealsFromDate`. Strings in all four locales under `nutrition.shortcuts.*`.
+- **Energy Balance Trend (Task 5, §3.7).** `src/lib/energyBalance.ts` + `EnergyBalanceChart` in the Insights tab: calories as bars, weight as a line, 7/14/28-day control, gaps shown as gaps. The "Est. TDEE" sentence from the spec is not built.
+- **Offline saves (Task 6): partly done, needs a decision.** Meals and workouts are not written to any server and are not persisted, so there was no network write to protect. Built and tested `src/lib/offlineSave.ts` (queue, idempotent flush) but did **not** wire it or add a "saved offline" toast, because nothing would sync. Fixed a real bug on the way: `preferencesStore.syncToCloud` wiped changes that were queued while a sync was in flight; it now removes only the changes that were in the uploaded snapshot.
+- **Exercise search cache (Task 7).** The live search is in `src/lib/services/exerciseSearch.ts`, not `service.ts`. `cachedExerciseSearch` (`src/features/exercise-library/searchCache.ts`) caches non-empty live results for 10 minutes; empty results and failures are never cached. It only matters when the local catalog has no match, because catalog hits never reach the network.
+- **Bug found by the browser smoke test.** The Nutrition page did not refresh after a meal was logged (it showed "0 meals logged" until the date changed), including the existing Add Food flow. Fixed with a store subscription and a regression test (`src/pages/Nutrition.refresh.test.tsx`).
+- **Smoke test coverage.** Run locally on the dev server, not on the beta: log a meal, copy yesterday, energy balance chart with no weigh-ins. Not exercised in a browser: template save from `SmartActions`, the weight line, exercise search, offline. The beta smoke test and the Task 6 offline check are still to do (owner).
 
 ### 2026-09-27 — Backlog Close-Out (branch `LinC/backlog-closeout`, from `preview_b` @ `d5ff5c0`)
 
@@ -488,6 +502,10 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 - [ ] Promote `preview_b` work to `main`: production (`fit-wizardly.vercel.app`) is built from `main` and still serves the old CSP (AUDIT-007 fix not live there yet)
 
 ### Short-term features
+- [ ] Decide where meals and workouts are saved (server/Supabase and/or local persistence). Until then `src/lib/offlineSave.ts` stays unwired — see 2026-11-13 entry
+- [ ] Food logger tags every logged food as `snack`, so "Copy Last <meal>" and the new "Save as template" in `SmartActions` only appear when the time-of-day meal type matches a logged meal (in practice, late evening). Add a meal-type choice when logging
+- [ ] Run Lighthouse (mobile) on the beta and fill in `docs/PERFORMANCE_BASELINE.md`
+- [ ] `src/locales/pt.json` has a duplicate top-level `"wizard"` key; the first block is ignored by the JSON parser
 - [x] About FitWizard page + What's new release notes + back navigation (PR #36, 2026-09-26)
 - [ ] About "Get in Touch" with Instagram/LinkedIn links — DEBT-013
 - [x] Remove tracked duplicate `config {2,3}.xml` files — DEBT-010 (done 2026-09-27)
@@ -495,8 +513,8 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 - [ ] Complete DE locale translation — 355 keys missing — AUDIT-001 (`src/locales/de.json`); remove keys from `localeGaps.json` as you go
 - [ ] Complete PT locale translation — 366 keys missing — AUDIT-002 (`src/locales/pt.json`)
 - [ ] Fill ES locale gaps — 127 keys missing (47 About), investigate 30 orphaned keys — AUDIT-003 (`src/locales/es.json`)
-- [ ] Smart Meal Shortcuts — copy previous meal, saved meal templates (AUDIT_AND_IDEAS.md §3.6)
-- [ ] Energy Balance Trend — dual-axis calories vs. weight chart in NutritionInsights (§3.7)
+- [x] Smart Meal Shortcuts — copy previous meal, saved meal templates (AUDIT_AND_IDEAS.md §3.6) (done 2026-11-13)
+- [x] Energy Balance Trend — dual-axis calories vs. weight chart in NutritionInsights (§3.7) (done 2026-11-13; TDEE estimate not built)
 - [ ] CalendarHeatmap — deferred from History page initial implementation
 - [ ] Circle/social data in GDPR export (circle posts, reactions, comments) — DEBT-009
 - [ ] Data deletion endpoint (backend + Profile UI)
