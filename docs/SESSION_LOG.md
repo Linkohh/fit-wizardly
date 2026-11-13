@@ -480,6 +480,13 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 - [ ] Tag releases in git (`v1.0.0` on the PR #36 merge commit); keep `src/data/changelog.ts` in sync each release
 - [ ] Legal review of the `/legal` guidance wording before store submission
 
+### Deferred by decision (2026-11-12) — revisit next session, not blocking the PR #37 merge
+- [ ] Translations (DE/PT/ES gaps, About copy + release notes) and the Delete Account endpoint — see Short-term below
+- [ ] Device testing (iOS Simulator, Android emulator) — DEBT-012
+- [ ] Legal review of `/legal`; `v1.0.0` tag; About "Get in Touch" handles
+- [ ] Delete stray untracked `ios/App/App/config 4.xml` in the main checkout; pull `preview_b` locally after the PR #37 merge
+- [ ] Promote `preview_b` work to `main`: production (`fit-wizardly.vercel.app`) is built from `main` and still serves the old CSP (AUDIT-007 fix not live there yet)
+
 ### Short-term features
 - [x] About FitWizard page + What's new release notes + back navigation (PR #36, 2026-09-26)
 - [ ] About "Get in Touch" with Instagram/LinkedIn links — DEBT-013
