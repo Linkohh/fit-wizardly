@@ -210,12 +210,18 @@ export const usePreferencesStore = create<PreferencesState>()(
 
         set({ isSyncing: true });
 
+        // Only the changes captured in this snapshot are acknowledged by a
+        // successful sync. Anything queued while the request is in flight stays
+        // queued so the next sync uploads it.
+        const snapshot = createCloudSnapshot(get());
+        const syncedIds = new Set(get().offlineQueue.map((action) => action.id));
+
         try {
-          await syncPreferencesRecord(user.id, createCloudSnapshot(get()));
-          set({
+          await syncPreferencesRecord(user.id, snapshot);
+          set((state) => ({
             lastSyncedAt: new Date().toISOString(),
-            offlineQueue: [],
-          });
+            offlineQueue: state.offlineQueue.filter((action) => !syncedIds.has(action.id)),
+          }));
         } catch (error) {
           console.error('Failed to sync preferences:', error);
         } finally {
