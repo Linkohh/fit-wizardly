@@ -147,7 +147,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ### 2026-09-27 — Backlog Close-Out (branch `LinC/backlog-closeout`, from `preview_b` @ `d5ff5c0`)
 
-- `/mcl` dev test route now exists only in DEV builds (AUDIT-004). Verified: the production build no longer contains `MCLIntegrationTest` (PWA precache 81 → 79 entries).
+- `/mcl` dev test route now exists only in DEV builds (AUDIT-004). Verified: the production build no longer contains `MCLIntegrationTest` (PWA precache dropped from 81 to 79–80 entries). A route test (`src/App.mclRoute.test.tsx`) checks dev serves it and production falls through to 404; Vite's build-time removal itself is only verified by grepping `dist/`.
 - Cleared the 5 pre-existing `tsc` errors (DEBT-001): missing `beforeEach`/`afterEach` imports in two tests, a `Promise<Response>` mock helper, and `useRef<number | undefined>(undefined)` in `useCountUp.ts`. Added `npm run typecheck` and a CI step so it cannot regress.
 - Removed the tracked Finder duplicates `config 2.xml` / `config 3.xml` in `ios/App/App/` and `android/app/src/main/res/xml/` (DEBT-010). An untracked `ios/App/App/config 4.xml` may still sit in the main checkout; it was never tracked, delete it locally.
 - Profile data export (GDPR Art. 20) now includes nutrition and body measurements, built by the pure, tested `src/lib/dataExport.ts`. Existing export keys are unchanged; `exportVersion` and `exportedAt` were added. Note: `nutritionStore` persists only `selectedDate` and `measurementsStore` is not persisted, so the export covers in-memory session data. Whether that data should be persisted is a product question.

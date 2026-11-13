@@ -10,14 +10,17 @@ Supabase project (there is no automated pipeline). Apply them in numeric order.
 | 003 | `003_social_features.sql` | `activity_reactions`, `activity_comments`, `circle_posts`, `challenge_participants`, extra challenge columns |
 | 004 | `004_plans_schema.sql` | `plans` (cloud plan sync) |
 | 005 | `005_trainer_roles.sql` | `profiles.role` / `profiles.is_trainer` columns, constraints and sync function |
-| 006 | `006_security_hardening.sql` | Tightened circle RLS policies |
+| 006 | `006_security_hardening.sql` | Tightened RLS policies on circle tables (`circle_members`, `circle_activities`, `circle_challenges`, `activity_comments`, `circle_posts`, `challenge_participants`) and replaced `join_circle_by_invite()` |
 
 ## Re-run safety
 
 - 002 and 004 are safe to re-run: tables/indexes use `IF NOT EXISTS`, and every
   policy and trigger is preceded by `DROP ... IF EXISTS`.
-- 006 only touches circle policies and does not overlap with 002/004, so
-  re-running 002 will not undo 006.
+- 006 only touches circle/social tables (001 and 003 tables) and does not
+  overlap with 002/004, so re-running 002 will not undo 006.
+- 001 and 003 are NOT safe to re-run: they create policies without
+  `DROP POLICY IF EXISTS`. Re-running 001/003 after 006 would also bring back the
+  looser policies that 006 replaced. Never re-run them on a live database.
 - Re-running a migration recreates its policies. Only do it if the policy text
   in the file is what you want live.
 
