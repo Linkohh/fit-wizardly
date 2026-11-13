@@ -409,6 +409,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-011 | About long-form copy + release notes English-only | `src/locales/{es,pt,de}.json`, `src/data/changelog.ts` | UI labels are translated; story/mission/creator/changelog bodies fall back to `en`. |
 | DEBT-013 | About "Get in Touch" hidden | `src/pages/About.tsx` | Waiting for public Instagram/LinkedIn handles. Personal email intentionally not published. See `docs/ABOUT_PAGE.md` §3. |
 | DEBT-014 | ~~SESSION_LOG gap May–Sep 2026~~ **BACKFILLED 2026-09-27** (summary) | `docs/SESSION_LOG.md` | See the 2026-09-27 entry; per-commit detail is in git history. |
+| AUDIT-007 | ~~CSP `style-src` blocked runtime-injected `<style>` tags~~ **RESOLVED 2026-11-12** | `vercel.json` | Sonner (toasts) and Vaul (drawers) inject their CSS at load; the strict `style-src` left both without a stylesheet on every deployment. Added `'unsafe-inline'` to `style-src` only; `script-src` is unchanged (`'self' 'wasm-unsafe-eval'`). Stricter option for later: per-request nonce (needs server work). Expected and harmless: Vercel's `vercel.live` feedback script is blocked on preview deployments only. |
 
 ---
 
