@@ -31,6 +31,9 @@ import { useTrainerStore } from '@/stores/trainerStore';
 import { usePlanStore } from '@/stores/planStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useReadinessStore } from '@/stores/readinessStore';
+import { useNutritionStore } from '@/stores/nutritionStore';
+import { useMeasurementsStore } from '@/stores/measurementsStore';
+import { buildUserDataExport } from '@/lib/dataExport';
 import { toast } from 'sonner';
 import { BodyTracker } from '@/components/measurements/BodyTracker';
 import { requestConsentModal } from '@/lib/consent';
@@ -71,13 +74,23 @@ export function Profile() {
 
     const handleExportData = () => {
         try {
-            const data = {
+            const nutrition = useNutritionStore.getState();
+            const data = buildUserDataExport({
                 settings,
                 planHistory: usePlanStore.getState().planHistory,
                 workoutLogs: usePlanStore.getState().workoutLogs,
                 personalRecords: usePlanStore.getState().personalRecords,
                 readinessLogs: useReadinessStore.getState().logs,
-            };
+                nutrition: {
+                    profile: nutrition.profile,
+                    targets: nutrition.targets,
+                    history: nutrition.history,
+                    customFoods: nutrition.customFoods,
+                    favorites: nutrition.favorites,
+                    savedMeals: nutrition.savedMeals,
+                },
+                bodyMeasurements: useMeasurementsStore.getState().measurements,
+            });
 
             const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
