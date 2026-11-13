@@ -16,7 +16,7 @@ export function useCountUp(
 ): number {
   const [count, setCount] = useState(0);
   const startTimeRef = useRef<number | null>(null);
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     // If animation is disabled, immediately set to target

@@ -5,12 +5,10 @@ import {
 } from './apiNinjasExercises';
 
 function createResponse(body: unknown, status = 200) {
-  return Promise.resolve(
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  );
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 describe('API Ninjas exercise normalization', () => {
