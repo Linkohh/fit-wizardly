@@ -147,7 +147,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ### 2026-11-13 — Quality-of-Life Pass (branch `LinC/quality-of-life`, from `preview_b` @ `09e0921`)
 
-Plan: `docs/superpowers/plans/2026-11-13-quality-of-life.md`. Verified at the end: lint 0 errors (4 warnings, unchanged), typecheck clean, 119 test files / 517 tests pass (was 110 / 466), `npm run build` OK, server `npm test` 14 pass and `npm run build` OK.
+Plan: `docs/superpowers/plans/2026-11-13-quality-of-life.md`. Verified at the end: lint 0 errors (4 warnings, unchanged), typecheck clean, 126 test files / 553 tests pass at the end of the day (was 110 / 466; 119 / 517 after the original plan), `npm run build` OK, server `npm test` 14 pass and `npm run build` OK.
 
 - **Bundle report (Task 1).** `npm run bundle:report` lists what `dist/index.html` loads up front. Baseline and after numbers are in `docs/PERFORMANCE_BASELINE.md`. `vitest.config.ts` now also picks up `scripts/**/*.test.ts`. The Lighthouse run is still pending (owner).
 - **Debug logging (Task 2).** `src/lib/devLog.ts` replaces `console.log` in `analyticsStore`, `analytics`, `performance`, `planMigrations` and `ErrorBoundary`. Only the `planMigrations` log was reaching production before; the rest were already DEV-gated.
