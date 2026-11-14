@@ -2,7 +2,7 @@
 
 > Read this file at the start of every session before touching any code.
 > Update it at session end using `/after-report`.
-> Last updated: 2026-11-13
+> Last updated: 2026-11-14
 
 ---
 
@@ -144,6 +144,31 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 ---
 
 ## Session History
+
+### 2026-11-14 — Header Capsule Scroll Tint (branch `LinC/top-pillar-scroll-tint-8f3713`, from `preview_b` @ `0feb8cf`)
+
+- **What was done:** The floating header capsule let page content read through it while scrolling (hero text, "Medical Disclaimer", the wizard's "About 2 min" chip), reported from an Android phone. It now has two states driven by a new `useScrolledPastTop` hook: the original airy tint at the top of a page, easing to a denser tint once the window has scrolled more than 8px. A tint-only fade (`header-capsule-scrim`) appears behind the capsule on scroll to cover the gaps beside it and under the status bar. The wizard-only capsule override was removed so every route uses the same capsule.
+- **Commits:**
+  - `5e6c6f6` feat(header): scroll-reactive tint for the floating header capsule
+- **Files changed:**
+  - `src/hooks/use-scrolled-past-top.ts` — new hook; passive window scroll listener, `requestAnimationFrame`-throttled, re-renders only when the answer flips
+  - `src/hooks/use-scrolled-past-top.test.ts` — 4 tests (top, threshold both ways, scrolled on mount, cleanup)
+  - `src/components/Header.tsx` — `data-scrolled` on the capsule and the new scrim element; wizard override removed
+  - `src/index.css` — `header-capsule-inner` two tint states, new `header-capsule-scrim` utility
+- **Tint values:** at top 65% dark / 70% light (the original opacities); scrolled 82% dark / 88% light. Tint colour is the app violet (`hsl(270 48% 9%)`) in dark and lavender-white (`hsl(264 44% 97%)`) in light. Blur is unchanged (24px, saturate 180%).
+- **Also changed:** `transition: all` replaced with explicit properties; hover lift applies only under `@media (hover: hover)`; both transitions are skipped under `prefers-reduced-motion`.
+- **Issues fixed this session:** none from the Known Issues table.
+- **New issues found this session:**
+  - DEBT-015: `backdrop-filter` on the header capsule did not appear to render on the owner's Android phone (text behind it was sharp in screenshots). Not reproduced or diagnosed; desktop Chromium renders it. The denser scrolled tint and the tint-only scrim are sized to work without blur. — LOW — `src/index.css`
+- **TODO/FIXME introduced:** none (pre-existing TODOs unchanged).
+- **Test status:** All passing: 557 tests across 127 files (was 553 / 126). Lint 0 errors, 4 warnings (unchanged).
+- **Verified in the dev-server preview, not on a device:** both states in dark and light at 375px on `/`, `/wizard` and `/legal`, and at desktop width on `/`; repeated with `backdrop-filter` force-disabled. Known remainder: in light mode with blur disabled, a very faint ghost of large dark headings is still visible inside the scrolled capsule (raise the light scrolled tint from 88% to about 92% if it shows on a device). **Not verified on a real Android or iOS device.**
+- **Legal/compliance notes:** None this session.
+- **Key decisions made:** Tint is scroll-reactive rather than one fixed value. The capsule and scrim must not rely on `backdrop-filter` to hide content. The capsule reacts to window scroll only; a screen that scrolls inside its own panel will not trigger the dense state (none found, not exhaustively checked).
+- **Next steps:**
+  1. Check the capsule on the owner's Android phone and on iOS 26/27 from the `preview_b` deploy.
+  2. Diagnose why blur does not render on that Android device (DEBT-015).
+  3. Tune the light-mode scrolled tint if the faint ghost is visible on a device.
 
 ### 2026-11-13 — Quality-of-Life Pass (branch `LinC/quality-of-life`, from `preview_b` @ `09e0921`)
 
@@ -432,6 +457,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-013 | About "Get in Touch" hidden | `src/pages/About.tsx` | Waiting for public Instagram/LinkedIn handles. Personal email intentionally not published. See `docs/ABOUT_PAGE.md` §3. |
 | DEBT-014 | ~~SESSION_LOG gap May–Sep 2026~~ **BACKFILLED 2026-09-27** (summary) | `docs/SESSION_LOG.md` | See the 2026-09-27 entry; per-commit detail is in git history. |
 | AUDIT-007 | ~~CSP `style-src` blocked runtime-injected `<style>` tags~~ **RESOLVED 2026-11-12** | `vercel.json` | Sonner (toasts) and Vaul (drawers) inject their CSS at load; the strict `style-src` left both without a stylesheet on every deployment. Added `'unsafe-inline'` to `style-src` only; `script-src` is unchanged (`'self' 'wasm-unsafe-eval'`). Stricter option for later: per-request nonce (needs server work). Expected and harmless: Vercel's `vercel.live` feedback script is blocked on preview deployments only. |
+| DEBT-015 | Header capsule `backdrop-filter` not rendering on an Android phone | `src/index.css` (`header-capsule-inner`) | Seen in owner screenshots 2026-11-14; not reproduced or diagnosed. Scrolled tint and scrim work without blur. |
 
 ---
 
@@ -501,6 +527,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 - [ ] Verify swipe-back, haptics and Android back on the iOS Simulator and an Android emulator — DEBT-012
 - [ ] Tag releases in git (`v1.0.0` on the PR #36 merge commit); keep `src/data/changelog.ts` in sync each release
 - [ ] Legal review of the `/legal` guidance wording before store submission
+- [ ] Check the header capsule scroll tint on a real Android phone and iOS 26/27; diagnose missing blur on Android — DEBT-015
 
 ### Deferred by decision (2026-11-12) — revisit next session, not blocking the PR #37 merge
 - [ ] Translations (DE/PT/ES gaps, About copy + release notes) and the Delete Account endpoint — see Short-term below
