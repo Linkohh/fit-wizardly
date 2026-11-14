@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowDownToLine, ChevronDown, ChevronUp, Share2, Sparkles, X } from 'lucide-react';
+import { useEffect, useId, useMemo, useState } from 'react';
+import { ArrowDownToLine, ChevronDown, ChevronUp, ListOrdered, Share, Sparkles, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,16 +23,32 @@ type InstallCoachContent = {
   title: string;
 };
 
-function InstallCoachHelp({ steps }: { steps: string[] }) {
+function InstallCoachHelp({
+  id,
+  showShareIcon,
+  steps,
+}: {
+  id: string;
+  showShareIcon: boolean;
+  steps: string[];
+}) {
   return (
-    <div className="mt-4 rounded-[1.5rem] border border-primary/15 bg-primary/8 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+    <div
+      id={id}
+      className="mt-4 rounded-[1.5rem] border border-primary/15 bg-primary/8 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+    >
       <ol className="space-y-3">
         {steps.map((step, index) => (
           <li key={step} className="flex items-start gap-3">
             <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/12 text-xs font-semibold text-primary">
               {index + 1}
             </span>
-            <span className="text-sm leading-6 text-muted-foreground">{step}</span>
+            <span className="text-sm leading-6 text-muted-foreground">
+              {step}
+              {showShareIcon && index === 0 ? (
+                <Share className="ml-1.5 inline h-4 w-4 align-text-bottom text-primary" aria-hidden="true" />
+              ) : null}
+            </span>
           </li>
         ))}
       </ol>
@@ -53,16 +69,13 @@ function getInstallCoachContent(
         'install_coach.safari.handoff.description',
         'Launch faster, keep the workout flow cleaner, and open FitWizard with less browser chrome.',
       ),
-      primaryAction: t('install_coach.safari.handoff.primary', 'Open Safari Share'),
-      helper: t(
-        'install_coach.safari.handoff.helper',
-        'Then choose Add to Home Screen in Safari.',
-      ),
+      primaryAction: t('install_coach.safari.handoff.primary', 'Show me how'),
+      helper: t('install_coach.safari.handoff.helper', 'Three quick steps in Safari.'),
       helpLabel: t('install_coach.help_label', 'Need the steps?'),
       steps: [
         t(
-          'install_coach.safari.steps.view_more',
-          'Tap View More if Add to Home Screen is not visible.',
+          'install_coach.safari.steps.share_button',
+          'Tap the Share button in Safari’s toolbar. If you don’t see it, tap ••• first.',
         ),
         t('install_coach.safari.steps.add_home', 'Choose Add to Home Screen.'),
         t(
@@ -81,14 +94,14 @@ function getInstallCoachContent(
         'install_coach.chrome.handoff.description',
         'Keep FitWizard one tap away without leaving the iPhone browser flow you already use.',
       ),
-      primaryAction: t('install_coach.chrome.handoff.primary', 'Open Share Menu'),
-      helper: t(
-        'install_coach.chrome.handoff.helper',
-        'Then choose Add to Home Screen.',
-      ),
+      primaryAction: t('install_coach.chrome.handoff.primary', 'Show me how'),
+      helper: t('install_coach.chrome.handoff.helper', 'Three quick steps in Chrome.'),
       helpLabel: t('install_coach.help_label', 'Need the steps?'),
       steps: [
-        t('install_coach.chrome.steps.open_menu', 'Open the share menu.'),
+        t(
+          'install_coach.chrome.steps.share_button',
+          'Tap the Share button next to the address bar.',
+        ),
         t('install_coach.chrome.steps.choose_add', 'Choose Add to Home Screen.'),
         t(
           'install_coach.chrome.steps.confirm',
@@ -137,17 +150,14 @@ export function InstallCoachSheet({ enableAutoPrompt = true }: InstallCoachSheet
   const { t } = useTranslation();
   const {
     canNativeInstall,
-    canShareShortcut,
-    closeCoach,
     dismissCoach,
     isEligible,
     isOpen,
-    openCoach,
     platform,
     promptNativeInstall,
-    promptShareShortcut,
   } = useInstallCoach({ enableAutoPrompt });
   const [showHelp, setShowHelp] = useState(false);
+  const helpId = useId();
 
   const isIos = platform === 'ios-safari' || platform === 'ios-chrome';
   const isAndroid = platform === 'android-chrome';
@@ -167,28 +177,15 @@ export function InstallCoachSheet({ enableAutoPrompt = true }: InstallCoachSheet
   }, [isOpen]);
 
   const handlePrimaryAction = async () => {
-    if (isAndroid) {
-      if (canNativeInstall) {
-        await promptNativeInstall();
-        return;
-      }
-
-      setShowHelp(true);
+    if (isAndroid && canNativeInstall) {
+      await promptNativeInstall();
       return;
     }
 
-    if (!canShareShortcut) {
-      setShowHelp(true);
-      return;
-    }
-
-    closeCoach();
-    const shareResult = await promptShareShortcut();
-
-    if (shareResult === 'unsupported' || shareResult === 'error') {
-      openCoach();
-      setShowHelp(true);
-    }
+    // iPhone has no way for a website to open "Add to Home Screen" directly, and
+    // the share sheet a site can open does not reliably contain it. Show the
+    // steps for the browser's own Share button instead.
+    setShowHelp(true);
   };
 
   if (!isEligible) {
@@ -259,7 +256,7 @@ export function InstallCoachSheet({ enableAutoPrompt = true }: InstallCoachSheet
           <div className="mt-6 space-y-3 [@media(max-height:760px)]:mt-5 [@media(max-height:760px)]:space-y-2.5">
             <Button
               type="button"
-              className="h-auto w-full justify-start rounded-[1.5rem] border border-primary/25 bg-gradient-to-r from-primary via-fuchsia-500 to-pink-500 px-4 py-4 text-left text-primary-foreground shadow-[0_22px_45px_rgba(192,76,255,0.28)] transition-transform duration-300 hover:-translate-y-0.5 [@media(max-height:760px)]:rounded-[1.35rem] [@media(max-height:760px)]:py-3.5"
+              className="h-auto w-full justify-start rounded-[1.5rem] border border-primary/25 bg-gradient-to-r from-primary via-fuchsia-500 to-pink-500 whitespace-normal px-4 py-4 text-left text-primary-foreground shadow-[0_22px_45px_rgba(192,76,255,0.28)] transition-transform duration-300 hover:-translate-y-0.5 [@media(max-height:760px)]:rounded-[1.35rem] [@media(max-height:760px)]:py-3.5"
               onClick={() => {
                 void handlePrimaryAction();
               }}
@@ -269,7 +266,7 @@ export function InstallCoachSheet({ enableAutoPrompt = true }: InstallCoachSheet
                   {isAndroid && canNativeInstall ? (
                     <ArrowDownToLine className="h-5 w-5" />
                   ) : (
-                    <Share2 className="h-5 w-5" />
+                    <ListOrdered className="h-5 w-5" />
                   )}
                 </span>
                 <span className="min-w-0 space-y-1">
@@ -299,6 +296,8 @@ export function InstallCoachSheet({ enableAutoPrompt = true }: InstallCoachSheet
                   variant="ghost"
                   className="h-auto rounded-full px-1 text-sm font-medium text-primary/85 hover:bg-transparent hover:text-primary"
                   onClick={() => setShowHelp((current) => !current)}
+                  aria-expanded={showHelp}
+                  aria-controls={helpId}
                 >
                   {content.helpLabel}
                   {showHelp ? <ChevronUp className="ml-2 h-4 w-4" /> : <ChevronDown className="ml-2 h-4 w-4" />}
@@ -307,7 +306,7 @@ export function InstallCoachSheet({ enableAutoPrompt = true }: InstallCoachSheet
             </div>
           </div>
 
-          {showHelp ? <InstallCoachHelp steps={content.steps} /> : null}
+          {showHelp ? <InstallCoachHelp id={helpId} showShareIcon={isIos} steps={content.steps} /> : null}
         </div>
       </SheetContent>
     </Sheet>

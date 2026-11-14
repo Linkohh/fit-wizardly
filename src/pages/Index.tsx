@@ -4,29 +4,13 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainerStore } from '@/stores/trainerStore';
-import { Suspense, lazy, useCallback, useEffect, useRef, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useMemo, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { FeatureCard, type FeatureCardFeature } from '@/components/landing/FeatureCard';
 import type { Feature } from '@/components/landing/FeatureDetailModal';
 import { useTranslation, Trans } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { isNativeApp } from '@/lib/platform';
-import { InstallCoachSheet } from '@/components/install/InstallCoachSheet';
-import { useInstallCoachAutoPromptReady } from '@/hooks/use-install-coach-auto-prompt-ready';
-
-function HeroPaintSignal({ onReady }: { onReady: () => void }) {
-  useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      onReady();
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [onReady]);
-
-  return null;
-}
 
 const PeriodizationTimeline = lazy(() =>
   import('@/components/analytics/PeriodizationTimeline').then((module) => ({
@@ -88,8 +72,6 @@ export default function Index() {
 
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [quoteReady, setQuoteReady] = useState(false);
-  const [heroReady, setHeroReady] = useState(false);
-  const installCoachAutoPromptReady = useInstallCoachAutoPromptReady({ heroReady });
 
   const features: FeatureCardFeature[] = useMemo(() => [
     { key: 'smart_goals', icon: Target, title: t('features.smart_goals.title'), description: t('features.smart_goals.description'), variant: 'strength' as const, gradient: 'from-orange-500 to-red-500' },
@@ -123,18 +105,12 @@ export default function Index() {
     return () => window.clearTimeout(timer);
   }, [quoteInView]);
 
-  const handleHeroReady = useCallback(() => {
-    setHeroReady(true);
-  }, []);
-
   return (
     <main>
       {/* Hero */}
       <Suspense fallback={<div className="min-h-[62dvh]" />}>
         <WelcomeHero />
-        <HeroPaintSignal onReady={handleHeroReady} />
       </Suspense>
-      <InstallCoachSheet enableAutoPrompt={installCoachAutoPromptReady} />
 
       {/* Domain Intelligence: Periodization Timeline */}
       <Suspense fallback={<div className={cn("container-content", nativeApp ? "pt-10" : "pt-8")}>

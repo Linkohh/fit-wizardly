@@ -23,6 +23,7 @@ import { usePlanStore } from "@/stores/planStore";
 import { useGlobalClickFeedback } from "@/hooks/useGlobalClickFeedback";
 import { Footer } from "@/components/Footer";
 import { ConsentModal } from "@/components/legal/ConsentModal";
+import { InstallCoachHost } from "@/components/install/InstallCoachHost";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
@@ -381,6 +382,7 @@ const App = () => {
                 <Header />
                 <EdgeSwipeBack />
                 <ConsentModal />
+                <InstallCoachHost />
                 <div id="main-content" className="flex-1 overflow-x-hidden">
                   <AnimatedRoutes />
                 </div>

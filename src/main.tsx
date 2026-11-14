@@ -4,6 +4,10 @@ import { registerSW } from "virtual:pwa-register";
 import App from "./App.tsx";
 import "./index.css";
 import "./lib/i18n"; // Initialize i18n
+import { startInstallPromptCapture } from "./lib/install-prompt-capture";
+
+// Catch the browser's install offer before React mounts; it fires once per load.
+startInstallPromptCapture();
 
 function applyInitialTheme() {
   if (typeof window === "undefined") {

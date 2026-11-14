@@ -309,12 +309,8 @@ vi.mock('@/components/landing/FeatureCard', () => ({
   FeatureCard: ({ feature }: { feature: { title: string } }) => <div>{feature.title}</div>,
 }));
 
-vi.mock('@/components/install/InstallCoachSheet', () => ({
-  InstallCoachSheet: () => null,
-}));
-
-vi.mock('@/hooks/use-install-coach-auto-prompt-ready', () => ({
-  useInstallCoachAutoPromptReady: () => false,
+vi.mock('@/components/install/InstallCoachHost', () => ({
+  InstallCoachHost: () => null,
 }));
 
 vi.mock('@/components/analytics/PeriodizationTimeline', () => ({
