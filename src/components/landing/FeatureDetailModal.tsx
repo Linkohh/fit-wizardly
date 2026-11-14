@@ -67,6 +67,18 @@ export function FeatureDetailModal({ feature, isOpen, onClose }: FeatureDetailMo
     }
   }, [isOpen, isMobile]);
 
+  // Escape closes the desktop popup (the Drawer handles this itself on mobile)
+  useEffect(() => {
+    if (!isOpen || isMobile) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, isMobile, onClose]);
+
   if (!feature) return null;
 
   const benefits = t(`features.${feature.key}.detail.benefits`, { returnObjects: true }) as string[];
@@ -274,20 +286,6 @@ export function FeatureDetailModal({ feature, isOpen, onClose }: FeatureDetailMo
               >
                 <ArrowRight className="ml-2 h-4 w-4" />
               </motion.span>
-            </Button>
-          </motion.div>
-          <motion.div
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-          >
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="sm:w-auto w-full"
-              size="lg"
-            >
-              {t('features.modal.close')}
             </Button>
           </motion.div>
         </motion.div>

@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
+import { Portal as TooltipPortal } from '@radix-ui/react-tooltip';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { AnimatedIcon } from '@/components/ui/page-transition';
 import { ArrowRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { LucideIcon } from 'lucide-react';
+import { pickHoverQuip } from '@/data/hoverQuips';
 
 // Spring configurations for natural feel
 const springConfig = { stiffness: 400, damping: 25 };
@@ -26,6 +29,13 @@ interface FeatureCardProps {
 
 export function FeatureCard({ feature, onClick }: FeatureCardProps) {
     const { t } = useTranslation();
+
+    // A fresh quip each time the icon tooltip opens. The card already shows the
+    // description, so the tooltip is for fun rather than repeating it.
+    const [hoverQuip, setHoverQuip] = useState(() => pickHoverQuip());
+    const handleTooltipOpenChange = (open: boolean) => {
+        if (open) setHoverQuip((current) => pickHoverQuip(current));
+    };
 
     // Mouse position for subtle 3D tilt effect
     const mouseX = useMotionValue(0);
@@ -110,7 +120,7 @@ export function FeatureCard({ feature, onClick }: FeatureCardProps) {
                 />
 
                 <CardContent className="p-6 relative">
-                    <Tooltip>
+                    <Tooltip onOpenChange={handleTooltipOpenChange}>
                         <TooltipTrigger asChild>
                             <motion.div
                                 className={`mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:shadow-xl transition-shadow duration-500 cursor-pointer overflow-visible relative`}
@@ -162,9 +172,13 @@ export function FeatureCard({ feature, onClick }: FeatureCardProps) {
                                 />
                             </motion.div>
                         </TooltipTrigger>
-                        <TooltipContent>
-                            <p className="max-w-xs">{feature.description}</p>
-                        </TooltipContent>
+                        {/* Rendered at page level: the card clips its own overflow,
+                            which cut the tooltip down to a sliver above the icon. */}
+                        <TooltipPortal>
+                            <TooltipContent>
+                                <p className="max-w-xs">{hoverQuip}</p>
+                            </TooltipContent>
+                        </TooltipPortal>
                     </Tooltip>
 
                     <h3 className="font-bold text-lg mb-2 text-foreground group-hover:text-primary transition-colors duration-300">
