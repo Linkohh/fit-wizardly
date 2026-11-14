@@ -606,6 +606,38 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
   }
 }
 
+/* Fade behind the capsule, visible only once the page has scrolled.
+   Solid behind the status bar, then dissolving to nothing just below the
+   capsule, so content never shows sharply in the gaps beside or above it.
+   Tint only, no blur: it must work where backdrop-filter does not render. */
+@utility header-capsule-scrim {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  pointer-events: none;
+  height: calc(env(safe-area-inset-top, 0px) + 5rem);
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--background)) 0,
+    hsl(var(--background)) env(safe-area-inset-top, 0px),
+    hsl(var(--background) / 0.86) calc(env(safe-area-inset-top, 0px) + 2rem),
+    hsl(var(--background) / 0.6) calc(env(safe-area-inset-top, 0px) + 3.75rem),
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.22s ease;
+
+  &[data-scrolled='true'] {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
 @utility header-capsule-inner {
   pointer-events: auto;
   margin-left: auto;
@@ -614,35 +646,59 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
   max-width: 1200px;
   height: 3.5rem;
   border-radius: 1.25rem;
-  background: rgba(255, 255, 255, 0.7);
+  /* TWO-STATE TINT:
+     At the top of a page the capsule is light, airy glass. Once the page has
+     scrolled (data-scrolled, set by useScrolledPastTop) it eases to a denser
+     tint so content passing behind it is no longer readable. */
+  background-color: hsl(264 44% 97% / 0.7);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 
+  box-shadow:
     0 12px 32px -10px rgba(72, 46, 118, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    background-color 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  &[data-scrolled='true'] {
+    background-color: hsl(264 44% 97% / 0.88);
+    border-color: rgba(255, 255, 255, 0.55);
+  }
 
   .dark & {
-    background: rgba(18, 10, 28, 0.65);
+    background-color: hsl(270 48% 9% / 0.65);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 
+    box-shadow:
       0 20px 40px -15px rgba(0, 0, 0, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
-  
-  /* Interactive scale on hover/focus */
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 
-      0 16px 36px -8px rgba(72, 46, 118, 0.16),
-      inset 0 1px 0 rgba(255, 255, 255, 0.7);
-    
-    .dark & {
-      box-shadow: 
-        0 24px 44px -12px rgba(0, 0, 0, 0.48),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  .dark &[data-scrolled='true'] {
+    background-color: hsl(270 48% 9% / 0.82);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Lift on hover, only where a real pointer exists (avoids sticky hover after a tap) */
+  @media (hover: hover) {
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow:
+        0 16px 36px -8px rgba(72, 46, 118, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+      .dark & {
+        box-shadow:
+          0 24px 44px -12px rgba(0, 0, 0, 0.48),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      }
     }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 }
 
