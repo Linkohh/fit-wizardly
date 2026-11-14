@@ -111,7 +111,6 @@ export function Header() {
   const { shouldReduceMotion } = useMotionPreferences();
   const motionTiltEnabled = usePreferencesStore((state) => state.settings.motionTilt !== false);
   const installCoachPlatform = useInstallCoachStore((state) => state.platform);
-  const installCoachHasSeen = useInstallCoachStore((state) => state.hasSeenCoach);
   const installCoachInstalled = useInstallCoachStore((state) => state.installed);
   const installCoachStandalone = useInstallCoachStore((state) => state.isStandalone);
   const installCoachOpen = useInstallCoachStore((state) => state.isOpen);
@@ -225,9 +224,7 @@ export function Header() {
       : t('profile.motion_tilt_enable', 'Enable');
 
   const showInstallCoachEntry =
-    location.pathname === '/' &&
     installCoachHydrated &&
-    installCoachHasSeen &&
     installCoachPlatform !== 'unsupported' &&
     !installCoachInstalled &&
     !installCoachStandalone &&

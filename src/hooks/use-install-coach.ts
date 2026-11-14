@@ -1,45 +1,26 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
-  canShareInstallShortcut,
-  type DeferredInstallPromptEvent,
   getInstallCoachPlatform,
   INSTALL_COACH_OPEN_DELAY_MS,
   isInstallCoachEligiblePlatform,
   isInstallCoachStandalone,
 } from '@/lib/install-coach';
+import {
+  clearDeferredInstallPrompt,
+  getDeferredInstallPrompt,
+  startInstallPromptCapture,
+  subscribeInstallPrompt,
+} from '@/lib/install-prompt-capture';
 import { useInstallCoachStore } from '@/stores/installCoachStore';
 
 type UseInstallCoachOptions = {
   enableAutoPrompt?: boolean;
 };
 
-type InstallCoachShareResult = 'shared' | 'cancelled' | 'unsupported' | 'error';
-
-function getShareResult(error: unknown): InstallCoachShareResult {
-  if (
-    error instanceof DOMException
-    && error.name === 'AbortError'
-  ) {
-    return 'cancelled';
-  }
-
-  if (
-    typeof error === 'object'
-    && error !== null
-    && 'name' in error
-    && error.name === 'AbortError'
-  ) {
-    return 'cancelled';
-  }
-
-  return 'error';
-}
-
 export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOptions = {}) {
   const platform = useInstallCoachStore((state) => state.platform);
   const isStandalone = useInstallCoachStore((state) => state.isStandalone);
   const canNativeInstall = useInstallCoachStore((state) => state.canNativeInstall);
-  const canShareShortcut = useInstallCoachStore((state) => state.canShareShortcut);
   const hasSeenCoach = useInstallCoachStore((state) => state.hasSeenCoach);
   const dismissed = useInstallCoachStore((state) => state.dismissed);
   const installed = useInstallCoachStore((state) => state.installed);
@@ -51,21 +32,22 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
   const dismissCoach = useInstallCoachStore((state) => state.dismissCoach);
   const markInstalled = useInstallCoachStore((state) => state.markInstalled);
 
-  const deferredPromptRef = useRef<DeferredInstallPromptEvent | null>(null);
-
   useEffect(() => {
     if (typeof window === 'undefined') {
       return undefined;
     }
 
+    // main.tsx starts this at app launch; calling it again is harmless and
+    // covers tests and any entry point that skipped it.
+    startInstallPromptCapture();
+
     const syncRuntimeState = () => {
-      const nextPlatform = getInstallCoachPlatform();
       const standalone = isInstallCoachStandalone();
 
       setRuntimeState({
-        platform: nextPlatform,
+        platform: getInstallCoachPlatform(),
         isStandalone: standalone,
-        canShareShortcut: canShareInstallShortcut(),
+        canNativeInstall: getDeferredInstallPrompt() !== null,
       });
 
       if (standalone) {
@@ -76,43 +58,21 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
     syncRuntimeState();
 
     const mediaQuery = window.matchMedia?.('(display-mode: standalone)');
-    const handleDisplayModeChange = () => {
-      syncRuntimeState();
-    };
+    mediaQuery?.addEventListener('change', syncRuntimeState);
 
-    const handleBeforeInstallPrompt = (event: Event) => {
-      const promptEvent = event as DeferredInstallPromptEvent;
-      promptEvent.preventDefault?.();
-      deferredPromptRef.current = promptEvent;
-
-      setRuntimeState({
-        platform: getInstallCoachPlatform(),
-        isStandalone: isInstallCoachStandalone(),
-        canShareShortcut: canShareInstallShortcut(),
-        canNativeInstall: true,
-      });
-    };
-
-    const handleAppInstalled = () => {
-      deferredPromptRef.current = null;
-      setRuntimeState({ canNativeInstall: false, isStandalone: true });
-      markInstalled();
-    };
-
-    if (mediaQuery) {
-      mediaQuery.addEventListener('change', handleDisplayModeChange);
-    }
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      if (mediaQuery) {
-        mediaQuery.removeEventListener('change', handleDisplayModeChange);
+    const unsubscribe = subscribeInstallPrompt((change) => {
+      if (change === 'installed') {
+        setRuntimeState({ canNativeInstall: false, isStandalone: true });
+        markInstalled();
+        return;
       }
 
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt as EventListener);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      syncRuntimeState();
+    });
+
+    return () => {
+      mediaQuery?.removeEventListener('change', syncRuntimeState);
+      unsubscribe();
     };
   }, [markInstalled, setRuntimeState]);
 
@@ -136,13 +96,13 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
   }, [dismissed, enableAutoPrompt, hasSeenCoach, isEligible, isOpen, openCoach]);
 
   const promptNativeInstall = useCallback(async () => {
-    const deferredPrompt = deferredPromptRef.current;
+    const deferredPrompt = getDeferredInstallPrompt();
 
     if (!deferredPrompt) {
       return false;
     }
 
-    deferredPromptRef.current = null;
+    clearDeferredInstallPrompt();
     setRuntimeState({ canNativeInstall: false });
 
     await deferredPrompt.prompt();
@@ -157,26 +117,8 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
     return false;
   }, [dismissCoach, markInstalled, setRuntimeState]);
 
-  const promptShareShortcut = useCallback(async () => {
-    if (!canShareInstallShortcut()) {
-      return 'unsupported' as const;
-    }
-
-    try {
-      await navigator.share({
-        title: 'FitWizard',
-        text: 'Save FitWizard to your Home Screen for a cleaner app-style launch.',
-        url: window.location.href,
-      });
-      return 'shared' as const;
-    } catch (error) {
-      return getShareResult(error);
-    }
-  }, []);
-
   return {
     canNativeInstall,
-    canShareShortcut,
     closeCoach,
     dismissCoach,
     hasHydrated,
@@ -188,7 +130,6 @@ export function useInstallCoach({ enableAutoPrompt = true }: UseInstallCoachOpti
     markInstalled,
     openCoach,
     platform,
-    promptShareShortcut,
     promptNativeInstall,
   };
 }

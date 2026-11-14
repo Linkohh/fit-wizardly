@@ -110,6 +110,43 @@ describe('useUserPreferences store behavior', () => {
     );
   });
 
+  it('keeps a change that is queued while a sync is in flight', async () => {
+    const { usePreferencesStore } = await loadPreferencesModule();
+    usePreferencesStore.setState({ favorites: [], offlineQueue: [] });
+
+    let finishUpsert: (value: { error: null }) => void = () => {};
+    const preferencesQuery = mocks.from() as { upsert: ReturnType<typeof vi.fn> };
+    preferencesQuery.upsert.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishUpsert = resolve;
+      })
+    );
+
+    usePreferencesStore.getState().addFavorite('ex-1');
+    const sync = usePreferencesStore.getState().syncToCloud();
+    usePreferencesStore.getState().addFavorite('ex-2');
+    finishUpsert({ error: null });
+    await sync;
+
+    const queue = usePreferencesStore.getState().offlineQueue;
+    expect(queue).toHaveLength(1);
+    expect(queue[0]).toEqual(expect.objectContaining({ type: 'favorite', payload: 'ex-2' }));
+  });
+
+  it('keeps the whole queue when the sync fails', async () => {
+    const { usePreferencesStore } = await loadPreferencesModule();
+    usePreferencesStore.setState({ favorites: [], offlineQueue: [] });
+    const preferencesQuery = mocks.from() as { upsert: ReturnType<typeof vi.fn> };
+    preferencesQuery.upsert.mockResolvedValueOnce({ error: new Error('offline') });
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    usePreferencesStore.getState().addFavorite('ex-1');
+    await usePreferencesStore.getState().syncToCloud();
+
+    expect(usePreferencesStore.getState().offlineQueue).toHaveLength(1);
+    consoleError.mockRestore();
+  });
+
   it('queues local settings updates and flushes them through cloud sync', async () => {
     const { usePreferencesStore } = await loadPreferencesModule();
 

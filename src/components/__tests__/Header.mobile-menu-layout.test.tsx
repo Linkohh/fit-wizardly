@@ -15,7 +15,6 @@ const mocks = vi.hoisted(() => ({
     platform: 'unsupported',
     isStandalone: false,
     canNativeInstall: false,
-    canShareShortcut: false,
     hasSeenCoach: false,
     dismissed: false,
     installed: false,
@@ -334,8 +333,7 @@ describe('Header mobile menu layout', () => {
       platform: 'unsupported',
       isStandalone: false,
       canNativeInstall: false,
-      canShareShortcut: false,
-      hasSeenCoach: false,
+        hasSeenCoach: false,
       dismissed: false,
       installed: false,
       isOpen: false,
@@ -386,7 +384,6 @@ describe('Header mobile menu layout', () => {
       platform: 'ios-safari',
       isStandalone: false,
       canNativeInstall: false,
-      canShareShortcut: true,
       hasSeenCoach: true,
       dismissed: true,
       installed: false,
@@ -404,6 +401,42 @@ describe('Header mobile menu layout', () => {
     fireEvent.click(installButton);
 
     expect(mocks.openInstallCoach).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers the install action on other pages and before the prompt was ever shown', async () => {
+    mocks.installCoachState = {
+      ...mocks.installCoachState,
+      platform: 'android-chrome',
+      hasSeenCoach: false,
+      dismissed: false,
+      installed: false,
+      isStandalone: false,
+      isOpen: false,
+      hasHydrated: true,
+    };
+
+    renderHeader('/nutrition');
+    fireEvent.click(screen.getByTestId('sheet-trigger'));
+
+    const drawer = await screen.findByTestId('mobile-sheet-content');
+    fireEvent.click(within(drawer).getByRole('button', { name: /install fitwizard/i }));
+
+    expect(mocks.openInstallCoach).toHaveBeenCalledTimes(1);
+  });
+
+  it('hides the install action once the app is installed', async () => {
+    mocks.installCoachState = {
+      ...mocks.installCoachState,
+      platform: 'ios-safari',
+      installed: true,
+      hasHydrated: true,
+    };
+
+    renderHeader();
+    fireEvent.click(screen.getByTestId('sheet-trigger'));
+
+    const drawer = await screen.findByTestId('mobile-sheet-content');
+    expect(within(drawer).queryByRole('button', { name: /add to home screen/i })).not.toBeInTheDocument();
   });
 
   it('renders the aetheric drawer shell with profile header, trainer section, and sticky footer controls', async () => {

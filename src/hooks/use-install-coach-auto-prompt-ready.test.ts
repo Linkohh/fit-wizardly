@@ -19,7 +19,7 @@ describe('useInstallCoachAutoPromptReady', () => {
 
   it('stays false until consent is resolved', () => {
     const { result } = renderHook(() =>
-      useInstallCoachAutoPromptReady({ heroReady: true }),
+      useInstallCoachAutoPromptReady({ engaged: true }),
     );
 
     act(() => {
@@ -40,13 +40,13 @@ describe('useInstallCoachAutoPromptReady', () => {
     expect(result.current).toBe(true);
   });
 
-  it('waits for hero readiness even when consent is already stored', () => {
+  it('waits for an engagement moment even when consent is already stored', () => {
     localStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
 
     const { result, rerender } = renderHook(
-      ({ heroReady }) => useInstallCoachAutoPromptReady({ heroReady }),
+      ({ engaged }) => useInstallCoachAutoPromptReady({ engaged }),
       {
-        initialProps: { heroReady: false },
+        initialProps: { engaged: false },
       },
     );
 
@@ -56,7 +56,7 @@ describe('useInstallCoachAutoPromptReady', () => {
 
     expect(result.current).toBe(false);
 
-    rerender({ heroReady: true });
+    rerender({ engaged: true });
 
     act(() => {
       vi.advanceTimersByTime(400);

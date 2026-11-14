@@ -647,5 +647,29 @@
             "pick_version": "Ir a una versión",
             "unread": "Nuevas notas de versión"
         }
+    },
+    "nutrition": {
+        "shortcuts": {
+            "copy_yesterday": "Copiar ayer",
+            "copy_yesterday_count": "Copiar ayer ({{count}})",
+            "copy_yesterday_empty": "No se registraron comidas ayer",
+            "copied_toast": "Copiado de ayer: {{count}}",
+            "save_template": "Guardar como plantilla",
+            "template_name": "Nombre de la plantilla",
+            "save": "Guardar",
+            "cancel": "Cancelar",
+            "template_saved": "Plantilla guardada"
+        },
+            "energyBalance": {
+                "title": "Balance energético",
+                "subtitle": "Calorías consumidas frente al peso corporal",
+                "window_label": "Días mostrados",
+                "empty": "Registra comidas y pesajes para ver cómo evolucionan juntos tu consumo y tu peso",
+                "avg_intake": "Consumo medio: {{value}} kcal/día",
+                "weight_change": "Cambio de peso: {{value}} {{unit}}",
+                "need_weigh_ins": "Añade dos pesajes en este periodo para ver tu tendencia de peso",
+                "intake_series": "Calorías",
+                "weight_series": "Peso ({{unit}})"
+            }
     }
 }

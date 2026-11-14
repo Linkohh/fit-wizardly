@@ -845,7 +845,7 @@ Uses Recharts (already installed) for line charts showing trends over time.
 
 ---
 
-### [3.6] Smart Meal Shortcuts (Quick Log) ⏳ TODO
+### [3.6] Smart Meal Shortcuts (Quick Log) ✅ DONE (2026-11-13)
 
 - **Priority:** LOW
 - **Effort:** M (4h)
@@ -856,7 +856,7 @@ Uses Recharts (already installed) for line charts showing trends over time.
 
 ---
 
-### [3.7] Energy Balance Trend (Calories vs Weight) ⏳ TODO
+### [3.7] Energy Balance Trend (Calories vs Weight) ✅ DONE (2026-11-13, TDEE estimate not built)
 
 - **Priority:** LOW
 - **Effort:** M (3-5h)

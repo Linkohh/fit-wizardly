@@ -1,9 +1,9 @@
-import { getAdapters } from './api/exerciseApiAdapter';
 import type { NormalizedExercise } from './api/types';
 import {
   getExerciseLibraryState,
   loadExerciseLibrary,
 } from '@/features/exercise-library/service';
+import { cachedExerciseSearch } from '@/features/exercise-library/searchCache';
 import type { ExerciseLibraryRecord } from '@/features/exercise-library/types';
 
 interface SearchResult {
@@ -14,7 +14,6 @@ interface SearchResult {
   warning?: string;
 }
 
-const ADAPTERS = getAdapters();
 const MAX_CATALOG_RESULTS = 20;
 
 function normalizeSearchTerm(value: string) {
@@ -71,23 +70,14 @@ export async function searchPrimary(query: string): Promise<SearchResult> {
     };
   }
 
-  const wgerResults = await ADAPTERS.wger.search(query).catch(() => []);
-  if (wgerResults.length > 0) {
+  const liveResults = await cachedExerciseSearch(query);
+  if (liveResults.length > 0) {
+    const isFromFallback = liveResults[0].source === 'api-ninjas';
     return {
-      results: wgerResults,
+      results: liveResults,
       hasEmptyResults: false,
-      isFromFallback: false,
-      source: 'wger',
-    };
-  }
-
-  const apiNinjasResults = await ADAPTERS.apiNinjas.search(query).catch(() => []);
-  if (apiNinjasResults.length > 0) {
-    return {
-      results: apiNinjasResults,
-      hasEmptyResults: false,
-      isFromFallback: true,
-      source: 'api-ninjas',
+      isFromFallback,
+      source: isFromFallback ? 'api-ninjas' : 'wger',
     };
   }
 

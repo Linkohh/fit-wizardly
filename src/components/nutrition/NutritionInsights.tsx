@@ -13,6 +13,7 @@ import {
 } from 'recharts';
 import { Flame, TrendingUp, Award, BarChart3 } from 'lucide-react';
 import { useNutritionStore } from '@/stores/nutritionStore';
+import { EnergyBalanceChart } from './EnergyBalanceChart';
 import {
   getLastNDays,
   calculateNutritionScore,
@@ -64,6 +65,9 @@ export function NutritionInsights() {
         {/* Consistency Streak */}
         <ConsistencyStreakCard streak={streak} hasData={hasAnyData} />
       </div>
+
+      {/* Energy Balance: calories vs body weight */}
+      <EnergyBalanceChart />
     </motion.div>
   );
 }

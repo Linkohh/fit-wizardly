@@ -1,3 +1,5 @@
+import { devLog } from '@/lib/devLog';
+
 // Analytics utility for tracking wizard completion funnel
 // Stub implementation - logs to console in dev, can be connected to external service
 
@@ -39,7 +41,7 @@ export function trackEvent(event: AnalyticsEvent, metadata: EventMetadata = {}) 
 
     // Log to console in development
     if (import.meta.env.DEV) {
-        console.log('[Analytics]', event, metadata);
+        devLog('[Analytics]', event, metadata);
     }
 
     // Send to external endpoint if configured

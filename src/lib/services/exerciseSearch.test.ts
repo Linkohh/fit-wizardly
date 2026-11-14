@@ -4,6 +4,7 @@ import {
   resetExerciseLibraryServiceForTests,
 } from '@/features/exercise-library/service';
 import { searchPrimary } from './exerciseSearch';
+import { apiCache } from '@/lib/offlineSupport';
 import type { ExerciseLibraryRecord } from '@/features/exercise-library/types';
 
 const fetchMock = vi.fn<typeof fetch>();
@@ -58,6 +59,7 @@ describe('exercise search', () => {
   beforeEach(() => {
     resetExerciseLibraryServiceForTests();
     window.localStorage.clear();
+    apiCache.clear();
     setNavigatorOnline(false);
     fetchMock.mockReset();
     fetchMock.mockImplementation((input) => {

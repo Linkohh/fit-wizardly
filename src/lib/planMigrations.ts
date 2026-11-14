@@ -1,4 +1,5 @@
 import type { Plan } from '@/types/fitness';
+import { devLog } from '@/lib/devLog';
 
 // Current schema version
 export const CURRENT_SCHEMA_VERSION = 1;
@@ -36,7 +37,7 @@ export function migratePlan(plan: unknown): Plan {
         migratedPlan = migration(migratedPlan);
         currentVersion++;
 
-        console.log(`Migrated plan from v${currentVersion - 1} to v${currentVersion}`);
+        devLog(`Migrated plan from v${currentVersion - 1} to v${currentVersion}`);
     }
 
     return migratedPlan as unknown as Plan;

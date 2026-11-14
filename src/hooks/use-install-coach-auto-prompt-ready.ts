@@ -5,12 +5,13 @@ const INSTALL_COACH_AUTO_PROMPT_HOLD_MS = 350;
 
 type UseInstallCoachAutoPromptReadyOptions = {
   delayMs?: number;
-  heroReady: boolean;
+  /** True at a moment worth interrupting: see shouldAutoPromptInstallCoach. */
+  engaged: boolean;
 };
 
 export function useInstallCoachAutoPromptReady({
   delayMs = INSTALL_COACH_AUTO_PROMPT_HOLD_MS,
-  heroReady,
+  engaged,
 }: UseInstallCoachAutoPromptReadyOptions) {
   const [consentResolved, setConsentResolved] = useState(() => hasStoredConsent());
   const [delayElapsed, setDelayElapsed] = useState(false);
@@ -41,7 +42,7 @@ export function useInstallCoachAutoPromptReady({
   }, []);
 
   useEffect(() => {
-    if (!heroReady || !consentResolved) {
+    if (!engaged || !consentResolved) {
       setDelayElapsed(false);
       return undefined;
     }
@@ -53,7 +54,7 @@ export function useInstallCoachAutoPromptReady({
     return () => {
       window.clearTimeout(timer);
     };
-  }, [consentResolved, delayMs, heroReady]);
+  }, [consentResolved, delayMs, engaged]);
 
-  return heroReady && consentResolved && delayElapsed;
+  return engaged && consentResolved && delayElapsed;
 }

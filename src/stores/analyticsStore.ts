@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { devLog } from '@/lib/devLog';
 
 // Analytics event types
 export interface AnalyticsEvent {
@@ -112,9 +113,9 @@ export const useAnalyticsStore = create<AnalyticsState>()(
                 // In production, send to analytics backend (PostHog, etc.)
                 // For now, log to console in development
                 if (import.meta.env.DEV) {
-                    console.log('[Analytics] Flushing events:', eventQueue.length);
+                    devLog('[Analytics] Flushing events:', eventQueue.length);
                     eventQueue.forEach((event) => {
-                        console.log(`  [${event.name}]`, event.properties);
+                        devLog(`  [${event.name}]`, event.properties);
                     });
                 }
 

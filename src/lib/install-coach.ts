@@ -27,25 +27,32 @@ export function getInstallCoachPlatform(): InstallCoachPlatform {
   }
 
   const userAgent = getUserAgent();
+
+  // Android first: a desktop browser emulating Android on a touch-capable Mac
+  // would otherwise match the "Mac with touch = iPad" rule below.
+  if (/Android/i.test(userAgent)) {
+    const isAndroidChrome =
+      /Chrome|Chromium/i.test(userAgent) && !/EdgA|OPR|SamsungBrowser/i.test(userAgent);
+
+    return isAndroidChrome ? 'android-chrome' : 'unsupported';
+  }
+
   const isIOSDevice =
     /iPad|iPhone|iPod/i.test(userAgent) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-  if (isIOSDevice) {
-    if (/CriOS/i.test(userAgent)) {
-      return 'ios-chrome';
-    }
-
-    const isSafari =
-      /Safari/i.test(userAgent) && !/CriOS|FxiOS|EdgiOS|OPiOS|YaBrowser/i.test(userAgent);
-
-    return isSafari ? 'ios-safari' : 'unsupported';
+  if (!isIOSDevice) {
+    return 'unsupported';
   }
 
-  const isAndroidChrome =
-    /Android/i.test(userAgent) && /Chrome|Chromium/i.test(userAgent) && !/EdgA|OPR|SamsungBrowser/i.test(userAgent);
+  if (/CriOS/i.test(userAgent)) {
+    return 'ios-chrome';
+  }
 
-  return isAndroidChrome ? 'android-chrome' : 'unsupported';
+  const isSafari =
+    /Safari/i.test(userAgent) && !/CriOS|FxiOS|EdgiOS|OPiOS|YaBrowser/i.test(userAgent);
+
+  return isSafari ? 'ios-safari' : 'unsupported';
 }
 
 export function isInstallCoachStandalone() {
@@ -63,13 +70,28 @@ export function isInstallCoachEligiblePlatform(platform: InstallCoachPlatform) {
   return platform !== 'unsupported';
 }
 
-export function canShareInstallShortcut() {
-  if (typeof window === 'undefined' || typeof navigator === 'undefined' || isNativeApp()) {
-    return false;
+/** Visits needed before the prompt may open by itself on the home page. */
+export const INSTALL_COACH_MIN_VISITS = 2;
+
+type AutoPromptContext = {
+  pathname: string;
+  hasPlan: boolean;
+  visitCount: number;
+};
+
+/**
+ * The prompt opens by itself only at a moment when the user has seen some value:
+ * right after their first plan exists, or when they come back for a second visit.
+ * It never opens on the first page load and never on other pages.
+ */
+export function shouldAutoPromptInstallCoach({ pathname, hasPlan, visitCount }: AutoPromptContext): boolean {
+  if (pathname === '/plan') {
+    return hasPlan;
   }
 
-  const isSecureContext =
-    typeof window.isSecureContext === 'boolean' ? window.isSecureContext : true;
+  if (pathname === '/') {
+    return visitCount >= INSTALL_COACH_MIN_VISITS;
+  }
 
-  return isSecureContext && typeof navigator.share === 'function';
+  return false;
 }

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { UserNutritionProfile, MacroTargets, DailyNutritionLog, MealEntry, MealTemplate } from '@/types/nutrition';
+import { copyableMeals } from '@/lib/mealShortcuts';
 
 interface NutritionState {
     profile: UserNutritionProfile | null;
@@ -20,6 +21,8 @@ interface NutritionState {
     updateHydration: (amount: number) => void;
     logMeal: (meal: MealEntry | MealEntry[]) => void;
     removeMeal: (mealId: string) => void;
+    /** Copies the meals of `sourceDate` into the selected date. Returns how many were added. */
+    copyMealsFromDate: (sourceDate: string) => number;
     changeDate: (date: string) => void;
 
     // Power Feature Actions
@@ -140,6 +143,14 @@ export const useNutritionStore = create<NutritionState>()(
                     }
                 };
             }),
+
+            copyMealsFromDate: (sourceDate) => {
+                const copies = copyableMeals(get().history, sourceDate);
+                if (copies.length === 0) return 0;
+
+                get().logMeal(copies);
+                return copies.length;
+            },
 
             removeMeal: (mealId) => set((state) => {
                 const log = get().getCurrentLog();

@@ -34,6 +34,10 @@ export default function NutritionPage() {
     const [isEditingCalculator, setIsEditingCalculator] = useState(false);
     const { impact, notification } = useHaptics();
 
+    // Subscribe to the selected day's log so the page re-renders when a meal or
+    // water is logged. getCurrentLog is a stable function and does not trigger renders.
+    useNutritionStore((state) => state.history[state.selectedDate]);
+
     // Get the log for the currently selected date
     const dailyLog = getCurrentLog();
 

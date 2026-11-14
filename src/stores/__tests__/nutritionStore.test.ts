@@ -67,6 +67,28 @@ describe('nutritionStore operations', () => {
         expect(saved.totalFats).toBe(15);
     });
 
+    it('copies meals from another date into the selected date', () => {
+        const store = useNutritionStore.getState();
+        store.changeDate('2026-02-18');
+        store.logMeal([buildMeal(), buildMeal({ id: 'meal-2', name: 'Chicken Bowl' })]);
+        store.changeDate('2026-02-19');
+
+        const added = useNutritionStore.getState().copyMealsFromDate('2026-02-18');
+
+        const today = useNutritionStore.getState().history['2026-02-19'].meals;
+        expect(added).toBe(2);
+        expect(today.map((meal) => meal.name)).toEqual(['Oatmeal', 'Chicken Bowl']);
+        expect(today.map((meal) => meal.id)).not.toContain('meal-1');
+        expect(useNutritionStore.getState().history['2026-02-18'].meals).toHaveLength(2);
+    });
+
+    it('creates no log entry when the source date has no meals', () => {
+        const added = useNutritionStore.getState().copyMealsFromDate('2026-02-18');
+
+        expect(added).toBe(0);
+        expect(useNutritionStore.getState().history['2026-02-19']).toBeUndefined();
+    });
+
     it('persists only the selected date', () => {
         const store = useNutritionStore.getState();
 

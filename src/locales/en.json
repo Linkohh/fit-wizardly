@@ -48,11 +48,11 @@
             "handoff": {
                 "title": "Add FitWizard to your Home Screen",
                 "description": "Launch faster, keep the workout flow cleaner, and open FitWizard with less browser chrome.",
-                "primary": "Open Safari Share",
-                "helper": "Then choose Add to Home Screen in Safari."
+                "primary": "Show me how",
+                "helper": "Three quick steps in Safari."
             },
             "steps": {
-                "view_more": "Tap View More if Add to Home Screen is not visible.",
+                "share_button": "Tap the Share button in Safari’s toolbar. If you don’t see it, tap ••• first.",
                 "add_home": "Choose Add to Home Screen.",
                 "open_as_app": "Keep Open as Web App on, then tap Add."
             }
@@ -61,11 +61,11 @@
             "handoff": {
                 "title": "Add FitWizard to your Home Screen",
                 "description": "Keep FitWizard one tap away without leaving the iPhone browser flow you already use.",
-                "primary": "Open Share Menu",
-                "helper": "Then choose Add to Home Screen."
+                "primary": "Show me how",
+                "helper": "Three quick steps in Chrome."
             },
             "steps": {
-                "open_menu": "Open the share menu.",
+                "share_button": "Tap the Share button next to the address bar.",
                 "choose_add": "Choose Add to Home Screen.",
                 "confirm": "Confirm the FitWizard icon."
             }
@@ -776,5 +776,29 @@
         "back": "Back",
         "back_home": "Back to Home",
         "swipe_back": "Swipe to go back"
+    },
+    "nutrition": {
+        "shortcuts": {
+            "copy_yesterday": "Copy yesterday",
+            "copy_yesterday_count": "Copy yesterday ({{count}})",
+            "copy_yesterday_empty": "No meals were logged yesterday",
+            "copied_toast": "Copied from yesterday: {{count}}",
+            "save_template": "Save as template",
+            "template_name": "Template name",
+            "save": "Save",
+            "cancel": "Cancel",
+            "template_saved": "Template saved"
+        },
+            "energyBalance": {
+                "title": "Energy Balance",
+                "subtitle": "Calories eaten against body weight",
+                "window_label": "Days shown",
+                "empty": "Log meals and weigh-ins to see how your intake and weight move together",
+                "avg_intake": "Average intake: {{value}} kcal/day",
+                "weight_change": "Weight change: {{value}} {{unit}}",
+                "need_weigh_ins": "Add two weigh-ins in this period to see your weight trend",
+                "intake_series": "Calories",
+                "weight_series": "Weight ({{unit}})"
+            }
     }
 }
