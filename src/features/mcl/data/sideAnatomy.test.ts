@@ -59,6 +59,7 @@ describe('side muscle coverage and layers', () => {
   it('no side path is made only of M/L/Z commands', () => {
     for (const muscle of sideMuscles) {
       expect(muscle.paths.side ?? '', muscle.id).toMatch(/C/);
+      expect(muscle.paths.side ?? '', muscle.id).not.toMatch(/L/);
     }
   });
 
