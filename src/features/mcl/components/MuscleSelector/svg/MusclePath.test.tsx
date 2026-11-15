@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MusclePath } from './MusclePath';
-import { SCULPT_DEFAULT, getMuscleOpacity, getSculptStyle, type SculptStyle } from '../../../lib/sculpt';
+import { SCULPT_DEFAULT, getGhostOpacity, getMuscleOpacity, getSculptStyle, type SculptStyle } from '../../../lib/sculpt';
 import type { Muscle, MuscleHighlight } from '../../../types';
 
 const TEST_MUSCLE: Muscle = {
@@ -24,6 +24,8 @@ function renderPathContainer({
   sculpt = getSculptStyle(SCULPT_DEFAULT),
   isSelected = false,
   isHovered = false,
+  isGhost = false,
+  isDisabled = false,
   highlight,
 }: {
   onClick?: (muscle: Muscle) => void;
@@ -31,8 +33,11 @@ function renderPathContainer({
   sculpt?: SculptStyle;
   isSelected?: boolean;
   isHovered?: boolean;
+  isGhost?: boolean;
+  isDisabled?: boolean;
   highlight?: MuscleHighlight;
 } = {}) {
+  const onMouseEnter = vi.fn();
   const { container } = render(
     <svg>
       <MusclePath
@@ -42,12 +47,13 @@ function renderPathContainer({
         sculpt={sculpt}
         isHovered={isHovered}
         highlight={highlight}
-        isDisabled={false}
+        isGhost={isGhost}
+        isDisabled={isDisabled}
         colorByGroup
         accentColor="#EF4444"
         enableTouchInfo
         longPressMs={380}
-        onMouseEnter={vi.fn()}
+        onMouseEnter={onMouseEnter}
         onMouseLeave={vi.fn()}
         onClick={onClick}
         onLongPress={onLongPress}
@@ -55,7 +61,10 @@ function renderPathContainer({
     </svg>
   );
 
-  return { container, button: screen.getByRole('button', { name: /Pectoralis Major \(Left\)/i }) };
+  const button = isGhost
+    ? (container.querySelector('path.muscle-path') as SVGPathElement)
+    : screen.getByRole('button', { name: /Pectoralis Major \(Left\)/i });
+  return { container, button, onMouseEnter };
 }
 
 function renderPath(options: RenderOptions = {}) {
@@ -166,5 +175,60 @@ describe('MusclePath sculpt rendering', () => {
   ])('renders no shading overlay when %s', (_name, state) => {
     const { container } = renderPathContainer({ sculpt: getSculptStyle(100), ...state });
     expect(container.querySelectorAll('path')).toHaveLength(1);
+  });
+});
+
+describe('MusclePath ghost rendering', () => {
+  it('ghost: opacity 0.08, tabIndex -1, aria-hidden, click does not call onClick', () => {
+    const onClick = vi.fn();
+    const onLongPress = vi.fn();
+    const { container, button, onMouseEnter } = renderPathContainer({ onClick, onLongPress, isGhost: true });
+
+    expect(getGhostOpacity(false)).toBe(0.08);
+    expect(button.getAttribute('tabindex')).toBe('-1');
+    expect(button.getAttribute('aria-hidden')).toBe('true');
+    expect(button.hasAttribute('role')).toBe(false);
+    expect(button.style.pointerEvents).toBe('none');
+    expect(button.getAttribute('class')).not.toContain('cursor-pointer');
+    expect(button.getAttribute('class')).not.toContain('muscle-pulse');
+
+    fireEvent.click(button);
+    fireEvent.keyDown(button, { key: 'Enter' });
+    fireEvent.mouseEnter(button);
+    expect(onClick).not.toHaveBeenCalled();
+    expect(onMouseEnter).not.toHaveBeenCalled();
+
+    // No separation edge and no shading overlay on a ghost.
+    expect(button.getAttribute('stroke')).toBe('transparent');
+    expect(container.querySelectorAll('path')).toHaveLength(1);
+  });
+
+  it('ghost: long press does not call onLongPress', () => {
+    vi.useFakeTimers();
+    const onLongPress = vi.fn();
+    const { button } = renderPathContainer({ onLongPress, isGhost: true });
+    fireEvent.pointerDown(button, { pointerType: 'touch', clientX: 10, clientY: 10 });
+    vi.advanceTimersByTime(500);
+    expect(onLongPress).not.toHaveBeenCalled();
+    vi.useRealTimers();
+  });
+
+  it('selected ghost: opacity 0.45 with its selection stroke, still not clickable', () => {
+    const onClick = vi.fn();
+    const { button } = renderPathContainer({ onClick, isGhost: true, isSelected: true });
+
+    expect(getGhostOpacity(true)).toBe(0.45);
+    expect(button.getAttribute('stroke')).not.toBe('transparent');
+    expect(button.getAttribute('stroke-width')).toBe('1.5');
+    expect(button.getAttribute('class')).not.toContain('muscle-pulse');
+    expect(button.style.filter).not.toContain('drop-shadow');
+
+    fireEvent.click(button);
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('ghost overrides disabled styling', () => {
+    const { button } = renderPathContainer({ isGhost: true, isDisabled: true });
+    expect(button.getAttribute('class')).not.toContain('cursor-not-allowed');
   });
 });

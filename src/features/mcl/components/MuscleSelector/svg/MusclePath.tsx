@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Muscle, ViewType, MuscleHighlight } from '../../../types';
 import { getMuscleGroupColor } from '../../../data/muscleGroups';
-import { getMuscleOpacity, type SculptStyle } from '../../../lib/sculpt';
+import { getGhostOpacity, getMuscleOpacity, type SculptStyle } from '../../../lib/sculpt';
 import { getSpringTransition, getTimedTransition } from '@/lib/motion/tokens';
 
 interface MusclePathProps {
@@ -11,6 +11,8 @@ interface MusclePathProps {
   isSelected: boolean;
   isHovered: boolean;
   isDisabled: boolean;
+  /** Receded layer: drawn faint and fully non-interactive. */
+  isGhost?: boolean;
   highlight?: MuscleHighlight;
   colorByGroup: boolean;
   accentColor: string;
@@ -41,6 +43,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   isSelected,
   isHovered,
   isDisabled,
+  isGhost = false,
   highlight,
   colorByGroup,
   accentColor,
@@ -89,16 +92,17 @@ export const MusclePath: React.FC<MusclePathProps> = ({
 
   // Determine opacity based on state - improved unselected visibility
   const opacity = useMemo(() => {
+    if (isGhost) return getGhostOpacity(isSelected);
     if (isDisabled) return 0.15;
     if (highlight) {
       const baseOpacity = highlight.intensity / 100;
       return Math.max(0.5, Math.min(1, baseOpacity * 0.5 + 0.5));
     }
     return getMuscleOpacity({ isSelected, isHovered, isDisabled }, sculpt, hoverIntensity);
-  }, [isSelected, isHovered, isDisabled, highlight, hoverIntensity, sculpt]);
+  }, [isGhost, isSelected, isHovered, isDisabled, highlight, hoverIntensity, sculpt]);
 
-  const isResting = !isSelected && !isHovered && !isDisabled && !highlight;
-  const scale = isHovered && !isDisabled ? (hoverIntensity === 'strong' ? 1.07 : 1.03) : isSelected ? 1.01 : 1;
+  const isResting = !isGhost && !isSelected && !isHovered && !isDisabled && !highlight;
+  const scale = isGhost ? 1 : isHovered && !isDisabled ? (hoverIntensity === 'strong' ? 1.07 : 1.03) : isSelected ? 1.01 : 1;
   const transition = reduceMotion
     ? { duration: 0 }
     : {
@@ -108,7 +112,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
 
   // Enhanced multi-layer glow effect for premium appearance
   const glowFilter = useMemo(() => {
-    if (isDisabled) return 'none';
+    if (isGhost || isDisabled) return 'none';
 
     if (highlight && highlight.intensity > 50) {
       const intensity = highlight.intensity / 100;
@@ -128,7 +132,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
     }
 
     return 'none';
-  }, [isSelected, isHovered, isDisabled, highlight, glowColor, hoverIntensity]);
+  }, [isGhost, isSelected, isHovered, isDisabled, highlight, glowColor, hoverIntensity]);
 
   const handleMouseEnter = useCallback(
     (e: React.MouseEvent) => {
@@ -203,11 +207,11 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   // Determine if this muscle should have the pulse animation
   const shouldPulse = useMemo(() => {
     if (reduceMotion) return false;
-    if (isDisabled) return false;
+    if (isGhost || isDisabled) return false;
     if (isSelected) return true;
     if (animateHighlights && highlight && highlight.intensity > 50) return true;
     return false;
-  }, [reduceMotion, isDisabled, isSelected, animateHighlights, highlight]);
+  }, [reduceMotion, isGhost, isDisabled, isSelected, animateHighlights, highlight]);
 
   // Calculate animation delay for staggered effect
   const animationDelay = useMemo(() => {
@@ -223,6 +227,25 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   );
 
   if (!pathData) return null;
+
+  if (isGhost) {
+    // Receded layer: no events, focus, roles or glow. A selected ghost keeps its stroke.
+    return (
+      <motion.path
+        d={pathData}
+        className="muscle-path"
+        style={{ transformOrigin: 'center', pointerEvents: 'none', cursor: 'default' }}
+        fill={isSelected ? `url(#gradient-${muscle.group})` : colorByGroup ? groupColor : '#9CA3AF'}
+        stroke={isSelected ? glowColor : 'transparent'}
+        strokeWidth={isSelected ? 1.5 : 0}
+        initial={false}
+        animate={{ opacity, scale: 1, filter: 'none' }}
+        transition={transition}
+        aria-hidden="true"
+        tabIndex={-1}
+      />
+    );
+  }
 
   return (
     <>

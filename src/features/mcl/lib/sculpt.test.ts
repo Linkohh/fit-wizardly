@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SCULPT_DEFAULT, getSculptStyle } from './sculpt';
+import { SCULPT_DEFAULT, getGhostOpacity, getSculptStyle } from './sculpt';
 
 describe('getSculptStyle', () => {
   it('exposes a default of 60', () => {
@@ -33,5 +33,15 @@ describe('getSculptStyle', () => {
   it('clamps out-of-range levels', () => {
     expect(getSculptStyle(-5)).toEqual(getSculptStyle(0));
     expect(getSculptStyle(250)).toEqual(getSculptStyle(100));
+  });
+});
+
+describe('getGhostOpacity', () => {
+  it('keeps an unselected ghost faint', () => {
+    expect(getGhostOpacity(false)).toBe(0.08);
+  });
+
+  it('shows a selected ghost clearly enough to see what is picked', () => {
+    expect(getGhostOpacity(true)).toBe(0.45);
   });
 });

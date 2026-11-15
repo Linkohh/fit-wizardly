@@ -130,6 +130,13 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
     [onViewChange]
   );
 
+  // A hovered muscle can become a ghost or disappear when the view or layer changes
+  // under a stationary pointer, so drop hover and tooltip state when either changes.
+  useEffect(() => {
+    setHoveredMuscle(null);
+    setTooltip((prev) => (prev.visible ? { ...prev, visible: false } : prev));
+  }, [currentView, layer]);
+
   const handleMuscleHover = useCallback(
     (muscle: Muscle | null, event?: React.MouseEvent) => {
       if (muscle && event && containerRef.current) {
@@ -387,6 +394,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 onMuscleLongPress={handleMuscleLongPress}
                 customViewBox={customViewBox}
                 sculptLevel={sculptLevel}
+                layer={layer}
               />
             </div>
           </motion.div>

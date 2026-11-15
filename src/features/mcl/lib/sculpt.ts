@@ -37,3 +37,8 @@ export function getMuscleOpacity(
   if (isHovered) return hoverIntensity === 'strong' ? 1 : 0.95;
   return sculpt.fillOpacity;
 }
+
+/** Opacity for a muscle on the receded layer: faint, unless selected so the pick stays visible. */
+export function getGhostOpacity(isSelected: boolean): number {
+  return isSelected ? 0.45 : 0.08;
+}
