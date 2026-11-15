@@ -90,6 +90,12 @@ describe('AnatomyPanel sizing', () => {
     expect(mocks.muscleSelectorProps.at(-1)?.showSideView).toBe(true);
   });
 
+  it('enables press-and-slide muscle previews in the wizard', () => {
+    render(<AnatomyPanel />);
+
+    expect(mocks.muscleSelectorProps.at(-1)?.enableTouchPreview).toBe(true);
+  });
+
   it('includes dvh-aware sizing classes for iOS viewport stability', () => {
     mocks.isAppleMobile = true;
     render(<AnatomyPanel />);

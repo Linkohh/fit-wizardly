@@ -1,5 +1,4 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Muscle } from '../../../types';
 import { getMuscleGroupColor, getMuscleGroupName } from '../../../data/muscleGroups';
 
@@ -9,7 +8,39 @@ interface MuscleTooltipProps {
   label?: string;
   position: { x: number; y: number };
   visible: boolean;
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  inputType?: 'mouse' | 'touch';
+}
+
+const CANVAS_INSET = 8;
+const MOUSE_GAP = 10;
+const TOUCH_GAP = 24;
+
+function clampToCanvas(offset: number, tooltipSize: number, canvasSize: number): number {
+  return Math.max(CANVAS_INSET, Math.min(offset, canvasSize - tooltipSize - CANVAS_INSET));
+}
+
+function adjustPosition(
+  { x, y }: MuscleTooltipProps['position'],
+  canvas: HTMLDivElement,
+  tooltip: HTMLDivElement,
+  isTouch: boolean,
+): MuscleTooltipProps['position'] {
+  const { width: canvasWidth, height: canvasHeight } = canvas.getBoundingClientRect();
+  const { offsetWidth: width, offsetHeight: height } = tooltip;
+  const gap = isTouch ? TOUCH_GAP : MOUSE_GAP;
+
+  let left = x + gap;
+  if (isTouch) left = x - width / 2;
+  else if (left + width > canvasWidth - CANVAS_INSET) left = x - width - gap;
+
+  const above = y - height - gap;
+  const below = y + gap;
+  const fitsAbove = above >= CANVAS_INSET;
+  const fitsBelow = below + height <= canvasHeight - CANVAS_INSET;
+  const top = fitsAbove && (isTouch || !fitsBelow) ? above : below;
+
+  return { x: clampToCanvas(left, width, canvasWidth), y: clampToCanvas(top, height, canvasHeight) };
 }
 
 export const MuscleTooltip: React.FC<MuscleTooltipProps> = ({
@@ -18,85 +49,49 @@ export const MuscleTooltip: React.FC<MuscleTooltipProps> = ({
   position,
   visible,
   containerRef,
+  inputType = 'mouse',
 }) => {
-  if (!muscle) return null;
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [adjustedPosition, setAdjustedPosition] = useState(position);
+  const isTouch = inputType === 'touch';
 
-  // Calculate position to keep tooltip within bounds
-  const getAdjustedPosition = () => {
-    if (!containerRef.current) return position;
+  useLayoutEffect(() => {
+    const canvas = containerRef.current;
+    const tooltip = tooltipRef.current;
+    if (canvas && tooltip) setAdjustedPosition(adjustPosition(position, canvas, tooltip, isTouch));
+  }, [containerRef, position, muscle, label, visible, isTouch]);
 
-    const container = containerRef.current.getBoundingClientRect();
-    const tooltipWidth = 200;
-    const tooltipHeight = 80;
-    const padding = 10;
-
-    let x = position.x;
-    let y = position.y;
-
-    // Adjust horizontal position
-    if (x + tooltipWidth > container.width - padding) {
-      x = position.x - tooltipWidth - padding;
-    } else {
-      x = position.x + padding;
-    }
-
-    // Adjust vertical position
-    if (y + tooltipHeight > container.height - padding) {
-      y = position.y - tooltipHeight - padding;
-    } else {
-      y = position.y + padding;
-    }
-
-    return { x: Math.max(padding, x), y: Math.max(padding, y) };
-  };
-
-  const adjustedPosition = getAdjustedPosition();
+  if (!muscle || !visible) return null;
   const groupColor = getMuscleGroupColor(muscle.group);
 
   return (
-    <AnimatePresence>
-      {visible && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 5 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.9, y: 5 }}
-          transition={{ duration: 0.15 }}
-          className="absolute z-50 pointer-events-none"
-          style={{
-            left: adjustedPosition.x,
-            top: adjustedPosition.y,
-          }}
-        >
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-3 min-w-[180px]">
-            {/* Muscle group indicator */}
-            <div className="flex items-center gap-2 mb-1">
-              <div
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: groupColor }}
-              />
-              <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                {getMuscleGroupName(muscle.group)}
-              </span>
-            </div>
-
-            {/* Muscle name */}
-            <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
-              {label ?? muscle.name}
-            </h4>
-
-            {/* Scientific name */}
-            <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-              {muscle.scientificName}
-            </p>
-
-            {/* Quick hint */}
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
-              Click for details
-            </p>
-          </div>
-        </motion.div>
+    <div
+      ref={tooltipRef}
+      role="tooltip"
+      className={`absolute z-50 pointer-events-none w-max break-words rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800 ${isTouch ? 'px-3 py-1.5' : 'p-3'}`}
+      style={{
+        left: adjustedPosition.x,
+        top: adjustedPosition.y,
+        maxWidth: `calc(100% - ${CANVAS_INSET * 2}px)`,
+      }}
+    >
+      {!isTouch && (
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: groupColor }} />
+          <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            {getMuscleGroupName(muscle.group)}
+          </span>
+        </div>
       )}
-    </AnimatePresence>
+      <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+        {label ?? muscle.name}
+      </h4>
+      {!isTouch && (
+        <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+          {muscle.scientificName}
+        </p>
+      )}
+    </div>
   );
 };
 

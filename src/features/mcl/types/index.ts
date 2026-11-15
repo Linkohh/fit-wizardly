@@ -69,6 +69,8 @@ export interface MuscleSelectorProps {
   showSearch?: boolean;
   showLegend?: boolean;
   showTooltip?: boolean;
+  /** Preview muscles by holding and sliding a finger on the diagram. */
+  enableTouchPreview?: boolean;
   showInfoPanel?: boolean;
   showSelectionSidebar?: boolean;
   colorByGroup?: boolean;

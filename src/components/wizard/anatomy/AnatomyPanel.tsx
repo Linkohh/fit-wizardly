@@ -77,6 +77,7 @@ export function AnatomyPanel() {
                         showInfoPanel={true}
                         showSelectionSidebar={true}
                         showSideView
+                        enableTouchPreview
                         showLegend={false}
                         headerControlsMode="embedded"
                         theme={themeMode}
