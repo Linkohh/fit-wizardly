@@ -110,6 +110,15 @@ describe('MuscleSelector side view paired selection', () => {
     expect(onSelectionChange).toHaveBeenCalledWith(['biceps-left']);
   });
 
+  it('a disabled muscle click does not change the selection', () => {
+    const onSelectionChange = vi.fn();
+    renderSide({ disabledMuscles: PAIR, onSelectionChange });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Biceps (disabled)' }));
+
+    expect(onSelectionChange).not.toHaveBeenCalled();
+  });
+
   it('keeps firing onMuscleClick once per click', () => {
     const onMuscleClick = vi.fn();
     renderSide({ onMuscleClick });

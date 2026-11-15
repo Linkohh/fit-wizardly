@@ -166,6 +166,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
         // The side view draws one side only, so a click acts on the whole pair in one history step.
         const disabled = new Set(disabledMuscles);
         const ids = getPairedIds(muscle.id).filter((id) => !disabled.has(id));
+        if (ids.length === 0) return;
         wasSelected = ids.length > 0 && ids.every((id) => selectedIds.includes(id));
 
         if (wasSelected) {

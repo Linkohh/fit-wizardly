@@ -1,20 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useState } from 'react';
 import type { MuscleLayer } from '../../../types';
 import { SculptSlider } from './SculptSlider';
 import { LayerToggle } from './LayerToggle';
 import { MuscleSelector } from '../MuscleSelector';
-
-beforeAll(() => {
-  // Radix slider measures its track in jsdom; keep stubs local to this file.
-  class ResizeObserverStub {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-  vi.stubGlobal('ResizeObserver', ResizeObserverStub);
-});
 
 beforeEach(() => {
   localStorage.clear();

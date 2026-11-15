@@ -96,3 +96,17 @@ if (!('IntersectionObserver' in window)) {
     value: NoopIntersectionObserver,
   });
 }
+
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  class NoopResizeObserver implements ResizeObserver {
+    observe(): void {}
+    unobserve(): void {}
+    disconnect(): void {}
+  }
+
+  Object.defineProperty(globalThis, 'ResizeObserver', {
+    writable: true,
+    configurable: true,
+    value: NoopResizeObserver,
+  });
+}
