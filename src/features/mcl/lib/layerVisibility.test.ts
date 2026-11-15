@@ -20,13 +20,15 @@ describe('getLayerRole', () => {
     expect(getLayerRole(implicitSurface, 'side', 'deep')).toBe('ghost');
   });
 
-  it('returns active for every muscle in front and back when layer is deep', () => {
-    for (const view of ['front', 'back'] as const) {
-      for (const layer of ['surface', 'deep'] as const) {
-        for (const m of muscles) {
-          expect(getLayerRole(m, view, layer)).toBe('active');
-        }
-      }
-    }
+  it('applies the same rule on front and back', () => {
+    const rhomboid = muscles.find((m) => m.id === 'rhomboid-left');
+    const lat = muscles.find((m) => m.id === 'latissimus-dorsi-left');
+    if (!rhomboid || !lat) throw new Error('fixture muscles missing');
+    expect(getLayerRole(rhomboid, 'back', 'surface')).toBe('hidden');
+    expect(getLayerRole(rhomboid, 'back', 'deep')).toBe('active');
+    expect(getLayerRole(lat, 'back', 'surface')).toBe('active');
+    expect(getLayerRole(lat, 'back', 'deep')).toBe('ghost');
+    expect(getLayerRole(surface, 'front', 'deep')).toBe('ghost');
+    expect(getLayerRole(deep, 'front', 'surface')).toBe('hidden');
   });
 });

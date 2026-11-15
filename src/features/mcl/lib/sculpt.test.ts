@@ -37,11 +37,20 @@ describe('getSculptStyle', () => {
 });
 
 describe('getGhostOpacity', () => {
-  it('keeps an unselected ghost faint', () => {
-    expect(getGhostOpacity(false)).toBe(0.08);
+  it('follows the sculpt level so the receded layer never looks switched off', () => {
+    expect(getGhostOpacity(false, getSculptStyle(0))).toBeCloseTo(0.12 * 0.35);
+    expect(getGhostOpacity(false, getSculptStyle(100))).toBeCloseTo(0.6 * 0.35);
   });
 
-  it('shows a selected ghost clearly enough to see what is picked', () => {
-    expect(getGhostOpacity(true)).toBe(0.45);
+  it('always stays clearly below the active layer', () => {
+    for (const level of [0, 25, 50, 75, 100]) {
+      const sculpt = getSculptStyle(level);
+      expect(getGhostOpacity(false, sculpt)).toBeLessThan(sculpt.fillOpacity * 0.6);
+    }
+  });
+
+  it('keeps a selected or highlighted ghost readable at any level', () => {
+    expect(getGhostOpacity(true, getSculptStyle(0))).toBe(0.45);
+    expect(getGhostOpacity(true, getSculptStyle(100))).toBe(0.45);
   });
 });

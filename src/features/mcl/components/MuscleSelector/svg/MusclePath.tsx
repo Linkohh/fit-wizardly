@@ -31,6 +31,9 @@ interface MusclePathProps {
   onLongPress?: (muscle: Muscle) => void;
 }
 
+// The receded layer is drawn in neutral grey, so colour always means "this is the layer you can pick from".
+const GHOST_FILL = '#9CA3AF';
+
 // Color mapping for highlight types
 const highlightColors: Record<MuscleHighlight['type'], { fill: string; glow: string }> = {
   fatigue: { fill: '#EF4444', glow: 'rgba(239, 68, 68, 0.5)' },
@@ -95,7 +98,8 @@ export const MusclePath: React.FC<MusclePathProps> = ({
 
   // Determine opacity based on state - improved unselected visibility
   const opacity = useMemo(() => {
-    if (isGhost) return getGhostOpacity(isSelected);
+    // A ghost that is selected or highlighted stays readable on the other layer.
+    if (isGhost) return getGhostOpacity(isSelected || Boolean(highlight), sculpt);
     if (isDisabled) return 0.15;
     if (highlight) {
       const baseOpacity = highlight.intensity / 100;
@@ -232,15 +236,18 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   if (!pathData) return null;
 
   if (isGhost) {
-    // Receded layer: no events, focus, roles or glow. A selected ghost keeps its stroke.
+    // Receded layer: no events, focus, roles or glow. A selected ghost keeps its stroke,
+    // and a highlighted one (search or region match on the other layer) takes the highlight colour.
+    const ghostHighlightColor = !isSelected && highlight ? highlightColors[highlight.type].fill : null;
     return (
       <motion.path
         d={pathData}
         className="muscle-path"
         style={{ transformOrigin: 'center', pointerEvents: 'none', cursor: 'default' }}
-        fill={isSelected ? `url(#gradient-${muscle.group})` : colorByGroup ? groupColor : '#9CA3AF'}
-        stroke={isSelected ? glowColor : 'transparent'}
-        strokeWidth={isSelected ? 1.5 : 0}
+        fill={isSelected ? `url(#gradient-${muscle.group})` : ghostHighlightColor ?? GHOST_FILL}
+        stroke={isSelected ? glowColor : ghostHighlightColor ?? 'transparent'}
+        strokeWidth={isSelected ? 1.5 : ghostHighlightColor ? 1 : 0}
+        data-ghost-highlight={ghostHighlightColor ? 'true' : undefined}
         initial={false}
         animate={{ opacity, scale: 1, filter: 'none' }}
         transition={transition}

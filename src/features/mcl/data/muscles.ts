@@ -952,6 +952,274 @@ export const muscles: Muscle[] = [
     paths: {
       front: 'M108,55 C112,58 115,65 114,72 L108,78 L100,75 L102,65 C102,58 104,55 108,55 Z'
     }
+  },
+
+  // Deep layer, front and back views (2026-11-15)
+  {
+    id: 'pectoralis-minor-left',
+    name: 'Pectoralis Minor (Left)',
+    scientificName: 'Pectoralis Minor',
+    group: 'chest',
+    function: 'Pulls the shoulder blade forward and down; assists breathing',
+    exercises: ['Dips', 'Push-Up Plus', 'Cable Pullover'],
+    views: ['front'],
+    layer: 'deep',
+    relatedMuscles: ['pectoralis-major-left', 'serratus-anterior-left'],
+    paths: {
+      front: 'M60,80 C65,79 70,83 75,88 C80,93 86,99 88,105 C84,107 79,106 75,103 C70,98 64,91 61,86 C59,83 59,81 60,80 Z'
+    }
+  },
+  {
+    id: 'pectoralis-minor-right',
+    name: 'Pectoralis Minor (Right)',
+    scientificName: 'Pectoralis Minor',
+    group: 'chest',
+    function: 'Pulls the shoulder blade forward and down; assists breathing',
+    exercises: ['Dips', 'Push-Up Plus', 'Cable Pullover'],
+    views: ['front'],
+    layer: 'deep',
+    relatedMuscles: ['pectoralis-major-right', 'serratus-anterior-right'],
+    paths: {
+      front: 'M140,80 C135,79 130,83 125,88 C120,93 114,99 112,105 C116,107 121,106 125,103 C130,98 136,91 139,86 C141,83 141,81 140,80 Z'
+    }
+  },
+  {
+    id: 'subscapularis-left',
+    name: 'Subscapularis (Left)',
+    scientificName: 'Subscapularis',
+    group: 'back',
+    function: 'Internal rotation of the arm (rotator cuff)',
+    exercises: ['Cable Internal Rotation', 'Band Internal Rotation'],
+    views: ['front'],
+    layer: 'deep',
+    relatedMuscles: ['infraspinatus-left', 'teres-minor-left', 'supraspinatus-left'],
+    paths: {
+      front: 'M46,92 C50,89 57,90 62,94 C64,98 63,103 60,108 C55,106 50,102 47,98 C45,96 45,94 46,92 Z'
+    }
+  },
+  {
+    id: 'subscapularis-right',
+    name: 'Subscapularis (Right)',
+    scientificName: 'Subscapularis',
+    group: 'back',
+    function: 'Internal rotation of the arm (rotator cuff)',
+    exercises: ['Cable Internal Rotation', 'Band Internal Rotation'],
+    views: ['front'],
+    layer: 'deep',
+    relatedMuscles: ['infraspinatus-right', 'teres-minor-right', 'supraspinatus-right'],
+    paths: {
+      front: 'M154,92 C150,89 143,90 138,94 C136,98 137,103 140,108 C145,106 150,102 153,98 C155,96 155,94 154,92 Z'
+    }
+  },
+  {
+    id: 'transverse-abdominis',
+    name: 'Transverse Abdominis',
+    scientificName: 'Transversus Abdominis',
+    group: 'core',
+    function: 'Deep core stabilization; draws the abdomen in',
+    exercises: ['Plank', 'Dead Bug', 'Stomach Vacuum'],
+    views: ['front'],
+    layer: 'deep',
+    relatedMuscles: ['rectus-abdominis', 'external-oblique-left', 'external-oblique-right'],
+    paths: {
+      front: 'M62,140 C75,134 90,132 100,132 C110,132 125,134 138,140 C141,155 141,172 137,190 C125,198 110,202 100,202 C90,202 75,198 63,190 C59,172 59,155 62,140 Z'
+    }
+  },
+  {
+    id: 'iliopsoas-left',
+    name: 'Iliopsoas (Left)',
+    scientificName: 'Iliopsoas',
+    group: 'legs',
+    function: 'Hip flexion (primary hip flexor)',
+    exercises: ['Hanging Leg Raise', 'Psoas March', 'Mountain Climbers'],
+    views: ['front'],
+    layer: 'deep',
+    relatedMuscles: ['rectus-femoris-left', 'adductor-left'],
+    paths: {
+      front: 'M92,168 C96,170 97,178 96,188 C95,200 91,214 86,226 C84,232 81,236 79,234 C77,230 79,222 81,212 C84,198 87,184 89,174 C89,171 90,168 92,168 Z'
+    }
+  },
+  {
+    id: 'iliopsoas-right',
+    name: 'Iliopsoas (Right)',
+    scientificName: 'Iliopsoas',
+    group: 'legs',
+    function: 'Hip flexion (primary hip flexor)',
+    exercises: ['Hanging Leg Raise', 'Psoas March', 'Mountain Climbers'],
+    views: ['front'],
+    layer: 'deep',
+    relatedMuscles: ['rectus-femoris-right', 'adductor-right'],
+    paths: {
+      front: 'M108,168 C104,170 103,178 104,188 C105,200 109,214 114,226 C116,232 119,236 121,234 C123,230 121,222 119,212 C116,198 113,184 111,174 C111,171 110,168 108,168 Z'
+    }
+  },
+  {
+    id: 'vastus-intermedius-left',
+    name: 'Vastus Intermedius (Left)',
+    scientificName: 'Vastus Intermedius',
+    group: 'legs',
+    function: 'Knee extension (deep quadriceps)',
+    exercises: ['Leg Extension', 'Front Squat', 'Sissy Squat'],
+    views: ['front'],
+    layer: 'deep',
+    relatedMuscles: ['rectus-femoris-left', 'vastus-lateralis-left', 'vastus-medialis-left'],
+    paths: {
+      front: 'M71,245 C76,241 82,242 85,248 C88,268 88,292 85,315 C83,322 76,323 73,317 C69,295 68,268 71,245 Z'
+    }
+  },
+  {
+    id: 'vastus-intermedius-right',
+    name: 'Vastus Intermedius (Right)',
+    scientificName: 'Vastus Intermedius',
+    group: 'legs',
+    function: 'Knee extension (deep quadriceps)',
+    exercises: ['Leg Extension', 'Front Squat', 'Sissy Squat'],
+    views: ['front'],
+    layer: 'deep',
+    relatedMuscles: ['rectus-femoris-right', 'vastus-lateralis-right', 'vastus-medialis-right'],
+    paths: {
+      front: 'M129,245 C124,241 118,242 115,248 C112,268 112,292 115,315 C117,322 124,323 127,317 C131,295 132,268 129,245 Z'
+    }
+  },
+  {
+    id: 'supraspinatus-left',
+    name: 'Supraspinatus (Left)',
+    scientificName: 'Supraspinatus',
+    group: 'back',
+    function: 'Starts arm abduction (rotator cuff)',
+    exercises: ['Full Can Raise', 'Cable Lateral Raise'],
+    views: ['back'],
+    layer: 'deep',
+    relatedMuscles: ['infraspinatus-left', 'teres-minor-left', 'subscapularis-left'],
+    paths: {
+      back: 'M58,77 C65,73 76,72 85,75 C87,77 87,80 85,81.5 C77,82.5 67,82.5 60,81.5 C57,80.5 56.5,78.5 58,77 Z'
+    }
+  },
+  {
+    id: 'supraspinatus-right',
+    name: 'Supraspinatus (Right)',
+    scientificName: 'Supraspinatus',
+    group: 'back',
+    function: 'Starts arm abduction (rotator cuff)',
+    exercises: ['Full Can Raise', 'Cable Lateral Raise'],
+    views: ['back'],
+    layer: 'deep',
+    relatedMuscles: ['infraspinatus-right', 'teres-minor-right', 'subscapularis-right'],
+    paths: {
+      back: 'M142,77 C135,73 124,72 115,75 C113,77 113,80 115,81.5 C123,82.5 133,82.5 140,81.5 C143,80.5 143.5,78.5 142,77 Z'
+    }
+  },
+  {
+    id: 'teres-minor-left',
+    name: 'Teres Minor (Left)',
+    scientificName: 'Teres Minor',
+    group: 'back',
+    function: 'Lateral rotation of the arm (rotator cuff)',
+    exercises: ['Face Pulls', 'Side-Lying External Rotation'],
+    views: ['back'],
+    layer: 'deep',
+    relatedMuscles: ['infraspinatus-left', 'supraspinatus-left', 'teres-major-left'],
+    paths: {
+      back: 'M50,92 C53,91 57,94 61,98 C64,101 67,104 68,107 C66,109 63,108 60,106 C56,103 52,99 49,96 C48,94 48,93 50,92 Z'
+    }
+  },
+  {
+    id: 'teres-minor-right',
+    name: 'Teres Minor (Right)',
+    scientificName: 'Teres Minor',
+    group: 'back',
+    function: 'Lateral rotation of the arm (rotator cuff)',
+    exercises: ['Face Pulls', 'Side-Lying External Rotation'],
+    views: ['back'],
+    layer: 'deep',
+    relatedMuscles: ['infraspinatus-right', 'supraspinatus-right', 'teres-major-right'],
+    paths: {
+      back: 'M150,92 C147,91 143,94 139,98 C136,101 133,104 132,107 C134,109 137,108 140,106 C144,103 148,99 151,96 C152,94 152,93 150,92 Z'
+    }
+  },
+  {
+    id: 'gluteus-minimus-left',
+    name: 'Gluteus Minimus (Left)',
+    scientificName: 'Gluteus Minimus',
+    group: 'glutes',
+    function: 'Hip abduction and pelvic stability',
+    exercises: ['Side-Lying Hip Abduction', 'Banded Lateral Walk', 'Clamshell'],
+    views: ['back'],
+    layer: 'deep',
+    relatedMuscles: ['gluteus-medius-left', 'gluteus-maximus-left'],
+    paths: {
+      back: 'M56,196 C62,191 70,191 75,196 C77,203 75,211 70,217 C66,220 61,219 58,215 C54,209 53,202 56,196 Z'
+    }
+  },
+  {
+    id: 'gluteus-minimus-right',
+    name: 'Gluteus Minimus (Right)',
+    scientificName: 'Gluteus Minimus',
+    group: 'glutes',
+    function: 'Hip abduction and pelvic stability',
+    exercises: ['Side-Lying Hip Abduction', 'Banded Lateral Walk', 'Clamshell'],
+    views: ['back'],
+    layer: 'deep',
+    relatedMuscles: ['gluteus-medius-right', 'gluteus-maximus-right'],
+    paths: {
+      back: 'M144,196 C138,191 130,191 125,196 C123,203 125,211 130,217 C134,220 139,219 142,215 C146,209 147,202 144,196 Z'
+    }
+  },
+  {
+    id: 'semimembranosus-left',
+    name: 'Semimembranosus (Left)',
+    scientificName: 'Semimembranosus',
+    group: 'legs',
+    function: 'Knee flexion and hip extension (inner hamstring)',
+    exercises: ['Romanian Deadlift', 'Seated Leg Curl', 'Good Morning'],
+    views: ['back'],
+    layer: 'deep',
+    relatedMuscles: ['semitendinosus-left', 'biceps-femoris-left'],
+    paths: {
+      back: 'M78,270 C82,268 85,272 86,280 C87,300 86,325 83,345 C82,350 78,351 77,346 C75,325 75,298 76,278 C76,274 77,271 78,270 Z'
+    }
+  },
+  {
+    id: 'semimembranosus-right',
+    name: 'Semimembranosus (Right)',
+    scientificName: 'Semimembranosus',
+    group: 'legs',
+    function: 'Knee flexion and hip extension (inner hamstring)',
+    exercises: ['Romanian Deadlift', 'Seated Leg Curl', 'Good Morning'],
+    views: ['back'],
+    layer: 'deep',
+    relatedMuscles: ['semitendinosus-right', 'biceps-femoris-right'],
+    paths: {
+      back: 'M122,270 C118,268 115,272 114,280 C113,300 114,325 117,345 C118,350 122,351 123,346 C125,325 125,298 124,278 C124,274 123,271 122,270 Z'
+    }
+  },
+  {
+    id: 'plantaris-left',
+    name: 'Plantaris (Left)',
+    scientificName: 'Plantaris',
+    group: 'calves',
+    function: 'Assists ankle plantar flexion and knee flexion',
+    exercises: ['Seated Calf Raise', 'Standing Calf Raise'],
+    views: ['back'],
+    layer: 'deep',
+    relatedMuscles: ['gastrocnemius-left', 'soleus-left'],
+    paths: {
+      back: 'M62,350 C66,348 70,351 71,357 C72,366 71,378 69,390 C68,394 65,394 64,390 C63,378 61,366 60,357 C60,353 60,351 62,350 Z'
+    }
+  },
+  {
+    id: 'plantaris-right',
+    name: 'Plantaris (Right)',
+    scientificName: 'Plantaris',
+    group: 'calves',
+    function: 'Assists ankle plantar flexion and knee flexion',
+    exercises: ['Seated Calf Raise', 'Standing Calf Raise'],
+    views: ['back'],
+    layer: 'deep',
+    relatedMuscles: ['gastrocnemius-right', 'soleus-right'],
+    paths: {
+      back: 'M138,350 C134,348 130,351 129,357 C128,366 129,378 131,390 C132,394 135,394 136,390 C137,378 139,366 140,357 C140,353 140,351 138,350 Z'
+    }
   }
 ];
 

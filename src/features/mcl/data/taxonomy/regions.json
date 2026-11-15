@@ -1,0 +1,35 @@
+{
+  "head": [
+    "head"
+  ],
+  "neck": [
+    "neck",
+    "trapezius_upper"
+  ],
+  "shoulders": [
+    "shoulders",
+    "trapezius",
+    "rotator_cuff"
+  ],
+  "chest": [
+    "chest"
+  ],
+  "back": [
+    "back"
+  ],
+  "arms": [
+    "arms"
+  ],
+  "core": [
+    "core"
+  ],
+  "hips": [
+    "hips"
+  ],
+  "legs": [
+    "legs"
+  ],
+  "feet": [
+    "feet"
+  ]
+}

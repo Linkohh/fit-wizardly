@@ -145,6 +145,35 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-15 — Anatomy Search, Regions, Deep Layers (branch `feat/anatomy-taxonomy-deep-layers`, stacked on `feat/side-view-sculpt`)
+
+Design: `docs/superpowers/specs/2026-11-15-anatomy-taxonomy-and-deep-layers-design.md` (section 14 lists what changed during the build). Plan: `docs/superpowers/plans/2026-11-15-anatomy-taxonomy-and-deep-layers.md`. Source material: Lincoln's `BUILD-PLAN.md`, `muscle-taxonomy.json` and `regions.json` (Google Drive, `fitwizard-anatomy/`). Verified at the end (`0b643c0`): 144 test files / 766 tests pass (was 138 / 666), ESLint 0 errors on `src/`, type-check 0 errors.
+
+- **What was done:** The muscle selector can now be searched by nickname and by body region, both through one engine (`src/features/mcl/lib/anatomyEngine.ts`) and one highlight path. The Surface / Deep toggle now works on the front and back views as well as the side, with ten new deep muscles. The receded layer now follows the Sculpt slider.
+- **Added:**
+  - Taxonomy data: 70-node muscle tree and 10 regions in `src/features/mcl/data/taxonomy/`, Zod-checked at load.
+  - Engine: `resolveSearch`, `resolveRegion`, `toFocusHighlights`. Plain TypeScript, no dependencies. Typo tolerance for words of 5+ letters.
+  - Interface: region chips row, result row with per-muscle select and "Select all", search box on phones.
+  - Deep muscles (front): pectoralis minor, subscapularis, transverse abdominis, iliopsoas, vastus intermedius. (Back): supraspinatus, teres minor, gluteus minimus, semimembranosus, plantaris. Each has a workout-group entry in `src/lib/muscleMapping.ts`.
+- **Changed:**
+  - `getLayerRole` applies on every view. On the back view the 11 existing deep muscles (rhomboids, teres major, infraspinatus, erector spinae, gluteus medius, soleus) are now picked on Deep, not Surface.
+  - Receded-layer muscles are neutral grey at 35% of the active layer's opacity (was a fixed 8% in group colour).
+  - A search or region match on the other layer shows as a highlighted ghost.
+  - Non-Apple phones: shell `min(84dvh, 720px)` (was 78dvh / 680px); inline selected list 26% when empty or while searching, 40% otherwise (was a fixed 40%).
+- **Removed:**
+  - The old search dropdown in `SearchBar` (name-only match, group colour dot, hover preview). `searchMuscles` in `data/muscles.ts` is no longer used by the selector but is still exported.
+  - The side-only restriction on the layer toggle.
+- **Corrections made to the source JSON:** shin moved out of Calves; Calves and Trapezius re-parented; "long head", "rotator cuff", "glutes", "hip flexors" and "abs" aliases de-duplicated; Rotator Cuff and Glutes group nodes added; upper/middle/lower traps and abs added; Head and Feet marked not selectable.
+- **Measured (body map height, empty / selected / selected while searching):** Android profile 360x740: 275 / 190 / 237px; 375x812: 319 / 225 / 281px; 412x915: 353 / 253 / about 315px. iPhone 17 Pro simulator (Safari): bottom-sheet layout, map about 300pt. **Not checked:** a physical phone, light theme, reduced motion.
+- **TODO/FIXME introduced:** none.
+- **Legal/compliance notes:** None this session. No new stored data.
+- **New issues:** DEBT-023, DEBT-024 (LOW; see Known Issues).
+- **Next steps:**
+  1. Merge PR 40 (`feat/side-view-sculpt`) first, then this branch.
+  2. Second artwork pass on the deep muscles (DEBT-023).
+  3. Decide on separate shapes for muscle heads and deep muscles on the side view (DEBT-024).
+  4. Check on a physical iPhone and Android phone.
+
 ### 2026-11-15 — Side-View Sculpt (branch `feat/side-view-sculpt`, from `preview_b` @ `0feb8cf`)
 
 Design: `docs/superpowers/specs/2026-11-14-side-view-sculpt-design.md`. Plan: `docs/superpowers/plans/2026-11-14-side-view-sculpt.md`. Built 2026-11-14/15 with one implementer and one reviewer subagent per task, then a whole-branch review. Verified at the end (`42a04ca`): 137 test files / 662 tests pass (was 126 / 553), `npm run build` OK, ESLint 0 errors on `src/`. A full `npm run lint` in the main checkout reports 22 errors, all in generated iOS folders (`ios/DerivedData`, `ios/App/CapApp-SPM/.build`), none in source.
@@ -500,6 +529,8 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-010 | ~~Duplicate `config 2/3.xml` tracked in git~~ **RESOLVED 2026-09-27** | — | Removed; an untracked `config 4.xml` may remain in the main checkout — delete locally. |
 | DEBT-011 | About long-form copy + release notes English-only | `src/locales/{es,pt,de}.json`, `src/data/changelog.ts` | UI labels are translated; story/mission/creator/changelog bodies fall back to `en`. |
 | DEBT-019 | Muscle selector controls are hardcoded English (Sculpt, Surface, Deep; also the older Front/Back/Side) | `src/features/mcl/components/MuscleSelector/ui/` | The MCL feature does not use i18next yet. |
+| DEBT-023 | Deep-layer artwork on front and back is a first pass; teres minor and plantaris are thin, and deep shapes overlap each other | `src/features/mcl/data/muscles.ts` | Checked by position tests (`deepAnatomy.test.ts`), not by an anatomist. |
+| DEBT-024 | Muscle heads (pec clavicular/sternal, triceps long/lateral/medial, biceps femoris short) share the parent's shape; the ten new deep muscles are not on the side view; internal oblique is not drawn | `src/features/mcl/data/taxonomy/`, `data/muscles.ts` | Searchable today. Separate shapes would change ids saved workouts use. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
 | DEBT-022 | `npm run lint` fails locally with 22 errors from generated iOS folders | `eslint.config.js` | Add `ios/DerivedData` and `ios/**/.build` to the ESLint ignores. Also a stray `node_modules/@types/node 2` folder breaks a bare `tsc`. |
@@ -567,6 +598,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 ## Backlog / Next Steps
 
 ### Immediate (unblocked)
+- [ ] Merge the `feat/anatomy-taxonomy-deep-layers` PR after PR 40
 - [ ] Merge the `feat/side-view-sculpt` PR into `preview_b`; then check the side view on a real iPhone and Android phone
 - [ ] Merge PR #28 into `preview_b` — all code review issues resolved
 - [x] Guard or remove `/mcl` dev route from production build — AUDIT-004 (done 2026-09-27)

@@ -63,9 +63,15 @@ describe('side muscle coverage and layers', () => {
     }
   });
 
-  it('deep layer is exactly the 13 ids: rhomboid, infraspinatus, teres-major, brachialis, soleus, gluteus-medius (left+right) and erector-spinae', () => {
-    const paired = ['rhomboid', 'infraspinatus', 'teres-major', 'brachialis', 'soleus', 'gluteus-medius'];
-    const expected = [...paired.flatMap((id) => [`${id}-left`, `${id}-right`]), 'erector-spinae'].sort();
+  it('deep layer is the 13 original ids plus the front and back deep muscles', () => {
+    const paired = [
+      'rhomboid', 'infraspinatus', 'teres-major', 'brachialis', 'soleus', 'gluteus-medius',
+      // front and back deep layer (see deepAnatomy.test.ts)
+      'pectoralis-minor', 'subscapularis', 'iliopsoas', 'vastus-intermedius',
+      'supraspinatus', 'teres-minor', 'gluteus-minimus', 'semimembranosus', 'plantaris',
+    ];
+    const single = ['erector-spinae', 'transverse-abdominis'];
+    const expected = [...paired.flatMap((id) => [`${id}-left`, `${id}-right`]), ...single].sort();
     const deep = muscles.filter((m) => m.layer === 'deep').map((m) => m.id).sort();
     expect(deep).toEqual(expected);
   });

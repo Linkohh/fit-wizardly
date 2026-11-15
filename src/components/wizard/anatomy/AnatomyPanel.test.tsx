@@ -105,8 +105,8 @@ describe('AnatomyPanel sizing', () => {
     render(<AnatomyPanel />);
 
     const shell = screen.getByTestId('anatomy-selector-shell');
-    expect(shell).toHaveClass('h-[min(78vh,680px)]');
-    expect(shell).toHaveClass('supports-[height:100dvh]:h-[min(78dvh,680px)]');
+    expect(shell).toHaveClass('h-[min(84vh,720px)]');
+    expect(shell).toHaveClass('supports-[height:100dvh]:h-[min(84dvh,720px)]');
     expect(shell).toHaveClass('sm:h-[600px]');
     expect(shell).not.toHaveClass('h-[min(62vh,560px)]');
   });

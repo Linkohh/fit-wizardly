@@ -71,7 +71,8 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   const highlightedSet = useMemo(() => new Set(highlightMap.keys()), [highlightMap]);
 
   // Ghosts paint first (behind), then active muscles; each group is sorted so
-  // selected/highlighted ones render on top (side view: by depth first). Hidden muscles are dropped unless selected.
+  // selected/highlighted ones render on top (side view: by depth first). Hidden muscles are dropped unless
+  // selected or highlighted, so a search match on the other layer is never invisible.
   const { ghostMuscles, activeMuscles, hiddenSelectedMuscles } = useMemo(() => {
     const ghosts: Muscle[] = [];
     const hiddenSelected: Muscle[] = [];
@@ -80,7 +81,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
       const role = getLayerRole(muscle, view, layer);
       if (role === 'ghost') ghosts.push(muscle);
       else if (role === 'active') active.push(muscle);
-      else if (selectedSet.has(muscle.id)) hiddenSelected.push(muscle);
+      else if (selectedSet.has(muscle.id) || highlightedSet.has(muscle.id)) hiddenSelected.push(muscle);
     }
     const state = {
       selected: selectedSet,
@@ -99,7 +100,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
     () => [
       ...ghostMuscles.map((muscle) => ({ muscle, isGhost: true })),
       ...activeMuscles.map((muscle) => ({ muscle, isGhost: false })),
-      // Selected muscles on the hidden layer stay visible as inert ghosts, drawn last so surface muscles do not bury them.
+      // Selected or highlighted muscles on the hidden layer stay visible as inert ghosts, drawn last so surface muscles do not bury them.
       ...hiddenSelectedMuscles.map((muscle) => ({ muscle, isGhost: true })),
     ],
     [ghostMuscles, activeMuscles, hiddenSelectedMuscles]

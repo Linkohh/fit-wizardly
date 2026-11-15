@@ -48,18 +48,13 @@ describe('LayerToggle', () => {
 });
 
 describe('MuscleSelector sculpt controls', () => {
-  it('shows the slider in every view and the layer toggle only in side view', () => {
+  it('shows the slider and the layer toggle in every view', () => {
     render(<MuscleSelector showLegend={false} showSideView />);
-    expect(screen.getByTestId('sculpt-slider')).toBeInTheDocument();
-    expect(screen.queryByTestId('layer-toggle')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Side' }));
-    expect(screen.getByTestId('sculpt-slider')).toBeInTheDocument();
-    expect(screen.getByTestId('layer-toggle')).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Back' }));
-    expect(screen.getByTestId('sculpt-slider')).toBeInTheDocument();
-    expect(screen.queryByTestId('layer-toggle')).not.toBeInTheDocument();
+    for (const view of ['Front', 'Side', 'Back']) {
+      fireEvent.click(screen.getByRole('button', { name: view }));
+      expect(screen.getByTestId('sculpt-slider')).toBeInTheDocument();
+      expect(screen.getByTestId('layer-toggle')).toBeInTheDocument();
+    }
   });
 
   it('hides the controls when showHeader is false', () => {

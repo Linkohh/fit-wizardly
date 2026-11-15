@@ -86,6 +86,27 @@ export const MCL_TO_LEGACY_MAP: Record<string, MuscleGroup> = {
     // Neck
     'sternocleidomastoid-left': 'neck',
     'sternocleidomastoid-right': 'neck',
+
+    // Deep layer (front and back views)
+    'pectoralis-minor-left': 'chest',
+    'pectoralis-minor-right': 'chest',
+    'subscapularis-left': 'upper_back',
+    'subscapularis-right': 'upper_back',
+    'transverse-abdominis': 'abs',
+    'iliopsoas-left': 'hip_flexors',
+    'iliopsoas-right': 'hip_flexors',
+    'vastus-intermedius-left': 'quads',
+    'vastus-intermedius-right': 'quads',
+    'supraspinatus-left': 'upper_back',
+    'supraspinatus-right': 'upper_back',
+    'teres-minor-left': 'upper_back',
+    'teres-minor-right': 'upper_back',
+    'gluteus-minimus-left': 'glutes',
+    'gluteus-minimus-right': 'glutes',
+    'semimembranosus-left': 'hamstrings',
+    'semimembranosus-right': 'hamstrings',
+    'plantaris-left': 'calves',
+    'plantaris-right': 'calves',
 };
 
 // Helper to get all MCL IDs for a given Legacy Group
