@@ -9,7 +9,8 @@ interface AnatomyResultListProps {
   current: ViewAndLayer;
   selectedIds: string[];
   onSelectMember: (member: AnatomyMember) => void;
-  onSelectAll: () => void;
+  /** Omitted in single-select mode, where selecting every match at once is not allowed. */
+  onSelectAll?: () => void;
   onClear: () => void;
 }
 
@@ -78,14 +79,16 @@ export const AnatomyResultList: React.FC<AnatomyResultListProps> = ({
           );
         })}
       </ul>
-      <button
-        type="button"
-        onClick={onSelectAll}
-        disabled={result.muscleIds.length === 0 || allSelected}
-        className="shrink-0 rounded-md bg-primary/20 px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/30 disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        {allSelected ? 'All selected' : 'Select all'}
-      </button>
+      {onSelectAll && (
+        <button
+          type="button"
+          onClick={onSelectAll}
+          disabled={result.muscleIds.length === 0 || allSelected}
+          className="shrink-0 rounded-md bg-primary/20 px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/30 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {allSelected ? 'All selected' : 'Select all'}
+        </button>
+      )}
       <button
         type="button"
         onClick={onClear}

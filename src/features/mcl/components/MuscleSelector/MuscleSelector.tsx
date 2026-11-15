@@ -301,6 +301,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
       const disabled = new Set(disabledMuscles);
       const allowed = ids.filter((id) => !disabled.has(id));
       if (allowed.length === 0) return;
+      // Single-select replaces the selection with this one muscle (both sides, like a side-view click).
       setSelection(multiSelect ? [...selectedIds, ...allowed.filter((id) => !selectedIds.includes(id))] : allowed);
       void emit('select');
     },
@@ -312,9 +313,10 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
     [selectFocusedIds]
   );
 
+  // Bulk selection only makes sense when several muscles can be selected at once.
   const handleSelectAllFocus = useCallback(() => {
-    if (anatomyFocus) selectFocusedIds(anatomyFocus.muscleIds);
-  }, [anatomyFocus, selectFocusedIds]);
+    if (anatomyFocus && multiSelect) selectFocusedIds(anatomyFocus.muscleIds);
+  }, [anatomyFocus, multiSelect, selectFocusedIds]);
 
   // Selected muscles keep their selected look; only the rest get the focus highlight.
   const canvasHighlights = useMemo(() => {
@@ -490,7 +492,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
             current={{ view: currentView, layer }}
             selectedIds={selectedIds}
             onSelectMember={handleSelectFocusMember}
-            onSelectAll={handleSelectAllFocus}
+            onSelectAll={multiSelect ? handleSelectAllFocus : undefined}
             onClear={handleClearAnatomyFocus}
           />
         )}

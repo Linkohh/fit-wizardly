@@ -116,6 +116,23 @@ describe('MuscleSelector anatomy search and regions', () => {
     expect(sidebar).toHaveClass('h-[40%]');
   });
 
+  it('single-select mode offers no Select all, and a name replaces the selection with that one muscle', () => {
+    const onSelectionChange = vi.fn();
+    render(
+      <MuscleSelector showLegend={false} defaultView="front" multiSelect={false} onSelectionChange={onSelectionChange} />
+    );
+
+    typeInSearch('arms');
+
+    expect(screen.queryByRole('button', { name: 'Select all' })).not.toBeInTheDocument();
+
+    const list = screen.getByTestId('anatomy-result-list');
+    fireEvent.click(within(list).getByText('Biceps Brachii'));
+    fireEvent.click(within(list).getByText('Brachialis'));
+
+    expect((onSelectionChange.mock.calls.at(-1)?.[0] as string[]).sort()).toEqual(['brachialis-left', 'brachialis-right']);
+  });
+
   it('the Back chip lists the region, and tapping it again clears it', () => {
     render(<MuscleSelector showLegend={false} defaultView="back" />);
 
