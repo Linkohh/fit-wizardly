@@ -127,6 +127,10 @@ vi.mock('./ui/InfoPanel', () => ({
     isOpen ? <div data-testid="info-panel">{muscle?.name}</div> : null,
 }));
 
+vi.mock('./ui/SculptSlider', () => ({
+  default: () => <div data-testid="sculpt-slider-stub" />,
+}));
+
 vi.mock('./ui/ViewSwitcher', () => ({
   default: () => <div />,
 }));

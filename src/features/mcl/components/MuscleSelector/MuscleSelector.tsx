@@ -5,8 +5,11 @@ import { MuscleSelectorProps, ViewType, Muscle, TooltipState, InfoPanelState } f
 import { getMuscleById } from '../../data/muscles';
 import { useMuscleSelection } from '../../hooks/useMuscleSelection';
 import { useTheme } from '../../hooks/useTheme';
+import { useSculptPrefs } from '../../hooks/useSculptPrefs';
 import MuscleCanvas from './svg/MuscleCanvas';
 import ViewSwitcher from './ui/ViewSwitcher';
+import SculptSlider from './ui/SculptSlider';
+import LayerToggle from './ui/LayerToggle';
 import MuscleTooltip from './ui/MuscleTooltip';
 import InfoPanel from './ui/InfoPanel';
 import SelectionSidebar from './ui/SelectionSidebar';
@@ -70,6 +73,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
   // View state
   const [currentView, setCurrentView] = useState<ViewType>(defaultView);
+  const { sculptLevel, setSculptLevel, layer, setLayer } = useSculptPrefs();
 
   // Sync view when defaultView prop changes (for controlled usage)
   useEffect(() => {
@@ -335,6 +339,20 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
           </div>
         )}
 
+        {/* Sculpt controls (slim second row; the header row is too tight) */}
+        {showHeader && (
+          <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4 border-b border-border/30 dark:border-white/10">
+            <div data-testid="sculpt-slider" className="shrink-0">
+              <SculptSlider value={sculptLevel} onChange={setSculptLevel} />
+            </div>
+            {currentView === 'side' && (
+              <div data-testid="layer-toggle" className="shrink-0">
+                <LayerToggle value={layer} onChange={setLayer} />
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Legend */}
         {showLegend && (
           <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
@@ -368,6 +386,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 onMuscleClick={handleMuscleClick}
                 onMuscleLongPress={handleMuscleLongPress}
                 customViewBox={customViewBox}
+                sculptLevel={sculptLevel}
               />
             </div>
           </motion.div>

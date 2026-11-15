@@ -73,6 +73,10 @@ vi.mock('./ui/InfoPanel', () => ({
   default: () => null,
 }));
 
+vi.mock('./ui/SculptSlider', () => ({
+  default: () => <div data-testid="sculpt-slider-stub" />,
+}));
+
 vi.mock('./ui/ViewSwitcher', () => ({
   default: () => <div data-testid="view-switcher" />,
 }));
