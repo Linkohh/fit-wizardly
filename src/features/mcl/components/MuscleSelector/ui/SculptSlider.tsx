@@ -18,7 +18,7 @@ export const SculptSlider: React.FC<SculptSliderProps> = ({ value, onChange }) =
   }, []);
 
   return (
-    <div className="flex items-center gap-2 p-2 surface-premium rounded-xl surface-premium-stroke">
+    <div className="flex items-center gap-2 p-1.5 md:p-2 surface-premium rounded-xl surface-premium-stroke">
       <span className="text-fluid-sm font-semibold text-muted-foreground" aria-hidden="true">
         Sculpt
       </span>

@@ -71,14 +71,16 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   const highlightedSet = useMemo(() => new Set(highlightMap.keys()), [highlightMap]);
 
   // Ghosts paint first (behind), then active muscles; each group is sorted so
-  // selected/highlighted ones render on top (side view: by depth first). Hidden muscles are dropped.
-  const { ghostMuscles, activeMuscles } = useMemo(() => {
+  // selected/highlighted ones render on top (side view: by depth first). Hidden muscles are dropped unless selected.
+  const { ghostMuscles, activeMuscles, hiddenSelectedMuscles } = useMemo(() => {
     const ghosts: Muscle[] = [];
+    const hiddenSelected: Muscle[] = [];
     const active: Muscle[] = [];
     for (const muscle of visibleMuscles) {
       const role = getLayerRole(muscle, view, layer);
       if (role === 'ghost') ghosts.push(muscle);
       else if (role === 'active') active.push(muscle);
+      else if (selectedSet.has(muscle.id)) hiddenSelected.push(muscle);
     }
     const state = {
       selected: selectedSet,
@@ -89,6 +91,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
     return {
       ghostMuscles: sortMusclesForRender(ghosts, view, state),
       activeMuscles: sortMusclesForRender(active, view, state),
+      hiddenSelectedMuscles: sortMusclesForRender(hiddenSelected, view, state),
     };
   }, [visibleMuscles, view, layer, selectedSet, hoveredMuscle, highlightedSet, disabledSet]);
 
@@ -96,8 +99,10 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
     () => [
       ...ghostMuscles.map((muscle) => ({ muscle, isGhost: true })),
       ...activeMuscles.map((muscle) => ({ muscle, isGhost: false })),
+      // Selected muscles on the hidden layer stay visible as inert ghosts, drawn last so surface muscles do not bury them.
+      ...hiddenSelectedMuscles.map((muscle) => ({ muscle, isGhost: true })),
     ],
-    [ghostMuscles, activeMuscles]
+    [ghostMuscles, activeMuscles, hiddenSelectedMuscles]
   );
 
   // Memoize event handlers to prevent unnecessary re-renders
@@ -206,7 +211,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
               muscle={muscle}
               label={view === 'side' ? getSideLabel(muscle.name) : undefined}
               view={view}
-              isSelected={selectedMuscles.includes(muscle.id)}
+              isSelected={selectedSet.has(muscle.id)}
               isHovered={!isGhost && hoveredMuscle === muscle.id}
               isDisabled={disabledSet.has(muscle.id)}
               isGhost={isGhost}

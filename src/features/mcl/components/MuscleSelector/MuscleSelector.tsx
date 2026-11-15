@@ -6,7 +6,7 @@ import { getMuscleById } from '../../data/muscles';
 import { useMuscleSelection } from '../../hooks/useMuscleSelection';
 import { useTheme } from '../../hooks/useTheme';
 import { useSculptPrefs } from '../../hooks/useSculptPrefs';
-import { getPairedIds } from '../../lib/pairedMuscles';
+import { getPairedIds, getSideLabel } from '../../lib/pairedMuscles';
 import MuscleCanvas from './svg/MuscleCanvas';
 import ViewSwitcher from './ui/ViewSwitcher';
 import SculptSlider from './ui/SculptSlider';
@@ -167,7 +167,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
         const disabled = new Set(disabledMuscles);
         const ids = getPairedIds(muscle.id).filter((id) => !disabled.has(id));
         if (ids.length === 0) return;
-        wasSelected = ids.length > 0 && ids.every((id) => selectedIds.includes(id));
+        wasSelected = ids.every((id) => selectedIds.includes(id));
 
         if (wasSelected) {
           setSelection(multiSelect ? selectedIds.filter((id) => !ids.includes(id)) : []);
@@ -368,7 +368,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
         {/* Sculpt controls (slim second row; the header row is too tight) */}
         {showHeader && (
-          <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:px-4 border-b border-border/30 dark:border-white/10">
+          <div className="flex flex-wrap items-center gap-2 px-3 py-1.5 md:py-2 sm:px-4 border-b border-border/30 dark:border-white/10">
             <div data-testid="sculpt-slider" className="shrink-0">
               <SculptSlider value={sculptLevel} onChange={setSculptLevel} />
             </div>
@@ -423,6 +423,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
           {showTooltip && !isTouchContext && (
             <MuscleTooltip
               muscle={tooltip.muscle}
+              label={currentView === 'side' && tooltip.muscle ? getSideLabel(tooltip.muscle.name) : undefined}
               position={{ x: tooltip.x, y: tooltip.y }}
               visible={tooltip.visible}
               containerRef={containerRef as React.RefObject<HTMLDivElement>}
@@ -452,7 +453,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
       {/* Selection Sidebar (Android + non-Apple mobile) */}
       {showInlineMobileSidebar && (
-        <div className="w-full min-h-0" data-testid="muscle-selector-sidebar">
+        <div className="w-full h-[45%] shrink-0 min-h-0 flex flex-col" data-testid="muscle-selector-sidebar">
           <SelectionSidebar
             selectedMuscles={selectedMuscles}
             onRemoveMuscle={handleRemoveMuscle}

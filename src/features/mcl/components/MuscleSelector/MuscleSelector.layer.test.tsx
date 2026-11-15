@@ -4,6 +4,7 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vite
 const mocks = vi.hoisted(() => ({
   isMobile: false,
   isAppleMobile: false,
+  selectedIds: [] as string[],
   emit: vi.fn(),
   toggleTheme: vi.fn(),
   toggleMuscle: vi.fn(),
@@ -47,7 +48,7 @@ vi.mock('../../hooks/useTheme', () => ({
 
 vi.mock('../../hooks/useMuscleSelection', () => ({
   useMuscleSelection: () => ({
-    selectedIds: [],
+    selectedIds: mocks.selectedIds,
     selectedMuscles: [],
     toggleMuscle: mocks.toggleMuscle,
     selectMuscle: mocks.selectMuscle,
@@ -101,6 +102,7 @@ describe('MuscleSelector layers', () => {
   beforeEach(() => {
     mocks.isMobile = false;
     mocks.isAppleMobile = false;
+    mocks.selectedIds = [];
     vi.clearAllMocks();
     window.localStorage.setItem(PREFS_KEY, JSON.stringify({ sculptLevel: 60, layer: 'deep' }));
   });
@@ -126,5 +128,17 @@ describe('MuscleSelector layers', () => {
     expect(screen.queryByRole('button', { name: /Gastrocnemius/i })).not.toBeInTheDocument();
     // Surface muscles are still drawn, as inert ghosts.
     expect(document.querySelectorAll('path.muscle-path[aria-hidden="true"]').length).toBeGreaterThan(0);
+  });
+
+  it('side view on the surface layer keeps a selected deep muscle as an inert selected ghost', () => {
+    window.localStorage.setItem(PREFS_KEY, JSON.stringify({ sculptLevel: 60, layer: 'surface' }));
+    mocks.selectedIds = ['soleus-left'];
+    render(<MuscleSelectorComponent showLegend={false} showSearch={false} defaultView="side" />);
+
+    expect(screen.queryByRole('button', { name: /Soleus/i })).not.toBeInTheDocument();
+    const ghosts = Array.from(document.querySelectorAll('path.muscle-path[aria-hidden="true"]'));
+    const selectedGhost = ghosts.find((p) => p.getAttribute('stroke') !== 'transparent' && p.getAttribute('stroke-width') === '1.5');
+    expect(selectedGhost).toBeDefined();
+    expect(selectedGhost).toHaveAttribute('tabindex', '-1');
   });
 });

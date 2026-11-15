@@ -16,7 +16,7 @@ export function getSculptStyle(level: number): SculptStyle {
     fillOpacity: lerp(0.12, 0.6, t),
     edgeOpacity: lerp(0, 0.8, t),
     shadingOpacity: lerp(0, 1, t),
-    outlineOpacity: lerp(0.9, 0.35, t),
+    outlineOpacity: lerp(1, 0.55, t),
   };
 }
 
