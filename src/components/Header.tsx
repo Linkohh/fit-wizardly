@@ -30,6 +30,7 @@ import { useThemeStore } from '@/stores/themeStore';
 import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { useMotionPreferences } from '@/hooks/use-motion-preferences';
 import { useMotionTiltStatus } from '@/hooks/use-motion-tilt-status';
+import { useScrolledPastTop } from '@/hooks/use-scrolled-past-top';
 import { cn, debounce } from '@/lib/utils';
 import { useInstallCoachStore } from '@/stores/installCoachStore';
 import {
@@ -99,6 +100,7 @@ export function Header() {
   const [dragPreviewPath, setDragPreviewPath] = useState<string | null>(null);
   const [dragOriginPath, setDragOriginPath] = useState<string | null>(null);
   const isWizardRoute = location.pathname.startsWith('/wizard');
+  const isScrolledPastTop = useScrolledPastTop();
 
   const user = useAuthStore((state) => state.user);
   const profile = useAuthStore((state) => state.profile);
@@ -523,12 +525,12 @@ export function Header() {
     <header className="header-capsule-wrapper">
       {/* Notch-safe top-fade overlay strictly behind status bar */}
       <div className="fixed top-0 left-0 right-0 z-30 pointer-events-none h-[calc(env(safe-area-inset-top,0px)+1.5rem)] bg-gradient-to-b from-background via-background/70 to-transparent" />
+      {/* Fades in on scroll so content dissolves around the capsule's edges instead of peeking past them */}
+      <div aria-hidden="true" data-scrolled={isScrolledPastTop} className="header-capsule-scrim" />
 
       <div
-        className={cn(
-          "header-capsule-inner flex items-center justify-between px-4 relative z-40",
-          isWizardRoute && "border-white/5 bg-background/85 supports-[backdrop-filter]:bg-background/75",
-        )}
+        data-scrolled={isScrolledPastTop}
+        className="header-capsule-inner flex items-center justify-between px-4 relative z-40"
       >
         <a
           href="#main-content"

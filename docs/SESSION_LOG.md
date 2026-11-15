@@ -174,7 +174,7 @@ Design: `docs/superpowers/specs/2026-11-14-side-view-sculpt-design.md`. Plan: `d
   - `src/components/wizard/anatomy/AnatomyPanel.tsx` — side view on mobile; taller shell on non-Apple phones
   - `src/test/setup.ts` — global `ResizeObserver` stub
 - **Issues fixed this session:** none from the Known Issues table. Fixed within the branch: body map collapsing on Android-width phones, a selected deep muscle vanishing on the Surface layer.
-- **New issues found this session:** DEBT-015, DEBT-016, DEBT-017, DEBT-018 (all LOW; see Known Issues).
+- **New issues found this session:** DEBT-019, DEBT-020, DEBT-021, DEBT-022 (all LOW; see Known Issues).
 - **TODO/FIXME introduced:** none (pre-existing TODOs unchanged).
 - **Test status:** All passing: 662 tests across 137 files.
 - **Legal/compliance notes:** None this session. The new `fitwizard.mcl.sculpt.v1` key holds interface state only (slider level, layer) and is **not** in the data export, like `visitCount`.
@@ -189,7 +189,31 @@ Design: `docs/superpowers/specs/2026-11-14-side-view-sculpt-design.md`. Plan: `d
   1. Review and merge the `feat/side-view-sculpt` PR into `preview_b`.
   2. Check the side view on a real iPhone (iOS 26/27) and an Android phone.
   3. Second artwork pass on the narrow forearm flexor and serratus strips, and the small unclickable gap under the shoulder.
-  4. Decide whether to fade the Surface/Deep switch (DEBT-016) and translate the selector controls (DEBT-015).
+  4. Decide whether to fade the Surface/Deep switch (DEBT-020) and translate the selector controls (DEBT-019).
+### 2026-11-14 — Header Capsule Scroll Tint (branch `LinC/top-pillar-scroll-tint-8f3713`, from `preview_b` @ `0feb8cf`)
+
+- **What was done:** The floating header capsule let page content read through it while scrolling (hero text, "Medical Disclaimer", the wizard's "About 2 min" chip), reported from an Android phone. It now has two states driven by a new `useScrolledPastTop` hook: the original airy tint at the top of a page, easing to a denser tint once the window has scrolled more than 8px. A tint-only fade (`header-capsule-scrim`) appears behind the capsule on scroll to cover the gaps beside it and under the status bar. The wizard-only capsule override was removed so every route uses the same capsule.
+- **Commits:**
+  - `5e6c6f6` feat(header): scroll-reactive tint for the floating header capsule
+- **Files changed:**
+  - `src/hooks/use-scrolled-past-top.ts` — new hook; passive window scroll listener, `requestAnimationFrame`-throttled, re-renders only when the answer flips
+  - `src/hooks/use-scrolled-past-top.test.ts` — 4 tests (top, threshold both ways, scrolled on mount, cleanup)
+  - `src/components/Header.tsx` — `data-scrolled` on the capsule and the new scrim element; wizard override removed
+  - `src/index.css` — `header-capsule-inner` two tint states, new `header-capsule-scrim` utility
+- **Tint values:** at top 65% dark / 70% light (the original opacities); scrolled 82% dark / 88% light. Tint colour is the app violet (`hsl(270 48% 9%)`) in dark and lavender-white (`hsl(264 44% 97%)`) in light. Blur is unchanged (24px, saturate 180%).
+- **Also changed:** `transition: all` replaced with explicit properties; hover lift applies only under `@media (hover: hover)`; both transitions are skipped under `prefers-reduced-motion`.
+- **Issues fixed this session:** none from the Known Issues table.
+- **New issues found this session:**
+  - DEBT-015: `backdrop-filter` on the header capsule did not appear to render on the owner's Android phone (text behind it was sharp in screenshots). Not reproduced or diagnosed; desktop Chromium renders it. The denser scrolled tint and the tint-only scrim are sized to work without blur. — LOW — `src/index.css`
+- **TODO/FIXME introduced:** none (pre-existing TODOs unchanged).
+- **Test status:** All passing: 557 tests across 127 files (was 553 / 126). Lint 0 errors, 4 warnings (unchanged).
+- **Verified in the dev-server preview, not on a device:** both states in dark and light at 375px on `/`, `/wizard` and `/legal`, and at desktop width on `/`; repeated with `backdrop-filter` force-disabled. Known remainder: in light mode with blur disabled, a very faint ghost of large dark headings is still visible inside the scrolled capsule (raise the light scrolled tint from 88% to about 92% if it shows on a device). **Not verified on a real Android or iOS device.**
+- **Legal/compliance notes:** None this session.
+- **Key decisions made:** Tint is scroll-reactive rather than one fixed value. The capsule and scrim must not rely on `backdrop-filter` to hide content. The capsule reacts to window scroll only; a screen that scrolls inside its own panel will not trigger the dense state (none found, not exhaustively checked).
+- **Next steps:**
+  1. Check the capsule on the owner's Android phone and on iOS 26/27 from the `preview_b` deploy.
+  2. Diagnose why blur does not render on that Android device (DEBT-015).
+  3. Tune the light-mode scrolled tint if the faint ghost is visible on a device.
 
 ### 2026-11-13 — Quality-of-Life Pass (branch `LinC/quality-of-life`, from `preview_b` @ `09e0921`)
 
@@ -475,13 +499,14 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | AUDIT-006 | `(window as any).__lastTrendingError` global hack | `src/hooks/useExerciseInteraction.ts:180,183` | Module-level variable would be safer and avoids `window as any`. Pre-existing lint warning. |
 | DEBT-010 | ~~Duplicate `config 2/3.xml` tracked in git~~ **RESOLVED 2026-09-27** | — | Removed; an untracked `config 4.xml` may remain in the main checkout — delete locally. |
 | DEBT-011 | About long-form copy + release notes English-only | `src/locales/{es,pt,de}.json`, `src/data/changelog.ts` | UI labels are translated; story/mission/creator/changelog bodies fall back to `en`. |
-| DEBT-015 | Muscle selector controls are hardcoded English (Sculpt, Surface, Deep; also the older Front/Back/Side) | `src/features/mcl/components/MuscleSelector/ui/` | The MCL feature does not use i18next yet. |
-| DEBT-016 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
-| DEBT-017 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
-| DEBT-018 | `npm run lint` fails locally with 22 errors from generated iOS folders | `eslint.config.js` | Add `ios/DerivedData` and `ios/**/.build` to the ESLint ignores. Also a stray `node_modules/@types/node 2` folder breaks a bare `tsc`. |
+| DEBT-019 | Muscle selector controls are hardcoded English (Sculpt, Surface, Deep; also the older Front/Back/Side) | `src/features/mcl/components/MuscleSelector/ui/` | The MCL feature does not use i18next yet. |
+| DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
+| DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
+| DEBT-022 | `npm run lint` fails locally with 22 errors from generated iOS folders | `eslint.config.js` | Add `ios/DerivedData` and `ios/**/.build` to the ESLint ignores. Also a stray `node_modules/@types/node 2` folder breaks a bare `tsc`. |
 | DEBT-013 | About "Get in Touch" hidden | `src/pages/About.tsx` | Waiting for public Instagram/LinkedIn handles. Personal email intentionally not published. See `docs/ABOUT_PAGE.md` §3. |
 | DEBT-014 | ~~SESSION_LOG gap May–Sep 2026~~ **BACKFILLED 2026-09-27** (summary) | `docs/SESSION_LOG.md` | See the 2026-09-27 entry; per-commit detail is in git history. |
 | AUDIT-007 | ~~CSP `style-src` blocked runtime-injected `<style>` tags~~ **RESOLVED 2026-11-12** | `vercel.json` | Sonner (toasts) and Vaul (drawers) inject their CSS at load; the strict `style-src` left both without a stylesheet on every deployment. Added `'unsafe-inline'` to `style-src` only; `script-src` is unchanged (`'self' 'wasm-unsafe-eval'`). Stricter option for later: per-request nonce (needs server work). Expected and harmless: Vercel's `vercel.live` feedback script is blocked on preview deployments only. |
+| DEBT-015 | Header capsule `backdrop-filter` not rendering on an Android phone | `src/index.css` (`header-capsule-inner`) | Seen in owner screenshots 2026-11-14; not reproduced or diagnosed. Scrolled tint and scrim work without blur. |
 
 ---
 
@@ -552,6 +577,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 - [ ] Verify swipe-back, haptics and Android back on the iOS Simulator and an Android emulator — DEBT-012
 - [ ] Tag releases in git (`v1.0.0` on the PR #36 merge commit); keep `src/data/changelog.ts` in sync each release
 - [ ] Legal review of the `/legal` guidance wording before store submission
+- [ ] Check the header capsule scroll tint on a real Android phone and iOS 26/27; diagnose missing blur on Android — DEBT-015
 
 ### Deferred by decision (2026-11-12) — revisit next session, not blocking the PR #37 merge
 - [ ] Translations (DE/PT/ES gaps, About copy + release notes) and the Delete Account endpoint — see Short-term below
