@@ -174,3 +174,4 @@ A new branch started from `feat/side-view-sculpt`, because the layer toggle and 
 - **Rotator cuff workout group:** the new cuff muscles count toward `upper_back`, matching the existing infraspinatus, not `rear_deltoid`.
 - **Non-Apple phone sizing:** the panel is `min(84dvh, 720px)` and the selected list takes 26% while empty, 40% once muscles are selected. Measured at 375x812: body map 319px empty, 281px while searching, 225px with muscles selected, 188px with both.
 - **Phase 5 (optional) not built:** separate shapes for muscle heads, the new deep muscles on the side view, internal oblique artwork, translations.
+- **Receded layer follows the slider (reported by Lincoln):** ghosts were a fixed 8% opacity, so at sculpt 0 they matched the active layer (12%) and at 100 they looked switched off next to it (60%). They are now neutral grey at 35% of the active layer's opacity at every level (4% to 21%), so colour always marks the layer you can pick from.

@@ -31,6 +31,9 @@ interface MusclePathProps {
   onLongPress?: (muscle: Muscle) => void;
 }
 
+// The receded layer is drawn in neutral grey, so colour always means "this is the layer you can pick from".
+const GHOST_FILL = '#9CA3AF';
+
 // Color mapping for highlight types
 const highlightColors: Record<MuscleHighlight['type'], { fill: string; glow: string }> = {
   fatigue: { fill: '#EF4444', glow: 'rgba(239, 68, 68, 0.5)' },
@@ -96,7 +99,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   // Determine opacity based on state - improved unselected visibility
   const opacity = useMemo(() => {
     // A ghost that is selected or highlighted stays readable on the other layer.
-    if (isGhost) return getGhostOpacity(isSelected || Boolean(highlight));
+    if (isGhost) return getGhostOpacity(isSelected || Boolean(highlight), sculpt);
     if (isDisabled) return 0.15;
     if (highlight) {
       const baseOpacity = highlight.intensity / 100;
@@ -241,7 +244,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
         d={pathData}
         className="muscle-path"
         style={{ transformOrigin: 'center', pointerEvents: 'none', cursor: 'default' }}
-        fill={isSelected ? `url(#gradient-${muscle.group})` : ghostHighlightColor ?? (colorByGroup ? groupColor : '#9CA3AF')}
+        fill={isSelected ? `url(#gradient-${muscle.group})` : ghostHighlightColor ?? GHOST_FILL}
         stroke={isSelected ? glowColor : ghostHighlightColor ?? 'transparent'}
         strokeWidth={isSelected ? 1.5 : ghostHighlightColor ? 1 : 0}
         data-ghost-highlight={ghostHighlightColor ? 'true' : undefined}

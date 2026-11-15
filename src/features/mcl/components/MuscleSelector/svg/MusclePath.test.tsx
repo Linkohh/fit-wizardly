@@ -179,12 +179,12 @@ describe('MusclePath sculpt rendering', () => {
 });
 
 describe('MusclePath ghost rendering', () => {
-  it('ghost: opacity 0.08, tabIndex -1, aria-hidden, click does not call onClick', () => {
+  it('ghost: neutral grey fill, tabIndex -1, aria-hidden, click does not call onClick', () => {
     const onClick = vi.fn();
     const onLongPress = vi.fn();
     const { container, button, onMouseEnter } = renderPathContainer({ onClick, onLongPress, isGhost: true });
 
-    expect(getGhostOpacity(false)).toBe(0.08);
+    expect(button.getAttribute('fill')).toBe('#9CA3AF');
     expect(button.getAttribute('tabindex')).toBe('-1');
     expect(button.getAttribute('aria-hidden')).toBe('true');
     expect(button.hasAttribute('role')).toBe(false);
@@ -217,7 +217,7 @@ describe('MusclePath ghost rendering', () => {
     const onClick = vi.fn();
     const { button } = renderPathContainer({ onClick, isGhost: true, isSelected: true });
 
-    expect(getGhostOpacity(true)).toBe(0.45);
+    expect(getGhostOpacity(true, getSculptStyle(SCULPT_DEFAULT))).toBe(0.45);
     expect(button.getAttribute('stroke')).not.toBe('transparent');
     expect(button.getAttribute('stroke-width')).toBe('1.5');
     expect(button.getAttribute('class')).not.toContain('muscle-pulse');
