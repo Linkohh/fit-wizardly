@@ -2,7 +2,7 @@
 
 > Read this file at the start of every session before touching any code.
 > Update it at session end using `/after-report`.
-> Last updated: 2026-11-13
+> Last updated: 2026-11-15
 
 ---
 
@@ -144,6 +144,52 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 ---
 
 ## Session History
+
+### 2026-11-15 — Side-View Sculpt (branch `feat/side-view-sculpt`, from `preview_b` @ `0feb8cf`)
+
+Design: `docs/superpowers/specs/2026-11-14-side-view-sculpt-design.md`. Plan: `docs/superpowers/plans/2026-11-14-side-view-sculpt.md`. Built 2026-11-14/15 with one implementer and one reviewer subagent per task, then a whole-branch review. Verified at the end (`42a04ca`): 137 test files / 662 tests pass (was 126 / 553), `npm run build` OK, ESLint 0 errors on `src/`. A full `npm run lint` in the main checkout reports 22 errors, all in generated iOS folders (`ios/DerivedData`, `ios/App/CapApp-SPM/.build`), none in source.
+
+- **What was done:** The muscle selector's side view (`src/features/mcl/`) was redrawn as one right-facing silhouette with 22 surface and 7 deep muscles. A Sculpt slider (0-100, default 60) controls how defined unselected muscles look on all three views. A Surface/Deep toggle (side view only) makes the deep muscles clickable over a ghosted surface. A side-view click selects the left and right muscle together. The side view is now enabled on phones (`AnatomyPanel`).
+- **Commits:**
+  - `7ea1584` docs: side-view sculpt design and implementation plan
+  - `725d1b6` refactor(mcl): extract muscle render order with side depth support
+  - `3190449` feat(mcl): single closed side silhouette and geometry helpers
+  - `9f24fbc` feat(mcl): redraw and extend side-view muscles
+  - `0572f91` fix(mcl): fill the side-view arm and redraw the deltoid cap
+  - `05934fd` feat(mcl): sculpt-level rendering for muscle definition
+  - `cac7f6d` fix(mcl): limit sculpt edge and shading to the resting state
+  - `a89fc61` feat(mcl): sculpt slider and layer toggle with saved preferences
+  - `6c8d2a8` feat(mcl): surface and deep muscle layers in side view
+  - `1e7d9c8` feat(mcl): paired side selection and side view on mobile
+  - `73b8ad6` fix(mcl): global ResizeObserver test stub and guard empty paired click
+  - `78297aa` fix(mcl): android sidebar share, selected deep ghost, side tooltip label, outline strength
+  - `42a04ca` fix(mcl): taller selector shell and 40% list share on non-Apple phones
+- **Files changed (36):**
+  - `src/features/mcl/data/muscles.ts` — side paths redrawn and added; `sideOrder` and `layer` per muscle; front/back paths unchanged
+  - `src/features/mcl/lib/{sortMuscles,pathGeometry,sculpt,layerVisibility,pairedMuscles}.ts` — new pure helpers, each with tests
+  - `src/features/mcl/hooks/useSculptPrefs.ts` — saves slider and layer in `localStorage` key `fitwizard.mcl.sculpt.v1` (Zod-checked)
+  - `src/features/mcl/components/MuscleSelector/svg/{MusclePath,MuscleCanvas,BodyOutline}.tsx`, `svg/sideOutline.ts` — sculpt rendering, ghost layer, new side outline
+  - `src/features/mcl/components/MuscleSelector/ui/{SculptSlider,LayerToggle,MuscleTooltip}.tsx` — new controls; tooltip label without "(Left)" in side view
+  - `src/features/mcl/components/MuscleSelector/MuscleSelector.tsx` — controls row, paired side click, 40% inline list on non-Apple phones
+  - `src/components/wizard/anatomy/AnatomyPanel.tsx` — side view on mobile; taller shell on non-Apple phones
+  - `src/test/setup.ts` — global `ResizeObserver` stub
+- **Issues fixed this session:** none from the Known Issues table. Fixed within the branch: body map collapsing on Android-width phones, a selected deep muscle vanishing on the Surface layer.
+- **New issues found this session:** DEBT-015, DEBT-016, DEBT-017, DEBT-018 (all LOW; see Known Issues).
+- **TODO/FIXME introduced:** none (pre-existing TODOs unchanged).
+- **Test status:** All passing: 662 tests across 137 files.
+- **Legal/compliance notes:** None this session. The new `fitwizard.mcl.sculpt.v1` key holds interface state only (slider level, layer) and is **not** in the data export, like `visitCount`.
+- **Key decisions made:**
+  - Erector spinae is deep-only in the side view.
+  - A selected muscle on the other layer shows as a 45% ghost with its outline.
+  - Front/back resting opacity now follows the slider (0.41 at the default, was a fixed 0.25).
+  - Non-Apple phones: shell `min(78dvh, 680px)`, list 40%. iPhones keep `min(62dvh, 560px)` with the bottom sheet.
+- **Measured in a browser (dev server, emulated 375x812 Android):** body map 237-249px tall, 38-39% of the panel (was 134-146px, 27-29%); no horizontal overflow. Desktop pane (831px wide): map 425-433px, sidebar 288px. Light theme checked after a reload. **Not checked:** real iPhone or Android device, reduced motion.
+- **Open issues carried forward:** all existing IDs unchanged.
+- **Next steps:**
+  1. Review and merge the `feat/side-view-sculpt` PR into `preview_b`.
+  2. Check the side view on a real iPhone (iOS 26/27) and an Android phone.
+  3. Second artwork pass on the narrow forearm flexor and serratus strips, and the small unclickable gap under the shoulder.
+  4. Decide whether to fade the Surface/Deep switch (DEBT-016) and translate the selector controls (DEBT-015).
 
 ### 2026-11-13 — Quality-of-Life Pass (branch `LinC/quality-of-life`, from `preview_b` @ `09e0921`)
 
@@ -429,6 +475,10 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | AUDIT-006 | `(window as any).__lastTrendingError` global hack | `src/hooks/useExerciseInteraction.ts:180,183` | Module-level variable would be safer and avoids `window as any`. Pre-existing lint warning. |
 | DEBT-010 | ~~Duplicate `config 2/3.xml` tracked in git~~ **RESOLVED 2026-09-27** | — | Removed; an untracked `config 4.xml` may remain in the main checkout — delete locally. |
 | DEBT-011 | About long-form copy + release notes English-only | `src/locales/{es,pt,de}.json`, `src/data/changelog.ts` | UI labels are translated; story/mission/creator/changelog bodies fall back to `en`. |
+| DEBT-015 | Muscle selector controls are hardcoded English (Sculpt, Surface, Deep; also the older Front/Back/Side) | `src/features/mcl/components/MuscleSelector/ui/` | The MCL feature does not use i18next yet. |
+| DEBT-016 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
+| DEBT-017 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
+| DEBT-018 | `npm run lint` fails locally with 22 errors from generated iOS folders | `eslint.config.js` | Add `ios/DerivedData` and `ios/**/.build` to the ESLint ignores. Also a stray `node_modules/@types/node 2` folder breaks a bare `tsc`. |
 | DEBT-013 | About "Get in Touch" hidden | `src/pages/About.tsx` | Waiting for public Instagram/LinkedIn handles. Personal email intentionally not published. See `docs/ABOUT_PAGE.md` §3. |
 | DEBT-014 | ~~SESSION_LOG gap May–Sep 2026~~ **BACKFILLED 2026-09-27** (summary) | `docs/SESSION_LOG.md` | See the 2026-09-27 entry; per-commit detail is in git history. |
 | AUDIT-007 | ~~CSP `style-src` blocked runtime-injected `<style>` tags~~ **RESOLVED 2026-11-12** | `vercel.json` | Sonner (toasts) and Vaul (drawers) inject their CSS at load; the strict `style-src` left both without a stylesheet on every deployment. Added `'unsafe-inline'` to `style-src` only; `script-src` is unchanged (`'self' 'wasm-unsafe-eval'`). Stricter option for later: per-request nonce (needs server work). Expected and harmless: Vercel's `vercel.live` feedback script is blocked on preview deployments only. |
@@ -492,6 +542,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 ## Backlog / Next Steps
 
 ### Immediate (unblocked)
+- [ ] Merge the `feat/side-view-sculpt` PR into `preview_b`; then check the side view on a real iPhone and Android phone
 - [ ] Merge PR #28 into `preview_b` — all code review issues resolved
 - [x] Guard or remove `/mcl` dev route from production build — AUDIT-004 (done 2026-09-27)
 - [ ] Rotate legacy Supabase anon JWT in Supabase dashboard (after confirming publishable-key deployment is live)
