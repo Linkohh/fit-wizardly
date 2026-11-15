@@ -5,6 +5,7 @@ import { getMusclesByView } from '../../../data/muscles';
 import BodyOutline from './BodyOutline';
 import MusclePath from './MusclePath';
 import { getTimedTransition } from '@/lib/motion/tokens';
+import { sortMusclesForRender } from '../../../lib/sortMuscles';
 
 interface MuscleCanvasProps {
   view: ViewType;
@@ -56,37 +57,20 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   // Create a Set for disabled muscles for O(1) lookup
   const disabledSet = useMemo(() => new Set(disabledMuscles), [disabledMuscles]);
 
-  // Sort muscles so selected/highlighted ones render on top
-  const sortedMuscles = useMemo(() => {
-    return [...visibleMuscles].sort((a, b) => {
-      const aSelected = selectedMuscles.includes(a.id);
-      const bSelected = selectedMuscles.includes(b.id);
-      const aHovered = hoveredMuscle === a.id;
-      const bHovered = hoveredMuscle === b.id;
-      const aHighlighted = highlightMap.has(a.id);
-      const bHighlighted = highlightMap.has(b.id);
-      const aDisabled = disabledSet.has(a.id);
-      const bDisabled = disabledSet.has(b.id);
+  const selectedSet = useMemo(() => new Set(selectedMuscles), [selectedMuscles]);
+  const highlightedSet = useMemo(() => new Set(highlightMap.keys()), [highlightMap]);
 
-      // Disabled muscles render at bottom
-      if (aDisabled && !bDisabled) return -1;
-      if (bDisabled && !aDisabled) return 1;
-
-      // Hovered muscle on top
-      if (aHovered && !bHovered) return 1;
-      if (bHovered && !aHovered) return -1;
-
-      // Selected muscles above highlighted but below hovered
-      if (aSelected && !bSelected) return 1;
-      if (bSelected && !aSelected) return -1;
-
-      // Highlighted above unselected
-      if (aHighlighted && !bHighlighted) return 1;
-      if (bHighlighted && !aHighlighted) return -1;
-
-      return 0;
-    });
-  }, [visibleMuscles, selectedMuscles, hoveredMuscle, highlightMap, disabledSet]);
+  // Sort muscles so selected/highlighted ones render on top (side view: by depth first)
+  const sortedMuscles = useMemo(
+    () =>
+      sortMusclesForRender(visibleMuscles, view, {
+        selected: selectedSet,
+        hovered: hoveredMuscle,
+        highlighted: highlightedSet,
+        disabled: disabledSet,
+      }),
+    [visibleMuscles, view, selectedSet, hoveredMuscle, highlightedSet, disabledSet]
+  );
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleMouseEnter = useCallback(
