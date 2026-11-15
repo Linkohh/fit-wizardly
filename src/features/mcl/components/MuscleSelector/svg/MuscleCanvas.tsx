@@ -6,6 +6,7 @@ import BodyOutline from './BodyOutline';
 import MusclePath from './MusclePath';
 import { getTimedTransition } from '@/lib/motion/tokens';
 import { sortMusclesForRender } from '../../../lib/sortMuscles';
+import { SCULPT_DEFAULT, getSculptStyle } from '../../../lib/sculpt';
 
 interface MuscleCanvasProps {
   view: ViewType;
@@ -24,6 +25,7 @@ interface MuscleCanvasProps {
   onMuscleClick: (muscle: Muscle) => void;
   onMuscleLongPress?: (muscle: Muscle) => void;
   customViewBox?: string;
+  sculptLevel?: number;
 }
 
 export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
@@ -43,7 +45,10 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   onMuscleClick,
   onMuscleLongPress,
   customViewBox,
+  sculptLevel = SCULPT_DEFAULT,
 }) => {
+  const sculpt = useMemo(() => getSculptStyle(sculptLevel), [sculptLevel]);
+
   // Get muscles for current view
   const visibleMuscles = useMemo(() => getMusclesByView(view), [view]);
 
@@ -139,6 +144,13 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
             <stop offset="100%" stopColor="#22D3EE" />
           </linearGradient>
 
+          {/* Light/shadow overlay used to model muscle form */}
+          <linearGradient id="muscle-shade" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.5" />
+            <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0" />
+            <stop offset="100%" stopColor="#000000" stopOpacity="0.5" />
+          </linearGradient>
+
           {/* Glow filter for selected muscles */}
           <filter id="glow-selected" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -161,10 +173,10 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
         />
 
         {/* Background body outline */}
-        <BodyOutline view={view} />
+        <BodyOutline view={view} opacity={sculpt.outlineOpacity} />
 
         {/* Muscle paths */}
-        <g className="muscles">
+        <g className="muscles text-background">
           {sortedMuscles.map((muscle, index) => (
             <MusclePath
               key={`${muscle.id}-${view}`}
@@ -178,6 +190,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
               accentColor={accentColor}
               animateHighlights={animateHighlights}
               hoverIntensity={hoverIntensity}
+              sculpt={sculpt}
               enableTouchInfo={enableTouchInfo}
               longPressMs={longPressMs}
               reduceMotion={reduceMotion}

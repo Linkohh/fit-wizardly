@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MusclePath } from './MusclePath';
+import { SCULPT_DEFAULT, getMuscleOpacity, getSculptStyle, type SculptStyle } from '../../../lib/sculpt';
 import type { Muscle } from '../../../types';
 
 const TEST_MUSCLE: Muscle = {
@@ -15,19 +16,26 @@ const TEST_MUSCLE: Muscle = {
   paths: { front: 'M10,10 L30,10 L30,30 L10,30 Z' },
 };
 
-function renderPath({
+type RenderOptions = Parameters<typeof renderPathContainer>[0];
+
+function renderPathContainer({
   onClick = vi.fn(),
   onLongPress = vi.fn(),
+  sculpt = getSculptStyle(SCULPT_DEFAULT),
+  isSelected = false,
 }: {
   onClick?: (muscle: Muscle) => void;
   onLongPress?: (muscle: Muscle) => void;
+  sculpt?: SculptStyle;
+  isSelected?: boolean;
 } = {}) {
-  render(
+  const { container } = render(
     <svg>
       <MusclePath
         muscle={TEST_MUSCLE}
         view="front"
-        isSelected={false}
+        isSelected={isSelected}
+        sculpt={sculpt}
         isHovered={false}
         isDisabled={false}
         colorByGroup
@@ -42,7 +50,11 @@ function renderPath({
     </svg>
   );
 
-  return screen.getByRole('button', { name: /Pectoralis Major \(Left\)/i });
+  return { container, button: screen.getByRole('button', { name: /Pectoralis Major \(Left\)/i }) };
+}
+
+function renderPath(options: RenderOptions = {}) {
+  return renderPathContainer(options).button;
 }
 
 describe('MusclePath touch behavior', () => {
@@ -83,3 +95,55 @@ describe('MusclePath touch behavior', () => {
   });
 });
 
+
+describe('MusclePath sculpt rendering', () => {
+  it('unselected muscle uses sculpt.fillOpacity as its target opacity', () => {
+    const sculpt = getSculptStyle(30);
+    const base = { isSelected: false, isHovered: false, isDisabled: false };
+    expect(getMuscleOpacity(base, sculpt, 'default')).toBe(sculpt.fillOpacity);
+    expect(getMuscleOpacity(base, sculpt, 'strong')).toBe(sculpt.fillOpacity);
+  });
+
+  it('selected muscle stays at opacity 1 when sculpt.fillOpacity is 0.12', () => {
+    const sculpt = getSculptStyle(0);
+    expect(sculpt.fillOpacity).toBeCloseTo(0.12);
+    expect(
+      getMuscleOpacity({ isSelected: true, isHovered: false, isDisabled: false }, sculpt, 'default')
+    ).toBe(1);
+  });
+
+  it('keeps disabled and hovered opacity independent of sculpt', () => {
+    const sculpt = getSculptStyle(0);
+    expect(getMuscleOpacity({ isSelected: false, isHovered: false, isDisabled: true }, sculpt, 'default')).toBe(0.15);
+    expect(getMuscleOpacity({ isSelected: false, isHovered: true, isDisabled: false }, sculpt, 'default')).toBe(0.95);
+    expect(getMuscleOpacity({ isSelected: false, isHovered: true, isDisabled: false }, sculpt, 'strong')).toBe(1);
+  });
+
+  it('draws a separation edge with strokeOpacity = sculpt.edgeOpacity when not selected or hovered', () => {
+    const sculpt = getSculptStyle(80);
+    const button = renderPath({ sculpt });
+    expect(button.getAttribute('stroke')).toBe('currentColor');
+    expect(button.getAttribute('stroke-width')).toBe('0.6');
+    expect(Number(button.getAttribute('stroke-opacity'))).toBeCloseTo(sculpt.edgeOpacity);
+  });
+
+  it('renders a non-interactive shading overlay (aria-hidden, pointer-events none) only when shadingOpacity > 0', () => {
+    const sculpt = getSculptStyle(100);
+    const { container } = renderPathContainer({ sculpt });
+    const paths = container.querySelectorAll('path');
+    expect(paths).toHaveLength(2);
+    const overlay = paths[1];
+    expect(overlay.getAttribute('d')).toBe(paths[0].getAttribute('d'));
+    expect(overlay.getAttribute('aria-hidden')).toBe('true');
+    expect(overlay.getAttribute('pointer-events')).toBe('none');
+    expect(overlay.getAttribute('fill')).toBe('url(#muscle-shade)');
+    expect(overlay.hasAttribute('tabindex')).toBe(false);
+    expect(overlay.hasAttribute('role')).toBe(false);
+
+  });
+
+  it('does not render the shading overlay when shadingOpacity is 0', () => {
+    const { container } = renderPathContainer({ sculpt: getSculptStyle(0) });
+    expect(container.querySelectorAll('path')).toHaveLength(1);
+  });
+});

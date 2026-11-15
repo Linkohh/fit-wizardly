@@ -5,6 +5,7 @@ import { SIDE_SILHOUETTE_PATH } from './sideOutline';
 interface BodyOutlineProps {
   view: ViewType;
   className?: string;
+  opacity?: number;
 }
 
 /**
@@ -137,9 +138,9 @@ const SideOutline: React.FC = () => (
   </g>
 );
 
-export const BodyOutline: React.FC<BodyOutlineProps> = ({ view, className }) => {
+export const BodyOutline: React.FC<BodyOutlineProps> = ({ view, className, opacity }) => {
   return (
-    <g className={className}>
+    <g className={className} opacity={opacity}>
       {view === 'front' && <FrontOutline />}
       {view === 'back' && <BackOutline />}
       {view === 'side' && <SideOutline />}

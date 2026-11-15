@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Muscle, ViewType, MuscleHighlight } from '../../../types';
 import { getMuscleGroupColor } from '../../../data/muscleGroups';
+import { getMuscleOpacity, type SculptStyle } from '../../../lib/sculpt';
 import { getSpringTransition, getTimedTransition } from '@/lib/motion/tokens';
 
 interface MusclePathProps {
@@ -15,6 +16,7 @@ interface MusclePathProps {
   accentColor: string;
   animateHighlights?: boolean;
   hoverIntensity?: 'default' | 'strong';
+  sculpt: SculptStyle;
   highlightIndex?: number;
   enableTouchInfo?: boolean;
   longPressMs?: number;
@@ -44,6 +46,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   accentColor,
   animateHighlights = false,
   hoverIntensity = 'default',
+  sculpt,
   highlightIndex = 0,
   enableTouchInfo = false,
   longPressMs = 380,
@@ -91,11 +94,17 @@ export const MusclePath: React.FC<MusclePathProps> = ({
       const baseOpacity = highlight.intensity / 100;
       return Math.max(0.5, Math.min(1, baseOpacity * 0.5 + 0.5));
     }
-    if (isSelected) return 1;
-    if (isHovered) return hoverIntensity === 'strong' ? 1 : 0.95;
-    // Improved unselected visibility
-    return hoverIntensity === 'strong' ? 0.2 : 0.25;
-  }, [isSelected, isHovered, isDisabled, highlight, hoverIntensity]);
+    return getMuscleOpacity({ isSelected, isHovered, isDisabled }, sculpt, hoverIntensity);
+  }, [isSelected, isHovered, isDisabled, highlight, hoverIntensity, sculpt]);
+
+  const isResting = !isSelected && !isHovered && !isDisabled;
+  const scale = isHovered && !isDisabled ? (hoverIntensity === 'strong' ? 1.07 : 1.03) : isSelected ? 1.01 : 1;
+  const transition = reduceMotion
+    ? { duration: 0 }
+    : {
+        ...getTimedTransition('base', reduceMotion),
+        scale: getSpringTransition('snappy', reduceMotion),
+      };
 
   // Enhanced multi-layer glow effect for premium appearance
   const glowFilter = useMemo(() => {
@@ -216,6 +225,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   if (!pathData) return null;
 
   return (
+    <>
     <motion.path
       d={pathData}
       className={`muscle-path ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${shouldPulse ? 'muscle-pulse' : ''}`}
@@ -224,22 +234,16 @@ export const MusclePath: React.FC<MusclePathProps> = ({
         ...(animationDelay ? { animationDelay } : {}),
       }}
       fill={fillColor}
-      stroke={isSelected || isHovered ? glowColor : 'transparent'}
-      strokeWidth={isSelected ? 1.5 : isHovered ? (hoverIntensity === 'strong' ? 2.25 : 1) : 0}
+      stroke={isSelected || isHovered ? glowColor : isResting ? 'currentColor' : 'transparent'}
+      strokeWidth={isSelected ? 1.5 : isHovered ? (hoverIntensity === 'strong' ? 2.25 : 1) : isResting ? 0.6 : 0}
+      strokeOpacity={isResting ? sculpt.edgeOpacity : undefined}
       initial={{ opacity: 0.25 }}
       animate={{
         opacity,
-        scale: isHovered && !isDisabled ? (hoverIntensity === 'strong' ? 1.07 : 1.03) : isSelected ? 1.01 : 1,
+        scale,
         filter: glowFilter,
       }}
-      transition={
-        reduceMotion
-          ? { duration: 0 }
-          : {
-              ...getTimedTransition('base', reduceMotion),
-              scale: getSpringTransition('snappy', reduceMotion),
-            }
-      }
+      transition={transition}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={onMouseLeave}
       onClick={handleClick}
@@ -261,6 +265,19 @@ export const MusclePath: React.FC<MusclePathProps> = ({
         }
       }}
     />
+    {sculpt.shadingOpacity > 0 && !isDisabled && (
+      <motion.path
+        d={pathData}
+        fill="url(#muscle-shade)"
+        pointerEvents="none"
+        aria-hidden="true"
+        style={{ transformOrigin: 'center' }}
+        initial={false}
+        animate={{ opacity: sculpt.shadingOpacity * 0.35, scale }}
+        transition={transition}
+      />
+    )}
+    </>
   );
 };
 
