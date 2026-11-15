@@ -1,5 +1,6 @@
 import React from 'react';
 import { ViewType } from '../../../types';
+import { SIDE_SILHOUETTE_PATH } from './sideOutline';
 
 interface BodyOutlineProps {
   view: ViewType;
@@ -120,42 +121,16 @@ const BackOutline: React.FC = () => (
   </g>
 );
 
-// Side view body outline
+// Side view body outline (faces right): one closed silhouette plus interior detail
 const SideOutline: React.FC = () => (
   <g className="body-outline" fill="none" strokeWidth="1.5">
-    {/* Head - side profile */}
-    <path d="M95,5 C115,5 125,20 125,35 C125,50 118,60 100,60 C85,60 78,50 78,35 C78,20 82,5 95,5" />
-    {/* Face profile */}
-    <path d="M125,30 C130,35 132,42 128,48 L120,55" />
+    <path d={SIDE_SILHOUETTE_PATH} />
 
-    {/* Neck */}
-    <path d="M92,58 C88,65 88,75 92,82" />
-    <path d="M105,58 C108,65 108,75 105,82" />
+    {/* Jaw line */}
+    <path d="M95,47 C99,52 106,55 118,57" opacity="0.5" />
 
-    {/* Chest / front torso */}
-    <path d="M92,82 C78,90 68,110 65,140 L62,180 C62,200 68,215 80,225" />
-
-    {/* Back torso */}
-    <path d="M105,82 C115,88 120,100 118,130 L115,170 C112,195 105,215 95,230" />
-
-    {/* Glute curve */}
-    <path d="M95,200 C85,210 75,225 72,250 L75,270" />
-
-    {/* Arm */}
-    <path d="M90,88 C95,95 98,115 96,150 L92,200" />
-    <path d="M78,92 C72,100 68,125 68,160 L65,210" />
-
-    {/* Hand */}
-    <ellipse cx="65" cy="220" rx="6" ry="12" />
-
-    {/* Leg - front */}
-    <path d="M85,230 C82,260 78,300 76,350 L75,400 C75,420 78,435 85,440" />
-
-    {/* Leg - back */}
-    <path d="M72,250 C68,290 65,340 65,390 L68,430" />
-
-    {/* Foot */}
-    <path d="M68,435 C60,438 55,440 50,440 L88,440 C90,438 92,435 92,432" />
+    {/* Ear hint */}
+    <path d="M93,27 C98,26 100,32 98,38 C97,41 94,42 92,40" opacity="0.5" />
   </g>
 );
 
