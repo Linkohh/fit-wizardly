@@ -464,11 +464,9 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
             <div data-testid="sculpt-slider" className="shrink-0">
               <SculptSlider value={sculptLevel} onChange={setSculptLevel} />
             </div>
-            {currentView === 'side' && (
-              <div data-testid="layer-toggle" className="shrink-0">
-                <LayerToggle value={layer} onChange={setLayer} />
-              </div>
-            )}
+            <div data-testid="layer-toggle" className="shrink-0">
+              <LayerToggle value={layer} onChange={setLayer} />
+            </div>
             {showSearch && (
               <div className="min-w-0 basis-full">
                 <RegionChips activeRegionId={activeRegionId} onToggle={handleRegionToggle} />

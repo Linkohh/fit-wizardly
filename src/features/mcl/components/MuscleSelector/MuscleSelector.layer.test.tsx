@@ -111,13 +111,35 @@ describe('MuscleSelector layers', () => {
     window.localStorage.removeItem(PREFS_KEY);
   });
 
-  it('front view with the deep layer stored still exposes surface muscles as enabled, focusable buttons', () => {
+  it('front view on the deep layer exposes deep muscles and ghosts surface muscles', () => {
     render(<MuscleSelectorComponent showLegend={false} showSearch={false} defaultView="front" />);
 
-    const pec = screen.getByRole('button', { name: /Pectoralis Major \(Left\)/i });
-    expect(pec).toHaveAttribute('aria-disabled', 'false');
-    expect(pec).toHaveAttribute('tabindex', '0');
-    expect(pec).not.toHaveAttribute('aria-hidden');
+    expect(screen.getByRole('button', { name: /Brachialis \(Left\)/i })).toHaveAttribute('tabindex', '0');
+    expect(screen.queryByRole('button', { name: /Pectoralis Major \(Left\)/i })).not.toBeInTheDocument();
+    expect(document.querySelectorAll('path.muscle-path[aria-hidden="true"]').length).toBeGreaterThan(0);
+  });
+
+  it('back view on the surface layer hides deep muscles and offers them on the deep layer', () => {
+    window.localStorage.setItem(PREFS_KEY, JSON.stringify({ sculptLevel: 60, layer: 'surface' }));
+    const { unmount } = render(<MuscleSelectorComponent showLegend={false} showSearch={false} defaultView="back" />);
+    expect(screen.queryByRole('button', { name: /Rhomboid \(Left\)/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Latissimus Dorsi \(Left\)/i })).toHaveAttribute('tabindex', '0');
+    unmount();
+
+    window.localStorage.setItem(PREFS_KEY, JSON.stringify({ sculptLevel: 60, layer: 'deep' }));
+    render(<MuscleSelectorComponent showLegend={false} showSearch={false} defaultView="back" />);
+    expect(screen.getByRole('button', { name: /Rhomboid \(Left\)/i })).toHaveAttribute('tabindex', '0');
+    expect(screen.queryByRole('button', { name: /Latissimus Dorsi \(Left\)/i })).not.toBeInTheDocument();
+  });
+
+  it('back view on the surface layer keeps a previously selected deep muscle as a selected ghost', () => {
+    window.localStorage.setItem(PREFS_KEY, JSON.stringify({ sculptLevel: 60, layer: 'surface' }));
+    mocks.selectedIds = ['rhomboid-left'];
+    render(<MuscleSelectorComponent showLegend={false} showSearch={false} defaultView="back" />);
+
+    const ghosts = Array.from(document.querySelectorAll('path.muscle-path[aria-hidden="true"]'));
+    const selectedGhost = ghosts.find((p) => p.getAttribute('stroke') !== 'transparent' && p.getAttribute('stroke-width') === '1.5');
+    expect(selectedGhost).toBeDefined();
   });
 
   it('side view with the deep layer exposes deep muscles and ghosts surface muscles', () => {
