@@ -19,3 +19,6 @@ export type MuscleGroup =
     | 'legs'
     | 'glutes'
     | 'calves';
+
+// Anatomical layer of a muscle: superficial (surface) or underlying (deep)
+export type MuscleLayer = 'surface' | 'deep';

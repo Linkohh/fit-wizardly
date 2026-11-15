@@ -1,9 +1,11 @@
 import React from 'react';
 import { ViewType } from '../../../types';
+import { SIDE_SILHOUETTE_PATH } from './sideOutline';
 
 interface BodyOutlineProps {
   view: ViewType;
   className?: string;
+  opacity?: number;
 }
 
 /**
@@ -120,48 +122,25 @@ const BackOutline: React.FC = () => (
   </g>
 );
 
-// Side view body outline
+// Side view body outline (faces right): one closed silhouette plus interior detail
 const SideOutline: React.FC = () => (
   <g className="body-outline" fill="none" strokeWidth="1.5">
-    {/* Head - side profile */}
-    <path d="M95,5 C115,5 125,20 125,35 C125,50 118,60 100,60 C85,60 78,50 78,35 C78,20 82,5 95,5" />
-    {/* Face profile */}
-    <path d="M125,30 C130,35 132,42 128,48 L120,55" />
+    <path d={SIDE_SILHOUETTE_PATH} />
 
-    {/* Neck */}
-    <path d="M92,58 C88,65 88,75 92,82" />
-    <path d="M105,58 C108,65 108,75 105,82" />
+    {/* Near arm: shoulder cap, upper arm, forearm and hand, hanging at the side */}
+    <path d="M92,76 C94,74 97.4,73.2 100,73 C102.6,72.8 105.5,73.8 107.5,75 C109.5,76.2 110.9,77.7 112,80 C113.1,82.3 113.7,85.7 114,89 C114.3,92.3 113.9,95.7 113.8,100 C113.7,104.3 113.6,109.2 113.6,115 C113.6,120.8 113.9,128.3 113.8,135 C113.7,141.7 113.5,148.3 113.2,155 C112.9,161.7 112.4,168.8 111.8,175 C111.2,181.2 109.9,187.3 109.8,192 C109.7,196.7 110.8,199.3 111.2,203 C111.6,206.7 112,209.2 112,214 C112,218.8 111.6,226 111,232 C110.4,238 109.3,245 108.5,250 C107.8,255 106.6,258.8 106.5,262 C106.4,265.2 107.7,266.5 108,269 C108.3,271.5 108.8,274.5 108.5,277 C108.2,279.5 107.3,282.3 106,284 C104.8,285.7 102.7,287 101,287 C99.3,287 97.2,285.7 96,284 C94.8,282.3 93.9,279.5 93.6,277 C93.3,274.5 93.9,271.5 94,269 C94.1,266.5 94.5,265.2 94.2,262 C94,258.8 93.1,255 92.5,250 C91.9,245 91,238 90.5,232 C90,226 89.6,218.8 89.5,214 C89.4,209.2 89.7,206.3 89.8,203 C89.9,199.7 90.6,197.8 90.3,194 C90,190.2 88.8,185.7 88.2,180 C87.6,174.3 87.1,166.7 86.8,160 C86.5,153.3 86.4,146.7 86.3,140 C86.2,133.3 86.2,126.7 86.2,120 C86.2,113.3 86.2,105.8 86.5,100 C86.8,94.2 87.3,89 88.2,85 C89.1,81 90,78 92,76 Z" opacity="0.8" />
 
-    {/* Chest / front torso */}
-    <path d="M92,82 C78,90 68,110 65,140 L62,180 C62,200 68,215 80,225" />
+    {/* Jaw line */}
+    <path d="M95,47 C99,52 106,55 118,57" opacity="0.5" />
 
-    {/* Back torso */}
-    <path d="M105,82 C115,88 120,100 118,130 L115,170 C112,195 105,215 95,230" />
-
-    {/* Glute curve */}
-    <path d="M95,200 C85,210 75,225 72,250 L75,270" />
-
-    {/* Arm */}
-    <path d="M90,88 C95,95 98,115 96,150 L92,200" />
-    <path d="M78,92 C72,100 68,125 68,160 L65,210" />
-
-    {/* Hand */}
-    <ellipse cx="65" cy="220" rx="6" ry="12" />
-
-    {/* Leg - front */}
-    <path d="M85,230 C82,260 78,300 76,350 L75,400 C75,420 78,435 85,440" />
-
-    {/* Leg - back */}
-    <path d="M72,250 C68,290 65,340 65,390 L68,430" />
-
-    {/* Foot */}
-    <path d="M68,435 C60,438 55,440 50,440 L88,440 C90,438 92,435 92,432" />
+    {/* Ear hint */}
+    <path d="M93,27 C98,26 100,32 98,38 C97,41 94,42 92,40" opacity="0.5" />
   </g>
 );
 
-export const BodyOutline: React.FC<BodyOutlineProps> = ({ view, className }) => {
+export const BodyOutline: React.FC<BodyOutlineProps> = ({ view, className, opacity }) => {
   return (
-    <g className={className}>
+    <g className={className} opacity={opacity}>
       {view === 'front' && <FrontOutline />}
       {view === 'back' && <BackOutline />}
       {view === 'side' && <SideOutline />}

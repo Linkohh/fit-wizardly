@@ -5,8 +5,12 @@ import { MuscleSelectorProps, ViewType, Muscle, TooltipState, InfoPanelState } f
 import { getMuscleById } from '../../data/muscles';
 import { useMuscleSelection } from '../../hooks/useMuscleSelection';
 import { useTheme } from '../../hooks/useTheme';
+import { useSculptPrefs } from '../../hooks/useSculptPrefs';
+import { getPairedIds, getSideLabel } from '../../lib/pairedMuscles';
 import MuscleCanvas from './svg/MuscleCanvas';
 import ViewSwitcher from './ui/ViewSwitcher';
+import SculptSlider from './ui/SculptSlider';
+import LayerToggle from './ui/LayerToggle';
 import MuscleTooltip from './ui/MuscleTooltip';
 import InfoPanel from './ui/InfoPanel';
 import SelectionSidebar from './ui/SelectionSidebar';
@@ -70,6 +74,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
   // View state
   const [currentView, setCurrentView] = useState<ViewType>(defaultView);
+  const { sculptLevel, setSculptLevel, layer, setLayer } = useSculptPrefs();
 
   // Sync view when defaultView prop changes (for controlled usage)
   useEffect(() => {
@@ -126,6 +131,13 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
     [onViewChange]
   );
 
+  // A hovered muscle can become a ghost or disappear when the view or layer changes
+  // under a stationary pointer, so drop hover and tooltip state when either changes.
+  useEffect(() => {
+    setHoveredMuscle(null);
+    setTooltip((prev) => (prev.visible ? { ...prev, visible: false } : prev));
+  }, [currentView, layer]);
+
   const handleMuscleHover = useCallback(
     (muscle: Muscle | null, event?: React.MouseEvent) => {
       if (muscle && event && containerRef.current) {
@@ -148,12 +160,31 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
   const handleMuscleClick = useCallback(
     (muscle: Muscle) => {
-      const wasSelected = selectedIds.includes(muscle.id);
-      toggleMuscle(muscle.id);
+      let wasSelected: boolean;
+
+      if (currentView === 'side') {
+        // The side view draws one side only, so a click acts on the whole pair in one history step.
+        const disabled = new Set(disabledMuscles);
+        const ids = getPairedIds(muscle.id).filter((id) => !disabled.has(id));
+        if (ids.length === 0) return;
+        wasSelected = ids.every((id) => selectedIds.includes(id));
+
+        if (wasSelected) {
+          setSelection(multiSelect ? selectedIds.filter((id) => !ids.includes(id)) : []);
+        } else {
+          setSelection(
+            multiSelect ? [...selectedIds, ...ids.filter((id) => !selectedIds.includes(id))] : ids
+          );
+        }
+      } else {
+        wasSelected = selectedIds.includes(muscle.id);
+        toggleMuscle(muscle.id);
+      }
+
       onMuscleClick?.(muscle);
       void emit(wasSelected ? 'deselect' : 'select');
     },
-    [selectedIds, toggleMuscle, onMuscleClick, emit]
+    [currentView, disabledMuscles, multiSelect, selectedIds, setSelection, toggleMuscle, onMuscleClick, emit]
   );
 
   const handleMuscleLongPress = useCallback(
@@ -335,6 +366,20 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
           </div>
         )}
 
+        {/* Sculpt controls (slim second row; the header row is too tight) */}
+        {showHeader && (
+          <div className="flex flex-wrap items-center gap-2 px-3 py-1.5 md:py-2 sm:px-4 border-b border-border/30 dark:border-white/10">
+            <div data-testid="sculpt-slider" className="shrink-0">
+              <SculptSlider value={sculptLevel} onChange={setSculptLevel} />
+            </div>
+            {currentView === 'side' && (
+              <div data-testid="layer-toggle" className="shrink-0">
+                <LayerToggle value={layer} onChange={setLayer} />
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Legend */}
         {showLegend && (
           <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800">
@@ -368,6 +413,8 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 onMuscleClick={handleMuscleClick}
                 onMuscleLongPress={handleMuscleLongPress}
                 customViewBox={customViewBox}
+                sculptLevel={sculptLevel}
+                layer={layer}
               />
             </div>
           </motion.div>
@@ -376,6 +423,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
           {showTooltip && !isTouchContext && (
             <MuscleTooltip
               muscle={tooltip.muscle}
+              label={currentView === 'side' && tooltip.muscle ? getSideLabel(tooltip.muscle.name) : undefined}
               position={{ x: tooltip.x, y: tooltip.y }}
               visible={tooltip.visible}
               containerRef={containerRef as React.RefObject<HTMLDivElement>}
@@ -405,7 +453,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
       {/* Selection Sidebar (Android + non-Apple mobile) */}
       {showInlineMobileSidebar && (
-        <div className="w-full min-h-0" data-testid="muscle-selector-sidebar">
+        <div className="w-full h-[40%] shrink-0 min-h-0 flex flex-col" data-testid="muscle-selector-sidebar">
           <SelectionSidebar
             selectedMuscles={selectedMuscles}
             onRemoveMuscle={handleRemoveMuscle}

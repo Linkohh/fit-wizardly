@@ -127,6 +127,10 @@ vi.mock('./ui/InfoPanel', () => ({
     isOpen ? <div data-testid="info-panel">{muscle?.name}</div> : null,
 }));
 
+vi.mock('./ui/SculptSlider', () => ({
+  default: () => <div data-testid="sculpt-slider-stub" />,
+}));
+
 vi.mock('./ui/ViewSwitcher', () => ({
   default: () => <div />,
 }));
@@ -166,6 +170,15 @@ describe('MuscleSelector iOS behavior', () => {
       'data-snap-points',
       JSON.stringify([0.22, 0.5, 0.88])
     );
+  });
+
+  it('non-Apple mobile gives the inline sidebar a fixed share so the body map keeps its height', () => {
+    mocks.isAppleMobile = false;
+    render(<MuscleSelectorComponent showLegend={false} showSearch={false} />);
+
+    const wrapper = screen.getByTestId('muscle-selector-sidebar');
+    expect(wrapper).toContainElement(screen.getByTestId('selection-sidebar-inline'));
+    expect(wrapper).toHaveClass('h-[40%]', 'shrink-0', 'min-h-0', 'flex', 'flex-col');
   });
 
   it('opens the selection sheet from the mobile trigger and emits sheet open feedback', () => {

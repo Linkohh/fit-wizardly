@@ -7,16 +7,21 @@ import { MuscleSelector } from '@/features/mcl';
 import { formatIdentifierLabel } from '@/lib/displayText';
 import { mapLegacyToMcl, mapMclToLegacy } from '@/lib/muscleMapping';
 import { useThemeStore } from '@/stores/themeStore';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useAppleMobile } from '@/hooks/use-apple-mobile';
 import { useTranslation } from 'react-i18next';
 
 const EMPTY_TARGET_MUSCLES: string[] = [];
+
+// Apple phones show the selected list in a bottom sheet, so the body map gets the whole shell.
+// Other phones stack the list inline under the map, so the shell is taller to keep the map readable.
+const SHELL_HEIGHT_SHEET = 'h-[min(62vh,560px)] supports-[height:100dvh]:h-[min(62dvh,560px)] sm:h-[600px]';
+const SHELL_HEIGHT_INLINE = 'h-[min(78vh,680px)] supports-[height:100dvh]:h-[min(78dvh,680px)] sm:h-[600px]';
 
 export function AnatomyPanel() {
     const { t } = useTranslation();
     const { selections, setTargetMuscles } = useWizardStore();
     const themeMode = useThemeStore((state) => state.mode);
-    const isMobile = useIsMobile();
+    const isAppleMobile = useAppleMobile();
 
     // React Hook Form integration with Zustand sync
     const { watch, setValue, formState: { errors }, trigger } = useWizardForm({
@@ -63,7 +68,7 @@ export function AnatomyPanel() {
             <div className="mx-auto w-full max-w-[1120px]">
                 <div
                     data-testid="anatomy-selector-shell"
-                    className="w-full h-[min(62vh,560px)] supports-[height:100dvh]:h-[min(62dvh,560px)] sm:h-[600px] rounded-[1.75rem] overflow-hidden surface-premium-strong surface-premium-stroke"
+                    className={`w-full ${isAppleMobile ? SHELL_HEIGHT_SHEET : SHELL_HEIGHT_INLINE} rounded-[1.75rem] overflow-hidden surface-premium-strong surface-premium-stroke`}
                 >
                     <MuscleSelector
                         selectedMuscles={selectedMclIds}
@@ -71,7 +76,7 @@ export function AnatomyPanel() {
                         showPresets={true}
                         showInfoPanel={true}
                         showSelectionSidebar={true}
-                        showSideView={!isMobile}
+                        showSideView
                         showLegend={false}
                         headerControlsMode="embedded"
                         theme={themeMode}

@@ -1,10 +1,14 @@
 import React, { useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Muscle, ViewType, MuscleHighlight } from '../../../types';
+import { Muscle, ViewType, MuscleHighlight, MuscleLayer } from '../../../types';
 import { getMusclesByView } from '../../../data/muscles';
 import BodyOutline from './BodyOutline';
 import MusclePath from './MusclePath';
 import { getTimedTransition } from '@/lib/motion/tokens';
+import { sortMusclesForRender } from '../../../lib/sortMuscles';
+import { getLayerRole } from '../../../lib/layerVisibility';
+import { getSideLabel } from '../../../lib/pairedMuscles';
+import { SCULPT_DEFAULT, getSculptStyle } from '../../../lib/sculpt';
 
 interface MuscleCanvasProps {
   view: ViewType;
@@ -23,6 +27,9 @@ interface MuscleCanvasProps {
   onMuscleClick: (muscle: Muscle) => void;
   onMuscleLongPress?: (muscle: Muscle) => void;
   customViewBox?: string;
+  sculptLevel?: number;
+  /** Side view only: which layer is interactive. Front and back ignore it. */
+  layer?: MuscleLayer;
 }
 
 export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
@@ -42,7 +49,11 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   onMuscleClick,
   onMuscleLongPress,
   customViewBox,
+  sculptLevel = SCULPT_DEFAULT,
+  layer = 'surface',
 }) => {
+  const sculpt = useMemo(() => getSculptStyle(sculptLevel), [sculptLevel]);
+
   // Get muscles for current view
   const visibleMuscles = useMemo(() => getMusclesByView(view), [view]);
 
@@ -56,37 +67,43 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   // Create a Set for disabled muscles for O(1) lookup
   const disabledSet = useMemo(() => new Set(disabledMuscles), [disabledMuscles]);
 
-  // Sort muscles so selected/highlighted ones render on top
-  const sortedMuscles = useMemo(() => {
-    return [...visibleMuscles].sort((a, b) => {
-      const aSelected = selectedMuscles.includes(a.id);
-      const bSelected = selectedMuscles.includes(b.id);
-      const aHovered = hoveredMuscle === a.id;
-      const bHovered = hoveredMuscle === b.id;
-      const aHighlighted = highlightMap.has(a.id);
-      const bHighlighted = highlightMap.has(b.id);
-      const aDisabled = disabledSet.has(a.id);
-      const bDisabled = disabledSet.has(b.id);
+  const selectedSet = useMemo(() => new Set(selectedMuscles), [selectedMuscles]);
+  const highlightedSet = useMemo(() => new Set(highlightMap.keys()), [highlightMap]);
 
-      // Disabled muscles render at bottom
-      if (aDisabled && !bDisabled) return -1;
-      if (bDisabled && !aDisabled) return 1;
+  // Ghosts paint first (behind), then active muscles; each group is sorted so
+  // selected/highlighted ones render on top (side view: by depth first). Hidden muscles are dropped unless selected.
+  const { ghostMuscles, activeMuscles, hiddenSelectedMuscles } = useMemo(() => {
+    const ghosts: Muscle[] = [];
+    const hiddenSelected: Muscle[] = [];
+    const active: Muscle[] = [];
+    for (const muscle of visibleMuscles) {
+      const role = getLayerRole(muscle, view, layer);
+      if (role === 'ghost') ghosts.push(muscle);
+      else if (role === 'active') active.push(muscle);
+      else if (selectedSet.has(muscle.id)) hiddenSelected.push(muscle);
+    }
+    const state = {
+      selected: selectedSet,
+      hovered: hoveredMuscle,
+      highlighted: highlightedSet,
+      disabled: disabledSet,
+    };
+    return {
+      ghostMuscles: sortMusclesForRender(ghosts, view, state),
+      activeMuscles: sortMusclesForRender(active, view, state),
+      hiddenSelectedMuscles: sortMusclesForRender(hiddenSelected, view, state),
+    };
+  }, [visibleMuscles, view, layer, selectedSet, hoveredMuscle, highlightedSet, disabledSet]);
 
-      // Hovered muscle on top
-      if (aHovered && !bHovered) return 1;
-      if (bHovered && !aHovered) return -1;
-
-      // Selected muscles above highlighted but below hovered
-      if (aSelected && !bSelected) return 1;
-      if (bSelected && !aSelected) return -1;
-
-      // Highlighted above unselected
-      if (aHighlighted && !bHighlighted) return 1;
-      if (bHighlighted && !aHighlighted) return -1;
-
-      return 0;
-    });
-  }, [visibleMuscles, selectedMuscles, hoveredMuscle, highlightMap, disabledSet]);
+  const sortedMuscles = useMemo(
+    () => [
+      ...ghostMuscles.map((muscle) => ({ muscle, isGhost: true })),
+      ...activeMuscles.map((muscle) => ({ muscle, isGhost: false })),
+      // Selected muscles on the hidden layer stay visible as inert ghosts, drawn last so surface muscles do not bury them.
+      ...hiddenSelectedMuscles.map((muscle) => ({ muscle, isGhost: true })),
+    ],
+    [ghostMuscles, activeMuscles, hiddenSelectedMuscles]
+  );
 
   // Memoize event handlers to prevent unnecessary re-renders
   const handleMouseEnter = useCallback(
@@ -155,6 +172,13 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
             <stop offset="100%" stopColor="#22D3EE" />
           </linearGradient>
 
+          {/* Light/shadow overlay used to model muscle form */}
+          <linearGradient id="muscle-shade" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.5" />
+            <stop offset="50%" stopColor="#FFFFFF" stopOpacity="0" />
+            <stop offset="100%" stopColor="#000000" stopOpacity="0.5" />
+          </linearGradient>
+
           {/* Glow filter for selected muscles */}
           <filter id="glow-selected" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -177,23 +201,26 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
         />
 
         {/* Background body outline */}
-        <BodyOutline view={view} />
+        <BodyOutline view={view} opacity={sculpt.outlineOpacity} />
 
         {/* Muscle paths */}
-        <g className="muscles">
-          {sortedMuscles.map((muscle, index) => (
+        <g className="muscles text-background">
+          {sortedMuscles.map(({ muscle, isGhost }, index) => (
             <MusclePath
               key={`${muscle.id}-${view}`}
               muscle={muscle}
+              label={view === 'side' ? getSideLabel(muscle.name) : undefined}
               view={view}
-              isSelected={selectedMuscles.includes(muscle.id)}
-              isHovered={hoveredMuscle === muscle.id}
+              isSelected={selectedSet.has(muscle.id)}
+              isHovered={!isGhost && hoveredMuscle === muscle.id}
               isDisabled={disabledSet.has(muscle.id)}
+              isGhost={isGhost}
               highlight={highlightMap.get(muscle.id)}
               colorByGroup={colorByGroup}
               accentColor={accentColor}
               animateHighlights={animateHighlights}
               hoverIntensity={hoverIntensity}
+              sculpt={sculpt}
               enableTouchInfo={enableTouchInfo}
               longPressMs={longPressMs}
               reduceMotion={reduceMotion}

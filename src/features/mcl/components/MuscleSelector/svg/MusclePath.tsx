@@ -2,19 +2,25 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Muscle, ViewType, MuscleHighlight } from '../../../types';
 import { getMuscleGroupColor } from '../../../data/muscleGroups';
+import { getGhostOpacity, getMuscleOpacity, type SculptStyle } from '../../../lib/sculpt';
 import { getSpringTransition, getTimedTransition } from '@/lib/motion/tokens';
 
 interface MusclePathProps {
   muscle: Muscle;
+  /** Accessible name override; defaults to `muscle.name`. */
+  label?: string;
   view: ViewType;
   isSelected: boolean;
   isHovered: boolean;
   isDisabled: boolean;
+  /** Receded layer: drawn faint and fully non-interactive. */
+  isGhost?: boolean;
   highlight?: MuscleHighlight;
   colorByGroup: boolean;
   accentColor: string;
   animateHighlights?: boolean;
   hoverIntensity?: 'default' | 'strong';
+  sculpt: SculptStyle;
   highlightIndex?: number;
   enableTouchInfo?: boolean;
   longPressMs?: number;
@@ -35,15 +41,18 @@ const highlightColors: Record<MuscleHighlight['type'], { fill: string; glow: str
 
 export const MusclePath: React.FC<MusclePathProps> = ({
   muscle,
+  label,
   view,
   isSelected,
   isHovered,
   isDisabled,
+  isGhost = false,
   highlight,
   colorByGroup,
   accentColor,
   animateHighlights = false,
   hoverIntensity = 'default',
+  sculpt,
   highlightIndex = 0,
   enableTouchInfo = false,
   longPressMs = 380,
@@ -86,20 +95,27 @@ export const MusclePath: React.FC<MusclePathProps> = ({
 
   // Determine opacity based on state - improved unselected visibility
   const opacity = useMemo(() => {
+    if (isGhost) return getGhostOpacity(isSelected);
     if (isDisabled) return 0.15;
     if (highlight) {
       const baseOpacity = highlight.intensity / 100;
       return Math.max(0.5, Math.min(1, baseOpacity * 0.5 + 0.5));
     }
-    if (isSelected) return 1;
-    if (isHovered) return hoverIntensity === 'strong' ? 1 : 0.95;
-    // Improved unselected visibility
-    return hoverIntensity === 'strong' ? 0.2 : 0.25;
-  }, [isSelected, isHovered, isDisabled, highlight, hoverIntensity]);
+    return getMuscleOpacity({ isSelected, isHovered, isDisabled }, sculpt, hoverIntensity);
+  }, [isGhost, isSelected, isHovered, isDisabled, highlight, hoverIntensity, sculpt]);
+
+  const isResting = !isGhost && !isSelected && !isHovered && !isDisabled && !highlight;
+  const scale = isGhost ? 1 : isHovered && !isDisabled ? (hoverIntensity === 'strong' ? 1.07 : 1.03) : isSelected ? 1.01 : 1;
+  const transition = reduceMotion
+    ? { duration: 0 }
+    : {
+        ...getTimedTransition('base', reduceMotion),
+        scale: getSpringTransition('snappy', reduceMotion),
+      };
 
   // Enhanced multi-layer glow effect for premium appearance
   const glowFilter = useMemo(() => {
-    if (isDisabled) return 'none';
+    if (isGhost || isDisabled) return 'none';
 
     if (highlight && highlight.intensity > 50) {
       const intensity = highlight.intensity / 100;
@@ -119,7 +135,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
     }
 
     return 'none';
-  }, [isSelected, isHovered, isDisabled, highlight, glowColor, hoverIntensity]);
+  }, [isGhost, isSelected, isHovered, isDisabled, highlight, glowColor, hoverIntensity]);
 
   const handleMouseEnter = useCallback(
     (e: React.MouseEvent) => {
@@ -194,11 +210,11 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   // Determine if this muscle should have the pulse animation
   const shouldPulse = useMemo(() => {
     if (reduceMotion) return false;
-    if (isDisabled) return false;
+    if (isGhost || isDisabled) return false;
     if (isSelected) return true;
     if (animateHighlights && highlight && highlight.intensity > 50) return true;
     return false;
-  }, [reduceMotion, isDisabled, isSelected, animateHighlights, highlight]);
+  }, [reduceMotion, isGhost, isDisabled, isSelected, animateHighlights, highlight]);
 
   // Calculate animation delay for staggered effect
   const animationDelay = useMemo(() => {
@@ -215,52 +231,79 @@ export const MusclePath: React.FC<MusclePathProps> = ({
 
   if (!pathData) return null;
 
+  if (isGhost) {
+    // Receded layer: no events, focus, roles or glow. A selected ghost keeps its stroke.
+    return (
+      <motion.path
+        d={pathData}
+        className="muscle-path"
+        style={{ transformOrigin: 'center', pointerEvents: 'none', cursor: 'default' }}
+        fill={isSelected ? `url(#gradient-${muscle.group})` : colorByGroup ? groupColor : '#9CA3AF'}
+        stroke={isSelected ? glowColor : 'transparent'}
+        strokeWidth={isSelected ? 1.5 : 0}
+        initial={false}
+        animate={{ opacity, scale: 1, filter: 'none' }}
+        transition={transition}
+        aria-hidden="true"
+        tabIndex={-1}
+      />
+    );
+  }
+
   return (
-    <motion.path
-      d={pathData}
-      className={`muscle-path ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${shouldPulse ? 'muscle-pulse' : ''}`}
-      style={{
-        transformOrigin: 'center',
-        ...(animationDelay ? { animationDelay } : {}),
-      }}
-      fill={fillColor}
-      stroke={isSelected || isHovered ? glowColor : 'transparent'}
-      strokeWidth={isSelected ? 1.5 : isHovered ? (hoverIntensity === 'strong' ? 2.25 : 1) : 0}
-      initial={{ opacity: 0.25 }}
-      animate={{
-        opacity,
-        scale: isHovered && !isDisabled ? (hoverIntensity === 'strong' ? 1.07 : 1.03) : isSelected ? 1.01 : 1,
-        filter: glowFilter,
-      }}
-      transition={
-        reduceMotion
-          ? { duration: 0 }
-          : {
-              ...getTimedTransition('base', reduceMotion),
-              scale: getSpringTransition('snappy', reduceMotion),
-            }
-      }
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={onMouseLeave}
-      onClick={handleClick}
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerEnd}
-      onPointerCancel={handlePointerEnd}
-      data-click-feedback="off"
-      data-interaction-feedback="explicit"
-      role="button"
-      aria-label={`${muscle.name}${isDisabled ? ' (disabled)' : ''}${highlight ? ` - ${highlight.label || highlight.type}` : ''}`}
-      aria-pressed={isSelected}
-      aria-disabled={isDisabled}
-      tabIndex={isDisabled ? -1 : 0}
-      onKeyDown={(e) => {
-        if ((e.key === 'Enter' || e.key === ' ') && !isDisabled) {
-          e.preventDefault();
-          handleClick();
-        }
-      }}
-    />
+    <>
+      <motion.path
+        d={pathData}
+        className={`muscle-path ${isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${shouldPulse ? 'muscle-pulse' : ''}`}
+        style={{
+          transformOrigin: 'center',
+          ...(animationDelay ? { animationDelay } : {}),
+        }}
+        fill={fillColor}
+        stroke={isSelected || isHovered ? glowColor : isResting ? 'currentColor' : 'transparent'}
+        strokeWidth={isSelected ? 1.5 : isHovered ? (hoverIntensity === 'strong' ? 2.25 : 1) : isResting ? 0.6 : 0}
+        strokeOpacity={isResting ? sculpt.edgeOpacity : undefined}
+        initial={{ opacity: 0.25 }}
+        animate={{
+          opacity,
+          scale,
+          filter: glowFilter,
+        }}
+        transition={transition}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onClick={handleClick}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
+        data-click-feedback="off"
+        data-interaction-feedback="explicit"
+        role="button"
+        aria-label={`${label ?? muscle.name}${isDisabled ? ' (disabled)' : ''}${highlight ? ` - ${highlight.label || highlight.type}` : ''}`}
+        aria-pressed={isSelected}
+        aria-disabled={isDisabled}
+        tabIndex={isDisabled ? -1 : 0}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !isDisabled) {
+            e.preventDefault();
+            handleClick();
+          }
+        }}
+      />
+      {isResting && sculpt.shadingOpacity > 0 && (
+        <motion.path
+          d={pathData}
+          fill="url(#muscle-shade)"
+          pointerEvents="none"
+          aria-hidden="true"
+          style={{ transformOrigin: 'center' }}
+          initial={false}
+          animate={{ opacity: sculpt.shadingOpacity * 0.35, scale }}
+          transition={transition}
+        />
+      )}
+    </>
   );
 };
 

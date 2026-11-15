@@ -5,6 +5,8 @@ import { getMuscleGroupColor, getMuscleGroupName } from '../../../data/muscleGro
 
 interface MuscleTooltipProps {
   muscle: Muscle | null;
+  /** Display name override (e.g. side view drops the Left/Right suffix). */
+  label?: string;
   position: { x: number; y: number };
   visible: boolean;
   containerRef: React.RefObject<HTMLDivElement>;
@@ -12,6 +14,7 @@ interface MuscleTooltipProps {
 
 export const MuscleTooltip: React.FC<MuscleTooltipProps> = ({
   muscle,
+  label,
   position,
   visible,
   containerRef,
@@ -78,7 +81,7 @@ export const MuscleTooltip: React.FC<MuscleTooltipProps> = ({
 
             {/* Muscle name */}
             <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
-              {muscle.name}
+              {label ?? muscle.name}
             </h4>
 
             {/* Scientific name */}

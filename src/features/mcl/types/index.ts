@@ -1,8 +1,8 @@
 // Import shared primitive types for use in this file
-import type { ViewType, MuscleGroup, DifficultyLevel } from './shared';
+import type { ViewType, MuscleGroup, DifficultyLevel, MuscleLayer } from './shared';
 
 // Re-export shared primitive types for external use
-export type { ViewType, MuscleGroup, DifficultyLevel } from './shared';
+export type { ViewType, MuscleGroup, DifficultyLevel, MuscleLayer } from './shared';
 
 // Individual muscle definition
 export interface Muscle {
@@ -29,6 +29,10 @@ export interface Muscle {
   difficulty?: DifficultyLevel;
   compoundPrimary?: boolean;  // Is this a primary mover in compound lifts?
   recoveryHours?: number;     // Typical recovery time (48-72hrs)
+  // Side view only: paint order (see SIDE_ORDER); lower renders first
+  sideOrder?: number;
+  // Side view only: surface or deep layer
+  layer?: MuscleLayer;
 }
 
 // Muscle group metadata for legend and filtering
