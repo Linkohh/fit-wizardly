@@ -34,7 +34,10 @@ export const AnatomyResultList: React.FC<AnatomyResultListProps> = ({
   onSelectAll,
   onClear,
 }) => {
-  const drawable = result.members.filter((member) => member.muscleIds.length > 0);
+  // Group headings (Calves, Back) have no shape of their own; list the muscles inside them.
+  const groupIds = new Set(result.members.map((member) => member.node.parent));
+  const listed = result.members.filter((member) => member.muscleIds.length > 0 || !groupIds.has(member.node.id));
+  const drawable = listed.filter((member) => member.muscleIds.length > 0);
   const allSelected = result.muscleIds.length > 0 && result.muscleIds.every((id) => selectedIds.includes(id));
 
   return (
@@ -42,43 +45,25 @@ export const AnatomyResultList: React.FC<AnatomyResultListProps> = ({
       data-testid="anatomy-result-list"
       role="region"
       aria-label={`Muscles matching ${title}`}
-      className="absolute inset-x-2 top-2 z-10 max-h-[45%] overflow-y-auto rounded-xl border border-border/40 bg-background/90 p-2 shadow-lg backdrop-blur dark:border-white/10"
+      className="flex items-center gap-2 border-b border-border/30 px-3 py-1.5 sm:px-4 dark:border-white/10"
     >
-      <div className="mb-1.5 flex items-center gap-2">
-        <p className="min-w-0 flex-1 truncate text-xs font-semibold text-foreground">
-          {title}: {drawable.length} {drawable.length === 1 ? 'muscle' : 'muscles'}
-        </p>
-        <button
-          type="button"
-          onClick={onSelectAll}
-          disabled={result.muscleIds.length === 0 || allSelected}
-          className="shrink-0 rounded-md bg-primary/20 px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/30 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {allSelected ? 'All selected' : 'Select all'}
-        </button>
-        <button
-          type="button"
-          onClick={onClear}
-          aria-label="Clear matches"
-          className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-        >
-          <X className="h-3.5 w-3.5" />
-        </button>
-      </div>
-      <ul className="flex flex-wrap gap-1.5">
-        {result.members.map((member) => {
+      <p className="shrink-0 text-xs font-semibold text-foreground">
+        {title}: {drawable.length} {drawable.length === 1 ? 'muscle' : 'muscles'}
+      </p>
+      <ul className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {listed.map((member) => {
           const note = describeMember(member, current);
           const isDrawn = member.muscleIds.length > 0;
           const isSelected = isDrawn && member.muscleIds.every((id) => selectedIds.includes(id));
           return (
-            <li key={member.node.id}>
+            <li key={member.node.id} className="shrink-0">
               <button
                 type="button"
                 disabled={!isDrawn}
                 aria-pressed={isSelected}
                 onClick={() => onSelectMember(member)}
                 className={`
-                  rounded-full px-2.5 py-1 text-left text-xs transition-colors
+                  whitespace-nowrap rounded-full px-2.5 py-1 text-left text-xs transition-colors
                   ${isSelected
                     ? 'bg-primary/25 text-primary ring-1 ring-primary/50'
                     : 'bg-muted/40 text-foreground hover:bg-muted/60 dark:bg-white/5 dark:hover:bg-white/10'
@@ -93,6 +78,22 @@ export const AnatomyResultList: React.FC<AnatomyResultListProps> = ({
           );
         })}
       </ul>
+      <button
+        type="button"
+        onClick={onSelectAll}
+        disabled={result.muscleIds.length === 0 || allSelected}
+        className="shrink-0 rounded-md bg-primary/20 px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/30 disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        {allSelected ? 'All selected' : 'Select all'}
+      </button>
+      <button
+        type="button"
+        onClick={onClear}
+        aria-label="Clear matches"
+        className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+      >
+        <X className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 };

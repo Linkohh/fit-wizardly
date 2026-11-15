@@ -163,3 +163,14 @@ Each phase ends with tests passing and can be reviewed on its own.
 ## 13. Where the work goes
 
 A new branch started from `feat/side-view-sculpt`, because the layer toggle and ghost rendering live there. If PR 40 merges first, start from `preview_b` instead. Nothing is added to PR 40.
+
+## 14. Changes made during the build (2026-11-15)
+
+- **View switching (section 7):** the selector goes to the view showing the most matches, and the current view wins ties. The earlier rule (stay if any match is on the current view) left the Back chip on the front view.
+- **Mixed layers (section 7):** a match on the other layer shows as a highlighted ghost on both Surface and Deep, so no match is ever invisible.
+- **Result list (section 7):** one slim row above the body map with the names scrolling sideways. A taller list covered the muscles it was highlighting. Group headings such as "Calves" are not listed as muscles.
+- **Search box:** now shown on phones as well as desktop.
+- **Chip names:** announced to screen readers as "Back region" and so on, so they do not clash with the Front / Back view buttons.
+- **Rotator cuff workout group:** the new cuff muscles count toward `upper_back`, matching the existing infraspinatus, not `rear_deltoid`.
+- **Non-Apple phone sizing:** the panel is `min(84dvh, 720px)` and the selected list takes 26% while empty, 40% once muscles are selected. Measured at 375x812: body map 319px empty, 281px while searching, 225px with muscles selected, 188px with both.
+- **Phase 5 (optional) not built:** separate shapes for muscle heads, the new deep muscles on the side view, internal oblique artwork, translations.

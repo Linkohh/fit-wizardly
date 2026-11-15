@@ -19,20 +19,19 @@ function idsOnView(muscleIds: string[], view: ViewType): string[] {
 
 /**
  * Where the selector should look so a set of matched muscles is visible:
- * stay put when any match is on the current view, otherwise move to the view
- * showing the most. The layer follows only when every match there agrees.
+ * the view showing the most of them (the current view wins ties). The layer
+ * follows only when every match on that view agrees.
  */
 export function pickViewAndLayer(muscleIds: string[], current: ViewAndLayer, allowSide: boolean): ViewAndLayer {
   const candidates = VIEW_ORDER.filter((view) => allowSide || view !== 'side');
+  // Go where most of the matches are; the current view wins ties so the body does not flip needlessly.
   let view = current.view;
-  if (idsOnView(muscleIds, current.view).length === 0) {
-    let bestCount = 0;
-    for (const candidate of candidates) {
-      const count = idsOnView(muscleIds, candidate).length;
-      if (count > bestCount) {
-        bestCount = count;
-        view = candidate;
-      }
+  let bestCount = idsOnView(muscleIds, current.view).length;
+  for (const candidate of candidates) {
+    const count = idsOnView(muscleIds, candidate).length;
+    if (count > bestCount) {
+      bestCount = count;
+      view = candidate;
     }
   }
 

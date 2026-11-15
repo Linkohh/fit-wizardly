@@ -15,7 +15,7 @@ const EMPTY_TARGET_MUSCLES: string[] = [];
 // Apple phones show the selected list in a bottom sheet, so the body map gets the whole shell.
 // Other phones stack the list inline under the map, so the shell is taller to keep the map readable.
 const SHELL_HEIGHT_SHEET = 'h-[min(62vh,560px)] supports-[height:100dvh]:h-[min(62dvh,560px)] sm:h-[600px]';
-const SHELL_HEIGHT_INLINE = 'h-[min(78vh,680px)] supports-[height:100dvh]:h-[min(78dvh,680px)] sm:h-[600px]';
+const SHELL_HEIGHT_INLINE = 'h-[min(84vh,720px)] supports-[height:100dvh]:h-[min(84dvh,720px)] sm:h-[600px]';
 
 export function AnatomyPanel() {
     const { t } = useTranslation();

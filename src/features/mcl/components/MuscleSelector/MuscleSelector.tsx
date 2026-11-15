@@ -482,6 +482,19 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
           </div>
         )}
 
+        {/* Matches from search or a region chip */}
+        {anatomyFocus && (
+          <AnatomyResultList
+            result={anatomyFocus}
+            title={anatomyFocusTitle}
+            current={{ view: currentView, layer }}
+            selectedIds={selectedIds}
+            onSelectMember={handleSelectFocusMember}
+            onSelectAll={handleSelectAllFocus}
+            onClear={handleClearAnatomyFocus}
+          />
+        )}
+
         {/* SVG Canvas Area */}
         <div className="flex-1 relative overflow-hidden p-2 sm:p-4" data-testid="muscle-selector-canvas-area">
           <motion.div
@@ -513,18 +526,6 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
               />
             </div>
           </motion.div>
-
-          {anatomyFocus && (
-            <AnatomyResultList
-              result={anatomyFocus}
-              title={anatomyFocusTitle}
-              current={{ view: currentView, layer }}
-              selectedIds={selectedIds}
-              onSelectMember={handleSelectFocusMember}
-              onSelectAll={handleSelectAllFocus}
-              onClear={handleClearAnatomyFocus}
-            />
-          )}
 
           {/* Tooltip */}
           {showTooltip && !isTouchContext && (
@@ -560,7 +561,10 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
       {/* Selection Sidebar (Android + non-Apple mobile) */}
       {showInlineMobileSidebar && (
-        <div className="w-full h-[40%] shrink-0 min-h-0 flex flex-col" data-testid="muscle-selector-sidebar">
+        <div
+          className={`w-full ${selectedIds.length > 0 ? 'h-[40%]' : 'h-[26%]'} shrink-0 min-h-0 flex flex-col`}
+          data-testid="muscle-selector-sidebar"
+        >
           <SelectionSidebar
             selectedMuscles={selectedMuscles}
             onRemoveMuscle={handleRemoveMuscle}

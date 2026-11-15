@@ -19,6 +19,7 @@ const mocks = vi.hoisted(() => {
   return {
     isMobile: true,
     isAppleMobile: true,
+    selectedIds: [] as string[],
     muscle,
     emit: vi.fn(),
     toggleMuscle: vi.fn(),
@@ -63,7 +64,7 @@ vi.mock('../../hooks/useTheme', () => ({
 
 vi.mock('../../hooks/useMuscleSelection', () => ({
   useMuscleSelection: () => ({
-    selectedIds: [],
+    selectedIds: mocks.selectedIds,
     selectedMuscles: [],
     toggleMuscle: mocks.toggleMuscle,
     selectMuscle: mocks.selectMuscle,
@@ -157,6 +158,7 @@ describe('MuscleSelector iOS behavior', () => {
   beforeEach(() => {
     mocks.isMobile = true;
     mocks.isAppleMobile = true;
+    mocks.selectedIds = [];
     vi.clearAllMocks();
   });
 
@@ -178,7 +180,16 @@ describe('MuscleSelector iOS behavior', () => {
 
     const wrapper = screen.getByTestId('muscle-selector-sidebar');
     expect(wrapper).toContainElement(screen.getByTestId('selection-sidebar-inline'));
-    expect(wrapper).toHaveClass('h-[40%]', 'shrink-0', 'min-h-0', 'flex', 'flex-col');
+    // Empty list: a smaller share, so the body map gets the room.
+    expect(wrapper).toHaveClass('h-[26%]', 'shrink-0', 'min-h-0', 'flex', 'flex-col');
+  });
+
+  it('non-Apple mobile grows the inline sidebar to 40% once muscles are selected', () => {
+    mocks.isAppleMobile = false;
+    mocks.selectedIds = ['biceps-left'];
+    render(<MuscleSelectorComponent showLegend={false} showSearch={false} />);
+
+    expect(screen.getByTestId('muscle-selector-sidebar')).toHaveClass('h-[40%]');
   });
 
   it('opens the selection sheet from the mobile trigger and emits sheet open feedback', () => {

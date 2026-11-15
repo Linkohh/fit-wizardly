@@ -84,6 +84,20 @@ describe('MuscleSelector anatomy search and regions', () => {
     expect(onViewChange).toHaveBeenCalledWith('back');
   });
 
+  it('matches on the other layer show as highlighted ghosts, and group headings are not listed', () => {
+    render(<MuscleSelector showLegend={false} defaultView="back" />);
+
+    typeInSearch('calf');
+
+    // Surface layer: gastrocnemius is active and focused; soleus and plantaris are deep.
+    expect(focusedLabels()).toEqual(expect.arrayContaining(['Gastrocnemius (Left) - focus']));
+    expect(document.querySelectorAll('path.muscle-path[data-ghost-highlight="true"]').length).toBe(4);
+
+    const list = screen.getByTestId('anatomy-result-list');
+    expect(within(list).queryByText('Calves')).not.toBeInTheDocument();
+    expect(within(list).getByText(/Calves: 3 muscles/)).toBeInTheDocument();
+  });
+
   it('the Back chip lists the region, and tapping it again clears it', () => {
     render(<MuscleSelector showLegend={false} defaultView="back" />);
 

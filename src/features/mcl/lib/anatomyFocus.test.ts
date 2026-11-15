@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveSearch } from './anatomyEngine';
+import { resolveRegion, resolveSearch } from './anatomyEngine';
 import { getMemberVisibility, pickViewAndLayer } from './anatomyFocus';
 
 describe('pickViewAndLayer', () => {
@@ -8,6 +8,12 @@ describe('pickViewAndLayer', () => {
       view: 'front',
       layer: 'surface',
     });
+  });
+
+  it('moves to the view showing most of a region, even when a few matches are on the current view', () => {
+    const backIds = resolveRegion('back')?.muscleIds ?? [];
+    expect(pickViewAndLayer(backIds, { view: 'front', layer: 'surface' }, true).view).toBe('back');
+    expect(pickViewAndLayer(backIds, { view: 'back', layer: 'surface' }, true).view).toBe('back');
   });
 
   it('moves to the view that shows the match', () => {
