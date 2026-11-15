@@ -10,7 +10,7 @@ const baseProps = {
   muscle,
   position: { x: 10, y: 10 },
   visible: true,
-  containerRef: { current: null },
+  containerRef: { current: document.createElement('div') },
 };
 
 describe('MuscleTooltip', () => {
