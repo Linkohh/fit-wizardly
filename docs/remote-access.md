@@ -8,6 +8,7 @@ We configured Vite to **proxy** backend requests, so you only need to run **one*
 
 1.  **Install ngrok**: `winget install ngrok`
 2.  **Authenticate**: Run `ngrok config add-authtoken <YOUR_TOKEN>` (You have already done this).
+3.  **Optional tunnel config**: copy `ngrok.example.yml` to `ngrok.yml` and put your token in the copy. `ngrok.yml` is gitignored, so never commit it.
 
 ## Usage
 

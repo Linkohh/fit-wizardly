@@ -4,6 +4,9 @@
 .env.staging
 .env.local
 
+# ngrok config holds a personal authtoken; copy ngrok.example.yml to ngrok.yml locally
+ngrok.yml
+
 # Logs
 logs
 *.log
