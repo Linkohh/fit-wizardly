@@ -559,10 +559,11 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
         </div>
       )}
 
-      {/* Selection Sidebar (Android + non-Apple mobile) */}
+      {/* Selection Sidebar (Android + non-Apple mobile). It takes 40% once muscles are selected, and steps
+          back to 26% while empty or while a search or region is active, so the body map keeps its room. */}
       {showInlineMobileSidebar && (
         <div
-          className={`w-full ${selectedIds.length > 0 ? 'h-[40%]' : 'h-[26%]'} shrink-0 min-h-0 flex flex-col`}
+          className={`w-full ${selectedIds.length > 0 && !anatomyFocus ? 'h-[40%]' : 'h-[26%]'} shrink-0 min-h-0 flex flex-col`}
           data-testid="muscle-selector-sidebar"
         >
           <SelectionSidebar

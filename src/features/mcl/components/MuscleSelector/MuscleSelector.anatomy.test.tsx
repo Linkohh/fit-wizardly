@@ -2,7 +2,9 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MuscleSelector } from './MuscleSelector';
 
-vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => false }));
+const device = vi.hoisted(() => ({ isMobile: false }));
+
+vi.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => device.isMobile }));
 vi.mock('@/hooks/use-apple-mobile', () => ({ useAppleMobile: () => false }));
 vi.mock('@/hooks/use-motion-preferences', () => ({
   useMotionPreferences: () => ({ shouldReduceMotion: true }),
@@ -28,6 +30,7 @@ function typeInSearch(text: string) {
 
 describe('MuscleSelector anatomy search and regions', () => {
   beforeEach(() => {
+    device.isMobile = false;
     vi.useFakeTimers();
     window.localStorage.clear();
   });
@@ -96,6 +99,21 @@ describe('MuscleSelector anatomy search and regions', () => {
     const list = screen.getByTestId('anatomy-result-list');
     expect(within(list).queryByText('Calves')).not.toBeInTheDocument();
     expect(within(list).getByText(/Calves: 3 muscles/)).toBeInTheDocument();
+  });
+
+  it('on a non-Apple phone the selected list steps back while a region is active, then returns', () => {
+    device.isMobile = true;
+    render(<MuscleSelector showLegend={false} defaultView="front" selectedMuscles={['biceps-left']} />);
+
+    const sidebar = screen.getByTestId('muscle-selector-sidebar');
+    expect(sidebar).toHaveClass('h-[40%]');
+
+    const chip = within(screen.getByTestId('region-chips')).getByRole('button', { name: 'Chest region' });
+    fireEvent.click(chip);
+    expect(sidebar).toHaveClass('h-[26%]');
+
+    fireEvent.click(chip);
+    expect(sidebar).toHaveClass('h-[40%]');
   });
 
   it('the Back chip lists the region, and tapping it again clears it', () => {
