@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Moon, Sun, Palette, Undo2, Redo2 } from 'lucide-react';
 import { MuscleSelectorProps, ViewType, Muscle, TooltipState, InfoPanelState } from '../../types';
@@ -16,12 +16,19 @@ import InfoPanel from './ui/InfoPanel';
 import SelectionSidebar from './ui/SelectionSidebar';
 import Legend from './ui/Legend';
 import SearchBar from './ui/SearchBar';
+import RegionChips from './ui/RegionChips';
+import AnatomyResultList from './ui/AnatomyResultList';
+import { resolveRegion, resolveSearch, toFocusHighlights, type AnatomyMember, type AnatomyResult } from '../../lib/anatomyEngine';
+import { pickViewAndLayer } from '../../lib/anatomyFocus';
+import { REGION_CHIPS } from '../../data/taxonomy';
 import { SelectedMusclesSheet } from './ui/SelectedMusclesSheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAppleMobile } from '@/hooks/use-apple-mobile';
 import { useMotionPreferences } from '@/hooks/use-motion-preferences';
 import { useInteractionFeedback } from '@/hooks/useInteractionFeedback';
 import { getTimedTransition } from '@/lib/motion/tokens';
+
+const SEARCH_DEBOUNCE_MS = 150;
 
 export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   selectedMuscles: controlledSelection,
@@ -221,17 +228,105 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
     [selectMuscle, currentView, emit]
   );
 
-  const handleSearchSelect = useCallback(
-    (muscle: Muscle) => {
-      selectMuscle(muscle.id);
-      void emit('select');
-      // Switch to a view where this muscle is visible
-      if (!muscle.views.includes(currentView) && muscle.views.length > 0) {
-        setCurrentView(muscle.views[0]);
+  // Anatomy focus: the muscles matched by the search box or a region chip.
+  // Both inputs set this one piece of state, so they always light up the same shapes.
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeRegionId, setActiveRegionId] = useState<string | null>(null);
+  const [anatomyFocus, setAnatomyFocus] = useState<AnatomyResult | null>(null);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const applyAnatomyFocus = useCallback(
+    (result: AnatomyResult | null) => {
+      setAnatomyFocus(result);
+      if (!result || result.muscleIds.length === 0) return;
+      const next = pickViewAndLayer(result.muscleIds, { view: currentView, layer }, showSideView);
+      if (next.view !== currentView) handleViewChange(next.view);
+      if (next.layer !== layer) setLayer(next.layer);
+    },
+    [currentView, layer, showSideView, handleViewChange, setLayer]
+  );
+
+  // The debounced search fires later, so it must call the latest applyAnatomyFocus.
+  const applyAnatomyFocusRef = useRef(applyAnatomyFocus);
+  useEffect(() => {
+    applyAnatomyFocusRef.current = applyAnatomyFocus;
+  }, [applyAnatomyFocus]);
+
+  const cancelPendingSearch = useCallback(() => {
+    if (searchTimerRef.current !== null) {
+      clearTimeout(searchTimerRef.current);
+      searchTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => cancelPendingSearch, [cancelPendingSearch]);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchQuery(value);
+      setActiveRegionId(null);
+      cancelPendingSearch();
+      searchTimerRef.current = setTimeout(() => {
+        searchTimerRef.current = null;
+        applyAnatomyFocusRef.current(resolveSearch(value)[0] ?? null);
+      }, SEARCH_DEBOUNCE_MS);
+    },
+    [cancelPendingSearch]
+  );
+
+  const handleRegionToggle = useCallback(
+    (regionId: string) => {
+      cancelPendingSearch();
+      setSearchQuery('');
+      if (activeRegionId === regionId) {
+        setActiveRegionId(null);
+        applyAnatomyFocus(null);
+      } else {
+        setActiveRegionId(regionId);
+        applyAnatomyFocus(resolveRegion(regionId));
       }
     },
-    [selectMuscle, currentView, emit]
+    [activeRegionId, applyAnatomyFocus, cancelPendingSearch]
   );
+
+  const handleClearAnatomyFocus = useCallback(() => {
+    cancelPendingSearch();
+    setSearchQuery('');
+    setActiveRegionId(null);
+    setAnatomyFocus(null);
+  }, [cancelPendingSearch]);
+
+  const selectFocusedIds = useCallback(
+    (ids: string[]) => {
+      const disabled = new Set(disabledMuscles);
+      const allowed = ids.filter((id) => !disabled.has(id));
+      if (allowed.length === 0) return;
+      setSelection(multiSelect ? [...selectedIds, ...allowed.filter((id) => !selectedIds.includes(id))] : allowed);
+      void emit('select');
+    },
+    [disabledMuscles, multiSelect, selectedIds, setSelection, emit]
+  );
+
+  const handleSelectFocusMember = useCallback(
+    (member: AnatomyMember) => selectFocusedIds(member.muscleIds),
+    [selectFocusedIds]
+  );
+
+  const handleSelectAllFocus = useCallback(() => {
+    if (anatomyFocus) selectFocusedIds(anatomyFocus.muscleIds);
+  }, [anatomyFocus, selectFocusedIds]);
+
+  // Selected muscles keep their selected look; only the rest get the focus highlight.
+  const canvasHighlights = useMemo(() => {
+    const focusIds = (anatomyFocus?.muscleIds ?? []).filter((id) => !selectedIds.includes(id));
+    return [...(highlightedMuscles ?? []), ...toFocusHighlights(focusIds)];
+  }, [anatomyFocus, highlightedMuscles, selectedIds]);
+
+  const anatomyFocusTitle = anatomyFocus
+    ? anatomyFocus.source === 'region'
+      ? REGION_CHIPS.find((chip) => chip.id === activeRegionId)?.label ?? anatomyFocus.node.name
+      : anatomyFocus.node.name
+    : '';
 
   const handleRemoveMuscle = useCallback(
     (muscleId: string) => {
@@ -283,11 +378,8 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
               {/* Search */}
               {showSearch && (
-                <div className="hidden min-w-0 flex-1 md:block md:max-w-[13rem] lg:max-w-[16rem] transition-all duration-300">
-                  <SearchBar
-                    onMuscleSelect={handleSearchSelect}
-                    onMuscleHover={(m) => setHoveredMuscle(m?.id || null)}
-                  />
+                <div className="min-w-0 flex-1 md:max-w-[13rem] lg:max-w-[16rem] transition-all duration-300">
+                  <SearchBar value={searchQuery} onChange={handleSearchChange} />
                 </div>
               )}
             </div>
@@ -377,6 +469,11 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 <LayerToggle value={layer} onChange={setLayer} />
               </div>
             )}
+            {showSearch && (
+              <div className="min-w-0 basis-full">
+                <RegionChips activeRegionId={activeRegionId} onToggle={handleRegionToggle} />
+              </div>
+            )}
           </div>
         )}
 
@@ -400,7 +497,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 view={currentView}
                 selectedMuscles={selectedIds}
                 hoveredMuscle={hoveredMuscle}
-                highlightedMuscles={highlightedMuscles}
+                highlightedMuscles={canvasHighlights}
                 disabledMuscles={disabledMuscles}
                 colorByGroup={colorByGroup}
                 accentColor={accentColor}
@@ -418,6 +515,18 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
               />
             </div>
           </motion.div>
+
+          {anatomyFocus && (
+            <AnatomyResultList
+              result={anatomyFocus}
+              title={anatomyFocusTitle}
+              current={{ view: currentView, layer }}
+              selectedIds={selectedIds}
+              onSelectMember={handleSelectFocusMember}
+              onSelectAll={handleSelectAllFocus}
+              onClear={handleClearAnatomyFocus}
+            />
+          )}
 
           {/* Tooltip */}
           {showTooltip && !isTouchContext && (
