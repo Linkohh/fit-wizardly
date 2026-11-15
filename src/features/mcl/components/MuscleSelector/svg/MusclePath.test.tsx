@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MusclePath } from './MusclePath';
 import { SCULPT_DEFAULT, getMuscleOpacity, getSculptStyle, type SculptStyle } from '../../../lib/sculpt';
-import type { Muscle } from '../../../types';
+import type { Muscle, MuscleHighlight } from '../../../types';
 
 const TEST_MUSCLE: Muscle = {
   id: 'pectoralis-major-left',
@@ -23,11 +23,15 @@ function renderPathContainer({
   onLongPress = vi.fn(),
   sculpt = getSculptStyle(SCULPT_DEFAULT),
   isSelected = false,
+  isHovered = false,
+  highlight,
 }: {
   onClick?: (muscle: Muscle) => void;
   onLongPress?: (muscle: Muscle) => void;
   sculpt?: SculptStyle;
   isSelected?: boolean;
+  isHovered?: boolean;
+  highlight?: MuscleHighlight;
 } = {}) {
   const { container } = render(
     <svg>
@@ -36,7 +40,8 @@ function renderPathContainer({
         view="front"
         isSelected={isSelected}
         sculpt={sculpt}
-        isHovered={false}
+        isHovered={isHovered}
+        highlight={highlight}
         isDisabled={false}
         colorByGroup
         accentColor="#EF4444"
@@ -95,7 +100,6 @@ describe('MusclePath touch behavior', () => {
   });
 });
 
-
 describe('MusclePath sculpt rendering', () => {
   it('unselected muscle uses sculpt.fillOpacity as its target opacity', () => {
     const sculpt = getSculptStyle(30);
@@ -139,11 +143,28 @@ describe('MusclePath sculpt rendering', () => {
     expect(overlay.getAttribute('fill')).toBe('url(#muscle-shade)');
     expect(overlay.hasAttribute('tabindex')).toBe(false);
     expect(overlay.hasAttribute('role')).toBe(false);
-
   });
 
   it('does not render the shading overlay when shadingOpacity is 0', () => {
     const { container } = renderPathContainer({ sculpt: getSculptStyle(0) });
+    expect(container.querySelectorAll('path')).toHaveLength(1);
+  });
+
+  it('keeps a highlighted resting muscle stroke transparent with width 0', () => {
+    const { button } = renderPathContainer({
+      highlight: { muscleId: TEST_MUSCLE.id, type: 'fatigue', intensity: 80 },
+    });
+    expect(button.getAttribute('stroke')).toBe('transparent');
+    expect(button.getAttribute('stroke-width')).toBe('0');
+    expect(button.hasAttribute('stroke-opacity')).toBe(false);
+  });
+
+  it.each([
+    ['selected', { isSelected: true }],
+    ['hovered', { isHovered: true }],
+    ['highlighted', { highlight: { muscleId: TEST_MUSCLE.id, type: 'focus' as const, intensity: 80 } }],
+  ])('renders no shading overlay when %s', (_name, state) => {
+    const { container } = renderPathContainer({ sculpt: getSculptStyle(100), ...state });
     expect(container.querySelectorAll('path')).toHaveLength(1);
   });
 });
