@@ -8,6 +8,11 @@ const mocks = vi.hoisted(() => ({
   setValue: vi.fn(),
   trigger: vi.fn(),
   muscleSelectorProps: [] as Array<Record<string, unknown>>,
+  isAppleMobile: true,
+}));
+
+vi.mock('@/hooks/use-apple-mobile', () => ({
+  useAppleMobile: () => mocks.isAppleMobile,
 }));
 
 vi.mock('@/stores/wizardStore', () => ({
@@ -86,12 +91,24 @@ describe('AnatomyPanel sizing', () => {
   });
 
   it('includes dvh-aware sizing classes for iOS viewport stability', () => {
+    mocks.isAppleMobile = true;
     render(<AnatomyPanel />);
 
     const shell = screen.getByTestId('anatomy-selector-shell');
     expect(shell).toHaveClass('h-[min(62vh,560px)]');
     expect(shell).toHaveClass('supports-[height:100dvh]:h-[min(62dvh,560px)]');
     expect(shell).toHaveClass('sm:h-[600px]');
+  });
+
+  it('gives non-Apple phones a taller shell because the selected list sits inline under the body map', () => {
+    mocks.isAppleMobile = false;
+    render(<AnatomyPanel />);
+
+    const shell = screen.getByTestId('anatomy-selector-shell');
+    expect(shell).toHaveClass('h-[min(78vh,680px)]');
+    expect(shell).toHaveClass('supports-[height:100dvh]:h-[min(78dvh,680px)]');
+    expect(shell).toHaveClass('sm:h-[600px]');
+    expect(shell).not.toHaveClass('h-[min(62vh,560px)]');
   });
 
   it('keeps supporting coach context below the selector instead of in a separate side rail', () => {

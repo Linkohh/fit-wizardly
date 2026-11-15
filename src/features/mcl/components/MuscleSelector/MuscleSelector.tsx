@@ -453,7 +453,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
       {/* Selection Sidebar (Android + non-Apple mobile) */}
       {showInlineMobileSidebar && (
-        <div className="w-full h-[45%] shrink-0 min-h-0 flex flex-col" data-testid="muscle-selector-sidebar">
+        <div className="w-full h-[40%] shrink-0 min-h-0 flex flex-col" data-testid="muscle-selector-sidebar">
           <SelectionSidebar
             selectedMuscles={selectedMuscles}
             onRemoveMuscle={handleRemoveMuscle}

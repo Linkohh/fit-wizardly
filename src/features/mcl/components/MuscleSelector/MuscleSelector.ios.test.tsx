@@ -178,7 +178,7 @@ describe('MuscleSelector iOS behavior', () => {
 
     const wrapper = screen.getByTestId('muscle-selector-sidebar');
     expect(wrapper).toContainElement(screen.getByTestId('selection-sidebar-inline'));
-    expect(wrapper).toHaveClass('h-[45%]', 'shrink-0', 'min-h-0', 'flex', 'flex-col');
+    expect(wrapper).toHaveClass('h-[40%]', 'shrink-0', 'min-h-0', 'flex', 'flex-col');
   });
 
   it('opens the selection sheet from the mobile trigger and emits sheet open feedback', () => {
