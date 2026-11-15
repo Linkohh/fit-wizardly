@@ -1,4 +1,5 @@
 import { Muscle } from '../types';
+import { SIDE_ORDER } from '../lib/sortMuscles';
 
 /**
  * Anatomically accurate muscle data with proper human body proportions
@@ -29,10 +30,12 @@ export const muscles: Muscle[] = [
     group: 'chest',
     function: 'Arm adduction, medial rotation, and flexion of the shoulder',
     exercises: ['Bench Press', 'Push-ups', 'Chest Fly', 'Dips'],
-    views: ['front'],
+    views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.torso,
     relatedMuscles: ['pectoralis-major-right', 'anterior-deltoid-left'],
     paths: {
-      front: 'M100,85 L100,90 C95,92 85,95 75,100 C65,105 55,108 50,105 L45,95 C43,88 48,80 58,78 C70,76 85,78 100,85 Z'
+      front: 'M100,85 L100,90 C95,92 85,95 75,100 C65,105 55,108 50,105 L45,95 C43,88 48,80 58,78 C70,76 85,78 100,85 Z',
+      side: 'M109,81 C109,81 113.2,83.8 115,86 C116.8,88.2 118.2,91 120,94 C121.8,97 124.8,100.8 126,104 C127.3,107.2 127.7,110.2 127.5,113 C127.3,115.8 126.4,119.2 125,121 C123.6,122.8 121.2,124.5 119,124 C116.8,123.5 114.3,121.2 112,118 C109.7,114.8 105,105 105,105 C105,105 105.3,96 106,92 C106.7,88 109,81 109,81 Z'
     }
   },
   {
@@ -56,10 +59,11 @@ export const muscles: Muscle[] = [
     function: 'Protracts and rotates scapula upward',
     exercises: ['Push-ups Plus', 'Scapular Push-ups', 'Ab Rollout'],
     views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.torso,
     relatedMuscles: ['external-oblique-left', 'pectoralis-major-left'],
     paths: {
       front: 'M55,108 L50,112 L48,120 L52,118 M52,118 L48,126 L52,124 M52,124 L50,132 L55,128 L60,115 Z',
-      side: 'M70,100 L65,108 L62,130 L70,125 Z'
+      side: 'M104,116 C104,116 108,119.3 110,121 C112,122.7 116,126 116,126 C116,126 111.8,127.5 112,129 C112.2,130.5 117,135 117,135 C117,135 112.5,136.5 112.5,138 C112.5,139.5 117,144 117,144 C117,144 112.3,145.5 112,147 C111.7,148.5 115,153 115,153 C115,153 110.2,154.8 108,154 C105.8,153.2 103.2,151.7 102,148 C100.8,144.3 100.7,137.3 101,132 C101.3,126.7 104,116 104,116 Z'
     }
   },
   {
@@ -69,7 +73,7 @@ export const muscles: Muscle[] = [
     group: 'chest',
     function: 'Protracts and rotates scapula upward',
     exercises: ['Push-ups Plus', 'Scapular Push-ups', 'Ab Rollout'],
-    views: ['front', 'side'],
+    views: ['front'],
     relatedMuscles: ['external-oblique-right', 'pectoralis-major-right'],
     paths: {
       front: 'M145,108 L150,112 L152,120 L148,118 M148,118 L152,126 L148,124 M148,124 L150,132 L145,128 L140,115 Z'
@@ -85,10 +89,11 @@ export const muscles: Muscle[] = [
     function: 'Shoulder flexion and medial rotation',
     exercises: ['Shoulder Press', 'Front Raise', 'Arnold Press'],
     views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.nearArm,
     relatedMuscles: ['lateral-deltoid-left', 'pectoralis-major-left'],
     paths: {
       front: 'M58,78 C50,75 42,78 38,85 L35,100 C38,108 45,110 50,105 L55,95 C56,88 56,82 58,78 Z',
-      side: 'M85,75 C78,72 72,75 70,82 L68,95 C70,102 76,105 82,100 L85,88 Z'
+      side: 'M107.5,76 C107.5,76 110.1,78.7 111,81 C111.9,83.3 112.8,86.5 113,90 C113.2,93.5 112.7,98 112,102 C111.3,106 109,114 109,114 C109,114 108.5,104.7 108.5,100 C108.5,95.3 109.2,90 109,86 C108.8,82 107.5,76 107.5,76 Z'
     }
   },
   {
@@ -112,11 +117,12 @@ export const muscles: Muscle[] = [
     function: 'Shoulder abduction',
     exercises: ['Lateral Raise', 'Upright Row', 'Shoulder Press'],
     views: ['front', 'back', 'side'],
+    sideOrder: SIDE_ORDER.nearArm,
     relatedMuscles: ['anterior-deltoid-left', 'posterior-deltoid-left'],
     paths: {
       front: 'M38,85 C32,82 26,88 25,95 L27,110 C30,115 35,112 38,108 L35,100 Z',
       back: 'M38,85 C32,82 26,88 25,95 L27,110 C30,115 35,112 38,108 L35,100 Z',
-      side: 'M75,78 C68,75 62,80 60,90 L62,108 C65,115 72,112 75,105 Z'
+      side: 'M99,75 C100.3,74.6 102.8,74 104,75.5 C105.3,77 106,80.3 106.5,84 C107,87.8 107.3,93.3 107,98 C106.7,102.7 105.6,107.3 104.5,112 C103.4,116.7 100.5,126 100.5,126 C100.5,126 97.8,117.3 97,113 C96.2,108.7 95.8,104.5 95.5,100 C95.3,95.5 95.3,89.7 95.5,86 C95.7,82.3 95.9,79.8 96.5,78 C97.1,76.2 97.8,75.4 99,75 Z'
     }
   },
   {
@@ -141,10 +147,11 @@ export const muscles: Muscle[] = [
     function: 'Shoulder extension and lateral rotation',
     exercises: ['Reverse Fly', 'Face Pulls', 'Bent Over Raises'],
     views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.nearArm,
     relatedMuscles: ['lateral-deltoid-left', 'trapezius-middle'],
     paths: {
       back: 'M55,78 C48,75 40,78 36,85 L33,100 C36,108 42,110 48,105 L52,95 C53,88 53,82 55,78 Z',
-      side: 'M60,78 C55,75 50,80 48,90 L50,105 C55,110 62,105 65,95 Z'
+      side: 'M92,77.5 C92,77.5 93.2,85.6 93.5,90 C93.8,94.4 93.8,99.3 94,104 C94.3,108.7 95,118 95,118 C95,118 90.8,111.5 89.5,108 C88.3,104.5 87.7,100.7 87.5,97 C87.3,93.3 87.8,89.3 88.5,86 C89.3,82.8 92,77.5 92,77.5 Z'
     }
   },
   {
@@ -169,11 +176,13 @@ export const muscles: Muscle[] = [
     group: 'back',
     function: 'Elevates and rotates scapula, extends neck',
     exercises: ['Shrugs', 'Upright Rows', 'Face Pulls'],
-    views: ['back', 'front'],
+    views: ['back', 'front', 'side'],
+    sideOrder: SIDE_ORDER.torso,
     relatedMuscles: ['trapezius-middle', 'levator-scapulae'],
     paths: {
       back: 'M100,55 L60,72 C55,75 55,80 58,82 L100,70 L142,82 C145,80 145,75 140,72 Z',
-      front: 'M100,55 L75,68 C72,70 72,74 75,76 L100,70 L125,76 C128,74 128,70 125,68 Z'
+      front: 'M100,55 L75,68 C72,70 72,74 75,76 L100,70 L125,76 C128,74 128,70 125,68 Z',
+      side: 'M91.5,56 C91.5,56 93.6,59.8 94.5,62 C95.4,64.2 95.9,66.8 97,69 C98.1,71.3 101,75.5 101,75.5 C101,75.5 97.2,77.5 95,78.5 C92.8,79.5 90.5,80 88,81.5 C85.5,83 80,87.5 80,87.5 C80,87.5 79.7,83.8 80.5,82 C81.3,80.3 83.5,78.8 85,77 C86.5,75.2 88.1,73 89.5,71 C90.9,69 93,67.5 93.3,65 C93.6,62.5 91.5,56 91.5,56 Z'
     }
   },
   {
@@ -210,10 +219,11 @@ export const muscles: Muscle[] = [
     function: 'Arm adduction, extension, and medial rotation',
     exercises: ['Pull-ups', 'Lat Pulldown', 'Rows', 'Deadlift'],
     views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.torso,
     relatedMuscles: ['latissimus-dorsi-right', 'teres-major-left'],
     paths: {
       back: 'M52,100 L48,108 C42,125 40,145 45,165 L55,185 C60,192 68,195 75,190 L85,175 L95,145 L100,120 L90,105 L75,100 Z',
-      side: 'M60,100 C55,110 52,130 55,150 L60,175 C65,185 75,180 80,165 L82,130 L75,105 Z'
+      side: 'M93,104 C93,104 94.8,118.2 95,125 C95.2,131.8 94.5,138.3 94,145 C93.5,151.7 92.8,158.3 92,165 C91.2,171.7 90,179.5 89,185 C88,190.5 86.8,194.7 86,198 C85.2,201.3 84,205 84,205 C84,205 83,199.2 82.5,195 C82,190.8 81.8,185.8 81,180 C80.2,174.2 78.6,166.7 77.5,160 C76.4,153.3 75.2,146.7 74.5,140 C73.8,133.3 72.9,125.3 73.5,120 C74.1,114.7 75.9,110.8 78,108 C80.1,105.2 83.5,103.7 86,103 C88.5,102.3 93,104 93,104 Z'
     }
   },
   {
@@ -236,10 +246,13 @@ export const muscles: Muscle[] = [
     group: 'back',
     function: 'Retracts and elevates scapula',
     exercises: ['Rows', 'Face Pulls', 'Reverse Fly'],
-    views: ['back'],
+    views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.torso,
+    layer: 'deep',
     relatedMuscles: ['rhomboid-right', 'trapezius-middle'],
     paths: {
-      back: 'M75,85 L85,82 L90,100 L85,115 L75,110 Z'
+      back: 'M75,85 L85,82 L90,100 L85,115 L75,110 Z',
+      side: 'M78,86 C78,86 81,88.8 82,92 C83,95.2 84,100.7 84,105 C84,109.3 82.8,114.2 82,118 C81.2,121.8 79,128 79,128 C79,128 76.3,122 75.5,118 C74.7,114 74.1,108.2 74,104 C73.9,99.8 74.3,96 75,93 C75.7,90 78,86 78,86 Z'
     }
   },
   {
@@ -250,6 +263,7 @@ export const muscles: Muscle[] = [
     function: 'Retracts and elevates scapula',
     exercises: ['Rows', 'Face Pulls', 'Reverse Fly'],
     views: ['back'],
+    layer: 'deep',
     relatedMuscles: ['rhomboid-left', 'trapezius-middle'],
     paths: {
       back: 'M125,85 L115,82 L110,100 L115,115 L125,110 Z'
@@ -262,10 +276,13 @@ export const muscles: Muscle[] = [
     group: 'back',
     function: 'Arm adduction and medial rotation',
     exercises: ['Lat Pulldown', 'Rows', 'Pull-ups'],
-    views: ['back'],
+    views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.torso,
+    layer: 'deep',
     relatedMuscles: ['latissimus-dorsi-left', 'teres-minor-left'],
     paths: {
-      back: 'M52,95 L48,100 L50,112 L58,108 L55,98 Z'
+      back: 'M52,95 L48,100 L50,112 L58,108 L55,98 Z',
+      side: 'M82,131 C82,131 85.7,128.2 88,126 C90.3,123.8 94,120 96,118 C98,116 100,114 100,114 C100,114 99.7,118.2 98,121 C96.3,123.8 92.3,128.7 90,131 C87.7,133.3 85.3,135 84,135 C82.7,135 82,131 82,131 Z'
     }
   },
   {
@@ -276,6 +293,7 @@ export const muscles: Muscle[] = [
     function: 'Arm adduction and medial rotation',
     exercises: ['Lat Pulldown', 'Rows', 'Pull-ups'],
     views: ['back'],
+    layer: 'deep',
     relatedMuscles: ['latissimus-dorsi-right', 'teres-minor-right'],
     paths: {
       back: 'M148,95 L152,100 L150,112 L142,108 L145,98 Z'
@@ -288,10 +306,13 @@ export const muscles: Muscle[] = [
     group: 'back',
     function: 'Lateral rotation of arm (rotator cuff)',
     exercises: ['Face Pulls', 'External Rotation'],
-    views: ['back'],
+    views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.torso,
+    layer: 'deep',
     relatedMuscles: ['teres-minor-left', 'supraspinatus-left'],
     paths: {
-      back: 'M55,85 L75,82 L78,100 L75,115 L55,108 L52,95 Z'
+      back: 'M55,85 L75,82 L78,100 L75,115 L55,108 L52,95 Z',
+      side: 'M86,95 C86,95 91.2,96.2 93,98 C94.8,99.8 96.7,103 97,106 C97.3,109 96.5,113.3 95,116 C93.5,118.7 88,122 88,122 C88,122 85.9,115.3 85.5,112 C85.1,108.7 85.4,104.8 85.5,102 C85.6,99.2 86,95 86,95 Z'
     }
   },
   {
@@ -302,6 +323,7 @@ export const muscles: Muscle[] = [
     function: 'Lateral rotation of arm (rotator cuff)',
     exercises: ['Face Pulls', 'External Rotation'],
     views: ['back'],
+    layer: 'deep',
     relatedMuscles: ['teres-minor-right', 'supraspinatus-right'],
     paths: {
       back: 'M145,85 L125,82 L122,100 L125,115 L145,108 L148,95 Z'
@@ -314,10 +336,13 @@ export const muscles: Muscle[] = [
     group: 'back',
     function: 'Spinal extension and lateral flexion',
     exercises: ['Deadlift', 'Back Extension', 'Good Morning'],
-    views: ['back'],
+    views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.torso,
+    layer: 'deep',
     relatedMuscles: ['multifidus', 'quadratus-lumborum'],
     paths: {
-      back: 'M92,120 L95,120 L98,200 L95,205 L92,205 Z M108,120 L105,120 L102,200 L105,205 L108,205 Z'
+      back: 'M92,120 L95,120 L98,200 L95,205 L92,205 Z M108,120 L105,120 L102,200 L105,205 L108,205 Z',
+      side: 'M77,132 C77,132 79.8,139.5 81,145 C82.3,150.5 83.4,158.3 84.5,165 C85.6,171.7 86.9,178.7 87.5,185 C88.1,191.3 88.6,197.8 88,203 C87.4,208.2 85.5,212.2 84,216 C82.5,219.8 79,226 79,226 C79,226 76.1,217.8 76.5,214 C76.9,210.2 80.6,207.3 81.5,203 C82.4,198.7 82.3,193.5 82,188 C81.7,182.5 80.4,176.3 79.5,170 C78.6,163.7 77.3,155 76.5,150 C75.7,145 74.4,143 74.5,140 C74.6,137 77,132 77,132 Z'
     }
   },
 
@@ -330,10 +355,11 @@ export const muscles: Muscle[] = [
     function: 'Elbow flexion and forearm supination',
     exercises: ['Bicep Curls', 'Chin-ups', 'Hammer Curls'],
     views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.nearArm,
     relatedMuscles: ['biceps-right', 'brachialis-left'],
     paths: {
       front: 'M30,112 C26,115 23,125 22,140 L22,165 C23,175 27,178 32,175 L35,165 L37,140 C38,125 36,115 30,112 Z',
-      side: 'M72,108 C68,112 65,125 65,145 L66,170 C68,178 74,178 78,172 L80,145 C80,125 78,112 72,108 Z'
+      side: 'M106.5,119 C106.5,119 109.7,121.7 110.5,126 C111.4,130.3 111.5,138.5 111.6,145 C111.7,151.5 111.7,159.2 111.3,165 C110.9,170.8 110.1,176.2 109.3,180 C108.5,183.8 106.5,188 106.5,188 C106.5,188 104.6,182.7 103.8,178 C103,173.3 101.9,166.3 101.5,160 C101.1,153.7 101.3,145.5 101.5,140 C101.8,134.5 102.2,130.5 103,127 C103.8,123.5 106.5,119 106.5,119 Z'
     }
   },
   {
@@ -357,10 +383,12 @@ export const muscles: Muscle[] = [
     function: 'Elbow flexion (primary flexor)',
     exercises: ['Hammer Curls', 'Reverse Curls'],
     views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.nearArm,
+    layer: 'deep',
     relatedMuscles: ['biceps-left', 'brachioradialis-left'],
     paths: {
       front: 'M25,165 C22,168 20,175 20,182 L22,195 C24,200 28,198 30,192 L32,180 C33,172 30,166 25,165 Z',
-      side: 'M68,165 C65,168 63,178 64,188 L66,198 C68,202 72,200 74,195 L75,180 C75,170 72,165 68,165 Z'
+      side: 'M101,145 C101,145 103.2,152.5 104,158 C104.8,163.5 105.6,172.7 106,178 C106.4,183.3 106.9,186.3 106.5,190 C106.1,193.7 103.5,200 103.5,200 C103.5,200 101.2,194.7 100.5,190 C99.8,185.3 99.6,177.3 99.5,172 C99.4,166.7 99.6,162.5 99.8,158 C100.1,153.5 101,145 101,145 Z'
     }
   },
   {
@@ -371,6 +399,7 @@ export const muscles: Muscle[] = [
     function: 'Elbow flexion (primary flexor)',
     exercises: ['Hammer Curls', 'Reverse Curls'],
     views: ['front'],
+    layer: 'deep',
     relatedMuscles: ['biceps-right', 'brachioradialis-right'],
     paths: {
       front: 'M175,165 C178,168 180,175 180,182 L178,195 C176,200 172,198 170,192 L168,180 C167,172 170,166 175,165 Z'
@@ -386,10 +415,11 @@ export const muscles: Muscle[] = [
     function: 'Elbow extension',
     exercises: ['Tricep Pushdown', 'Dips', 'Close-Grip Bench'],
     views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.nearArm,
     relatedMuscles: ['triceps-right'],
     paths: {
       back: 'M30,112 C24,115 20,128 18,145 L18,175 C20,185 26,188 32,182 L35,165 L38,140 C40,125 38,115 30,112 Z',
-      side: 'M58,108 C52,112 48,128 48,150 L50,178 C52,186 58,186 62,180 L65,150 C65,128 62,112 58,108 Z'
+      side: 'M88.5,113 C88.5,113 92.3,118 94,121 C95.7,124 97.5,126.2 98.5,131 C99.5,135.8 99.8,143.5 100,150 C100.2,156.5 100.2,164 99.8,170 C99.4,176 98.6,181.7 97.5,186 C96.4,190.3 93,196 93,196 C93,196 91.1,191.2 90.3,186 C89.5,180.8 88.7,172.7 88.2,165 C87.7,157.3 87.6,146.8 87.5,140 C87.4,133.2 87.2,128.5 87.4,124 C87.6,119.5 88.5,113 88.5,113 Z'
     }
   },
   {
@@ -414,10 +444,12 @@ export const muscles: Muscle[] = [
     group: 'arms',
     function: 'Wrist flexion and grip strength',
     exercises: ['Wrist Curls', 'Farmer Walks'],
-    views: ['front'],
+    views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.nearArm,
     relatedMuscles: ['brachioradialis-left', 'forearm-extensors-left'],
     paths: {
-      front: 'M22,195 C18,200 15,215 14,235 L15,260 C17,268 22,268 25,262 L27,235 C28,215 26,200 22,195 Z'
+      front: 'M22,195 C18,200 15,215 14,235 L15,260 C17,268 22,268 25,262 L27,235 C28,215 26,200 22,195 Z',
+      side: 'M101.5,199 C101.5,199 102.8,202.8 102.8,206 C102.9,209.2 101.9,213 101.8,218 C101.7,223 101.7,230.7 102.2,236 C102.7,241.3 104,246.2 104.6,250 C105.2,253.8 105.6,259 105.6,259 C105.6,259 100.5,261.3 99.5,259.5 C98.5,257.7 99.3,252.6 99.5,248 C99.8,243.4 100.7,237.5 101,232 C101.3,226.5 101.5,219.5 101.2,215 C100.9,210.5 99.3,207.7 99.3,205 C99.4,202.3 101.5,199 101.5,199 Z'
     }
   },
   {
@@ -440,10 +472,12 @@ export const muscles: Muscle[] = [
     group: 'arms',
     function: 'Wrist extension and grip strength',
     exercises: ['Reverse Wrist Curls', 'Farmer Walks'],
-    views: ['back'],
+    views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.nearArm,
     relatedMuscles: ['brachioradialis-left', 'forearm-flexors-left'],
     paths: {
-      back: 'M20,195 C16,200 13,218 12,240 L13,265 C15,272 20,272 24,265 L26,240 C27,218 24,200 20,195 Z'
+      back: 'M20,195 C16,200 13,218 12,240 L13,265 C15,272 20,272 24,265 L26,240 C27,218 24,200 20,195 Z',
+      side: 'M91.3,199 C91.3,199 95.6,198.5 97,201 C98.4,203.5 99.2,208.8 99.6,214 C100,219.2 99.6,226.3 99.3,232 C99,237.7 98.3,243.5 97.8,248 C97.3,252.5 96.5,259 96.5,259 C96.5,259 95.2,254.3 94.6,250 C94,245.7 93.3,238.8 92.9,233 C92.5,227.2 92.5,220.7 92.2,215 C91.9,209.3 91.3,199 91.3,199 Z'
     }
   },
   {
@@ -469,10 +503,11 @@ export const muscles: Muscle[] = [
     function: 'Elbow flexion with forearm in neutral position',
     exercises: ['Hammer Curls', 'Reverse Curls', 'Chin-ups'],
     views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.nearArm,
     relatedMuscles: ['brachioradialis-right', 'biceps-left', 'brachialis-left'],
     paths: {
       front: 'M28,178 C24,185 22,200 20,220 L19,245 C20,252 24,252 28,248 L30,220 C31,200 30,185 28,178 Z',
-      side: 'M70,175 C66,182 64,200 63,222 L63,248 C65,255 70,255 74,250 L76,222 C76,200 74,182 70,175 Z'
+      side: 'M108,192 C108,192 109.2,197.3 109.5,201 C109.8,204.7 110,208.8 109.9,214 C109.8,219.2 109.4,226 108.8,232 C108.2,238 106.2,250 106.2,250 C106.2,250 104.5,239.7 104,234 C103.5,228.3 103.2,221.5 103.3,216 C103.4,210.5 103.7,205 104.5,201 C105.3,197 108,192 108,192 Z'
     }
   },
   {
@@ -497,10 +532,12 @@ export const muscles: Muscle[] = [
     group: 'core',
     function: 'Trunk flexion and compression of abdomen',
     exercises: ['Crunches', 'Leg Raises', 'Planks'],
-    views: ['front'],
+    views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.torso,
     relatedMuscles: ['external-oblique-left', 'external-oblique-right'],
     paths: {
-      front: 'M88,105 L88,195 L100,200 L112,195 L112,105 L100,100 Z'
+      front: 'M88,105 L88,195 L100,200 L112,195 L112,105 L100,100 Z',
+      side: 'M118.5,128 C118.5,128 120.7,126.2 121.5,127 C122.3,127.8 123.4,129.2 123.5,133 C123.6,136.8 122.7,143.5 122,150 C121.3,156.5 119.8,164.5 119.5,172 C119.2,179.5 119.7,188.3 120,195 C120.3,201.7 121.5,207.5 121.5,212 C121.5,216.5 120,222 120,222 C120,222 117.6,217.3 117,212 C116.4,206.7 116.9,197 116.5,190 C116.1,183 114.3,176.7 114.5,170 C114.7,163.3 116.7,155.8 117.5,150 C118.3,144.2 119.3,138.7 119.5,135 C119.7,131.3 118.5,128 118.5,128 Z'
     }
   },
   {
@@ -550,10 +587,11 @@ export const muscles: Muscle[] = [
     function: 'Trunk rotation and lateral flexion',
     exercises: ['Russian Twists', 'Side Planks'],
     views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.torso,
     relatedMuscles: ['internal-oblique-left', 'rectus-abdominis'],
     paths: {
       front: 'M60,115 C65,112 75,115 82,120 L85,145 L88,195 C82,205 70,210 62,200 L58,175 C55,150 55,125 60,115 Z',
-      side: 'M70,110 C75,108 82,112 85,120 L85,180 C80,195 68,198 62,185 L60,140 C60,120 65,112 70,110 Z'
+      side: 'M100,153 C100,153 104.7,157.3 107,158 C109.3,158.7 114,157 114,157 C114,157 112.9,164.5 113,170 C113.1,175.5 114,183 114.5,190 C115,197 115.6,206.7 116,212 C116.4,217.3 117,222 117,222 C117,222 111.2,219.7 108,218 C104.8,216.3 101,213.7 98,212 C95,210.3 90,208 90,208 C90,208 90.3,196.3 91,190 C91.7,183.7 93.2,175.3 94,170 C94.8,164.7 95,160.8 96,158 C97,155.2 100,153 100,153 Z'
     }
   },
   {
@@ -579,10 +617,11 @@ export const muscles: Muscle[] = [
     function: 'Hip extension and lateral rotation',
     exercises: ['Squats', 'Hip Thrusts', 'Deadlifts'],
     views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.torso,
     relatedMuscles: ['gluteus-maximus-right', 'gluteus-medius-left'],
     paths: {
       back: 'M65,200 C58,205 52,215 50,230 C52,250 60,260 75,255 L95,245 L100,220 L90,205 C82,200 72,198 65,200 Z',
-      side: 'M55,195 C48,200 45,215 48,235 L55,255 C65,265 78,255 82,240 L85,215 C82,200 70,192 55,195 Z'
+      side: 'M84,210 C84,210 88.8,213 91,216 C93.2,219 95.3,223.2 97,228 C98.7,232.8 100.3,239.3 101,245 C101.7,250.7 101,262 101,262 C101,262 96.7,264.7 94,266 C91.3,267.3 87.7,269.3 85,270 C82.3,270.7 79.8,271.7 78,270 C76.2,268.3 75.5,264 74,260 C72.5,256 69.8,251 69,246 C68.3,241 68.8,234.7 69.5,230 C70.2,225.3 71.6,221 73,218 C74.4,215 76.2,213.3 78,212 C79.8,210.7 84,210 84,210 Z'
     }
   },
   {
@@ -606,10 +645,12 @@ export const muscles: Muscle[] = [
     function: 'Hip abduction and stabilization',
     exercises: ['Clamshells', 'Side Lying Leg Raises'],
     views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.torso,
+    layer: 'deep',
     relatedMuscles: ['gluteus-maximus-left', 'gluteus-minimus-left'],
     paths: {
       back: 'M55,185 C48,188 45,195 48,205 L58,215 L75,205 L78,192 C75,185 65,182 55,185 Z',
-      side: 'M52,180 C45,185 42,195 45,210 L55,220 L68,208 L70,192 C68,182 60,178 52,180 Z'
+      side: 'M91,206 C91,206 95.5,206 98,207 C100.5,208 104,209.5 106,212 C108,214.5 110,218.3 110,222 C110,225.7 107.7,231 106,234 C104.3,237 100,240 100,240 C100,240 97.2,233.3 96,230 C94.8,226.7 94,223 93,220 C92,217 90.3,214.3 90,212 C89.7,209.7 91,206 91,206 Z'
     }
   },
   {
@@ -620,6 +661,7 @@ export const muscles: Muscle[] = [
     function: 'Hip abduction and stabilization',
     exercises: ['Clamshells', 'Side Lying Leg Raises'],
     views: ['back'],
+    layer: 'deep',
     relatedMuscles: ['gluteus-maximus-right', 'gluteus-minimus-right'],
     paths: {
       back: 'M145,185 C152,188 155,195 152,205 L142,215 L125,205 L122,192 C125,185 135,182 145,185 Z'
@@ -635,10 +677,11 @@ export const muscles: Muscle[] = [
     function: 'Knee extension and hip flexion',
     exercises: ['Squats', 'Leg Press', 'Leg Extensions'],
     views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.nearLeg,
     relatedMuscles: ['vastus-lateralis-left', 'vastus-medialis-left'],
     paths: {
       front: 'M78,230 C72,235 68,250 66,275 L65,310 C66,325 70,330 78,328 L85,320 L88,280 C90,255 88,238 78,230 Z',
-      side: 'M78,225 C72,232 68,250 66,280 L66,320 C68,335 76,338 82,330 L85,285 C86,255 84,235 78,225 Z'
+      side: 'M116.5,232 C116.5,232 119,235.7 120,240 C121,244.3 122.2,250.5 122.5,258 C122.8,265.5 122.5,276.7 122,285 C121.5,293.3 120.3,301.2 119.3,308 C118.3,314.8 116,326 116,326 C116,326 114.6,316.8 114.3,310 C114,303.2 114,293 114,285 C114,277 114.2,268.8 114.4,262 C114.6,255.2 114.7,249 115,244 C115.4,239 116.5,232 116.5,232 Z'
     }
   },
   {
@@ -662,10 +705,11 @@ export const muscles: Muscle[] = [
     function: 'Knee extension',
     exercises: ['Squats', 'Leg Press', 'Lunges'],
     views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.nearLeg,
     relatedMuscles: ['rectus-femoris-left', 'vastus-medialis-left'],
     paths: {
       front: 'M62,210 C55,218 50,240 48,275 L48,315 C50,330 58,335 65,328 L68,310 L66,275 C66,245 62,225 62,210 Z',
-      side: 'M68,210 C60,220 55,245 54,280 L54,320 C56,335 65,340 72,330 L75,285 C76,250 74,225 68,210 Z'
+      side: 'M106.5,245 C106.5,245 110.5,250.2 111.5,256 C112.5,261.8 112.4,271.8 112.5,280 C112.6,288.2 112.2,297.3 112.3,305 C112.4,312.7 113,326 113,326 C113,326 108.2,332.8 106,333 C103.8,333.2 101.3,330.5 100,327 C98.8,323.5 98.8,317.3 98.5,312 C98.3,306.7 98.4,300 98.5,295 C98.6,290 98.5,286.7 99,282 C99.5,277.3 100.3,273.2 101.5,267 C102.8,260.8 106.5,245 106.5,245 Z'
     }
   },
   {
@@ -743,10 +787,11 @@ export const muscles: Muscle[] = [
     function: 'Knee flexion and hip extension',
     exercises: ['Romanian Deadlift', 'Leg Curls'],
     views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.nearLeg,
     relatedMuscles: ['semitendinosus-left', 'semimembranosus-left'],
     paths: {
       back: 'M60,255 C55,262 50,285 48,315 L50,340 C55,350 65,350 72,342 L78,315 C80,285 75,262 68,255 Z',
-      side: 'M52,250 C48,260 45,290 45,325 L48,350 C52,360 62,358 68,345 L72,305 C74,275 68,255 52,250 Z'
+      side: 'M86,272 C86,272 91.3,275.2 93,279 C94.8,282.8 95.9,289.5 96.5,295 C97.1,300.5 96.8,306.7 96.5,312 C96.2,317.3 95.2,322.5 94.5,327 C93.8,331.5 92.5,339 92.5,339 C92.5,339 90.5,332.5 90,328 C89.5,323.5 89.7,317 89.3,312 C88.9,307 88.4,302.3 87.8,298 C87.2,293.7 85.8,290.3 85.5,286 C85.2,281.7 86,272 86,272 Z'
     }
   },
   {
@@ -769,10 +814,12 @@ export const muscles: Muscle[] = [
     group: 'legs',
     function: 'Knee flexion and hip extension',
     exercises: ['Romanian Deadlift', 'Leg Curls'],
-    views: ['back'],
+    views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.nearLeg,
     relatedMuscles: ['biceps-femoris-left', 'semimembranosus-left'],
     paths: {
-      back: 'M78,255 C82,262 86,285 88,318 L86,345 C82,355 75,352 72,342 L70,310 C68,280 72,260 78,255 Z'
+      back: 'M78,255 C82,262 86,285 88,318 L86,345 C82,355 75,352 72,342 L70,310 C68,280 72,260 78,255 Z',
+      side: 'M79,274 C79,274 82.3,280.8 83.5,286 C84.7,291.2 85.3,299 86,305 C86.7,311 87,316.5 87.5,322 C88,327.5 89,338 89,338 C89,338 87.7,334 86.8,331 C85.9,328 84.5,324.3 83.5,320 C82.5,315.7 81.6,310 80.8,305 C80,300 79.1,294 78.6,290 C78.1,286 77.4,283.7 77.5,281 C77.6,278.3 79,274 79,274 Z'
     }
   },
   {
@@ -798,10 +845,11 @@ export const muscles: Muscle[] = [
     function: 'Ankle plantarflexion and knee flexion',
     exercises: ['Standing Calf Raises', 'Jump Rope'],
     views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.nearLeg,
     relatedMuscles: ['gastrocnemius-right', 'soleus-left'],
     paths: {
       back: 'M58,345 C52,350 48,365 48,385 L50,408 C54,415 62,415 68,408 L72,385 C74,365 70,352 62,345 Z M78,345 C82,350 86,365 88,385 L86,408 C82,415 74,418 72,408 Z',
-      side: 'M52,340 C46,348 42,370 44,395 L48,415 C54,425 66,422 72,410 L75,380 C76,358 68,345 52,340 Z'
+      side: 'M86,340 C86,340 92.2,341.7 94,345 C95.8,348.3 96.7,354.2 97,360 C97.3,365.8 96.7,374.2 96,380 C95.3,385.8 93.7,390.3 93,395 C92.3,399.7 92,408 92,408 C92,408 90.9,401.8 89.5,398 C88.1,394.2 85,389.7 83.5,385 C82,380.3 80.8,375.2 80.5,370 C80.3,364.8 81.1,359 82,354 C82.9,349 86,340 86,340 Z'
     }
   },
   {
@@ -825,10 +873,12 @@ export const muscles: Muscle[] = [
     function: 'Ankle plantarflexion',
     exercises: ['Seated Calf Raises'],
     views: ['back', 'side'],
+    sideOrder: SIDE_ORDER.nearLeg,
+    layer: 'deep',
     relatedMuscles: ['gastrocnemius-left', 'soleus-right'],
     paths: {
       back: 'M55,405 C50,408 48,418 50,430 L55,438 C60,442 68,440 72,432 L75,418 C76,410 70,405 62,405 Z',
-      side: 'M50,408 C45,412 44,425 48,435 L55,442 C62,445 72,440 75,430 L76,415 C75,408 65,405 50,408 Z'
+      side: 'M88,360 C88,360 96,361.7 98,365 C100,368.3 99.8,374.5 100,380 C100.2,385.5 99.8,392.7 99,398 C98.2,403.3 95,412 95,412 C95,412 92.3,408.3 91,405 C89.7,401.7 88,397 87,392 C86,387 84.8,380.3 85,375 C85.2,369.7 88,360 88,360 Z'
     }
   },
   {
@@ -839,6 +889,7 @@ export const muscles: Muscle[] = [
     function: 'Ankle plantarflexion',
     exercises: ['Seated Calf Raises'],
     views: ['back'],
+    layer: 'deep',
     relatedMuscles: ['gastrocnemius-right', 'soleus-left'],
     paths: {
       back: 'M145,405 C150,408 152,418 150,430 L145,438 C140,442 132,440 128,432 L125,418 C124,410 130,405 138,405 Z'
@@ -852,10 +903,11 @@ export const muscles: Muscle[] = [
     function: 'Ankle dorsiflexion',
     exercises: ['Toe Raises', 'Tibialis Raises'],
     views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.nearLeg,
     relatedMuscles: ['tibialis-anterior-right'],
     paths: {
       front: 'M72,340 C68,345 65,365 64,390 L66,418 C70,425 78,425 82,418 L85,390 C86,365 82,348 75,340 Z',
-      side: 'M80,338 C75,345 72,368 72,395 L74,420 C78,428 86,426 90,418 L92,388 C92,362 88,345 80,338 Z'
+      side: 'M107,342 C107,342 110.4,346.2 111,350 C111.6,353.8 110.8,359.2 110.5,365 C110.2,370.8 109.8,378.3 109,385 C108.3,391.7 106.8,400.2 106,405 C105.2,409.8 104,414 104,414 C104,414 102.8,405.7 102.5,400 C102.2,394.3 102.1,386.7 102,380 C101.9,373.3 101.8,365.3 102,360 C102.3,354.7 102.7,351 103.5,348 C104.3,345 107,342 107,342 Z'
     }
   },
   {
@@ -881,10 +933,11 @@ export const muscles: Muscle[] = [
     function: 'Neck flexion and rotation',
     exercises: ['Neck Curls', 'Neck Rotation'],
     views: ['front', 'side'],
+    sideOrder: SIDE_ORDER.torso,
     relatedMuscles: ['sternocleidomastoid-right', 'trapezius-upper'],
     paths: {
       front: 'M92,55 C88,58 85,65 86,72 L92,78 L100,75 L98,65 C98,58 96,55 92,55 Z',
-      side: 'M88,52 C82,55 78,65 80,75 L88,82 L95,78 L92,65 C92,58 90,52 88,52 Z'
+      side: 'M93.5,44 C93.5,44 95.4,45.8 97,48 C98.6,50.2 101.2,54 103,57 C104.8,60 106.9,63.1 108,66 C109.1,68.9 109.5,74.5 109.5,74.5 C109.5,74.5 107,75.1 105.5,73.5 C104,71.9 102.2,68.3 100.5,65 C98.8,61.8 96.7,57.5 95.5,54 C94.3,50.5 93.5,44 93.5,44 Z'
     }
   },
   {

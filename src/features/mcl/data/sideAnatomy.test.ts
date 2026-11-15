@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { getMusclesByView } from './muscles';
+import { getMusclesByView, muscles } from './muscles';
 import { SIDE_SILHOUETTE_PATH } from '../components/MuscleSelector/svg/sideOutline';
 import { flattenPath, getAnchorPoints, isPointInPolygon, type Point } from '../lib/pathGeometry';
+import { SIDE_ORDER } from '../lib/sortMuscles';
 
 const silhouette = flattenPath(SIDE_SILHOUETTE_PATH);
 
@@ -31,12 +32,40 @@ describe('side silhouette', () => {
   });
 });
 
-// enabled in Task 3
-describe.skip('side muscles sit inside the silhouette', () => {
+describe('side muscles sit inside the silhouette', () => {
   it.each(getMusclesByView('side'))('$id sits inside the silhouette', (muscle) => {
     const anchors = getAnchorPoints(muscle.paths.side ?? '');
     expect(anchors.length).toBeGreaterThan(0);
     const inside = anchors.filter((p) => isPointInPolygon(p, silhouette)).length;
     expect(inside / anchors.length).toBeGreaterThanOrEqual(0.9);
+  });
+});
+
+describe('side muscle coverage and layers', () => {
+  const sideMuscles = getMusclesByView('side');
+
+  it('has 22 surface and 7 deep side muscles', () => {
+    expect(sideMuscles.filter((m) => m.layer !== 'deep')).toHaveLength(22);
+    expect(sideMuscles.filter((m) => m.layer === 'deep')).toHaveLength(7);
+  });
+
+  it('every side muscle declares a sideOrder from SIDE_ORDER', () => {
+    const allowed: number[] = Object.values(SIDE_ORDER);
+    for (const muscle of sideMuscles) {
+      expect(allowed, muscle.id).toContain(muscle.sideOrder);
+    }
+  });
+
+  it('no side path is made only of M/L/Z commands', () => {
+    for (const muscle of sideMuscles) {
+      expect(muscle.paths.side ?? '', muscle.id).toMatch(/C/);
+    }
+  });
+
+  it('deep layer is exactly the 13 ids: rhomboid, infraspinatus, teres-major, brachialis, soleus, gluteus-medius (left+right) and erector-spinae', () => {
+    const paired = ['rhomboid', 'infraspinatus', 'teres-major', 'brachialis', 'soleus', 'gluteus-medius'];
+    const expected = [...paired.flatMap((id) => [`${id}-left`, `${id}-right`]), 'erector-spinae'].sort();
+    const deep = muscles.filter((m) => m.layer === 'deep').map((m) => m.id).sort();
+    expect(deep).toEqual(expected);
   });
 });
