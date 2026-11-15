@@ -6,6 +6,7 @@ import { getMuscleById } from '../../data/muscles';
 import { useMuscleSelection } from '../../hooks/useMuscleSelection';
 import { useTheme } from '../../hooks/useTheme';
 import { useSculptPrefs } from '../../hooks/useSculptPrefs';
+import { getPairedIds } from '../../lib/pairedMuscles';
 import MuscleCanvas from './svg/MuscleCanvas';
 import ViewSwitcher from './ui/ViewSwitcher';
 import SculptSlider from './ui/SculptSlider';
@@ -159,12 +160,30 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
   const handleMuscleClick = useCallback(
     (muscle: Muscle) => {
-      const wasSelected = selectedIds.includes(muscle.id);
-      toggleMuscle(muscle.id);
+      let wasSelected: boolean;
+
+      if (currentView === 'side') {
+        // The side view draws one side only, so a click acts on the whole pair in one history step.
+        const disabled = new Set(disabledMuscles);
+        const ids = getPairedIds(muscle.id).filter((id) => !disabled.has(id));
+        wasSelected = ids.length > 0 && ids.every((id) => selectedIds.includes(id));
+
+        if (wasSelected) {
+          setSelection(multiSelect ? selectedIds.filter((id) => !ids.includes(id)) : []);
+        } else {
+          setSelection(
+            multiSelect ? [...selectedIds, ...ids.filter((id) => !selectedIds.includes(id))] : ids
+          );
+        }
+      } else {
+        wasSelected = selectedIds.includes(muscle.id);
+        toggleMuscle(muscle.id);
+      }
+
       onMuscleClick?.(muscle);
       void emit(wasSelected ? 'deselect' : 'select');
     },
-    [selectedIds, toggleMuscle, onMuscleClick, emit]
+    [currentView, disabledMuscles, multiSelect, selectedIds, setSelection, toggleMuscle, onMuscleClick, emit]
   );
 
   const handleMuscleLongPress = useCallback(

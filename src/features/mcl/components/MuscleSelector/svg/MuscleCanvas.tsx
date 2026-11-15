@@ -7,6 +7,7 @@ import MusclePath from './MusclePath';
 import { getTimedTransition } from '@/lib/motion/tokens';
 import { sortMusclesForRender } from '../../../lib/sortMuscles';
 import { getLayerRole } from '../../../lib/layerVisibility';
+import { getSideLabel } from '../../../lib/pairedMuscles';
 import { SCULPT_DEFAULT, getSculptStyle } from '../../../lib/sculpt';
 
 interface MuscleCanvasProps {
@@ -203,6 +204,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
             <MusclePath
               key={`${muscle.id}-${view}`}
               muscle={muscle}
+              label={view === 'side' ? getSideLabel(muscle.name) : undefined}
               view={view}
               isSelected={selectedMuscles.includes(muscle.id)}
               isHovered={!isGhost && hoveredMuscle === muscle.id}

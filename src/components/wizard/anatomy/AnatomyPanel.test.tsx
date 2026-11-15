@@ -41,10 +41,6 @@ vi.mock('@/stores/themeStore', () => ({
     selector({ mode: 'dark' }),
 }));
 
-vi.mock('@/hooks/use-mobile', () => ({
-  useIsMobile: () => true,
-}));
-
 vi.mock('@/components/ui/form-error', () => ({
   FormError: () => null,
 }));
@@ -81,6 +77,12 @@ describe('AnatomyPanel sizing', () => {
     render(<AnatomyPanel />);
 
     expect(mocks.muscleSelectorProps.at(-1)?.headerControlsMode).toBe('embedded');
+  });
+
+  it('enables the side view even on mobile', () => {
+    render(<AnatomyPanel />);
+
+    expect(mocks.muscleSelectorProps.at(-1)?.showSideView).toBe(true);
   });
 
   it('includes dvh-aware sizing classes for iOS viewport stability', () => {

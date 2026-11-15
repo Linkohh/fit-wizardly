@@ -7,6 +7,8 @@ import { getSpringTransition, getTimedTransition } from '@/lib/motion/tokens';
 
 interface MusclePathProps {
   muscle: Muscle;
+  /** Accessible name override; defaults to `muscle.name`. */
+  label?: string;
   view: ViewType;
   isSelected: boolean;
   isHovered: boolean;
@@ -39,6 +41,7 @@ const highlightColors: Record<MuscleHighlight['type'], { fill: string; glow: str
 
 export const MusclePath: React.FC<MusclePathProps> = ({
   muscle,
+  label,
   view,
   isSelected,
   isHovered,
@@ -277,7 +280,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
         data-click-feedback="off"
         data-interaction-feedback="explicit"
         role="button"
-        aria-label={`${muscle.name}${isDisabled ? ' (disabled)' : ''}${highlight ? ` - ${highlight.label || highlight.type}` : ''}`}
+        aria-label={`${label ?? muscle.name}${isDisabled ? ' (disabled)' : ''}${highlight ? ` - ${highlight.label || highlight.type}` : ''}`}
         aria-pressed={isSelected}
         aria-disabled={isDisabled}
         tabIndex={isDisabled ? -1 : 0}

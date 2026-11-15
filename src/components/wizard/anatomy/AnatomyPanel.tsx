@@ -7,7 +7,6 @@ import { MuscleSelector } from '@/features/mcl';
 import { formatIdentifierLabel } from '@/lib/displayText';
 import { mapLegacyToMcl, mapMclToLegacy } from '@/lib/muscleMapping';
 import { useThemeStore } from '@/stores/themeStore';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslation } from 'react-i18next';
 
 const EMPTY_TARGET_MUSCLES: string[] = [];
@@ -16,7 +15,6 @@ export function AnatomyPanel() {
     const { t } = useTranslation();
     const { selections, setTargetMuscles } = useWizardStore();
     const themeMode = useThemeStore((state) => state.mode);
-    const isMobile = useIsMobile();
 
     // React Hook Form integration with Zustand sync
     const { watch, setValue, formState: { errors }, trigger } = useWizardForm({
@@ -71,7 +69,7 @@ export function AnatomyPanel() {
                         showPresets={true}
                         showInfoPanel={true}
                         showSelectionSidebar={true}
-                        showSideView={!isMobile}
+                        showSideView
                         showLegend={false}
                         headerControlsMode="embedded"
                         theme={themeMode}
