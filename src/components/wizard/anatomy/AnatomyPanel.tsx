@@ -7,21 +7,18 @@ import { MuscleSelector } from '@/features/mcl';
 import { formatIdentifierLabel } from '@/lib/displayText';
 import { mapLegacyToMcl, mapMclToLegacy } from '@/lib/muscleMapping';
 import { useThemeStore } from '@/stores/themeStore';
-import { useAppleMobile } from '@/hooks/use-apple-mobile';
 import { useTranslation } from 'react-i18next';
 
 const EMPTY_TARGET_MUSCLES: string[] = [];
 
-// Apple phones show the selected list in a bottom sheet, so the body map gets the whole shell.
-// Other phones stack the list inline under the map, so the shell is taller to keep the map readable.
-const SHELL_HEIGHT_SHEET = 'h-[min(62vh,560px)] supports-[height:100dvh]:h-[min(62dvh,560px)] sm:h-[600px]';
-const SHELL_HEIGHT_INLINE = 'h-[min(84vh,720px)] supports-[height:100dvh]:h-[min(84dvh,720px)] sm:h-[600px]';
+// Phones stack the selected list under the map and let it grow, so the shell has no fixed height
+// below the 768px breakpoint where the list becomes a side column.
+const SHELL_HEIGHT = 'h-auto md:h-[600px]';
 
 export function AnatomyPanel() {
     const { t } = useTranslation();
     const { selections, setTargetMuscles } = useWizardStore();
     const themeMode = useThemeStore((state) => state.mode);
-    const isAppleMobile = useAppleMobile();
 
     // React Hook Form integration with Zustand sync
     const { watch, setValue, formState: { errors }, trigger } = useWizardForm({
@@ -68,7 +65,7 @@ export function AnatomyPanel() {
             <div className="mx-auto w-full max-w-[1120px]">
                 <div
                     data-testid="anatomy-selector-shell"
-                    className={`w-full ${isAppleMobile ? SHELL_HEIGHT_SHEET : SHELL_HEIGHT_INLINE} rounded-[1.75rem] overflow-hidden surface-premium-strong surface-premium-stroke`}
+                    className={`w-full ${SHELL_HEIGHT} rounded-[1.75rem] overflow-hidden surface-premium-strong surface-premium-stroke`}
                 >
                     <MuscleSelector
                         selectedMuscles={selectedMclIds}
@@ -78,6 +75,7 @@ export function AnatomyPanel() {
                         showSelectionSidebar={true}
                         showSideView
                         enableTouchPreview
+                        mobileSelectionLayout="flow"
                         showLegend={false}
                         headerControlsMode="embedded"
                         theme={themeMode}

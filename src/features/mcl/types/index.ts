@@ -71,6 +71,12 @@ export interface MuscleSelectorProps {
   showTooltip?: boolean;
   /** Preview muscles by holding and sliding a finger on the diagram. */
   enableTouchPreview?: boolean;
+  /**
+   * How phones show the selected list. `contained` keeps it inside the selector's fixed height
+   * (a bottom sheet on Apple phones). `flow` lets it grow below the map so the page scrolls;
+   * the parent must not set a fixed height.
+   */
+  mobileSelectionLayout?: 'contained' | 'flow';
   showInfoPanel?: boolean;
   showSelectionSidebar?: boolean;
   colorByGroup?: boolean;

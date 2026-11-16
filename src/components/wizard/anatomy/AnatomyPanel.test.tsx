@@ -8,11 +8,6 @@ const mocks = vi.hoisted(() => ({
   setValue: vi.fn(),
   trigger: vi.fn(),
   muscleSelectorProps: [] as Array<Record<string, unknown>>,
-  isAppleMobile: true,
-}));
-
-vi.mock('@/hooks/use-apple-mobile', () => ({
-  useAppleMobile: () => mocks.isAppleMobile,
 }));
 
 vi.mock('@/stores/wizardStore', () => ({
@@ -96,25 +91,17 @@ describe('AnatomyPanel sizing', () => {
     expect(mocks.muscleSelectorProps.at(-1)?.enableTouchPreview).toBe(true);
   });
 
-  it('includes dvh-aware sizing classes for iOS viewport stability', () => {
-    mocks.isAppleMobile = true;
+  it('lets the selected list grow below the map on every phone', () => {
     render(<AnatomyPanel />);
 
-    const shell = screen.getByTestId('anatomy-selector-shell');
-    expect(shell).toHaveClass('h-[min(62vh,560px)]');
-    expect(shell).toHaveClass('supports-[height:100dvh]:h-[min(62dvh,560px)]');
-    expect(shell).toHaveClass('sm:h-[600px]');
+    expect(mocks.muscleSelectorProps.at(-1)?.mobileSelectionLayout).toBe('flow');
   });
 
-  it('gives non-Apple phones a taller shell because the selected list sits inline under the body map', () => {
-    mocks.isAppleMobile = false;
+  it('only fixes the shell height where the list becomes a side column', () => {
     render(<AnatomyPanel />);
 
     const shell = screen.getByTestId('anatomy-selector-shell');
-    expect(shell).toHaveClass('h-[min(84vh,720px)]');
-    expect(shell).toHaveClass('supports-[height:100dvh]:h-[min(84dvh,720px)]');
-    expect(shell).toHaveClass('sm:h-[600px]');
-    expect(shell).not.toHaveClass('h-[min(62vh,560px)]');
+    expect(shell).toHaveClass('h-auto', 'md:h-[600px]');
   });
 
   it('keeps supporting coach context below the selector instead of in a separate side rail', () => {

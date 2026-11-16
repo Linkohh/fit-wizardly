@@ -7,6 +7,8 @@ import PresetSelector from './PresetSelector';
 import { StateCard } from '@/components/ui/state-card';
 import { getTimedTransition } from '@/lib/motion/tokens';
 
+const FLOW_LIST_MAX_HEIGHT = 'max-h-[min(70vh,560px)] supports-[height:100dvh]:max-h-[min(70dvh,560px)]';
+
 interface SelectionSidebarProps {
   selectedMuscles: Muscle[];
   onRemoveMuscle: (muscleId: string) => void;
@@ -15,6 +17,10 @@ interface SelectionSidebarProps {
   onPresetSelect?: (muscleIds: string[], presetId: string) => void;
   currentSelectionIds?: string[];
   mobileSheetMode?: boolean;
+  /** Grow to fit the list instead of scrolling inside a fixed height. */
+  flow?: boolean;
+  /** Keep the row buttons visible; hover never happens on a touch screen. */
+  touchActions?: boolean;
   showPresets?: boolean;
   reduceMotion?: boolean;
 }
@@ -27,6 +33,8 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
   onPresetSelect,
   currentSelectionIds = [],
   mobileSheetMode = false,
+  flow = false,
+  touchActions = false,
   showPresets = true,
   reduceMotion = false,
 }) => {
@@ -41,9 +49,16 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
     {} as Record<string, Muscle[]>
   );
 
+  // Flow only scrolls inside for very large selections; normally the page scrolls.
+  const listClassName = flow
+    ? `${FLOW_LIST_MAX_HEIGHT} p-4`
+    : mobileSheetMode
+      ? 'flex-1 px-4 py-3 pb-5'
+      : 'flex-1 p-4';
+
   return (
     <div
-      className={`h-full flex flex-col surface-premium-strong surface-premium-stroke border-t md:border-t-0 md:border-l relative z-20 ${mobileSheetMode ? 'rounded-t-2xl' : ''}`}
+      className={`${flow ? 'h-auto' : 'h-full'} flex flex-col surface-premium-strong surface-premium-stroke border-t md:border-t-0 md:border-l relative z-20 ${mobileSheetMode ? 'rounded-t-2xl' : ''}`}
       data-testid={mobileSheetMode ? 'muscle-selector-sheet-sidebar' : 'muscle-selector-inline-sidebar'}
     >
       <div className={`${mobileSheetMode ? 'p-4 pb-3' : 'p-4'} border-b border-border/30 dark:border-white/10 space-y-3`}>
@@ -80,7 +95,10 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
         </div>
       </div>
 
-      <div className={`${mobileSheetMode ? 'flex-1 overflow-y-auto px-4 py-3 pb-5' : 'flex-1 overflow-y-auto p-4'} custom-scrollbar`}>
+      <div
+        data-testid="muscle-selector-selected-list"
+        className={`${listClassName} overflow-y-auto custom-scrollbar`}
+      >
         {selectedMuscles.length === 0 ? (
           <StateCard
             variant="empty"
@@ -124,7 +142,7 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
                         <span className="text-fluid-sm text-gray-200 truncate flex-1 font-medium">
                           {muscle.name}
                         </span>
-                        <div className={`flex items-center gap-1 transition-opacity ${mobileSheetMode ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                        <div className={`flex items-center gap-1 transition-opacity ${mobileSheetMode || touchActions ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                           <button
                             onClick={() => onViewInfo(muscle)}
                             className="min-h-[36px] min-w-[36px] p-1.5 hover:bg-gray-200/10 rounded"
@@ -153,18 +171,6 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
           </div>
         )}
       </div>
-
-      {selectedMuscles.length > 0 ? (
-        <div className="p-4 border-t border-border/30 dark:border-white/10">
-          <button
-            className="w-full min-h-[44px] py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white text-fluid-sm font-medium rounded-lg transition-colors tabular-nums"
-            data-click-feedback="off"
-            data-interaction-feedback="explicit"
-          >
-            View Exercises ({selectedMuscles.length} muscles)
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 };

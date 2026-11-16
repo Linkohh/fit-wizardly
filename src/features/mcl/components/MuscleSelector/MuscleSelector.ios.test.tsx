@@ -192,6 +192,30 @@ describe('MuscleSelector iOS behavior', () => {
     expect(screen.getByTestId('muscle-selector-sidebar')).toHaveClass('h-[40%]');
   });
 
+  it.each([true, false])('flow layout stacks a growing list under a fixed-height map (Apple phone: %s)', (isAppleMobile) => {
+    mocks.isAppleMobile = isAppleMobile;
+    mocks.selectedIds = ['biceps-left'];
+    render(<MuscleSelectorComponent showLegend={false} showSearch={false} mobileSelectionLayout="flow" />);
+
+    expect(screen.queryByTestId('muscle-selector-sheet-trigger')).not.toBeInTheDocument();
+    const wrapper = screen.getByTestId('muscle-selector-sidebar');
+    expect(wrapper).toContainElement(screen.getByTestId('selection-sidebar-inline'));
+    expect(wrapper).not.toHaveClass('h-[40%]');
+    expect(wrapper).not.toHaveClass('h-[26%]');
+    const canvas = screen.getByTestId('muscle-selector-canvas-area');
+    expect(canvas).toHaveClass('h-[min(56vh,460px)]', 'shrink-0');
+    expect(canvas).not.toHaveClass('flex-1');
+  });
+
+  it('flow layout leaves the desktop side column alone', () => {
+    mocks.isMobile = false;
+    mocks.isAppleMobile = false;
+    render(<MuscleSelectorComponent showLegend={false} showSearch={false} mobileSelectionLayout="flow" />);
+
+    expect(screen.getByTestId('muscle-selector-canvas-area')).toHaveClass('flex-1');
+    expect(screen.getByTestId('muscle-selector-sidebar')).toHaveClass('md:w-72');
+  });
+
   it('opens the selection sheet from the mobile trigger and emits sheet open feedback', () => {
     render(<MuscleSelectorComponent showLegend={false} showSearch={false} />);
 

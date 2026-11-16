@@ -29,6 +29,9 @@ import { useInteractionFeedback } from '@/hooks/useInteractionFeedback';
 import { getTimedTransition } from '@/lib/motion/tokens';
 
 const SEARCH_DEBOUNCE_MS = 150;
+// In the flow layout the map keeps one height while the selected list grows below it.
+const FLOW_CANVAS_HEIGHT =
+  'h-[min(56vh,460px)] supports-[height:100dvh]:h-[min(56dvh,460px)] shrink-0';
 type ClientPoint = { clientX: number; clientY: number };
 
 export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
@@ -42,6 +45,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   showLegend = true,
   showTooltip = true,
   enableTouchPreview = false,
+  mobileSelectionLayout = 'contained',
   showInfoPanel = true,
   showSelectionSidebar = true,
   showPresets = true,
@@ -67,9 +71,10 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   const isAppleMobile = useAppleMobile();
   const { shouldReduceMotion } = useMotionPreferences();
   const { emit } = useInteractionFeedback();
-  const shouldUseAppleSheet = showSelectionSidebar && isMobile && isAppleMobile;
+  const isFlowLayout = isMobile && mobileSelectionLayout === 'flow';
+  const shouldUseAppleSheet = showSelectionSidebar && isMobile && isAppleMobile && !isFlowLayout;
   const shouldUseAppleHaptics = isMobile && isAppleMobile;
-  const showInlineMobileSidebar = showSelectionSidebar && isMobile && !isAppleMobile;
+  const showInlineMobileSidebar = showSelectionSidebar && isMobile && (!isAppleMobile || isFlowLayout);
   const showDesktopSidebar = showSelectionSidebar && !isMobile;
   const isEmbeddedHeader = headerControlsMode === 'embedded';
   const showAppearanceControls = !isEmbeddedHeader;
@@ -495,7 +500,11 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
         )}
 
         {/* SVG Canvas Area */}
-        <div ref={canvasRef} className="flex-1 relative overflow-hidden p-2 sm:p-4" data-testid="muscle-selector-canvas-area">
+        <div
+          ref={canvasRef}
+          className={`${isFlowLayout ? FLOW_CANVAS_HEIGHT : 'flex-1'} relative overflow-hidden p-2 sm:p-4`}
+          data-testid="muscle-selector-canvas-area"
+        >
           <motion.div
             className="w-full h-full flex items-center justify-center"
             initial={shouldReduceMotion ? false : { opacity: 0 }}
@@ -561,14 +570,21 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
         </div>
       )}
 
-      {/* Selection Sidebar (Android + non-Apple mobile). It takes 40% once muscles are selected, and steps
-          back to 26% while empty or while a search or region is active, so the body map keeps its room. */}
+      {/* Selection Sidebar (phones without the Apple sheet). Contained: it takes 40% once muscles are
+          selected, and steps back to 26% while empty or while a search or region is active, so the body
+          map keeps its room. Flow: it grows to fit the list and the page scrolls. */}
       {showInlineMobileSidebar && (
         <div
-          className={`w-full ${selectedIds.length > 0 && !anatomyFocus ? 'h-[40%]' : 'h-[26%]'} shrink-0 min-h-0 flex flex-col`}
+          className={
+            isFlowLayout
+              ? 'w-full shrink-0'
+              : `w-full ${selectedIds.length > 0 && !anatomyFocus ? 'h-[40%]' : 'h-[26%]'} shrink-0 min-h-0 flex flex-col`
+          }
           data-testid="muscle-selector-sidebar"
         >
           <SelectionSidebar
+            flow={isFlowLayout}
+            touchActions
             selectedMuscles={selectedMuscles}
             onRemoveMuscle={handleRemoveMuscle}
             onClearAll={clearSelection}
