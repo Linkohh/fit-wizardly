@@ -145,6 +145,45 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-15 — Phone Selected-List Layout, Merged With PR 43 (branch `preview_b`)
+
+Verified after merging `origin/preview_b` (`834b8d7`): 148 test files / 791 tests pass, ESLint 0 errors on `src/features/mcl` and `src/components/wizard/anatomy`, type-check 0 errors.
+
+**Pushed to `origin/preview_b` on 2026-11-15. Not merged into `main`, on the owner's instruction. No branch was created or deleted.**
+
+The touch preview described below was written twice from the same uncommitted starting point: once here (`f6b9916`) and once on `LO/fix-muscle-preview`, which landed on the remote as PR 43 while this session was running (see the next entry). The merge kept this session's side where the two clashed: the flow layout, and `MusclePath` without the unused `onMouseEnter` / `onMouseLeave` props. PR 43's group taps, details sheet and `InfoPanel` changes came through untouched.
+
+- **What was done:** Two changes to the wizard's Target Muscles step. First, holding a finger on a muscle shows its name and the label follows as the finger slides (`useTouchMusclePreview`); a quick tap still selects. Second, the selected-muscles list on phones no longer sits in a tiny inner scroller: every phone, iPhone included, now shows the body map at a fixed height with the full list below it and the page scrolls.
+- **Commits:**
+  - `f6b9916` feat(mcl): preview muscle names by holding and sliding on the anatomy diagram
+  - `416f8d0` fix(mcl): give the selected-muscles list room on phones
+  - `834b8d7` Merge remote-tracking branch 'origin/preview_b' into preview_b
+- **Files changed:**
+  - `src/features/mcl/components/MuscleSelector/svg/useTouchMusclePreview.ts` — new; the hold, slide, tap and cancel gesture.
+  - `src/features/mcl/components/MuscleSelector/svg/MuscleCanvas.tsx`, `svg/MusclePath.tsx` — hover moved to pointer events; legacy mouse-hover props removed.
+  - `src/features/mcl/components/MuscleSelector/ui/MuscleTooltip.tsx` — measures itself and stays inside the canvas; name-only label above the finger for touch.
+  - `src/features/mcl/components/MuscleSelector/MuscleSelector.tsx` — `enableTouchPreview` and `mobileSelectionLayout` props; flow layout skips the Apple sheet and gives the map `min(56dvh, 460px)`.
+  - `src/features/mcl/components/MuscleSelector/ui/SelectionSidebar.tsx` — `flow` and `touchActions` props; dead "View Exercises" button removed.
+  - `src/components/wizard/anatomy/AnatomyPanel.tsx` — shell is `h-auto md:h-[600px]`; passes `enableTouchPreview` and `mobileSelectionLayout="flow"`.
+  - Tests: `MuscleSelector.preview.test.tsx` and `ui/SelectionSidebar.test.tsx` (new); `MuscleSelector.ios.test.tsx`, `AnatomyPanel.test.tsx`, `MusclePath.test.tsx`, `MuscleTooltip.test.tsx` (updated).
+- **Why the list was cramped (measured at 412x915):** shell 706px, list panel 40% = 282px, panel header 105px, "View Exercises" footer 76px, leaving about 100px (one row). On iPhone Safari and the iOS app the bottom sheet opened at its 22% snap point with the same header, so it also showed about one row. Chrome, Firefox and Edge on iPhone never got the sheet (`detectAppleMobile` is true only for Safari and the native app) and used the cramped inline list.
+- **Measured after (browser, Android profile):** 412x915: map 451-460px, 4 selected rows show with no inner scroll; Full Body preset (21 muscles) caps the list at 560px and scrolls inside. 344x780 (Fold outer screen): map 437px, no horizontal overflow, no truncated names. 820x1000: side column 288px in a 600px shell, unchanged.
+- **Issues fixed this session:** none from the Known Issues table. Fixed in passing: row info and remove buttons were hover-only, so invisible on touch in the inline list; "View Exercises" had no click handler.
+- **New issues found this session:** DEBT-026 (LOW; see Known Issues).
+- **TODO/FIXME introduced:** none (pre-existing TODOs unchanged).
+- **Test status:** All passing: 791 tests across 148 files (after the merge).
+- **Legal/compliance notes:** None this session. No new stored data.
+- **Key decisions made:**
+  - One phone layout in the wizard. The iPhone bottom sheet (`SelectedMusclesSheet`) is no longer used there; it remains the default (`mobileSelectionLayout="contained"`) for other `MuscleSelector` consumers.
+  - In the wizard, a hold on the diagram shows the muscle name instead of opening the info panel on iPhone. Info is reached from the row buttons in the selected list.
+  - A touch that starts on a selectable muscle does not scroll the page.
+- **Housekeeping:** 171 untracked Finder-style " 2" duplicates deleted from the checkout, plus 1,497 in `node_modules` and 67 in ignored iOS/Android build folders. Each was compared with its original first. This also removed `node_modules/@types/node 2`, which had been breaking plain `tsc`.
+- **Not checked:** a physical phone; iPhone Safari in the simulator (the attempt stopped at the first-run consent screen); light theme.
+- **Open issues carried forward:** all others in Known Issues, unchanged.
+- **Next steps:**
+  1. Check hold-and-slide, page scrolling past the map, and the new list layout on a real iPhone and Android phone, and in the iOS 26 / 27 simulators (DEBT-026). Group taps from PR 43 select a whole muscle group at once, so lists get long quickly; confirm the 560px cap feels right.
+  2. Decide when `preview_b` goes to `main` (it is 100+ commits ahead). Not done this session.
+  3. Decide whether to delete `SelectedMusclesSheet` if no other screen needs it.
 ### 2026-11-15 — Muscle Hover and Touch Preview
 
 - **What was done.** Restored the visible muscle name when hovering in Wizard Step 4. The tooltip now uses the anatomy canvas for both positioning and clipping bounds. On touchscreens, a 380 ms hold starts a preview with 10 px of allowed drift. Sliding updates the highlighted muscle and name, and lifting or canceling clears the preview. Quick taps still use the wizard's muscle-group selection flow.
@@ -154,6 +193,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 - **Follow-up.** Test on physical iOS and Android devices. Scrolling from outside a muscle worked in the Front view, but a repeated iPhone WebKit check in Deep Back did not scroll. Browser testing also surfaced the existing wizard-level Enter shortcut described in DEBT-025.
 - **Code hygiene.** The diff introduced no TODOs, new dependencies, or legal and consent changes.
 - **iPhone report follow-up.** The reported beta URL and installed app showed the older long-press details card. The beta URL could not be matched to the PR deployment in the connected Vercel project. Testing the exact PR commit in iPhone browser profiles reproduced two additional issues. The Selected Muscles drawer remained modal when it opened a details card, and its overlay intercepted the X. A resumed wizard could also remove one muscle highlight while keeping its saved group selected. The follow-up closes the Selected Muscles drawer before showing details in a portaled sheet with a separate scroll area. A direct tap in Step 4 now toggles all selectable muscles in that saved group in one selection update. The restored patch passed 784 client tests on Node 22, typecheck, and lint with four pre-existing warnings. Physical iPhone verification remains pending.
+
 
 ### 2026-11-15 — Anatomy Search, Regions, Deep Layers (branch `feat/anatomy-taxonomy-deep-layers`, stacked on `feat/side-view-sculpt`)
 
@@ -541,6 +581,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-019 | Muscle selector controls are hardcoded English (Sculpt, Surface, Deep; also the older Front/Back/Side) | `src/features/mcl/components/MuscleSelector/ui/` | The MCL feature does not use i18next yet. |
 | DEBT-023 | Deep-layer artwork on front and back is a first pass; teres minor and plantaris are thin, and deep shapes overlap each other | `src/features/mcl/data/muscles.ts` | Checked by position tests (`deepAnatomy.test.ts`), not by an anatomist. |
 | DEBT-024 | Muscle heads (pec clavicular/sternal, triceps long/lateral/medial, biceps femoris short) share the parent's shape; the ten new deep muscles are not on the side view; internal oblique is not drawn | `src/features/mcl/data/taxonomy/`, `data/muscles.ts` | Searchable today. Separate shapes would change ids saved workouts use. |
+| DEBT-026 | Touch preview and the phone flow layout are not device-verified; a touch starting on a muscle does not scroll the page, which may feel sticky on small screens | `svg/useTouchMusclePreview.ts`, `MuscleSelector.tsx`, `AnatomyPanel.tsx` | Unit-tested and browser-tested with simulated touch (2026-11-15). Check on a physical iPhone and Android phone, and with VoiceOver. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
 | DEBT-025 | Enter on a focused muscle can advance the wizard after selecting it | `src/pages/Wizard.tsx` | The existing window-level shortcut handles Enter after the focused SVG control has already handled it. |
@@ -609,8 +650,10 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 ## Backlog / Next Steps
 
 ### Immediate (unblocked)
-- [ ] Merge the `feat/anatomy-taxonomy-deep-layers` PR after PR 40
-- [ ] Merge the `feat/side-view-sculpt` PR into `preview_b`; then check the side view on a real iPhone and Android phone
+- [ ] Check the wizard muscle step on a real iPhone and Android phone: hold-and-slide preview, scrolling past the map, the selected list — DEBT-026
+- [x] Merge the `feat/anatomy-taxonomy-deep-layers` PR after PR 40 (merged as PR 41, `9ffbada`)
+- [x] Merge the `feat/side-view-sculpt` PR into `preview_b` (PR 40, `3845d06`)
+- [ ] Check the side view on a real iPhone and Android phone
 - [ ] Merge PR #28 into `preview_b` — all code review issues resolved
 - [x] Guard or remove `/mcl` dev route from production build — AUDIT-004 (done 2026-09-27)
 - [ ] Rotate legacy Supabase anon JWT in Supabase dashboard (after confirming publishable-key deployment is live)
