@@ -37,6 +37,7 @@ type ClientPoint = { clientX: number; clientY: number };
 export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   selectedMuscles: controlledSelection,
   onSelectionChange,
+  getCanvasSelectionIds,
   multiSelect = true,
   defaultView = 'front',
   showSideView = true,
@@ -172,12 +173,14 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
     (muscle: Muscle) => {
       let wasSelected: boolean;
 
-      if (currentView === 'side') {
-        // The side view draws one side only, so a click acts on the whole pair in one history step.
+      const groupIds = getCanvasSelectionIds?.(muscle.id);
+      if (groupIds || currentView === 'side') {
         const disabled = new Set(disabledMuscles);
-        const ids = getPairedIds(muscle.id).filter((id) => !disabled.has(id));
+        const ids = (groupIds ?? getPairedIds(muscle.id)).filter((id) => !disabled.has(id));
         if (ids.length === 0) return;
-        wasSelected = ids.every((id) => selectedIds.includes(id));
+        const isSelected = (id: string) => selectedIds.includes(id);
+        // A saved wizard group is selected even if only one of its members is highlighted.
+        wasSelected = groupIds ? ids.some(isSelected) : ids.every(isSelected);
 
         if (wasSelected) {
           setSelection(multiSelect ? selectedIds.filter((id) => !ids.includes(id)) : []);
@@ -194,7 +197,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
       onMuscleClick?.(muscle);
       void emit(wasSelected ? 'deselect' : 'select');
     },
-    [currentView, disabledMuscles, multiSelect, selectedIds, setSelection, toggleMuscle, onMuscleClick, emit]
+    [currentView, disabledMuscles, getCanvasSelectionIds, multiSelect, selectedIds, setSelection, toggleMuscle, onMuscleClick, emit]
   );
 
   const handleMuscleLongPress = useCallback(
@@ -342,6 +345,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   );
 
   const handleViewMuscleInfo = useCallback((muscle: Muscle) => {
+    setIsSelectionSheetOpen(false);
     setInfoPanel({ isOpen: true, muscle });
     onInfoRequest?.(muscle);
   }, [onInfoRequest]);
@@ -634,6 +638,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
           muscle={infoPanel.muscle}
           isOpen={infoPanel.isOpen}
           reduceMotion={shouldReduceMotion}
+          themeClassName={themeClassName}
           onClose={handleCloseInfo}
           onMuscleClick={handleInfoMuscleClick}
         />

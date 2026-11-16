@@ -5,7 +5,7 @@ import { useWizardForm, anatomyStepSchema } from '@/hooks/useWizardForm';
 import { FormError } from '@/components/ui/form-error';
 import { MuscleSelector } from '@/features/mcl';
 import { formatIdentifierLabel } from '@/lib/displayText';
-import { mapLegacyToMcl, mapMclToLegacy } from '@/lib/muscleMapping';
+import { getMclIdsForLegacyGroup, mapLegacyToMcl, mapMclToLegacy, MCL_TO_LEGACY_MAP } from '@/lib/muscleMapping';
 import { useThemeStore } from '@/stores/themeStore';
 import { useTranslation } from 'react-i18next';
 
@@ -14,6 +14,11 @@ const EMPTY_TARGET_MUSCLES: string[] = [];
 // Phones stack the selected list under the map and let it grow, so the shell has no fixed height
 // below the 768px breakpoint where the list becomes a side column.
 const SHELL_HEIGHT = 'h-auto md:h-[600px]';
+
+function getCanvasSelectionIds(muscleId: string) {
+    const group = MCL_TO_LEGACY_MAP[muscleId];
+    return group ? getMclIdsForLegacyGroup(group) : undefined;
+}
 
 export function AnatomyPanel() {
     const { t } = useTranslation();
@@ -70,6 +75,7 @@ export function AnatomyPanel() {
                     <MuscleSelector
                         selectedMuscles={selectedMclIds}
                         onSelectionChange={handleSelectionChange}
+                        getCanvasSelectionIds={getCanvasSelectionIds}
                         showPresets={true}
                         showInfoPanel={true}
                         showSelectionSidebar={true}
