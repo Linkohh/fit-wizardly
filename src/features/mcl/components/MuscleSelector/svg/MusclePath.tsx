@@ -23,10 +23,12 @@ interface MusclePathProps {
   sculpt: SculptStyle;
   highlightIndex?: number;
   enableTouchInfo?: boolean;
+  enableTouchPreview?: boolean;
   longPressMs?: number;
   reduceMotion?: boolean;
-  onMouseEnter: (muscle: Muscle, event: React.MouseEvent) => void;
-  onMouseLeave: () => void;
+  onPointerHover?: (muscle: Muscle | null, event: React.PointerEvent<SVGPathElement>) => void;
+  onMouseEnter?: (muscle: Muscle, event: React.MouseEvent) => void;
+  onMouseLeave?: () => void;
   onClick: (muscle: Muscle) => void;
   onLongPress?: (muscle: Muscle) => void;
 }
@@ -58,8 +60,10 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   sculpt,
   highlightIndex = 0,
   enableTouchInfo = false,
+  enableTouchPreview = false,
   longPressMs = 380,
   reduceMotion = false,
+  onPointerHover,
   onMouseEnter,
   onMouseLeave,
   onClick,
@@ -70,6 +74,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
   const longPressTriggeredRef = useRef(false);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const touchMoveTolerance = 10;
+  const canPreviewTouch = enableTouchPreview && !isDisabled && !isGhost;
 
   const groupColor = getMuscleGroupColor(muscle.group);
 
@@ -141,14 +146,14 @@ export const MusclePath: React.FC<MusclePathProps> = ({
     return 'none';
   }, [isGhost, isSelected, isHovered, isDisabled, highlight, glowColor, hoverIntensity]);
 
-  const handleMouseEnter = useCallback(
-    (e: React.MouseEvent) => {
-      if (!isDisabled) {
-        onMouseEnter(muscle, e);
-      }
-    },
-    [muscle, onMouseEnter, isDisabled]
-  );
+  const handlePointerHover = (event: React.PointerEvent<SVGPathElement>) => {
+    if (isDisabled || (event.pointerType !== 'mouse' && event.pointerType !== 'pen')) return;
+    onPointerHover?.(event.type === 'pointerenter' ? muscle : null, event);
+  };
+
+  const handleMouseEnter = (event: React.MouseEvent<SVGPathElement>) => {
+    if (!isDisabled) onMouseEnter?.(muscle, event);
+  };
 
   const handleClick = useCallback(() => {
     if (longPressTriggeredRef.current) {
@@ -265,6 +270,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
         style={{
           transformOrigin: 'center',
           ...(animationDelay ? { animationDelay } : {}),
+          ...(canPreviewTouch ? { touchAction: 'none', WebkitTouchCallout: 'none' } : {}),
         }}
         fill={fillColor}
         stroke={isSelected || isHovered ? glowColor : isResting ? 'currentColor' : 'transparent'}
@@ -277,8 +283,10 @@ export const MusclePath: React.FC<MusclePathProps> = ({
           filter: glowFilter,
         }}
         transition={transition}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={onMouseLeave}
+        onPointerEnter={onPointerHover ? handlePointerHover : undefined}
+        onPointerLeave={onPointerHover ? handlePointerHover : undefined}
+        onMouseEnter={onPointerHover ? undefined : handleMouseEnter}
+        onMouseLeave={onPointerHover ? undefined : onMouseLeave}
         onClick={handleClick}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -286,6 +294,7 @@ export const MusclePath: React.FC<MusclePathProps> = ({
         onPointerCancel={handlePointerEnd}
         data-click-feedback="off"
         data-interaction-feedback="explicit"
+        data-touch-preview-muscle={canPreviewTouch ? muscle.id : undefined}
         role="button"
         aria-label={`${label ?? muscle.name}${isDisabled ? ' (disabled)' : ''}${highlight ? ` - ${highlight.label || highlight.type}` : ''}`}
         aria-pressed={isSelected}

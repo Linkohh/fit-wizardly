@@ -9,6 +9,7 @@ import { sortMusclesForRender } from '../../../lib/sortMuscles';
 import { getLayerRole } from '../../../lib/layerVisibility';
 import { getSideLabel } from '../../../lib/pairedMuscles';
 import { SCULPT_DEFAULT, getSculptStyle } from '../../../lib/sculpt';
+import { useTouchMusclePreview, type TouchMuscleHoverHandler } from './useTouchMusclePreview';
 
 interface MuscleCanvasProps {
   view: ViewType;
@@ -21,14 +22,16 @@ interface MuscleCanvasProps {
   animateHighlights?: boolean;
   hoverIntensity?: 'default' | 'strong';
   enableTouchInfo?: boolean;
+  enableTouchPreview?: boolean;
   longPressMs?: number;
   reduceMotion?: boolean;
   onMuscleHover: (muscle: Muscle | null, event?: React.MouseEvent) => void;
+  onTouchMuscleHover?: TouchMuscleHoverHandler;
   onMuscleClick: (muscle: Muscle) => void;
   onMuscleLongPress?: (muscle: Muscle) => void;
   customViewBox?: string;
   sculptLevel?: number;
-  /** Side view only: which layer is interactive. Front and back ignore it. */
+  /** The layer whose muscles can be selected in this view. */
   layer?: MuscleLayer;
 }
 
@@ -43,9 +46,11 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   animateHighlights = false,
   hoverIntensity = 'default',
   enableTouchInfo = false,
+  enableTouchPreview = false,
   longPressMs = 380,
   reduceMotion = false,
   onMuscleHover,
+  onTouchMuscleHover,
   onMuscleClick,
   onMuscleLongPress,
   customViewBox,
@@ -53,6 +58,14 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
   layer = 'surface',
 }) => {
   const sculpt = useMemo(() => getSculptStyle(sculptLevel), [sculptLevel]);
+  const { setCanvas, handlers: touchPreviewHandlers, isTouchActive } = useTouchMusclePreview({
+    enabled: enableTouchPreview,
+    view,
+    layer,
+    longPressMs,
+    onTouchMuscleHover,
+    onMuscleClick,
+  });
 
   // Get muscles for current view
   const visibleMuscles = useMemo(() => getMusclesByView(view), [view]);
@@ -106,22 +119,20 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
     [ghostMuscles, activeMuscles, hiddenSelectedMuscles]
   );
 
-  // Memoize event handlers to prevent unnecessary re-renders
-  const handleMouseEnter = useCallback(
-    (muscle: Muscle, event: React.MouseEvent) => {
-      onMuscleHover(muscle, event);
+  const handlePointerHover = useCallback(
+    (muscle: Muscle | null, event: React.PointerEvent) => {
+      if (isTouchActive()) return;
+      if (muscle) onMuscleHover(muscle, event);
+      else onMuscleHover(null);
     },
-    [onMuscleHover]
+    [isTouchActive, onMuscleHover],
   );
-
-  const handleMouseLeave = useCallback(() => {
-    onMuscleHover(null);
-  }, [onMuscleHover]);
 
   return (
     <AnimatePresence mode="wait">
       <motion.svg
         key={view}
+        ref={setCanvas}
         viewBox={customViewBox || "0 0 200 440"}
         className="w-full h-full"
         initial={reduceMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: view === 'front' ? -20 : 20 }}
@@ -129,6 +140,7 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
         exit={reduceMotion ? { opacity: 1, x: 0 } : { opacity: 0, x: view === 'front' ? 20 : -20 }}
         transition={getTimedTransition('slow', reduceMotion)}
         preserveAspectRatio="xMidYMid meet"
+        {...touchPreviewHandlers}
       >
         {/* SVG Definitions: Gradients for muscle groups */}
         <defs>
@@ -222,12 +234,12 @@ export const MuscleCanvas: React.FC<MuscleCanvasProps> = ({
               animateHighlights={animateHighlights}
               hoverIntensity={hoverIntensity}
               sculpt={sculpt}
-              enableTouchInfo={enableTouchInfo}
+              enableTouchInfo={enableTouchInfo && !enableTouchPreview}
+              enableTouchPreview={enableTouchPreview}
               longPressMs={longPressMs}
               reduceMotion={reduceMotion}
               highlightIndex={highlightMap.has(muscle.id) ? Array.from(highlightMap.keys()).indexOf(muscle.id) : index}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
+              onPointerHover={handlePointerHover}
               onClick={onMuscleClick}
               onLongPress={onMuscleLongPress}
             />
