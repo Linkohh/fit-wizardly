@@ -37,7 +37,7 @@ function renderPathContainer({
   isDisabled?: boolean;
   highlight?: MuscleHighlight;
 } = {}) {
-  const onMouseEnter = vi.fn();
+  const onPointerHover = vi.fn();
   const { container } = render(
     <svg>
       <MusclePath
@@ -53,8 +53,7 @@ function renderPathContainer({
         accentColor="#EF4444"
         enableTouchInfo
         longPressMs={380}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={vi.fn()}
+        onPointerHover={onPointerHover}
         onClick={onClick}
         onLongPress={onLongPress}
       />
@@ -64,7 +63,7 @@ function renderPathContainer({
   const button = isGhost
     ? (container.querySelector('path.muscle-path') as SVGPathElement)
     : screen.getByRole('button', { name: /Pectoralis Major \(Left\)/i });
-  return { container, button, onMouseEnter };
+  return { container, button, onPointerHover };
 }
 
 function renderPath(options: RenderOptions = {}) {
@@ -182,7 +181,7 @@ describe('MusclePath ghost rendering', () => {
   it('ghost: neutral grey fill, tabIndex -1, aria-hidden, click does not call onClick', () => {
     const onClick = vi.fn();
     const onLongPress = vi.fn();
-    const { container, button, onMouseEnter } = renderPathContainer({ onClick, onLongPress, isGhost: true });
+    const { container, button, onPointerHover } = renderPathContainer({ onClick, onLongPress, isGhost: true });
 
     expect(button.getAttribute('fill')).toBe('#9CA3AF');
     expect(button.getAttribute('tabindex')).toBe('-1');
@@ -194,9 +193,9 @@ describe('MusclePath ghost rendering', () => {
 
     fireEvent.click(button);
     fireEvent.keyDown(button, { key: 'Enter' });
-    fireEvent.mouseEnter(button);
+    fireEvent.pointerEnter(button, { pointerType: 'mouse' });
     expect(onClick).not.toHaveBeenCalled();
-    expect(onMouseEnter).not.toHaveBeenCalled();
+    expect(onPointerHover).not.toHaveBeenCalled();
 
     // No separation edge and no shading overlay on a ghost.
     expect(button.getAttribute('stroke')).toBe('transparent');

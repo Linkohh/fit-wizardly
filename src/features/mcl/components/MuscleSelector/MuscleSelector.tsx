@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Moon, Sun, Palette, Undo2, Redo2 } from 'lucide-react';
-import { MuscleSelectorProps, ViewType, Muscle, TooltipState, InfoPanelState } from '../../types';
+import { MuscleSelectorProps, ViewType, Muscle, InfoPanelState } from '../../types';
 import { getMuscleById } from '../../data/muscles';
 import { useMuscleSelection } from '../../hooks/useMuscleSelection';
 import { useTheme } from '../../hooks/useTheme';
@@ -29,6 +29,7 @@ import { useInteractionFeedback } from '@/hooks/useInteractionFeedback';
 import { getTimedTransition } from '@/lib/motion/tokens';
 
 const SEARCH_DEBOUNCE_MS = 150;
+type ClientPoint = { clientX: number; clientY: number };
 
 export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   selectedMuscles: controlledSelection,
@@ -40,6 +41,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   showSearch = true,
   showLegend = true,
   showTooltip = true,
+  enableTouchPreview = false,
   showInfoPanel = true,
   showSelectionSidebar = true,
   showPresets = true,
@@ -63,7 +65,6 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const isAppleMobile = useAppleMobile();
-  const isTouchContext = isMobile;
   const { shouldReduceMotion } = useMotionPreferences();
   const { emit } = useInteractionFeedback();
   const shouldUseAppleSheet = showSelectionSidebar && isMobile && isAppleMobile;
@@ -74,7 +75,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   const showAppearanceControls = !isEmbeddedHeader;
 
   // Refs
-  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
 
   // Theme
   const { resolvedTheme, toggleTheme, themeClassName } = useTheme(themeProp);
@@ -110,13 +111,11 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
     onChange: onSelectionChange,
   });
 
-  // Tooltip state
-  const [tooltip, setTooltip] = useState<TooltipState>({
-    visible: false,
-    x: 0,
-    y: 0,
-    muscle: null,
-  });
+  const [hover, setHover] = useState<{
+    muscle: Muscle;
+    position: { x: number; y: number };
+    inputType: 'mouse' | 'touch';
+  } | null>(null);
 
   // Info panel state
   const [infoPanel, setInfoPanel] = useState<InfoPanelState>({
@@ -124,8 +123,6 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
     muscle: null,
   });
 
-  // Hover state for highlighting
-  const [hoveredMuscle, setHoveredMuscle] = useState<string | null>(null);
   const [isSelectionSheetOpen, setIsSelectionSheetOpen] = useState(false);
   const [selectionSheetSnap, setSelectionSheetSnap] = useState<number | string | null>(0.22);
 
@@ -141,28 +138,29 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
   // A hovered muscle can become a ghost or disappear when the view or layer changes
   // under a stationary pointer, so drop hover and tooltip state when either changes.
   useEffect(() => {
-    setHoveredMuscle(null);
-    setTooltip((prev) => (prev.visible ? { ...prev, visible: false } : prev));
+    setHover(null);
   }, [currentView, layer]);
 
   const handleMuscleHover = useCallback(
-    (muscle: Muscle | null, event?: React.MouseEvent) => {
-      if (muscle && event && containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setTooltip({
-          visible: true,
-          x: event.clientX - rect.left,
-          y: event.clientY - rect.top,
+    (muscle: Muscle | null, point?: ClientPoint, inputType: 'mouse' | 'touch' = 'mouse') => {
+      if (muscle && point && canvasRef.current) {
+        const rect = canvasRef.current.getBoundingClientRect();
+        setHover({
           muscle,
+          position: { x: point.clientX - rect.left, y: point.clientY - rect.top },
+          inputType,
         });
-        setHoveredMuscle(muscle.id);
       } else {
-        setTooltip((prev) => ({ ...prev, visible: false }));
-        setHoveredMuscle(null);
+        setHover(null);
       }
       onMuscleHover?.(muscle);
     },
     [onMuscleHover]
+  );
+
+  const handleTouchMuscleHover = useCallback(
+    (muscle: Muscle | null, point?: ClientPoint) => handleMuscleHover(muscle, point, 'touch'),
+    [handleMuscleHover]
   );
 
   const handleMuscleClick = useCallback(
@@ -358,7 +356,6 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
 
   return (
     <div
-      ref={containerRef}
       data-testid="muscle-selector-root"
       className={`relative flex flex-col md:flex-row ${(className || '').includes('bg-transparent') ? '' : 'surface-premium surface-premium-stroke'} ${themeClassName} ${className || ''}`}
       style={{ width, height }}
@@ -498,7 +495,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
         )}
 
         {/* SVG Canvas Area */}
-        <div className="flex-1 relative overflow-hidden p-2 sm:p-4" data-testid="muscle-selector-canvas-area">
+        <div ref={canvasRef} className="flex-1 relative overflow-hidden p-2 sm:p-4" data-testid="muscle-selector-canvas-area">
           <motion.div
             className="w-full h-full flex items-center justify-center"
             initial={shouldReduceMotion ? false : { opacity: 0 }}
@@ -509,7 +506,7 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
               <MuscleCanvas
                 view={currentView}
                 selectedMuscles={selectedIds}
-                hoveredMuscle={hoveredMuscle}
+                hoveredMuscle={hover?.muscle.id ?? null}
                 highlightedMuscles={canvasHighlights}
                 disabledMuscles={disabledMuscles}
                 colorByGroup={colorByGroup}
@@ -517,9 +514,11 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
                 animateHighlights={!shouldReduceMotion && animateHighlights}
                 hoverIntensity={hoverIntensity}
                 enableTouchInfo={isAppleMobile && isMobile}
+                enableTouchPreview={enableTouchPreview}
                 longPressMs={380}
                 reduceMotion={shouldReduceMotion}
                 onMuscleHover={handleMuscleHover}
+                onTouchMuscleHover={handleTouchMuscleHover}
                 onMuscleClick={handleMuscleClick}
                 onMuscleLongPress={handleMuscleLongPress}
                 customViewBox={customViewBox}
@@ -530,13 +529,14 @@ export const MuscleSelector: React.FC<MuscleSelectorProps> = ({
           </motion.div>
 
           {/* Tooltip */}
-          {showTooltip && !isTouchContext && (
+          {showTooltip && hover && (
             <MuscleTooltip
-              muscle={tooltip.muscle}
-              label={currentView === 'side' && tooltip.muscle ? getSideLabel(tooltip.muscle.name) : undefined}
-              position={{ x: tooltip.x, y: tooltip.y }}
-              visible={tooltip.visible}
-              containerRef={containerRef as React.RefObject<HTMLDivElement>}
+              muscle={hover.muscle}
+              label={currentView === 'side' ? getSideLabel(hover.muscle.name) : undefined}
+              position={hover.position}
+              visible
+              inputType={hover.inputType}
+              containerRef={canvasRef}
             />
           )}
         </div>
