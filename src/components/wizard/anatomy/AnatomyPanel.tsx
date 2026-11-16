@@ -5,7 +5,7 @@ import { useWizardForm, anatomyStepSchema } from '@/hooks/useWizardForm';
 import { FormError } from '@/components/ui/form-error';
 import { MuscleSelector } from '@/features/mcl';
 import { formatIdentifierLabel } from '@/lib/displayText';
-import { mapLegacyToMcl, mapMclToLegacy } from '@/lib/muscleMapping';
+import { getMclIdsForLegacyGroup, mapLegacyToMcl, mapMclToLegacy, MCL_TO_LEGACY_MAP } from '@/lib/muscleMapping';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAppleMobile } from '@/hooks/use-apple-mobile';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,11 @@ const EMPTY_TARGET_MUSCLES: string[] = [];
 // Other phones stack the list inline under the map, so the shell is taller to keep the map readable.
 const SHELL_HEIGHT_SHEET = 'h-[min(62vh,560px)] supports-[height:100dvh]:h-[min(62dvh,560px)] sm:h-[600px]';
 const SHELL_HEIGHT_INLINE = 'h-[min(84vh,720px)] supports-[height:100dvh]:h-[min(84dvh,720px)] sm:h-[600px]';
+
+function getCanvasSelectionIds(muscleId: string) {
+    const group = MCL_TO_LEGACY_MAP[muscleId];
+    return group ? getMclIdsForLegacyGroup(group) : undefined;
+}
 
 export function AnatomyPanel() {
     const { t } = useTranslation();
@@ -73,6 +78,7 @@ export function AnatomyPanel() {
                     <MuscleSelector
                         selectedMuscles={selectedMclIds}
                         onSelectionChange={handleSelectionChange}
+                        getCanvasSelectionIds={getCanvasSelectionIds}
                         showPresets={true}
                         showInfoPanel={true}
                         showSelectionSidebar={true}

@@ -58,6 +58,8 @@ export interface MuscleSelectorProps {
   // Selection state
   selectedMuscles?: string[];
   onSelectionChange?: (muscles: string[]) => void;
+  /** IDs to toggle together when a muscle is selected directly on the canvas. */
+  getCanvasSelectionIds?: (muscleId: string) => readonly string[] | undefined;
   multiSelect?: boolean;
 
   // View configuration

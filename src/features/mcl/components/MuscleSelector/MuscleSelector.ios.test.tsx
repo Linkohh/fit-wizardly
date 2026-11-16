@@ -88,8 +88,15 @@ vi.mock('./svg/MuscleCanvas', () => ({
 }));
 
 vi.mock('./ui/SelectionSidebar', () => ({
-  default: ({ mobileSheetMode }: { mobileSheetMode?: boolean }) => (
-    <div data-testid={mobileSheetMode ? 'selection-sidebar-sheet' : 'selection-sidebar-inline'} />
+  default: ({ mobileSheetMode, onViewInfo }: {
+    mobileSheetMode?: boolean;
+    onViewInfo?: (muscle: Muscle) => void;
+  }) => (
+    <div data-testid={mobileSheetMode ? 'selection-sidebar-sheet' : 'selection-sidebar-inline'}>
+      {mobileSheetMode && (
+        <button onClick={() => onViewInfo?.(mocks.muscle)}>Open selected muscle details</button>
+      )}
+    </div>
   ),
 }));
 
@@ -200,6 +207,18 @@ describe('MuscleSelector iOS behavior', () => {
     expect(screen.getByTestId('selection-drawer')).toHaveAttribute('data-open', 'true');
     expect(screen.getByTestId('selection-sidebar-sheet')).toBeInTheDocument();
     expect(mocks.emit).toHaveBeenCalledWith('sheetOpen');
+  });
+
+  it('closes the selection drawer before showing muscle details', () => {
+    render(<MuscleSelectorComponent showLegend={false} showSearch={false} />);
+
+    fireEvent.click(screen.getByTestId('muscle-selector-sheet-trigger'));
+    expect(screen.getByTestId('selection-drawer')).toHaveAttribute('data-open', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open selected muscle details' }));
+
+    expect(screen.getByTestId('selection-drawer')).toHaveAttribute('data-open', 'false');
+    expect(screen.getByTestId('info-panel')).toHaveTextContent('Pectoralis Major (Left)');
   });
 
   it('emits sheet snap feedback when active snap point changes', () => {
