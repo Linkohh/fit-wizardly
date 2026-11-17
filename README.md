@@ -1,121 +1,232 @@
-# Welcome to your Lovable project
+# FitWizard
 
-## Project info
+**Science-based workout plans, built around you.**
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+FitWizard is a workout planner and training log for people who lift. You answer a few questions (goal, experience, equipment, schedule, injuries), pick the muscles you want to train on an interactive anatomy map, and FitWizard builds a periodized plan: a training split, sets and reps per exercise, a four-week effort progression measured in reps in reserve (RIR) with a deload week, and weekly volume checks per muscle. You then log each workout set by set, and the app tracks your history, personal records and strength trends.
 
-## How can I edit this code?
+Plans are generated on the device by a rules-based engine grounded in strength-training research. There is no AI model in the app, and plan generation works offline at no cost per user.
 
-There are several ways of editing your application.
+> **Not medical advice.** FitWizard gives general fitness guidance. Talk to a qualified professional before starting a new training program, especially with an injury or medical condition. See the in-app Legal page (`/legal`).
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Status
 
-Changes made via Lovable will be committed automatically to this repo.
+FitWizard is in **beta** and is being prepared for the App Store, Google Play and desktop.
 
-**Use your preferred IDE**
+| Branch | Role | Deployed to |
+|---|---|---|
+| `preview_b` | Active development and beta | Beta site on Vercel |
+| `main` | Production | Production site on Vercel (currently behind `preview_b`) |
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+The plan for getting to the stores is in [`docs/LAUNCH_ROADMAP.md`](docs/LAUNCH_ROADMAP.md). The work is organized as a day-by-day project with parallel lanes in [`docs/project/`](docs/project/README.md).
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+---
 
-Follow these steps:
+## How people use it
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+| Platform | How | State |
+|---|---|---|
+| **Web** | Any modern browser | Live (beta) |
+| **Installable web app (PWA)** | "Add to Home Screen" on phones, "Install" in Chrome, Edge or Safari on desktop. Works offline after the first visit | Live (beta) |
+| **iOS** | Native app built with Capacitor 8 from the same web code | Project builds in Xcode; not yet in the App Store |
+| **Android** | Native app built with Capacitor 8 | Project builds in Android Studio; not yet on Google Play |
+| **Desktop** | The installed PWA today; Microsoft Store package and a macOS wrapper planned | Planned (roadmap Phase 5) |
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+FitWizard is **free**. Most of the app works without an account (guest mode). An account (email sign-in) is needed to keep plans in the cloud.
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+## Features
 
-## Backend (Express API)
+| Feature | State | Notes |
+|---|---|---|
+| Onboarding and plan wizard (goal, equipment, target muscles, constraints, schedule, review) | ✅ Shipped | |
+| Anatomy muscle selector (front, back and side views; surface and deep layers; search) | ✅ Shipped | `src/features/mcl` |
+| Plan generator with splits, RIR progression, deload and volume (MRV) warnings | ✅ Shipped | `src/lib/planGenerator.ts`, `src/lib/progressionEngine.ts` |
+| Workout logger: rest timer, warm-up sets, supersets, plate calculator, RIR or RPE | ✅ Shipped | |
+| History, analytics, strength curve, readiness check-ins | ✅ Shipped | |
+| Nutrition: food log, barcode lookup (Open Food Facts), hydration, meal shortcuts | ✅ Shipped | Barcode lookup is consent-gated |
+| Exercise library (bundled data plus the wger catalog) | ✅ Shipped | |
+| PDF export of plans | ✅ Shipped | |
+| Light and dark themes | ✅ Shipped | |
+| Languages | ⚠️ Partial | English is complete. Spanish, German and Portuguese are partly translated; v1 targets English and Spanish (roadmap 3.3) |
+| Cloud sync of plans for signed-in users | ✅ Shipped | |
+| **Saving workout logs, nutrition and measurements between sessions** | ⚠️ **Not yet** | Today these are kept in memory only and are lost when the app closes. This is the top launch item (roadmap Phase 1, project Wave 1) |
+| Cloud sync of logs, nutrition, measurements and readiness | 🗓️ Planned | Roadmap 1.4 |
+| Account deletion | 🗓️ Planned | Roadmap 1.5 |
+| Circles (social groups, feed, challenges) | 🚩 Behind a flag (`VITE_FEATURE_CIRCLES`) | Not part of v1 |
+| Coach portal (clients, templates, revenue) | 🚩 Behind a flag (`VITE_FEATURE_COACH`) | Not part of v1; parts use sample data |
+| Pro subscription, Apple Health / Health Connect, AI coach | 🗓️ After launch | Roadmap Phase 6 |
 
-This repo also contains a lightweight Express API in `server/` that powers the `/plans` and `/health` endpoints during development (Vite proxies these paths to `http://localhost:3001`).
+---
 
-Plans can be persisted either:
-- **Directly to Supabase (A2)** – recommended, no custom backend required
-- **Via the Express API (A1)** – thin layer that forwards writes to Supabase with RLS enforced
+## Tech stack
 
-Before using plan sync, apply the Supabase migration in `supabase/migrations/004_plans_schema.sql` to your project.
+| Layer | Technology |
+|---|---|
+| UI | React 19, TypeScript 5.9 (strict), Vite 7 with SWC |
+| Styling | Tailwind CSS 4 (tokens in `src/index.css`), shadcn/ui on Radix, Framer Motion 12 |
+| State | Zustand 5 (persist middleware), TanStack Query 5 |
+| Routing | React Router 7 |
+| Validation | Zod 4 (client), Zod 3 (local server) |
+| Backend | Supabase: Postgres with row-level security on every table, Auth (email), Realtime |
+| Serverless | Vercel functions in `api/` (exercise search, quotes, wger proxy) |
+| Native | Capacitor 8 (iOS with Swift Package Manager, Android with Gradle) |
+| Internationalization | i18next: `en`, `es`, `de`, `pt` |
+| Charts and export | Recharts, jsPDF |
+| Testing | Vitest 4 and Testing Library, Playwright |
 
-In separate terminals:
+---
 
-```sh
-# Install backend deps
-npm --prefix server install
+## Quick start
 
-# Start backend (port 3001)
-npm run server:dev
-
-# Start frontend (port 8080)
-npm run dev
-```
-
-The server verifies `Authorization: Bearer <token>` using Supabase and expects:
-
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY` (Supabase publishable key preferred; legacy anon key also works)
-- optional: `VITE_API_URL` (must be the current host, localhost, or a relative same-origin path)
-- optional: `VITE_PLANS_PROVIDER` (`auto|supabase|api`)
-- optional: `VITE_USE_API=true` (only needed if you want the frontend to call the API outside dev)
-- optional: `ALLOWED_ORIGINS` (comma-separated)
-- optional: `TRUST_PROXY` (`false`, `true`, or a non-negative integer)
-
-Keep real values in `.env.local` for local development and in Vercel environment variables for deployments. Do not commit populated `.env` files.
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
-
-## Native app icons (Capacitor)
-
-- Source icon: `resources/icon.png` (1024x1024, no alpha channel)
-- iOS app icon asset: `ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png`
-
-When Android is added to this repo, run:
+Requirements: **Node 22** and **npm** (the repository uses `package-lock.json`; CI rejects other lockfiles).
 
 ```sh
-npx cap add android
-npm i -D @capacitor/assets
-npx @capacitor/assets generate --android
+git clone https://github.com/Linkohh/fit-wizardly.git
+cd fit-wizardly
+git checkout preview_b
+npm ci
+cp .env.example .env.local   # then fill in the values you need
+npm run dev                  # http://localhost:8080
 ```
+
+With no Supabase values the app runs in **demo mode**: everything except sign-in, cloud sync and Circles works.
+
+### Environment variables
+
+Put real values in `.env.local` for local work and in Vercel project settings for deployments. Never commit a filled-in `.env` file.
+
+| Variable | Where it runs | Purpose |
+|---|---|---|
+| `VITE_SUPABASE_URL` | Client (public) | Supabase project URL. Must be HTTPS outside localhost |
+| `VITE_SUPABASE_ANON_KEY` | Client (public) | Supabase publishable key (`sb_publishable_…`) or legacy anon key |
+| `VITE_PLANS_PROVIDER` | Client | `auto` (default: Supabase when configured), `supabase`, or `api` |
+| `VITE_USE_API` | Client | `true` to call the local Express API outside dev |
+| `VITE_API_URL` | Client | Express API base; same-origin or localhost only |
+| `VITE_SHARE_BASE_URL` | Client | Base URL for shared workout links |
+| `VITE_FEATURE_CIRCLES` | Client | `true` to show Circles. Default off |
+| `VITE_FEATURE_COACH` | Client | `true` to show the coach portal. Default off |
+| `VITE_TRAINER_ACCESS_USERNAME`, `VITE_TRAINER_ACCESS_PASSCODE` | Client | Present in `.env.example`; not read by current code |
+| `ALLOWED_ORIGINS` | Local Express server | Comma-separated CORS allowlist |
+| `TRUST_PROXY` | Local Express server | `false`, `true`, or a hop count |
+| `API_NINJAS_API_KEY` | Vercel functions (server only) | Key for exercise search and quotes. **Never prefix with `VITE_`** |
+
+Anything starting with `VITE_` is bundled into the app and visible to users. Only put public values there.
+
+### Database
+
+Create a Supabase project, then apply the SQL files in `supabase/migrations/` **in order** (`001` to `006`) in the Supabase SQL editor. [`docs/SUPABASE_MIGRATIONS.md`](docs/SUPABASE_MIGRATIONS.md) explains which files can be re-run and how to check what is already applied.
+
+### Optional local API
+
+`server/` is a small Express API for plan storage (`/plans`, `/health`), used only in local development. Production writes to Supabase directly. Its future is decision D1 in the roadmap.
+
+```sh
+npm --prefix server ci
+npm run server:dev      # http://localhost:3001 (Vite proxies /plans and /health)
+```
+
+---
+
+## Scripts
+
+| Group | Command | What it does |
+|---|---|---|
+| Develop | `npm run dev` | Vite dev server on port 8080 |
+| | `npm run server:dev` / `server:build` / `server:start` | Local Express API |
+| Quality | `npm run lint` | ESLint |
+| | `npm run typecheck` | TypeScript, no emit |
+| | `npm run test` / `npm run test:run` | Vitest in watch mode / once |
+| | `npm --prefix server test` | Server tests |
+| | `npm run test:playwright` (`:headed`) | Playwright smoke tests (builds and previews on port 5173) |
+| | `npm run test:exercise-library` | Exercise library tests only |
+| Build | `npm run build` / `build:dev` | Production / development build into `dist/` |
+| | `npm run preview` | Serve the built app |
+| | `npm run bundle:report` | Initial bundle size report |
+| Data | `npm run sync:exercise-library` | Refresh the bundled wger snapshot |
+| iOS | `npm run ios:sync` | Copy `dist/` into the iOS project |
+| | `npm run ios:dev` | Build and run in the simulator with bundled files |
+| | `npm run ios:live` | Run with live reload from the dev server |
+| | `npm run ios:open` | Open the Xcode project |
+
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, client tests, the client build, server tests and the server build on every push to `main` or `preview_b` and on every pull request.
+
+---
+
+## Mobile builds
+
+Both native projects are generated by Capacitor from the web build. Always build the web app first.
+
+**iOS** (macOS with Xcode; dependencies use Swift Package Manager, CocoaPods is not needed):
+
+```sh
+npm run build
+npm run ios:sync
+npm run ios:open        # archive and sign in Xcode
+```
+
+**Android** (Android Studio with SDK 36):
+
+```sh
+npm run build
+npx cap sync android
+npx cap open android
+```
+
+App id on both platforms: `com.fitwizardly.app`. Release signing, store metadata and CI builds are covered in roadmap Phases 2 and 4. More detail is in [`docs/IOS_DEVELOPMENT.md`](docs/IOS_DEVELOPMENT.md).
+
+---
+
+## Deployment
+
+Vercel builds the static app from `dist/` and serves the functions in `api/`. Security headers, including a strict Content Security Policy and HSTS, are set in `vercel.json`. `main` deploys to production and `preview_b` to the beta site. The service worker updates installed copies automatically.
+
+## Releasing
+
+1. Bump `version` in `package.json`.
+2. Add a matching entry at the top of `src/data/changelog.ts`. A test fails if the two differ.
+3. Bump the native versions: `MARKETING_VERSION` in Xcode and `versionName` / `versionCode` in `android/app/build.gradle`.
+4. Merge to `main` and tag the commit (`vX.Y.Z`).
+
+Details: [`docs/ABOUT_PAGE.md`](docs/ABOUT_PAGE.md).
+
+---
+
+## Project layout
+
+```
+api/                 Vercel serverless functions
+android/, ios/       Capacitor native projects
+docs/                Documentation (see index below)
+public/              Static assets, icons, bundled exercise data
+scripts/             Dev and data scripts (iOS live reload, wger sync, bundle report)
+server/              Optional local Express API
+src/
+  components/        Feature components (ui/ holds shadcn primitives: do not edit)
+  features/          Self-contained features: mcl (anatomy selector), exercise-library
+  pages/             Route-level pages
+  stores/            Zustand stores
+  hooks/             Custom hooks
+  lib/               Plan engine, sync, services, utilities
+  locales/           en, es, de, pt translations
+  data/              Static data (changelog, exercise data)
+  types/             TypeScript types, including generated Supabase types
+supabase/migrations/ SQL migrations, applied in order
+```
+
+## Documentation
+
+| Document | State |
+|---|---|
+| [`docs/LAUNCH_ROADMAP.md`](docs/LAUNCH_ROADMAP.md) | Current. Analysis, work items, decisions, risks |
+| [`docs/project/`](docs/project/README.md) | Current. Day-by-day project, lanes, contracts, board |
+| [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md) | Current. Session history and known issues |
+| [`docs/SUPABASE_MIGRATIONS.md`](docs/SUPABASE_MIGRATIONS.md), [`docs/ABOUT_PAGE.md`](docs/ABOUT_PAGE.md), [`docs/VERCEL_SECRET_ROTATION.md`](docs/VERCEL_SECRET_ROTATION.md), [`docs/PERFORMANCE_BASELINE.md`](docs/PERFORMANCE_BASELINE.md) | Current |
+| [`CLAUDE.md`](CLAUDE.md) and the lens docs (`ENGINEERING`, `DESIGN_SYSTEM`, `SECURITY`, `ORCHESTRATION`, `API_REFERENCE`, `SCHEMAS`, `TESTING`, `TROUBLESHOOTING`, `MIGRATION`, `AI_GUIDELINES`) | **Partly out of date.** Some versions, paths and variables they mention do not exist. Corrections are scheduled (roadmap 0.9) |
+| [`docs/privacy-policy.md`](docs/privacy-policy.md) | **Draft, not accurate yet.** Rewrite scheduled (roadmap 4.1) |
+
+## License
+
+No license file is published. All rights reserved by the repository owner unless stated otherwise.
