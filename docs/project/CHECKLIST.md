@@ -16,17 +16,17 @@
 | 6 | 2026-11-17 | Decisions D1–D6 acknowledged (defaults apply); store enrolment (L4) deferred by Lincoln | `BOARD.md` |
 | 7 | 2026-11-17 | Lane E Day 1: device storage layer and loading gate | PR #45 |
 | 8 | 2026-11-17 | **PR #45 merged** (Lane E Day 1) | `5984b86` |
-| 9 | 2026-11-17 | Lane E Day 2: **plans, workout logs, personal records, in-progress workouts and body measurements now survive closing the app**; streak, weekly goal and badges now work | PR (see session log) |
+| 9 | 2026-11-17 | Lane E Day 2: **plans, workout logs, personal records, in-progress workouts and body measurements now survive closing the app**; streak, weekly goal and badges now work | PR #46 |
 
 ## In progress
 
 | What | Status | Waiting on |
 |---|---|---|
-| Lane E Day 2 PR | Open, all checks green | Lincoln's review and merge |
+| Lane E Day 2: PR #46 | Open; all checks green locally, CI running | Lincoln's review and merge |
 
 ## Next up (in order)
 
-1. **Review and merge the Lane E Day 2 PR.**
+1. **Review and merge PR #46** (Lane E Day 2).
 2. **Lane E Day 3:** save nutrition, readiness check-ins, achievements, custom exercises and favourites on the device too; set what sign-out does to device data; write ADR 11.
 3. **Start the other Wave 1 lanes.** Each has a task card ready (A, B, C, D, F, H). Lane B must start only after the Day 2 PR merges, because its brief changed again.
 

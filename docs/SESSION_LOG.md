@@ -168,7 +168,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
   - Initial bundle 342.7 → 344.8 KB gzip. The badge catalogue is loaded on demand to keep it out of the startup bundle.
 - **Legal/compliance notes:** workout logs, personal records and body measurements are now stored on the device: IndexedDB `fitwizard` on the web, app files on native. They are already included in the Profile JSON export. Lane A adds them to the data inventory.
 - **Next steps:**
-  1. Lincoln reviews and merges the Lane E Day 2 PR.
+  1. Lincoln reviews and merges PR #46 (Lane E Day 2).
   2. Lane E Day 3 (remaining stores, sign-out behaviour, ADR 11).
   3. Start the other Wave 1 lanes. Lane B goes after this PR merges.
 
