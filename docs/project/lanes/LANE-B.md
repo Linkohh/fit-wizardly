@@ -72,6 +72,11 @@
 
 ## Day 2: Language picker (0.4)
 
+> **Carried over from Day 1 handoffs (added 2026-11-17 by the coordinator).** Do these too:
+> - `src/components/auth/AuthModal.tsx:86` says "account-backed features like circles and trainer tools", which is untrue with both flags off. Reword it to "Sync your plans and history across devices". DEBT-049. (Lane H owns `auth/*`, but this one-line wording change is an agreed exception for today.)
+> - `src/pages/UserGuide.tsx` spells the name "FitWizardly". Change it to "FitWizard". DEBT-047.
+
+
 ### Steps
 1. In `src/lib/i18n.ts`, add `launchReady: boolean` to each `AVAILABLE_LANGUAGES` entry: `en: true`, `es: true`, `de: false`, `pt: false` (decision **D3**; default English + Spanish). Export `LAUNCH_LANGUAGES = AVAILABLE_LANGUAGES.filter(l => l.launchReady)`.
 2. In `getInitialLanguage()`, if the stored or browser language is supported but not launch-ready, fall back to `en`. This makes German and Portuguese users see English rather than a half-translated UI. Add a test.

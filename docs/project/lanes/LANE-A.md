@@ -63,6 +63,12 @@ Lane A consumes none. When it writes the privacy text, it relies on what each la
 
 ## Day 2: iOS docs and the data inventory
 
+> **Carried over from Day 1 handoffs (added 2026-11-17 by the coordinator).** Do these too:
+> - Audit `.claude/rules.md`, `.claude/context.md` and `.claude/ignore.md` (linked from `CLAUDE.md`) for the old stack, such as Tailwind 3 and the `fr` locale. DEBT-056.
+> - In `docs/IOS_DEVELOPMENT.md`, change the name to FitWizard and state that the app is **iPhone-only and portrait-only** (Lane H Day 1).
+> - `DATA_INVENTORY.md`: include the rows from the Lane E Day 2 and Day 3 handoffs and the `exercise-data` Cache Storage entry from Lane D Day 1 (public catalogue, no personal data). Match Lane H's privacy manifest: email (linked), fitness (linked), crash data (not linked, opt-in), product interaction (not linked, opt-in).
+
+
 ### Steps
 1. Merge `IOS_XCODE_COMPATIBILITY.md` into `docs/IOS_DEVELOPMENT.md`, then delete the root file:
    - Commands must match `package.json`: `ios:dev` is a bundled build (`npx cap run ios`), `ios:live` runs `scripts/dev-ios-live.mjs`, `ios:live:cap` uses `--host=localhost`, and `ios:open` and `ios:sync` are as named.

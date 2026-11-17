@@ -73,6 +73,13 @@ Data stores other than `trainerStore` and `onboardingStore`, the sync code, nati
 
 ## Day 2: Flags, part 2 — coach mode, onboarding and badges (0.2)
 
+> **Carried over from Day 1 handoffs (added 2026-11-17 by the coordinator).** Do these too:
+> - `CommandPalette.tsx` has commands for `/achievements`, `/settings` and `/auth`. None of those routes exist, so they land on the 404 page. Point them at real routes (`/profile`, the auth modal) or remove them. The "Documentation" command opens `docs.fitwizardly.com`, which may not exist; point it at `/guide`. DEBT-050.
+> - `App.auth-routing.test.tsx`: the `CircleLayout` mock exports `default`, but `App.tsx` imports the named export. Fix the mock. DEBT-051.
+> - Check `TrainerDashboard` on Index once `trainerStore` forces coach mode off.
+> - Gate the UserGuide Circles tab, which is already on this day's list. DEBT-047.
+
+
 ### Steps
 1. `src/stores/trainerStore.ts`:
    - When `!isFeatureEnabled('coach')`, `isTrainerMode` is always `false`. Do this in the initial state, in the persisted-state sanitiser (`sanitizeTrainerPersistedState`, around line 46) and in `setTrainerMode` / toggle (around lines 64–80).

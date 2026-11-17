@@ -76,6 +76,11 @@ Stores, the sync engine, native files, `supabase/`, and docs other than your han
 
 ## Day 2: Dead code (0.8)
 
+> **Carried over from Day 1 handoffs (added 2026-11-17 by the coordinator).** Do these too:
+> - Also delete `src/components/wisdom/*`, along with the commented `WisdomBubble` import and usage in `src/pages/Plan.tsx` (around lines 16 and 276–277). That UI is unreachable and says "AI". DEBT-057. Also delete `ProgressionRecommendations.tsx` and `SplitRecommender.tsx` (AI wording, unused) and `src/stores/favorites-store.ts` (DEBT-044).
+> - Keep `src/stores/wisdomStore.ts` only if something still imports it once the wisdom components are gone; otherwise delete it too.
+
+
 ### Steps
 1. `npm install -D knip`. Add a minimal `knip.json`:
    - entries: `src/main.tsx`, `src/**/*.test.{ts,tsx}`, `api/*.ts`, `scripts/*.mjs`, `playwright/**/*.ts`, `vite.config.ts`, `vitest.config.ts`

@@ -146,6 +146,37 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-17 — Wave 1 / Day 1 Reviewed and Merged (#47–#53) (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`)
+
+- **Review before merging** (Lincoln asked for one more look first):
+  - Read every lane diff and every handoff.
+  - Each lane stayed in its own files. Lane H's Gradle and SPM edits come from `cap sync` registering Lane E's `@capacitor/filesystem`.
+  - No secrets were added; Lane H git-ignores `keystore.properties`, `*.jks` and `*.keystore`.
+  - Migration 007: 7 tables, each `ON DELETE CASCADE` from `auth.users`; RLS on all of them; 28 owner-only policies (`auth.uid() = user_id`); no `USING (true)`; no anon access.
+  - Nothing in the old logo path is still referenced.
+  - All seven PRs passed CI and had no open review findings.
+- **Merged on Lincoln's instruction, each pinned to the reviewed head SHA:**
+  - #50 F `54fcae8`
+  - #49 C `1a715ef`
+  - #48 H `6a31fd2`
+  - #51 B `e69675a`
+  - #52 D `8524a3c`
+  - #47 A `4ff74e6`
+  - #53 E (this entry's PR)
+  - Lane B went before E, so the expected `en/de/pt.json` end-of-file conflict was resolved on this branch (keep both; no duplicate keys).
+- **Final combined code** (`preview_b` + #53):
+  - 891/891 tests in 159 files. Lint 0 errors / 4 warnings. Typecheck clean. Build passes. Bundle 344.3 KB gzip.
+  - Browser checks: title is "FitWizard - Science-Based Workout Planner"; no AI wording; Circles hidden; `/circles`, `/clients` and `/revenue` show 404; WebP logo; plan and achievements in IndexedDB after reload; no user data in localStorage; home 0/3; no errors.
+- **Documentation:**
+  - Fixed the two references Lane A left for the coordinator (`codex-auth-hardening-handoff.md`, DEBT-004 path).
+  - Added each lane's carry-over items from the Day 1 handoffs to its next brief (A, B, C, D, F and H Day 2; E Day 4).
+  - Logged the new issues DEBT-046 to DEBT-057.
+- **Native risk to remember:** Lane H turned on `minifyEnabled`/`shrinkResources` and removed `CapacitorHttp`. Neither affects the web app. Both are checked on the first real Android/iOS build (Lincoln's Mac and Android Studio), and native wger calls are routed through the proxy on Lane H Day 2 (DEBT-054).
+- **Next steps:**
+  1. Start Day 2 for lanes A, B, C, D, F and H.
+  2. Lane E Day 4 (sync engine core).
+  3. Gate 1 after Day 3. Lincoln needs to set up a staging Supabase project and run the migration-repair step first (DEBT-053).
+
 ### 2026-11-17 — PR #46 Merged; Wave 1 Lanes Started in Parallel; Lane E Day 3 (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, restarted from `preview_b` @ `803842e`)
 
 - **What was done:**
@@ -694,7 +725,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | SEC-003 | Legacy JWT in local `.env.local`, `dist/`, Capacitor assets | local only | Delete after rotation confirmed live. |
 | SEC-004 | Stale env in worktree `.claude/worktrees/trusting-almeida/` | local only | Sanitize or delete. |
 | DEBT-003 | `CircleSettingsTab.tsx` and `CircleMembersTab.tsx` are stub placeholders | `src/components/circles/tabs/` | Marked TODO Phase 5. Not implemented. |
-| DEBT-004 | Test coverage gaps: logging flow, progression engine edge cases, nutrition store, circle store | `src/__tests__/` | See AUDIT_AND_IDEAS.md §5.4 for prioritized list. |
+| DEBT-004 | Test coverage gaps: logging flow, progression engine edge cases, nutrition store, circle store | — | See AUDIT_AND_IDEAS.md §5.4 for prioritized list. |
 | DEBT-005 | Accessibility partial: RIR color-only indicators, skip-link, wizard keyboard nav | Multiple | See AUDIT_AND_IDEAS.md §5.5. |
 | DEBT-009 | Circle/social data not included in GDPR data export | `src/pages/Profile.tsx` | handleExportData exports fitness + readiness data but not circle posts, reactions, or comments. |
 | AUDIT-003 | ES locale missing 127 keys vs `en.json` (47 are About copy, DEBT-011) | `src/locales/es.json` | Also has 30 orphaned keys (`circles.*`, `consent.*`, `workout.*`) not in EN — investigate. |
@@ -722,6 +753,18 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-043 | The wizard header says "Coach-built intake" / "Coach intake" while the coach portal is off | `src/pages/Wizard.tsx` and the wizard header | Wording only; Lane B could reword it on Day 4. |
 | DEBT-044 | `favorites-store.ts` is unused; exercise favourites live in `preferencesStore` | `src/stores/favorites-store.ts` | Delete in Lane D's dead-code pass (Day 2). |
 | DEBT-045 | On a shared device, a signed-out account's training data stays visible until cloud sync ships | `src/stores/authStore.ts` | Deliberate (the alternative is losing data). Lane E Day 6 clears device data after a successful sync. |
+| DEBT-046 | Three "Wisdom AI" achievements can't be earned (the Wisdom chat isn't shown) and mention AI | `src/stores/achievementStore.ts` (~214–236) | Lane E Day 4: remove them from `BADGES`. |
+| DEBT-047 | UserGuide: Circles tab not behind the flag; "FitWizardly" spelling; all strings hardcoded | `src/pages/UserGuide.tsx` | Lane C Day 2 (flag), Lane B Day 2 (spelling), J2 (strings). |
+| DEBT-048 | Rest of the consent tray is hardcoded English | `src/components/legal/ConsentModal.tsx` | Lane C Day 5 (uses the new `consent.*` namespace). |
+| DEBT-049 | Auth modal promises "circles and trainer tools", which are hidden in v1 | `src/components/auth/AuthModal.tsx:86` | Lane B Day 2. |
+| DEBT-050 | Command palette links to nonexistent routes (`/achievements`, `/settings`, `/auth`) and an external docs site | `src/components/CommandPalette.tsx` | Lane C Day 2. |
+| DEBT-051 | `CircleLayout` mock exports `default`, but App imports the named export | `src/App.auth-routing.test.tsx` | Lane C Day 2. |
+| DEBT-052 | Social share image is a 512 px square; a 1200×630 card would render better | `index.html`, `public/logo.png` | Lane A / Lane D, Wave 3 (store assets). |
+| DEBT-053 | Supabase CLI history is empty (001–006 were applied by hand); a bare `db push` would re-run 001 | staging/production | **Lincoln, Gate 1:** run `supabase migration repair --status applied 001 … 006` first (see `docs/SUPABASE_MIGRATIONS.md`). |
+| DEBT-054 | Native wger calls relied on CapacitorHttp, which was removed on Lane H Day 1 | `src/features/exercise-library/service.ts:267` | Lane H Day 2: route through `apiUrl('/api/proxy-wger')`. |
+| DEBT-055 | `WgerAdapter.search` calls wger directly on the web, bypassing the proxy allowlist | `src/lib/services/api/exerciseApiAdapter.ts:26` | Lane H Day 2. |
+| DEBT-056 | `.claude/*.md` not audited; probably repeat the old stack and locales | `.claude/` | Lane A Day 2. |
+| DEBT-057 | Unreachable Wisdom UI still says "AI" | `src/components/wisdom/*`, `src/pages/Plan.tsx` | Lane D Day 2: delete. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
 | DEBT-025 | Enter on a focused muscle can advance the wizard after selecting it | `src/pages/Wizard.tsx` | The existing window-level shortcut handles Enter after the focused SVG control has already handled it. |
@@ -847,7 +890,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | Purpose | File |
 |---------|------|
 | Audit roadmap + item status | `AUDIT_AND_IDEAS.md` |
-| Auth hardening handoff (PR #23) | `docs/codex-auth-handoff.md` |
+| Auth hardening handoff (PR #23) | `docs/codex-auth-hardening-handoff.md` |
 | Engineering patterns | `docs/ENGINEERING.md` |
 | Design system | `docs/DESIGN_SYSTEM.md` |
 | Security context | `docs/SECURITY.md` |
