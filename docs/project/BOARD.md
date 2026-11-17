@@ -1,17 +1,17 @@
 # Project Board
 
 > **Only Lane A edits this file.** Other lanes report through handoff notes.
-> Status key: ⬜ not started · 🟡 in progress · 🔵 PR open · ✅ merged · ⛔ blocked · ➖ off or buffer
+> Status key: ⬜ not started · 🟡 in progress · 🔵 PR open · ✅ merged · ⛔ blocked · ⏸ deferred · ➖ off or buffer
 > Item IDs (for example `0.2`) refer to [`docs/LAUNCH_ROADMAP.md`](../LAUNCH_ROADMAP.md) §3. Step-by-step instructions are in [`lanes/`](lanes/).
 
 ## Day 0: Setup (this session)
 
 | Task | Status |
 |---|---|
-| README rewrite, launch roadmap, project folder (board, contracts, lane briefs, handoff template) | 🔵 |
-| Feature-flag contract `src/lib/featureFlags.ts` with tests, plus `.env.example` flags | 🔵 |
+| README rewrite, launch roadmap, project folder (board, contracts, lane briefs, handoff template) | ✅ PR #44, merged 2026-11-17 (`79b6ebb`) |
+| Feature-flag contract `src/lib/featureFlags.ts` with tests, plus `.env.example` flags | ✅ PR #44 |
 | Baseline recorded: lint 0 errors / 4 warnings, typecheck clean, 795/795 client tests in 149 files, 14/14 server tests | ✅ |
-| L0: Lincoln merges the Day 0 PR into `preview_b` | ⬜ |
+| L0: Lincoln merges the Day 0 PR into `preview_b` | ✅ 2026-11-17 (merged on Lincoln's instruction after CI and the automated review passed) |
 
 ---
 
@@ -25,7 +25,7 @@ All seven lanes run in parallel. There are no dependencies between them.
 | **B** | ⬜ 0.1 AI claim (except `vite.config.ts`); 0.5 fake content | ⬜ 0.4 Language picker; `pt.json` duplicate key; Profile labels | ⬜ 3.6a Empty states (History, Analytics, Nutrition) |
 | **C** | ⬜ 0.2 part 1: routes, every nav entry point, flag tests | ⬜ 0.2 part 2: coach toggles, onboarding skip, `trainerStore`, badge filter | ⬜ 3.1 Sentry (`monitoring.ts`, `main.tsx`, `ErrorBoundary`, per-route boundaries, CSP) |
 | **D** | ⬜ 0.7 Icons, logo, PWA runtime caching, manifest text | ⬜ 0.8 knip cleanup, deletions, ESLint ignores | ⬜ 3.6b PDF export fixes |
-| **E** | ⬜ 1.1 `appStorage`, `HydrationGate`, date reviver | ⬜ 1.2 part 1: plan and measurement stores; 0.3 counters; circles gate | ⬜ 1.2 part 2: other stores, localStorage copy, `clearSensitiveStorage`, ADR 11 |
+| **E** | 🔵 1.1 `appStorage`, `HydrationGate`, date reviver (trial lane, run first on 2026-11-17) | ⬜ 1.2 part 1: plan and measurement stores; 0.3 counters; circles gate | ⬜ 1.2 part 2: other stores, localStorage copy, `clearSensitiveStorage`, ADR 11 |
 | **F** | ⬜ Supabase CLI, local Postgres harness, naming check; 1.3 migration 007 and types | ⬜ 1.6 migration 008 and policy tests | ⬜ 1.5 part 1: `delete-account` function, cascade check, docs |
 | **H** | ⬜ 0.6 name; 2.5/2.6 native project fixes | ⬜ 2.5 self-hosted fonts and CSP; 2.3 `apiBase` and API hardening | ⬜ 2.1 Email-code sign-in |
 
@@ -101,10 +101,10 @@ Full detail is in [`lanes/LANE-L.md`](lanes/LANE-L.md).
 
 | ID | Task | Due | Status |
 |---|---|---|---|
-| L0 | Merge Day 0 PR; start Wave 1 lanes | Day 0 | ⬜ |
-| D1–D6 | Answer the open decisions (defaults apply otherwise) | Days 1–5 | ⬜ |
+| L0 | Merge Day 0 PR; start Wave 1 lanes | Day 0 | ✅ PR #44 merged. Lane E started first as a trial; other lanes wait until the trial is reviewed |
+| D1–D6 | Answer the open decisions (defaults apply otherwise) | Days 1–5 | ✅ Acknowledged 2026-11-17: defaults apply unless Lincoln changes one |
 | L1 | Revoke the legacy Supabase key (SEC-001) | Day 1 | ⬜ |
-| L4 | Apple Developer and Google Play Console enrolment; create app records | Day 1 | ⬜ |
+| L4 | Apple Developer and Google Play Console enrolment; create app records | Deferred | ⏸ Deferred by Lincoln (2026-11-17) until store work is near. **Effect:** Gate 2's TestFlight and Play uploads, and the 14-day Play test, can't start until enrolment is approved, so Android launch moves back by however long enrolment is deferred |
 | L3 | Domain for the app | Day 2 | ⬜ |
 | L5 | Name and trademark search | Day 3 | ⬜ |
 | L6 | Sentry and PostHog accounts; keys in Vercel | Day 3 | ⬜ |
@@ -120,9 +120,9 @@ Full detail is in [`lanes/LANE-L.md`](lanes/LANE-L.md).
 
 | ID | Decision | Default | Needed by | Answer |
 |---|---|---|---|---|
-| D1 | Retire the Express server? | Yes | Day 5 | — |
-| D2 | Keep users signed in across restarts? | Yes | Day 4 | — |
-| D3 | Launch languages | English and Spanish | Day 2 | — |
-| D4 | iPhone only (no iPad) for v1? | Yes | Day 1 | — |
-| D5 | Analytics tool | PostHog EU | Day 4 | — |
-| D6 | Keep `AGENTS.md` / context-mode? | No, delete it | Day 1 | — |
+| D1 | Retire the Express server? | Yes | Day 5 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
+| D2 | Keep users signed in across restarts? | Yes | Day 4 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
+| D3 | Launch languages | English and Spanish | Day 2 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
+| D4 | iPhone only (no iPad) for v1? | Yes | Day 1 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
+| D5 | Analytics tool | PostHog EU | Day 4 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
+| D6 | Keep `AGENTS.md` / context-mode? | No, delete it | Day 1 | Default applies (acknowledged 2026-11-17, not individually confirmed) |

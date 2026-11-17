@@ -16,7 +16,7 @@
 
 ## Owns
 - `index.html` meta tags only. The fonts block is Lane H's.
-- AI wording in `src/pages/Legal.tsx` and `src/pages/UserGuide.tsx` (**Day 1 only**).
+- AI wording in `src/pages/Legal.tsx`, `src/pages/UserGuide.tsx` and `src/components/legal/ConsentModal.tsx` (**Day 1 only**; Lane C owns `ConsentModal.tsx` from Wave 2).
 - The About components (`src/components/about/*`), `src/data/changelog.ts` (wording only, Day 1), `src/components/exercises/ExerciseDetailModal.tsx`, `src/components/exercises/ExerciseBadges.tsx`, `src/components/nutrition/MealSuggestions.tsx`.
 - `src/pages/Profile.tsx`: the **language, units and theme** block only. Lane C owns the coach toggle, F the account block, E the sync indicator, H the reminders.
 - `src/components/LanguageSelector.tsx` (delete it).
@@ -39,13 +39,14 @@
 1. Search the repo, excluding `node_modules`, `docs/` and the `.md` files at the root:
 
    ```sh
-   grep -rniE "ai-powered|ai powered|artificial intelligence|\bAI\b coach|wisdom ai|KI-gestützt|con IA|com IA" \
+   grep -rnE "\bAI\b|[Aa]rtificial intelligence|KI-gestützt|con IA|com IA" \
      index.html src --include=*.tsx --include=*.ts --include=*.json --include=*.html
    ```
 
    Known hits:
    - `index.html` lines 9 and 29, plus the title and any Twitter tags
    - `src/locales/en.json`, `es.json`, `de.json` and `pt.json` line 4 (`tagline`)
+   - `src/components/legal/ConsentModal.tsx` line 126: "Your AI workout companion is ready." Hardcoded, so it also needs a `t()` key. Found on the Lane E Day 1 smoke test.
    - `src/pages/UserGuide.tsx` lines 15, 27, 93–135 (the "Wisdom AI" section)
    - the unused `ProgressionRecommendations.tsx` and `SplitRecommender.tsx`: leave these alone. Lane D deletes unused files on Day 2. Just list them in your handoff.
 2. Replacement wording:
