@@ -74,6 +74,10 @@ Cloud agents can't reach Lincoln's Supabase dashboard, and usually can't run Doc
 
 ## Day 2: Migration 008, access-rule fixes (1.6)
 
+> **Carried over from Day 1 handoffs (added 2026-11-17 by the coordinator).** Do these too:
+> - Note for Gate 1 (Lincoln): migrations 001–006 were applied in the SQL Editor, so the CLI history is empty. **Run `supabase migration repair --status applied 001 … 006` before the first `supabase db push`.** The steps are in `docs/SUPABASE_MIGRATIONS.md`. DEBT-053.
+
+
 Write `008_policy_fixes.sql`, re-runnable, with a test file for each fix.
 
 1. **`circle_members` recursion.** The SELECT policy in `001:115-122` queries `circle_members` from inside its own policy, which Postgres rejects as infinite recursion.

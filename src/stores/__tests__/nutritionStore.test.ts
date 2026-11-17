@@ -89,7 +89,7 @@ describe('nutritionStore operations', () => {
         expect(useNutritionStore.getState().history['2026-02-19']).toBeUndefined();
     });
 
-    it('persists only the selected date', () => {
+    it('never writes nutrition data to localStorage', async () => {
         const store = useNutritionStore.getState();
 
         store.setProfile(
@@ -105,15 +105,10 @@ describe('nutritionStore operations', () => {
             { calories: 2200, protein: 150, carbs: 180, fats: 70 }
         );
         store.logMeal(buildMeal());
+        await new Promise((resolve) => setTimeout(resolve, 20));
 
-        const persisted = JSON.parse(window.localStorage.getItem('fitwizard-nutrition-storage') ?? '{"state":{}}');
-
-        expect(persisted.state.selectedDate).toBe('2026-02-19');
-        expect(persisted.state.profile).toBeUndefined();
-        expect(persisted.state.targets).toBeUndefined();
-        expect(persisted.state.history).toBeUndefined();
-        expect(persisted.state.customFoods).toBeUndefined();
-        expect(persisted.state.favorites).toBeUndefined();
-        expect(persisted.state.savedMeals).toBeUndefined();
+        // Since ADR 11 nutrition data is saved to device storage (IndexedDB /
+        // app files), never localStorage. Round trips: nutritionStore.persistence.test.ts.
+        expect(window.localStorage.getItem('fitwizard-nutrition-storage')).toBeNull();
     });
 });

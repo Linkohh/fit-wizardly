@@ -381,6 +381,9 @@
         "resume": "{{unfinished}} fortsetzen",
         "discard": "Verwerfen und dieses Training starten"
     },
+    "storage": {
+        "kept_on_device": "Abgemeldet. Deine Trainingsdaten bleiben auf diesem Gerät."
+    },
     "consent": {
         "welcome_description": "Dein Trainingsplaner ist bereit. Bevor wir beginnen, bestätige bitte diese Grundlagen."
     }

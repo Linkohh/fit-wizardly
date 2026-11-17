@@ -43,7 +43,18 @@ export function dateReviver(key: string, value: unknown): unknown;
 export function requestPersistentStorage(): Promise<boolean>;
 ```
 
-`src/lib/storage/clearLocalUserData.ts` (Lane E, Day 3):
+`src/lib/storage/clearLocalUserData.ts` (Lane E, Day 3; **merged with Day 3**). It covers plans, nutrition, measurements, readiness, achievements, custom exercises and exercise preferences (`fitwizard-preferences`). `USER_DATA_STORE_NAMES` lists them.
+
+```ts
+// src/lib/storage/hydration.ts (Day 3)
+/** Resolves once a persisted store has loaded. Await it before changing a store that was just loaded on demand. */
+export function waitForHydration(store: { persist: { hasHydrated(): boolean; onFinishHydration(fn: () => void): () => void } }, name: string, timeoutMs?: number): Promise<void>;
+// Settles on success OR failure (via hydrationTracking), with a safety timeout. `name` = the store's persist name.
+```
+
+`dateReviver` also restores `timestamp` (meal entries) since Day 3.
+
+Original specification:
 
 ```ts
 /** Erases every persisted user-data store from the device and resets those stores in memory.

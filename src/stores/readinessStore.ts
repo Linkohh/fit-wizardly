@@ -3,6 +3,40 @@ import { persist } from 'zustand/middleware';
 import { filterReadinessLogsByRange, type ReadinessDayRange } from '@/lib/readinessRange';
 import type { ReadinessEntry, ReadinessRating } from '@/types/readiness';
 import { useAchievementStore } from '@/stores/achievementStore';
+import { createUserDataStorage } from '@/lib/storage/appStorage';
+import { hydrationTracking } from '@/lib/storage/hydration';
+import { isFiniteNumber, isRecord, sanitizeList } from '@/lib/storage/sanitize';
+
+export const READINESS_STORE_NAME = 'readiness-storage';
+
+type PersistedReadinessState = { logs: ReadinessEntry[] };
+
+function isRating(value: unknown): value is ReadinessRating {
+    return value === 1 || value === 2 || value === 3 || value === 4 || value === 5;
+}
+
+/** Checks one saved readiness entry; malformed entries are dropped. */
+export function sanitizeReadinessEntry(value: unknown): ReadinessEntry | null {
+    if (
+        !isRecord(value) ||
+        typeof value.date !== 'string' ||
+        !isRating(value.sleepQuality) ||
+        !isRating(value.muscleSoreness) ||
+        !isRating(value.energyLevel) ||
+        !isRating(value.stressLevel) ||
+        !isFiniteNumber(value.overallScore)
+    ) {
+        return null;
+    }
+    return {
+        date: value.date,
+        sleepQuality: value.sleepQuality,
+        muscleSoreness: value.muscleSoreness,
+        energyLevel: value.energyLevel,
+        stressLevel: value.stressLevel,
+        overallScore: value.overallScore,
+    };
+}
 
 type ReadinessInput = {
     sleepQuality: ReadinessRating;
@@ -34,7 +68,7 @@ function countConsecutiveDays(logs: ReadinessEntry[]): number {
 }
 
 export const useReadinessStore = create<ReadinessState>()(
-    persist(
+    persist<ReadinessState, [], [], PersistedReadinessState>(
         (set, get) => ({
             logs: [],
 
@@ -83,7 +117,16 @@ export const useReadinessStore = create<ReadinessState>()(
             },
         }),
         {
-            name: 'readiness-storage',
+            name: READINESS_STORE_NAME,
+            version: 1,
+            storage: createUserDataStorage<PersistedReadinessState>(),
+            partialize: (state) => ({ logs: state.logs }),
+            migrate: (persistedState) => persistedState as PersistedReadinessState,
+            merge: (persistedState, currentState) => ({
+                ...currentState,
+                logs: sanitizeList(isRecord(persistedState) ? persistedState.logs : undefined, sanitizeReadinessEntry),
+            }),
+            ...hydrationTracking(READINESS_STORE_NAME),
         }
     )
 );

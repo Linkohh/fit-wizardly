@@ -22,13 +22,13 @@ All seven lanes run in parallel. There are no dependencies between them.
 
 | Lane | Day 1 | Day 2 | Day 3 |
 |---|---|---|---|
-| **A** | ⬜ 0.9 Fix `CLAUDE.md`; add stale-doc banners; handle `AGENTS.md` (D6) | ⬜ 0.9 Merge iOS docs; draft `docs/store/DATA_INVENTORY.md` | ⬜ Fold Wave 1 handoffs into the log and board; Gate 1 checklist |
-| **B** | ⬜ 0.1 AI claim (except `vite.config.ts`); 0.5 fake content | ⬜ 0.4 Language picker; `pt.json` duplicate key; Profile labels | ⬜ 3.6a Empty states (History, Analytics, Nutrition) |
-| **C** | ⬜ 0.2 part 1: routes, every nav entry point, flag tests | ⬜ 0.2 part 2: coach toggles, onboarding skip, `trainerStore`, badge filter | ⬜ 3.1 Sentry (`monitoring.ts`, `main.tsx`, `ErrorBoundary`, per-route boundaries, CSP) |
-| **D** | ⬜ 0.7 Icons, logo, PWA runtime caching, manifest text | ⬜ 0.8 knip cleanup, deletions, ESLint ignores | ⬜ 3.6b PDF export fixes |
-| **E** | ✅ 1.1 `appStorage`, `HydrationGate`, date reviver (trial lane; PR #45, `5984b86`) | 🔵 1.2 part 1: plan and measurement stores; 0.3 counters; circles gate (PR #46) | ⬜ 1.2 part 2: other stores, localStorage copy, `clearSensitiveStorage`, ADR 11 |
-| **F** | ⬜ Supabase CLI, local Postgres harness, naming check; 1.3 migration 007 and types | ⬜ 1.6 migration 008 and policy tests | ⬜ 1.5 part 1: `delete-account` function, cascade check, docs |
-| **H** | ⬜ 0.6 name; 2.5/2.6 native project fixes | ⬜ 2.5 self-hosted fonts and CSP; 2.3 `apiBase` and API hardening | ⬜ 2.1 Email-code sign-in |
+| **A** | ✅ PR #47 · 0.9 Fix `CLAUDE.md`; add stale-doc banners; handle `AGENTS.md` (D6) | ⬜ 0.9 Merge iOS docs; draft `docs/store/DATA_INVENTORY.md` | ⬜ Fold Wave 1 handoffs into the log and board; Gate 1 checklist |
+| **B** | ✅ PR #51 · 0.1 AI claim (except `vite.config.ts`); 0.5 fake content | ⬜ 0.4 Language picker; `pt.json` duplicate key; Profile labels | ⬜ 3.6a Empty states (History, Analytics, Nutrition) |
+| **C** | ✅ PR #49 · 0.2 part 1: routes, every nav entry point, flag tests | ⬜ 0.2 part 2: coach toggles, onboarding skip, `trainerStore`, badge filter | ⬜ 3.1 Sentry (`monitoring.ts`, `main.tsx`, `ErrorBoundary`, per-route boundaries, CSP) |
+| **D** | ✅ PR #52 · 0.7 Icons, logo, PWA runtime caching, manifest text | ⬜ 0.8 knip cleanup, deletions, ESLint ignores | ⬜ 3.6b PDF export fixes |
+| **E** | ✅ 1.1 `appStorage`, `HydrationGate`, date reviver (trial lane; PR #45, `5984b86`) | ✅ 1.2 part 1: plan and measurement stores; 0.3 counters; circles gate (PR #46, `803842e`) | ✅ 1.2 part 2: other stores, localStorage copy, `clearSensitiveStorage`, ADR 11 (PR #53) |
+| **F** | ✅ PR #50 · Supabase CLI, local Postgres harness, naming check; 1.3 migration 007 and types | ⬜ 1.6 migration 008 and policy tests | ⬜ 1.5 part 1: `delete-account` function, cascade check, docs |
+| **H** | ✅ PR #48 · 0.6 name; 2.5/2.6 native project fixes | ⬜ 2.5 self-hosted fonts and CSP; 2.3 `apiBase` and API hardening | ⬜ 2.1 Email-code sign-in |
 
 ### Gate 1 checklist (Lincoln, end of Day 3)
 - [ ] All Wave 1 PRs merged in merge order (F → E → C → H → B → D → A)
@@ -115,7 +115,7 @@ Full detail is in [`lanes/LANE-L.md`](lanes/LANE-L.md).
 | L2 | Production migrations | Gate 2 | ⬜ |
 | L7 | iPhone, Android phone, and a Mac with Xcode available | Day 8 | ⬜ |
 | L9 | Legal review of privacy policy and terms | Days 8–10 | ⬜ |
-| L12 | Review and merge PRs daily, in merge order | Daily | ⬜ |
+| L12 | Review and merge PRs daily, in merge order | Daily | 🟡 Wave 1 / Day 1 merged on Lincoln's instruction (#47–#53) |
 
 ## Open decisions
 

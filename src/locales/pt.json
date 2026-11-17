@@ -383,6 +383,9 @@
         "resume": "Retomar {{unfinished}}",
         "discard": "Descartar e começar este treino"
     },
+    "storage": {
+        "kept_on_device": "Sessão encerrada. Seus dados de treino continuam neste dispositivo."
+    },
     "consent": {
         "welcome_description": "Seu planejador de treinos está pronto. Antes de começar, confirme estes pontos básicos."
     }

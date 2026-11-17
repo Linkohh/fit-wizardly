@@ -58,10 +58,22 @@ export function registerHydration(name: string): void {
   }
 }
 
+const storeSettledListeners = new Map<string, Set<() => void>>();
+
+/** True once a store has finished loading, whether it succeeded or failed. */
+export function isStoreHydrated(name: string): boolean {
+  return hydrationState.get(name) === true;
+}
+
 /** Marks a registered store as hydrated (also registers it if needed). */
 export function markHydrated(name: string): void {
   hydrationState.set(name, true);
   emit();
+  const waiting = storeSettledListeners.get(name);
+  if (waiting) {
+    storeSettledListeners.delete(name);
+    for (const listener of waiting) listener();
+  }
 }
 
 /**
@@ -95,6 +107,7 @@ export function getHydrationSnapshot(): boolean {
 /** Test helper: clear every registration and timer. */
 export function resetHydrationForTests(): void {
   hydrationState.clear();
+  storeSettledListeners.clear();
   safetyValveOpen = false;
   if (safetyTimer) {
     clearTimeout(safetyTimer);
@@ -102,4 +115,59 @@ export function resetHydrationForTests(): void {
   }
   snapshot = computeSnapshot();
   for (const listener of listeners) listener();
+}
+
+interface PersistedStoreApi {
+  persist: {
+    hasHydrated: () => boolean;
+    onFinishHydration: (listener: () => void) => () => void;
+  };
+}
+
+/**
+ * Resolves once a persisted store has finished loading from device storage,
+ * whether it succeeded or failed. Use before changing (or resetting) a store
+ * that may have just been loaded on demand: changes made before loading
+ * finishes are overwritten by the saved copy.
+ *
+ * `name` is the store's persist name, tracked through hydrationTracking().
+ * It matters for failures: on a load error (for example damaged JSON)
+ * zustand never sets hasHydrated() or calls onFinishHydration, but the
+ * store's onRehydrateStorage callback still marks the name as settled here.
+ * A safety timeout means this can never wait forever.
+ */
+export function waitForHydration(
+  store: PersistedStoreApi,
+  name: string,
+  timeoutMs: number = HYDRATION_SAFETY_TIMEOUT_MS,
+): Promise<void> {
+  if (store.persist.hasHydrated() || isStoreHydrated(name)) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      unsubscribePersist();
+      storeSettledListeners.get(name)?.delete(finish);
+      resolve();
+    };
+
+    const unsubscribePersist = store.persist.onFinishHydration(finish);
+    const listeners = storeSettledListeners.get(name) ?? new Set<() => void>();
+    listeners.add(finish);
+    storeSettledListeners.set(name, listeners);
+    const timer = setTimeout(() => {
+      console.warn(`[FitWizard] "${name}" was still loading after ${timeoutMs} ms; continuing.`);
+      finish();
+    }, timeoutMs);
+
+    // It may have finished between the first check and the subscriptions.
+    if (store.persist.hasHydrated() || isStoreHydrated(name)) {
+      finish();
+    }
+  });
 }

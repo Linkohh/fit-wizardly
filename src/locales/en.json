@@ -816,6 +816,9 @@
         "resume": "Resume {{unfinished}}",
         "discard": "Discard it and start this workout"
     },
+    "storage": {
+        "kept_on_device": "Signed out. Your training data stays on this device."
+    },
     "consent": {
         "welcome_description": "Your workout planner is ready. Before we begin, confirm these basics."
     }

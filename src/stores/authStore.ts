@@ -7,19 +7,21 @@
 
 import { create } from 'zustand';
 import { toast } from 'sonner';
+import { translate } from '@/lib/translate';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Profile } from '@/types/supabase';
 import type { User, Session } from '@supabase/supabase-js';
 
 let authSubscription: { unsubscribe: () => void } | null = null;
 
+// Workout, nutrition and measurement data moved to device storage (ADR 11)
+// and is no longer cleared here: until cloud sync exists (Lane E Day 6),
+// clearing it on sign-out would permanently delete data that exists nowhere
+// else. Day 6 clears it after a successful sync via clearLocalUserData().
 const SENSITIVE_LOCAL_STORAGE_KEYS = [
     'fitwizard-trainer',
-    'fitwizard-plans',
     'fitwizard-onboarding',
     'fitwizard-wizard',
-    'fitwizard-nutrition-storage',
-    'measurements-storage',
     'fitwizard-wisdom',
 ];
 
@@ -67,6 +69,12 @@ function clearSensitiveStorage(): void {
     for (const key of SENSITIVE_SESSION_STORAGE_KEYS) {
         window.sessionStorage.removeItem(key);
     }
+
+    // Same id: signOut() and the SIGNED_OUT event both call this; show one toast.
+    toast.info(
+        translate('storage.kept_on_device', 'Signed out. Your training data stays on this device.'),
+        { id: 'fitwizard-data-kept-on-device' },
+    );
 }
 
 interface AuthState {

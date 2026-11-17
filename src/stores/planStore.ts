@@ -35,7 +35,7 @@ import {
   upsertPlanHistory,
 } from '@/lib/plans/planSyncService';
 import { createUserDataStorage } from '@/lib/storage/appStorage';
-import { hydrationTracking } from '@/lib/storage/hydration';
+import { hydrationTracking, waitForHydration } from '@/lib/storage/hydration';
 import { isFeatureEnabled } from '@/lib/featureFlags';
 import {
   MAX_PERSONAL_RECORDS,
@@ -74,6 +74,8 @@ async function recordWorkoutForAchievements(): Promise<void> {
       import('@/stores/achievementStore'),
       import('@/lib/achievements/announceBadges'),
     ]);
+    // Changes made before saved achievements finish loading would be overwritten.
+    await waitForHydration(useAchievementStore, 'fitwizard-achievements');
     const achievements = useAchievementStore.getState();
     const unlockedBadges = achievements.updateStreak();
     achievements.incrementWeeklyProgress();

@@ -687,5 +687,8 @@
         "body": "{{unfinished}} sigue en curso. Reanúdalo o descártalo y empieza {{requested}}.",
         "resume": "Reanudar {{unfinished}}",
         "discard": "Descartarlo y empezar este entrenamiento"
+    },
+    "storage": {
+        "kept_on_device": "Sesión cerrada. Tus datos de entrenamiento siguen en este dispositivo."
     }
 }

@@ -14,8 +14,9 @@ import { ReviewStep } from '@/components/wizard/steps/ReviewStep';
 import { useWizardStore } from '@/stores/wizardStore';
 import { usePlanStore } from '@/stores/planStore';
 import { generatePlanFromExercises } from '@/lib/planGenerator';
-import { useAchievementStore } from '@/stores/achievementStore';
+import { ACHIEVEMENTS_STORE_NAME, useAchievementStore } from '@/stores/achievementStore';
 import { announceNewBadges } from '@/lib/achievements/announceBadges';
+import { waitForHydration } from '@/lib/storage/hydration';
 import { loadExerciseDatabase, useExerciseDatabase } from '@/lib/exerciseRepository';
 import { useToast } from '@/hooks/use-toast';
 import { createFunnelTracker, trackWizardComplete, trackPlanGenerated } from '@/lib/analytics';
@@ -139,6 +140,7 @@ export default function WizardPage() {
       savePlanToHistory(plan);
 
       // Count the plan, and aim the weekly goal at the plan's training days.
+      await waitForHydration(useAchievementStore, ACHIEVEMENTS_STORE_NAME);
       const achievements = useAchievementStore.getState();
       announceNewBadges(achievements.incrementPlansGenerated());
       achievements.setWeeklyGoal(Math.max(1, plan.workoutDays.length || selections.daysPerWeek));

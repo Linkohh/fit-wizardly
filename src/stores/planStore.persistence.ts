@@ -1,5 +1,6 @@
 import type { PersonalRecord, Plan, WeightUnit, WorkoutLog } from '@/types/fitness';
 import type { ActiveWorkout } from '@/stores/planStore.types';
+import { isFiniteNumber, isRecord, sanitizeList, toValidDate } from '@/lib/storage/sanitize';
 
 /**
  * What the plan store saves on the device, and how saved data is checked
@@ -23,27 +24,6 @@ export interface PersistedPlanState {
   activeWorkout: ActiveWorkout | null;
   currentWeek: number;
   preferredWeightUnit: WeightUnit;
-}
-
-type UnknownRecord = Record<string, unknown>;
-
-function isRecord(value: unknown): value is UnknownRecord {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-function isFiniteNumber(value: unknown): value is number {
-  return typeof value === 'number' && Number.isFinite(value);
-}
-
-function toValidDate(value: unknown): Date | null {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value;
-  }
-  if (typeof value === 'string' || typeof value === 'number') {
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed;
-  }
-  return null;
 }
 
 export function sanitizePlan(value: unknown): Plan | null {
@@ -136,19 +116,6 @@ export function sanitizeActiveWorkout(value: unknown): ActiveWorkout | null {
     currentSetIndex: isFiniteNumber(value.currentSetIndex) ? value.currentSetIndex : 0,
     restTimerEndTime: isFiniteNumber(value.restTimerEndTime) ? value.restTimerEndTime : null,
   };
-}
-
-function sanitizeList<T>(value: unknown, sanitizeItem: (item: unknown) => T | null, max: number): T[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-  const items: T[] = [];
-  for (const item of value) {
-    const clean = sanitizeItem(item);
-    if (clean) items.push(clean);
-    if (items.length >= max) break;
-  }
-  return items;
 }
 
 /** Checks saved data read back from storage. Anything malformed is dropped. */

@@ -1,5 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { createUserDataStorage } from '@/lib/storage/appStorage';
+import { markHydrated, registerHydration } from '@/lib/storage/hydration';
+import { isFiniteNumber, isRecord, sanitizeStringList } from '@/lib/storage/sanitize';
 
 export type BadgeId =
   | 'first_plan'
@@ -318,6 +321,49 @@ interface AchievementState {
   getUnlockedBadges: () => Badge[];
 }
 
+export const ACHIEVEMENTS_STORE_NAME = 'fitwizard-achievements';
+
+type PersistedAchievementState = Pick<
+  AchievementState,
+  | 'totalPlansGenerated'
+  | 'currentStreak'
+  | 'longestStreak'
+  | 'lastActivityDate'
+  | 'weeklyGoal'
+  | 'weeklyProgress'
+  | 'weekStart'
+  | 'userName'
+  | 'unlockedBadges'
+  | 'newBadges'
+>;
+
+function sanitizeBadgeIds(value: unknown): BadgeId[] {
+  return [...new Set(sanitizeStringList(value))].filter((id): id is BadgeId => id in BADGES);
+}
+
+function nonNegativeInteger(value: unknown, fallback: number): number {
+  return isFiniteNumber(value) && value >= 0 ? Math.floor(value) : fallback;
+}
+
+/** Checks saved achievements read back from storage. Unknown badges are dropped. */
+export function sanitizeAchievementState(state: unknown): PersistedAchievementState {
+  const source = isRecord(state) ? state : {};
+  return {
+    totalPlansGenerated: nonNegativeInteger(source.totalPlansGenerated, 0),
+    currentStreak: nonNegativeInteger(source.currentStreak, 0),
+    longestStreak: nonNegativeInteger(source.longestStreak, 0),
+    lastActivityDate: typeof source.lastActivityDate === 'string' ? source.lastActivityDate : null,
+    weeklyGoal: Math.max(1, nonNegativeInteger(source.weeklyGoal, 5)),
+    weeklyProgress: nonNegativeInteger(source.weeklyProgress, 0),
+    weekStart: typeof source.weekStart === 'string' ? source.weekStart : null,
+    userName: typeof source.userName === 'string' ? source.userName : '',
+    unlockedBadges: sanitizeBadgeIds(source.unlockedBadges),
+    newBadges: sanitizeBadgeIds(source.newBadges),
+  };
+}
+
+registerHydration(ACHIEVEMENTS_STORE_NAME);
+
 /** Monday of the given date's week, as YYYY-MM-DD in local time. */
 export function getWeekStart(date: Date = new Date()): string {
   const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -329,7 +375,7 @@ export function getWeekStart(date: Date = new Date()): string {
 }
 
 export const useAchievementStore = create<AchievementState>()(
-  persist(
+  persist<AchievementState, [], [], PersistedAchievementState>(
     (set, get) => ({
       totalPlansGenerated: 0,
       currentStreak: 0,
@@ -475,10 +521,33 @@ export const useAchievementStore = create<AchievementState>()(
       },
     }),
     {
-      name: 'fitwizard-achievements',
-      // A new week starts at zero, even if the app wasn't opened when it began.
-      onRehydrateStorage: () => (state) => {
+      name: ACHIEVEMENTS_STORE_NAME,
+      version: 1,
+      storage: createUserDataStorage<PersistedAchievementState>(),
+      partialize: (state) => ({
+        totalPlansGenerated: state.totalPlansGenerated,
+        currentStreak: state.currentStreak,
+        longestStreak: state.longestStreak,
+        lastActivityDate: state.lastActivityDate,
+        weeklyGoal: state.weeklyGoal,
+        weeklyProgress: state.weeklyProgress,
+        weekStart: state.weekStart,
+        userName: state.userName,
+        unlockedBadges: state.unlockedBadges,
+        newBadges: state.newBadges,
+      }),
+      migrate: (persistedState) => persistedState as PersistedAchievementState,
+      merge: (persistedState, currentState) => ({
+        ...currentState,
+        ...sanitizeAchievementState(persistedState),
+      }),
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error(`[FitWizard] Could not load "${ACHIEVEMENTS_STORE_NAME}" from device storage.`, error);
+        }
+        // A new week starts at zero, even if the app wasn't opened when it began.
         state?.rollWeekIfNeeded();
+        markHydrated(ACHIEVEMENTS_STORE_NAME);
       },
     }
   )

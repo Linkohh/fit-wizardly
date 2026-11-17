@@ -175,12 +175,12 @@ export const appStorage: StateStorage = {
   },
 };
 
-const DATE_KEYS = new Set(['startedAt', 'completedAt', 'achievedAt', 'createdAt', 'updatedAt']);
+const DATE_KEYS = new Set(['startedAt', 'completedAt', 'achievedAt', 'createdAt', 'updatedAt', 'timestamp']);
 const ISO_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
 
 /**
  * JSON reviver that turns ISO timestamps back into Date objects for the known
- * date fields (startedAt, completedAt, achievedAt, createdAt, updatedAt).
+ * date fields (startedAt, completedAt, achievedAt, createdAt, updatedAt, timestamp).
  * Anything else, including invalid dates, is returned unchanged.
  */
 export function dateReviver(key: string, value: unknown): unknown {

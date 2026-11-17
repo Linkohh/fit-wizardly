@@ -99,6 +99,13 @@ Stores other than `authStore`'s sign-in area, sync code, `supabase/`, routing.
 
 ## Day 2: Self-hosted fonts, API base, API hardening (2.5, 2.3)
 
+> **Carried over from Day 1 handoffs (added 2026-11-17 by the coordinator).** Do these too:
+> - Lock Android to portrait as well, to match iOS (`android:screenOrientation="portrait"` on `MainActivity`, or the Capacitor setting). This is Lincoln's default answer to your Day 1 question.
+> - Add `"test:db": "bash supabase/tests/run.sh"` to the `package.json` `scripts` (request from Lane F Day 1).
+> - Native wger calls (`src/features/exercise-library/service.ts:267`) went straight to wger and relied on CapacitorHttp, which was removed on Day 1. Route them through `apiUrl('/api/proxy-wger?...')`. DEBT-054.
+> - `WgerAdapter.search` (`src/lib/services/api/exerciseApiAdapter.ts:26`) calls wger directly on the web too, bypassing the proxy's host allowlist. Pick one path and use it for both. DEBT-055.
+
+
 ### Steps
 1. **Fonts.**
    - `npm install @fontsource/outfit @fontsource/plus-jakarta-sans @fontsource/unbounded`.

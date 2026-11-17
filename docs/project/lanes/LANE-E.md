@@ -149,6 +149,11 @@ Routing, nav, native project files, `supabase/` (that's Lane F; you consume its 
 
 ## Day 4: Sync engine core (1.4 part 1)
 
+> **Carried over from Day 1 handoffs (added 2026-11-17 by the coordinator).** Do these too:
+> - The three "Wisdom AI" achievements in `achievementStore.ts` (around lines 214–236) can't be earned, because the Wisdom chat isn't shown, and their text mentions AI. Remove them from `BADGES`. The load check already drops unknown badge ids from saved data. DEBT-046.
+> - Type `planToRow()` in `src/lib/plans/supabasePlansRepo.ts` as `Database['public']['Tables']['plans']['Insert']`, so Lane F can make `plans.Row.deleted_at` required (Lane F Day 1). This can also wait until Day 7.
+
+
 Build `src/lib/sync/` exactly to contract #5.
 
 ### Steps
