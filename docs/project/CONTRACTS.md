@@ -48,7 +48,8 @@ export function requestPersistentStorage(): Promise<boolean>;
 ```ts
 // src/lib/storage/hydration.ts (Day 3)
 /** Resolves once a persisted store has loaded. Await it before changing a store that was just loaded on demand. */
-export function waitForHydration(store: { persist: { hasHydrated(): boolean; onFinishHydration(fn: () => void): () => void } }): Promise<void>;
+export function waitForHydration(store: { persist: { hasHydrated(): boolean; onFinishHydration(fn: () => void): () => void } }, name: string, timeoutMs?: number): Promise<void>;
+// Settles on success OR failure (via hydrationTracking), with a safety timeout. `name` = the store's persist name.
 ```
 
 `dateReviver` also restores `timestamp` (meal entries) since Day 3.

@@ -168,6 +168,10 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 - **Test status:**
   - Lane E Day 3 branch: 857/857 tests in 155 files (+15). Lint 0 errors / 4 warnings. Typecheck clean. Build passes. Bundle 344.0 KB gzip.
   - Verified in Chromium: plan and achievements are in IndexedDB after reload, and localStorage holds no user data.
+- **Review follow-up on PR #53:** the automated reviewer found two real issues, both fixed and tested.
+  - `waitForHydration` hung forever when a saved store failed to load, which could freeze plan generation. It now settles through the load tracker and has a safety timeout.
+  - `clearLocalUserData` could have its erase undone by a store that was still loading. It now waits for each store before resetting it; the test was confirmed to fail without the fix.
+  - 861/861 tests.
 - **Next steps:**
   1. Lincoln reviews and merges the seven PRs in merge order: #50 (F), #53 (E), #49 (C), #48 (H), #51 (B, after the translation fix), #52 (D), #47 (A).
   2. Start Day 2 for lanes A, B, C, D, F and H.

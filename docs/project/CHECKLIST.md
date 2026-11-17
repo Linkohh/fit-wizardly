@@ -27,7 +27,7 @@ All seven pass CI and have no review findings. Each merges cleanly on its own.
 | PR | Lane · Day | What it does | Notes |
 |---|---|---|---|
 | #50 | F · 1 | Supabase CLI, local Postgres test harness, migration 007 (cloud tables for logs, nutrition, measurements, readiness) | The lane says to run `supabase migration repair` before the first `db push` (see its handoff) |
-| #53 | E · 3 | Nutrition, readiness and achievements saved on the device; `clearLocalUserData`; sign-out keeps data; ADR 11 | Merge after #50 |
+| #53 | E · 3 | Nutrition, readiness and achievements saved on the device; `clearLocalUserData`; sign-out keeps data; ADR 11 | CI passed. The automated reviewer found 2 real bugs, both now fixed and tested: a damaged save could freeze plan generation, and erasing could be undone. 861/861 tests. Merge after #50 |
 | #49 | C · 1 | Circles and coach routes and links hidden behind the flags | Two of the lane's questions have defaults |
 | #48 | H · 1 | App name FitWizard; iOS and Android release config; privacy manifest | Native builds are unverified; they need your Mac and Android Studio |
 | #51 | B · 1 | AI claims removed; fake exercise badges and blocked meal images removed | **Conflicts with #53 in three translation files** (both added keys at the end). It's a simple keep-both fix, tested in the trial. Whichever merges second needs it |
