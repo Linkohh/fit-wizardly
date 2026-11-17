@@ -85,13 +85,14 @@ Stores, the sync engine, native files, `supabase/`, and docs other than your han
 2. **Do not delete**, even if `knip` lists them:
    - `src/lib/offlineSave.ts` and `src/lib/planMigrations.ts` (Lane E uses them)
    - anything under `src/components/circles/`, `src/components/trainer/`, `src/pages/Clients*`, `src/pages/Revenue.tsx`, `src/pages/TemplateLibrary.tsx` (flagged off, kept for later)
-   - `src/stores/*`
+   - `src/stores/*`, except `favorites-store.ts`, which is listed under the expected deletions
    - `src/components/nutrition/NutritionSkeleton.tsx` and `src/components/plan/PlanSkeleton.tsx` (Lane B uses them on Day 3)
    - anything another lane's Day 2 task names
 3. **Expected deletions**, if `knip` confirms they're unused:
    - pages and review cards: `src/pages/exercises/*`, the six `src/components/wizard/review/Review*Card.tsx`
    - components: `QuickActions`, `WeeklyProgressReview`, `ProgressionRecommendations`, `ReadinessModal`, `SplitRecommender`, `VolumeChart`, `InteractiveQuote`, `NavLink`, `ExercisesBrowser`, `ExerciseMuscleHighlight`, `MotivationalQuote`, `AnalyticsProvider`
    - libraries and hooks: `src/lib/fitnessUtils.ts`, `src/lib/performance.ts`, `src/lib/exerciseVersioning.ts`, `useNetworkStatus`
+   - stores: `src/stores/favorites-store.ts` (confirmed unused on Lane E Day 3; exercise favourites live in `preferencesStore`)
    - Delete each one's test too.
 4. Other removals:
    - `lovable-tagger`: remove it from `package.json` devDependencies and from `vite.config.ts` (its `componentTagger()` plugin)

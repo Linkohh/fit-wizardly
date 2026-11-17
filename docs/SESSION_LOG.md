@@ -146,6 +146,33 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-17 — PR #46 Merged; Wave 1 Lanes Started in Parallel; Lane E Day 3 (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, restarted from `preview_b` @ `803842e`)
+
+- **What was done:**
+  - Merged PR #46 (Lane E Day 2) on Lincoln's instruction, after CI passed on the head commit `1385ceb`.
+  - **Started Wave 1 / Day 1 for lanes A, B, C, D, F and H** as six parallel cloud agent sessions, which this session coordinates. Each one finished and opened a PR: #47 (A), #48 (H), #49 (C), #50 (F), #51 (B), #52 (D). All six pass CI and have no review findings. Their queued task cards were withdrawn so no lane runs twice.
+  - Ran **Lane E Day 3**:
+    - Nutrition, readiness check-ins, achievements and custom exercises are now saved on the device.
+    - Added `clearLocalUserData()`, `waitForHydration()` and a `translate()` helper.
+    - Sign-out now keeps training data on the device, with a notice, until cloud sync exists.
+    - Wrote ADR 11 in `docs/DECISIONS.md`.
+    - Details are in `docs/project/handoffs/2026-11-17-lane-e-day-3.md`.
+  - **Trial integration:**
+    - In a throwaway local branch, merged the Lane E Day 3 work plus all six lane PRs in the planned order.
+    - The only conflict was Lane B in `en/de/pt.json` (end-of-file appends; resolved by keeping both, with no duplicate keys).
+    - The combined code passes 887/887 tests, lint, typecheck and build.
+    - Checked in a browser: no AI wording, Circles hidden, `/circles`, `/clients` and `/revenue` return 404, WebP logo, `public/` 4.1 MB (was 11 MB), no errors.
+- **Found:** `favorites-store.ts` is unused (exercise favourites live in `preferencesStore`), so it was left unchanged and added to Lane D's deletion list. `clearLocalUserData` covers `fitwizard-preferences` instead.
+- **Process note:** I used the `gh` CLI once for read-only PR and check status. This environment allows `gh` only for search, so I switched back to the GitHub MCP tools.
+- **New issues found:** DEBT-044 (LOW), DEBT-045 (MEDIUM; see Known Issues).
+- **Test status:**
+  - Lane E Day 3 branch: 857/857 tests in 155 files (+15). Lint 0 errors / 4 warnings. Typecheck clean. Build passes. Bundle 344.0 KB gzip.
+  - Verified in Chromium: plan and achievements are in IndexedDB after reload, and localStorage holds no user data.
+- **Next steps:**
+  1. Lincoln reviews and merges the seven PRs in merge order: F, E, C, H, B (after the translation fix), D, A.
+  2. Start Day 2 for lanes A, B, C, D, F and H.
+  3. Gate 1 after Day 3.
+
 ### 2026-11-17 — PR #45 Merged; Lane E Day 2: Plans, Workouts and Measurements Survive Restarts (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, restarted from `preview_b` @ `5984b86`)
 
 - **What was done:**
@@ -689,6 +716,8 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-041 | `pt.json` has a duplicate `"wizard"` key, and JSON tools silently drop the first block | `src/locales/pt.json` | Merge by hand (Lane B Day 2). Never rewrite locale files with a parser. |
 | DEBT-042 | `BadgeUnlockModal` is never mounted; badges are now shown as toasts | `src/components/motivation/BadgeUnlockModal.tsx` | Candidate for Lane D's dead-code removal. |
 | DEBT-043 | The wizard header says "Coach-built intake" / "Coach intake" while the coach portal is off | `src/pages/Wizard.tsx` and the wizard header | Wording only; Lane B could reword it on Day 4. |
+| DEBT-044 | `favorites-store.ts` is unused; exercise favourites live in `preferencesStore` | `src/stores/favorites-store.ts` | Delete in Lane D's dead-code pass (Day 2). |
+| DEBT-045 | On a shared device, a signed-out account's training data stays visible until cloud sync ships | `src/stores/authStore.ts` | Deliberate (the alternative is losing data). Lane E Day 6 clears device data after a successful sync. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
 | DEBT-025 | Enter on a focused muscle can advance the wizard after selecting it | `src/pages/Wizard.tsx` | The existing window-level shortcut handles Enter after the focused SVG control has already handled it. |
