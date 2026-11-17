@@ -198,6 +198,26 @@ describe('clearLocalUserData', () => {
     expect(usePlanStore.getState().currentWeek).toBe(1);
   });
 
+  it('erases a store that had not been opened yet, without its saved copy coming back', async () => {
+    // Save check-ins, then simulate a fresh start where nothing has opened the readiness store.
+    let stores = await startApp();
+    stores.readiness.getState().logReadiness({ sleepQuality: 4, muscleSoreness: 2, energyLevel: 4, stressLevel: 2 });
+    await waitForSaved('readiness-storage', 'sleepQuality');
+    vi.resetModules();
+
+    const { clearLocalUserData } = await import('@/lib/storage/clearLocalUserData');
+    await clearLocalUserData();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    const { useReadinessStore } = await import('@/stores/readinessStore');
+    expect(useReadinessStore.getState().logs).toEqual([]);
+    expect(await savedValue('readiness-storage')).toBeNull();
+
+    // And after the next app start it is still gone.
+    stores = await startApp();
+    expect(stores.readiness.getState().logs).toEqual([]);
+  });
+
   it('lists every store that saves user data', async () => {
     const { USER_DATA_STORE_NAMES } = await import('@/lib/storage/clearLocalUserData');
     expect([...USER_DATA_STORE_NAMES].sort()).toEqual([...STORE_NAMES, 'fitwizard-preferences'].sort());

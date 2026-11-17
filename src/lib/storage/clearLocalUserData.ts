@@ -1,4 +1,5 @@
 import { migratingAppStorage } from '@/lib/storage/appStorage';
+import { waitForHydration } from '@/lib/storage/hydration';
 
 /**
  * Every user-data store kept on the device (ADR 11). Keep this list in sync
@@ -21,6 +22,10 @@ export const USER_DATA_STORE_NAMES: readonly string[] = USER_DATA_STORES.map((st
 interface ResettableStore {
   getInitialState: () => object;
   setState: (state: object, replace: true) => void;
+  persist: {
+    hasHydrated: () => boolean;
+    onFinishHydration: (listener: () => void) => () => void;
+  };
 }
 
 /**
@@ -33,6 +38,9 @@ export async function clearLocalUserData(): Promise<void> {
   for (const { name, load } of USER_DATA_STORES) {
     try {
       const store = (await load()) as unknown as ResettableStore;
+      // A store loaded just now may still be reading its saved copy; if we
+      // reset before that finishes, the read merges the old data back in.
+      await waitForHydration(store, name);
       // Reset first: the persist write it triggers is queued before the removal below.
       store.setState(store.getInitialState(), true);
     } catch (error) {

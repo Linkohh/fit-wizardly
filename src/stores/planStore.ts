@@ -75,7 +75,7 @@ async function recordWorkoutForAchievements(): Promise<void> {
       import('@/lib/achievements/announceBadges'),
     ]);
     // Changes made before saved achievements finish loading would be overwritten.
-    await waitForHydration(useAchievementStore);
+    await waitForHydration(useAchievementStore, 'fitwizard-achievements');
     const achievements = useAchievementStore.getState();
     const unlockedBadges = achievements.updateStreak();
     achievements.incrementWeeklyProgress();
