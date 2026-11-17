@@ -51,12 +51,21 @@ export function requestPersistentStorage(): Promise<boolean>;
 export async function clearLocalUserData(): Promise<void>;
 ```
 
-`src/components/HydrationGate.tsx`:
+Hydration (merged on Lane E Day 1):
 
 ```ts
-export function useStoresHydrated(): boolean;   // true once every persisted store has rehydrated
-export function HydrationGate(props: { children: React.ReactNode }): JSX.Element; // shows LoadingScreen until hydrated
+// src/hooks/useStoresHydrated.ts
+export function useStoresHydrated(): boolean;   // true once every registered store has rehydrated, or after a 3 s safety timeout
+
+// src/components/HydrationGate.tsx
+export function HydrationGate(props: { children: React.ReactNode }): JSX.Element; // shows LoadingScreen until hydrated; gates the first render only
+
+// src/lib/storage/hydration.ts — how a persisted store takes part
+export function hydrationTracking(name: string): { onRehydrateStorage: () => (state: unknown, error?: unknown) => void };
+// Usage: persist(creator, { name, storage: createJSONStorage(() => appStorage, { reviver: dateReviver }), ...hydrationTracking(name) })
 ```
+
+> **Change on Lane E Day 1:** the hook moved from `HydrationGate.tsx` to `src/hooks/useStoresHydrated.ts`. Exporting a hook from a component file breaks React fast refresh, which the lint rule `react-refresh/only-export-components` flags. Nothing used the old location.
 
 - `dateReviver` turns ISO strings back into `Date` objects for the keys `startedAt`, `completedAt`, `achievedAt`, `createdAt` and `updatedAt`.
 - Persisted store keys keep the existing `fitwizard-*` names.

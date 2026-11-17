@@ -12,7 +12,7 @@ The AI lanes can't do these tasks. They need your accounts, your dashboards, you
 
 ## Day 1 (start early: these involve waiting)
 - [ ] **D1–D6** Answer the open decisions in `BOARD.md`. Each has a default that applies if you don't answer by the day it's needed.
-- [ ] **L4 Developer accounts.**
+- [ ] **L4 Developer accounts.** ⏸ *Deferred by Lincoln on 2026-11-17 until store work is near. Gate 2's store uploads and the 14-day Play test can't start until enrolment is approved, so start it at least a week before Gate 2.*
   - Enrol in the Apple Developer Program and create a Google Play Console developer account. **Check the current fees on each site.** Apple identity verification can take several days.
   - Once approved, create the app records with bundle id `com.fitwizardly.app` and app name FitWizard.
   - On Google Play, read the current testing requirements for new personal accounts. At the time of writing that's a closed test with **12+ testers for 14 days** before production; verify it.

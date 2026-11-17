@@ -146,6 +146,33 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-17 — PR #44 Merged; Lane E Day 1 Device Storage (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, restarted from `preview_b` @ `79b6ebb`)
+
+- **What was done:**
+  - On Lincoln's instruction, merged PR #44 (Day 0) into `preview_b` as `79b6ebb`, after the CI `test` job passed, the Vercel preview deployed, and the automated code review reported no findings.
+  - Ran **Lane E Day 1** as a trial lane: the device storage layer (`src/lib/storage/appStorage.ts`), the hydration registry (`src/lib/storage/hydration.ts`), `useStoresHydrated` and `HydrationGate`, with `<App />` wrapped in `main.tsx`.
+  - Details are in `docs/project/handoffs/2026-11-17-lane-e-day-1.md`.
+- **Decisions recorded from Lincoln:**
+  - L4 (Apple and Google enrolment) is deferred until store work is near. Effect: it delays Gate 2's store uploads and the 14-day Play test.
+  - D1–D6 acknowledged: each default applies unless he changes it.
+  - Lane E runs first as a trial; the other lanes wait for its review.
+- **Contract change:** `useStoresHydrated` moved to `src/hooks/useStoresHydrated.ts`. Exporting it from the component file broke fast refresh, which the `react-refresh/only-export-components` lint rule flags. `CONTRACTS.md` is updated.
+- **Plan corrections:**
+  - The first-run consent screen hardcodes "Your AI workout companion is ready." (`ConsentModal.tsx:126`), and Lane B's search pattern would have missed it. Added to Lane B's brief and ownership; the Lane B task card was replaced.
+  - The Lane E task card was withdrawn because the work ran in this session.
+- **New issues found:** DEBT-039, DEBT-040 (LOW; see Known Issues).
+- **Test status:**
+  - 817 tests across 151 files pass (795/149 before, plus 22 new).
+  - Lint: 0 errors and the 4 pre-existing warnings. Typecheck clean. Build passes.
+  - Initial bundle 342.4 → 342.7 KB gzipped.
+  - Production build smoke-tested in Chromium: it renders, IndexedDB is available, and there are no console errors.
+- **Legal/compliance notes:** no user data moves yet. From Lane E Day 2, user data is stored in IndexedDB (`fitwizard` database) on the web and in app files on native; Lane A adds this to the data inventory.
+- **Not checked:** native storage on a real device; Safari private mode.
+- **Next steps:**
+  1. Lincoln reviews and merges the Lane E Day 1 PR (the trial).
+  2. If the trial looks right, start the other Wave 1 lanes. **Lane B must start after this PR merges**, because its brief changed.
+  3. Lane E Day 2: persist the plan and measurement stores, and wire up the achievement counters.
+
 ### 2026-11-17 — Launch Analysis, README Rewrite, Parallel Launch Project (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, from `preview_b` @ `85d5cbd`)
 
 - **What was done:**
@@ -627,6 +654,8 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-023 | Deep-layer artwork on front and back is a first pass; teres minor and plantaris are thin, and deep shapes overlap each other | `src/features/mcl/data/muscles.ts` | Checked by position tests (`deepAnatomy.test.ts`), not by an anatomist. |
 | DEBT-024 | Muscle heads (pec clavicular/sternal, triceps long/lateral/medial, biceps femoris short) share the parent's shape; the ten new deep muscles are not on the side view; internal oblique is not drawn | `src/features/mcl/data/taxonomy/`, `data/muscles.ts` | Searchable today. Separate shapes would change ids saved workouts use. |
 | DEBT-026 | Touch preview and the phone flow layout are not device-verified; a touch starting on a muscle does not scroll the page, which may feel sticky on small screens | `svg/useTouchMusclePreview.ts`, `MuscleSelector.tsx`, `AnatomyPanel.tsx` | Unit-tested and browser-tested with simulated touch (2026-11-15). Check on a physical iPhone and Android phone, and with VoiceOver. |
+| DEBT-039 | First-run consent screen hardcodes "Your AI workout companion is ready." | `src/components/legal/ConsentModal.tsx:126` | Assigned to Lane B, Day 1 (roadmap 0.1). |
+| DEBT-040 | Consent screen says "My data is stored locally on this device"; this becomes inaccurate once Wave 2 sync ships | `src/components/legal/ConsentModal.tsx` | Reword in Lane C Day 5 and Lane A Day 4. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
 | DEBT-025 | Enter on a focused muscle can advance the wizard after selecting it | `src/pages/Wizard.tsx` | The existing window-level shortcut handles Enter after the focused SVG control has already handled it. |

@@ -79,7 +79,7 @@ You may edit **only** files your lane owns in the current wave, plus the listed 
 | `src/pages/Legal.tsx`, `README.md`, `CLAUDE.md`, `docs/**` (except `DECISIONS.md`) | A. Exception: B edits AI wording in `Legal.tsx` on Day 1 | A | A |
 | `docs/DECISIONS.md` | Append only (E adds ADR 11) | Append only (H adds ADR 12) | Append only |
 | `src/lib/dataExport.ts` | — | F | — |
-| `src/components/legal/ConsentModal.tsx` | — | C | — |
+| `src/components/legal/ConsentModal.tsx` | B: AI wording on line 126 only (Day 1) | C | — |
 | `src/lib/pdfExport.ts` | D (Day 3) | — | — |
 | `src/components/logging/*` | D: `SetLogger.tsx` touch targets (Wave 2) | D: `SetLogger.tsx`. H: `RestTimer.tsx` and `WorkoutSummary.tsx` share block | J1 |
 | `src/features/mcl/*` | — | D: accessibility items | J2 |
