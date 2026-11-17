@@ -555,7 +555,7 @@ export function Header() {
               width="64"
               height="64"
               className="h-full w-full object-contain scale-[1.22] origin-center"
-              src="/lovable-uploads/85daa486-f2ec-4130-b122-65b217aecb1c.png"
+              src="/brand/logo-header.webp"
             />
           </motion.div>
           {isWizardRoute ? (
