@@ -19,3 +19,23 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# --- Capacitor ---------------------------------------------------------------
+# Capacitor finds plugins and their @PluginMethod methods by reflection, and the
+# WebView calls into the JS bridge. Keep them so R8 doesn't strip or rename them.
+-keep public class * extends com.getcapacitor.Plugin { *; }
+-keep @com.getcapacitor.annotation.CapacitorPlugin public class * {
+    @com.getcapacitor.annotation.PermissionCallback <methods>;
+    @com.getcapacitor.annotation.ActivityCallback <methods>;
+    @com.getcapacitor.annotation.Permission <methods>;
+    @com.getcapacitor.PluginMethod public <methods>;
+}
+-keep class com.getcapacitor.** { *; }
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+-keepattributes *Annotation*, Signature, InnerClasses, EnclosingMethod
+
+# Cordova plugin compatibility layer (capacitor-cordova-android-plugins)
+-keep class org.apache.cordova.** { *; }
+-keep public class * extends org.apache.cordova.CordovaPlugin

@@ -1,5 +1,5 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "fitwizard",
   "private": true,
   "version": "1.0.0",
   "packageManager": "npm@11.12.1",
@@ -26,7 +26,10 @@
     "ios:live": "node scripts/dev-ios-live.mjs",
     "ios:live:cap": "npx cap run ios -l --host=localhost --port=8080",
     "ios:open": "npx cap open ios",
-    "ios:sync": "npx cap sync ios"
+    "ios:sync": "npx cap sync ios",
+    "android:sync": "npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:run": "npx cap run android"
   },
   "devDependencies": {
     "@capacitor/android": "^8.3.1",
