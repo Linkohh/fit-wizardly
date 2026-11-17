@@ -1,4 +1,4 @@
-import { Utensils, Flame, Coffee, Moon, Sun, Star } from "lucide-react";
+import { Utensils, Flame, Coffee, Moon, Sun, Star, Apple, type LucideIcon } from "lucide-react";
 import { MealRecommendation, MacroGoal } from "@/types/nutrition";
 import { useNutritionStore } from "@/stores/nutritionStore";
 import { cn } from "@/lib/utils";
@@ -8,33 +8,40 @@ interface MealSuggestionsProps {
     isWorkoutDay: boolean;
 }
 
-// PREMIUM MOCK DATA with Images (Fallback)
+// Sample meal ideas shown alongside the user's favourites
 const SAMPLE_MEALS: MealRecommendation[] = [
     {
-        id: '1', name: 'Power Quinoa Bowl', calories: 550, protein: 45, carbs: 50, fats: 15, category: 'maintain', tags: ['High Protein', 'Lunch'], isWorkoutMeal: true,
-        imageUrl: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=2680&auto=format&fit=crop"
+        id: '1', name: 'Power Quinoa Bowl', calories: 550, protein: 45, carbs: 50, fats: 15, category: 'maintain', tags: ['High Protein', 'Lunch'], isWorkoutMeal: true
     },
     {
-        id: '2', name: 'Egg White Delight', calories: 350, protein: 30, carbs: 10, fats: 12, category: 'cut', tags: ['Low Carb', 'Breakfast'], isWorkoutMeal: false,
-        imageUrl: "https://images.unsplash.com/photo-1482049016688-2d3e1b311543?q=80&w=2510&auto=format&fit=crop"
+        id: '2', name: 'Egg White Delight', calories: 350, protein: 30, carbs: 10, fats: 12, category: 'cut', tags: ['Low Carb', 'Breakfast'], isWorkoutMeal: false
     },
     {
-        id: '3', name: 'Salmon Supreme', calories: 700, protein: 40, carbs: 60, fats: 25, category: 'bulk', tags: ['Omega-3', 'Dinner'], isWorkoutMeal: true,
-        imageUrl: "https://images.unsplash.com/photo-1467003909585-2f8a7270028d?q=80&w=2574&auto=format&fit=crop"
+        id: '3', name: 'Salmon Supreme', calories: 700, protein: 40, carbs: 60, fats: 25, category: 'bulk', tags: ['Omega-3', 'Dinner'], isWorkoutMeal: true
     },
     {
-        id: '4', name: 'Berry Parfait', calories: 300, protein: 25, carbs: 35, fats: 5, category: 'maintain', tags: ['Snack', 'Quick'], isWorkoutMeal: false,
-        imageUrl: "https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=2574&auto=format&fit=crop"
+        id: '4', name: 'Berry Parfait', calories: 300, protein: 25, carbs: 35, fats: 5, category: 'maintain', tags: ['Snack', 'Quick'], isWorkoutMeal: false
     },
     {
-        id: '5', name: 'Pro-Oats & Berries', calories: 450, protein: 30, carbs: 55, fats: 8, category: 'bulk', tags: ['Breakfast', 'Pre-Workout'], isWorkoutMeal: true,
-        imageUrl: "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?q=80&w=2676&auto=format&fit=crop"
+        id: '5', name: 'Pro-Oats & Berries', calories: 450, protein: 30, carbs: 55, fats: 8, category: 'bulk', tags: ['Breakfast', 'Pre-Workout'], isWorkoutMeal: true
     },
     {
-        id: '6', name: 'Keto Tuna Salad', calories: 400, protein: 40, carbs: 8, fats: 20, category: 'cut', tags: ['Keto Friendly', 'Lunch'], isWorkoutMeal: false,
-        imageUrl: "https://images.unsplash.com/photo-1540420773420-3366772f4999?q=80&w=2584&auto=format&fit=crop"
+        id: '6', name: 'Keto Tuna Salad', calories: 400, protein: 40, carbs: 8, fats: 20, category: 'cut', tags: ['Keto Friendly', 'Lunch'], isWorkoutMeal: false
     },
 ];
+
+// One icon per meal type, so cards need no external images (the production CSP blocks them).
+const MEAL_TYPE_ICONS: ReadonlyArray<[tag: string, icon: LucideIcon]> = [
+    ['Breakfast', Coffee],
+    ['Lunch', Sun],
+    ['Dinner', Moon],
+    ['Snack', Apple],
+];
+
+function getMealTypeIcon(tags: readonly string[]): LucideIcon {
+    const match = MEAL_TYPE_ICONS.find(([tag]) => tags.includes(tag));
+    return match ? match[1] : Utensils;
+}
 
 export function MealSuggestions({ goal, isWorkoutDay }: MealSuggestionsProps) {
     const { favorites } = useNutritionStore();
@@ -59,8 +66,7 @@ export function MealSuggestions({ goal, isWorkoutDay }: MealSuggestionsProps) {
         fats: fav.fats,
         category: 'maintain', // Generic
         tags: ['Favorite'],
-        isWorkoutMeal: false,
-        imageUrl: fav.imageUrl || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=2670&auto=format&fit=crop" // Generic food fallback
+        isWorkoutMeal: false
     }));
 
     const allMeals = [...favoriteSuggestions, ...SAMPLE_MEALS];
@@ -95,14 +101,15 @@ export function MealSuggestions({ goal, isWorkoutDay }: MealSuggestionsProps) {
             </div>
 
             <div className="flex gap-4 overflow-x-auto pb-4 px-1 snap-x scrollbar-purple">
-                {filteredMeals.map(meal => (
+                {filteredMeals.map(meal => {
+                    const MealIcon = getMealTypeIcon(meal.tags);
+                    return (
                     <div key={meal.id} className="min-w-[280px] snap-center glass-card hover:translate-y-[-4px] transition-all rounded-3xl overflow-hidden group border border-white/5 cursor-pointer">
-                        {/* Image Header */}
-                        <div className="h-32 w-full relative">
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10" />
-                            <img src={meal.imageUrl} alt={meal.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                            <div className="absolute bottom-2 left-3 z-20">
-                                <div className="font-bold text-white text-lg leading-tight">{meal.name}</div>
+                        {/* Icon tile header (no network images) */}
+                        <div className="h-32 w-full relative flex items-center justify-center bg-primary/10" data-testid="meal-icon-tile">
+                            <MealIcon className="w-10 h-10 text-primary opacity-80 group-hover:scale-110 transition-transform duration-700" aria-hidden="true" />
+                            <div className="absolute bottom-2 left-3">
+                                <div className="font-bold text-foreground text-lg leading-tight">{meal.name}</div>
                             </div>
                         </div>
 
@@ -123,7 +130,8 @@ export function MealSuggestions({ goal, isWorkoutDay }: MealSuggestionsProps) {
                             </div>
                         </div>
                     </div>
-                ))}
+                    );
+                })}
             </div>
         </div>
     );

@@ -1,7 +1,7 @@
 {
     "app": {
         "name": "FitWizard",
-        "tagline": "Tu Compañero de Entrenamiento con IA"
+        "tagline": "Planes de entrenamiento basados en la ciencia, hechos para ti."
     },
     "nav": {
         "home": "Inicio",
@@ -473,6 +473,7 @@
         "confirm": "Confirmar"
     },
     "consent": {
+        "welcome_description": "Tu planificador de entrenamiento está listo. Antes de empezar, confirma estos puntos básicos.",
         "medical": "Entiendo que esto <strong>no es consejo médico</strong>.",
         "consult": "Consultaré a un médico antes de iniciar nuevos ejercicios.",
         "local": "Mis datos se almacenan <strong>localmente</strong> en este dispositivo."

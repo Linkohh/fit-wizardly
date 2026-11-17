@@ -1,7 +1,7 @@
 {
     "app": {
         "name": "FitWizard",
-        "tagline": "Seu Companheiro de Treino com IA"
+        "tagline": "Planos de treino baseados em ciência, feitos para você."
     },
     "nav": {
         "home": "Início",
@@ -382,5 +382,8 @@
         "body": "{{unfinished}} ainda está em andamento. Retome-o ou descarte-o e comece {{requested}}.",
         "resume": "Retomar {{unfinished}}",
         "discard": "Descartar e começar este treino"
+    },
+    "consent": {
+        "welcome_description": "Seu planejador de treinos está pronto. Antes de começar, confirme estes pontos básicos."
     }
 }
