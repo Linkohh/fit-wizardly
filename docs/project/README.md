@@ -4,6 +4,7 @@ This folder turns [`docs/LAUNCH_ROADMAP.md`](../LAUNCH_ROADMAP.md) into a schedu
 
 | File | Purpose |
 |---|---|
+| [`CHECKLIST.md`](CHECKLIST.md) | The running quick view: done, in progress, next up, remaining |
 | [`BOARD.md`](BOARD.md) | Day-by-day schedule, task checkboxes, gate checklists. Only Lane A edits it |
 | [`CONTRACTS.md`](CONTRACTS.md) | Interfaces shared between lanes. Code against these, even before the provider merges |
 | [`lanes/`](lanes/) | One brief per lane, with step-by-step tasks and a definition of done for each day |
@@ -90,7 +91,7 @@ You may edit **only** files your lane owns in the current wave, plus the listed 
 ## Conflict rules
 
 1. **Lockfile:** never hand-merge `package-lock.json`. On conflict, take `preview_b`'s version, then run `npm install <your packages>` again and commit.
-2. **Locales:** add keys only inside your own namespace object (for example `featureFlags.*`, `sync.*`). On conflict, keep both sides.
+2. **Locales:** add keys only inside your own namespace object (for example `featureFlags.*`, `sync.*`). On conflict, keep both sides. **Never rewrite a locale file through a JSON parser** (Python `json`, `JSON.parse` + `JSON.stringify`). `pt.json` has a duplicate `"wizard"` key, and parsers silently drop the first copy. Edit the text directly and check that `git diff` shows only your lines.
 3. **`.env.example`:** add variables in your own labelled block. On conflict, keep both.
 4. **Rebase** onto `origin/preview_b` just before opening the PR, and again if Lincoln asks after an earlier merge.
 5. **One PR per lane per day.** Title: `[Lane X · Day N] short summary`. Link the handoff note in the body.

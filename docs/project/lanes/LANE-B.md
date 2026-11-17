@@ -77,7 +77,7 @@
 2. In `getInitialLanguage()`, if the stored or browser language is supported but not launch-ready, fall back to `en`. This makes German and Portuguese users see English rather than a half-translated UI. Add a test.
 3. In `Profile.tsx`, replace the hardcoded `<SelectItem>` list (around lines 215–222) with `LAUNCH_LANGUAGES.map(...)`. Call `changeLanguage(val)` from `@/lib/i18n` instead of `i18n.changeLanguage`, because only the helper saves the choice. Remove French.
 4. Move the visible strings in that Profile block (Language, Units, Theme, the labels and descriptions) into `profile.*` keys in `en.json` and `es.json`.
-5. `pt.json` defines `"wizard"` twice (lines 13 and 154). Merge the two objects into one, keeping every key, then check that `localeParity.test.ts` still passes.
+5. `pt.json` defines `"wizard"` twice (lines 13 and 154). Merge the two objects into one **by editing the text**, keeping every key from both, then check that `localeParity.test.ts` still passes. **Do not use a JSON parser for this.** It keeps only the second copy and silently drops the first, which happened once already and was reverted (see the Lane E Day 2 handoff).
 6. Delete `src/components/LanguageSelector.tsx` (unused), plus any test or barrel export for it.
 7. Add a test, `src/pages/Profile.language.test.tsx`: change to Spanish → `localStorage['fitwizard-language'] === 'es'` → re-render → the UI is in Spanish.
 

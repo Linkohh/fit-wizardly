@@ -65,6 +65,15 @@ export function hydrationTracking(name: string): { onRehydrateStorage: () => (st
 // Usage: persist(creator, { name, storage: createJSONStorage(() => appStorage, { reviver: dateReviver }), ...hydrationTracking(name) })
 ```
 
+Storage helper (added on Lane E Day 2):
+
+```ts
+// src/lib/storage/appStorage.ts
+/** The storage every user-data store passes to persist(): device storage, dates restored,
+ *  and a one-time move of any old localStorage value with the same name. */
+export function createUserDataStorage<S>(): PersistStorage<S> | undefined;
+```
+
 > **Change on Lane E Day 1:** the hook moved from `HydrationGate.tsx` to `src/hooks/useStoresHydrated.ts`. Exporting a hook from a component file breaks React fast refresh, which the lint rule `react-refresh/only-export-components` flags. Nothing used the old location.
 
 - `dateReviver` turns ISO strings back into `Date` objects for the keys `startedAt`, `completedAt`, `achievedAt`, `createdAt` and `updatedAt`.
