@@ -10,7 +10,7 @@ export default function UserGuide() {
         <main className="container max-w-4xl mx-auto px-4 py-12">
             <BackButton className="mb-4" />
             <div className="text-center mb-12">
-                <h1 className="text-4xl font-bold mb-4">How to Use FitWizardly</h1>
+                <h1 className="text-4xl font-bold mb-4">How to Use FitWizard</h1>
                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                     Everything you need to know about planning, logging and tracking your training.
                 </p>
@@ -61,7 +61,7 @@ export default function UserGuide() {
                                         </div>
                                         <p className="font-medium">Automatic PR Tracking</p>
                                         <p className="text-sm text-muted-foreground mt-1">
-                                            FitWizardly automatically detects when you hit a new Personal Record for volume or 1RM.
+                                            FitWizard automatically detects when you hit a new Personal Record for volume or 1RM.
                                         </p>
                                     </div>
                                 </div>

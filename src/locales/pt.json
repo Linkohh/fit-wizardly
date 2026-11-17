@@ -10,23 +10,6 @@
         "history": "Histórico",
         "clients": "Clientes"
     },
-    "wizard": {
-        "title": "Crie Seu Plano de Treino",
-        "steps": {
-            "goal": "Objetivo do Treino",
-            "equipment": "Equipamentos",
-            "anatomy": "Músculos Alvo",
-            "constraints": "Restrições",
-            "schedule": "Cronograma",
-            "review": "Revisão"
-        },
-        "navigation": {
-            "back": "Voltar",
-            "next": "Próximo",
-            "generate": "Gerar Plano"
-        },
-        "progress": "{{percent}}% completo"
-    },
     "plan": {
         "title": "Seu Plano de Treino",
         "export": "Exportar PDF",
@@ -152,6 +135,21 @@
         "no_credit_card": "Sem cartão de crédito • Crie seu plano em segundos"
     },
     "wizard": {
+        "title": "Crie Seu Plano de Treino",
+        "steps": {
+            "goal": "Objetivo do Treino",
+            "equipment": "Equipamentos",
+            "anatomy": "Músculos Alvo",
+            "constraints": "Restrições",
+            "schedule": "Cronograma",
+            "review": "Revisão"
+        },
+        "navigation": {
+            "back": "Voltar",
+            "next": "Próximo",
+            "generate": "Gerar Plano"
+        },
+        "progress": "{{percent}}% completo",
         "goal": {
             "options": {
                 "strength": {

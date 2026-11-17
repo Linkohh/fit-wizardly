@@ -38,9 +38,12 @@ import { toast } from 'sonner';
 import { BodyTracker } from '@/components/measurements/BodyTracker';
 import { requestConsentModal } from '@/lib/consent';
 import { AboutSupportCard } from '@/components/about/AboutSupportCard';
+import { LAUNCH_LANGUAGES, changeLanguage, isLaunchLanguage } from '@/lib/i18n';
 
 export function Profile() {
     const { t, i18n } = useTranslation();
+    const resolvedLanguage = i18n.language?.split('-')[0];
+    const currentLanguage = isLaunchLanguage(resolvedLanguage) ? resolvedLanguage : 'en';
 
     // Theme Store
     const mode = useThemeStore((state) => state.mode);
@@ -190,9 +193,13 @@ export function Profile() {
                                 {/* Theme */}
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-0.5">
-                                        <Label className="text-base">{t('header.theme.label', 'Theme')}</Label>
+                                        <Label className="text-base">{t('profile.theme.label', 'Theme')}</Label>
                                         <p className="text-sm text-muted-foreground">
-                                            {mode === 'system' ? 'System' : mode === 'dark' ? 'Dark' : 'Light'}
+                                            {mode === 'system'
+                                                ? t('profile.theme.system', 'System')
+                                                : mode === 'dark'
+                                                    ? t('profile.theme.dark', 'Dark')
+                                                    : t('profile.theme.light', 'Light')}
                                         </p>
                                     </div>
                                     <ThemeModePill
@@ -209,18 +216,19 @@ export function Profile() {
                                 {/* Language */}
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-0.5">
-                                        <Label className="text-base">Language</Label>
-                                        <p className="text-sm text-muted-foreground">{i18n.language.toUpperCase()}</p>
+                                        <Label htmlFor="profile-language" className="text-base">{t('profile.language.label', 'Language')}</Label>
+                                        <p className="text-sm text-muted-foreground">{t('profile.language.description', 'Used for every screen in the app.')}</p>
                                     </div>
-                                    <Select value={i18n.language} onValueChange={(val) => i18n.changeLanguage(val)}>
-                                        <SelectTrigger className="w-[140px]">
-                                            <SelectValue placeholder="Select Language" />
+                                    <Select value={currentLanguage} onValueChange={(value) => void changeLanguage(value)}>
+                                        <SelectTrigger id="profile-language" className="w-[140px]" data-testid="profile-language-select">
+                                            <SelectValue placeholder={t('profile.language.placeholder', 'Select language')} />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="en">English</SelectItem>
-                                            <SelectItem value="es">Español</SelectItem>
-                                            <SelectItem value="fr">Français</SelectItem>
-                                            <SelectItem value="de">Deutsch</SelectItem>
+                                            {LAUNCH_LANGUAGES.map((language) => (
+                                                <SelectItem key={language.code} value={language.code}>
+                                                    {language.name}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -318,7 +326,7 @@ export function Profile() {
 
                                 {/* Weight Unit */}
                                 <div className="flex items-center justify-between">
-                                    <Label className="text-base">Weight Unit</Label>
+                                    <Label className="text-base">{t('profile.units.label', 'Weight Unit')}</Label>
                                     <div className="flex bg-secondary rounded-lg p-1">
                                         <Button
                                             variant={preferredWeightUnit === 'lbs' ? 'default' : 'ghost'}
@@ -326,7 +334,7 @@ export function Profile() {
                                             onClick={() => setPreferredWeightUnit('lbs')}
                                             className="px-4"
                                         >
-                                            LBS
+                                            {t('profile.units.lbs', 'LBS')}
                                         </Button>
                                         <Button
                                             variant={preferredWeightUnit === 'kg' ? 'default' : 'ghost'}
@@ -334,7 +342,7 @@ export function Profile() {
                                             onClick={() => setPreferredWeightUnit('kg')}
                                             className="px-4"
                                         >
-                                            KG
+                                            {t('profile.units.kg', 'KG')}
                                         </Button>
                                     </div>
                                 </div>
