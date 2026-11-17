@@ -2,7 +2,8 @@
 
 > Read this file at the start of every session before touching any code.
 > Update it at session end using `/after-report`.
-> Last updated: 2026-11-15
+> Last updated: 2026-11-17
+> **Launch project:** work is now scheduled in [`docs/project/BOARD.md`](project/BOARD.md) (lanes, days, gates). Agents write handoffs; Lane A folds them in here.
 
 ---
 
@@ -144,6 +145,36 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 ---
 
 ## Session History
+
+### 2026-11-17 — Launch Analysis, README Rewrite, Parallel Launch Project (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, from `preview_b` @ `85d5cbd`)
+
+- **What was done:**
+  - Full launch-readiness review: all code, every doc, the migrations, the native projects and CI.
+  - Rewrote `README.md`; it was the Lovable template.
+  - Wrote `docs/LAUNCH_ROADMAP.md` (the analysis, work items 0.1–6, decisions and risks).
+  - Split the work into a day-by-day project with parallel AI lanes under `docs/project/`: `README.md` (rules, ownership, merge order, kickoff prompt), `BOARD.md`, `CONTRACTS.md`, `lanes/LANE-{A,B,C,D,E,F,H,J,L}.md` and `handoffs/TEMPLATE.md`.
+  - Added the feature-flag contract `src/lib/featureFlags.ts` (+ test) and `VITE_FEATURE_CIRCLES` / `VITE_FEATURE_COACH` in `.env.example`.
+- **Decisions made by the owner:**
+  - Name: FitWizard.
+  - Drop the "AI-powered" claim; there is no AI in the code.
+  - Free at launch.
+  - v1 is for lifters only; Circles and the coach portal go behind flags (off by default).
+- **Key finding:** almost no user data survives a reload. Since `26e3534` (2026-04-11):
+  - `planStore` persists only `currentWeek` and the weight unit.
+  - `nutritionStore` persists only `selectedDate`.
+  - `measurementsStore` does not persist at all.
+  - Workout logs, PRs, nutrition and measurements are lost when the app closes, and there are no cloud tables for them. This is DEBT-027, the top launch item (Lane E, Wave 1).
+- **New issues found:** DEBT-027 to DEBT-038 and SEC-006 to SEC-007 (see Known Issues). The roadmap lists them as findings A–T with evidence.
+- **Test status:** 795 tests across 149 files pass (791/148 before plus the 4 new flag tests). Lint: 0 errors and the 4 pre-existing warnings. Typecheck clean. Server: 14/14.
+- **Legal/compliance notes:**
+  - No new stored data.
+  - Account deletion (required by both stores) is still missing; scheduled for Lane F, Days 3–4.
+  - `docs/privacy-policy.md` is inaccurate; rewrite scheduled for Lane A, Day 4.
+- **Open decisions:** D1–D6 in `docs/project/BOARD.md`. Each has a default.
+- **Next steps:**
+  1. Lincoln merges this PR into `preview_b`.
+  2. Lincoln starts the Wave 1 lanes (7 lanes, or 4 agents grouped as A+B, C+D, E+F, H) with the kickoff prompt in `docs/project/README.md`.
+  3. Day 1 Lincoln tasks: L1 (revoke the legacy key), L4 (developer accounts: start now, approval takes days), and the decisions.
 
 ### 2026-11-15 — Phone Selected-List Layout, Merged With PR 43 (branch `preview_b`)
 
@@ -552,12 +583,26 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-012 | Swipe-back / haptics / Android back not device-verified | `src/hooks/useEdgeSwipeBack.ts`, `src/hooks/useAndroidBackButton.ts` | Unit-tested, and browser-tested with simulated touch. Needs a pass on the iOS Simulator and an Android emulator. |
 | AUDIT-001 | DE locale missing 355 keys vs `en.json` (558 flat keys) | `src/locales/de.json` | Untranslated keys fall back to English (`fallbackLng: en`), not raw keys. Gaps are snapshotted in `src/test/fixtures/localeGaps.json`; the parity test blocks new gaps. Legal copy needs a human translator. |
 | AUDIT-002 | PT locale missing 366 keys vs `en.json` | `src/locales/pt.json` | Same as AUDIT-001. |
+| DEBT-027 | **User data lost on reload:** workout logs, PRs, current plan (guests), nutrition, measurements | `src/stores/planStore.ts:59-64`, `nutritionStore.ts:44-48`, `measurementsStore.ts` | Persistence was cut to preferences only in `26e3534`. Fix: local-first storage plus sync (roadmap 1.1–1.4, Lane E). |
+| DEBT-028 | No account deletion (required by Apple and Google) | `src/pages/Profile.tsx:399-403` | Roadmap 1.5, Lane F. |
+| DEBT-029 | Native sign-in can't complete: the magic link returns to `window.location.origin`, and there are no deep links | `src/stores/authStore.ts:228-241` | Fix: 6-digit email code (roadmap 2.1, Lane H). |
+| DEBT-030 | Session stored in `sessionStorage`; users are signed out whenever the app or tab closes | `src/lib/supabase.ts:72-73` | Roadmap 2.2, decision D2. |
+| DEBT-031 | "AI-powered" marketing claim, but there is no AI in the code | `index.html:9,29`, `vite.config.ts:167`, locale `tagline` | Roadmap 0.1 (Lanes B and D). |
+| SEC-006 | Database rules: users can write their own streaks, badges and challenge scores; signed-out visitors can read `profiles`; the `circle_members` read policy references itself (likely infinite recursion, not confirmed on a live DB) | `001_circles_schema.sql:75-77,115-122`, `002_exercise_interactions_schema.sql:117-135` | Migration 008 (roadmap 1.6, Lane F). |
+| DEBT-032 | iOS: arbitrary network loads allowed, no privacy manifest, no team, iPad and landscape enabled. Android: no release signing, no minify, `allowBackup=true` | `ios/App/App/Info.plist`, `android/app/build.gradle`, `AndroidManifest.xml` | Roadmap 2.5–2.6 (Lane H). |
 
 ### MEDIUM
 
 | ID | Issue | File(s) | Notes |
 |----|-------|---------|-------|
 | DEBT-002 | `analyticsStore.ts` analytics events fire to nowhere | `src/stores/analyticsStore.ts:121` | TODO comment: "Send to PostHog or custom backend". No external destination wired. |
+| DEBT-033 | Streak, plans-generated and weekly-progress counters are never updated (no callers) | `src/stores/achievementStore.ts` | Roadmap 0.3 (Lane E). |
+| DEBT-034 | Fake data on real screens: Revenue totals, client progress from `Math.random()`, hard-coded circle stats, exercise badges chosen by id length | `Revenue.tsx:48`, `ClientProgress.tsx`, `CircleDashboardTab.tsx`, `ExerciseBadges.tsx:10` | Coach and Circles hidden by flags; badges removed (roadmap 0.5). |
+| DEBT-035 | Language picker offers French (no file), omits Portuguese, doesn't save the choice | `src/pages/Profile.tsx:215-222` | Roadmap 0.4 (Lane B). |
+| DEBT-036 | Relative `/api/...` calls don't resolve inside native apps | `motivationQuoteClient.ts:137`, `exerciseApiAdapter.ts:95` | Roadmap 2.3 (Lane H). |
+| DEBT-037 | Express `/plans/:id` requires a UUID but plan ids are `plan_<hash>`; Express is not deployed | `server/src/index.ts:68,349,380,445` vs `planGenerator.ts:560` | Retire Express (roadmap 1.7, decision D1). |
+| SEC-007 | `/api/*` functions allow any origin, with no rate limit (API Ninjas quota exposed) | `api/*.ts` | Roadmap 2.3 (Lane H). |
+| DEBT-038 | `public/` is 11 MB (1.7 MB logo, 1.4 MB icons, exercise data in the precache); fonts load from Google at runtime | `public/`, `vite.config.ts:153-163`, `index.html:13-16` | Roadmap 0.7, 2.5. |
 | SEC-003 | Legacy JWT in local `.env.local`, `dist/`, Capacitor assets | local only | Delete after rotation confirmed live. |
 | SEC-004 | Stale env in worktree `.claude/worktrees/trusting-almeida/` | local only | Sanitize or delete. |
 | DEBT-003 | `CircleSettingsTab.tsx` and `CircleMembersTab.tsx` are stub placeholders | `src/components/circles/tabs/` | Marked TODO Phase 5. Not implemented. |
@@ -648,6 +693,8 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 ---
 
 ## Backlog / Next Steps
+
+> **Superseded for launch work:** the launch backlog now lives in [`docs/project/BOARD.md`](project/BOARD.md) and [`docs/LAUNCH_ROADMAP.md`](LAUNCH_ROADMAP.md). The items below are kept for history; Lane A reconciles them.
 
 ### Immediate (unblocked)
 - [ ] Check the wizard muscle step on a real iPhone and Android phone: hold-and-slide preview, scrolling past the map, the selected list — DEBT-026
