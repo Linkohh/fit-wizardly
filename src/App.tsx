@@ -31,6 +31,7 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { useAnalyticsStore } from "@/stores/analyticsStore";
 import { useScrollActivity } from "@/hooks/use-scroll-activity";
 import { NavigationDirectionProvider } from "@/contexts/navigation-direction-context";
+import { isFeatureEnabled } from "@/lib/featureFlags";
 
 const Index = lazy(() => import("./pages/Index"));
 const WizardPage = lazy(() => import("./pages/Wizard"));
@@ -198,6 +199,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
 function AnimatedRoutes() {
   const location = useLocation();
+  // Feature flags are build-time values. They are read on render (a cheap env lookup)
+  // rather than at module load so tests can stub them per case with vi.stubEnv.
+  // When a flag is off its routes are not registered, so the "*" route shows NotFound.
+  const coachEnabled = isFeatureEnabled("coach");
+  const circlesEnabled = isFeatureEnabled("circles");
 
   // Onboarding keeps the shared shell but manages its own page content layout.
   if (location.pathname === '/onboarding') {
@@ -234,59 +240,65 @@ function AnimatedRoutes() {
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/exercises" element={<ExerciseLibraryPage />} />
 
-                {/* Auth-backed trainer routes */}
-                <Route path="/clients">
-                  <Route index element={
-                    <RequireAuth>
-                      <TrainerGuard>
-                        <ClientsPage />
-                      </TrainerGuard>
-                    </RequireAuth>
-                  } />
-                  <Route path=":clientId" element={
-                    <RequireAuth>
-                      <TrainerGuard>
-                        <ClientDetailsPage />
-                      </TrainerGuard>
-                    </RequireAuth>
-                  } />
-                </Route>
-                <Route path="/templates" element={
-                  <RequireAuth>
-                    <TrainerGuard>
-                      <TemplateLibrary />
-                    </TrainerGuard>
-                  </RequireAuth>
-                } />
-                <Route path="/revenue" element={
-                  <RequireAuth>
-                    <TrainerGuard>
-                      <Revenue />
-                    </TrainerGuard>
-                  </RequireAuth>
-                } />
+                {/* Auth-backed trainer routes (coach feature flag) */}
+                {coachEnabled && (
+                  <>
+                    <Route path="/clients">
+                      <Route index element={
+                        <RequireAuth>
+                          <TrainerGuard>
+                            <ClientsPage />
+                          </TrainerGuard>
+                        </RequireAuth>
+                      } />
+                      <Route path=":clientId" element={
+                        <RequireAuth>
+                          <TrainerGuard>
+                            <ClientDetailsPage />
+                          </TrainerGuard>
+                        </RequireAuth>
+                      } />
+                    </Route>
+                    <Route path="/templates" element={
+                      <RequireAuth>
+                        <TrainerGuard>
+                          <TemplateLibrary />
+                        </TrainerGuard>
+                      </RequireAuth>
+                    } />
+                    <Route path="/revenue" element={
+                      <RequireAuth>
+                        <TrainerGuard>
+                          <Revenue />
+                        </TrainerGuard>
+                      </RequireAuth>
+                    } />
+                  </>
+                )}
 
-                {/* Demo landing + auth-backed circle membership routes */}
-                <Route path="/circles">
-                  <Route index element={<CirclesPage />} />
+                {/* Demo landing + auth-backed circle membership routes (circles feature flag) */}
+                {circlesEnabled && (
+                  <Route path="/circles">
+                    <Route index element={<CirclesPage />} />
 
-                  <Route path="join/:inviteCode" element={
-                    <JoinCircleHandler />
-                  } />
+                    <Route path="join/:inviteCode" element={
+                      <JoinCircleHandler />
+                    } />
 
-                  <Route path=":circleId" element={
-                    <RequireAuth>
-                      <CircleLayout />
-                    </RequireAuth>
-                  }>
-                    <Route index element={<CircleDashboardTab />} />
-                    <Route path="feed" element={<CircleFeedTab />} />
-                    <Route path="leaderboard" element={<CircleLeaderboardTab />} />
-                    <Route path="challenges" element={<CircleChallengesTab />} />
-                    <Route path="members" element={<CircleMembersTab />} />
-                    <Route path="settings" element={<CircleSettingsTab />} />
+                    <Route path=":circleId" element={
+                      <RequireAuth>
+                        <CircleLayout />
+                      </RequireAuth>
+                    }>
+                      <Route index element={<CircleDashboardTab />} />
+                      <Route path="feed" element={<CircleFeedTab />} />
+                      <Route path="leaderboard" element={<CircleLeaderboardTab />} />
+                      <Route path="challenges" element={<CircleChallengesTab />} />
+                      <Route path="members" element={<CircleMembersTab />} />
+                      <Route path="settings" element={<CircleSettingsTab />} />
+                    </Route>
                   </Route>
-                </Route>
+                )}
 
                 {MCLIntegrationTest && (
                   <Route path="/mcl" element={<MCLIntegrationTest />} />
@@ -331,7 +343,14 @@ const App = () => {
     return () => window.cancelAnimationFrame(frame);
   }, []);
 
+  const circlesEnabled = isFeatureEnabled("circles");
+
   useEffect(() => {
+    // Invite links only exist while Circles is on; leave any stored code untouched otherwise.
+    if (!circlesEnabled) {
+      return;
+    }
+
     if (!isLoading && user) {
       const pendingInvite = sessionStorage.getItem('pendingInviteCode');
       if (pendingInvite) {
@@ -339,7 +358,7 @@ const App = () => {
         navigate(`/circles/join/${pendingInvite}`);
       }
     }
-  }, [user, isLoading, navigate]);
+  }, [circlesEnabled, user, isLoading, navigate]);
 
   useEffect(() => {
     if (!isLoading && user) {

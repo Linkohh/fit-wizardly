@@ -278,6 +278,11 @@ export type Database = {
                     schema_version: number
                     created_at: string
                     updated_at: string
+                    // Added by 007. Optional on Row (not required, unlike the
+                    // other tables) until supabasePlansRepo.planToRow() is typed
+                    // against Insert instead of Omit<Row, ...> (Lane E, Day 7)
+                    // and 007 is live on every project.
+                    deleted_at?: string | null
                 }
                 Insert: {
                     user_id: string
@@ -286,6 +291,7 @@ export type Database = {
                     schema_version?: number
                     created_at?: string
                     updated_at?: string
+                    deleted_at?: string | null
                 }
                 Update: {
                     user_id?: string
@@ -294,6 +300,218 @@ export type Database = {
                     schema_version?: number
                     created_at?: string
                     updated_at?: string
+                    deleted_at?: string | null
+                }
+                Relationships: []
+            }
+            // 007_user_data.sql (contract #3): synced per-user data.
+            // JSONB blobs: WorkoutLog / PersonalRecord / BodyMeasurement
+            // (src/types/fitness.ts), DailyNutritionLog (src/types/nutrition.ts),
+            // ReadinessEntry (src/types/readiness.ts).
+            workout_logs: {
+                Row: {
+                    user_id: string
+                    id: string
+                    plan_id: string
+                    completed_at: string
+                    total_volume: number
+                    log: Json
+                    schema_version: number
+                    updated_at: string
+                    deleted_at: string | null
+                }
+                Insert: {
+                    user_id: string
+                    id: string
+                    plan_id: string
+                    completed_at: string
+                    total_volume?: number
+                    log: Json
+                    schema_version?: number
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Update: {
+                    user_id?: string
+                    id?: string
+                    plan_id?: string
+                    completed_at?: string
+                    total_volume?: number
+                    log?: Json
+                    schema_version?: number
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Relationships: []
+            }
+            personal_records: {
+                Row: {
+                    user_id: string
+                    id: string
+                    exercise_id: string
+                    type: 'weight' | 'reps' | 'volume'
+                    value: number
+                    achieved_at: string
+                    record: Json
+                    updated_at: string
+                    deleted_at: string | null
+                }
+                Insert: {
+                    user_id: string
+                    id: string
+                    exercise_id: string
+                    type: 'weight' | 'reps' | 'volume'
+                    value: number
+                    achieved_at: string
+                    record: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Update: {
+                    user_id?: string
+                    id?: string
+                    exercise_id?: string
+                    type?: 'weight' | 'reps' | 'volume'
+                    value?: number
+                    achieved_at?: string
+                    record?: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Relationships: []
+            }
+            nutrition_days: {
+                Row: {
+                    user_id: string
+                    day: string
+                    log: Json
+                    updated_at: string
+                    deleted_at: string | null
+                }
+                Insert: {
+                    user_id: string
+                    day: string
+                    log: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Update: {
+                    user_id?: string
+                    day?: string
+                    log?: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Relationships: []
+            }
+            nutrition_settings: {
+                Row: {
+                    user_id: string
+                    profile: Json | null
+                    targets: Json | null
+                    custom_foods: Json
+                    favorites: Json
+                    saved_meals: Json
+                    updated_at: string
+                    deleted_at: string | null
+                }
+                Insert: {
+                    user_id: string
+                    profile?: Json | null
+                    targets?: Json | null
+                    custom_foods?: Json
+                    favorites?: Json
+                    saved_meals?: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Update: {
+                    user_id?: string
+                    profile?: Json | null
+                    targets?: Json | null
+                    custom_foods?: Json
+                    favorites?: Json
+                    saved_meals?: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Relationships: []
+            }
+            body_measurements: {
+                Row: {
+                    user_id: string
+                    id: string
+                    measured_on: string
+                    data: Json
+                    updated_at: string
+                    deleted_at: string | null
+                }
+                Insert: {
+                    user_id: string
+                    id: string
+                    measured_on: string
+                    data: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Update: {
+                    user_id?: string
+                    id?: string
+                    measured_on?: string
+                    data?: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Relationships: []
+            }
+            readiness_entries: {
+                Row: {
+                    user_id: string
+                    day: string
+                    entry: Json
+                    updated_at: string
+                    deleted_at: string | null
+                }
+                Insert: {
+                    user_id: string
+                    day: string
+                    entry: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Update: {
+                    user_id?: string
+                    day?: string
+                    entry?: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Relationships: []
+            }
+            user_state: {
+                Row: {
+                    user_id: string
+                    achievements: Json
+                    custom_exercises: Json
+                    favorite_exercises: Json
+                    updated_at: string
+                    deleted_at: string | null
+                }
+                Insert: {
+                    user_id: string
+                    achievements?: Json
+                    custom_exercises?: Json
+                    favorite_exercises?: Json
+                    updated_at?: string
+                    deleted_at?: string | null
+                }
+                Update: {
+                    user_id?: string
+                    achievements?: Json
+                    custom_exercises?: Json
+                    favorite_exercises?: Json
+                    updated_at?: string
+                    deleted_at?: string | null
                 }
                 Relationships: []
             }

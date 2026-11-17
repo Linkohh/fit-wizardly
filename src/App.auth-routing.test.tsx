@@ -1,6 +1,6 @@
 import { MemoryRouter, Outlet } from 'react-router-dom';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 
 type Selector<TState, TResult> = ((state: TState) => TResult) | undefined;
@@ -322,6 +322,9 @@ function resetState() {
 describe('App auth routing', () => {
   beforeEach(() => {
     resetState();
+    // The guarded Circles and coach routes only exist while their flags are on.
+    vi.stubEnv('VITE_FEATURE_CIRCLES', 'true');
+    vi.stubEnv('VITE_FEATURE_COACH', 'true');
     vi.useRealTimers();
 
     Object.defineProperty(window, 'matchMedia', {
@@ -350,6 +353,10 @@ describe('App auth routing', () => {
         };
       }),
     });
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it('keeps demo routes available to guests', async () => {

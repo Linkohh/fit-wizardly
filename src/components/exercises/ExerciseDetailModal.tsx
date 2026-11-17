@@ -13,7 +13,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { getExerciseTheme } from '@/lib/exerciseTheme';
 import { cn } from '@/lib/utils';
 import { RelatedExercises } from './RelatedExercises';
-import { ExerciseBadges } from './ExerciseBadges';
 import { useTranslation } from 'react-i18next';
 
 interface ExerciseDetailModalProps {
@@ -186,10 +185,6 @@ export function ExerciseDetailModal({ exercise, isOpen, onClose, onSelectExercis
                                 </div>
                             )}
 
-                            {/* Mastery & Badges */}
-                            <div className="pt-3 border-t border-white/[0.06]">
-                                <ExerciseBadges exerciseId={exercise.id} />
-                            </div>
                         </div>
 
                         {/* Right Column: Content Tabs */}

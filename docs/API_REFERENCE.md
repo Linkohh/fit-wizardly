@@ -1,5 +1,8 @@
 # API_REFERENCE.md - Complete API Documentation
 
+> **Partly out of date (2026-11-17).** Some files, versions and variables named here don't exist.
+> The accurate sources are `README.md` and `docs/LAUNCH_ROADMAP.md`. This doc is corrected when its area is worked on.
+
 > **Purpose**: Complete reference for all backend API endpoints.
 > **Audience**: Frontend developers, API consumers, AI assistants building features.
 

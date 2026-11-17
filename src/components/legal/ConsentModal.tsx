@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BarChart3, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -22,6 +23,7 @@ import {
 } from '@/lib/consent';
 
 export function ConsentModal() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [analyticsOptIn, setAnalyticsOptIn] = useState(false);
   const [nutritionLookupOptIn, setNutritionLookupOptIn] = useState(false);
@@ -123,7 +125,7 @@ export function ConsentModal() {
                   Welcome to FitWizard
                 </SheetTitle>
                 <SheetDescription className="max-w-[34rem] text-left text-sm leading-6 text-muted-foreground sm:text-[0.95rem]">
-                  Your AI workout companion is ready. Before we begin, confirm these basics.
+                  {t('consent.welcome_description', 'Your workout planner is ready. Before we begin, confirm these basics.')}
                 </SheetDescription>
               </div>
             </div>

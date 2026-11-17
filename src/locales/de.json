@@ -1,7 +1,7 @@
 {
     "app": {
         "name": "FitWizard",
-        "tagline": "Dein KI-gestützter Trainingsbegleiter"
+        "tagline": "Wissenschaftlich fundierte Trainingspläne, auf dich zugeschnitten."
     },
     "nav": {
         "home": "Startseite",
@@ -383,5 +383,8 @@
     },
     "storage": {
         "kept_on_device": "Abgemeldet. Deine Trainingsdaten bleiben auf diesem Gerät."
+    },
+    "consent": {
+        "welcome_description": "Dein Trainingsplaner ist bereit. Bevor wir beginnen, bestätige bitte diese Grundlagen."
     }
 }

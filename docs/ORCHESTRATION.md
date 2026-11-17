@@ -1,5 +1,8 @@
 # Orchestration & DevOps Context
 
+> **Partly out of date (2026-11-17).** Some files, versions and variables named here don't exist.
+> The accurate sources are `README.md` and `docs/LAUNCH_ROADMAP.md`. This doc is corrected when its area is worked on.
+
 > **Lens Purpose**: This document covers build pipelines, environment configuration, deployment strategies, database management, and monitoring. Read this before setting up environments or deploying.
 
 ---

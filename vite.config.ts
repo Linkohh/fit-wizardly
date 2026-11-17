@@ -156,15 +156,28 @@ export default defineConfig(({ mode }) => {
         'app-icon-512.png',
         'apple-touch-icon.png',
         'favicon.png',
-        'exercise-data/legacy-exercises.v1.json',
-        'exercise-data/wger-snapshot.v1.json',
+        'brand/logo-header.webp',
         'logo.png',
         'robots.txt',
       ],
+      workbox: {
+        // Exercise data (~3.7 MB) is fetched on demand and cached after the
+        // first online load, instead of being precached on install.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/exercise-data/'),
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'exercise-data',
+              expiration: { maxEntries: 4 },
+            },
+          },
+        ],
+      },
       manifest: {
         name: 'FitWizard',
         short_name: 'FitWizard',
-        description: 'Your AI-powered workout companion',
+        description: 'Science-based workout plans, built around you.',
         theme_color: '#8B5CF6',
         background_color: '#0a0a0a',
         display: 'standalone',

@@ -1,7 +1,7 @@
 {
     "app": {
         "name": "FitWizard",
-        "tagline": "Seu Companheiro de Treino com IA"
+        "tagline": "Planos de treino baseados em ciência, feitos para você."
     },
     "nav": {
         "home": "Início",
@@ -385,5 +385,8 @@
     },
     "storage": {
         "kept_on_device": "Sessão encerrada. Seus dados de treino continuam neste dispositivo."
+    },
+    "consent": {
+        "welcome_description": "Seu planejador de treinos está pronto. Antes de começar, confirme estes pontos básicos."
     }
 }
