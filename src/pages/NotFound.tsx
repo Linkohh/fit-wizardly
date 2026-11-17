@@ -2,10 +2,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Home, ArrowLeft, Dumbbell } from 'lucide-react';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 
 export default function NotFound() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const circlesEnabled = isFeatureEnabled('circles');
 
   return (
     <main className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 animate-fade-in">
@@ -63,11 +65,13 @@ export default function NotFound() {
                 {t('notfound.create_plan')}
               </Button>
             </Link>
-            <Link to="/circles">
-              <Button variant="ghost" size="sm">
-                {t('nav.circles')}
-              </Button>
-            </Link>
+            {circlesEnabled && (
+              <Link to="/circles">
+                <Button variant="ghost" size="sm">
+                  {t('nav.circles')}
+                </Button>
+              </Link>
+            )}
             <Link to="/exercises">
               <Button variant="ghost" size="sm">
                 {t('notfound.exercise_library')}

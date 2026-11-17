@@ -325,6 +325,9 @@ function mockElementFromPoint(element: Element | null) {
 describe('Header mobile menu layout', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // These cases cover the full drawer, including Circles and coach entries.
+    vi.stubEnv('VITE_FEATURE_CIRCLES', 'true');
+    vi.stubEnv('VITE_FEATURE_COACH', 'true');
     vi.useRealTimers();
     mocks.isNative = false;
     mocks.themeMode = 'system';
@@ -344,6 +347,54 @@ describe('Header mobile menu layout', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
+  });
+
+  it('lists Circles and coach links in both navs when the flags are on', () => {
+    renderHeader('/');
+
+    const desktopNav = screen.getByRole('navigation', { name: 'Main navigation' });
+    for (const label of ['Circles', 'Clients', 'Templates', 'Revenue']) {
+      expect(within(desktopNav).getByRole('link', { name: label })).toBeInTheDocument();
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
+
+    const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
+    for (const label of ['Circles', 'Clients', 'Templates', 'Revenue']) {
+      expect(within(mobileNav).getByRole('link', { name: label })).toBeInTheDocument();
+    }
+    expect(screen.getByTestId('mobile-drawer-trainer-cluster')).toBeInTheDocument();
+  });
+
+  it('hides Circles, coach links and the coach toggle when the flags are off', () => {
+    vi.stubEnv('VITE_FEATURE_CIRCLES', 'false');
+    vi.stubEnv('VITE_FEATURE_COACH', 'false');
+
+    renderHeader('/');
+
+    const desktopNav = screen.getByRole('navigation', { name: 'Main navigation' });
+    expect(within(desktopNav).getByRole('link', { name: 'Home' })).toBeInTheDocument();
+    for (const label of ['Circles', 'Clients', 'Templates', 'Revenue']) {
+      expect(within(desktopNav).queryByRole('link', { name: label })).not.toBeInTheDocument();
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: /open menu/i }));
+
+    const sheetContent = screen.getByTestId('mobile-sheet-content');
+    const mobileNav = screen.getByRole('navigation', { name: 'Mobile navigation' });
+    expect(within(mobileNav).getByRole('link', { name: 'Nutrition' })).toBeInTheDocument();
+    for (const label of ['Circles', 'Clients', 'Templates', 'Revenue']) {
+      expect(within(mobileNav).queryByRole('link', { name: label })).not.toBeInTheDocument();
+    }
+    expect(within(sheetContent).queryByText('Coach Tools')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mobile-drawer-trainer-cluster')).not.toBeInTheDocument();
+    expect(within(sheetContent).queryByRole('switch', { name: 'Coach Mode' })).not.toBeInTheDocument();
+
+    // The mocked store still reports trainer mode on; the badge must not show it.
+    const profile = within(sheetContent).getByTestId('mobile-drawer-profile');
+    expect(within(profile).queryByText('Coach Mode')).not.toBeInTheDocument();
+    expect(within(profile).getByText('Personal Mode')).toBeInTheDocument();
   });
 
   it('omits the About · Help · Legal quick links on the web, where the footer carries them', () => {
