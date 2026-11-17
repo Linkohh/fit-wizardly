@@ -27,6 +27,7 @@ import { usePlanStore } from '@/stores/planStore';
 import { useCircleStore } from '@/stores/circleStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useTranslation } from 'react-i18next';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 
 export function CommandPalette() {
   const { t } = useTranslation();
@@ -35,6 +36,8 @@ export function CommandPalette() {
   const { currentPlan } = usePlanStore();
   const { circles } = useCircleStore();
   const { user, signOut } = useAuthStore();
+  // Build-time flag; read on render so tests can stub the env per case.
+  const circlesEnabled = isFeatureEnabled('circles');
 
   // Keyboard shortcut: Cmd/Ctrl+K
   useEffect(() => {
@@ -82,15 +85,17 @@ export function CommandPalette() {
             </kbd>
           </CommandItem>
 
-          <CommandItem
-            onSelect={() => handleCommand(() => navigate('/circles'))}
-          >
-            <Users className="mr-2 h-4 w-4" />
-            <span>{t('commands.circles')}</span>
-            <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-              <span className="text-xs">⌘</span>C
-            </kbd>
-          </CommandItem>
+          {circlesEnabled && (
+            <CommandItem
+              onSelect={() => handleCommand(() => navigate('/circles'))}
+            >
+              <Users className="mr-2 h-4 w-4" />
+              <span>{t('commands.circles')}</span>
+              <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <span className="text-xs">⌘</span>C
+              </kbd>
+            </CommandItem>
+          )}
 
           <CommandItem
             onSelect={() => handleCommand(() => navigate('/exercises'))}
@@ -139,7 +144,7 @@ export function CommandPalette() {
         )}
 
         {/* Circles Commands */}
-        {circles.length > 0 && (
+        {circlesEnabled && circles.length > 0 && (
           <>
             <CommandGroup heading={t('commands.circles_heading')}>
               {circles.slice(0, 3).map((circle) => (

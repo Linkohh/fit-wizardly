@@ -17,6 +17,7 @@ import { ThemeModePill } from '@/components/theme/ThemeModePill';
 import { AnimatedMenuIcon } from '@/components/ui/animated-menu-icon';
 import { DrawerQuickLinks } from '@/components/header/DrawerQuickLinks';
 import { isNativeApp } from '@/lib/platform';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -131,8 +132,10 @@ export function Header() {
   const dragPreviewPathRef = useRef<string | null>(null);
   const dragSuppressNextClickRef = useRef(false);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  // Build-time flag; read on render so tests can stub the env per case.
+  const coachFeatureEnabled = isFeatureEnabled('coach');
   const isTrainerAuthorized = !user || profile?.is_trainer === true;
-  const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
+  const isTrainerEnabled = coachFeatureEnabled && isTrainerAuthorized && isTrainerMode;
   const translate = useCallback(
     (key: string, fallback?: string) => (fallback === undefined ? t(key) : t(key, fallback)),
     [t],
@@ -658,15 +661,17 @@ export function Header() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <div className="flex items-center justify-between px-2 py-2">
-                    <span className="text-sm font-medium">{t('header.trainer_mode', 'Coach Mode')}</span>
-                    <Switch
-                      checked={isTrainerEnabled}
-                      aria-label={t('header.trainer_mode', 'Coach Mode')}
-                      disabled={!isTrainerAuthorized}
-                      onCheckedChange={setTrainerMode}
-                    />
-                  </div>
+                  {coachFeatureEnabled ? (
+                    <div className="flex items-center justify-between px-2 py-2">
+                      <span className="text-sm font-medium">{t('header.trainer_mode', 'Coach Mode')}</span>
+                      <Switch
+                        checked={isTrainerEnabled}
+                        aria-label={t('header.trainer_mode', 'Coach Mode')}
+                        disabled={!isTrainerAuthorized}
+                        onCheckedChange={setTrainerMode}
+                      />
+                    </div>
+                  ) : null}
                   <DropdownMenuItem asChild>
                     <Link
                       to="/profile"
@@ -812,21 +817,23 @@ export function Header() {
                         buttonClassName="aetheric-drawer__theme-button"
                         testId="mobile-drawer-theme-toggle"
                       />
-                      <div
-                        className="aetheric-drawer__trainer-switch-cluster"
-                        data-testid="mobile-drawer-trainer-cluster"
-                      >
-                        <Label className="aetheric-drawer__trainer-switch-label">
-                          {t('header.mobile_drawer.trainer_toggle_label', 'Coach Mode')}
-                        </Label>
-                        <Switch
-                          className="aetheric-drawer__trainer-switch"
-                          checked={isTrainerEnabled}
-                          aria-label={t('header.mobile_drawer.trainer_toggle_label', 'Coach Mode')}
-                          disabled={!isTrainerAuthorized}
-                          onCheckedChange={setTrainerMode}
-                        />
-                      </div>
+                      {coachFeatureEnabled ? (
+                        <div
+                          className="aetheric-drawer__trainer-switch-cluster"
+                          data-testid="mobile-drawer-trainer-cluster"
+                        >
+                          <Label className="aetheric-drawer__trainer-switch-label">
+                            {t('header.mobile_drawer.trainer_toggle_label', 'Coach Mode')}
+                          </Label>
+                          <Switch
+                            className="aetheric-drawer__trainer-switch"
+                            checked={isTrainerEnabled}
+                            aria-label={t('header.mobile_drawer.trainer_toggle_label', 'Coach Mode')}
+                            disabled={!isTrainerAuthorized}
+                            onCheckedChange={setTrainerMode}
+                          />
+                        </div>
+                      ) : null}
                     </div>
                   </div>
 

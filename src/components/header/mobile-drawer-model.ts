@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import type { Profile } from '@/types/supabase';
 import type { OnboardingUserData } from '@/stores/onboardingStore';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 
 type TranslateFn = (key: string, fallback?: string) => string;
 
@@ -51,9 +52,23 @@ export interface DrawerProfileViewModel {
   subtitle: string;
 }
 
+export interface MobileNavFeatures {
+  circles: boolean;
+  coach: boolean;
+}
+
 interface BuildMobileNavItemsOptions {
   isTrainerMode: boolean;
   t: TranslateFn;
+  /** Defaults to the build-time feature flags (src/lib/featureFlags.ts). */
+  features?: MobileNavFeatures;
+}
+
+export function getMobileNavFeatures(): MobileNavFeatures {
+  return {
+    circles: isFeatureEnabled('circles'),
+    coach: isFeatureEnabled('coach'),
+  };
 }
 
 interface BuildDrawerProfileOptions {
@@ -108,8 +123,12 @@ export function isMobileNavPathActive(currentPath: string, itemPath: string) {
   return currentPath === itemPath || currentPath.startsWith(`${itemPath}/`);
 }
 
-export function buildMobileNavItems({ isTrainerMode, t }: BuildMobileNavItemsOptions): MobileNavItem[] {
-  const items: MobileNavItem[] = [
+export function buildMobileNavItems({
+  isTrainerMode,
+  t,
+  features = getMobileNavFeatures(),
+}: BuildMobileNavItemsOptions): MobileNavItem[] {
+  const allPrimaryItems: MobileNavItem[] = [
     { path: '/', label: t('nav.home', 'Home'), icon: House, section: 'primary' },
     { path: '/wizard', label: t('nav.create_plan', 'Create Plan'), icon: CirclePlus, section: 'primary' },
     { path: '/plan', label: t('nav.view_plan', 'View Plan'), icon: Eye, section: 'primary' },
@@ -119,8 +138,11 @@ export function buildMobileNavItems({ isTrainerMode, t }: BuildMobileNavItemsOpt
     { path: '/circles', label: t('nav.circles', 'Circles'), icon: Users, section: 'primary' },
     { path: '/nutrition', label: t('nav.nutrition', 'Nutrition'), icon: Apple, section: 'primary' },
   ];
+  const items = features.circles
+    ? allPrimaryItems
+    : allPrimaryItems.filter((item) => item.path !== '/circles');
 
-  if (!isTrainerMode) {
+  if (!features.coach || !isTrainerMode) {
     return items;
   }
 
