@@ -1,5 +1,8 @@
 # Security Context
 
+> **Partly out of date (2026-11-17).** Some files, versions and variables named here don't exist.
+> The accurate sources are `README.md` and `docs/LAUNCH_ROADMAP.md`. This doc is corrected when its area is worked on.
+
 > **Lens Purpose**: This document defines authentication, authorization, data protection, and security best practices. Read this before implementing any feature that handles user data or authentication.
 
 ---

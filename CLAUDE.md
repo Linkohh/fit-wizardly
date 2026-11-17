@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+**Start here:** [README.md](README.md) (accurate overview), [docs/LAUNCH_ROADMAP.md](docs/LAUNCH_ROADMAP.md) (launch plan and analysis) and [docs/project/README.md](docs/project/README.md) (how the parallel lanes work). Where an older lens doc disagrees with these, these win.
+
 > [!IMPORTANT]
 > **MANDATORY CONTEXT LOADING PROTOCOL**
 > Before starting ANY task, you **MUST**:
@@ -107,16 +109,18 @@ See [.claude/](.claude/) for AI-specific configuration:
 
 ### Technology Stack
 ```
-Frontend:     React 19 + TypeScript 5.8 + Vite 7 (SWC)
+Frontend:     React 19 + TypeScript 5.9 + Vite 7 (SWC)
 State:        Zustand 5 (with persist middleware)
 Data:         TanStack React Query v5
 Routing:      React Router 7
-Styling:      Tailwind CSS 3.4 + shadcn/ui + Framer Motion 12
-Backend:      Express (Node.js) on Port 3001
+Styling:      Tailwind CSS 4 (CSS-first; tokens in the @theme block of src/index.css)
+              + shadcn/ui + Framer Motion 12
+Serverless:   Vercel functions in api/ (exercise search, quotes, wger proxy)
+Backend:      Optional local Express API (server/src/index.ts) on port 3001, dev only; uses Zod 3
 Database:     Supabase (PostgreSQL + Auth + Realtime)
-Validation:   Zod 4
-I18n:         i18next (4 locales: en, es, fr, de)
-Testing:      Vitest + Testing Library
+Validation:   Zod 4 (client)
+I18n:         i18next (4 locales: en, es, de, pt)
+Testing:      Vitest 4 + Testing Library
 ```
 
 ### Directory Structure
@@ -128,19 +132,23 @@ src/
 │   ├── onboarding/     # Feature: onboarding flow
 │   ├── circles/        # Feature: social circles
 │   └── logging/        # Feature: workout logging
+├── features/           # Self-contained features: mcl (anatomy selector), exercise-library
 ├── pages/              # Route-level components
 ├── stores/             # Zustand state stores
 ├── hooks/              # Custom React hooks
-├── lib/                # Utilities and services
+├── lib/                # Plan engine, storage, services, utilities
 │   └── validation/     # Zod schemas
-├── types/              # TypeScript type definitions
-├── locales/            # i18n translation files
-└── data/               # Static data (exercise library)
+├── types/              # TypeScript type definitions (incl. Supabase types)
+├── locales/            # i18n translation files (en, es, de, pt)
+└── data/               # Static data (changelog, exercise library)
 
+api/                    # Vercel serverless functions
 server/
-├── src/
-│   ├── routes/         # Express route handlers
-│   └── middleware/     # Auth, validation, rate limiting
+└── src/index.ts        # Optional local Express API (single file; plus schemas/ and types/)
+supabase/
+└── migrations/         # SQL migrations (numbered 001_…, 002_…)
+docs/
+└── project/            # Launch project: board, lanes, contracts, handoffs
 ```
 
 ### Path Aliases
@@ -482,7 +490,7 @@ animate={{ x: 100, y: 100 }}
 ## Code Quality Gates
 
 ### Pre-Commit Checklist
-1. **Type Check**: `npm run lint` passes
+1. **Lint and Type Check**: `npm run lint` (0 errors) and `npm run typecheck` pass
 2. **Tests Pass**: `npm run test:run` passes
 3. **No Console Logs**: Remove debug statements
 4. **No TODOs without tickets**: `TODO(TICKET-123): description`
@@ -570,12 +578,13 @@ if (result.success) {
 
 | Command | Purpose |
 |---------|---------|
-| `npm run dev` | Start dev server (FE: 8080, BE: 3001) |
+| `npm run dev` | Start Vite dev server on port 8080 (`npm run server:dev` starts the optional Express API on 3001) |
 | `npm run build` | Production build |
 | `npm run preview` | Preview production build |
 | `npm run test` | Run Vitest in watch mode |
 | `npm run test:run` | Run tests once (CI mode) |
 | `npm run lint` | Run ESLint |
+| `npm run typecheck` | TypeScript check, no emit |
 
 ---
 
@@ -588,74 +597,11 @@ if (result.success) {
 | **Icons** | Import from `lucide-react`: `import { ChevronRight } from 'lucide-react'` |
 | **Toast** | Use Sonner: `toast.success('Saved!')` or `toast.error('Failed')` |
 | **Validation** | Define Zod schema, infer type: `type X = z.infer<typeof XSchema>` |
-| **Dark Mode** | Use Tailwind variants: `className="bg-white dark:bg-gray-900"` |
+| **Dark Mode** | Use semantic tokens that adapt to the theme: `className="bg-background text-foreground"`. Never hardcode white or black |
 | **Animation** | Use Tailwind tokens or Framer Motion (see DESIGN_SYSTEM.md) |
 
 ---
 
 ## Active Tasks
 
-Check [task.md](.gemini/antigravity/brain/a9a7a119-4e76-4589-ac99-512e0795d912/task.md) for current objectives.
-
-# context-mode — MANDATORY routing rules
-
-You have context-mode MCP tools available. These rules are NOT optional — they protect your context window from flooding. A single unrouted command can dump 56 KB into context and waste the entire session.
-
-## BLOCKED commands — do NOT attempt these
-
-### curl / wget — BLOCKED
-Any Bash command containing `curl` or `wget` is intercepted and replaced with an error message. Do NOT retry.
-Instead use:
-- `ctx_fetch_and_index(url, source)` to fetch and index web pages
-- `ctx_execute(language: "javascript", code: "const r = await fetch(...)")` to run HTTP calls in sandbox
-
-### Inline HTTP — BLOCKED
-Any Bash command containing `fetch('http`, `requests.get(`, `requests.post(`, `http.get(`, or `http.request(` is intercepted and replaced with an error message. Do NOT retry with Bash.
-Instead use:
-- `ctx_execute(language, code)` to run HTTP calls in sandbox — only stdout enters context
-
-### WebFetch — BLOCKED
-WebFetch calls are denied entirely. The URL is extracted and you are told to use `ctx_fetch_and_index` instead.
-Instead use:
-- `ctx_fetch_and_index(url, source)` then `ctx_search(queries)` to query the indexed content
-
-## REDIRECTED tools — use sandbox equivalents
-
-### Bash (>20 lines output)
-Bash is ONLY for: `git`, `mkdir`, `rm`, `mv`, `cd`, `ls`, `npm install`, `pip install`, and other short-output commands.
-For everything else, use:
-- `ctx_batch_execute(commands, queries)` — run multiple commands + search in ONE call
-- `ctx_execute(language: "shell", code: "...")` — run in sandbox, only stdout enters context
-
-### Read (for analysis)
-If you are reading a file to **Edit** it → Read is correct (Edit needs content in context).
-If you are reading to **analyze, explore, or summarize** → use `ctx_execute_file(path, language, code)` instead. Only your printed summary enters context. The raw file content stays in the sandbox.
-
-### Grep (large results)
-Grep results can flood context. Use `ctx_execute(language: "shell", code: "grep ...")` to run searches in sandbox. Only your printed summary enters context.
-
-## Tool selection hierarchy
-
-1. **GATHER**: `ctx_batch_execute(commands, queries)` — Primary tool. Runs all commands, auto-indexes output, returns search results. ONE call replaces 30+ individual calls.
-2. **FOLLOW-UP**: `ctx_search(queries: ["q1", "q2", ...])` — Query indexed content. Pass ALL questions as array in ONE call.
-3. **PROCESSING**: `ctx_execute(language, code)` | `ctx_execute_file(path, language, code)` — Sandbox execution. Only stdout enters context.
-4. **WEB**: `ctx_fetch_and_index(url, source)` then `ctx_search(queries)` — Fetch, chunk, index, query. Raw HTML never enters context.
-5. **INDEX**: `ctx_index(content, source)` — Store content in FTS5 knowledge base for later search.
-
-## Subagent routing
-
-When spawning subagents (Agent/Task tool), the routing block is automatically injected into their prompt. Bash-type subagents are upgraded to general-purpose so they have access to MCP tools. You do NOT need to manually instruct subagents about context-mode.
-
-## Output constraints
-
-- Keep responses under 500 words.
-- Write artifacts (code, configs, PRDs) to FILES — never return them as inline text. Return only: file path + 1-line description.
-- When indexing content, use descriptive source labels so others can `ctx_search(source: "label")` later.
-
-## ctx commands
-
-| Command | Action |
-|---------|--------|
-| `ctx stats` | Call the `ctx_stats` MCP tool and display the full output verbatim |
-| `ctx doctor` | Call the `ctx_doctor` MCP tool, run the returned shell command, display as checklist |
-| `ctx upgrade` | Call the `ctx_upgrade` MCP tool, run the returned shell command, display as checklist |
+Current objectives, lane status and gate checklists live in [docs/project/BOARD.md](docs/project/BOARD.md).

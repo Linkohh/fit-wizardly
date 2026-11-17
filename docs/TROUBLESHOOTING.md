@@ -1,5 +1,8 @@
 # TROUBLESHOOTING.md - Common Issues and Solutions
 
+> **Partly out of date (2026-11-17).** Some files, versions and variables named here don't exist.
+> The accurate sources are `README.md` and `docs/LAUNCH_ROADMAP.md`. This doc is corrected when its area is worked on.
+
 > **Purpose**: Quick reference for diagnosing and resolving common development issues.
 > **Audience**: Developers debugging issues, AI assistants helping users.
 

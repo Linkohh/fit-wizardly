@@ -1,5 +1,8 @@
 # MIGRATION.md - Version Upgrades and Breaking Changes
 
+> **Partly out of date (2026-11-17).** Some files, versions and variables named here don't exist.
+> The accurate sources are `README.md` and `docs/LAUNCH_ROADMAP.md`. This doc is corrected when its area is worked on.
+
 > **Purpose**: Guide for handling schema versions, dependency upgrades, and breaking changes.
 > **Audience**: Developers upgrading the application, AI assistants managing migrations.
 
