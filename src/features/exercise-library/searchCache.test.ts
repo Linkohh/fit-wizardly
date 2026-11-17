@@ -27,14 +27,16 @@ const wgerHit = {
   ],
 };
 
-const wgerCalls = () => fetchMock.mock.calls.filter(([input]) => String(input).includes('/exerciseinfo/'));
+// wger is reached through /api/proxy-wger?url=<encoded wger URL>, so decode before matching.
+const requestedUrl = (input: unknown) => decodeURIComponent(String(input));
+const wgerCalls = () => fetchMock.mock.calls.filter(([input]) => requestedUrl(input).includes('/exerciseinfo/'));
 
 describe('cachedExerciseSearch', () => {
   beforeEach(() => {
     apiCache.clear();
     fetchMock.mockReset();
     fetchMock.mockImplementation((input) =>
-      String(input).includes('/exerciseinfo/') ? jsonResponse(wgerHit) : jsonResponse({ results: [] })
+      requestedUrl(input).includes('/exerciseinfo/') ? jsonResponse(wgerHit) : jsonResponse({ results: [] })
     );
     vi.stubGlobal('fetch', fetchMock);
   });
@@ -78,7 +80,7 @@ describe('cachedExerciseSearch', () => {
   it('truncates a very long query to 200 characters before fetching', async () => {
     await cachedExerciseSearch('a'.repeat(600));
 
-    const url = String(fetchMock.mock.calls[0][0]);
+    const url = requestedUrl(fetchMock.mock.calls[0][0]);
     expect(url).toContain(`search=${'a'.repeat(200)}`);
     expect(url).not.toContain('a'.repeat(201));
   });

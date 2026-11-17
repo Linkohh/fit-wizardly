@@ -1,6 +1,6 @@
 import { loadLegacyExerciseLibraryRecords } from './legacy';
 import { normalizeWgerExercise, validateNormalizedRecords } from './normalize';
-import { isNativeApp } from '@/lib/platform';
+import { apiUrl } from '@/lib/apiBase';
 import type {
   ExerciseLibraryRecord,
   ExerciseLibrarySnapshotPayload,
@@ -264,9 +264,9 @@ async function fetchWithTimeout(url: string) {
   const controller = new AbortController();
   const timeoutId = globalThis.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
-  const fetchUrl = isNativeApp()
-    ? url
-    : `/api/proxy-wger?url=${encodeURIComponent(url)}`;
+  // Web and native both go through our proxy (DEBT-054). On native, apiUrl()
+  // points it at the deployed origin, since native has no /api of its own.
+  const fetchUrl = apiUrl(`/api/proxy-wger?url=${encodeURIComponent(url)}`);
 
   try {
     const response = await fetch(fetchUrl, {

@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App.tsx";
 import { HydrationGate } from "./components/HydrationGate";
+import "./styles/fonts.css";
 import "./index.css";
 import "./lib/i18n"; // Initialize i18n
 import { startInstallPromptCapture } from "./lib/install-prompt-capture";

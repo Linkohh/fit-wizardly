@@ -1,0 +1,23 @@
+/*
+ * Self-hosted fonts (roadmap 2.5). Replaces the Google Fonts links that used to
+ * sit in index.html, so no request leaves the app's own origin for typography.
+ * Only the weights the UI uses are imported. Each file declares every subset
+ * with a unicode-range, so browsers download just the subsets a page needs.
+ */
+
+/* Outfit: UI text (--font-sans) */
+@import '@fontsource/outfit/300.css';
+@import '@fontsource/outfit/400.css';
+@import '@fontsource/outfit/500.css';
+@import '@fontsource/outfit/600.css';
+@import '@fontsource/outfit/700.css';
+
+/* Plus Jakarta Sans: Aetheric drawer */
+@import '@fontsource/plus-jakarta-sans/500.css';
+@import '@fontsource/plus-jakarta-sans/600.css';
+@import '@fontsource/plus-jakarta-sans/700.css';
+@import '@fontsource/plus-jakarta-sans/800.css';
+
+/* Unbounded: display headlines */
+@import '@fontsource/unbounded/700.css';
+@import '@fontsource/unbounded/900.css';

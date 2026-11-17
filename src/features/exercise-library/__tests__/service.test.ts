@@ -350,13 +350,15 @@ describe('exercise-library service', () => {
     }
   });
 
-  it('fetches directly when running on native app (isNativeApp is true)', async () => {
+  it('proxies through the deployed origin on native (isNativeApp is true), DEBT-054', async () => {
     vi.mocked(isNativeApp).mockReturnValue(true);
+    vi.stubEnv('VITE_PUBLIC_APP_ORIGIN', 'https://fitwizard.app/');
 
     fetchMock.mockImplementationOnce((input) => {
       const url = input instanceof Request ? input.url : input.toString();
-      expect(url).not.toContain('/api/proxy-wger?url=');
-      expect(url).toContain('https://wger.de/api/v2/exerciseinfo/');
+      expect(url).toBe(
+        `https://fitwizard.app/api/proxy-wger?url=${encodeURIComponent('https://wger.de/api/v2/exerciseinfo/?limit=100')}`
+      );
       return createJsonResponse({
         count: 0,
         next: null,
@@ -368,6 +370,10 @@ describe('exercise-library service', () => {
       await fetchAllWgerExercises();
     } catch {
       // Ignore validation errors
+    } finally {
+      vi.unstubAllEnvs();
     }
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

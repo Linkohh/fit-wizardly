@@ -206,7 +206,7 @@ export function CommandPalette() {
         {/* Help & Resources */}
         <CommandGroup heading={t('commands.help_heading')}>
           <CommandItem
-            onSelect={() => handleCommand(() => window.open('https://docs.fitwizardly.com', '_blank'))}
+            onSelect={() => handleCommand(() => navigate('/guide'))}
           >
             <BookOpen className="mr-2 h-4 w-4" />
             <span>{t('commands.documentation')}</span>

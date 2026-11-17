@@ -1,3 +1,4 @@
+import { apiUrl } from '@/lib/apiBase';
 import type { MotivationQuoteApiResponse, RemoteMotivationQuote } from './motivationQuoteTypes';
 
 const CACHE_KEY = 'fitwizard:motivation-quote:v1';
@@ -134,7 +135,7 @@ export async function fetchDailyMotivationQuote({
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetcher('/api/motivation-quote', {
+    const response = await fetcher(apiUrl('/api/motivation-quote'), {
       method: 'GET',
       headers: {
         Accept: 'application/json',

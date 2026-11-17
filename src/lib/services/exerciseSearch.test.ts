@@ -63,7 +63,7 @@ describe('exercise search', () => {
     setNavigatorOnline(false);
     fetchMock.mockReset();
     fetchMock.mockImplementation((input) => {
-      const url = String(input);
+      const url = decodeURIComponent(String(input));
       if (url.includes('wger-snapshot.v1.json')) {
         return createJsonResponse({
           generatedAt: '2026-03-15T17:08:40.000Z',
@@ -101,7 +101,7 @@ describe('exercise search', () => {
 
   it('uses live wger results before API Ninjas fallback', async () => {
     fetchMock.mockImplementation((input) => {
-      const url = String(input);
+      const url = decodeURIComponent(String(input));
       if (url.includes('wger-snapshot.v1.json')) {
         return createJsonResponse({
           generatedAt: '2026-03-15T17:08:40.000Z',
@@ -148,7 +148,7 @@ describe('exercise search', () => {
 
   it('uses API Ninjas when local catalog and wger have no matches', async () => {
     fetchMock.mockImplementation((input) => {
-      const url = String(input);
+      const url = decodeURIComponent(String(input));
       if (url.includes('wger-snapshot.v1.json')) {
         return createJsonResponse({
           generatedAt: '2026-03-15T17:08:40.000Z',
@@ -198,7 +198,7 @@ describe('exercise search', () => {
 
   it('returns the existing fallback warning when all live providers fail', async () => {
     fetchMock.mockImplementation((input) => {
-      const url = String(input);
+      const url = decodeURIComponent(String(input));
       if (url.includes('wger-snapshot.v1.json')) {
         return createJsonResponse({
           generatedAt: '2026-03-15T17:08:40.000Z',

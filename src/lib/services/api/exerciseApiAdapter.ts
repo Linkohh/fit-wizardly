@@ -1,3 +1,4 @@
+import { apiUrl } from '@/lib/apiBase';
 import type {
   ExerciseApiAdapter,
   NormalizedExercise,
@@ -6,6 +7,15 @@ import type {
 } from './types';
 
 const WGER_BASE_URL = 'https://wger.de/api/v2';
+
+/**
+ * wger is always reached through our own /api/proxy-wger function (DEBT-055),
+ * on the web and in the native app alike: one path, one host allowlist, and no
+ * dependence on wger's CORS headers now that CapacitorHttp is gone.
+ */
+function wgerProxyUrl(targetUrl: string) {
+  return apiUrl(`/api/proxy-wger?url=${encodeURIComponent(targetUrl)}`);
+}
 
 function stripHtml(value: string) {
   return value.replace(/<[^>]*>/g, '').trim();
@@ -24,7 +34,7 @@ function getBestTranslation(exercise: WgerExercise) {
 export class WgerAdapter implements ExerciseApiAdapter {
   async search(query: string): Promise<NormalizedExercise[]> {
     const response = await fetch(
-      `${WGER_BASE_URL}/exerciseinfo/?search=${encodeURIComponent(query)}`,
+      wgerProxyUrl(`${WGER_BASE_URL}/exerciseinfo/?search=${encodeURIComponent(query)}`),
       {
         method: 'GET',
         headers: {
@@ -92,7 +102,7 @@ export class ApiNinjasExerciseAdapter implements ExerciseApiAdapter {
 
     try {
       const params = new URLSearchParams({ name });
-      const response = await fetch(`/api/exercise-search-ninjas?${params.toString()}`, {
+      const response = await fetch(apiUrl(`/api/exercise-search-ninjas?${params.toString()}`), {
         method: 'GET',
         headers: {
           Accept: 'application/json',
