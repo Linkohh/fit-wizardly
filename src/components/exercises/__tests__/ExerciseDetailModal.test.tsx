@@ -42,10 +42,6 @@ vi.mock('../RelatedExercises', () => ({
     RelatedExercises: () => <div data-testid="related-exercises" />,
 }));
 
-vi.mock('../ExerciseBadges', () => ({
-    ExerciseBadges: () => <div data-testid="exercise-badges" />,
-}));
-
 vi.mock('@/components/ui/dialog', () => ({
     Dialog: ({ children }: { children: ReactNode }) => <div>{children}</div>,
     DialogContent: ({ children, className }: { children: ReactNode; className?: string }) => (

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { MessageCircle, Trophy, Users, Dumbbell, ArrowRight } from 'lucide-react';
+import { Trophy, Users, Dumbbell, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BackButton } from '@/components/navigation/BackButton';
 
@@ -12,19 +12,15 @@ export default function UserGuide() {
             <div className="text-center mb-12">
                 <h1 className="text-4xl font-bold mb-4">How to Use FitWizardly</h1>
                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                    Everything you need to know about your new AI-powered fitness companion.
+                    Everything you need to know about planning, logging and tracking your training.
                 </p>
             </div>
 
             <Tabs defaultValue="workouts" className="space-y-8">
-                <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 h-auto p-1 bg-muted/50 gap-1 rounded-xl">
+                <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 h-auto p-1 bg-muted/50 gap-1 rounded-xl">
                     <TabsTrigger value="workouts" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-3 rounded-lg">
                         <Dumbbell className="h-4 w-4 mr-2" />
                         Workouts & Logging
-                    </TabsTrigger>
-                    <TabsTrigger value="wisdom" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-3 rounded-lg">
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        Wisdom AI Coach
                     </TabsTrigger>
                     <TabsTrigger value="circles" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-3 rounded-lg">
                         <Users className="h-4 w-4 mr-2" />
@@ -85,54 +81,6 @@ export default function UserGuide() {
                     <div className="flex justify-center">
                         <Button asChild className="gradient-primary text-white">
                             <Link to="/plan">Go to My Plan <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                        </Button>
-                    </div>
-                </TabsContent>
-
-
-                {/* WISDOM AI SECTION */}
-                <TabsContent value="wisdom" className="space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <MessageCircle className="h-6 w-6 text-purple-500" />
-                                Your AI Coach
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="grid md:grid-cols-2 gap-8">
-                                <div>
-                                    <h3 className="font-semibold text-lg mb-2">How to Access</h3>
-                                    <p className="text-muted-foreground mb-4">
-                                        On the <strong>View Plan</strong> page, look for the floating purple bubble ✨ in the bottom right corner.
-                                        Click it to open the Wisdom Chat.
-                                    </p>
-
-                                    <h3 className="font-semibold text-lg mb-2">What to Ask</h3>
-                                    <ul className="list-disc list-inside text-muted-foreground space-y-1 ml-1">
-                                        <li>"Why am I doing 12 reps?"</li>
-                                        <li>"What muscles does this exercise work?"</li>
-                                        <li>"Explain 'Stabilization Endurance' phase"</li>
-                                    </ul>
-                                </div>
-                                <div className="bg-muted/50 p-6 rounded-xl">
-                                    <h4 className="font-medium mb-2">Knowledge Level</h4>
-                                    <p className="text-sm text-muted-foreground mb-4">
-                                        The more you ask, the more you learn! Unlock badges like <strong>Exercise Scientist</strong> as you discover new concepts.
-                                    </p>
-                                    <div className="flex flex-wrap gap-2">
-                                        <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">Novice</span>
-                                        <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">Apprentice</span>
-                                        <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md text-xs font-medium">Scholar</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <div className="flex justify-center">
-                        <Button asChild variant="outline">
-                            <Link to="/plan">Try Wisdom AI <ArrowRight className="ml-2 h-4 w-4" /></Link>
                         </Button>
                     </div>
                 </TabsContent>

@@ -1,7 +1,7 @@
 {
     "app": {
         "name": "FitWizard",
-        "tagline": "Your AI-Powered Workout Companion"
+        "tagline": "Science-based workout plans, built around you."
     },
     "nav": {
         "home": "Home",
@@ -815,5 +815,8 @@
         "body": "{{unfinished}} is still in progress. Resume it, or discard it and start {{requested}}.",
         "resume": "Resume {{unfinished}}",
         "discard": "Discard it and start this workout"
+    },
+    "consent": {
+        "welcome_description": "Your workout planner is ready. Before we begin, confirm these basics."
     }
 }
