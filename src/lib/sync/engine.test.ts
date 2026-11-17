@@ -276,6 +276,42 @@ describe('sync engine', () => {
     expect(server.rows('notes')).toHaveLength(1);
   });
 
+  it('keeps unsent changes from before a restart when a new change is made before the first sync', async () => {
+    let sync = await loadEngine();
+    sync.markDirty('notes', 'old', { deleted: true });
+    await sync.flushOutboxWrites();
+
+    sync = await loadEngine();
+    sync.markDirty('notes', 'new');
+    await sync.flushOutboxWrites();
+
+    sync = await loadEngine();
+    await sync.loadOutbox();
+    expect(sync.getOutboxEntries('notes')).toMatchObject({ old: { deleted: true }, new: { deleted: false } });
+  });
+
+  it('pushes a delete for a one-row-per-user table as a tombstone', async () => {
+    server.rows('settings').push({ user_id: USER, data: { text: 'mine' }, updated_at: server.now(), deleted_at: null });
+    const sync = await loadEngine();
+    const local = { items: [] as Note[] };
+    sync.registerCollection({
+      ...noteCollection('settings', local),
+      keyColumn: null,
+      onConflict: 'user_id',
+      key: () => 'singleton',
+      fromRow: (row) => ({ id: 'singleton', text: String((row.data as { text: string }).text), updatedAt: row.updated_at }),
+    });
+    await sync.syncAll(USER, { client: server.client() });
+
+    local.items = [];
+    sync.markDirty('settings', 'singleton', { deleted: true });
+    const result = await sync.syncAll(USER, { client: server.client() });
+
+    expect(result.pushed).toBe(1);
+    expect(server.rows('settings')[0].deleted_at).not.toBeNull();
+    expect(sync.countPendingChanges()).toBe(0);
+  });
+
   it('carries on with other collections when one fails', async () => {
     server.writeFromOtherDevice('good', { id: 'g', data: { text: 'fine' } });
     server.failingTables.add('broken');

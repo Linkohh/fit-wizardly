@@ -141,15 +141,10 @@ async function pushChanges<T>(client: SyncClient, collection: SyncCollection<T>,
 
   for (const [key, entry] of entries) {
     if (entry.deleted) {
-      if (!collection.keyColumn) {
-        clearOutboxEntry(collection.table, key, entry);
-        continue;
-      }
-      const { error } = await client
-        .from(collection.table)
-        .update({ deleted_at: entry.at })
-        .eq('user_id', userId)
-        .eq(collection.keyColumn, key);
+      // One-row-per-user tables (keyColumn null) are identified by user_id alone.
+      let deletion = client.from(collection.table).update({ deleted_at: entry.at }).eq('user_id', userId);
+      if (collection.keyColumn) deletion = deletion.eq(collection.keyColumn, key);
+      const { error } = await deletion;
       if (error) throw new Error(`delete ${collection.table}/${key}: ${error.message}`);
       clearOutboxEntry(collection.table, key, entry);
       pushed += 1;

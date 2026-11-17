@@ -28,10 +28,13 @@ function isOutbox(value: unknown): value is Outbox {
 }
 
 function scheduleSave(): void {
-  const snapshot = JSON.stringify(outbox);
+  // Load (and merge) the saved outbox first, so a change made after a restart
+  // but before the first sync doesn't overwrite unsent changes from last time.
+  // The snapshot is taken at write time, after that merge.
   saveChain = saveChain
     .then(async () => {
-      await appStorage.setItem(OUTBOX_STORAGE_KEY, snapshot);
+      await loadOutbox();
+      await appStorage.setItem(OUTBOX_STORAGE_KEY, JSON.stringify(outbox));
     })
     .catch(() => undefined);
 }
