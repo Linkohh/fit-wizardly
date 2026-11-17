@@ -15,6 +15,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { usePlanStore } from '@/stores/planStore';
 import { useReadinessStore } from '@/stores/readinessStore';
 import { useTrainerStore } from '@/stores/trainerStore';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 import { BarChart2, Compass, Dumbbell, Target } from 'lucide-react';
 
 function TodayNextAction() {
@@ -66,7 +67,8 @@ export default function Analytics() {
     const profile = useAuthStore((state) => state.profile);
     const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
     const isTrainerAuthorized = !user || profile?.is_trainer === true;
-    const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
+    // Coach UI only exists while the coach flag is on (contract #1).
+    const isTrainerEnabled = isFeatureEnabled('coach') && isTrainerAuthorized && isTrainerMode;
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-8 space-y-8 pb-24">

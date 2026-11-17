@@ -128,6 +128,8 @@ async function renderOnboardingFlow() {
 
 describe('OnboardingFlow', () => {
   beforeEach(async () => {
+    // These cases cover the role and coach steps, which exist only with the coach flag on.
+    vi.stubEnv('VITE_FEATURE_COACH', 'true');
     localStorage.clear();
     mocks.fireConfetti.mockReset();
     mocks.navigate.mockReset();
@@ -140,6 +142,7 @@ describe('OnboardingFlow', () => {
     await act(async () => {
       resetOnboardingState();
     });
+    vi.unstubAllEnvs();
   });
 
   it('renders progress and skip controls in a normal-flow top row below the shared header', async () => {
@@ -254,5 +257,33 @@ describe('OnboardingFlow', () => {
 
     expect(screen.queryByTestId('onboarding-top-row')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Skip for now' })).not.toBeInTheDocument();
+  });
+
+  it('skips the role step when the coach flag is off', async () => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'false');
+    act(() => {
+      useOnboardingStore.setState({
+        currentStep: 'welcome',
+        userData: {
+          avatarEmoji: '💪',
+          displayName: 'Alex',
+          interestedGoals: [],
+          role: 'user',
+        },
+      });
+    });
+
+    await renderOnboardingFlow();
+
+    const topRow = screen.getByTestId('onboarding-top-row');
+    expect(within(topRow).getByText('1/2')).toBeInTheDocument();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Next' }));
+    });
+
+    expect(useOnboardingStore.getState().currentStep).toBe('goals');
+    expect(within(screen.getByTestId('onboarding-top-row')).getByText('2/2')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: "Let's go" })).toBeInTheDocument();
   });
 });

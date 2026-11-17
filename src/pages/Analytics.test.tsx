@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Analytics from './Analytics';
 
 type Selector<TState, TResult> = ((state: TState) => TResult) | undefined;
@@ -130,7 +130,12 @@ vi.mock('@/components/recovery/ReadinessTrend', () => ({
 }));
 
 describe('Analytics page command center', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   beforeEach(() => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'true');
     mocks.authState.user = null;
     mocks.authState.profile = null;
     mocks.trainerState.isTrainerMode = false;
@@ -172,6 +177,17 @@ describe('Analytics page command center', () => {
     fireEvent.click(screen.getByText('Load'));
 
     expect(screen.getByText('Coach Notes')).toBeInTheDocument();
+  });
+
+  it('hides Coach Notes when the coach flag is off, even if Coach Mode is persisted on', () => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'false');
+    mocks.trainerState.isTrainerMode = true;
+
+    render(<Analytics />);
+
+    fireEvent.click(screen.getByText('Load'));
+
+    expect(screen.queryByText('Coach Notes')).not.toBeInTheDocument();
   });
 
   it('hides Coach Notes for an authenticated non-trainer even if Coach Mode is persisted on', () => {

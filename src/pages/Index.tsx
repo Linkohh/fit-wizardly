@@ -4,6 +4,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainerStore } from '@/stores/trainerStore';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 import { Suspense, lazy, useEffect, useRef, useMemo, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { FeatureCard, type FeatureCardFeature } from '@/components/landing/FeatureCard';
@@ -68,7 +69,8 @@ export default function Index() {
   const isTrainerAuthorized = useAuthStore((state) => !state.user || state.profile?.is_trainer === true);
   const nativeApp = isNativeApp();
   const hasActivity = totalPlansGenerated > 0;
-  const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
+  // Coach UI only exists while the coach flag is on (contract #1).
+  const isTrainerEnabled = isFeatureEnabled('coach') && isTrainerAuthorized && isTrainerMode;
 
   const [selectedFeature, setSelectedFeature] = useState<Feature | null>(null);
   const [quoteReady, setQuoteReady] = useState(false);

@@ -1,11 +1,17 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { useOnboardingStore } from '@/stores/onboardingStore';
 
 describe('onboardingStore', () => {
     beforeEach(() => {
+        // The existing role and coach cases describe the flow with the coach flag on.
+        vi.stubEnv('VITE_FEATURE_COACH', 'true');
         window.localStorage.clear();
         // Reset store to initial state before each test
         useOnboardingStore.getState().resetOnboarding();
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
     });
 
     describe('initial state', () => {
@@ -194,5 +200,60 @@ describe('onboardingStore', () => {
             expect(state.userData.role).toBe('user');
             expect(state.canProceed()).toBe(false);
         });
+    });
+});
+
+describe('onboardingStore with the coach flag off', () => {
+    beforeEach(() => {
+        vi.stubEnv('VITE_FEATURE_COACH', 'false');
+        window.localStorage.clear();
+        useOnboardingStore.getState().resetOnboarding();
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
+    });
+
+    it('skips the role step: welcome goes straight to goals', () => {
+        useOnboardingStore.getState().nextStep();
+        expect(useOnboardingStore.getState().currentStep).toBe('goals');
+
+        useOnboardingStore.getState().prevStep();
+        expect(useOnboardingStore.getState().currentStep).toBe('welcome');
+    });
+
+    it('has two steps', () => {
+        expect(useOnboardingStore.getState().getTotalSteps()).toBe(2);
+    });
+
+    it('forces the role to user and leaves coach mode off', async () => {
+        const { useTrainerStore } = await import('@/stores/trainerStore');
+
+        useOnboardingStore.getState().setRole('coach');
+
+        expect(useOnboardingStore.getState().userData.role).toBe('user');
+        expect(useOnboardingStore.getState().getTotalSteps()).toBe(2);
+        expect(useTrainerStore.getState().isTrainerMode).toBe(false);
+    });
+
+    it('drops a persisted coach role and role step on rehydration', async () => {
+        window.localStorage.setItem(
+            'fitwizard-onboarding',
+            JSON.stringify({
+                state: {
+                    isComplete: false,
+                    hasStarted: true,
+                    currentStep: 'role',
+                    userData: { avatarEmoji: '💪', role: 'coach', interestedGoals: [] },
+                },
+                version: 0,
+            }),
+        );
+
+        await useOnboardingStore.persist.rehydrate();
+
+        const state = useOnboardingStore.getState();
+        expect(state.userData.role).toBe('user');
+        expect(state.currentStep).toBe('welcome');
     });
 });

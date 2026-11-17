@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import type { Badge } from '@/stores/achievementStore';
 import { BADGES, BadgeId } from '@/stores/achievementStore';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 
 interface BadgeDisplayProps {
   badge: Badge | BadgeId;
@@ -71,6 +72,24 @@ export function BadgeDisplay({
   );
 }
 
+// Badges that belong to surfaces hidden in v1 (contract #1). They are filtered
+// here rather than in achievementStore.ts, which Lane E owns.
+const CIRCLES_BADGE_PREFIXES = ['circle_', 'team_player', 'social_butterfly'] as const;
+const COACH_BADGE_PREFIXES = ['trainer_activated', 'first_client', 'clients_', 'template_creator'] as const;
+
+const matchesAnyPrefix = (badgeId: string, prefixes: readonly string[]) =>
+  prefixes.some((prefix) => badgeId.startsWith(prefix));
+
+function isBadgeVisible(badgeId: BadgeId): boolean {
+  if (!isFeatureEnabled('circles') && matchesAnyPrefix(badgeId, CIRCLES_BADGE_PREFIXES)) {
+    return false;
+  }
+  if (!isFeatureEnabled('coach') && matchesAnyPrefix(badgeId, COACH_BADGE_PREFIXES)) {
+    return false;
+  }
+  return true;
+}
+
 interface BadgeGridProps {
   badges: BadgeId[];
   unlockedBadges: BadgeId[];
@@ -78,9 +97,11 @@ interface BadgeGridProps {
 }
 
 export function BadgeGrid({ badges, unlockedBadges, size = 'md' }: BadgeGridProps) {
+  const visibleBadges = badges.filter(isBadgeVisible);
+
   return (
     <div className="grid grid-cols-4 sm:grid-cols-6 gap-4">
-      {badges.map((badgeId) => (
+      {visibleBadges.map((badgeId) => (
         <BadgeDisplay
           key={badgeId}
           badge={badgeId}

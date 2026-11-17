@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import PlanPage from './Plan';
 
 type Selector<TState, TResult> = ((state: TState) => TResult) | undefined;
@@ -18,6 +18,8 @@ const mocks = vi.hoisted(() => ({
   resetWizard: vi.fn(),
   setContext: vi.fn(),
 }));
+
+const trainerState = vi.hoisted(() => ({ isTrainerMode: false }));
 
 const planStoreState = vi.hoisted(() => ({
   currentPlan: null as unknown,
@@ -55,7 +57,7 @@ vi.mock('@/stores/planStore', () => ({
 
 vi.mock('@/stores/trainerStore', () => ({
   useTrainerStore: <T,>(selector?: Selector<{ isTrainerMode: boolean }, T>) =>
-    selectState({ isTrainerMode: false }, selector),
+    selectState(trainerState, selector),
 }));
 
 vi.mock('@/stores/wizardStore', () => ({
@@ -149,6 +151,40 @@ describe('PlanPage', () => {
     vi.clearAllMocks();
     planStoreState.currentPlan = null;
     planStoreState.planHistory = [];
+    trainerState.isTrainerMode = false;
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('hides Save as Template when the coach flag is off, even if Coach Mode is persisted on', () => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'false');
+    trainerState.isTrainerMode = true;
+    planStoreState.currentPlan = samplePlan;
+
+    render(
+      <MemoryRouter>
+        <PlanPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('plan.title')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /save as template/i })).not.toBeInTheDocument();
+  });
+
+  it('shows Save as Template when the coach flag and Coach Mode are on', () => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'true');
+    trainerState.isTrainerMode = true;
+    planStoreState.currentPlan = samplePlan;
+
+    render(
+      <MemoryRouter>
+        <PlanPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole('button', { name: /save as template/i })).toBeInTheDocument();
   });
 
   it('shows the empty state instead of an infinite skeleton when no plan is selected', () => {
