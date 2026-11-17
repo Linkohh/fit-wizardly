@@ -31,6 +31,7 @@ RERUNNABLE_MIGRATIONS=(
   "002_exercise_interactions_schema.sql"
   "004_plans_schema.sql"
   "007_user_data.sql"
+  "008_policy_fixes.sql"
 )
 
 TEMPLATE_DB="fw_test_template"
