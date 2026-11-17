@@ -177,10 +177,6 @@ vi.mock('./components/OnboardingGuard', () => ({
   OnboardingGuard: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-vi.mock('@/hooks/useNetworkStatus', () => ({
-  useNetworkStatus: () => undefined,
-}));
-
 vi.mock('@/hooks/useGlobalClickFeedback', () => ({
   useGlobalClickFeedback: () => undefined,
 }));
