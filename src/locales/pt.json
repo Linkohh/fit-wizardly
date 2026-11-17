@@ -376,5 +376,11 @@
     },
     "achievements": {
         "badge_unlocked": "Conquista desbloqueada: {{name}}"
+    },
+    "workoutResume": {
+        "title": "Você tem um treino não terminado",
+        "body": "{{unfinished}} ainda está em andamento. Retome-o ou descarte-o e comece {{requested}}.",
+        "resume": "Retomar {{unfinished}}",
+        "discard": "Descartar e começar este treino"
     }
 }

@@ -244,10 +244,27 @@ function removeLegacyLocalStorage(name: string): void {
 }
 
 /**
+ * Writes to a durable backend and reports whether it worked. False when only
+ * the in-memory fallback is available or the write failed.
+ */
+async function writeDurably(name: string, value: string): Promise<boolean> {
+  try {
+    const backend = await getBackend();
+    if (backend.kind === 'memory') return false;
+    await backend.setItem(name, value);
+    return true;
+  } catch (error) {
+    console.error(`[FitWizard] Could not move "${name}" into device storage.`, error);
+    return false;
+  }
+}
+
+/**
  * appStorage plus a one-time move from localStorage: if a store has nothing
  * in device storage yet but an older version of the app saved it in
- * localStorage under the same name, that value is copied over and the
- * localStorage copy is removed.
+ * localStorage under the same name, that value is copied over. The
+ * localStorage copy is removed only once the copy is confirmed saved in
+ * durable storage, so a failed or memory-only write never loses it.
  */
 export const migratingAppStorage: StateStorage = {
   async getItem(name) {
@@ -257,8 +274,9 @@ export const migratingAppStorage: StateStorage = {
     const legacy = readLegacyLocalStorage(name);
     if (legacy === null) return null;
 
-    await appStorage.setItem(name, legacy);
-    removeLegacyLocalStorage(name);
+    if (await writeDurably(name, legacy)) {
+      removeLegacyLocalStorage(name);
+    }
     return legacy;
   },
   setItem: (name, value) => appStorage.setItem(name, value),

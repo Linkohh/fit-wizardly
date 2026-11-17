@@ -809,5 +809,11 @@
     },
     "achievements": {
         "badge_unlocked": "Badge unlocked: {{name}}"
+    },
+    "workoutResume": {
+        "title": "You have an unfinished workout",
+        "body": "{{unfinished}} is still in progress. Resume it, or discard it and start {{requested}}.",
+        "resume": "Resume {{unfinished}}",
+        "discard": "Discard it and start this workout"
     }
 }

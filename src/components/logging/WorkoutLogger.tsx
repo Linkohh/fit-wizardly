@@ -132,6 +132,50 @@ export function WorkoutLogger() {
         );
     }
 
+    // A workout from another plan or day is still in progress (it survives
+    // app restarts). Don't mix it with this day: ask to resume or discard.
+    const unfinishedWorkout =
+        activeWorkout && (activeWorkout.planId !== planId || activeWorkout.dayIndex !== dayIndexNum)
+            ? activeWorkout
+            : null;
+
+    if (unfinishedWorkout) {
+        const requestedDayName = plan.workoutDays[dayIndexNum]?.name ?? '';
+        return (
+            <div className="container max-w-2xl mx-auto px-4 py-8">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>{t('workoutResume.title', 'You have an unfinished workout')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <p className="text-muted-foreground">
+                            {t(
+                                'workoutResume.body',
+                                '{{unfinished}} is still in progress. Resume it, or discard it and start {{requested}}.',
+                                { unfinished: unfinishedWorkout.dayName, requested: requestedDayName },
+                            )}
+                        </p>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                            <Button
+                                className="flex-1 min-h-[44px]"
+                                onClick={() => navigate(`/workout/${unfinishedWorkout.planId}/${unfinishedWorkout.dayIndex}`)}
+                            >
+                                {t('workoutResume.resume', 'Resume {{unfinished}}', { unfinished: unfinishedWorkout.dayName })}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="flex-1 min-h-[44px]"
+                                onClick={() => cancelWorkout()}
+                            >
+                                {t('workoutResume.discard', 'Discard it and start this workout')}
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
     if (!activeWorkout) {
         if (showReadinessCheck) {
             return (
