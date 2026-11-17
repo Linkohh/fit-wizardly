@@ -1,4 +1,4 @@
-import type { StateStorage } from 'zustand/middleware';
+import { createJSONStorage, type PersistStorage, type StateStorage } from 'zustand/middleware';
 import { isNativeApp } from '@/lib/platform';
 import { devLog } from '@/lib/devLog';
 
@@ -225,6 +225,75 @@ export async function requestPersistentStorage(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+function readLegacyLocalStorage(name: string): string | null {
+  try {
+    return typeof window === 'undefined' ? null : window.localStorage.getItem(name);
+  } catch {
+    return null;
+  }
+}
+
+function removeLegacyLocalStorage(name: string): void {
+  try {
+    if (typeof window !== 'undefined') window.localStorage.removeItem(name);
+  } catch {
+    // Nothing to clean up.
+  }
+}
+
+/**
+ * Writes to a durable backend and reports whether it worked. False when only
+ * the in-memory fallback is available or the write failed.
+ */
+async function writeDurably(name: string, value: string): Promise<boolean> {
+  try {
+    const backend = await getBackend();
+    if (backend.kind === 'memory') return false;
+    await backend.setItem(name, value);
+    return true;
+  } catch (error) {
+    console.error(`[FitWizard] Could not move "${name}" into device storage.`, error);
+    return false;
+  }
+}
+
+/**
+ * appStorage plus a one-time move from localStorage: if a store has nothing
+ * in device storage yet but an older version of the app saved it in
+ * localStorage under the same name, that value is copied over. The
+ * localStorage copy is removed only once the copy is confirmed saved in
+ * durable storage, so a failed or memory-only write never loses it.
+ */
+export const migratingAppStorage: StateStorage = {
+  async getItem(name) {
+    const current = await appStorage.getItem(name);
+    if (current !== null) return current;
+
+    const legacy = readLegacyLocalStorage(name);
+    if (legacy === null) return null;
+
+    if (await writeDurably(name, legacy)) {
+      removeLegacyLocalStorage(name);
+    }
+    return legacy;
+  },
+  setItem: (name, value) => appStorage.setItem(name, value),
+  async removeItem(name) {
+    // Synchronous part first, so callers that don't await (zustand's
+    // clearStorage) can't have it land after a later write.
+    removeLegacyLocalStorage(name);
+    await appStorage.removeItem(name);
+  },
+};
+
+/**
+ * The storage every user-data store should pass to persist():
+ * device storage, JSON with dates restored, and the one-time localStorage move.
+ */
+export function createUserDataStorage<S>(): PersistStorage<S> | undefined {
+  return createJSONStorage<S>(() => migratingAppStorage, { reviver: dateReviver });
 }
 
 /** Test helper: forget the chosen backend so the next call picks again. */

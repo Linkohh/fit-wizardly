@@ -227,3 +227,61 @@ describe('requestPersistentStorage', () => {
     expect(await requestPersistentStorage()).toBe(false);
   });
 });
+
+describe('migratingAppStorage (one-time move from localStorage)', () => {
+  const originalIndexedDb = globalThis.indexedDB;
+  const legacyValue = JSON.stringify({ state: { currentWeek: 3 }, version: 0 });
+
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  afterEach(() => {
+    Object.defineProperty(globalThis, 'indexedDB', { value: originalIndexedDb, configurable: true, writable: true });
+    vi.doUnmock('@/lib/platform');
+    vi.doUnmock('@capacitor/filesystem');
+    window.localStorage.clear();
+  });
+
+  it('moves the value and removes the localStorage copy once it is saved', async () => {
+    const { migratingAppStorage, appStorage } = await loadAppStorage({ native: false });
+    await appStorage.removeItem('fitwizard-test-move');
+    window.localStorage.setItem('fitwizard-test-move', legacyValue);
+
+    expect(await migratingAppStorage.getItem('fitwizard-test-move')).toBe(legacyValue);
+
+    expect(await appStorage.getItem('fitwizard-test-move')).toBe(legacyValue);
+    expect(window.localStorage.getItem('fitwizard-test-move')).toBeNull();
+    await appStorage.removeItem('fitwizard-test-move');
+  });
+
+  it('keeps the localStorage copy when only memory storage is available', async () => {
+    Object.defineProperty(globalThis, 'indexedDB', { value: undefined, configurable: true, writable: true });
+    const { migratingAppStorage } = await loadAppStorage({ native: false });
+    window.localStorage.setItem('fitwizard-test-move', legacyValue);
+
+    expect(await migratingAppStorage.getItem('fitwizard-test-move')).toBe(legacyValue);
+
+    expect(window.localStorage.getItem('fitwizard-test-move')).toBe(legacyValue);
+  });
+
+  it('keeps the localStorage copy when the durable write fails', async () => {
+    vi.doMock('@capacitor/filesystem', () => ({
+      Filesystem: {
+        readFile: vi.fn(async () => { throw new Error('File does not exist'); }),
+        writeFile: vi.fn(async () => { throw new Error('disk full'); }),
+        deleteFile: vi.fn(async () => undefined),
+      },
+      Directory: { Data: 'DATA' },
+      Encoding: { UTF8: 'utf8' },
+    }));
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const { migratingAppStorage } = await loadAppStorage({ native: true });
+    window.localStorage.setItem('fitwizard-test-move', legacyValue);
+
+    expect(await migratingAppStorage.getItem('fitwizard-test-move')).toBe(legacyValue);
+
+    expect(window.localStorage.getItem('fitwizard-test-move')).toBe(legacyValue);
+    consoleError.mockRestore();
+  });
+});

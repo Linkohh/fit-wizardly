@@ -365,5 +365,20 @@
                 "intake_series": "Kalorien",
                 "weight_series": "Gewicht ({{unit}})"
             }
+    },
+    "weeklyGoal": {
+        "remaining_one": "Nur noch 1 Training!",
+        "remaining_other": "Noch {{count}} Trainings bis zu deinem Ziel",
+        "away_one": "Nur noch 1 Training bis zu deinem Wochenziel!",
+        "away_other": "Noch {{count}} Trainings bis zu deinem Wochenziel"
+    },
+    "achievements": {
+        "badge_unlocked": "Abzeichen freigeschaltet: {{name}}"
+    },
+    "workoutResume": {
+        "title": "Du hast ein unvollendetes Training",
+        "body": "{{unfinished}} läuft noch. Setze es fort oder verwirf es und starte {{requested}}.",
+        "resume": "{{unfinished}} fortsetzen",
+        "discard": "Verwerfen und dieses Training starten"
     }
 }

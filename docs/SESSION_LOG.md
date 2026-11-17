@@ -146,6 +146,36 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-17 — PR #45 Merged; Lane E Day 2: Plans, Workouts and Measurements Survive Restarts (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, restarted from `preview_b` @ `5984b86`)
+
+- **What was done:**
+  - Merged PR #45 (Lane E Day 1) on Lincoln's instruction, after CI, the Vercel preview and the automated review all passed, with no review threads.
+  - Ran **Lane E Day 2**:
+    - The plan store now saves plans, workout logs, personal records and the in-progress workout on the device; body measurements are saved too.
+    - Saved data from the previous version (week and weight unit) is carried over once from localStorage.
+    - The streak, weekly goal and badges now update. The weekly goal counts finished workouts and is set from the plan's training days.
+    - Circles posting only runs when the circles flag is on.
+  - Added the running checklist `docs/project/CHECKLIST.md` at Lincoln's request.
+  - Details are in `docs/project/handoffs/2026-11-17-lane-e-day-2.md`.
+- **Verified in a real browser** (production build): generated a plan through the wizard, then reloaded. The plan survived, it sits in IndexedDB (`fitwizard-plans` v2), localStorage has no plan data, and home shows weekly goal 0/3 with "3 workouts to reach your goal".
+- **Mistakes caught and fixed in this session:**
+  - Rewriting `pt.json` through a JSON parser dropped its duplicate `"wizard"` block. Reverted; the keys were re-added as text. Warnings were added to the conflict rules and to Lane B's brief.
+  - A script truncated `measurementsStore.ts`. It was rebuilt from `HEAD` plus the intended changes; the diff was checked.
+  - `migratingAppStorage.removeItem` cleared localStorage only after an async step, so an un-awaited `clearStorage()` could delete a newer value. It now clears localStorage first.
+- **New issues found:** DEBT-041, DEBT-042, DEBT-043 (LOW; see Known Issues).
+- **Test status:**
+  - 836 tests across 153 files pass (+19). Lint: 0 errors, 4 pre-existing warnings. Typecheck clean. Build passes.
+  - Initial bundle 342.7 → 344.8 KB gzip. The badge catalogue is loaded on demand to keep it out of the startup bundle.
+- **Legal/compliance notes:** workout logs, personal records and body measurements are now stored on the device: IndexedDB `fitwizard` on the web, app files on native. They are already included in the Profile JSON export. Lane A adds them to the data inventory.
+- **Review follow-up (same day):** the automated reviewer raised 2 findings on PR #46, and both were real.
+  - Fixed: an unfinished workout from another day is now offered as **Resume / Discard** instead of being mixed with the opened day (`WorkoutLogger.tsx`).
+  - Fixed: the one-time localStorage move keeps the old copy unless the new copy was confirmed written to durable storage (`appStorage.ts`).
+  - 842/842 tests. The resume flow was checked in a real browser.
+- **Next steps:**
+  1. Lincoln reviews and merges PR #46 (Lane E Day 2).
+  2. Lane E Day 3 (remaining stores, sign-out behaviour, ADR 11).
+  3. Start the other Wave 1 lanes. Lane B goes after this PR merges.
+
 ### 2026-11-17 — PR #44 Merged; Lane E Day 1 Device Storage (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, restarted from `preview_b` @ `79b6ebb`)
 
 - **What was done:**
@@ -656,6 +686,9 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-026 | Touch preview and the phone flow layout are not device-verified; a touch starting on a muscle does not scroll the page, which may feel sticky on small screens | `svg/useTouchMusclePreview.ts`, `MuscleSelector.tsx`, `AnatomyPanel.tsx` | Unit-tested and browser-tested with simulated touch (2026-11-15). Check on a physical iPhone and Android phone, and with VoiceOver. |
 | DEBT-039 | First-run consent screen hardcodes "Your AI workout companion is ready." | `src/components/legal/ConsentModal.tsx:126` | Assigned to Lane B, Day 1 (roadmap 0.1). |
 | DEBT-040 | Consent screen says "My data is stored locally on this device"; this becomes inaccurate once Wave 2 sync ships | `src/components/legal/ConsentModal.tsx` | Reword in Lane C Day 5 and Lane A Day 4. |
+| DEBT-041 | `pt.json` has a duplicate `"wizard"` key, and JSON tools silently drop the first block | `src/locales/pt.json` | Merge by hand (Lane B Day 2). Never rewrite locale files with a parser. |
+| DEBT-042 | `BadgeUnlockModal` is never mounted; badges are now shown as toasts | `src/components/motivation/BadgeUnlockModal.tsx` | Candidate for Lane D's dead-code removal. |
+| DEBT-043 | The wizard header says "Coach-built intake" / "Coach intake" while the coach portal is off | `src/pages/Wizard.tsx` and the wizard header | Wording only; Lane B could reword it on Day 4. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
 | DEBT-025 | Enter on a focused muscle can advance the wizard after selecting it | `src/pages/Wizard.tsx` | The existing window-level shortcut handles Enter after the focused SVG control has already handled it. |

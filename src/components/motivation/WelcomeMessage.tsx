@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Sparkles, Sun, Moon, Sunrise, Sunset } from 'lucide-react';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface WelcomeMessageProps {
   className?: string;
@@ -60,6 +61,7 @@ const TimeIcon = ({ timeOfDay }: { timeOfDay: string }) => {
 };
 
 export function WelcomeMessage({ className }: WelcomeMessageProps) {
+  const { t } = useTranslation();
   const { userName, currentStreak, weeklyProgress, weeklyGoal } = useAchievementStore();
   const [timeOfDay, setTimeOfDay] = useState(getTimeOfDay);
   const [greeting, setGreeting] = useState('');
@@ -89,10 +91,11 @@ export function WelcomeMessage({ className }: WelcomeMessageProps) {
         
         {remainingForGoal > 0 && remainingForGoal <= weeklyGoal && (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-            {remainingForGoal === 1 
-              ? "Just 1 more plan to hit your weekly goal!" 
-              : `${remainingForGoal} plans away from your weekly goal`
-            }
+            {t('weeklyGoal.away', {
+              count: remainingForGoal,
+              defaultValue_one: 'Just 1 more workout to hit your weekly goal!',
+              defaultValue_other: '{{count}} workouts away from your weekly goal',
+            })}
           </span>
         )}
         

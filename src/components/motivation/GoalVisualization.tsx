@@ -3,12 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProgressRing } from './ProgressRing';
 import { useAchievementStore } from '@/stores/achievementStore';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface GoalVisualizationProps {
   className?: string;
 }
 
 export function GoalVisualization({ className }: GoalVisualizationProps) {
+  const { t } = useTranslation();
   const { weeklyGoal, weeklyProgress } = useAchievementStore();
   
   const progress = Math.min((weeklyProgress / weeklyGoal) * 100, 100);
@@ -39,10 +41,11 @@ export function GoalVisualization({ className }: GoalVisualizationProps) {
             ) : (
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">
-                  {remaining === 1 
-                    ? "Just 1 more workout plan to go!"
-                    : `${remaining} workout plans to reach your goal`
-                  }
+                  {t('weeklyGoal.remaining', {
+                    count: remaining,
+                    defaultValue_one: 'Just 1 more workout to go!',
+                    defaultValue_other: '{{count}} workouts to reach your goal',
+                  })}
                 </p>
                 <p className="text-xs text-muted-foreground/70">
                   You're making great progress!

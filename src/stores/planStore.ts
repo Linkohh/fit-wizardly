@@ -34,6 +34,18 @@ import {
   syncPlanStateWithRemote,
   upsertPlanHistory,
 } from '@/lib/plans/planSyncService';
+import { createUserDataStorage } from '@/lib/storage/appStorage';
+import { hydrationTracking } from '@/lib/storage/hydration';
+import { isFeatureEnabled } from '@/lib/featureFlags';
+import {
+  MAX_PERSONAL_RECORDS,
+  MAX_WORKOUT_LOGS,
+  PLAN_STORE_NAME,
+  PLAN_STORE_VERSION,
+  pickPersistedPlanState,
+  sanitizePlanPersistedState,
+  type PersistedPlanState,
+} from '@/stores/planStore.persistence';
 
 // Helper for async operations with error handling
 const handleAsyncOperation = async <T>(
@@ -56,12 +68,23 @@ const handleAsyncOperation = async <T>(
 // ACTIVE WORKOUT STATE
 // ============================================
 
-type PersistedPlanState = Pick<PlanState, 'currentWeek' | 'preferredWeightUnit'>;
+async function recordWorkoutForAchievements(): Promise<void> {
+  try {
+    const [{ useAchievementStore }, { announceNewBadges }] = await Promise.all([
+      import('@/stores/achievementStore'),
+      import('@/lib/achievements/announceBadges'),
+    ]);
+    const achievements = useAchievementStore.getState();
+    const unlockedBadges = achievements.updateStreak();
+    achievements.incrementWeeklyProgress();
+    announceNewBadges(unlockedBadges);
+  } catch (error) {
+    console.error('Failed to update streak and weekly goal:', error);
+  }
+}
 
-const sanitizePlanPersistedState = (state: Partial<PlanState> | undefined): PersistedPlanState => ({
-  currentWeek: typeof state?.currentWeek === 'number' ? state.currentWeek : 1,
-  preferredWeightUnit: state?.preferredWeightUnit === 'kg' ? 'kg' : 'lbs',
-});
+// What is saved on the device, and how it's checked on load, lives in
+// planStore.persistence.ts (ADR 11: local-first user data).
 
 // ============================================
 // PLAN STATE INTERFACE
@@ -409,28 +432,34 @@ export const usePlanStore = create<PlanState>()(
           const newPRs = detectNewPersonalRecords(workoutLog, workoutLogs);
 
           set((state) => ({
-            workoutLogs: [workoutLog, ...state.workoutLogs].slice(0, 100), // Keep last 100 logs
+            workoutLogs: [workoutLog, ...state.workoutLogs].slice(0, MAX_WORKOUT_LOGS),
             activeWorkout: null,
-            personalRecords: [...newPRs, ...state.personalRecords].slice(0, 50),
+            personalRecords: [...newPRs, ...state.personalRecords].slice(0, MAX_PERSONAL_RECORDS),
           }));
 
-          // Post workout to user's circles (fire-and-forget)
-          postWorkoutToCircles({
-            workoutName: workoutLog.dayName,
-            duration: workoutLog.duration,
-            exerciseCount: workoutLog.exercises.length,
-            totalVolume: workoutLog.totalVolume,
-          }).catch(err => console.error('Failed to post workout to circles:', err));
+          // Streak and weekly goal count finished workouts. Loaded on demand
+          // so the badge catalogue stays out of the start-up bundle.
+          void recordWorkoutForAchievements();
 
-          // Post any new PRs to circles
-          if (newPRs.length > 0) {
-            for (const pr of newPRs) {
-              postPRToCircles({
-                exerciseName: pr.exerciseName,
-                oldValue: pr.previousValue || 0,
-                newValue: pr.newValue,
-                prType: pr.type as 'weight' | 'reps' | 'volume',
-              }).catch(err => console.error('Failed to post PR to circles:', err));
+          if (isFeatureEnabled('circles')) {
+            // Post workout to user's circles (fire-and-forget)
+            postWorkoutToCircles({
+              workoutName: workoutLog.dayName,
+              duration: workoutLog.duration,
+              exerciseCount: workoutLog.exercises.length,
+              totalVolume: workoutLog.totalVolume,
+            }).catch(err => console.error('Failed to post workout to circles:', err));
+
+            // Post any new PRs to circles
+            if (newPRs.length > 0) {
+              for (const pr of newPRs) {
+                postPRToCircles({
+                  exerciseName: pr.exerciseName,
+                  oldValue: pr.previousValue || 0,
+                  newValue: pr.newValue,
+                  prType: pr.type as 'weight' | 'reps' | 'volume',
+                }).catch(err => console.error('Failed to post PR to circles:', err));
+              }
             }
           }
 
@@ -507,12 +536,18 @@ export const usePlanStore = create<PlanState>()(
       },
     }),
     {
-      name: 'fitwizard-plans',
-      partialize: sanitizePlanPersistedState,
+      name: PLAN_STORE_NAME,
+      version: PLAN_STORE_VERSION,
+      storage: createUserDataStorage<PersistedPlanState>(),
+      partialize: pickPersistedPlanState,
+      // Older saved shapes are checked field by field in merge(), so no
+      // conversion is needed here: v1 data keeps currentWeek and the unit.
+      migrate: (persistedState) => persistedState as PersistedPlanState,
       merge: (persistedState, currentState) => ({
         ...currentState,
-        ...sanitizePlanPersistedState(persistedState as Partial<PlanState> | undefined),
+        ...sanitizePlanPersistedState(persistedState),
       }),
+      ...hydrationTracking(PLAN_STORE_NAME),
     }
   )
 );

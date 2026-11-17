@@ -118,7 +118,7 @@ Routing, nav, native project files, `supabase/` (that's Lane F; you consume its 
 1. Move these stores to `appStorage`, each with `version`, `migrate` and hydration registration:
    - `nutritionStore`: persist `profile`, `targets`, `history`, `customFoods`, `favorites`, `savedMeals`, `selectedDate`. Widen `PersistedNutritionState` and `sanitizeNutritionPersistedState`. Validate every day log.
    - `readinessStore` (`readiness-storage`), `achievementStore`, `customExerciseStore`, `favorites-store`: these currently persist to `localStorage`.
-2. **One-time copy from localStorage:**
+2. **One-time copy from localStorage** (already built on Day 2: `createUserDataStorage()` in `appStorage.ts` does the copy, so a store just uses it as its `storage`):
    - In each store's `migrate`, or in a small `src/lib/storage/migrateFromLocalStorage.ts` run before hydration:
      - If `appStorage` has no value for the key but `localStorage` does, copy it over, then remove the `localStorage` key.
    - Test this.

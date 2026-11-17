@@ -132,7 +132,9 @@ describe('planStore syncWithBackend', () => {
     expect(state.currentPlan).toEqual(remotePlan);
   });
 
-  it('persists only non-sensitive preference fields', async () => {
+  it('never writes plans or workout data to localStorage', async () => {
+    // Since ADR 11 (2026-11) user data is saved to device storage (IndexedDB /
+    // app files), not localStorage. Round-trip tests: planStore.persistence.test.ts.
     const { usePlanStore } = await loadPlanStore();
     const sensitivePlan = buildPlan('plan-5', 'Sensitive plan');
 
@@ -145,15 +147,8 @@ describe('planStore syncWithBackend', () => {
       personalRecords: [{ exerciseId: 'exercise-1' } as never],
       preferredWeightUnit: 'kg',
     });
+    await new Promise((resolve) => setTimeout(resolve, 20));
 
-    const persisted = JSON.parse(window.localStorage.getItem('fitwizard-plans') ?? '{"state":{}}');
-
-    expect(persisted.state.currentWeek).toBe(3);
-    expect(persisted.state.preferredWeightUnit).toBe('kg');
-    expect(persisted.state.currentPlan).toBeUndefined();
-    expect(persisted.state.planHistory).toBeUndefined();
-    expect(persisted.state.workoutLogs).toBeUndefined();
-    expect(persisted.state.activeWorkout).toBeUndefined();
-    expect(persisted.state.personalRecords).toBeUndefined();
+    expect(window.localStorage.getItem('fitwizard-plans')).toBeNull();
   });
 });

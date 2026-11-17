@@ -1,10 +1,11 @@
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { WorkoutLogger } from '../WorkoutLogger';
 
 const mocks = vi.hoisted(() => ({
     startWorkout: vi.fn(),
+    cancelWorkout: vi.fn(),
     getTodayLog: vi.fn(),
     activeWorkout: null as unknown,
 }));
@@ -38,7 +39,7 @@ vi.mock('@/stores/planStore', () => ({
         getPlanById: () => planFixture,
         activeWorkout: mocks.activeWorkout,
         startWorkout: mocks.startWorkout,
-        cancelWorkout: vi.fn(),
+        cancelWorkout: mocks.cancelWorkout,
         logSet: vi.fn(),
         skipExercise: vi.fn(),
         completeWorkout: vi.fn(() => null),
@@ -123,5 +124,61 @@ describe('WorkoutLogger readiness gate', () => {
         await waitFor(() => {
             expect(mocks.startWorkout).toHaveBeenCalledWith('plan-1', 0);
         });
+    });
+});
+
+describe('WorkoutLogger with an unfinished workout from another day', () => {
+    const unfinishedWorkout = {
+        planId: 'plan-old',
+        dayIndex: 2,
+        dayName: 'Lower B',
+        startedAt: new Date('2026-11-16T17:00:00.000Z'),
+        exercises: [],
+        currentExerciseIndex: 0,
+        currentSetIndex: 0,
+        restTimerEndTime: null,
+    };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mocks.activeWorkout = unfinishedWorkout;
+        mocks.getTodayLog.mockReturnValue({ date: '2026-11-17', overallScore: 3 });
+    });
+
+    function renderAt(path: string) {
+        return render(
+            <MemoryRouter initialEntries={[path]}>
+                <Routes>
+                    <Route path="/workout/plan-old/2" element={<div>Resumed unfinished workout</div>} />
+                    <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
+                </Routes>
+            </MemoryRouter>
+        );
+    }
+
+    it('asks to resume or discard instead of mixing the two workouts', () => {
+        renderAt('/workout/plan-1/0');
+
+        expect(screen.getByText('You have an unfinished workout')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Resume/ })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /Discard/ })).toBeInTheDocument();
+        expect(mocks.startWorkout).not.toHaveBeenCalled();
+    });
+
+    it('goes back to the unfinished workout on Resume', () => {
+        renderAt('/workout/plan-1/0');
+
+        fireEvent.click(screen.getByRole('button', { name: /Resume/ }));
+
+        expect(screen.getByText('Resumed unfinished workout')).toBeInTheDocument();
+        expect(mocks.cancelWorkout).not.toHaveBeenCalled();
+    });
+
+    it('discards the unfinished workout on Discard', () => {
+        renderAt('/workout/plan-1/0');
+
+        fireEvent.click(screen.getByRole('button', { name: /Discard/ }));
+
+        expect(mocks.cancelWorkout).toHaveBeenCalledTimes(1);
     });
 });
