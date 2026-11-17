@@ -184,6 +184,12 @@ describe('clearLocalUserData', () => {
     await vi.waitFor(() => expect(usePlanStore.persist.hasHydrated()).toBe(true));
     usePlanStore.setState({ currentWeek: 3 });
     await waitForSaved('fitwizard-plans', '"currentWeek":3');
+    const { markDirty, countPendingChanges, flushOutboxWrites } = await import('@/lib/sync/outbox');
+    markDirty('workout_logs', 'log-1');
+    await flushOutboxWrites();
+    expect(await savedValue('fitwizard-sync-outbox')).toContain('log-1');
+    const { appStorage } = await import('@/lib/storage/appStorage');
+    await appStorage.setItem('fitwizard-sync-cursor', '{"userId":"u","cursors":{}}');
 
     const { clearLocalUserData, USER_DATA_STORE_NAMES } = await import('@/lib/storage/clearLocalUserData');
     await clearLocalUserData();
@@ -191,11 +197,14 @@ describe('clearLocalUserData', () => {
     for (const name of USER_DATA_STORE_NAMES) {
       expect(await savedValue(name)).toBeNull();
     }
+    expect(await savedValue('fitwizard-sync-outbox')).toBeNull();
+    expect(await savedValue('fitwizard-sync-cursor')).toBeNull();
     expect(usePreferencesStore.getState().favorites).toEqual([]);
     expect(window.localStorage.getItem('fitwizard-preferences')).toBeNull();
     expect(stores.readiness.getState().logs).toEqual([]);
     expect(Object.keys(stores.nutrition.getState().history)).toEqual([]);
     expect(usePlanStore.getState().currentWeek).toBe(1);
+    expect(countPendingChanges()).toBe(0);
   });
 
   it('erases a store that had not been opened yet, without its saved copy coming back', async () => {

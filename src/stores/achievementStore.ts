@@ -30,9 +30,6 @@ export type BadgeId =
   | 'tonnage_king'
   | 'pr_machine'
   // Wisdom badges
-  | 'exercise_scientist'
-  | 'programming_nerd'
-  | 'wisdom_master'
   | 'concept_collector'
   // Circle badges
   | 'circle_founder'
@@ -215,28 +212,9 @@ export const BADGES: Record<BadgeId, Omit<Badge, 'unlockedAt'>> = {
     icon: '🏆',
     tier: 'gold',
   },
-  // Wisdom badges
-  exercise_scientist: {
-    id: 'exercise_scientist',
-    name: 'Exercise Scientist',
-    description: 'Asked 10 questions to Wisdom AI',
-    icon: '🔬',
-    tier: 'bronze',
-  },
-  programming_nerd: {
-    id: 'programming_nerd',
-    name: 'Programming Nerd',
-    description: 'Asked 25 questions to Wisdom AI',
-    icon: '🧠',
-    tier: 'silver',
-  },
-  wisdom_master: {
-    id: 'wisdom_master',
-    name: 'Wisdom Master',
-    description: 'Asked 50 questions to Wisdom AI',
-    icon: '🎓',
-    tier: 'gold',
-  },
+  // The three "Wisdom AI" question badges were removed (DEBT-046): the Wisdom
+  // chat isn't part of the app, so they could never be earned. Saved data that
+  // still lists them is cleaned by sanitizeAchievementState (unknown ids dropped).
   concept_collector: {
     id: 'concept_collector',
     name: 'Concept Collector',
