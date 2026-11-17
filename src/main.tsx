@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App.tsx";
+import { HydrationGate } from "./components/HydrationGate";
 import "./index.css";
 import "./lib/i18n"; // Initialize i18n
 import { startInstallPromptCapture } from "./lib/install-prompt-capture";
@@ -65,6 +66,8 @@ applyInitialTheme();
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
-    <App />
+    <HydrationGate>
+      <App />
+    </HydrationGate>
   </BrowserRouter>
 );
