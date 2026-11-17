@@ -167,6 +167,10 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
   - 836 tests across 153 files pass (+19). Lint: 0 errors, 4 pre-existing warnings. Typecheck clean. Build passes.
   - Initial bundle 342.7 → 344.8 KB gzip. The badge catalogue is loaded on demand to keep it out of the startup bundle.
 - **Legal/compliance notes:** workout logs, personal records and body measurements are now stored on the device: IndexedDB `fitwizard` on the web, app files on native. They are already included in the Profile JSON export. Lane A adds them to the data inventory.
+- **Review follow-up (same day):** the automated reviewer raised 2 findings on PR #46, and both were real.
+  - Fixed: an unfinished workout from another day is now offered as **Resume / Discard** instead of being mixed with the opened day (`WorkoutLogger.tsx`).
+  - Fixed: the one-time localStorage move keeps the old copy unless the new copy was confirmed written to durable storage (`appStorage.ts`).
+  - 842/842 tests. The resume flow was checked in a real browser.
 - **Next steps:**
   1. Lincoln reviews and merges PR #46 (Lane E Day 2).
   2. Lane E Day 3 (remaining stores, sign-out behaviour, ADR 11).

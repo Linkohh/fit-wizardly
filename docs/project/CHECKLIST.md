@@ -22,7 +22,7 @@
 
 | What | Status | Waiting on |
 |---|---|---|
-| Lane E Day 2: PR #46 | Open; all checks green locally, CI running | Lincoln's review and merge |
+| Lane E Day 2: PR #46 | Open. CI passed; 2 automated review findings fixed (resume/discard an unfinished workout; never delete old saved settings unless the move succeeded); 842/842 tests | Lincoln's review and merge |
 
 ## Next up (in order)
 
