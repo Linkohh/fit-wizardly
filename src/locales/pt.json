@@ -367,5 +367,14 @@
                 "intake_series": "Calorias",
                 "weight_series": "Peso ({{unit}})"
             }
+    },
+    "weeklyGoal": {
+        "remaining_one": "Só mais 1 treino!",
+        "remaining_other": "Faltam {{count}} treinos para a sua meta",
+        "away_one": "Só mais 1 treino para a sua meta semanal!",
+        "away_other": "Faltam {{count}} treinos para a sua meta semanal"
+    },
+    "achievements": {
+        "badge_unlocked": "Conquista desbloqueada: {{name}}"
     }
 }

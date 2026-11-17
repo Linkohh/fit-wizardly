@@ -800,5 +800,14 @@
                 "intake_series": "Calories",
                 "weight_series": "Weight ({{unit}})"
             }
+    },
+    "weeklyGoal": {
+        "remaining_one": "Just 1 more workout to go!",
+        "remaining_other": "{{count}} workouts to reach your goal",
+        "away_one": "Just 1 more workout to hit your weekly goal!",
+        "away_other": "{{count}} workouts away from your weekly goal"
+    },
+    "achievements": {
+        "badge_unlocked": "Badge unlocked: {{name}}"
     }
 }

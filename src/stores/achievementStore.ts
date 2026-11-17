@@ -295,6 +295,8 @@ interface AchievementState {
   lastActivityDate: string | null;
   weeklyGoal: number;
   weeklyProgress: number;
+  /** Monday (YYYY-MM-DD, local time) of the week weeklyProgress belongs to. */
+  weekStart: string | null;
   userName: string;
 
   // Badges
@@ -309,9 +311,21 @@ interface AchievementState {
   setWeeklyGoal: (goal: number) => void;
   incrementWeeklyProgress: () => void;
   resetWeeklyProgress: () => void;
+  /** Starts a fresh week count when the calendar week has changed. */
+  rollWeekIfNeeded: () => void;
   setUserName: (name: string) => void;
   getBadge: (badgeId: BadgeId) => Badge | undefined;
   getUnlockedBadges: () => Badge[];
+}
+
+/** Monday of the given date's week, as YYYY-MM-DD in local time. */
+export function getWeekStart(date: Date = new Date()): string {
+  const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const daysSinceMonday = (monday.getDay() + 6) % 7;
+  monday.setDate(monday.getDate() - daysSinceMonday);
+  const month = String(monday.getMonth() + 1).padStart(2, '0');
+  const day = String(monday.getDate()).padStart(2, '0');
+  return `${monday.getFullYear()}-${month}-${day}`;
 }
 
 export const useAchievementStore = create<AchievementState>()(
@@ -323,6 +337,7 @@ export const useAchievementStore = create<AchievementState>()(
       lastActivityDate: null,
       weeklyGoal: 5,
       weeklyProgress: 0,
+      weekStart: null,
       userName: '',
       unlockedBadges: [],
       newBadges: [],
@@ -350,9 +365,9 @@ export const useAchievementStore = create<AchievementState>()(
             newBadges.push('plans_100');
           }
 
+          // Weekly progress counts finished workouts, not generated plans.
           return {
             totalPlansGenerated: newTotal,
-            weeklyProgress: state.weeklyProgress + 1,
             unlockedBadges: [...state.unlockedBadges, ...newBadges],
             newBadges: [...state.newBadges, ...newBadges],
           };
@@ -427,11 +442,19 @@ export const useAchievementStore = create<AchievementState>()(
 
       setWeeklyGoal: (goal) => set({ weeklyGoal: goal }),
 
-      incrementWeeklyProgress: () => set((state) => ({
-        weeklyProgress: state.weeklyProgress + 1,
-      })),
+      incrementWeeklyProgress: () => {
+        get().rollWeekIfNeeded();
+        set((state) => ({ weeklyProgress: state.weeklyProgress + 1 }));
+      },
 
-      resetWeeklyProgress: () => set({ weeklyProgress: 0 }),
+      resetWeeklyProgress: () => set({ weeklyProgress: 0, weekStart: getWeekStart() }),
+
+      rollWeekIfNeeded: () => {
+        const thisWeek = getWeekStart();
+        if (get().weekStart !== thisWeek) {
+          set({ weeklyProgress: 0, weekStart: thisWeek });
+        }
+      },
 
       setUserName: (name) => set({ userName: name }),
 
@@ -453,6 +476,10 @@ export const useAchievementStore = create<AchievementState>()(
     }),
     {
       name: 'fitwizard-achievements',
+      // A new week starts at zero, even if the app wasn't opened when it began.
+      onRehydrateStorage: () => (state) => {
+        state?.rollWeekIfNeeded();
+      },
     }
   )
 );

@@ -1,4 +1,4 @@
-import type { StateStorage } from 'zustand/middleware';
+import { createJSONStorage, type PersistStorage, type StateStorage } from 'zustand/middleware';
 import { isNativeApp } from '@/lib/platform';
 import { devLog } from '@/lib/devLog';
 
@@ -225,6 +225,57 @@ export async function requestPersistentStorage(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+function readLegacyLocalStorage(name: string): string | null {
+  try {
+    return typeof window === 'undefined' ? null : window.localStorage.getItem(name);
+  } catch {
+    return null;
+  }
+}
+
+function removeLegacyLocalStorage(name: string): void {
+  try {
+    if (typeof window !== 'undefined') window.localStorage.removeItem(name);
+  } catch {
+    // Nothing to clean up.
+  }
+}
+
+/**
+ * appStorage plus a one-time move from localStorage: if a store has nothing
+ * in device storage yet but an older version of the app saved it in
+ * localStorage under the same name, that value is copied over and the
+ * localStorage copy is removed.
+ */
+export const migratingAppStorage: StateStorage = {
+  async getItem(name) {
+    const current = await appStorage.getItem(name);
+    if (current !== null) return current;
+
+    const legacy = readLegacyLocalStorage(name);
+    if (legacy === null) return null;
+
+    await appStorage.setItem(name, legacy);
+    removeLegacyLocalStorage(name);
+    return legacy;
+  },
+  setItem: (name, value) => appStorage.setItem(name, value),
+  async removeItem(name) {
+    // Synchronous part first, so callers that don't await (zustand's
+    // clearStorage) can't have it land after a later write.
+    removeLegacyLocalStorage(name);
+    await appStorage.removeItem(name);
+  },
+};
+
+/**
+ * The storage every user-data store should pass to persist():
+ * device storage, JSON with dates restored, and the one-time localStorage move.
+ */
+export function createUserDataStorage<S>(): PersistStorage<S> | undefined {
+  return createJSONStorage<S>(() => migratingAppStorage, { reviver: dateReviver });
 }
 
 /** Test helper: forget the chosen backend so the next call picks again. */
