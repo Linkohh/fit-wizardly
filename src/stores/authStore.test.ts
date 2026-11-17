@@ -9,10 +9,15 @@ const mocks = vi.hoisted(() => ({
   signOut: vi.fn(),
 }));
 
+const toastMocks = vi.hoisted(() => ({
+  info: vi.fn(),
+}));
+
 vi.mock('sonner', () => ({
   toast: {
     error: vi.fn(),
     success: vi.fn(),
+    info: toastMocks.info,
   },
 }));
 
@@ -326,11 +331,8 @@ describe('authStore.signOut', () => {
 
   it('clears legacy privacy-sensitive storage on sign out', async () => {
     window.localStorage.setItem('fitwizard-trainer', '1');
-    window.localStorage.setItem('fitwizard-plans', '1');
     window.localStorage.setItem('fitwizard-onboarding', '1');
     window.localStorage.setItem('fitwizard-wizard', '1');
-    window.localStorage.setItem('fitwizard-nutrition-storage', '1');
-    window.localStorage.setItem('measurements-storage', '1');
     window.localStorage.setItem('fitwizard-wisdom', '1');
 
     const { useAuthStore } = await loadAuthStore({ configured: false });
@@ -338,12 +340,26 @@ describe('authStore.signOut', () => {
     await useAuthStore.getState().signOut();
 
     expect(window.localStorage.getItem('fitwizard-trainer')).toBeNull();
-    expect(window.localStorage.getItem('fitwizard-plans')).toBeNull();
     expect(window.localStorage.getItem('fitwizard-onboarding')).toBeNull();
     expect(window.localStorage.getItem('fitwizard-wizard')).toBeNull();
-    expect(window.localStorage.getItem('fitwizard-nutrition-storage')).toBeNull();
-    expect(window.localStorage.getItem('measurements-storage')).toBeNull();
     expect(window.localStorage.getItem('fitwizard-wisdom')).toBeNull();
+  });
+
+  it('keeps training data on the device and says so (until cloud sync exists)', async () => {
+    // An older app version's copy that has not been moved to device storage yet.
+    window.localStorage.setItem('fitwizard-plans', '{"state":{"currentWeek":2}}');
+    window.localStorage.setItem('fitwizard-nutrition-storage', '{"state":{}}');
+
+    const { useAuthStore } = await loadAuthStore({ configured: false });
+
+    await useAuthStore.getState().signOut();
+
+    expect(window.localStorage.getItem('fitwizard-plans')).toBe('{"state":{"currentWeek":2}}');
+    expect(window.localStorage.getItem('fitwizard-nutrition-storage')).toBe('{"state":{}}');
+    expect(toastMocks.info).toHaveBeenCalledWith(
+      'Signed out. Your training data stays on this device.',
+      { id: 'fitwizard-data-kept-on-device' },
+    );
   });
 });
 

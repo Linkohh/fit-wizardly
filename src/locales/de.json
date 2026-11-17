@@ -380,5 +380,8 @@
         "body": "{{unfinished}} läuft noch. Setze es fort oder verwirf es und starte {{requested}}.",
         "resume": "{{unfinished}} fortsetzen",
         "discard": "Verwerfen und dieses Training starten"
+    },
+    "storage": {
+        "kept_on_device": "Abgemeldet. Deine Trainingsdaten bleiben auf diesem Gerät."
     }
 }

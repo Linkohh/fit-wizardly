@@ -1,0 +1,47 @@
+import { migratingAppStorage } from '@/lib/storage/appStorage';
+
+/**
+ * Every user-data store kept on the device (ADR 11). Keep this list in sync
+ * when a store starts persisting user data.
+ */
+const USER_DATA_STORES = [
+  { name: 'fitwizard-plans', load: async () => (await import('@/stores/planStore')).usePlanStore },
+  { name: 'fitwizard-nutrition-storage', load: async () => (await import('@/stores/nutritionStore')).useNutritionStore },
+  { name: 'fitwizard-measurements', load: async () => (await import('@/stores/measurementsStore')).useMeasurementsStore },
+  { name: 'readiness-storage', load: async () => (await import('@/stores/readinessStore')).useReadinessStore },
+  { name: 'fitwizard-achievements', load: async () => (await import('@/stores/achievementStore')).useAchievementStore },
+  { name: 'fitwizard-custom-exercises', load: async () => (await import('@/stores/customExerciseStore')).useCustomExerciseStore },
+  // Exercise favourites, collections and settings. Kept in localStorage and
+  // synced to Supabase (user_exercise_preferences); removed here for erase/delete.
+  { name: 'fitwizard-preferences', load: async () => (await import('@/stores/preferencesStore')).usePreferencesStore },
+] as const;
+
+export const USER_DATA_STORE_NAMES: readonly string[] = USER_DATA_STORES.map((store) => store.name);
+
+interface ResettableStore {
+  getInitialState: () => object;
+  setState: (state: object, replace: true) => void;
+}
+
+/**
+ * Erases every persisted user-data store from this device and resets those
+ * stores in memory. Used by account deletion and "Erase data on this device"
+ * (contract #2). Stores are loaded on demand to keep them out of the startup
+ * bundle.
+ */
+export async function clearLocalUserData(): Promise<void> {
+  for (const { name, load } of USER_DATA_STORES) {
+    try {
+      const store = (await load()) as unknown as ResettableStore;
+      // Reset first: the persist write it triggers is queued before the removal below.
+      store.setState(store.getInitialState(), true);
+    } catch (error) {
+      console.error(`[FitWizard] Could not reset "${name}" in memory.`, error);
+    }
+    await migratingAppStorage.removeItem(name);
+    // Belt and braces: if the reset's write landed after the removal, remove again.
+    if ((await migratingAppStorage.getItem(name)) !== null) {
+      await migratingAppStorage.removeItem(name);
+    }
+  }
+}

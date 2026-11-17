@@ -103,3 +103,33 @@ export function resetHydrationForTests(): void {
   snapshot = computeSnapshot();
   for (const listener of listeners) listener();
 }
+
+interface PersistedStoreApi {
+  persist: {
+    hasHydrated: () => boolean;
+    onFinishHydration: (listener: () => void) => () => void;
+  };
+}
+
+/**
+ * Resolves once a persisted store has loaded from device storage. Use before
+ * changing a store that may have just been loaded on demand: changes made
+ * before hydration finishes are overwritten by the saved copy.
+ */
+export function waitForHydration(store: PersistedStoreApi): Promise<void> {
+  if (store.persist.hasHydrated()) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => {
+    const unsubscribe = store.persist.onFinishHydration(() => {
+      unsubscribe();
+      resolve();
+    });
+    // It may have finished between the check and the subscription.
+    if (store.persist.hasHydrated()) {
+      unsubscribe();
+      resolve();
+    }
+  });
+}
+

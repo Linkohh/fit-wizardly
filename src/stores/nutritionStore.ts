@@ -2,6 +2,15 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { UserNutritionProfile, MacroTargets, DailyNutritionLog, MealEntry, MealTemplate } from '@/types/nutrition';
 import { copyableMeals } from '@/lib/mealShortcuts';
+import { createUserDataStorage } from '@/lib/storage/appStorage';
+import { hydrationTracking } from '@/lib/storage/hydration';
+import {
+    NUTRITION_STORE_NAME,
+    NUTRITION_STORE_VERSION,
+    pickPersistedNutritionState,
+    sanitizeNutritionPersistedState,
+    type PersistedNutritionState,
+} from '@/stores/nutritionStore.persistence';
 
 interface NutritionState {
     profile: UserNutritionProfile | null;
@@ -40,11 +49,8 @@ interface NutritionState {
     getLastFullMeal: (type: string) => MealEntry[]; // New helper
 }
 
-type PersistedNutritionState = Pick<NutritionState, 'selectedDate'>;
-
-const sanitizeNutritionPersistedState = (state: Partial<NutritionState> | undefined): PersistedNutritionState => ({
-    selectedDate: typeof state?.selectedDate === 'string' ? state.selectedDate : new Date().toISOString().split('T')[0],
-});
+// What is saved on the device, and how it's checked on load, lives in
+// nutritionStore.persistence.ts (ADR 11: local-first user data).
 
 export const useNutritionStore = create<NutritionState>()(
     persist<NutritionState, [], [], PersistedNutritionState>(
@@ -224,12 +230,17 @@ export const useNutritionStore = create<NutritionState>()(
             },
         }),
         {
-            name: 'fitwizard-nutrition-storage',
-            partialize: sanitizeNutritionPersistedState,
+            name: NUTRITION_STORE_NAME,
+            version: NUTRITION_STORE_VERSION,
+            storage: createUserDataStorage<PersistedNutritionState>(),
+            partialize: pickPersistedNutritionState,
+            // Older saved shapes are checked field by field in merge().
+            migrate: (persistedState) => persistedState as PersistedNutritionState,
             merge: (persistedState, currentState) => ({
                 ...currentState,
-                ...sanitizeNutritionPersistedState(persistedState as Partial<NutritionState> | undefined),
+                ...sanitizeNutritionPersistedState(persistedState),
             }),
+            ...hydrationTracking(NUTRITION_STORE_NAME),
         }
     )
 );

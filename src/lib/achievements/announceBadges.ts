@@ -1,5 +1,5 @@
 import { toast } from 'sonner';
-import i18n from '@/lib/i18n';
+import { translate } from '@/lib/translate';
 import { BADGES, type BadgeId } from '@/stores/achievementStore';
 
 /**
@@ -12,7 +12,7 @@ export function announceNewBadges(badgeIds: readonly BadgeId[]): void {
     if (!badge) continue;
 
     toast.success(
-      i18n.t('achievements.badge_unlocked', 'Badge unlocked: {{name}}', { name: badge.name }),
+      translate('achievements.badge_unlocked', 'Badge unlocked: {{name}}', { name: badge.name }),
       { description: `${badge.icon} ${badge.description}` },
     );
   }
