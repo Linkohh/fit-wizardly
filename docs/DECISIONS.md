@@ -1,5 +1,8 @@
 # Architectural Decisions (ADR)
 
+> **Partly out of date (2026-11-17).** Some files, versions and variables named here don't exist.
+> The accurate sources are `README.md` and `docs/LAUNCH_ROADMAP.md`. This doc is corrected when its area is worked on.
+
 ## 1. Supabase for Backend
 - **Decision**: Use Supabase for Auth, Database (Postgres), and Realtime.
 - **Why**: Reduces backend boilerplate. Row Level Security (RLS) provides robust authorization at the data layer, removing the need for complex API middleware checks.

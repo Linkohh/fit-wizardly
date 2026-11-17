@@ -1,5 +1,8 @@
 # TESTING.md - Testing Patterns and Strategies
 
+> **Partly out of date (2026-11-17).** Some files, versions and variables named here don't exist.
+> The accurate sources are `README.md` and `docs/LAUNCH_ROADMAP.md`. This doc is corrected when its area is worked on.
+
 > **Purpose**: Comprehensive guide to testing patterns, infrastructure, and best practices.
 > **Audience**: Developers writing tests, AI assistants generating test code.
 
