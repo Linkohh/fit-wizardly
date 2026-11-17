@@ -146,6 +146,28 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-18 — Day 2 Lanes Restarted; Lane E Day 4: Sync Engine Core (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, from `preview_b` @ `7ef77e5`)
+
+- **What happened to Day 2:**
+  - The six Day 2 sessions (A, B, C, D, F, H) started at 21:10 UTC and stopped on the account's 5-hour usage limit (`usage_limit_reached`, reset 23:10 UTC) before any of them pushed work.
+  - Checked the remote: no `lane-*/day-2` branches existed.
+  - After the reset, each session was sent a message to start its Day 2 task over.
+- **What was done (Lane E Day 4):**
+  - Built the sync engine core in `src/lib/sync/`: types, outbox, registry, engine, status and index. Nothing calls it yet; the triggers come on Day 6.
+  - Replaced the unused in-memory `src/lib/offlineSave.ts` with the device-saved outbox and deleted it.
+  - `clearLocalUserData` now also erases the outbox and the pull cursors.
+  - Removed the three unearnable "Wisdom AI" badges (DEBT-046 resolved).
+  - Details: `docs/project/handoffs/2026-11-18-lane-e-day-4.md`.
+- **Verification:**
+  - 13 engine tests against an in-memory fake database that copies 007's `updated_at` trigger.
+  - Confirmed the tests catch real faults by deliberately breaking three engine rules; each break made a test fail.
+  - 897/897 tests. Lint 0 errors / 4 warnings. Typecheck clean. Build passes. Bundle unchanged at 344.3 KB, since the sync engine isn't in the startup bundle.
+- **Contract #5:** added `keyColumn`, `onConflict`, `markDirty(..., { deleted })`, `syncAll(..., { client })` and `countPendingChanges()`. `CONTRACTS.md` is updated.
+- **Not verified:** a run against real Supabase. That needs a staging project (L10) and the migration-repair step (DEBT-053).
+- **Next steps:**
+  1. Review and merge the Day 2 PRs as they arrive.
+  2. Lane E Day 5 (collections).
+
 ### 2026-11-17 — Wave 1 / Day 1 Reviewed and Merged (#47–#53) (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`)
 
 - **Review before merging** (Lincoln asked for one more look first):
@@ -753,7 +775,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-043 | The wizard header says "Coach-built intake" / "Coach intake" while the coach portal is off | `src/pages/Wizard.tsx` and the wizard header | Wording only; Lane B could reword it on Day 4. |
 | DEBT-044 | `favorites-store.ts` is unused; exercise favourites live in `preferencesStore` | `src/stores/favorites-store.ts` | Delete in Lane D's dead-code pass (Day 2). |
 | DEBT-045 | On a shared device, a signed-out account's training data stays visible until cloud sync ships | `src/stores/authStore.ts` | Deliberate (the alternative is losing data). Lane E Day 6 clears device data after a successful sync. |
-| DEBT-046 | Three "Wisdom AI" achievements can't be earned (the Wisdom chat isn't shown) and mention AI | `src/stores/achievementStore.ts` (~214–236) | Lane E Day 4: remove them from `BADGES`. |
+| DEBT-046 | ~~Three "Wisdom AI" achievements can't be earned~~ **RESOLVED 2026-11-18 (Lane E Day 4)**. (the Wisdom chat isn't shown) and mention AI | `src/stores/achievementStore.ts` (~214–236) | Lane E Day 4: remove them from `BADGES`. |
 | DEBT-047 | UserGuide: Circles tab not behind the flag; "FitWizardly" spelling; all strings hardcoded | `src/pages/UserGuide.tsx` | Lane C Day 2 (flag), Lane B Day 2 (spelling), J2 (strings). |
 | DEBT-048 | Rest of the consent tray is hardcoded English | `src/components/legal/ConsentModal.tsx` | Lane C Day 5 (uses the new `consent.*` namespace). |
 | DEBT-049 | Auth modal promises "circles and trainer tools", which are hidden in v1 | `src/components/auth/AuthModal.tsx:86` | Lane B Day 2. |

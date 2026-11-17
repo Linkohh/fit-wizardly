@@ -134,13 +134,15 @@ Client wrapper (Lane F, `src/lib/account/deleteAccount.ts`):
 export async function deleteAccount(): Promise<{ error: Error | null }>;
 ```
 
-## 5. Sync engine: `src/lib/sync/`
+## 5. Sync engine: `src/lib/sync/` (merged on Lane E Day 4; import from `@/lib/sync`)
 
 ```ts
 export interface SyncRow { user_id: string; updated_at: string; deleted_at: string | null; [column: string]: unknown }
 
 export interface SyncCollection<T> {
   table: string;                          // a table from contract 3
+  keyColumn: string | null;               // 'id' or 'day'; null for one-row-per-user tables   (added Day 4)
+  onConflict: string;                     // upsert key, for example 'user_id,id'               (added Day 4)
   key(item: T): string;                   // stable local id (or the YYYY-MM-DD day)
   toRow(item: T, userId: string): Omit<SyncRow, 'updated_at'>;
   fromRow(row: SyncRow): T;
@@ -153,14 +155,24 @@ export interface SyncResult { pulled: number; pushed: number; failed: number }
 export type SyncStatus = 'synced' | 'saving' | 'offline' | 'error' | 'signed-out';
 
 export function registerCollection<T>(collection: SyncCollection<T>): void;
-export function syncAll(userId: string): Promise<SyncResult>;
-export function markDirty(table: string, key: string): void;   // called by stores after a local write
+export function syncAll(userId: string, options?: { client?: SyncClient }): Promise<SyncResult>; // client: tests only
+export function markDirty(table: string, key: string, options?: { deleted?: boolean }): void; // every store write; { deleted: true } for deletes
+export function countPendingChanges(): number;
 export function useSyncStatus(): SyncStatus;
 ```
 
 Merge rules:
 - Per record, the newer `updated_at` wins.
 - A tombstone (`deleted_at` set) beats any edit older than itself.
+- A local delete beats any remote edit older than itself; a remote edit made after the local delete brings the item back.
+- Local items without `updatedAt` (older data) count as oldest, so the remote copy wins the first conflict.
+
+Behaviour:
+- **Pull** pages through rows with `updated_at >= cursor`, ordered, 500 at a time. The cursor is the newest server `updated_at` seen, saved per user in `fitwizard-sync-cursor`. A different account starts from scratch. The cursor only advances after a successful pull.
+- **Push** upserts changed items in batches of 200. Deletes are sent as `UPDATE ... SET deleted_at`, never as hard deletes.
+- The **outbox** (`fitwizard-sync-outbox`, saved on the device) survives restarts. An entry is cleared only if it hasn't changed during the push.
+- A collection that fails is counted in `failed`, and the rest still sync. Overlapping `syncAll` calls share one run.
+- **Not yet built (Day 6):** the triggers, and marking every existing local item dirty on the first sign-in.
 
 ## 6. API base: `src/lib/apiBase.ts`
 

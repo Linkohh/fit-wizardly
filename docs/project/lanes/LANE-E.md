@@ -188,6 +188,12 @@ Build `src/lib/sync/` exactly to contract #5.
 
 ## Day 5: Collections (1.4 part 2)
 
+> **Notes from Day 4 (coordinator):**
+> - The engine is in `src/lib/sync/`; import from `@/lib/sync`.
+> - Each collection also needs `keyColumn` (`'id'`, `'day'`, or `null` for `nutrition_settings` and `user_state`) and `onConflict` (`'user_id,id'`, `'user_id,day'` or `'user_id'`).
+> - Deletes call `markDirty(table, key, { deleted: true })`.
+> - Test collections with the `FakeServer` in `src/lib/sync/engine.test.ts`. Move it to a shared test helper if two test files need it.
+
 Implement and register one `SyncCollection` per table in contract #3. Each lives in `src/lib/sync/collections/<name>.ts`.
 
 | Collection | Store | Key | Notes |
