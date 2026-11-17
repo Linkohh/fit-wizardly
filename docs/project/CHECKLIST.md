@@ -17,7 +17,7 @@
 | 7 | **PR #45 merged:** Lane E Day 1 (device storage and loading gate) | `5984b86` |
 | 8 | **PR #46 merged:** Lane E Day 2. Plans, workouts, PRs, an in-progress workout and measurements now survive restarts; streak, weekly goal and badges work; resume/discard prompt for an unfinished workout | `803842e` |
 | 9 | **Wave 1 / Day 1 started for lanes A, B, C, D, F and H** as six parallel agent sessions; all six finished and opened PRs | PRs #47–#52 |
-| 10 | Lane E Day 3 written: nutrition, readiness, achievements and custom exercises are saved on the device; erase-all function; sign-out keeps data until cloud sync exists; ADR 11 | PR (see "In progress") |
+| 10 | Lane E Day 3 written: nutrition, readiness, achievements and custom exercises are saved on the device; erase-all function; sign-out keeps data until cloud sync exists; ADR 11 | PR #53 |
 | 11 | **Trial integration:** all seven open PRs merged together locally in the planned order. 887/887 tests, lint, typecheck and build all pass. Checked in a browser: no AI wording, Circles hidden, coach pages show 404, new logo, `public/` down from 11 MB to 4.1 MB | This session |
 
 ## In progress: waiting for Lincoln's review
@@ -27,14 +27,14 @@ All seven pass CI and have no review findings. Each merges cleanly on its own.
 | PR | Lane · Day | What it does | Notes |
 |---|---|---|---|
 | #50 | F · 1 | Supabase CLI, local Postgres test harness, migration 007 (cloud tables for logs, nutrition, measurements, readiness) | The lane says to run `supabase migration repair` before the first `db push` (see its handoff) |
-| Lane E Day 3 PR | E · 3 | Nutrition, readiness and achievements saved on the device; `clearLocalUserData`; sign-out keeps data; ADR 11 | Opened next. Merge after #50 |
+| #53 | E · 3 | Nutrition, readiness and achievements saved on the device; `clearLocalUserData`; sign-out keeps data; ADR 11 | Merge after #50 |
 | #49 | C · 1 | Circles and coach routes and links hidden behind the flags | Two of the lane's questions have defaults |
 | #48 | H · 1 | App name FitWizard; iOS and Android release config; privacy manifest | Native builds are unverified; they need your Mac and Android Studio |
-| #51 | B · 1 | AI claims removed; fake exercise badges and blocked meal images removed | **Conflicts with the Lane E Day 3 PR in three translation files** (both added keys at the end). It's a simple keep-both fix, tested in the trial. Whichever merges second needs it |
+| #51 | B · 1 | AI claims removed; fake exercise badges and blocked meal images removed | **Conflicts with #53 in three translation files** (both added keys at the end). It's a simple keep-both fix, tested in the trial. Whichever merges second needs it |
 | #52 | D · 1 | Compressed icons, WebP logo, exercise data cached on first use | App icons are about 70 KB against a 60 KB target. The lane left that call to you |
 | #47 | A · 1 | CLAUDE.md fixed, AGENTS.md deleted, out-of-date banners added | Left two links for the coordinator to fix |
 
-**Merge order:** F (#50) → E (Day 3) → C (#49) → H (#48) → B (#51, after the translation fix) → D (#52) → A (#47).
+**Merge order:** F (#50) → E (#53) → C (#49) → H (#48) → B (#51, after the translation fix) → D (#52) → A (#47).
 
 ## Next up, in order
 
@@ -54,7 +54,7 @@ All seven pass CI and have no review findings. Each merges cleanly on its own.
 ### Wave 1: Foundations (Days 1–3)
 - [x] E1 Device storage layer
 - [x] E2 Plans, logs, PRs, in-progress workout and measurements saved; counters fixed
-- [x] E3 Nutrition, readiness, achievements and custom exercises saved; erase-all; sign-out behaviour; ADR 11 (PR open)
+- [x] E3 Nutrition, readiness, achievements and custom exercises saved; erase-all; sign-out behaviour; ADR 11 (PR #53 open)
 - [x] A1 Fix misleading docs (PR #47 open)
 - [x] B1 Remove the AI claim and fake content (PR #51 open)
 - [x] C1 Hide Circles and coach routes and links (PR #49 open)
@@ -92,7 +92,7 @@ All seven pass CI and have no review findings. Each merges cleanly on its own.
 |---|---|
 | L0 Merge Day 0 | ✅ Done |
 | D1–D6 Decisions | ✅ Acknowledged; defaults apply |
-| Review and merge PRs (L12) | ⏳ Seven waiting (#47–#52 and the Lane E Day 3 PR) |
+| Review and merge PRs (L12) | ⏳ Seven waiting (#47–#53) |
 | L4 Apple and Google developer enrolment | ⏸ Deferred. Start at least a week before Gate 2, because the first store uploads and the 14-day Play test need it |
 | L10 Staging Supabase project | ⬜ Needed for Gate 1, to apply migrations 007 and 008 |
 | L11 Email code in the Supabase template | ⬜ Needed when Lane H Day 3 lands |

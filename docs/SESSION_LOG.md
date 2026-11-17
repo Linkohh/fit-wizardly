@@ -169,7 +169,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
   - Lane E Day 3 branch: 857/857 tests in 155 files (+15). Lint 0 errors / 4 warnings. Typecheck clean. Build passes. Bundle 344.0 KB gzip.
   - Verified in Chromium: plan and achievements are in IndexedDB after reload, and localStorage holds no user data.
 - **Next steps:**
-  1. Lincoln reviews and merges the seven PRs in merge order: F, E, C, H, B (after the translation fix), D, A.
+  1. Lincoln reviews and merges the seven PRs in merge order: #50 (F), #53 (E), #49 (C), #48 (H), #51 (B, after the translation fix), #52 (D), #47 (A).
   2. Start Day 2 for lanes A, B, C, D, F and H.
   3. Gate 1 after Day 3.
 
