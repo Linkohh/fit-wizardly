@@ -707,5 +707,30 @@
     },
     "storage": {
         "kept_on_device": "Sesión cerrada. Tus datos de entrenamiento siguen en este dispositivo."
+    },
+    "auth": {
+        "unavailable_title": "Funciones de cuenta no disponibles",
+        "unavailable_description": "El inicio de sesión y los círculos necesitan Supabase y un backend configurados. Esta versión funciona en modo demo.",
+        "unavailable_dismiss": "Entendido",
+        "title": "Inicia sesión para continuar",
+        "description": "Sincroniza tus planes y tu historial entre dispositivos.",
+        "email_label": "Correo electrónico",
+        "email_placeholder": "tu@ejemplo.com",
+        "email_invalid": "Introduce un correo electrónico válido.",
+        "send_code": "Envíame un código",
+        "sending": "Enviando…",
+        "no_password": "Sin contraseña. Te enviaremos un código de 6 dígitos por correo.",
+        "code_title": "Revisa tu correo",
+        "code_description_web": "Enviamos un código de 6 dígitos a {{email}}. Escríbelo abajo o toca el enlace del correo.",
+        "code_description_native": "Enviamos un código de 6 dígitos a {{email}}. Escríbelo abajo.",
+        "code_label": "Código de acceso",
+        "verifying": "Comprobando el código…",
+        "code_wrong": "Ese código no es correcto.",
+        "code_expired": "Ese código ha caducado. Pide uno nuevo.",
+        "resend": "Reenviar código",
+        "resend_in": "Reenviar código en {{seconds}} s",
+        "resent": "Te enviamos un código nuevo.",
+        "different_email": "Usar otro correo",
+        "close": "Cerrar"
     }
 }

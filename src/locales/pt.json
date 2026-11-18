@@ -386,5 +386,30 @@
     },
     "consent": {
         "welcome_description": "Seu planejador de treinos está pronto. Antes de começar, confirme estes pontos básicos."
+    },
+    "auth": {
+        "unavailable_title": "Recursos de conta indisponíveis",
+        "unavailable_description": "O login e os círculos precisam do Supabase e de um backend configurados. Esta versão está em modo demo.",
+        "unavailable_dismiss": "Entendi",
+        "title": "Entre para continuar",
+        "description": "Sincronize seus planos e seu histórico entre dispositivos.",
+        "email_label": "E-mail",
+        "email_placeholder": "voce@exemplo.com",
+        "email_invalid": "Digite um e-mail válido.",
+        "send_code": "Enviar código por e-mail",
+        "sending": "Enviando…",
+        "no_password": "Sem senha. Enviaremos um código de 6 dígitos por e-mail.",
+        "code_title": "Confira seu e-mail",
+        "code_description_web": "Enviamos um código de 6 dígitos para {{email}}. Digite-o abaixo ou toque no link do e-mail.",
+        "code_description_native": "Enviamos um código de 6 dígitos para {{email}}. Digite-o abaixo.",
+        "code_label": "Código de acesso",
+        "verifying": "Verificando o código…",
+        "code_wrong": "Esse código não está certo.",
+        "code_expired": "Esse código expirou. Peça um novo.",
+        "resend": "Reenviar código",
+        "resend_in": "Reenviar código em {{seconds}} s",
+        "resent": "Enviamos um novo código.",
+        "different_email": "Usar outro e-mail",
+        "close": "Fechar"
     }
 }

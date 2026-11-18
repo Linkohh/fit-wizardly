@@ -8,6 +8,7 @@ const DEV_HOST = '127.0.0.1';
 const DEV_PORT = 8080;
 const STARTUP_TIMEOUT_MS = 30_000;
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
 
 if (process.argv.includes('--help')) {
   console.log(`Usage: npm run ios:live
@@ -16,10 +17,14 @@ Starts the Vite dev server if needed, waits for http://localhost:8080,
 then launches Capacitor iOS live reload.
 
 Notes:
+- Points live reload at this machine's LAN address (for example 192.168.1.20),
+  so it works on a physical iPhone on the same Wi-Fi as well as in the
+  Simulator. With no LAN address it falls back to localhost (Simulator only).
 - Reuses an existing server on port 8080 if one is already running, and warns
   if it is localhost-only (physical devices need \`npm run dev -- --host ::\`)
 - Forwards Ctrl+C to both child processes when it started them
-- Under the hood this runs: npm run dev + npm run ios:live:cap
+- Under the hood this runs: npm run dev + npx cap run ios -l --host=<LAN address> --port=8080
+- npm run ios:live:cap is the Simulator-only shortcut (--host=localhost)
 - npm run dev:ios is kept as an alias for the same workflow`);
   process.exit(0);
 }
@@ -42,7 +47,11 @@ function describeExit(code, signal) {
 }
 
 function spawnNpm(args, label) {
-  const child = spawn(npmCommand, args, {
+  return spawnCommand(npmCommand, args, label);
+}
+
+function spawnCommand(command, args, label) {
+  const child = spawn(command, args, {
     stdio: 'inherit',
     env: process.env,
   });
@@ -188,13 +197,17 @@ async function main() {
   await ensureDevServerReady();
 
   const extraArgs = process.argv.slice(2).filter(arg => arg !== '--help');
-  const capArgs = ['run', 'ios:live:cap'];
-  if (extraArgs.length > 0) {
-    capArgs.push('--', ...extraArgs);
+  // A physical iPhone can't reach "localhost" on this machine (DEBT-058), so
+  // live reload points at the LAN address. The Simulator can use it too.
+  const lanAddress = getLanAddress();
+  const liveHost = lanAddress ?? 'localhost';
+  if (!lanAddress) {
+    console.warn('No LAN address found: live reload will use localhost, which only the iOS Simulator can reach.');
   }
+  const capArgs = ['cap', 'run', 'ios', '-l', `--host=${liveHost}`, `--port=${DEV_PORT}`, ...extraArgs];
 
-  console.log(`Launching Capacitor iOS live reload with arguments: ${capArgs.join(' ')}`);
-  iosProcess = spawnNpm(capArgs, 'Capacitor iOS live reload');
+  console.log(`Launching Capacitor iOS live reload: npx ${capArgs.join(' ')}`);
+  iosProcess = spawnCommand(npxCommand, capArgs, 'Capacitor iOS live reload');
 
   if (devProcess) {
     devProcess.once('exit', (code, signal) => {
