@@ -15,6 +15,10 @@ const USER_DATA_STORES = [
   // Exercise favourites, collections and settings. Kept in localStorage and
   // synced to Supabase (user_exercise_preferences); removed here for erase/delete.
   { name: 'fitwizard-preferences', load: async () => (await import('@/stores/preferencesStore')).usePreferencesStore },
+  // Answers in progress (goal, constraints such as injuries, equipment) and
+  // onboarding answers. Kept in localStorage; sign-out also clears them.
+  { name: 'fitwizard-wizard', load: async () => (await import('@/stores/wizardStore')).useWizardStore },
+  { name: 'fitwizard-onboarding', load: async () => (await import('@/stores/onboardingStore')).useOnboardingStore },
 ] as const;
 
 export const USER_DATA_STORE_NAMES: readonly string[] = USER_DATA_STORES.map((store) => store.name);

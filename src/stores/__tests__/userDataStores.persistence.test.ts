@@ -190,6 +190,12 @@ describe('clearLocalUserData', () => {
     expect(await savedValue('fitwizard-sync-outbox')).toContain('log-1');
     const { appStorage } = await import('@/lib/storage/appStorage');
     await appStorage.setItem('fitwizard-sync-cursor', '{"userId":"u","cursors":{}}');
+    const { useWizardStore } = await import('@/stores/wizardStore');
+    const { useOnboardingStore } = await import('@/stores/onboardingStore');
+    useWizardStore.getState().setIsTrainer(true);
+    useOnboardingStore.getState().setAvatarEmoji('🦾');
+    expect(window.localStorage.getItem('fitwizard-wizard')).toContain('"isTrainer":true');
+    expect(window.localStorage.getItem('fitwizard-onboarding')).toContain('🦾');
 
     const { clearLocalUserData, USER_DATA_STORE_NAMES } = await import('@/lib/storage/clearLocalUserData');
     await clearLocalUserData();
@@ -205,6 +211,9 @@ describe('clearLocalUserData', () => {
     expect(Object.keys(stores.nutrition.getState().history)).toEqual([]);
     expect(usePlanStore.getState().currentWeek).toBe(1);
     expect(countPendingChanges()).toBe(0);
+    expect(window.localStorage.getItem('fitwizard-wizard')).toBeNull();
+    expect(window.localStorage.getItem('fitwizard-onboarding')).toBeNull();
+    expect(useWizardStore.getState().selections.isTrainer).toBe(false);
   });
 
   it('erases a store that had not been opened yet, without its saved copy coming back', async () => {
@@ -229,7 +238,9 @@ describe('clearLocalUserData', () => {
 
   it('lists every store that saves user data', async () => {
     const { USER_DATA_STORE_NAMES } = await import('@/lib/storage/clearLocalUserData');
-    expect([...USER_DATA_STORE_NAMES].sort()).toEqual([...STORE_NAMES, 'fitwizard-preferences'].sort());
+    expect([...USER_DATA_STORE_NAMES].sort()).toEqual(
+      [...STORE_NAMES, 'fitwizard-preferences', 'fitwizard-wizard', 'fitwizard-onboarding'].sort(),
+    );
   });
 });
 
