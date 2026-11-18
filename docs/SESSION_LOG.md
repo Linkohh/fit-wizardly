@@ -163,8 +163,9 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
   - A two-device sync through the fake database.
   - The first-sign-in upload.
   - Three deliberate tracker bugs, each caught by a test.
-  - **983/983 tests.** Lint 0 errors / 4 warnings. Typecheck clean. Build passes. Startup bundle unchanged against `preview_b` (358.2 vs 358.3 KB).
+  - **984/984 tests.** Lint 0 errors / 4 warnings. Typecheck clean. Build passes. Startup bundle unchanged against `preview_b` (358.2 vs 358.3 KB).
 - **Corrected the Day 6 brief:** guest items are not already dirty; call `markAllCollectionsDirty()` on the first sign-in.
+- **Review finding fixed (#64):** pulled items are written newest first, as the stores expect.
 - **Also fixed:** persistent storage was never requested, so the browser could evict saved data. This was a Lane E Day 1 miss, found by Lane A as their DEBT-076 in #63. The browser is now asked after the first save.
 - **New:** DEBT-078 (startup bundle baseline to confirm after Day 2). Numbered to avoid Lane A's DEBT-076 and DEBT-077 in #63.
 - **Next steps:**

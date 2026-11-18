@@ -1,5 +1,11 @@
 import { usePlanStore } from '@/stores/planStore';
-import { PLAN_STORE_NAME, sanitizePersonalRecord, sanitizeWorkoutLog } from '@/stores/planStore.persistence';
+import {
+  MAX_PERSONAL_RECORDS,
+  MAX_WORKOUT_LOGS,
+  PLAN_STORE_NAME,
+  sanitizePersonalRecord,
+  sanitizeWorkoutLog,
+} from '@/stores/planStore.persistence';
 import { createStoreCollection, required } from '@/lib/sync/storeCollection';
 import type { PersonalRecord, WorkoutLog } from '@/types/fitness';
 
@@ -9,6 +15,11 @@ function toIso(value: Date | string): string {
   return (value instanceof Date ? value : new Date(value)).toISOString();
 }
 
+/** Newest first, as completeWorkout() keeps them (getLastPerformance() reads the first match). */
+function newestFirst<T>(items: T[], time: (item: T) => Date | string, max: number): T[] {
+  return [...items].sort((a, b) => new Date(time(b)).getTime() - new Date(time(a)).getTime()).slice(0, max);
+}
+
 /** `workout_logs` (migration 007): one row per finished workout. */
 export const workoutLogsCollection = createStoreCollection<WorkoutLog>({
   table: 'workout_logs',
@@ -16,7 +27,7 @@ export const workoutLogsCollection = createStoreCollection<WorkoutLog>({
   onConflict: 'user_id,id',
   stores: planStores,
   readItems: () => usePlanStore.getState().workoutLogs,
-  writeItems: (workoutLogs) => usePlanStore.setState({ workoutLogs }),
+  writeItems: (logs) => usePlanStore.setState({ workoutLogs: newestFirst(logs, (log) => log.completedAt, MAX_WORKOUT_LOGS) }),
   key: (log) => log.id,
   toRow: (log, userId) => ({
     user_id: userId,
@@ -38,7 +49,8 @@ export const personalRecordsCollection = createStoreCollection<PersonalRecord>({
   onConflict: 'user_id,id',
   stores: planStores,
   readItems: () => usePlanStore.getState().personalRecords,
-  writeItems: (personalRecords) => usePlanStore.setState({ personalRecords }),
+  writeItems: (records) =>
+    usePlanStore.setState({ personalRecords: newestFirst(records, (record) => record.achievedAt, MAX_PERSONAL_RECORDS) }),
   key: (record) => record.id,
   toRow: (record, userId) => ({
     user_id: userId,

@@ -197,6 +197,31 @@ describe('sync collections', () => {
     expect(server.rows('body_measurements').map((row) => row.id)).toEqual(['m-1']);
   });
 
+  it('keeps workouts, records and measurements newest first after a pull', async () => {
+    const server = new FakeServer();
+    const olderLog = { ...workoutLog, id: 'log-0', completedAt: new Date('2026-11-10T18:00:00.000Z') } as WorkoutLog;
+    const olderRecord = { ...personalRecord, id: 'pr-0', achievedAt: new Date('2026-11-10T18:00:00.000Z') };
+    const olderMeasurement = { ...measurement, id: 'm-0', date: '2026-11-10T07:30:00.000Z' };
+
+    // The newest items reach the cloud first, so a fresh device pulls them first.
+    let app = await startApp();
+    app.plan.setState({ workoutLogs: [workoutLog], personalRecords: [personalRecord] });
+    app.measurements.getState().addMeasurement(measurement);
+    await app.syncAll(FAKE_USER, { client: server.client() });
+    app.plan.setState({ workoutLogs: [workoutLog, olderLog], personalRecords: [personalRecord, olderRecord] });
+    app.measurements.getState().addMeasurement(olderMeasurement);
+    await app.syncAll(FAKE_USER, { client: server.client() });
+
+    await eraseDevice();
+    app = await startApp();
+    await app.syncAll(FAKE_USER, { client: server.client() });
+
+    expect(app.plan.getState().workoutLogs.map((log) => log.id)).toEqual(['log-1', 'log-0']);
+    expect(app.plan.getState().personalRecords.map((record) => record.id)).toEqual(['pr-1', 'pr-0']);
+    expect(app.measurements.getState().measurements.map((m) => m.id)).toEqual(['m-1', 'm-0']);
+    expect(app.measurements.getState().getLatestMeasurement()?.id).toBe('m-1');
+  });
+
   it("doesn't push back records it has just pulled", async () => {
     const app = await startApp();
     const collection = app.SYNC_COLLECTIONS.find((c) => c.table === 'body_measurements');

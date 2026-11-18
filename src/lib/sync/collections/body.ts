@@ -15,7 +15,8 @@ export const bodyMeasurementsCollection = createStoreCollection<BodyMeasurement>
   readItems: () => useMeasurementsStore.getState().measurements.filter((m) => isStorableDay(measuredOn(m))),
   writeItems: (items) => {
     const kept = useMeasurementsStore.getState().measurements.filter((m) => !isStorableDay(measuredOn(m)));
-    const measurements = [...kept, ...items].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // Newest first, as addMeasurement() and getLatestMeasurement() expect.
+    const measurements = [...kept, ...items].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     useMeasurementsStore.setState({ measurements });
   },
   key: (measurement) => measurement.id,
