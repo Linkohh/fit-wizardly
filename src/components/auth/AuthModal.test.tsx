@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@/lib/i18n';
@@ -48,6 +48,9 @@ function renderModal(initialPath = '/') {
   );
 }
 
+/** Longer than input-otp's longest caret-sync timer (50 ms). */
+const INPUT_OTP_TIMER_SETTLE_MS = 75;
+
 function codeInput() {
   return screen.getByLabelText('Sign-in code');
 }
@@ -78,8 +81,19 @@ describe('AuthModal email-code sign-in', () => {
     mocks.redirectUrl = null;
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
+  afterEach(async () => {
+    // input-otp syncs the caret with un-cleared setTimeouts (0, 10 and 50 ms) after
+    // each input event. If one fires after the test file's jsdom is torn down, React
+    // throws "window is not defined" as an unhandled error and fails the run in CI.
+    // Unmount first, drain any fake timers, then let the real ones run out.
+    cleanup();
+    if (vi.isFakeTimers()) {
+      act(() => {
+        vi.runOnlyPendingTimers();
+      });
+      vi.useRealTimers();
+    }
+    await new Promise((resolve) => setTimeout(resolve, INPUT_OTP_TIMER_SETTLE_MS));
   });
 
   it('moves to the code step after a successful send', async () => {
