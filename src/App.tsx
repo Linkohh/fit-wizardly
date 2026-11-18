@@ -32,6 +32,7 @@ import { useAnalyticsStore } from "@/stores/analyticsStore";
 import { useScrollActivity } from "@/hooks/use-scroll-activity";
 import { NavigationDirectionProvider } from "@/contexts/navigation-direction-context";
 import { isFeatureEnabled } from "@/lib/featureFlags";
+import { isSupabaseConfigured } from "@/lib/supabase";
 
 const Index = lazy(() => import("./pages/Index"));
 const WizardPage = lazy(() => import("./pages/Wizard"));
@@ -365,6 +366,27 @@ const App = () => {
       syncWithBackend(user.id);
     }
   }, [user, isLoading, syncWithBackend]);
+
+  // Cloud sync for training data (Lane E Day 6): runs on sign-in, coming back
+  // online, returning to the app, and 2 s after a change. Loaded lazily so the
+  // sync engine and collections stay out of the startup bundle.
+  const signedInUserId = !isLoading && user ? user.id : null;
+  useEffect(() => {
+    if (!signedInUserId || !isSupabaseConfigured()) {
+      return;
+    }
+    let cancelled = false;
+    let stopSync: (() => void) | null = null;
+    void import('@/lib/sync/triggers')
+      .then(({ startSync }) => {
+        if (!cancelled) stopSync = startSync(signedInUserId);
+      })
+      .catch((error) => console.error('[FitWizard] Could not start sync.', error));
+    return () => {
+      cancelled = true;
+      stopSync?.();
+    };
+  }, [signedInUserId]);
 
   useEffect(() => {
     const handleOnline = () => {

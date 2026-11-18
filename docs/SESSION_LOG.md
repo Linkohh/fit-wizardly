@@ -146,6 +146,31 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-18 — #62 Merged; Day 3 Sessions Restarted; Lane E Day 6: Sync Turned On (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, from `preview_b` @ `4b3bb21`)
+
+- **Merged #62** (Lane H Day 3: sign in with a 6-digit email code; iPhone live reload).
+  - Before merging: two review findings were fixed and a CI teardown error from `input-otp` timers was fixed in the test.
+  - A trial merge with #64 ran 1001/1001 tests with no unhandled errors.
+- **Day 3 sessions:**
+  - Lincoln said "keep it going". B, C, D and F wouldn't start on a message from another session, so the coordinator created fresh B, C, D and F Day 3 sessions with their briefs as the opening prompt, as on Day 1.
+  - All four stopped on the usage limit and were resumed after the reset.
+  - The old blocked B, C, D and F sessions are left idle. Lane D's earlier, unpushed Day 3 work there is superseded by the new session.
+- **What was done (Lane E Day 6):**
+  - Sync triggers (sign-in, online, app resume, 2 s after a change), with no overlapping runs.
+  - The first-sign-in upload with a toast.
+  - The Profile Synced / Saving / Offline / Problem / Sign-in row.
+  - Details: `docs/project/handoffs/2026-11-18-lane-e-day-6.md`.
+- **Moved to Day 7:** sync on sign-out with an unsent-changes warning, and clearing device data (DEBT-045). It needs Lane C's and Lane H's sign-out buttons to share one helper.
+- **Verification:**
+  - 14 new tests. The trigger file passed five runs in a row.
+  - Three deliberate trigger bugs, each caught by a test.
+  - **1015/1015 tests.** Lint 0 errors / 4 warnings. Build passes. Day 6 adds 0.4 KB to the startup download.
+- **New:** DEBT-079 (email-code step in the startup bundle, about 6 KB, Lane H).
+- **Next steps:**
+  1. Review and merge the B, C, D and F Day 3 PRs, then #63 (Lane A).
+  2. Gate 1 with Lincoln.
+  3. Lane E Day 7.
+
 ### 2026-11-18 — Day 3 Started; Lane E Day 5: Sync Collections (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, from `preview_b` @ `172c428`)
 
 - **Day 3 sessions:**
@@ -879,6 +904,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-072 | CSP `connect-src` still allows `wger.de`; no browser code needs it | `vercel.json` | Lane H, later, after checking production. |
 | DEBT-073 | `/api/*` rate limit is in memory and per instance | `api/_lib/guard.ts` | Add a Vercel firewall rate-limit rule before launch (Lincoln / Lane H). |
 | DEBT-074 | The dev wger proxy returns `err.message`; production returns a generic 502 | `vite.config.ts:104` | Lane D Day 3. |
+| DEBT-079 | The email-code step (`input-otp`) is in the startup bundle, about 6 KB gzip | `src/components/auth/AuthModal.tsx` | Lane H: lazy-load `EmailCodeStep`. |
 | DEBT-078 | Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4 | build | Lane D: confirm the cause (likely the self-hosted font CSS) and record the new baseline. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |

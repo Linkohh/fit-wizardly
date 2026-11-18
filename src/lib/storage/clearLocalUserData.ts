@@ -23,8 +23,8 @@ const USER_DATA_STORES = [
 
 export const USER_DATA_STORE_NAMES: readonly string[] = USER_DATA_STORES.map((store) => store.name);
 
-/** Sync bookkeeping saved on the device (Lane E Day 4): unsent changes and pull positions. */
-const SYNC_STORAGE_KEYS = ['fitwizard-sync-outbox', 'fitwizard-sync-cursor'] as const;
+/** Sync bookkeeping saved on the device: unsent changes, pull positions (Day 4) and which accounts this device has uploaded to (Day 6). */
+const SYNC_STORAGE_KEYS = ['fitwizard-sync-outbox', 'fitwizard-sync-cursor', 'fitwizard-sync-first-upload'] as const;
 
 interface ResettableStore {
   getInitialState: () => object;

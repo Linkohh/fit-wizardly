@@ -181,7 +181,14 @@ Behaviour:
   - Loading the saved copy at startup, and writing pulled records, are not counted as edits.
   - The outbox entry's time is the local edit time, so stored items have no `updatedAt` field (`getUpdatedAt` returns `''`). A record with no outbox entry has already synced, so the cloud copy wins.
 - **Left out of sync:** exercise favourites, which already sync through `user_exercise_preferences`. Also any item whose day isn't a valid `YYYY-MM-DD`, because one bad value would fail a whole upload batch; it stays on the device.
-- **Not yet built (Day 6):** calling `startSyncCollections()` at startup, the triggers, calling `markAllCollectionsDirty()` on the first sign-in, and the indicator.
+- **Triggers (Day 6):** `startSync(userId)` in `src/lib/sync/triggers.ts`, started from `App.tsx` when a user is signed in and Supabase is configured. It loads lazily.
+  - It syncs on sign-in, on the `online` event, on returning to the app (`visibilitychange` on web; `appStateChange` with `isActive` on native), and 2 s after the last `markDirty`.
+  - Runs never overlap; triggers during a run collapse into one follow-up.
+  - It doesn't run while `navigator.onLine` is false.
+  - The **first sign-in on a device for an account** calls `markAllCollectionsDirty()` and uploads. The account id is then recorded in `fitwizard-sync-first-upload`, which erase-on-device clears. If the upload partly fails, it isn't recorded, so it retries on the next start.
+  - `retrySync(userId)` is for the Profile Retry button.
+- **Indicator (Day 6):** `src/components/sync/SyncStatusRow.tsx` on Profile shows Synced, Saving…, Offline, Sync problem (with Retry), or a sign-in prompt. It's hidden in demo mode (no Supabase).
+- **Not yet built (Day 7):** sync before sign-out with an unsent-changes warning, and clearing device data after sign-out (DEBT-045). Plans move onto the engine.
 
 ## 6. API base: `src/lib/apiBase.ts`
 

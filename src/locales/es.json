@@ -732,5 +732,17 @@
         "resent": "Te enviamos un código nuevo.",
         "different_email": "Usar otro correo",
         "close": "Cerrar"
+    },
+    "sync": {
+        "first_upload": "Tu entrenamiento de este dispositivo ya tiene copia de seguridad en tu cuenta.",
+        "first_upload_failed": "Aún no se pudo guardar parte de tu entrenamiento. Lo seguiremos intentando.",
+        "title": "Copia en la nube",
+        "synced": "Sincronizado",
+        "saving": "Guardando…",
+        "offline": "Sin conexión. Los cambios se sincronizarán cuando vuelvas a estar en línea.",
+        "error": "Problema de sincronización. Tus datos siguen guardados en este dispositivo.",
+        "signed_out": "Inicia sesión para guardar una copia de tu entrenamiento.",
+        "retry": "Reintentar",
+        "sign_in": "Iniciar sesión"
     }
 }

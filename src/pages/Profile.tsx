@@ -39,6 +39,7 @@ import { toast } from 'sonner';
 import { BodyTracker } from '@/components/measurements/BodyTracker';
 import { requestConsentModal } from '@/lib/consent';
 import { AboutSupportCard } from '@/components/about/AboutSupportCard';
+import { SyncStatusRow } from '@/components/sync/SyncStatusRow';
 import { LAUNCH_LANGUAGES, changeLanguage, isLaunchLanguage } from '@/lib/i18n';
 
 export function Profile() {
@@ -181,6 +182,15 @@ export function Profile() {
                     animate="visible"
                     className="space-y-6"
                 >
+                    {/* Cloud backup status (Lane E) */}
+                    <motion.div variants={itemVariants}>
+                        <Card className="border-border/50 shadow-sm">
+                            <CardContent className="pt-6">
+                                <SyncStatusRow />
+                            </CardContent>
+                        </Card>
+                    </motion.div>
+
                     {/* App Settings */}
                     <motion.div variants={itemVariants}>
                         <Card className="border-border/50 shadow-sm relative overflow-hidden">
