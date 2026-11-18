@@ -12,13 +12,13 @@
  */
 import { CONSENT_RESOLVED_EVENT, hasAnalyticsConsent } from '@/lib/consent';
 
-type SentryModule = typeof import('@sentry/react');
+type SentryModule = typeof import('@sentry/browser');
 type SentryEvent = Parameters<NonNullable<Parameters<SentryModule['init']>[0]>['beforeSend'] & object>[0];
 type SentryBreadcrumb = Parameters<
   NonNullable<NonNullable<Parameters<SentryModule['init']>[0]>['beforeBreadcrumb']>
 >[0];
 
-let sentry: SentryModule | null = null;
+let sentryCapture: SentryModule['captureException'] | null = null;
 let loading: Promise<void> | null = null;
 let listening = false;
 
@@ -28,6 +28,16 @@ let listening = false;
  */
 const HEALTH_KEY_PATTERN =
   /weight|kg|lbs|bodyfat|body_fat|measure|waist|chest|hips?\b|bicep|thigh|neck|height|bmi|calorie|kcal|macro|protein|carb|fat|food|meal|nutrition|diet|heart|pulse|sleep|injur|pain|medical|health/i;
+
+/** The `sendDefaultPii: false` equivalent for SDK v11, made strict. */
+export const NO_PII_DATA_COLLECTION = {
+  userInfo: false,
+  cookies: false,
+  httpHeaders: false,
+  httpBodies: [],
+  urlQueryParams: false,
+  stackFrameVariables: false,
+} as const satisfies NonNullable<NonNullable<Parameters<SentryModule['init']>[0]>['dataCollection']>;
 
 function readDsn(): string {
   const value = import.meta.env.VITE_SENTRY_DSN;
@@ -100,22 +110,27 @@ export function scrubBreadcrumb(breadcrumb: SentryBreadcrumb): SentryBreadcrumb 
 }
 
 function startSentry(): void {
-  if (sentry || loading || !readDsn() || !hasAnalyticsConsent()) {
+  if (sentryCapture || loading || !readDsn() || !hasAnalyticsConsent()) {
     return;
   }
 
-  loading = import('@sentry/react')
-    .then((module) => {
-      module.init({
+  // Destructured so the bundler keeps only what is used. Imported from @sentry/browser,
+  // not @sentry/react: vite.config.ts's manualChunks sends any path containing "/react/"
+  // to the preloaded vendor-react chunk, which would put the SDK in the startup bundle.
+  loading = import('@sentry/browser')
+    .then(({ init, captureException }) => {
+      init({
         dsn: readDsn(),
         release: __APP_VERSION__,
         environment: import.meta.env.MODE,
         tracesSampleRate: 0,
-        sendDefaultPii: false,
+        // SDK v11 replaced `sendDefaultPii` with `dataCollection`. Collect the minimum:
+        // no user info, cookies, headers, bodies, query params or local variables.
+        dataCollection: NO_PII_DATA_COLLECTION,
         beforeSend: (event) => scrubEvent(event),
         beforeBreadcrumb: (breadcrumb) => scrubBreadcrumb(breadcrumb),
       });
-      sentry = module;
+      sentryCapture = captureException;
     })
     .catch((error: unknown) => {
       // Allow a later consent event to try again (for example after a network blip).
@@ -140,9 +155,9 @@ export function initMonitoring(): void {
 
 /** Always safe to call. Forwards to Sentry once it is running, otherwise logs. */
 export function captureError(error: unknown, context?: Record<string, string>): void {
-  if (sentry) {
+  if (sentryCapture) {
     try {
-      sentry.captureException(error, context ? { extra: context } : undefined);
+      sentryCapture(error, context ? { extra: context } : undefined);
       return;
     } catch {
       // Fall through to the console so the error is never lost.

@@ -6,7 +6,7 @@ const sentry = vi.hoisted(() => ({
   captureException: vi.fn(),
 }));
 
-vi.mock('@sentry/react', () => sentry);
+vi.mock('@sentry/browser', () => sentry);
 
 const DSN = 'https://public@o1.ingest.de.sentry.io/1';
 
@@ -67,7 +67,7 @@ describe('monitoring', () => {
       expect(sentry.init).not.toHaveBeenCalled();
     });
 
-    it('inits with a DSN and consent, errors only and no PII', async () => {
+    it('inits with a DSN and consent, errors only and no personal data', async () => {
       vi.stubEnv('VITE_SENTRY_DSN', DSN);
       window.localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
       const { initMonitoring } = await loadMonitoring();
@@ -82,7 +82,13 @@ describe('monitoring', () => {
           release: __APP_VERSION__,
           environment: import.meta.env.MODE,
           tracesSampleRate: 0,
-          sendDefaultPii: false,
+          dataCollection: expect.objectContaining({
+            userInfo: false,
+            cookies: false,
+            httpHeaders: false,
+            httpBodies: [],
+            urlQueryParams: false,
+          }),
         }),
       );
     });
@@ -148,6 +154,7 @@ describe('monitoring', () => {
       const { scrubEvent } = await loadMonitoring();
 
       const result = scrubEvent({
+        type: undefined,
         request: { url: 'https://app.example/plan?weight=80#top', query_string: 'weight=80' },
         extra: { componentStack: 'at Plan', bodyWeightKg: 80, waist: 81, foodName: 'oats', mealId: 'm1' },
         breadcrumbs: [{ category: 'fetch', data: { url: 'https://api.example/foods?q=oats' } }],
