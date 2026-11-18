@@ -1,850 +1,215 @@
-# Security Context
+# Security
 
-> **Partly out of date (2026-11-17).** Some files, versions and variables named here don't exist.
-> The accurate sources are `README.md` and `docs/LAUNCH_ROADMAP.md`. This doc is corrected when its area is worked on.
+> **Rewritten 2026-11-18 (Lane F, Day 3) to match the code on `preview_b`.** Everything below names files that exist. If you change auth, a policy, a header or where data is stored, update this file in the same PR.
+> For *what* data the app stores and who receives it, the single source is [`docs/store/DATA_INVENTORY.md`](store/DATA_INVENTORY.md). This file covers *how* it's protected.
 
-> **Lens Purpose**: This document defines authentication, authorization, data protection, and security best practices. Read this before implementing any feature that handles user data or authentication.
-
----
-
-## Table of Contents
-- [Security Principles](#security-principles)
+## Contents
+- [Threat model in one paragraph](#threat-model-in-one-paragraph)
 - [Authentication](#authentication)
-- [Authorization](#authorization)
-- [Frontend Security](#frontend-security)
-- [Backend Security](#backend-security)
-- [Database Security (RLS)](#database-security-rls)
-- [Input Validation](#input-validation)
-- [Data Protection](#data-protection)
-- [API Security](#api-security)
-- [Environment Variables](#environment-variables)
-- [Security Checklist](#security-checklist)
-- [Common Vulnerabilities](#common-vulnerabilities)
+- [Authorization: Row Level Security](#authorization-row-level-security)
+- [Account deletion and the service-role key](#account-deletion-and-the-service-role-key)
+- [Server code: Vercel functions](#server-code-vercel-functions)
+- [Browser hardening: CSP and headers](#browser-hardening-csp-and-headers)
+- [Consent](#consent)
+- [What is stored where](#what-is-stored-where)
+- [Secrets and environment variables](#secrets-and-environment-variables)
+- [Testing the security rules](#testing-the-security-rules)
+- [PR checklist](#pr-checklist)
+- [Known gaps](#known-gaps)
 
 ---
 
-## Security Principles
+## Threat model in one paragraph
 
-### Defense in Depth
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                      FRONTEND                            │
-│  Input Sanitization → Auth Guards → HTTPS Only          │
-├─────────────────────────────────────────────────────────┤
-│                      API LAYER                           │
-│  Rate Limiting → Token Validation → Request Validation  │
-├─────────────────────────────────────────────────────────┤
-│                      DATABASE                            │
-│  RLS Policies → Encryption at Rest → Audit Logs         │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Core Security Rules
-
-1. **Never Trust the Client** - Always validate on the server
-2. **Principle of Least Privilege** - Grant minimum necessary access
-3. **Fail Secure** - Default to denying access when in doubt
-4. **Validate All Inputs** - Use Zod schemas for runtime validation
-5. **Log Security Events** - Track auth failures and suspicious activity
+FitWizard is a client-heavy React app (web, plus iOS and Android through Capacitor). The client is **untrusted**: anything in the bundle, including every `VITE_*` variable and the Supabase anon key, is public. The browser talks **directly** to Supabase (PostgREST, Auth, Realtime), so the database's Row Level Security (RLS) policies are the real access control. Client-side checks such as `RequireAuth` and feature flags are for user experience, not security. The only privileged server code is one Supabase Edge Function (`delete-account`) and three small Vercel functions in `api/`. Guests (not signed in) keep everything on the device and send no training data anywhere.
 
 ---
 
 ## Authentication
 
-### Provider: Supabase Auth
+| Item | Where | Notes |
+|---|---|---|
+| Provider | Supabase Auth (GoTrue) | No passwords. Email only. |
+| Sign-in | `src/stores/authStore.ts`: `signInWithEmail()` → `supabase.auth.signInWithOtp({ email })` | Supabase emails a magic link **and** a 6-digit code. |
+| Code entry | `verifyEmailCode()` → `supabase.auth.verifyOtp({ email, token, type: 'email' })`; UI in `src/components/auth/EmailCodeStep.tsx` | The email code is the main path on native, where magic links can't reliably return to the app (Lane H, Day 3). |
+| Magic-link redirect | `emailRedirectTo: redirectUrl \|\| window.location.origin`; same-origin check in `src/components/auth/sameOriginPath.ts` | Allowed redirect URLs must also be listed in the Supabase dashboard (Auth → URL Configuration). |
+| Session storage | `src/lib/supabase.ts`: `persistSession: true`, `autoRefreshToken: true`, `storage: window.sessionStorage` | On the web the session lasts for the tab. This narrows exposure but is **not** XSS protection: script on the page can still read it. The CSP is the XSS defence. |
+| Sign-out | `signOut()` clears in-memory auth state, calls `clearSensitiveStorage()` (wizard and onboarding keys), then `supabase.auth.signOut()` | Training data stays on the device until sync ships (DEBT-045); the app says so in a toast. |
+| Route guard | `src/components/RequireAuth.tsx` | UX only: it opens the sign-in modal. RLS still blocks data access when this is bypassed. |
+| Not configured | `isSupabaseConfigured()`; `src/components/auth/AuthUnavailableState.tsx` | Without `VITE_SUPABASE_URL` and the anon key, the app runs in guest-only mode. |
 
-Magic Link / OTP authentication flow.
+### Roles
 
-```typescript
-// src/stores/authStore.ts manages all auth state
-
-interface AuthState {
-  user: User | null;
-  session: Session | null;
-  profile: Profile | null;
-  isLoading: boolean;
-  isConfigured: boolean;
-}
-```
-
-### Auth Flow
-
-```
-1. User enters email
-2. Supabase sends magic link
-3. User clicks link → redirected to app
-4. App receives session via onAuthStateChange
-5. Profile created/fetched
-6. User redirected to intended page
-```
-
-### Sign In Implementation
-
-```typescript
-// Magic link sign-in
-const signInWithEmail = async (email: string) => {
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: window.location.origin,
-    },
-  });
-
-  return { error };
-};
-```
-
-### Session Management
-
-```typescript
-// Initialize auth state on app load
-const initialize = async () => {
-  // Get existing session
-  const { data: { session } } = await supabase.auth.getSession();
-
-  if (session?.user) {
-    // Fetch profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .maybeSingle();
-
-    set({ user: session.user, session, profile });
-  }
-
-  // Listen for auth changes
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN' && session?.user) {
-      // Handle sign in
-    } else if (event === 'SIGNED_OUT') {
-      // Clear state
-    }
-  });
-};
-```
-
-### Sign Out
-
-```typescript
-// Always clear state even if API fails
-const signOut = async () => {
-  try {
-    await supabase.auth.signOut();
-  } catch (error) {
-    console.error('Sign out error:', error);
-  }
-
-  // Clear state regardless
-  set({ user: null, session: null, profile: null });
-};
-```
+- **Database roles:** `anon` (signed out), `authenticated` (signed in), and `service_role` (bypasses RLS). Only the `delete-account` function uses `service_role`.
+- **App role on `profiles`:** `role` is `client` or `trainer`, and `is_trainer` is derived from it. The `sync_profile_trainer_flags` trigger in `005_trainer_roles.sql` forces `role = 'client'` on insert and keeps the old value on update, unless the caller is `service_role`. **A user can't promote themselves to trainer**, even with a hand-written request. The client also strips these fields (`stripTrainerFields` in `authStore.ts`).
+- **Circle roles:** `admin` and `member` (`circle_members.role`, constrained in 006).
 
 ---
 
-## Authorization
+## Authorization: Row Level Security
 
-### Role-Based Access Control (RBAC)
+Every table in `public` has RLS **enabled**. Policies are in `supabase/migrations/`. Since 008, every circle and profile policy is `TO authenticated`, so `anon` gets nothing from them.
 
-```typescript
-// server/src/middleware/auth.ts
-export type UserRole = 'client' | 'trainer' | 'admin';
+Two `SECURITY DEFINER` helpers in `008_policy_fixes.sql` avoid policies that query their own table, which Postgres rejects as infinite recursion. Both are revoked from `PUBLIC` and `anon`, granted to `authenticated` and `service_role`, and pinned to `search_path = public`:
+- `is_circle_member(circle_id)` and `is_circle_admin(circle_id)`
+- `shares_circle_with(user_id)`
 
-// Permission checks
-export const permissions = {
-  canViewPlan: (user, planOwnerId) => {
-    if (!user) return false;
-    if (user.role === 'admin') return true;
-    if (user.role === 'trainer') return true;
-    return user.id === planOwnerId;
-  },
+### Per table
 
-  canEditPlan: (user, planOwnerId) => {
-    if (!user) return false;
-    if (user.role === 'admin') return true;
-    return user.id === planOwnerId;
-  },
+"Own" means `auth.uid() = user_id` (or `= id` for `profiles`).
 
-  canManageClients: (user) => {
-    if (!user) return false;
-    return user.role === 'trainer' || user.role === 'admin';
-  },
+| Table | Read | Insert | Update | Delete | On account deletion |
+|---|---|---|---|---|---|
+| `plans` (004) | own | own | own | own | CASCADE |
+| `workout_logs`, `personal_records`, `nutrition_days`, `nutrition_settings`, `body_measurements`, `readiness_entries`, `user_state` (007) | own | own | own | own | CASCADE |
+| `profiles` (001, 008) | own row, plus profiles of people you share a circle with | own (trainer fields forced, 005) | own (trainer fields locked, 005) | own | CASCADE (from `auth.users`) |
+| `exercise_interactions` (002) | own | own | — | own | CASCADE |
+| `user_exercise_preferences` (002) | own | own | own | — | CASCADE |
+| `exercise_stats` (002) | everyone (aggregate counts, no user column) | — (written by trigger) | — | — | no user data |
+| `user_streaks`, `exercise_badges` (002, 008) | own | **none for clients** (written only by `SECURITY DEFINER` functions or `service_role`) | none | none | CASCADE |
+| `circles` (001, 006, 008) | members, plus the creator | signed in, `created_by = auth.uid()` | admins | admins | creator SET NULL (circle survives) |
+| `circle_members` (001, 006, 008) | members of the same circle | join a public circle as member, or your own circle as admin; private circles only through `join_circle_by_invite()` | — | own row (leave) | CASCADE |
+| `circle_activities` (001, 008) | members | members, as themselves | — | author or admin | CASCADE |
+| `circle_challenges` (001, 008) | members | members, as creator | — | creator or admin | `created_by`, `winner_id` SET NULL |
+| `activity_reactions`, `activity_comments`, `circle_posts` (003, 008) | members | members, as themselves | own (comments, posts) | own | CASCADE |
+| `challenge_participants` (003, 008) | members | members, as themselves; **score forced to 0** | **none for clients**; the `trg_protect_challenge_score` trigger keeps the old score for non-service roles | own | CASCADE |
 
-  canAccessAdmin: (user) => {
-    return user?.role === 'admin';
-  },
-};
-```
+Circles is behind `VITE_FEATURE_CIRCLES` and off in v1. Its policies are still enforced and tested, because the tables exist in production.
 
-### Frontend Protection
+### Rules for new tables
 
-#### RequireAuth Component
-
-```typescript
-// src/components/RequireAuth.tsx
-interface RequireAuthProps {
-  children: ReactNode;
-  strict?: boolean;  // true = force login, false = allow guests
-}
-
-function RequireAuth({ children, strict = true }: RequireAuthProps) {
-  const { user, isLoading, setShowAuthModal } = useAuthStore();
-
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
-
-  if (strict && !user) {
-    // Show auth modal instead of redirecting
-    setShowAuthModal(true);
-    return <AuthPrompt />;
-  }
-
-  return <>{children}</>;
-}
-
-// Usage
-<RequireAuth strict={true}>
-  <ProtectedPage />
-</RequireAuth>
-```
-
-#### Route Guards
-
-```typescript
-// Guards for specific conditions
-
-// TrainerGuard - requires trainer role
-function TrainerGuard({ children }) {
-  const { profile } = useAuthStore();
-
-  if (profile?.role !== 'trainer') {
-    return <Navigate to="/unauthorized" />;
-  }
-
-  return <>{children}</>;
-}
-
-// OnboardingGuard - ensures profile is complete
-function OnboardingGuard({ children }) {
-  const { profile } = useAuthStore();
-
-  if (!profile?.onboarding_complete) {
-    return <Navigate to="/onboarding" />;
-  }
-
-  return <>{children}</>;
-}
-```
+1. `ENABLE ROW LEVEL SECURITY` in the same migration that creates the table.
+2. `user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE`, or `SET NULL` for a shared row that must survive. **Never `NO ACTION`:** it makes account deletion fail.
+3. Four owner policies, `TO authenticated`, using `DROP POLICY IF EXISTS` then `CREATE POLICY` (copy `007_user_data.sql`).
+4. Never query a table from inside its own policy. Use a `SECURITY DEFINER` helper as in 008.
+5. Columns the client must not set (scores, roles, badges) are protected by a trigger or by having no client write policy.
+6. Add the table to the seed in `supabase/tests/delete_account.test.sql`. Its coverage check fails until you do.
 
 ---
 
-## Frontend Security
+## Account deletion and the service-role key
 
-### XSS Prevention
-
-React automatically escapes JSX content, providing built-in XSS protection:
-
-```typescript
-// SAFE: React escapes this automatically
-<div>{userInput}</div>
-
-// UNSAFE PATTERN TO AVOID: Directly setting inner HTML
-// If you must render HTML, always sanitize with DOMPurify first:
-import DOMPurify from 'dompurify';
-
-// Only use this pattern when HTML rendering is absolutely required
-const sanitizedHtml = DOMPurify.sanitize(untrustedHtml);
-```
-
-### URL Handling
-
-```typescript
-// Validate URLs before using
-function isValidUrl(string: string): boolean {
-  try {
-    const url = new URL(string);
-    return ['http:', 'https:'].includes(url.protocol);
-  } catch {
-    return false;
-  }
-}
-
-// Sanitize redirect URLs
-function getSafeRedirect(url: string | null): string {
-  if (!url) return '/';
-
-  // Only allow relative URLs or same-origin
-  try {
-    const parsed = new URL(url, window.location.origin);
-    if (parsed.origin !== window.location.origin) {
-      return '/'; // Reject cross-origin redirects
-    }
-    return parsed.pathname + parsed.search;
-  } catch {
-    return '/';
-  }
-}
-```
-
-### Sensitive Data Handling
-
-```typescript
-// Never log sensitive data
-console.log('User:', user);  // OK
-console.log('Session:', session.access_token);  // BAD!
-
-// Clear sensitive data from memory when done
-function handlePasswordChange(password: string) {
-  try {
-    await updatePassword(password);
-  } finally {
-    password = ''; // Clear from variable
-  }
-}
-
-// Don't store sensitive data in localStorage
-localStorage.setItem('token', token);  // BAD!
-// Supabase handles token storage securely
-```
+- **Function:** `supabase/functions/delete-account/` (contract #4). Deploy steps and a curl test are in its [README](../supabase/functions/delete-account/README.md).
+- **Flow:** it verifies the caller's token with the anon key, then calls `auth.admin.deleteUser(<id from the token>)` with the service role. Every row goes through the foreign-key cascades above. It returns `204`, `401` or `500 {"error":"Deletion failed"}`, and never returns internal details.
+- **The service-role key exists only as a Supabase function secret (`SUPABASE_SERVICE_ROLE_KEY`, injected by Supabase), used only by this one function.** It is not in `.env*`, Vercel, `api/`, `server/` or the app bundle. If you ever see it anywhere else, rotate it in the Supabase dashboard (Settings → API) and remove it.
+- **CORS:** `capacitor://localhost` and `https://localhost` are always allowed, plus the `ALLOWED_ORIGINS` function secret. CORS is not the boundary; the token is.
+- **Client:** `src/lib/account/deleteAccount.ts` and the Profile → Account → Delete account button (Lane F, Day 4). After `204`, the client clears device data (`clearLocalUserData()`) and signs out.
+- **Guests:** "Erase data on this device" calls `clearLocalUserData()` (`src/lib/storage/clearLocalUserData.ts`). No server call is needed because nothing was uploaded.
 
 ---
 
-## Backend Security
+## Server code: Vercel functions
 
-### Middleware Stack
+| Function | Purpose | Secret |
+|---|---|---|
+| `api/exercise-search-ninjas.ts` | Exercise search through API Ninjas | `API_NINJAS_API_KEY` (server only) |
+| `api/motivation-quote.ts` | Quote of the day | `API_NINJAS_API_KEY` |
+| `api/proxy-wger.ts` | Proxy to the public wger API (host allowlist) | none |
 
-```typescript
-// server/src/index.ts
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-import { authenticate, requireAuth } from './middleware/auth';
+All three use `api/_lib/guard.ts`:
+- **CORS allowlist:** `ALLOWED_ORIGINS`, plus the deployment's own URLs, `capacitor://localhost` and `https://localhost`. Other origins get `403`; requests with no `Origin` header are allowed.
+- **Rate limit:** per IP, in memory. This is best-effort: each function instance has its own table.
 
-// CORS configuration
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:8080',
-  credentials: true,
-}));
+None of them touch user data or Supabase.
 
-// Rate limiting
-const standardLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window
-  message: { error: 'Too many requests', code: 'RATE_LIMITED' },
-});
-
-const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // 10 auth attempts per hour
-  message: { error: 'Too many login attempts', code: 'RATE_LIMITED' },
-});
-
-// Apply middleware
-app.use(standardLimiter);
-app.use('/api/auth', authLimiter);
-app.use(authenticate); // Parse auth token
-```
-
-### Token Verification
-
-```typescript
-// CRITICAL: Always verify tokens server-side
-export async function verifyToken(token: string): Promise<User | null> {
-  try {
-    // Verify with Supabase Auth API
-    const response = await fetch(
-      `${process.env.SUPABASE_URL}/auth/v1/user`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          apikey: process.env.SUPABASE_ANON_KEY!,
-        },
-      }
-    );
-
-    if (!response.ok) return null;
-
-    const user = await response.json();
-    return user;
-  } catch {
-    return null;
-  }
-}
-
-// CRITICAL: Never trust client-claimed user ID
-router.post('/plans', requireAuth, async (req, res) => {
-  // BAD: Using client-provided userId
-  const { userId, ...planData } = req.body;
-
-  // GOOD: Using verified user from auth middleware
-  const userId = req.user!.id;
-
-  await createPlan({ ...planData, user_id: userId });
-});
-```
-
-### Request Validation
-
-```typescript
-import { z } from 'zod';
-
-// Define schema
-const CreatePlanSchema = z.object({
-  name: z.string().min(1).max(100),
-  exercises: z.array(z.string().uuid()).min(1).max(50),
-  scheduledFor: z.coerce.date().optional(),
-});
-
-// Validate in route
-router.post('/plans', requireAuth, async (req, res) => {
-  const result = CreatePlanSchema.safeParse(req.body);
-
-  if (!result.success) {
-    return res.status(400).json({
-      error: 'Validation failed',
-      code: 'VALIDATION_ERROR',
-      details: result.error.format(),
-    });
-  }
-
-  // result.data is now typed and validated
-  const plan = result.data;
-  // ...
-});
-```
+The optional Express API in `server/` is **dev only**, not deployed, and is being removed on Lane F Day 5 (decision D1).
 
 ---
 
-## Database Security (RLS)
+## Browser hardening: CSP and headers
 
-### Row Level Security Policies
+Set for every path in `vercel.json`:
 
-RLS is **ENABLED** on all tables. Users can only access their own data.
+| Header | Value (summary) |
+|---|---|
+| `Content-Security-Policy` | `default-src 'self'`; `script-src 'self' 'wasm-unsafe-eval'`; `style-src 'self' 'unsafe-inline'`; `font-src 'self'`; `img-src 'self' data:` + `*.supabase.co`, `images.openfoodfacts.org`, `wger.de`; `connect-src 'self'` + `https://*.supabase.co`, `wss://*.supabase.co`, `world.openfoodfacts.org`, `wger.de`; `frame-ancestors 'none'` |
+| `X-Frame-Options` | `DENY` |
+| `X-Content-Type-Options` | `nosniff` |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` |
 
-```sql
--- Example RLS policy for workouts table
-CREATE POLICY "Users can view own workouts"
-  ON workouts FOR SELECT
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own workouts"
-  ON workouts FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own workouts"
-  ON workouts FOR UPDATE
-  USING (auth.uid() = user_id)
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own workouts"
-  ON workouts FOR DELETE
-  USING (auth.uid() = user_id);
-```
-
-### RLS Best Practices
-
-```sql
--- Always use auth.uid() for user checks
-USING (auth.uid() = user_id)  -- GOOD
-USING (user_id = $1)          -- BAD - could be bypassed
-
--- For shared resources (e.g., circles)
-CREATE POLICY "Members can view circle"
-  ON circles FOR SELECT
-  USING (
-    auth.uid() IN (
-      SELECT user_id FROM circle_members
-      WHERE circle_id = circles.id
-    )
-  );
-
--- Admin bypass (use sparingly)
-CREATE POLICY "Admins can view all"
-  ON workouts FOR SELECT
-  USING (
-    auth.uid() = user_id OR
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE id = auth.uid() AND role = 'admin'
-    )
-  );
-```
-
-### Testing RLS
-
-```typescript
-// Test RLS policies work correctly
-describe('Workout RLS', () => {
-  it('user can only see their own workouts', async () => {
-    // Sign in as user A
-    await supabase.auth.signInWithPassword({ email: userA, password });
-
-    // Try to read user B's workout
-    const { data, error } = await supabase
-      .from('workouts')
-      .select()
-      .eq('id', userBWorkoutId);
-
-    // Should return empty, not error
-    expect(data).toEqual([]);
-  });
-});
-```
+- There are no inline scripts and no third-party script hosts. Fonts are self-hosted (Lane H, Day 2).
+- **A new third party means editing the CSP** (Lane C owns `vercel.json` in Wave 2), plus a row in `DATA_INVENTORY.md` and, if data leaves the device, a consent gate (ADR 10).
+- The `delete-account` function is on `*.supabase.co`, which `connect-src` already covers.
+- **Native:** Capacitor serves the bundle locally, so these HTTP headers don't apply in the native apps. The WebView loads only bundled code.
+- **React:** don't use `dangerouslySetInnerHTML` with user input. User-provided URLs go through the same-origin or allowlist helpers (`sameOriginPath.ts`, `validateRemoteEndpoint` in `src/lib/supabase.ts`).
 
 ---
 
-## Input Validation
+## Consent
 
-### Validation Strategy
+Consent is in `src/lib/consent.ts`, with the UI in `src/components/legal/ConsentModal.tsx`. Flags are stored on the device in localStorage; the exact keys are in `DATA_INVENTORY.md`.
 
-```
-1. Client-side (UX feedback) → Zod schema
-2. API layer (security gate) → Zod schema
-3. Database layer (last defense) → RLS + constraints
-```
+| Flag | Gates |
+|---|---|
+| `fitwizard_consent_v1` | First-run acknowledgement of the privacy terms (`/legal`) |
+| `fitwizard_analytics_consent` | Analytics. Off until the user opts in (`src/stores/analyticsStore.ts`) |
+| `fitwizard_nutrition_lookup_consent` | Sending barcode and food searches to Open Food Facts (`src/lib/openFoodFacts.ts`) |
+| Crash reporting | Lane C, Day 3 (Sentry): opt-in, disclosed in `/legal` |
 
-### Zod Schema Patterns
-
-```typescript
-// src/lib/validation/fitness.ts
-
-// Reusable validators
-const SafeString = z.string()
-  .min(1)
-  .max(1000)
-  .transform(s => s.trim());
-
-const Email = z.string()
-  .email()
-  .toLowerCase()
-  .max(255);
-
-const UUID = z.string().uuid();
-
-// Enum validation (prevents injection)
-const GoalSchema = z.enum(['strength', 'hypertrophy', 'general']);
-
-// Array with limits
-const ExerciseListSchema = z.array(z.string().uuid())
-  .min(1, 'Add at least one exercise')
-  .max(50, 'Too many exercises');
-
-// Numeric bounds
-const SetsSchema = z.number()
-  .int()
-  .min(1)
-  .max(10);
-
-// Complete validation
-const CreateWorkoutSchema = z.object({
-  name: SafeString.max(100),
-  goal: GoalSchema,
-  exercises: ExerciseListSchema,
-  sets: SetsSchema,
-});
-```
-
-### Validation Helpers
-
-```typescript
-// Safe parsing with error handling
-export function validateOrThrow<T>(
-  schema: z.ZodSchema<T>,
-  data: unknown,
-  context?: string
-): T {
-  const result = schema.safeParse(data);
-
-  if (!result.success) {
-    const message = context
-      ? `${context}: ${result.error.message}`
-      : result.error.message;
-
-    console.error('Validation failed:', {
-      context,
-      errors: result.error.format(),
-    });
-
-    throw new ValidationError(message, result.error);
-  }
-
-  return result.data;
-}
-
-// Usage
-const workout = validateOrThrow(
-  CreateWorkoutSchema,
-  req.body,
-  'Create workout'
-);
-```
+Signing in is the consent for cloud storage of the signed-in user's data. Guests send nothing to Supabase.
 
 ---
 
-## Data Protection
+## What is stored where
 
-### Sensitive Data Categories
+[`docs/store/DATA_INVENTORY.md`](store/DATA_INVENTORY.md) is the full table: every field, its key, where it's stored, who receives it, retention, and whether it's in the export. In short:
 
-| Category | Examples | Handling |
-|----------|----------|----------|
-| **PII** | Email, name, phone | Encrypt, minimize storage |
-| **Auth** | Tokens, passwords | Never log, hash passwords |
-| **Health** | Weight, injuries | RLS protected, consent required |
-| **Financial** | Payment info | Use Stripe, never store cards |
-
-### Data Minimization
-
-```typescript
-// Only request necessary data
-const { data } = await supabase
-  .from('profiles')
-  .select('id, display_name, avatar_url')  // Only needed fields
-  .eq('id', userId)
-  .single();
-
-// Don't return sensitive fields to client
-const publicProfile = {
-  id: profile.id,
-  displayName: profile.display_name,
-  avatarUrl: profile.avatar_url,
-  // Omit: email, phone, role, etc.
-};
-```
-
-### Audit Logging
-
-```typescript
-// Log security-relevant events
-function logSecurityEvent(event: {
-  type: 'AUTH_SUCCESS' | 'AUTH_FAILURE' | 'ACCESS_DENIED' | 'DATA_EXPORT';
-  userId?: string;
-  ip?: string;
-  details?: Record<string, unknown>;
-}) {
-  console.log(JSON.stringify({
-    timestamp: new Date().toISOString(),
-    ...event,
-  }));
-
-  // In production, send to logging service
-  // await sendToLoggingService(event);
-}
-
-// Usage
-logSecurityEvent({
-  type: 'AUTH_FAILURE',
-  ip: req.ip,
-  details: { email: maskedEmail, reason: 'invalid_token' },
-});
-```
+- **On the device:** training, nutrition, measurements, readiness, achievements and custom exercises are in IndexedDB `fitwizard` on the web, or app-private files on native (ADR 11). Preferences and consent flags are in localStorage. The auth session is in sessionStorage on the web.
+- **In Supabase (signed in only):** the tables in the RLS table above, the account email in `auth.users`, and the profile.
+- **Third parties:** Supabase (auth and database), Vercel (hosting and functions), API Ninjas (through `api/`, no user data), wger (through `api/proxy-wger`), Open Food Facts (with consent). Crash reporting arrives with Lane C.
+- **Export:** Profile → Export data (`src/lib/dataExport.ts`). Version 3, covering every store, is Lane F Day 4.
 
 ---
 
-## API Security
+## Secrets and environment variables
 
-### Security Headers
+| Variable | Where it lives | Public? |
+|---|---|---|
+| `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` | `.env.local`, Vercel, native build env | **Yes** (bundled). RLS is what protects data. |
+| `VITE_FEATURE_*`, `VITE_PUBLIC_APP_ORIGIN`, `VITE_SHARE_BASE_URL` | same | Yes |
+| `VITE_TRAINER_ACCESS_USERNAME` / `_PASSCODE` | same | **Yes.** A UX hold only, not a security control. |
+| `API_NINJAS_API_KEY`, `ALLOWED_ORIGINS` | Vercel (server only, no `VITE_` prefix) | No |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Supabase function secret only** (injected automatically) | No. Never anywhere else. |
+| `ALLOWED_ORIGINS` (function) | Supabase function secret (`supabase secrets set`) | No (not sensitive, but configured server-side) |
 
-```typescript
-// server/src/middleware/security.ts
-import helmet from 'helmet';
-
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'", process.env.SUPABASE_URL],
-    },
-  },
-  hsts: {
-    maxAge: 31536000,
-    includeSubDomains: true,
-  },
-}));
-```
-
-### Error Handling (Don't Leak Info)
-
-```typescript
-// DON'T: Expose internal errors
-res.status(500).json({
-  error: 'Database error: relation "users" does not exist',
-  stack: error.stack,
-});
-
-// DO: Generic message, log details
-console.error('Database error:', error);
-res.status(500).json({
-  error: 'An unexpected error occurred',
-  code: 'INTERNAL_ERROR',
-  requestId: req.id, // For support reference
-});
-```
-
-### Request Signing (Future)
-
-```typescript
-// For sensitive operations, consider request signing
-interface SignedRequest {
-  payload: string;
-  signature: string;
-  timestamp: number;
-}
-
-function verifySignature(
-  payload: string,
-  signature: string,
-  secret: string
-): boolean {
-  const expected = crypto
-    .createHmac('sha256', secret)
-    .update(payload)
-    .digest('hex');
-
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expected)
-  );
-}
-```
+Rules:
+- Anything prefixed `VITE_` ships to every user. Never put a secret there.
+- No secrets in code, docs, tests or commit messages. `.env`, `.env.local`, `.env.staging` and `.env.production` are git-ignored; only `.env.example` is committed.
+- To rotate the anon key or the service-role key, use Supabase → Settings → API. Then update Vercel and the native build env for the anon key. Function secrets update themselves.
 
 ---
 
-## Environment Variables
+## Testing the security rules
 
-### Required Variables
+| What | Command | Covers |
+|---|---|---|
+| RLS and cascades | `npm run test:db` (`supabase/tests/run.sh`, local Postgres with an `auth` stub) | 007 owner policies, 008 recursion, forgeable scores, profile exposure, delete cascades; `delete_account.test.sql` covers the full deletion path |
+| delete-account function | `npx -y deno@2 test --no-config supabase/functions/delete-account/` | 401, 204, 500 (no details), 405, CORS |
+| API guard | `npm run test:run` (`api/_lib/guard.test.ts`) | CORS allowlist, rate limit |
+| Dependencies | `npm audit --omit=dev` | Known vulnerabilities |
 
-```bash
-# .env.local (frontend)
-VITE_SUPABASE_URL=https://xxx.supabase.co
-VITE_SUPABASE_ANON_KEY=your-publishable-or-legacy-anon-key
-
-# server/.env (backend)
-SUPABASE_URL=https://xxx.supabase.co
-SUPABASE_ANON_KEY=your-publishable-or-legacy-anon-key
-SUPABASE_SERVICE_KEY=your-server-only-secret-key
-```
-
-### Security Rules
-
-```typescript
-// NEVER commit .env files
-// .gitignore must include:
-// .env
-// .env.local
-// .env.*.local
-
-// NEVER expose service keys to frontend
-// VITE_* variables are bundled into frontend code!
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,  // OK - anon key
-  // NEVER: import.meta.env.VITE_SUPABASE_SERVICE_KEY
-);
-
-// Validate required variables on startup
-const required = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY'];
-for (const key of required) {
-  if (!process.env[key]) {
-    throw new Error(`Missing required env var: ${key}`);
-  }
-}
-```
+The harness is not GoTrue. Real JWT handling and Supabase's own grants are approximated, so policy changes still get a staging check (see `docs/SUPABASE_MIGRATIONS.md`).
 
 ---
 
-## Security Checklist
+## PR checklist
 
-### Before Every PR
-
-- [ ] All user inputs validated with Zod
-- [ ] No `any` types in security-critical code
-- [ ] Auth required on all protected routes
-- [ ] RLS policies tested for new tables
-- [ ] No sensitive data in logs
-- [ ] No secrets in code or comments
-- [ ] Error messages don't leak internals
-
-### New Feature Security Review
-
-- [ ] What user data does this touch?
-- [ ] Who should have access?
-- [ ] What could go wrong if input is malicious?
-- [ ] Are there rate limiting needs?
-- [ ] Does this need audit logging?
-
-### Deployment Checklist
-
-- [ ] All env vars set in production
-- [ ] HTTPS enforced
-- [ ] Security headers configured
-- [ ] Rate limiting enabled
-- [ ] Error tracking configured (no PII)
-- [ ] Database backups enabled
+- [ ] New table: RLS on, owner policies `TO authenticated`, user FK `CASCADE` or `SET NULL`, added to `delete_account.test.sql`, and a test in `supabase/tests/`.
+- [ ] No secret in code, `VITE_*` or docs. No new use of the service-role key.
+- [ ] New stored data or third party: row in `DATA_INVENTORY.md`, disclosure text for `Legal.tsx` (Lane A), included in `dataExport.ts`, consent gate if it leaves the device, CSP updated.
+- [ ] User input validated with Zod at the boundary (`src/lib/validation/`).
+- [ ] Errors shown to users are generic; details go to the console or logs.
 
 ---
 
-## Common Vulnerabilities
+## Known gaps
 
-### OWASP Top 10 Coverage
-
-| Vulnerability | Mitigation |
-|---------------|------------|
-| **Injection** | Zod validation, parameterized queries (Supabase) |
-| **Broken Auth** | Supabase Auth, token verification |
-| **Sensitive Data Exposure** | RLS, HTTPS, data minimization |
-| **XXE** | Not applicable (no XML processing) |
-| **Broken Access Control** | RLS policies, RBAC middleware |
-| **Security Misconfiguration** | Helmet, secure defaults |
-| **XSS** | React escaping, CSP headers, DOMPurify for HTML |
-| **Insecure Deserialization** | Zod validation on all inputs |
-| **Components with Vulnerabilities** | Regular npm audit |
-| **Insufficient Logging** | Security event logging |
-
-### Vulnerability Patterns to Avoid
-
-```typescript
-// INSECURE: SQL injection (if using raw queries)
-const { data } = await supabase.rpc('search', {
-  query: `%${userInput}%`,  // Could contain SQL
-});
-
-// SECURE: Use Supabase's built-in escaping
-const { data } = await supabase
-  .from('exercises')
-  .select()
-  .ilike('name', `%${userInput}%`);  // Properly escaped
-
-// INSECURE: Prototype pollution
-Object.assign(target, userInput);
-
-// SECURE: Validate structure first
-const validated = SafeObjectSchema.parse(userInput);
-Object.assign(target, validated);
-
-// INSECURE: Regex DoS
-const regex = new RegExp(userInput);  // Could be evil regex
-
-// SECURE: Escape user input in regex
-const escaped = userInput.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const regex = new RegExp(escaped);
-```
-
-### Security Testing Commands
-
-```bash
-# Check for known vulnerabilities
-npm audit
-
-# Fix automatically where safe
-npm audit fix
-
-# Check for secrets in code
-git secrets --scan
-
-# Lint for security issues (if configured)
-npm run lint:security
-```
+| Gap | Status |
+|---|---|
+| Re-running 002 after 008 recreates the client write policies on streaks and badges (DEBT-070) | Documented: re-run 008 straight after 002 |
+| A circle whose only admin deletes their account has no admin | Lane F Day 6 (Circles is off in v1) |
+| The rate limit in `api/` is per instance | Long term: Vercel firewall rules |
+| Sign-out keeps training data on the device (DEBT-045) | Until sync ships (Lane E) |
+| `delete-account` hasn't run against a real project yet | Lincoln deploys it to staging at Gate 1 (function README) |

@@ -268,3 +268,47 @@ where contype = 'f' and connamespace = 'public'::regnamespace
 
 Then, on staging: sign in and open Profile (the own-profile read must still
 work), and sign out and confirm the app still loads.
+
+## Staging order at Gate 1 (L10)
+
+Do these in order, on **staging** first and production only at Gate 2. Each step
+links to its details above.
+
+1. **Repair 001–006 (DEBT-053).** They were applied in the SQL Editor, so the CLI
+   doesn't know about them:
+   `supabase migration repair --status applied 001 002 003 004 005 006`
+   (see [Before the first `supabase db push`](#before-the-first-supabase-db-push-on-staging-or-production)).
+2. **Push 007 and 008:** `supabase db push --dry-run` must list exactly
+   `007_user_data.sql` and `008_policy_fixes.sql`, then `supabase db push`.
+   Run the [007](#007-user-data-tables) and [008](#008-access-rule-fixes)
+   verification queries.
+3. **Deploy the `delete-account` function** (needs 008; without it, deleting a user
+   who created a circle fails). Follow
+   [`supabase/functions/delete-account/README.md`](../supabase/functions/delete-account/README.md):
+   `supabase secrets set ALLOWED_ORIGINS=…`, `supabase functions deploy delete-account`,
+   then the curl test with a throwaway account.
+4. **If 002 is ever re-run, re-run 008 straight after it (DEBT-070).** 002 recreates
+   the client write policies on `user_streaks` and `exercise_badges` that 008
+   drops. The same applies if anyone pastes 002 into the SQL Editor again.
+
+## Account deletion (delete-account function)
+
+Account deletion relies only on foreign keys: GoTrue deletes the `auth.users` row,
+and every user row goes through `ON DELETE CASCADE`, or `SET NULL` for shared
+circle rows (008).
+
+`supabase/tests/delete_account.test.sql` checks this on top of 001–008:
+- user A gets a row in **every** public column that references `auth.users` or
+  `profiles` (22 columns today). A new user-linked table fails the test until it's
+  seeded there, so the check can't go stale;
+- a signed-in client can't delete from `auth.users` itself;
+- the delete works for a role with no grants on public tables, as GoTrue's own
+  role does;
+- afterwards no row points at A; circles and challenges A created survive with
+  the user nulled; user B's rows are unchanged, apart from B's reaction on A's
+  deleted activity.
+
+Mutation check (2026-11-18): with 008 removed, the test fails on
+`circles_created_by_fkey`.
+
+The verification query for deletion on a real project is in the function README.
