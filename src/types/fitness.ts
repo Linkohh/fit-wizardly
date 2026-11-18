@@ -350,32 +350,6 @@ export interface PersonalRecord {
   workoutLogId: string;
 }
 
-// ============================================
-// WISDOM AI TYPES
-// ============================================
-
-export type WisdomMessageRole = 'user' | 'assistant';
-
-export interface WisdomMessage {
-  id: string;
-  role: WisdomMessageRole;
-  content: string;
-  timestamp: Date;
-}
-
-export interface WisdomResponse {
-  content: string;
-  suggestedFollowUps?: string[];
-  conceptsIntroduced?: string[];
-}
-
-export interface WisdomContext {
-  planId: string | null;
-  exerciseId: string | null;
-  weekNumber: number;
-  phase?: OptPhase;
-}
-
 // Muscle data for anatomy picker
 export interface MuscleData {
   id: MuscleGroup;

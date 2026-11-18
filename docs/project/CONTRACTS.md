@@ -172,7 +172,16 @@ Behaviour:
 - **Push** upserts changed items in batches of 200. Deletes are sent as `UPDATE ... SET deleted_at`, never as hard deletes. For one-row-per-user tables (`keyColumn: null`) the update is filtered on `user_id` alone.
 - The **outbox** (`fitwizard-sync-outbox`, saved on the device) survives restarts. Every save merges the saved copy first, so a change made after a restart but before the first sync keeps the older unsent changes. An entry is cleared only if it hasn't changed during the push.
 - A collection that fails is counted in `failed`, and the rest still sync. Overlapping `syncAll` calls share one run.
-- **Not yet built (Day 6):** the triggers, and marking every existing local item dirty on the first sign-in.
+- **Collections (Day 5):** `src/lib/sync/collections/` holds one collection per 007 table: `workout_logs`, `personal_records`, `nutrition_days`, `nutrition_settings` (one row), `body_measurements`, `readiness_entries`, `user_state` (one row: achievements and custom exercises).
+  - `startSyncCollections()` registers them all and starts tracking.
+  - `markAllCollectionsDirty()` queues every local record, for the first sign-in.
+  - Import from `@/lib/sync/collections`, not `@/lib/sync`, so the engine doesn't pull the stores into the startup bundle.
+- **How changes are marked (Day 5):** a tracker watches each store, compares records before and after every change, and calls `markDirty` for the changed keys (or `{ deleted: true }` for removed ones).
+  - It catches every store action, so actions don't call `markDirty` themselves.
+  - Loading the saved copy at startup, and writing pulled records, are not counted as edits.
+  - The outbox entry's time is the local edit time, so stored items have no `updatedAt` field (`getUpdatedAt` returns `''`). A record with no outbox entry has already synced, so the cloud copy wins.
+- **Left out of sync:** exercise favourites, which already sync through `user_exercise_preferences`. Also any item whose day isn't a valid `YYYY-MM-DD`, because one bad value would fail a whole upload batch; it stays on the device.
+- **Not yet built (Day 6):** calling `startSyncCollections()` at startup, the triggers, calling `markAllCollectionsDirty()` on the first sign-in, and the indicator.
 
 ## 6. API base: `src/lib/apiBase.ts`
 

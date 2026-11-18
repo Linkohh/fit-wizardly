@@ -13,7 +13,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ExerciseSwapModal } from '@/components/plan/ExerciseSwapModal';
-import { useWisdomStore } from '@/stores/wisdomStore';
 import { WorkoutDayCard } from '@/components/plan/WorkoutDayCard';
 import { useAuthStore } from '@/stores/authStore';
 import { useWizardStore } from '@/stores/wizardStore';
@@ -44,7 +43,6 @@ export default function PlanPage() {
   const [swapModalOpen, setSwapModalOpen] = useState(false);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; exerciseIndex: number; exercise: ExercisePrescription } | null>(null);
-  const setContext = useWisdomStore((state) => state.setContext);
   const activePlan = currentPlan ?? planHistory[0] ?? null;
   // Coach UI only exists while the coach flag is on (contract #1).
   const isTrainerEnabled = isFeatureEnabled('coach') && isTrainerAuthorized && isTrainerMode;
@@ -54,18 +52,6 @@ export default function PlanPage() {
       setCurrentPlan(planHistory[0]);
     }
   }, [currentPlan, planHistory, setCurrentPlan]);
-
-  // Set Wisdom AI context when plan changes
-  useEffect(() => {
-    if (activePlan) {
-      setContext({
-        planId: activePlan.id,
-        exerciseId: null,
-        weekNumber: 1,
-        phase: activePlan.selections.optPhase,
-      });
-    }
-  }, [activePlan, setContext]);
 
   const handleStartOver = () => {
     clearCurrentPlan();

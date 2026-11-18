@@ -146,6 +146,33 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-18 — Day 3 Started; Lane E Day 5: Sync Collections (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, from `preview_b` @ `172c428`)
+
+- **Day 3 sessions:**
+  - Sent Day 3 to all six lane sessions after #61 merged.
+  - A, D and H had started, then stopped on the usage limit. After the reset they were told to carry on.
+  - B, C and F declined to start a push-and-PR task on a message from another session alone, and are waiting for Lincoln to reply "go" in each. That's correct behaviour.
+- **What was done (Lane E Day 5):**
+  - One sync collection per migration 007 table, plus a tracker that marks every store change dirty.
+  - `startSyncCollections()` and `markAllCollectionsDirty()` for Day 6.
+  - DEBT-065 (saved coach flag) and DEBT-067 (dead Wisdom store) resolved.
+  - Details: `docs/project/handoffs/2026-11-18-lane-e-day-5.md`.
+- **Change of approach:** no `updatedAt` on stored items and no `markDirty` in each action. A tracker compares records instead. The reasons are in the handoff and in contract #5.
+- **Verification:**
+  - Round trip for every table.
+  - A two-device sync through the fake database.
+  - The first-sign-in upload.
+  - Three deliberate tracker bugs, each caught by a test.
+  - **984/984 tests.** Lint 0 errors / 4 warnings. Typecheck clean. Build passes. Startup bundle unchanged against `preview_b` (358.2 vs 358.3 KB).
+- **Corrected the Day 6 brief:** guest items are not already dirty; call `markAllCollectionsDirty()` on the first sign-in.
+- **Review finding fixed (#64):** pulled items are written newest first, as the stores expect.
+- **Also fixed:** persistent storage was never requested, so the browser could evict saved data. This was a Lane E Day 1 miss, found by Lane A as their DEBT-076 in #63. The browser is now asked after the first save.
+- **New:** DEBT-078 (startup bundle baseline to confirm after Day 2). Numbered to avoid Lane A's DEBT-076 and DEBT-077 in #63.
+- **Next steps:**
+  1. Review and merge the Day 3 PRs.
+  2. Gate 1.
+  3. Lane E Day 6.
+
 ### 2026-11-18 — Wave 1 / Day 2 Reviewed and Merged (#54–#60); Day 4 Review Fixes (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, restarted from `preview_b` @ `ac525a5`)
 
 - **Merged, in merge order:**
@@ -842,9 +869,9 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-062 | "FitWizardly" in a user-visible coach note | `src/lib/analyticsIntelligence.ts:840` | Lane B Day 3 (one-word exception). |
 | DEBT-063 | `<html lang>` doesn't change with the language (screen readers) | `src/lib/i18n.ts` | Lane B Day 3. |
 | DEBT-064 | Profile strings outside Lane B's block are hardcoded ("Sound Effects", "Haptics", "Guest User", "Local Account") | `src/pages/Profile.tsx` | Lane J2. |
-| DEBT-065 | A persisted `selections.isTrainer: true` survives with the coach flag off | `src/stores/wizardStore.ts` | Lane E Day 5 (sanitiser). Note: `ReviewCoachCard.tsx` was deleted in #54, so nothing reads it today. |
+| DEBT-065 | **RESOLVED 2026-11-18** (Lane E Day 5: loads as false while coach is off). ~~A persisted `selections.isTrainer: true` survives with the coach flag off~~ | `src/stores/wizardStore.ts` | Lane E Day 5 (sanitiser). Note: `ReviewCoachCard.tsx` was deleted in #54, so nothing reads it today. |
 | DEBT-066 | `BadgeDisplay`/`BadgeGrid` has no consumer in the app | `src/components/motivation/BadgeDisplay.tsx` | Lane C decides on Day 3; Lane D deletes in Wave 2 if unused. |
-| DEBT-067 | `Plan.tsx` still feeds `wisdomStore`, but no Wisdom UI exists | `src/pages/Plan.tsx`, `src/stores/wisdomStore.ts` | Lane E Day 5. |
+| DEBT-067 | **RESOLVED 2026-11-18** (Lane E Day 5: Wisdom store, templates and types deleted). ~~`Plan.tsx` still feeds `wisdomStore`, but no Wisdom UI exists~~ | `src/pages/Plan.tsx`, `src/stores/wisdomStore.ts` | Lane E Day 5. |
 | DEBT-068 | `ExercisesBrowser` and `ExerciseDetailModal` are used only by tests | `src/components/exercises/` | Lane D, Wave 2 (Lincoln's default: keep until Lane B is done). |
 | DEBT-069 | `CLAUDE.md` cites the unused `src/lib/validation/fitness.ts` as a golden path | `CLAUDE.md` | Lane A Day 3. |
 | DEBT-070 | **MEDIUM.** Re-running 002 after 008 recreates the client streak and badge write policies | `supabase/migrations/002_*.sql` | Operational: re-run 008 straight after any 002 re-run (documented in `SUPABASE_MIGRATIONS.md`). |
@@ -852,6 +879,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-072 | CSP `connect-src` still allows `wger.de`; no browser code needs it | `vercel.json` | Lane H, later, after checking production. |
 | DEBT-073 | `/api/*` rate limit is in memory and per instance | `api/_lib/guard.ts` | Add a Vercel firewall rate-limit rule before launch (Lincoln / Lane H). |
 | DEBT-074 | The dev wger proxy returns `err.message`; production returns a generic 502 | `vite.config.ts:104` | Lane D Day 3. |
+| DEBT-078 | Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4 | build | Lane D: confirm the cause (likely the self-hosted font CSS) and record the new baseline. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |

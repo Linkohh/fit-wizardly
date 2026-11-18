@@ -301,7 +301,7 @@ interface AchievementState {
 
 export const ACHIEVEMENTS_STORE_NAME = 'fitwizard-achievements';
 
-type PersistedAchievementState = Pick<
+export type PersistedAchievementState = Pick<
   AchievementState,
   | 'totalPlansGenerated'
   | 'currentStreak'

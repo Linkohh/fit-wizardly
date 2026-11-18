@@ -51,7 +51,7 @@ All seven lanes run in parallel. There are no dependencies between them.
 | **B** | ⬜ 3.6c Fewer taps to the first plan | ⬜ Buffer: Gate 1 bugs | ➖ | ➖ |
 | **C** | ⬜ 3.2 `track()` and PostHog adapter; wire events | ⬜ Consent entries; disclosure text to Lane A | ⬜ Error-boundary tests; source maps (if L6 done) | ➖ |
 | **D** | ⬜ 3.5 Playwright lifter loop with reload; CI job | ⬜ 3.4 RIR labels, 44 px targets, `MotionConfig`, DEBT-021 | ⬜ 3.4 Wizard Enter key (DEBT-025) | ⬜ 4.5 `npm audit` gate; Dependabot |
-| **E** | ✅ PR #59 (`0513fd0`) · 1.4 part 1: sync engine, outbox, tests; 3 review findings fixed | ⬜ 1.4 part 2: six collections | ⬜ 1.4 part 3: triggers, first sign-in upload, indicator | ⬜ 1.4 part 4: plans move onto the engine |
+| **E** | ✅ PR #59 (`0513fd0`) · 1.4 part 1: sync engine, outbox, tests; 3 review findings fixed | 🔵 1.4 part 2: seven collections and change tracking (Day 5 PR) | ⬜ 1.4 part 3: triggers, first sign-in upload, indicator | ⬜ 1.4 part 4: plans move onto the engine |
 | **F** | ⬜ 1.5 part 2: deletion UI, guest erase, export v3 | ⬜ 1.7 Retire Express (D1) | ⬜ Circles queries checked against migration 008 | ➖ Buffer |
 | **H** | ⬜ 2.2 Session storage adapter; ADR 12 | ⬜ 2.4 part 1: preferences, status bar, splash, keyboard, share | ⬜ 2.4 part 2: local notifications | ⬜ 4.5 Android CI job; iOS archive guide |
 
