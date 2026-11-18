@@ -83,7 +83,7 @@ export function AuthModal() {
               </div>
               <DialogTitle className="text-center">Sign In to Continue</DialogTitle>
               <DialogDescription className="text-center">
-                Use your email to access account-backed features like circles and trainer tools.
+                Sync your plans and history across devices.
               </DialogDescription>
             </DialogHeader>
 

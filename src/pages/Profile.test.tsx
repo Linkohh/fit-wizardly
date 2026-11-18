@@ -24,6 +24,15 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+vi.mock('@/lib/i18n', () => ({
+  LAUNCH_LANGUAGES: [
+    { code: 'en', name: 'English', flag: '🇺🇸', launchReady: true },
+    { code: 'es', name: 'Español', flag: '🇪🇸', launchReady: true },
+  ],
+  changeLanguage: vi.fn(),
+  isLaunchLanguage: (code: string | undefined) => code === 'en' || code === 'es',
+}));
+
 vi.mock('@/stores/themeStore', () => ({
   useThemeStore: (selector?: (state: {
     mode: 'light' | 'dark' | 'system';

@@ -695,6 +695,23 @@
             "guide": "How to Use",
             "legal": "Legal & Privacy",
             "version": "Version"
+        },
+        "app_settings": "App Settings",
+        "theme": {
+            "label": "Theme",
+            "light": "Light",
+            "dark": "Dark",
+            "system": "System"
+        },
+        "language": {
+            "label": "Language",
+            "description": "Used for every screen in the app.",
+            "placeholder": "Select language"
+        },
+        "units": {
+            "label": "Weight Unit",
+            "lbs": "LBS",
+            "kg": "KG"
         }
     },
     "about": {

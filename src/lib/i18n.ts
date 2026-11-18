@@ -14,24 +14,56 @@ const resources = {
     de: { translation: de },
 };
 
-// Supported language codes
-const SUPPORTED_LANGS = ['en', 'es', 'pt', 'de'];
+export const LANGUAGE_STORAGE_KEY = 'fitwizard-language';
 
-// Get initial language from localStorage or browser
-function getInitialLanguage(): string {
-    // Check localStorage first
-    const stored = localStorage.getItem('fitwizard-language');
-    if (stored && SUPPORTED_LANGS.includes(stored)) {
-        return stored;
+/**
+ * Every language with a locale file. `launchReady` marks the ones translated well
+ * enough to offer at launch (decision D3: English and Spanish). The others stay
+ * loaded so their keys keep counting in the parity test, but nobody is put on them.
+ */
+export const AVAILABLE_LANGUAGES = [
+    { code: 'en', name: 'English', flag: '🇺🇸', launchReady: true },
+    { code: 'es', name: 'Español', flag: '🇪🇸', launchReady: true },
+    { code: 'pt', name: 'Português', flag: '🇧🇷', launchReady: false },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪', launchReady: false },
+] as const;
+
+export type LanguageCode = (typeof AVAILABLE_LANGUAGES)[number]['code'];
+
+/** The languages the Profile picker offers. */
+export const LAUNCH_LANGUAGES = AVAILABLE_LANGUAGES.filter((language) => language.launchReady);
+
+export function isLaunchLanguage(code: string | null | undefined): code is LanguageCode {
+    return LAUNCH_LANGUAGES.some((language) => language.code === code);
+}
+
+/**
+ * Picks the starting language: the saved choice, then the browser language, then English.
+ * A supported but not launch-ready language (de, pt) falls back to English, so nobody
+ * sees a half-translated UI.
+ */
+export function getInitialLanguage(
+    storedLanguage: string | null = readStoredLanguage(),
+    browserLanguage: string | undefined = typeof navigator === 'undefined' ? undefined : navigator.language,
+): LanguageCode {
+    if (isLaunchLanguage(storedLanguage)) {
+        return storedLanguage;
     }
 
-    // Browser language detection
-    const browserLang = navigator.language.split('-')[0];
-    if (SUPPORTED_LANGS.includes(browserLang)) {
-        return browserLang;
+    const browserCode = browserLanguage?.split('-')[0];
+    if (isLaunchLanguage(browserCode)) {
+        return browserCode;
     }
 
-    return 'en'; // Default fallback
+    return 'en';
+}
+
+function readStoredLanguage(): string | null {
+    try {
+        return localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    } catch {
+        return null;
+    }
 }
 
 i18n
@@ -55,16 +87,12 @@ export function getCurrentLanguage() {
     return i18n.language;
 }
 
-// Helper to change language
+// Helper to change language. Saves the choice so it survives a reload.
 export function changeLanguage(lang: string) {
-    localStorage.setItem('fitwizard-language', lang);
+    try {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    } catch {
+        // Storage can be unavailable (private mode); the change still applies for this session.
+    }
     return i18n.changeLanguage(lang);
 }
-
-// Available languages with flags
-export const AVAILABLE_LANGUAGES = [
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'es', name: 'Español', flag: '🇪🇸' },
-    { code: 'pt', name: 'Português', flag: '🇧🇷' },
-    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
-] as const;

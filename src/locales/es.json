@@ -628,6 +628,23 @@
             "guide": "Cómo usar",
             "legal": "Legal y privacidad",
             "version": "Versión"
+        },
+        "app_settings": "Ajustes de la app",
+        "theme": {
+            "label": "Tema",
+            "light": "Claro",
+            "dark": "Oscuro",
+            "system": "Sistema"
+        },
+        "language": {
+            "label": "Idioma",
+            "description": "Se usa en todas las pantallas de la app.",
+            "placeholder": "Elige un idioma"
+        },
+        "units": {
+            "label": "Unidad de peso",
+            "lbs": "LB",
+            "kg": "KG"
         }
     },
     "navigation": {
