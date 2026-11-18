@@ -37,8 +37,8 @@ Every command below is a script in `package.json`.
 | `npm run ios:sync` | `npx cap sync ios` | Copies `dist/` into the iOS project and updates the native plugin list. Run it after `npm run build` and after adding or removing a Capacitor plugin |
 | `npm run ios:open` | `npx cap open ios` | Opens the Xcode project. Use it for signing, icons, permissions, devices and archives |
 | `npm run ios:dev` | `npx cap run ios` | Syncs, then installs and launches the **bundled** app from `dist/` on a Simulator or device you pick. No dev server is involved, so it can't show a blank screen from a missing server. It does **not** run `npm run build`, so build first |
-| `npm run ios:live` | `node scripts/dev-ios-live.mjs` | Live reload. Starts Vite with `--host ::` (or reuses a server already on port 8080), waits for it, then runs `ios:live:cap`. Ctrl+C stops both |
-| `npm run ios:live:cap` | `npx cap run ios -l --host=localhost --port=8080` | The Capacitor half of `ios:live`. Run it on its own only when Vite is already running |
+| `npm run ios:live` | `node scripts/dev-ios-live.mjs` | Live reload. Starts Vite with `--host ::` (or reuses a server already on port 8080), waits for it, then runs `npx cap run ios -l` pointed at the Mac's LAN address, so it works on the Simulator and on an iPhone on the same Wi-Fi. Ctrl+C stops both |
+| `npm run ios:live:cap` | `npx cap run ios -l --host=localhost --port=8080` | **Simulator only** (an iPhone can't reach `localhost` on the Mac). Run it on its own only when Vite is already running |
 | `npm run dev:ios` | `node scripts/dev-ios-live.mjs` | Alias of `ios:live` |
 
 `node scripts/dev-ios-live.mjs --help` prints the script's own usage notes.
@@ -88,7 +88,26 @@ The script starts the dev server and launches the app pointed at it. Code change
 
 `npm run ios:dev` also works once signing is set up; pick the iPhone from its list.
 
-Live reload on a physical iPhone is **not verified**. `ios:live:cap` passes `--host=localhost`, which the Simulator can reach (it shares the Mac's network) but an iPhone can't. If you need it, the Mac and iPhone must be on the same network and Capacitor must be given the Mac's LAN address. Until someone checks this on a device, use the bundled build on a phone.
+Live reload on a physical iPhone is **not verified yet**. `npm run ios:live` now gives Capacitor the Mac's LAN address (for example `192.168.1.20`) instead of `localhost` whenever the dev server listens on it, so the iPhone can reach the dev server as long as both are on the same Wi-Fi and the network allows device-to-device traffic (guest and office networks often don't). If it reuses a Vite server that is localhost-only (a plain `npm run dev`), it falls back to `localhost` and warns: the Simulator still works, and for an iPhone you restart that server with `npm run dev -- --host ::`. `npm run ios:live:cap` still uses `localhost` and works only in the Simulator. Until someone checks this on a device, the bundled build is the safe choice on a phone.
+
+## Auth email (sign-in code)
+
+The app signs people in with one email that holds both a magic link and a 6-digit code. On the web either works. The native app has no deep links, so **the code is the only way in on iPhone and Android**: if the email has no code, nobody can sign in from the app.
+
+One-time setup in the Supabase dashboard (decision L11). The setting names below are from memory and couldn't be checked from the build environment, so **confirm each one in the dashboard**:
+
+1. **Authentication → Email Templates → Magic Link.** Add the code to the body, near the top, for example:
+   ```html
+   <h2>Your FitWizard code: {{ .Token }}</h2>
+   <p>Enter it in the app, or tap the link below on this device.</p>
+   <p><a href="{{ .ConfirmationURL }}">Sign in to FitWizard</a></p>
+   ```
+   Keep the `{{ .ConfirmationURL }}` link for web users. Set the subject to something like "Your FitWizard sign-in code".
+2. **Code length:** under Authentication → Providers → Email (or Authentication → Sign In / Providers), find **Email OTP Length** and check it is **6**. The app's input has exactly six boxes.
+3. **Code lifetime:** in the same place, set **Email OTP Expiration** to **600** seconds (10 minutes). The app uses 10 minutes to tell "expired" from "wrong" (`EMAIL_CODE_TTL_MS` in `src/components/auth/EmailCodeStep.tsx`), because Supabase returns the same error for both. If you choose another value, change that constant too.
+4. **Resend limit:** the app's "Resend code" button waits 60 seconds, which matches Supabase's usual limit of one email per address per 60 seconds. Check Authentication → Rate Limits if resends fail.
+5. **Custom domain (L3):** when the production domain is added, also add it to **`ALLOWED_ORIGINS`** in the Vercel project (Production and Preview). Otherwise every `/api/*` call from that domain gets a 403 (DEBT-075). Also add the domain under Authentication → URL Configuration (Site URL and Redirect URLs) so the magic link returns to it.
+6. **Test:** on the beta site, sign in with a real address. The email should show the code and the link, and typing the code should sign you in. Then do the same in the iOS or Android app.
 
 ## Troubleshooting
 

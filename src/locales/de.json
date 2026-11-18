@@ -386,5 +386,30 @@
     },
     "consent": {
         "welcome_description": "Dein Trainingsplaner ist bereit. Bevor wir beginnen, bestätige bitte diese Grundlagen."
+    },
+    "auth": {
+        "unavailable_title": "Kontofunktionen nicht verfügbar",
+        "unavailable_description": "Anmeldung und Gruppen brauchen Supabase und ein eingerichtetes Backend. Diese Version läuft im Demomodus.",
+        "unavailable_dismiss": "Verstanden",
+        "title": "Melde dich an, um fortzufahren",
+        "description": "Synchronisiere deine Pläne und deinen Verlauf auf allen Geräten.",
+        "email_label": "E-Mail",
+        "email_placeholder": "du@beispiel.de",
+        "email_invalid": "Bitte gib eine gültige E-Mail-Adresse ein.",
+        "send_code": "Code per E-Mail senden",
+        "sending": "Wird gesendet…",
+        "no_password": "Kein Passwort nötig. Wir schicken dir einen 6-stelligen Code per E-Mail.",
+        "code_title": "Sieh in deinen Posteingang",
+        "code_description_web": "Wir haben einen 6-stelligen Code an {{email}} geschickt. Gib ihn unten ein oder tippe auf den Link in der E-Mail.",
+        "code_description_native": "Wir haben einen 6-stelligen Code an {{email}} geschickt. Gib ihn unten ein.",
+        "code_label": "Anmeldecode",
+        "verifying": "Code wird geprüft…",
+        "code_wrong": "Dieser Code stimmt nicht.",
+        "code_expired": "Dieser Code ist abgelaufen. Fordere einen neuen an.",
+        "resend": "Code erneut senden",
+        "resend_in": "Code erneut senden in {{seconds}} s",
+        "resent": "Wir haben dir einen neuen Code geschickt.",
+        "different_email": "Andere E-Mail verwenden",
+        "close": "Schließen"
     }
 }

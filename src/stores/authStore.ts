@@ -88,6 +88,7 @@ interface AuthState {
     // Actions
     initialize: () => Promise<void>;
     signInWithEmail: (email: string) => Promise<{ error: Error | null }>;
+    verifyEmailCode: (email: string, code: string) => Promise<{ error: Error | null }>;
     signOut: () => Promise<void>;
     updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>;
 
@@ -244,6 +245,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             options: {
                 emailRedirectTo: redirectUrl || window.location.origin,
             },
+        });
+
+        return { error: error as Error | null };
+    },
+
+    // Verify the 6-digit code from the sign-in email (contract #7). On success
+    // Supabase emits SIGNED_IN, and the onAuthStateChange handler above loads
+    // the session and profile, exactly as for the magic link.
+    verifyEmailCode: async (email, code) => {
+        if (!isSupabaseConfigured()) {
+            return { error: new Error('Supabase not configured') };
+        }
+
+        const { error } = await supabase.auth.verifyOtp({
+            email: email.trim(),
+            token: code.trim(),
+            type: 'email',
         });
 
         return { error: error as Error | null };

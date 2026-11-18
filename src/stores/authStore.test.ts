@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   onAuthStateChange: vi.fn(),
   from: vi.fn(),
   signInWithOtp: vi.fn(),
+  verifyOtp: vi.fn(),
   signOut: vi.fn(),
 }));
 
@@ -47,6 +48,7 @@ async function loadAuthStore({ configured = true }: { configured?: boolean } = {
         getSession: mocks.getSession,
         onAuthStateChange: mocks.onAuthStateChange,
         signInWithOtp: mocks.signInWithOtp,
+        verifyOtp: mocks.verifyOtp,
         signOut: mocks.signOut,
       },
       from: mocks.from,
@@ -293,6 +295,46 @@ describe('authStore.signInWithEmail', () => {
     expect(mocks.signInWithOtp).toHaveBeenCalledWith(
       expect.objectContaining({ email: 'user@example.com' })
     );
+  });
+});
+
+describe('authStore.verifyEmailCode', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    vi.clearAllMocks();
+  });
+
+  it('returns an error without calling Supabase when it is not configured', async () => {
+    const { useAuthStore } = await loadAuthStore({ configured: false });
+
+    const result = await useAuthStore.getState().verifyEmailCode('user@example.com', '123456');
+
+    expect(result.error?.message).toMatch(/not configured/i);
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
+  });
+
+  it('calls verifyOtp with the trimmed code and type email', async () => {
+    mocks.verifyOtp.mockResolvedValue({ data: {}, error: null });
+    const { useAuthStore } = await loadAuthStore();
+
+    const result = await useAuthStore.getState().verifyEmailCode(' user@example.com ', ' 123456 ');
+
+    expect(result.error).toBeNull();
+    expect(mocks.verifyOtp).toHaveBeenCalledWith({
+      email: 'user@example.com',
+      token: '123456',
+      type: 'email',
+    });
+  });
+
+  it('returns the Supabase error for a wrong or expired code', async () => {
+    const supabaseError = Object.assign(new Error('Token has expired or is invalid'), { code: 'otp_expired' });
+    mocks.verifyOtp.mockResolvedValue({ data: {}, error: supabaseError });
+    const { useAuthStore } = await loadAuthStore();
+
+    const result = await useAuthStore.getState().verifyEmailCode('user@example.com', '000000');
+
+    expect(result.error).toBe(supabaseError);
   });
 });
 
