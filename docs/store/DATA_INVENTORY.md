@@ -58,7 +58,7 @@ Every row in this table except exercise interactions (which live only in memory 
 | Install coach | `fitwizard-install-coach-v1` (localStorage), `fitwizard-install-coach-visit` (sessionStorage) | Browser storage | Nobody | **Now** |
 | Motion tilt permission | `fitwizard-motion-granted` | localStorage | Nobody | **Now** |
 | Anatomy view preferences | `fitwizard.mcl.sculpt.v1` | localStorage | Nobody | **Now** |
-| Persistent-storage request made | `fitwizard-storage-persist-requested` | localStorage | Nobody | Code exists (`requestPersistentStorage()` in `src/lib/storage/appStorage.ts`), but **nothing calls it yet**, so the key is never written |
+| Persistent-storage request made | `fitwizard-storage-persist-requested` | localStorage | Nobody | **Now** once #64 merges: the browser is asked after the first save (`src/lib/storage/appStorage.ts`). Before #64 nothing called `requestPersistentStorage()`, so the key was never written (DEBT-076) |
 | Pending circle invite code | `pendingInviteCode` | sessionStorage | Nobody | **Now** (Circles is off by default) |
 
 ## Caches (public content, no personal data)
@@ -122,7 +122,7 @@ Checks for whoever fills in the forms:
 
 `api/_lib/guard.ts` (Lane H Day 2) protects every Vercel function:
 - **Origin allowlist:** only `ALLOWED_ORIGINS`, the deployment's own Vercel URLs, `capacitor://localhost` and `https://localhost` may call them from a browser. Any other origin gets a 403. Requests with no `Origin` header (same-origin) pass.
-- **Rate limit:** 60 requests a minute per IP address. To enforce it, each function instance keeps the caller's **IP address in memory for the one-minute window** (at most 10,000 at once). The guard never writes it to disk, logs it or sends it anywhere, and it's gone when the window ends or the instance stops. Vercel's own platform request logs are separate and follow Vercel's policy. Over the limit, the reply is a 429.
+- **Rate limit:** 60 requests a minute per IP address. To enforce it, each function instance keeps the caller's **IP address in memory**, with a request count for the current one-minute window. The count resets after a minute, but the entry is not removed then: it stays until that IP calls again (the entry is replaced), the table reaches 10,000 entries (expired entries are pruned, and if it's still full the table is cleared), or the function instance stops. So retention is **up to the life of the function instance**, not one minute. The guard never writes the IP to disk, logs it or sends it anywhere. Vercel's own platform request logs are separate and follow Vercel's policy. Over the limit, the reply is a 429.
 - The functions store nothing else about the caller. Upstream services (wger, API Ninjas) see Vercel's IP, not the user's.
 
 The policy links were written from known URLs. This environment couldn't reach them, so Lane A Day 4 should open each one before the privacy policy cites it.

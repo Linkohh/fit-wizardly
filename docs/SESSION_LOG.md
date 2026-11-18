@@ -154,7 +154,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
     - Exercise catalogue and search now go through `/api/proxy-wger` on web and native. Exercise images still load from wger directly.
     - Added the sync keys `fitwizard-sync-outbox` and `fitwizard-sync-cursor`, both erased by `clearLocalUserData()`.
     - Re-checked the erase line against the code: the nine stores, both sync keys, and the outbox in memory.
-    - New "Our own API functions" section: the origin allowlist, plus the per-IP rate limit, which holds IPs in memory for one minute and never logs or stores them.
+    - New "Our own API functions" section: the origin allowlist, plus the per-IP rate limit. It keeps IPs in memory for up to the life of the function instance (pruned only at 10,000 entries) and never logs or stores them.
     - Corrected my own Day 2 row: `fitwizard-storage-persist-requested` is never written, because nothing calls `requestPersistentStorage()`.
   - `CLAUDE.md` golden paths (DEBT-069): replaced the unused `fitness.ts` with `planStore.persistence.ts` (saved-data checks) and `useSculptPrefs.ts` (a small Zod schema in use). In `.claude/rules.md`, the same swap, and the Hook example is now `useCountUp.ts`. The old one, `useWizardForm.ts`, uses `as any`.
   - `.claude/*.md` added to Lane A's "Owns" list in `LANE-A.md`. The README ownership table already had it.
@@ -162,7 +162,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
   - New `docs/store/RELEASE_NOTES_1.1.0.md` (draft, user language). It covers Wave 1 and lists the Wave 2 items to add on Day 7.
 - **Bookkeeping:** no other lane had opened a Day 3 PR or written a Day 3 handoff when this was written. They get folded into the board and this log when they arrive.
 - **Verification:** lint 0 errors / 4 warnings, typecheck clean, tests pass (count in the handoff), 0 broken relative links.
-- **New issues:** DEBT-076, DEBT-077. **Resolved:** DEBT-069.
+- **New issues:** DEBT-076 (since fixed by the coordinator in #64), DEBT-077. **Resolved:** DEBT-069, DEBT-076. DEBT-078 is reserved for the coordinator's Day 5 bundle-size note.
 - **Next steps:**
   1. Fold the Day 3 handoffs from B, C, D, F and H.
   2. Gate 1 (Lincoln).
@@ -930,7 +930,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-079 | The email-code step (`input-otp`) is in the startup bundle, about 6 KB gzip | `src/components/auth/AuthModal.tsx` | Lane H: lazy-load `EmailCodeStep`. |
 | DEBT-078 | Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4 | build | Lane D: confirm the cause (likely the self-hosted font CSS) and record the new baseline. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
-| DEBT-076 | **MEDIUM.** `requestPersistentStorage()` is never called, so browsers may still evict IndexedDB data under storage pressure (ADR 11 meant it to run after the first save) | `src/lib/storage/appStorage.ts` | Lane E Day 5 or 6: call it once after the first user-data save. |
+| DEBT-076 | **RESOLVED 2026-11-18** (coordinator #64: the browser is asked after the first save). ~~**MEDIUM.** `requestPersistentStorage()` is never called, so browsers may still evict IndexedDB data under storage pressure (ADR 11 meant it to run after the first save)~~ | `src/lib/storage/appStorage.ts` | Lane E Day 5 or 6: call it once after the first user-data save. |
 | DEBT-077 | `SCHEMAS.md`, `TESTING.md`, `SECURITY.md`, `ENGINEERING.md` and `AI_GUIDELINES.md` still use the unused `src/lib/validation/fitness.ts` in examples (they carry the stale-doc banner) | `docs/*.md` | Lane A, when each doc's area is worked on. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
