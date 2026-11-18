@@ -107,6 +107,12 @@ Data stores other than `trainerStore` and `onboardingStore`, the sync code, nati
 
 ## Day 3: Crash reporting (3.1)
 
+> **Carried over from Day 2 handoffs and review (added 2026-11-18 by the coordinator).** Do these too:
+> - Add the crash-reporting consent key to `docs/store/DATA_INVENTORY.md`'s consent table **through your handoff** (Lane A edits the file).
+> - Analytics consent is stored twice (`fitwizard-analytics.hasConsented` and `fitwizard_analytics_consent`; DEBT-061). Crash consent must use **one** key. Pick the one in `src/lib/consent.ts` and say in your handoff which one Day 4/5 should settle on for analytics.
+> - `BadgeUnlockModal.tsx` was deleted by Lane D (#54), so that note from your Day 2 handoff is closed. `BadgeDisplay`/`BadgeGrid` has no consumer in the app now (DEBT-066). Decide in your handoff: keep it for a future achievements page, or let Lane D delete it in Wave 2.
+
+
 ### Steps
 1. `npm install @sentry/react`. Don't add `@sentry/capacitor` yet; native setup is a Lane H follow-up after Gate 2. Note this in your handoff.
 2. Create `src/lib/monitoring.ts` (contract #8):

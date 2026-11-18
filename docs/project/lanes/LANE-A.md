@@ -103,6 +103,15 @@ Lane A consumes none. When it writes the privacy text, it relies on what each la
 
 ## Day 3: Wave 1 bookkeeping and Gate 1
 
+> **Carried over from Day 2 handoffs and review (added 2026-11-18 by the coordinator).** Do these too:
+> - `.claude/*.md` is now Lane A's (default for your Day 2 question; Lincoln can change it). `docs/project/README.md` ownership table: add it.
+> - `DATA_INVENTORY.md`: delete the Google Fonts row (fonts are self-hosted since Lane H Day 2, #60). Add the two sync keys from Lane E Day 4: `fitwizard-sync-outbox` (which items changed, with times; no content) and `fitwizard-sync-cursor` (pull positions). Both are erased by erase-on-device.
+> - `DATA_INVENTORY.md`: erase-on-device now does clear `fitwizard-wizard` and `fitwizard-onboarding` (fixed in #59 after the review on #56), so the line the reviewer flagged is now true. Re-read it once against `src/lib/storage/clearLocalUserData.ts`.
+> - `DATA_INVENTORY.md` third parties: add the `/api/*` origin allowlist and per-IP rate limit (Lane H Day 2). The rate limit keeps IPs in memory for one minute; say so.
+> - `CLAUDE.md` golden paths: `src/lib/validation/fitness.ts` is unused (DEBT-069). Replace it with a schema file that is used, for example `src/stores/planStore.persistence.ts`.
+> - Supabase region: still unanswered by Lincoln. Keep "Lincoln to provide".
+
+
 ### Steps
 1. Read every `docs/project/handoffs/*-day-1.md`, `*-day-2.md` and `*-day-3.md`.
 2. Update `docs/project/BOARD.md`: set each task's status, record decision answers in the decisions table, and add newly found issues under the right wave as buffer tasks.

@@ -115,6 +115,11 @@ Stores, the sync engine, native files, `supabase/`, and docs other than your han
 
 ## Day 3: PDF export fixes (3.6b)
 
+> **Carried over from Day 2 handoffs and review (added 2026-11-18 by the coordinator).** Do these too:
+> - `vite.config.ts` `wgerProxyPlugin` (about line 104) returns `err.message`. Return `{ error: 'Upstream request failed' }` with status 502, as production does (DEBT-074).
+> - `tailwind.config.ts` isn't loaded by Tailwind 4 (DEBT-060). Only `components.json` points at it. Don't delete it today; note in your handoff whether shadcn's CLI still needs it.
+
+
 Three bugs are visible in the sample exports that used to sit at the repo root:
 
 1. **"DAY 1: DAY 1:" duplicated.** `pdfExport.ts` around line 153 prints `DAY ${index + 1}: ${day.name}`, and `day.name` often already starts with "Day 1:". Strip a leading `/^day\s*\d+\s*[:\-–]\s*/i` from the name before printing.

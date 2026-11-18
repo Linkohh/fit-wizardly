@@ -146,6 +146,54 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-18 — Wave 1 / Day 2 Reviewed and Merged (#54–#60); Day 4 Review Fixes (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, restarted from `preview_b` @ `ac525a5`)
+
+- **Merged, in merge order:**
+  - #57 F (migration 008: access-rule fixes)
+  - #59 E (sync engine core)
+  - #58 C (coach mode off everywhere)
+  - #60 H (self-hosted fonts, `apiUrl()`, API hardening, wger through the proxy)
+  - #55 B (language picker: en/es)
+  - #54 D (36 dead files, `lovable-tagger`, PDFs, `.lovable/`, `apps/`)
+  - #56 A (iOS docs, data inventory, `.claude/` audit)
+- **Review before merging:**
+  - Read every diff and handoff.
+  - Checked file ownership. Overlaps were all in separate blocks:
+    - `Profile.tsx`: B and C
+    - `Plan.tsx` and `App.auth-routing.test.tsx`: C and D
+    - `CommandPalette.tsx`: C and H, with the same `/guide` change
+    - `UserGuide.tsx`: B and C
+  - Scanned every diff for secrets; none found.
+  - Read migration 008 in full: SECURITY DEFINER helpers with a pinned `search_path` and no anon EXECUTE; policies `TO authenticated`; a trigger that pins challenge scores; `SET NULL` columns confirmed nullable in 001.
+  - Read H's API guard: the native origins (`capacitor://localhost`, `https://localhost`) are allowed.
+- **Automated review findings, all fixed before merging:**
+  1. #59: a change made after a restart, before the first sync, overwrote the saved outbox. Fixed: saves merge the saved outbox first.
+  2. #59: deletes on one-row-per-user tables (`nutrition_settings`, `user_state`) were dropped instead of pushed. Fixed: the update is filtered on `user_id`.
+  3. #56: the data inventory promised erase-on-device clears wizard and onboarding answers, but it didn't. Fixed in code (#59): `clearLocalUserData()` now clears `fitwizard-wizard` and `fitwizard-onboarding`.
+  - Each fix has a regression test that fails without it.
+- **Verification:**
+  - Trial-merged all seven branches in merge order: no conflicts.
+  - **974/974 tests** in 168 files. Lint 0 errors / 4 warnings. Typecheck clean. Build passes.
+  - Ran the DB harness myself: all 13 checks for 008 pass, including deleting an account with no orphan rows.
+  - Browser checks on the preview build:
+    - Profile has no coach toggle.
+    - The language picker offers only English and Español, and Spanish survives a reload.
+    - The command palette has no dead links.
+    - `/circles` and `/clients` return 404.
+    - Fonts load from our own origin; no request goes to Google.
+    - No user data is in localStorage, and there are no page errors.
+  - The merged `preview_b` tree is identical to the tested trial.
+- **Docs:**
+  - Each lane brief has a "Carried over from Day 2" block on its next day.
+  - `.claude/*.md` added to Lane A's ownership (the default for Lane A's question).
+  - New DEBT-058 to DEBT-075 below.
+  - Resolved DEBT-022, 041, 042, 044, 047, 049, 050, 051, 054, 055, 056 and 057.
+- **Not verified:** native builds; 007 and 008 on a real Supabase project (L10).
+- **Next steps:**
+  1. Start Wave 1 / Day 3 for A, B, C, D, F, H.
+  2. Lane E Day 5 (collections).
+  3. Gate 1 after Day 3.
+
 ### 2026-11-18 — Day 2 Lanes Restarted; Lane E Day 4: Sync Engine Core (branch `claude/fitzwizardly-preview-b-analysis-96ptn8`, from `preview_b` @ `7ef77e5`)
 
 - **What happened to Day 2:**
@@ -770,27 +818,45 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-026 | Touch preview and the phone flow layout are not device-verified; a touch starting on a muscle does not scroll the page, which may feel sticky on small screens | `svg/useTouchMusclePreview.ts`, `MuscleSelector.tsx`, `AnatomyPanel.tsx` | Unit-tested and browser-tested with simulated touch (2026-11-15). Check on a physical iPhone and Android phone, and with VoiceOver. |
 | DEBT-039 | First-run consent screen hardcodes "Your AI workout companion is ready." | `src/components/legal/ConsentModal.tsx:126` | Assigned to Lane B, Day 1 (roadmap 0.1). |
 | DEBT-040 | Consent screen says "My data is stored locally on this device"; this becomes inaccurate once Wave 2 sync ships | `src/components/legal/ConsentModal.tsx` | Reword in Lane C Day 5 and Lane A Day 4. |
-| DEBT-041 | `pt.json` has a duplicate `"wizard"` key, and JSON tools silently drop the first block | `src/locales/pt.json` | Merge by hand (Lane B Day 2). Never rewrite locale files with a parser. |
-| DEBT-042 | `BadgeUnlockModal` is never mounted; badges are now shown as toasts | `src/components/motivation/BadgeUnlockModal.tsx` | Candidate for Lane D's dead-code removal. |
+| DEBT-041 | **RESOLVED 2026-11-18** (Fixed by Lane B Day 2 (#55): merged by hand, 232/232 keys kept). ~~`pt.json` has a duplicate `"wizard"` key, and JSON tools silently drop the first block~~ | `src/locales/pt.json` | Merge by hand (Lane B Day 2). Never rewrite locale files with a parser. |
+| DEBT-042 | **RESOLVED 2026-11-18** (Lane D Day 2 (#54) deleted it). ~~`BadgeUnlockModal` is never mounted; badges are now shown as toasts~~ | `src/components/motivation/BadgeUnlockModal.tsx` | Candidate for Lane D's dead-code removal. |
 | DEBT-043 | The wizard header says "Coach-built intake" / "Coach intake" while the coach portal is off | `src/pages/Wizard.tsx` and the wizard header | Wording only; Lane B could reword it on Day 4. |
-| DEBT-044 | `favorites-store.ts` is unused; exercise favourites live in `preferencesStore` | `src/stores/favorites-store.ts` | Delete in Lane D's dead-code pass (Day 2). |
+| DEBT-044 | **RESOLVED 2026-11-18** (Lane D Day 2 (#54) deleted it). ~~`favorites-store.ts` is unused; exercise favourites live in `preferencesStore`~~ | `src/stores/favorites-store.ts` | Delete in Lane D's dead-code pass (Day 2). |
 | DEBT-045 | On a shared device, a signed-out account's training data stays visible until cloud sync ships | `src/stores/authStore.ts` | Deliberate (the alternative is losing data). Lane E Day 6 clears device data after a successful sync. |
 | DEBT-046 | ~~Three "Wisdom AI" achievements can't be earned~~ **RESOLVED 2026-11-18 (Lane E Day 4)**. (the Wisdom chat isn't shown) and mention AI | `src/stores/achievementStore.ts` (~214–236) | Lane E Day 4: remove them from `BADGES`. |
-| DEBT-047 | UserGuide: Circles tab not behind the flag; "FitWizardly" spelling; all strings hardcoded | `src/pages/UserGuide.tsx` | Lane C Day 2 (flag), Lane B Day 2 (spelling), J2 (strings). |
+| DEBT-047 | **RESOLVED 2026-11-18** (Flag (C, #58) and spelling (B, #55) done; strings stay with J2). ~~UserGuide: Circles tab not behind the flag; "FitWizardly" spelling; all strings hardcoded~~ | `src/pages/UserGuide.tsx` | Lane C Day 2 (flag), Lane B Day 2 (spelling), J2 (strings). |
 | DEBT-048 | Rest of the consent tray is hardcoded English | `src/components/legal/ConsentModal.tsx` | Lane C Day 5 (uses the new `consent.*` namespace). |
-| DEBT-049 | Auth modal promises "circles and trainer tools", which are hidden in v1 | `src/components/auth/AuthModal.tsx:86` | Lane B Day 2. |
-| DEBT-050 | Command palette links to nonexistent routes (`/achievements`, `/settings`, `/auth`) and an external docs site | `src/components/CommandPalette.tsx` | Lane C Day 2. |
-| DEBT-051 | `CircleLayout` mock exports `default`, but App imports the named export | `src/App.auth-routing.test.tsx` | Lane C Day 2. |
+| DEBT-049 | **RESOLVED 2026-11-18** (Lane B Day 2 (#55) reworded it). ~~Auth modal promises "circles and trainer tools", which are hidden in v1~~ | `src/components/auth/AuthModal.tsx:86` | Lane B Day 2. |
+| DEBT-050 | **RESOLVED 2026-11-18** (Lane C Day 2 (#58) fixed it). ~~Command palette links to nonexistent routes (`/achievements`, `/settings`, `/auth`) and an external docs site~~ | `src/components/CommandPalette.tsx` | Lane C Day 2. |
+| DEBT-051 | **RESOLVED 2026-11-18** (Lane C Day 2 (#58) fixed it). ~~`CircleLayout` mock exports `default`, but App imports the named export~~ | `src/App.auth-routing.test.tsx` | Lane C Day 2. |
 | DEBT-052 | Social share image is a 512 px square; a 1200×630 card would render better | `index.html`, `public/logo.png` | Lane A / Lane D, Wave 3 (store assets). |
 | DEBT-053 | Supabase CLI history is empty (001–006 were applied by hand); a bare `db push` would re-run 001 | staging/production | **Lincoln, Gate 1:** run `supabase migration repair --status applied 001 … 006` first (see `docs/SUPABASE_MIGRATIONS.md`). |
-| DEBT-054 | Native wger calls relied on CapacitorHttp, which was removed on Lane H Day 1 | `src/features/exercise-library/service.ts:267` | Lane H Day 2: route through `apiUrl('/api/proxy-wger')`. |
-| DEBT-055 | `WgerAdapter.search` calls wger directly on the web, bypassing the proxy allowlist | `src/lib/services/api/exerciseApiAdapter.ts:26` | Lane H Day 2. |
-| DEBT-056 | `.claude/*.md` not audited; probably repeat the old stack and locales | `.claude/` | Lane A Day 2. |
-| DEBT-057 | Unreachable Wisdom UI still says "AI" | `src/components/wisdom/*`, `src/pages/Plan.tsx` | Lane D Day 2: delete. |
+| DEBT-054 | **RESOLVED 2026-11-18** (Lane H Day 2 (#60): wger goes through `/api/proxy-wger`). ~~Native wger calls relied on CapacitorHttp, which was removed on Lane H Day 1~~ | `src/features/exercise-library/service.ts:267` | Lane H Day 2: route through `apiUrl('/api/proxy-wger')`. |
+| DEBT-055 | **RESOLVED 2026-11-18** (Lane H Day 2 (#60) fixed it). ~~`WgerAdapter.search` calls wger directly on the web, bypassing the proxy allowlist~~ | `src/lib/services/api/exerciseApiAdapter.ts:26` | Lane H Day 2. |
+| DEBT-056 | **RESOLVED 2026-11-18** (Lane A Day 2 (#56) audited it). ~~`.claude/*.md` not audited; probably repeat the old stack and locales~~ | `.claude/` | Lane A Day 2. |
+| DEBT-057 | **RESOLVED 2026-11-18** (Lane D Day 2 (#54) deleted the Wisdom UI; the leftover store is DEBT-067). ~~Unreachable Wisdom UI still says "AI"~~ | `src/components/wisdom/*`, `src/pages/Plan.tsx` | Lane D Day 2: delete. |
+| DEBT-058 | `ios:live:cap` uses `--host=localhost`, so live reload can't reach a physical iPhone | `package.json`, `scripts/dev-ios-live.mjs` | Lane H Day 3. |
+| DEBT-059 | Export v2 omits achievements, custom exercises, exercise favourites and collections, and the profile | `src/lib/dataExport.ts` | Lane F Day 4 (export v3). |
+| DEBT-060 | `tailwind.config.ts` isn't loaded by Tailwind 4; only `components.json` points at it | `tailwind.config.ts` | Lane D Day 3 checks whether shadcn's CLI needs it. |
+| DEBT-061 | Analytics consent stored twice (`fitwizard-analytics.hasConsented`, `fitwizard_analytics_consent`) | `src/stores/analyticsStore.ts`, `src/lib/consent.ts` | Lane C Days 3–5: settle on one key. |
+| DEBT-062 | "FitWizardly" in a user-visible coach note | `src/lib/analyticsIntelligence.ts:840` | Lane B Day 3 (one-word exception). |
+| DEBT-063 | `<html lang>` doesn't change with the language (screen readers) | `src/lib/i18n.ts` | Lane B Day 3. |
+| DEBT-064 | Profile strings outside Lane B's block are hardcoded ("Sound Effects", "Haptics", "Guest User", "Local Account") | `src/pages/Profile.tsx` | Lane J2. |
+| DEBT-065 | A persisted `selections.isTrainer: true` survives with the coach flag off | `src/stores/wizardStore.ts` | Lane E Day 5 (sanitiser). Note: `ReviewCoachCard.tsx` was deleted in #54, so nothing reads it today. |
+| DEBT-066 | `BadgeDisplay`/`BadgeGrid` has no consumer in the app | `src/components/motivation/BadgeDisplay.tsx` | Lane C decides on Day 3; Lane D deletes in Wave 2 if unused. |
+| DEBT-067 | `Plan.tsx` still feeds `wisdomStore`, but no Wisdom UI exists | `src/pages/Plan.tsx`, `src/stores/wisdomStore.ts` | Lane E Day 5. |
+| DEBT-068 | `ExercisesBrowser` and `ExerciseDetailModal` are used only by tests | `src/components/exercises/` | Lane D, Wave 2 (Lincoln's default: keep until Lane B is done). |
+| DEBT-069 | `CLAUDE.md` cites the unused `src/lib/validation/fitness.ts` as a golden path | `CLAUDE.md` | Lane A Day 3. |
+| DEBT-070 | **MEDIUM.** Re-running 002 after 008 recreates the client streak and badge write policies | `supabase/migrations/002_*.sql` | Operational: re-run 008 straight after any 002 re-run (documented in `SUPABASE_MIGRATIONS.md`). |
+| DEBT-071 | A circle whose only admin deletes their account has no admin left | circles | Lane F Day 6 (Circles is off in v1). |
+| DEBT-072 | CSP `connect-src` still allows `wger.de`; no browser code needs it | `vercel.json` | Lane H, later, after checking production. |
+| DEBT-073 | `/api/*` rate limit is in memory and per instance | `api/_lib/guard.ts` | Add a Vercel firewall rate-limit rule before launch (Lincoln / Lane H). |
+| DEBT-074 | The dev wger proxy returns `err.message`; production returns a generic 502 | `vite.config.ts:104` | Lane D Day 3. |
+| DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
 | DEBT-025 | Enter on a focused muscle can advance the wizard after selecting it | `src/pages/Wizard.tsx` | The existing window-level shortcut handles Enter after the focused SVG control has already handled it. |
-| DEBT-022 | `npm run lint` fails locally with 22 errors from generated iOS folders | `eslint.config.js` | Add `ios/DerivedData` and `ios/**/.build` to the ESLint ignores. Also a stray `node_modules/@types/node 2` folder breaks a bare `tsc`. |
+| DEBT-022 | **RESOLVED 2026-11-18** (Fixed by Lane D Day 2 (#54): ESLint ignores added). ~~`npm run lint` fails locally with 22 errors from generated iOS folders~~ | `eslint.config.js` | Add `ios/DerivedData` and `ios/**/.build` to the ESLint ignores. Also a stray `node_modules/@types/node 2` folder breaks a bare `tsc`. |
 | DEBT-013 | About "Get in Touch" hidden | `src/pages/About.tsx` | Waiting for public Instagram/LinkedIn handles. Personal email intentionally not published. See `docs/ABOUT_PAGE.md` §3. |
 | DEBT-014 | ~~SESSION_LOG gap May–Sep 2026~~ **BACKFILLED 2026-09-27** (summary) | `docs/SESSION_LOG.md` | See the 2026-09-27 entry; per-commit detail is in git history. |
 | AUDIT-007 | ~~CSP `style-src` blocked runtime-injected `<style>` tags~~ **RESOLVED 2026-11-12** | `vercel.json` | Sonner (toasts) and Vaul (drawers) inject their CSS at load; the strict `style-src` left both without a stylesheet on every deployment. Added `'unsafe-inline'` to `style-src` only; `script-src` is unchanged (`'self' 'wasm-unsafe-eval'`). Stricter option for later: per-request nonce (needs server work). Expected and harmless: Vercel's `vercel.live` feedback script is blocked on preview deployments only. |

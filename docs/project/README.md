@@ -77,7 +77,7 @@ You may edit **only** files your lane owns in the current wave, plus the listed 
 | `vercel.json` | H (Day 2, fonts CSP), then C (Day 3, Sentry) | C | — |
 | `supabase/**`, `src/types/supabase.ts` | F | F | F |
 | `server/`, `.github/workflows/*` | Nobody | F removes server steps (Day 5). D adds jobs (Days 4, 7). H adds the Android job (Day 7) | H, D |
-| `src/pages/Legal.tsx`, `README.md`, `CLAUDE.md`, `docs/**` (except `DECISIONS.md`) | A. Exception: B edits AI wording in `Legal.tsx` on Day 1 | A | A |
+| `src/pages/Legal.tsx`, `README.md`, `CLAUDE.md`, `.claude/*.md` (from Day 3), `docs/**` (except `DECISIONS.md`) | A. Exception: B edits AI wording in `Legal.tsx` on Day 1 | A | A |
 | `docs/DECISIONS.md` | Append only (E adds ADR 11) | Append only (H adds ADR 12) | Append only |
 | `src/lib/dataExport.ts` | — | F | — |
 | `src/components/legal/ConsentModal.tsx` | B: AI wording on line 126 only (Day 1) | C | — |

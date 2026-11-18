@@ -108,6 +108,12 @@ Write `008_policy_fixes.sql`, re-runnable, with a test file for each fix.
 
 ## Day 3: The delete-account function (1.5 part 1)
 
+> **Carried over from Day 2 handoffs and review (added 2026-11-18 by the coordinator).** Do these too:
+> - Migration 008 (#57) is merged, so deleting a user who created a circle now works. Your cascade check should run on top of 008.
+> - In `docs/SUPABASE_MIGRATIONS.md`, state the order for staging (L10): repair 001–006 (DEBT-053), push 007 and 008, and if 002 is ever re-run, re-run 008 straight after (DEBT-070).
+> - Export v3 (Day 4) must add achievements, custom exercises, exercise favourites and collections, and the profile (DEBT-059). They're listed in `docs/store/DATA_INVENTORY.md`.
+
+
 1. Create `supabase/functions/delete-account/index.ts` (Deno), following contract #4:
    - Read the `Authorization` header and create a Supabase client with the **anon key plus that header**, then call `auth.getUser()` to identify the caller. If there's no user, return 401.
    - Create an admin client with `SUPABASE_SERVICE_ROLE_KEY`, which Supabase provides to functions as a secret. Call `auth.admin.deleteUser(user.id)`. The cascades from 007 and 008 remove every row.
