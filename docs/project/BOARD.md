@@ -30,7 +30,6 @@ All seven lanes run in parallel. There are no dependencies between them.
 | **F** | ✅ PR #50 · Supabase CLI, local Postgres harness, naming check; 1.3 migration 007 and types | ✅ PR #57 · 1.6 migration 008 and policy tests | ✅ PR #65 (`521be87`) · 1.5 part 1: `delete-account` function (contract #4), cascade check, `SECURITY.md` rewrite |
 | **H** | ✅ PR #48 · 0.6 name; 2.5/2.6 native project fixes | ✅ PR #60 · 2.5 self-hosted fonts and CSP; 2.3 `apiBase` and API hardening | ✅ PR #62 (`4b3bb21`) · 2.1 Email-code sign-in (contract #7); iPhone live reload (DEBT-058) |
 
-| **H** | ✅ PR #48 · 0.6 name; 2.5/2.6 native project fixes | ✅ PR #60 · 2.5 self-hosted fonts and CSP; 2.3 `apiBase` and API hardening | ✅ PR #62 (`4b3bb21`) · 2.1 Email-code sign-in |
 
 ### Gate 1 checklist (Lincoln, end of Day 3)
 - [ ] All Wave 1 PRs merged in merge order (F → E → C → H → B → D → A). Days 1 and 2 done; Day 3 remaining
@@ -53,7 +52,7 @@ All seven lanes run in parallel. There are no dependencies between them.
 | **B** | ⬜ 3.6c Fewer taps to the first plan | ⬜ Buffer: Gate 1 bugs | ➖ | ➖ |
 | **C** | ⬜ 3.2 `track()` and PostHog adapter; wire events | ⬜ Consent entries; disclosure text to Lane A | ⬜ Error-boundary tests; source maps (if L6 done) | ➖ |
 | **D** | ⬜ 3.5 Playwright lifter loop with reload; CI job | ⬜ 3.4 RIR labels, 44 px targets, `MotionConfig`, DEBT-021 | ⬜ 3.4 Wizard Enter key (DEBT-025) | ⬜ 4.5 `npm audit` gate; Dependabot |
-| **E** | ✅ PR #59 (`0513fd0`) · 1.4 part 1: sync engine, outbox, tests; 3 review findings fixed | ✅ PR #64 (`a621a4f`) · 1.4 part 2: seven collections and change tracking | 🔵 1.4 part 3: triggers, first sign-in upload, indicator (Day 6 PR; sign-out step moved to Day 7) | ⬜ 1.4 part 4: plans move onto the engine |
+| **E** | ✅ PR #59 (`0513fd0`) · 1.4 part 1: sync engine, outbox, tests; 3 review findings fixed | ✅ PR #64 (`a621a4f`) · 1.4 part 2: seven collections and change tracking | ✅ PR #66 (`12fbcbb`) · 1.4 part 3: triggers, first sign-in upload, indicator; 2 review findings fixed (sign-out step moved to Day 7) | ⬜ 1.4 part 4: plans move onto the engine |
 | **F** | ⬜ 1.5 part 2: deletion UI, guest erase, export v3 | ⬜ 1.7 Retire Express (D1) | ⬜ Circles queries checked against migration 008 | ➖ Buffer |
 | **H** | ⬜ 2.2 Session storage adapter; ADR 12 | ⬜ 2.4 part 1: preferences, status bar, splash, keyboard, share | ⬜ 2.4 part 2: local notifications | ⬜ 4.5 Android CI job; iOS archive guide |
 
