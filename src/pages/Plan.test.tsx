@@ -83,10 +83,6 @@ vi.mock('@/components/plan/WorkoutDayCard', () => ({
   WorkoutDayCard: ({ day }: { day: { name: string } }) => <div>Workout day: {day.name}</div>,
 }));
 
-vi.mock('@/components/wisdom/WisdomBubble', () => ({
-  WisdomBubble: () => <div>Wisdom bubble</div>,
-}));
-
 vi.mock('@/components/plan/PlanNavigation', () => ({
   PlanNavigation: () => <div>Plan navigation</div>,
 }));

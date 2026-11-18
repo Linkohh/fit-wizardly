@@ -13,7 +13,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ExerciseSwapModal } from '@/components/plan/ExerciseSwapModal';
-import { WisdomBubble } from '@/components/wisdom/WisdomBubble';
 import { useWisdomStore } from '@/stores/wisdomStore';
 import { WorkoutDayCard } from '@/components/plan/WorkoutDayCard';
 import { useAuthStore } from '@/stores/authStore';
@@ -274,9 +273,6 @@ export default function PlanPage() {
           allowedEquipment={activePlan.selections.equipment}
         />
       )}
-
-      {/* Wisdom AI Floating Bubble (Disabled for the time being) */}
-      {/* <WisdomBubble /> */}
 
       {/* Navigation Footer */}
       <PlanNavigation onStartOver={handleStartOver} />
