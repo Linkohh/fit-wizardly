@@ -4,7 +4,7 @@
 
 Before generating ANY code, you MUST:
 
-1. Read `CLAUDE.md` in the project root
+1. Read `CLAUDE.md` in the project root, then `README.md`, `docs/LAUNCH_ROADMAP.md` and `docs/project/README.md`. Where an older lens doc disagrees with these, these win
 2. Read the relevant "Lens" document for your task:
    - Components/UI: `docs/DESIGN_SYSTEM.md`
    - State/Logic: `docs/ENGINEERING.md`
@@ -29,9 +29,14 @@ Before generating ANY code, you MUST:
 
 ### Styling
 
-- **Tailwind only** - No inline styles, no CSS files
-- **Dark mode required** - Include `dark:` variants
+- **Tailwind 4 utilities only** - No inline styles and no new CSS files. Theme tokens live in the `@theme` block of `src/index.css`
+- **Semantic tokens for colour** - `bg-background`, `text-foreground`, `bg-muted`. They adapt to dark mode, so `dark:` variants are rarely needed. Never hardcode white or black
 - **Mobile-first** - Start with base styles, add `md:`, `lg:`
+
+### Text
+
+- **All UI text through i18n** - `t('key', 'English fallback')`. Add new keys to `en.json` and `es.json` (locales: `en`, `es`, `de`, `pt`)
+- **Never rewrite a locale file through a JSON parser** - `pt.json` has a duplicate key that parsers silently drop
 
 ### State Management
 

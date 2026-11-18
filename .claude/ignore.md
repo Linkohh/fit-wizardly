@@ -10,7 +10,7 @@ These files should NOT be modified without explicit user request:
 ### Configuration Files
 - `package-lock.json` - Auto-generated
 - `tsconfig.json` - Rarely needs changes
-- `tailwind.config.ts` - Only for theme additions
+- `tailwind.config.ts` - Legacy. Tailwind 4 doesn't load it (there is no `@config` in `src/index.css`); only `components.json` (shadcn CLI) points at it. Add theme tokens to the `@theme` block of `src/index.css` instead
 
 ### Third-Party
 - `node_modules/` - Dependencies
@@ -71,5 +71,5 @@ When context is limited, prioritize reading:
 
 3. **Low Priority** (Include only if asked)
    - Configuration files
-   - Translation files
+   - Translation files (`src/locales/{en,es,de,pt}.json`)
    - Style definitions

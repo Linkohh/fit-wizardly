@@ -2,7 +2,7 @@
 
 ## Project Description
 
-**fit-wizardly** is a fitness workout planning application that helps users create personalized workout programs based on their goals, equipment, and constraints.
+**FitWizard** (repository `fit-wizardly`) is a fitness workout planning application that helps users create personalized workout programs based on their goals, equipment, and constraints.
 
 ## Core User Flows
 
@@ -41,49 +41,65 @@ User views and follows their plan:
 
 ## Tech Stack Summary
 
+`CLAUDE.md` and `README.md` are the authority; this is a summary.
+
 | Layer | Technology |
 |-------|------------|
-| Frontend | React 19 + TypeScript 5.8 |
+| Frontend | React 19 + TypeScript 5.9 |
 | Build | Vite 7 with SWC |
-| Styling | Tailwind CSS + shadcn/ui |
-| Animation | Framer Motion |
-| State | Zustand (client) + TanStack Query (server) |
-| Validation | Zod 4 |
-| Auth | Supabase Auth (magic links) |
+| Styling | Tailwind CSS 4 (CSS-first; tokens in the `@theme` block of `src/index.css`) + shadcn/ui |
+| Animation | Framer Motion 12 |
+| State | Zustand 5 (client) + TanStack Query 5 (server) |
+| Validation | Zod 4 (client); `server/` uses Zod 3 |
+| I18n | i18next, 4 locales: `en`, `es`, `de`, `pt` |
+| Testing | Vitest 4 + Testing Library |
+| Auth | Supabase Auth (email sign-in link) |
 | Database | Supabase (PostgreSQL) |
-| Backend | Express.js on port 3001 |
+| Serverless | Vercel functions in `api/` (exercise search, quotes, wger proxy) |
+| Backend | Optional local Express API (`server/src/index.ts`) on port 3001, dev only |
+| Native | Capacitor 8 (iOS uses Swift Package Manager) |
 
 ## Key Directories
 
 ```
 src/
 ├── components/     # UI components
-│   ├── ui/        # shadcn/ui primitives
+│   ├── ui/        # shadcn/ui primitives (do not modify)
 │   └── motivation/ # Feature-specific
+├── features/      # Self-contained features (mcl, exercise-library)
 ├── hooks/         # Custom React hooks
-├── lib/           # Utilities & validation
+├── lib/           # Plan engine, storage, services, validation
 ├── pages/         # Route components
 ├── stores/        # Zustand stores
-└── locales/       # i18n translations
+└── locales/       # i18n translations (en, es, de, pt)
 
+api/               # Vercel serverless functions
 server/
-└── src/           # Express API
+└── src/index.ts   # Optional Express API (single file, dev only)
+supabase/
+└── migrations/    # Numbered SQL migrations
 
 docs/
-├── ENGINEERING.md    # Architecture guide
-├── DESIGN_SYSTEM.md  # UI/UX patterns
-├── SECURITY.md       # Auth & security
-├── ORCHESTRATION.md  # Build & deploy
-├── SCHEMAS.md        # Zod schema catalog
-├── API_REFERENCE.md  # API documentation
+├── ENGINEERING.md    # Architecture guide (partly out of date)
+├── DESIGN_SYSTEM.md  # UI/UX patterns (partly out of date)
+├── SECURITY.md       # Auth & security (partly out of date)
+├── ORCHESTRATION.md  # Build & deploy (partly out of date)
+├── SCHEMAS.md        # Zod schema catalog (partly out of date)
+├── API_REFERENCE.md  # API documentation (partly out of date)
+├── project/          # Launch project: board, lanes, contracts, handoffs
+├── store/            # Store paperwork (data inventory)
 └── snippets/         # Code patterns
 ```
 
 ## Environment Variables
 
+See `.env.example` for the full list. The main ones:
+
 | Variable | Purpose |
 |----------|---------|
 | `VITE_SUPABASE_URL` | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase public key |
-| `VITE_API_URL` | Backend API URL |
-| `PORT` | Backend server port (3001) |
+| `VITE_SUPABASE_ANON_KEY` | Supabase publishable (anon) key |
+| `VITE_FEATURE_CIRCLES`, `VITE_FEATURE_COACH` | Feature flags, off by default (read through `src/lib/featureFlags.ts`) |
+| `VITE_PLANS_PROVIDER`, `VITE_USE_API`, `VITE_API_URL` | Plans persistence provider and the optional Express API |
+| `API_NINJAS_API_KEY` | Server-only key for the Vercel functions. Never prefix with `VITE_` |
+| `PORT` | Express server port (3001), dev only |
