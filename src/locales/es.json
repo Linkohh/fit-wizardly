@@ -744,5 +744,16 @@
         "signed_out": "Inicia sesión para guardar una copia de tu entrenamiento.",
         "retry": "Reintentar",
         "sign_in": "Iniciar sesión"
+    },
+    "pdfExport": {
+        "headers": {
+            "exercise": "EJERCICIO",
+            "sets": "SERIES",
+            "reps": "REPS",
+            "rir": "RIR",
+            "rest": "DESCANSO"
+        },
+        "failure": "FALLO",
+        "dayLabel": "DÍA {{number}}"
     }
 }

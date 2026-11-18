@@ -97,10 +97,11 @@ const wgerProxyPlugin = () => ({
           res.statusCode = 200;
           res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify(data));
-        } catch (err) {
-          res.statusCode = 500;
+        } catch {
+          // Same generic body as the production proxy (api/proxy-wger.ts): don't leak upstream error details.
+          res.statusCode = 502;
           res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify({ error: err instanceof Error ? err.message : 'Internal Server Error' }));
+          res.end(JSON.stringify({ error: 'Upstream request failed' }));
         }
       } else {
         next();

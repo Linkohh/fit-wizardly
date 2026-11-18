@@ -875,5 +875,16 @@
         "signed_out": "Sign in to back up your training.",
         "retry": "Retry",
         "sign_in": "Sign in"
+    },
+    "pdfExport": {
+        "headers": {
+            "exercise": "EXERCISE",
+            "sets": "SETS",
+            "reps": "REPS",
+            "rir": "RIR",
+            "rest": "REST"
+        },
+        "failure": "FAILURE",
+        "dayLabel": "DAY {{number}}"
     }
 }

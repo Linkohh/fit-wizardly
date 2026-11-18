@@ -1,9 +1,68 @@
+import i18n from 'i18next';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { Plan } from '@/types/fitness';
 import { formatIdentifierLabel } from '@/lib/displayText';
 
 const WORKOUT_PLAN_FILENAME_SUFFIX = 'Fitz-Wizardly workout plan';
+
+/**
+ * Emoji and other pictographs, plus the invisible pieces that build emoji sequences
+ * (variation selectors, zero-width joiner, keycap, skin tones, flag letters).
+ * jsPDF's standard fonts only cover WinAnsi, so these print as garbage like "Ø=Üª".
+ * ©, ® and ™ are pictographic in Unicode but exist in WinAnsi, so they are kept.
+ */
+const UNPRINTABLE_GLYPHS =
+    /(?![\u00A9\u00AE\u2122])\p{Extended_Pictographic}|[\u{1F3FB}-\u{1F3FF}\u{1F1E6}-\u{1F1FF}]|\u200D|\u20E3|\uFE0E|\uFE0F/gu;
+
+/** Removes characters the PDF's standard fonts can't draw, then tidies the spacing left behind. */
+export const toPdfSafeText = (value: string | null | undefined): string =>
+    (value ?? '')
+        .replace(UNPRINTABLE_GLYPHS, '')
+        .replace(/[ \t]{2,}/g, ' ')
+        .trim();
+
+/** Matches a leading "Day 1:", "Day 2 -", "day 3 –" or a bare "Day 4" that the day number already covers. */
+const LEADING_DAY_PREFIX = /^day\s*\d+\s*(?:[:\-–]\s*|$)/i;
+
+/** Day names from the plan engine often start with "Day N:"; the PDF adds its own number. */
+export const stripLeadingDayPrefix = (name: string): string => name.replace(LEADING_DAY_PREFIX, '').trim();
+
+/**
+ * Translated label with an English fallback. Works before i18n has initialised
+ * (for example in a unit test), because then `t` has nothing to return.
+ */
+const pdfLabel = (key: string, fallback: string, options?: Record<string, unknown>): string => {
+    if (!i18n.isInitialized) {
+        return fallback.replace(/\{\{(\w+)\}\}/g, (_match, name: string) => String(options?.[name] ?? ''));
+    }
+    const value = i18n.t(key, { defaultValue: fallback, ...options });
+    return typeof value === 'string' && value ? value : fallback;
+};
+
+export const getPdfTableHeaders = (): [string, string, string, string, string] => [
+    pdfLabel('pdfExport.headers.exercise', 'EXERCISE'),
+    pdfLabel('pdfExport.headers.sets', 'SETS'),
+    pdfLabel('pdfExport.headers.reps', 'REPS'),
+    pdfLabel('pdfExport.headers.rir', 'RIR'),
+    pdfLabel('pdfExport.headers.rest', 'REST'),
+];
+
+/** Cell padding in mm. Left and right are kept small so short headers fit their columns. */
+export const PDF_TABLE_CELL_PADDING = { top: 4, bottom: 4, left: 2, right: 2 } as const;
+
+/**
+ * Fixed widths (mm) for every column but the exercise name, which takes the rest.
+ * Sized so the longest translated header (es/pt "DESCANSO", 8pt bold) fits on one line.
+ */
+export const PDF_TABLE_COLUMN_WIDTHS = { sets: 18, reps: 22, rir: 22, rest: 24 } as const;
+
+/** "DAY 1: PUSH" from index 0 and a name like "Day 1: Push 💪". */
+export const formatPdfDayTitle = (index: number, name: string): string => {
+    const dayLabel = pdfLabel('pdfExport.dayLabel', 'DAY {{number}}', { number: index + 1 }).toUpperCase();
+    const cleanName = stripLeadingDayPrefix(toPdfSafeText(name)).toUpperCase();
+    return cleanName ? `${dayLabel}: ${cleanName}` : dayLabel;
+};
 
 export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean): jsPDF => {
     const doc = new jsPDF();
@@ -90,7 +149,9 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
     // User & Goal
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(18);
-    const userName = redactSensitive ? 'ATHLETE' : `${selections.firstName || ''} ${selections.lastName || ''}`.trim();
+    const userName = redactSensitive
+        ? 'ATHLETE'
+        : toPdfSafeText(`${selections.firstName || ''} ${selections.lastName || ''}`);
     doc.text(userName.toUpperCase() || 'ATHLETE', 20, 160);
 
     doc.setFontSize(12);
@@ -121,11 +182,12 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
     y = 30;
 
     // Personal Note
-    if (!redactSensitive && selections.personalGoalNote) {
+    const personalGoalNote = redactSensitive ? '' : toPdfSafeText(selections.personalGoalNote);
+    if (personalGoalNote) {
         doc.setTextColor(...COLORS.text.body);
         doc.setFontSize(11);
         doc.setFont('helvetica', 'italic');
-        doc.text(`"${selections.personalGoalNote}"`, 105, y, { align: 'center' });
+        doc.text(`"${personalGoalNote}"`, 105, y, { align: 'center' });
         y += 15;
     }
 
@@ -150,13 +212,14 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
         doc.setFontSize(10);
         doc.setTextColor(...COLORS.text.heading);
         doc.setFont('helvetica', 'bold');
-        doc.text(`DAY ${index + 1}: ${day.name.toUpperCase()}`, 15, y + 8);
+        doc.text(formatPdfDayTitle(index, day.name), 15, y + 8);
 
         // Tags
-        if (day.focusTags && day.focusTags.length > 0) {
+        const focusTags = (day.focusTags ?? []).map(toPdfSafeText).filter(Boolean);
+        if (focusTags.length > 0) {
             doc.setFontSize(8);
             doc.setTextColor(...COLORS.text.light);
-            doc.text(day.focusTags.join(' • ').toUpperCase(), 195, y + 8, { align: 'right' });
+            doc.text(focusTags.join(' • ').toUpperCase(), 195, y + 8, { align: 'right' });
         }
 
         y += 18;
@@ -165,17 +228,18 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
         if (day.warmUp && day.warmUp.length > 0) {
             doc.setFontSize(8);
             doc.setTextColor(...COLORS.text.light);
-            doc.text(`WARM UP: ${day.warmUp.join(', ')}`, 15, y);
+            doc.text(toPdfSafeText(`WARM UP: ${day.warmUp.join(', ')}`), 15, y);
             y += 8;
         }
 
         // Exercise Table
+        const failureLabel = pdfLabel('pdfExport.failure', 'FAILURE');
         const rows = day.exercises.map(e => {
-            const rirLabel = e.rir === 0 ? 'FAILURE' : `${e.rir} RIR`;
+            const rirLabel = e.rir === 0 ? failureLabel : `${e.rir} RIR`;
             return [
-                e.exercise.name,
+                toPdfSafeText(e.exercise.name),
                 `${e.sets}`,
-                e.reps,
+                toPdfSafeText(e.reps),
                 rirLabel,
                 `${e.restSeconds}s`
             ];
@@ -183,14 +247,14 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
 
         autoTable(doc, {
             startY: y,
-            head: [['EXERCISE', 'SETS', 'REPS', 'INTENSITY', 'REST']],
+            head: [getPdfTableHeaders()],
             body: rows,
             theme: 'plain', // Cleaner look, we will add borders manually if needed or rely on row colors
             styles: {
                 font: 'helvetica',
                 fontSize: 9,
                 textColor: COLORS.text.body,
-                cellPadding: 4,
+                cellPadding: { ...PDF_TABLE_CELL_PADDING },
             },
             headStyles: {
                 fillColor: [255, 255, 255],
@@ -202,13 +266,19 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
             },
             columnStyles: {
                 0: { fontStyle: 'bold', cellWidth: 'auto' },
-                1: { halign: 'center', cellWidth: 15 },
-                2: { halign: 'center', cellWidth: 20 },
-                3: { halign: 'center', cellWidth: 20, fontStyle: 'bold', textColor: COLORS.secondary }, // Pink Intensity
-                4: { halign: 'center', cellWidth: 15 }
+                1: { halign: 'center', cellWidth: PDF_TABLE_COLUMN_WIDTHS.sets },
+                2: { halign: 'center', cellWidth: PDF_TABLE_COLUMN_WIDTHS.reps },
+                3: { halign: 'center', cellWidth: PDF_TABLE_COLUMN_WIDTHS.rir, fontStyle: 'bold', textColor: COLORS.secondary }, // Pink Intensity
+                4: { halign: 'center', cellWidth: PDF_TABLE_COLUMN_WIDTHS.rest }
             },
             alternateRowStyles: {
                 fillColor: COLORS.surface
+            },
+            // Centre the number-column headers over their centred values.
+            didParseCell: (data) => {
+                if (data.section === 'head' && data.column.index > 0) {
+                    data.cell.styles.halign = 'center';
+                }
             },
             margin: { left: 10, right: 10 }
         });
@@ -224,7 +294,7 @@ export const generatePlanDocument = (currentPlan: Plan, redactSensitive: boolean
         if (day.coolDown && day.coolDown.length > 0) {
             doc.setFontSize(8);
             doc.setTextColor(...COLORS.text.light);
-            doc.text(`COOL DOWN: ${day.coolDown.join(', ')}`, 15, y);
+            doc.text(toPdfSafeText(`COOL DOWN: ${day.coolDown.join(', ')}`), 15, y);
             y += 8;
         }
 
