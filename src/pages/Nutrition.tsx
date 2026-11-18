@@ -10,7 +10,7 @@ import { format, parseISO, isToday as isDayToday, addDays, subDays } from "date-
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { HydrationTracker } from "@/components/nutrition/HydrationTracker";
-import { FoodLogger } from "@/components/nutrition/FoodLogger";
+import { FoodLogger, type FoodLoggerHandle } from "@/components/nutrition/FoodLogger";
 import { NutritionInsights } from "@/components/nutrition/NutritionInsights";
 import { NutritionLearn } from "@/components/nutrition/NutritionLearn";
 import { SmartRemaining } from "@/components/nutrition/SmartRemaining";
@@ -39,7 +39,8 @@ export default function NutritionPage() {
     const { impact, notification } = useHaptics();
     const { t } = useTranslation();
     const storesHydrated = useStoresHydrated();
-    const foodLoggerRef = useRef<HTMLDivElement>(null);
+    const foodLoggerRef = useRef<FoodLoggerHandle>(null);
+    const foodLoggerContainerRef = useRef<HTMLDivElement>(null);
 
     // Subscribe to the selected day's log so the page re-renders when a meal or
     // water is logged. getCurrentLog is a stable function and does not trigger renders.
@@ -81,12 +82,10 @@ export default function NutritionPage() {
         }
     };
 
-    // Opens the existing food logger: brings it into view and presses its "Add Food" button.
+    // Opens the existing food logger and brings it into view. Never closes it.
     const openFoodLogger = () => {
-        const logger = foodLoggerRef.current;
-        if (!logger) return;
-        logger.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
-        logger.querySelector<HTMLButtonElement>('button')?.click();
+        foodLoggerRef.current?.openLogger();
+        foodLoggerContainerRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
     };
 
     if (!storesHydrated) {
@@ -213,8 +212,9 @@ export default function NutritionPage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <HydrationTracker />
-                                    <div ref={foodLoggerRef}>
+                                    <div ref={foodLoggerContainerRef}>
                                         <FoodLogger
+                                            ref={foodLoggerRef}
                                             onLogMeal={logMeal}
                                             dayTotal={currentTotals}
                                         />

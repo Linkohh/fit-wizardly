@@ -52,6 +52,17 @@ describe('Nutrition page empty state', () => {
         expect(screen.queryByRole('button', { name: /Add Food/ })).not.toBeInTheDocument();
     });
 
+    it('keeps the food logger open when "Log a meal" is pressed twice', () => {
+        renderNutrition();
+
+        const logMeal = screen.getByRole('button', { name: 'Log a meal' });
+        fireEvent.click(logMeal);
+        fireEvent.click(logMeal);
+
+        expect(screen.queryByRole('button', { name: /Add Food/ })).not.toBeInTheDocument();
+        expect(screen.getByRole('textbox')).toBeInTheDocument();
+    });
+
     it('hides the empty state once a meal is logged', () => {
         const today = new Date().toISOString().split('T')[0];
         useNutritionStore.setState({

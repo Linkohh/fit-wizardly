@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { Plus, Search, X, Loader2, Star, ChefHat, Heart } from "lucide-react";
 import { SmartActions } from "./SmartActions";
 import { MealEntry, MacroTargets } from "@/types/nutrition";
@@ -18,7 +18,15 @@ interface FoodLoggerProps {
     dayTotal: MacroTargets;
 }
 
-export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) {
+/** Lets a parent open the logger. `openLogger()` only ever opens it, so calling it twice is safe. */
+export interface FoodLoggerHandle {
+    openLogger: () => void;
+}
+
+export const FoodLogger = forwardRef<FoodLoggerHandle, FoodLoggerProps>(function FoodLogger(
+    { onLogMeal, dayTotal: _dayTotal },
+    ref,
+) {
     const { addCustomFood, customFoods, favorites, toggleFavorite, saveMealTemplate } = useNutritionStore();
     const [mode, setMode] = useState<'view' | 'logging'>('view');
     const [activeTab, setActiveTab] = useState<'search' | 'favorites' | 'custom'>('search');
@@ -117,6 +125,14 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
         setMode('view');
         setSearchQuery("");
     };
+
+    useImperativeHandle(ref, () => ({
+        openLogger: () => {
+            if (mode === 'logging') return; // already open: keep the user's tab and search
+            setMode('logging');
+            setActiveTab('search');
+        },
+    }), [mode]);
 
     return (
         <div className={cn("glass-card p-6 rounded-3xl space-y-6 relative overflow-hidden transition-all duration-500", mode === 'logging' ? 'min-h-[500px]' : '')}>
@@ -383,4 +399,4 @@ export function FoodLogger({ onLogMeal, dayTotal: _dayTotal }: FoodLoggerProps) 
 
         </div>
     );
-}
+});
