@@ -12,12 +12,16 @@ Supabase project (there is no automated pipeline). Apply them in numeric order.
 | 005 | `005_trainer_roles.sql` | `profiles.role` / `profiles.is_trainer` columns, constraints and sync function |
 | 006 | `006_security_hardening.sql` | Tightened RLS policies on circle tables (`circle_members`, `circle_activities`, `circle_challenges`, `activity_comments`, `circle_posts`, `challenge_participants`) and replaced `join_circle_by_invite()` |
 | 007 | `007_user_data.sql` | `workout_logs`, `personal_records`, `nutrition_days`, `nutrition_settings`, `body_measurements`, `readiness_entries`, `user_state`; `plans.deleted_at` (see [007 section](#007-user-data-tables)) |
+| 008 | `008_policy_fixes.sql` | No tables. Membership helpers `is_circle_member()`, `is_circle_admin()`, `shares_circle_with()`; rewrites the circle, social, profile, streak, badge and challenge-score policies; adds DELETE policies; fixes the foreign keys that blocked account deletion (see [008 section](#008-access-rule-fixes)) |
 
 ## Re-run safety
 
-- 002, 004 and 007 are safe to re-run: tables/indexes use `IF NOT EXISTS`, and every
+- 002, 004, 007 and 008 are safe to re-run: tables/indexes use `IF NOT EXISTS`, and every
   policy and trigger is preceded by `DROP ... IF EXISTS`. The local harness
-  (`bash supabase/tests/run.sh`) re-applies all three on every run to prove it.
+  (`bash supabase/tests/run.sh`) re-applies all four on every run to prove it.
+- **Re-running 002 after 008 brings back the client write policies on
+  `user_streaks` and `exercise_badges`** that 008 drops. If you ever re-run
+  002, re-run 008 straight after it.
 - 006 only touches circle/social tables (001 and 003 tables) and does not
   overlap with 002/004, so re-running 002 will not undo 006.
 - 001 and 003 are NOT safe to re-run: they create policies without
@@ -103,7 +107,7 @@ production.
    `auth.uid()`, `auth.role()` read from `request.jwt.claim.*`), the `anon`,
    `authenticated` and `service_role` roles, the `supabase_realtime`
    publication, and Supabase's default grants, so RLS is what blocks access.
-3. Applies `migrations/*.sql` in order, then re-applies 002, 004 and 007.
+3. Applies `migrations/*.sql` in order, then re-applies 002, 004, 007 and 008.
 4. Runs each `tests/*.test.sql` in its own copy of the database. Tests switch
    identity with `SET ROLE authenticated; SET request.jwt.claim.sub = '<uuid>';`
    and fail with `RAISE EXCEPTION`.
@@ -182,3 +186,85 @@ order by 1;
 
 Then, signed in to the app on staging, no requests to these tables should
 return `401`/`403` once Lane E's sync engine starts writing to them.
+
+## 008: access-rule fixes
+
+Roadmap item 1.6. No new tables and no data changes, only functions, policies,
+one trigger and four foreign keys.
+
+> **Apply to staging first.** Circles is flagged off in v1
+> (`VITE_FEATURE_CIRCLES`), so the only live code these policies affect is the
+> profile read in `authStore` (own row: still allowed) and the streak and badge
+> reads in `useExerciseInteraction` (own rows: still allowed). The circle
+> policies are there to keep the feature working for later; Lane F Day 6 checks
+> every circle query shape against them.
+
+| Fix | Before | After |
+|---|---|---|
+| `circle_members` recursion | The SELECT policy queried `circle_members` inside itself; Postgres raised `infinite recursion detected`, so every circle read failed | `is_circle_member(circle_id)` and `is_circle_admin(circle_id)`, `SECURITY DEFINER` with `search_path = public`, executable by `authenticated` only. Every circle, feed, challenge, reaction, comment and post policy from 001, 003 and 006 uses them |
+| Circle policies for signed-out users | Policies applied to every role; anon could read public circles | All circle and profile policies are `TO authenticated`; anon gets nothing |
+| Private circle creation | The creator couldn't read back a new private circle (not yet a member), so `insert().select()` and the admin self-join failed | `circles` SELECT also allows `created_by = auth.uid()`; INSERT requires `auth.uid() = created_by` |
+| Forgeable streaks and badges | Clients could insert and update their own `user_streaks` and insert `exercise_badges` | Client write policies dropped; SELECT-own stays. Writes come only from `update_user_streak()` (via the `exercise_interactions` trigger) or the service role |
+| Forgeable challenge score | Clients could update their own `challenge_participants.score`, and insert with any score | Client UPDATE policy dropped, plus trigger `trg_protect_challenge_score`: for `anon`/`authenticated`, an insert starts at 0 and an update keeps the old score. The service role and `SECURITY DEFINER` functions can set it |
+| `profiles` exposure | `USING (true)`: anyone, signed out included, could read every profile | Own row (`auth.uid() = id`), plus profiles of people you share a circle with (`shares_circle_with(id)`). UPDATE also has `WITH CHECK` |
+| Missing DELETE policies | None on `circles`, `circle_activities`, `circle_challenges`, `profiles` | `circles`: admins. `circle_activities`: author or admin. `circle_challenges`: creator or admin. `profiles`: own row |
+| Foreign keys that blocked account deletion | `circles.created_by`, `circle_activities.user_id`, `circle_challenges.created_by` and `winner_id` referenced `profiles` with NO ACTION, so deleting anyone who had created a circle, posted or created a challenge failed | `circle_activities.user_id` CASCADE (the user's own feed items). The other three SET NULL: the circle and its challenges are shared, so they survive for the other members |
+
+**Choice recorded:** when a circle's creator deletes their account the circle
+stays, `created_by` becomes NULL, and their membership row is removed by the
+existing cascade. If they were the only admin, the circle has no admin until a
+later change promotes one (follow-up for Day 6; Circles is off in v1).
+
+**Re-runnable:** yes. The foreign-key step looks each constraint up by column
+before dropping and re-adding it.
+
+**Verified locally** (`supabase/tests/008_policy_fixes.test.sql`, Postgres 16):
+reading `circle_members` no longer recurses; members see their circle and its
+feed, strangers see nothing and can't join a private circle or post into it; a
+creator can create a private circle and become its admin; only admins update or
+delete a circle; clients can't insert or update streaks or badges or set a
+score, while the interaction trigger and the service role still can; anon reads
+no profiles, a stranger reads only their own, a co-member reads (not writes) a
+shared member's; deleting a user succeeds and no row in any table points at
+them afterwards. Run against 001–007 without 008, the same checks fail on the
+recursion, the streak write, the three profile reads and the deletion. Not yet
+run on staging.
+
+### Verification queries (SQL Editor, read-only)
+
+```sql
+-- 1. The helpers exist, are SECURITY DEFINER, and anon can't run them.
+--    Expect 3 rows: definer = true, anon = false, authenticated = true.
+select p.proname, p.prosecdef as definer,
+       has_function_privilege('anon', p.oid, 'EXECUTE') as anon,
+       has_function_privilege('authenticated', p.oid, 'EXECUTE') as authenticated
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public'
+  and p.proname in ('is_circle_member','is_circle_admin','shares_circle_with')
+order by 1;
+
+-- 2. No policy queries circle_members directly. Expect 0 rows.
+select tablename, policyname from pg_policies
+where schemaname = 'public'
+  and (coalesce(qual,'') ~ '(FROM|JOIN) circle_members'
+       or coalesce(with_check,'') ~ '(FROM|JOIN) circle_members');
+
+-- 3. profiles is no longer public. Expect 0 rows.
+select policyname from pg_policies
+where schemaname = 'public' and tablename = 'profiles' and qual = 'true';
+
+-- 4. Streaks and badges are read-only for clients. Expect 2 rows, both SELECT.
+select tablename, cmd from pg_policies
+where schemaname = 'public' and tablename in ('user_streaks','exercise_badges')
+order by 1;
+
+-- 5. No user foreign key blocks account deletion. Expect 0 rows.
+select conrelid::regclass as table_name, conname, confdeltype
+from pg_constraint
+where contype = 'f' and connamespace = 'public'::regnamespace
+  and confrelid in ('auth.users'::regclass, 'public.profiles'::regclass)
+  and confdeltype not in ('c','n');
+```
+
+Then, on staging: sign in and open Profile (the own-profile read must still
+work), and sign out and confirm the app still loads.
