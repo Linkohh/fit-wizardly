@@ -169,8 +169,8 @@ Merge rules:
 
 Behaviour:
 - **Pull** pages through rows with `updated_at >= cursor`, ordered, 500 at a time. The cursor is the newest server `updated_at` seen, saved per user in `fitwizard-sync-cursor`. A different account starts from scratch. The cursor only advances after a successful pull.
-- **Push** upserts changed items in batches of 200. Deletes are sent as `UPDATE ... SET deleted_at`, never as hard deletes.
-- The **outbox** (`fitwizard-sync-outbox`, saved on the device) survives restarts. An entry is cleared only if it hasn't changed during the push.
+- **Push** upserts changed items in batches of 200. Deletes are sent as `UPDATE ... SET deleted_at`, never as hard deletes. For one-row-per-user tables (`keyColumn: null`) the update is filtered on `user_id` alone.
+- The **outbox** (`fitwizard-sync-outbox`, saved on the device) survives restarts. Every save merges the saved copy first, so a change made after a restart but before the first sync keeps the older unsent changes. An entry is cleared only if it hasn't changed during the push.
 - A collection that fails is counted in `failed`, and the rest still sync. Overlapping `syncAll` calls share one run.
 - **Not yet built (Day 6):** the triggers, and marking every existing local item dirty on the first sign-in.
 

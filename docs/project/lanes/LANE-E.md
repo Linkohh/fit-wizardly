@@ -188,6 +188,12 @@ Build `src/lib/sync/` exactly to contract #5.
 
 ## Day 5: Collections (1.4 part 2)
 
+> **Carried over from Day 2 handoffs and review (added 2026-11-18 by the coordinator).** Do these too:
+> - `wizardStore` sanitiser: with the coach flag off, load `selections.isTrainer` as `false` (DEBT-065; Lane C Day 2 handoff has the one-line fix).
+> - Remove the `setContext` call in `src/pages/Plan.tsx` (the only use of `wisdomStore`), then delete `src/stores/wisdomStore.ts` and its test (DEBT-067). `Plan.tsx` isn't a Lane E file, so this is a small allowed exception; note it in the handoff.
+> - Review findings fixed on #59 (read before writing collections): `markDirty` before the first sync now merges the saved outbox, and one-row tables (`nutrition_settings`, `user_state`) push deletes filtered on `user_id`. Use `keyColumn: null` for those two.
+
+
 > **Notes from Day 4 (coordinator):**
 > - The engine is in `src/lib/sync/`; import from `@/lib/sync`.
 > - Each collection also needs `keyColumn` (`'id'`, `'day'`, or `null` for `nutrition_settings` and `user_state`) and `onConflict` (`'user_id,id'`, `'user_id,day'` or `'user_id'`).

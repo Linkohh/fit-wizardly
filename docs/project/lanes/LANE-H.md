@@ -145,6 +145,11 @@ Stores other than `authStore`'s sign-in area, sync code, `supabase/`, routing.
 
 ## Day 3: Email-code sign-in (2.1)
 
+> **Carried over from Day 2 handoffs and review (added 2026-11-18 by the coordinator).** Do these too:
+> - `ios:live:cap` uses `--host=localhost`, so live reload can't reach a physical iPhone (DEBT-058). Either pass the machine's LAN address for devices or change the `dev-ios-live.mjs` hint to say Simulator only.
+> - For Lincoln's L3 step: a custom domain must be added to `ALLOWED_ORIGINS` in Vercel, or `/api/*` calls from it get 403 (DEBT-075). Add this to the email-template steps you write for Lincoln.
+
+
 ### Steps
 1. In `authStore.ts`, add `verifyEmailCode(email, code)` (contract #7):
    - Call `supabase.auth.verifyOtp({ email, token: code.trim(), type: 'email' })`, then `return { error }`.

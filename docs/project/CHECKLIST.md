@@ -2,7 +2,7 @@
 
 > The quick view: what's done, what's in progress, and what's left. It's updated after every step.
 > `BOARD.md` has the full day-by-day grid and the gate checklists; this page is the short version.
-> **Last updated:** 2026-11-18, after Lane E Day 4 (sync engine core), with Wave 1 / Day 2 running.
+> **Last updated:** 2026-11-18, after Wave 1 / Day 2 was reviewed and merged (#54–#60).
 
 ## Done
 
@@ -24,43 +24,56 @@
 | 14 | **Merged #51** Lane B: AI claims, fake exercise badges and blocked meal images removed | `e69675a` |
 | 15 | **Merged #52** Lane D: icons and logo compressed; exercise data cached on first use; `public/` 11 MB → 4 MB | `8524a3c` |
 | 16 | **Merged #47** Lane A: CLAUDE.md fixed, AGENTS.md deleted, warning banners on outdated docs | `4ff74e6` |
-| 17 | **Merged #53** Lane E Day 3: nutrition, readiness, achievements and custom exercises saved on the device; erase-all; sign-out keeps data; ADR 11; 2 review findings fixed | (this PR) |
+| 17 | **Merged #53** Lane E Day 3: nutrition, readiness, achievements and custom exercises saved on the device; erase-all; sign-out keeps data; ADR 11; 2 review findings fixed | `7ef77e5` |
 | 18 | Final combined check: 891/891 tests, lint, typecheck and build. Browser checks pass: no AI wording, Circles hidden, coach pages 404, plan and achievements survive reload, nothing stored in localStorage | This session |
 | 19 | Each lane's carry-over items written into its next brief; new issues DEBT-046 to DEBT-057 logged | Lane briefs, `SESSION_LOG.md` |
 | 20 | Wave 1 / Day 2 started for A, B, C, D, F, H. The first attempt hit the usage limit before any work was done (no branches were pushed), so all six were restarted once the limit reset | 6 sessions |
-| 21 | Lane E Day 4: cloud sync engine core (pull, merge, push, outbox, status), 13 tests that catch deliberately introduced bugs, and the 3 unearnable "Wisdom AI" badges removed | Day 4 PR |
+| 21 | **Merged #59**, Lane E Day 4: cloud sync engine core (pull, merge, push, outbox, status) and the 3 unearnable "Wisdom AI" badges removed. 3 review findings fixed first, each with a test that fails without the fix | `0513fd0` |
+| 22 | Reviewed all seven Day 2 PRs: every diff and handoff, file ownership, secrets, migration 008 line by line, DB harness re-run here, trial merge (974/974 tests), browser checks | This session |
+| 23 | **Merged #57** Lane F: migration 008 fixes the Circles policy loop, stops forged streaks/badges/scores, makes profiles private, and lets accounts be deleted | `886d34b` |
+| 24 | **Merged #58** Lane C: coach mode off everywhere, onboarding skips the role step, palette links fixed | `6abc06f` |
+| 25 | **Merged #60** Lane H: fonts self-hosted (nothing goes to Google), `/api` origin allowlist and rate limit, exercise data always through our proxy, Android portrait | `cb64f9f` |
+| 26 | **Merged #55** Lane B: language picker offers English and Spanish and remembers the choice; Profile labels translated | `59c2d05` |
+| 27 | **Merged #54** Lane D: 36 dead files and the leftover Lovable tooling removed | `761c8e0` |
+| 28 | **Merged #56** Lane A: iOS guide merged, data inventory written, `.claude/` audited | `ac525a5` |
+| 29 | Carry-overs written into each lane's next brief; DEBT-058 to DEBT-075 logged; 12 old issues closed | Lane briefs, `SESSION_LOG.md` |
 
 ## In progress
 
 | What | Status |
 |---|---|
-| Wave 1 / Day 2 for lanes A, B, C, D, F, H | Running in six parallel sessions (restarted after the usage limit) |
-| Lane E Day 4: sync engine core | PR open, all checks green. Merge after CI |
+| Wave 1 / Day 3 for lanes A, B, C, D, F, H | Starting now in the six lane sessions |
+| Lane E Day 5: sync collections | Starting now in this session |
 
 ## Next up, in order
 
-1. **Review and merge each Day 2 PR as it arrives.** Then start Day 3 for those lanes.
+1. **Day 3 for each lane** (running)
+   - A: fold handoffs into the log and board; Gate 1 checklist
+   - B: empty states; `<html lang>`
+   - C: crash reporting (Sentry, needs L6 for a real key)
+   - D: PDF export fixes; dev proxy error text
+   - F: delete-account function
+   - H: sign in with a 6-digit email code (needs L11)
 2. **Lane E Day 5:** sync collections for logs, PRs, nutrition, measurements, readiness and user state.
-3. **Day 2 contents per lane** (running now)
-   - A: iOS docs, data inventory, `.claude/` audit
-   - B: language picker, auth-modal wording
-   - C: coach mode off everywhere, onboarding, broken command-palette links
-   - D: dead code, including the Wisdom UI and the unused favourites store
-   - F: migration 008 access-rule fixes
-   - H: self-hosted fonts, API hardening, wger through the proxy, `test:db` script
-4. **Day 3 for each lane**, then **Gate 1**: a beta smoke test, plus migrations 007 and 008 on a staging Supabase project.
+3. **Review and merge each Day 3 PR as it arrives**, then **Gate 1**: a beta smoke test, plus migrations 007 and 008 on a staging Supabase project (L10).
 
 ## Still remaining
 
 ### Wave 1: Foundations (Days 1–3)
 - [x] Day 1 for all lanes (A, B, C, D, E, F, H), all merged
 - [x] E2 and E3 (Lane E is running ahead)
-- [ ] A2–A3 iOS docs; data inventory; Wave 1 bookkeeping
-- [ ] B2–B3 Language picker; empty states
-- [ ] C2–C3 Coach mode off everywhere; crash reporting
-- [ ] D2–D3 Dead code; PDF export fixes
-- [ ] F2–F3 Access-rule fixes (migration 008); delete-account function
-- [ ] H2–H3 Self-hosted fonts and API hardening; sign in with an email code
+- [x] A2 iOS docs; data inventory
+- [ ] A3 Wave 1 bookkeeping
+- [x] B2 Language picker
+- [ ] B3 Empty states
+- [x] C2 Coach mode off everywhere
+- [ ] C3 Crash reporting
+- [x] D2 Dead code
+- [ ] D3 PDF export fixes
+- [x] F2 Access-rule fixes (migration 008)
+- [ ] F3 Delete-account function
+- [x] H2 Self-hosted fonts and API hardening
+- [ ] H3 Sign in with an email code
 - [ ] **Gate 1:** beta smoke test; staging database
 
 ### Wave 2: Sync, accounts, native, observability (Days 4–7)
@@ -87,13 +100,13 @@
 |---|---|
 | L0 Merge Day 0 | ✅ Done |
 | D1–D6 Decisions | ✅ Acknowledged; defaults apply |
-| L12 Review and merge PRs | ✅ Wave 1 / Day 1 merged (#44–#53) |
+| L12 Review and merge PRs | ✅ Wave 1 / Days 1–2 merged (#44–#60) |
 | L4 Apple and Google developer enrollment | ⏸ Deferred. Start at least a week before Gate 2, because the first store uploads and the 14-day Play test need it |
 | L10 Staging Supabase project | ⬜ Needed for Gate 1. **Before the first `supabase db push`, run `supabase migration repair --status applied 001 … 006`** (DEBT-053; steps in `docs/SUPABASE_MIGRATIONS.md`) |
 | L11 Email code in the Supabase email template | ⬜ Needed when Lane H Day 3 lands |
 | First native build on a Mac and in Android Studio | ⬜ Checks Lane H's release settings: code shrinking, signing, privacy manifest |
 | L1 Revoke the old Supabase key | ⬜ |
-| L3 Domain | ⬜ |
+| L3 Domain | ⬜ When it's set up, add it to `ALLOWED_ORIGINS` in Vercel, or `/api` calls from it are refused (DEBT-075) |
 | L5 Name and trademark search | ⬜ |
 | L6 Sentry and PostHog accounts | ⬜ |
 | L2 Production database migrations | ⬜ Before Gate 2 |
@@ -106,4 +119,10 @@ Each has a default that applies unless you change it.
 1. Weekly progress counts **finished workouts**, with the goal set from your plan's days per week. (Default: yes.)
 2. **Signing out keeps training data on the device** until cloud sync exists. (Default: yes.)
 3. Lane D's icons are about 70 KB against a 60 KB target, because going smaller visibly bands the gradient. (Default: keep them.)
-4. Lane H asks whether to lock Android to portrait as well, to match iOS. (Default: yes, on Lane H Day 2.)
+4. Lane H asks whether to lock Android to portrait as well, to match iOS. (Default: yes. **Done** in #60.)
+5. **Which region is your Supabase project in?** It goes in the privacy policy. (No default; Lane A leaves a placeholder.)
+6. `.claude/*.md` is now owned by Lane A. (Default: yes; applied.)
+7. The `/api` rate limit is 60 requests a minute per IP. (Default: keep 60.)
+8. People who share a circle can see each other's whole profile row (goal, experience, timezone). (Default: yes; revisit when Circles turns on.)
+9. When a circle's creator deletes their account, the circle stays for its other members. (Default: yes.)
+10. Coach mode switched on before the flag existed is switched off and isn't restored if coach is turned on later. (Default: acceptable.)

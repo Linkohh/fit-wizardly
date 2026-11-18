@@ -96,6 +96,11 @@
 
 ## Day 3: Empty states (3.6a)
 
+> **Carried over from Day 2 handoffs and review (added 2026-11-18 by the coordinator).** Do these too:
+> - `src/lib/i18n.ts`: set `document.documentElement.lang` on start and on `i18n.on('languageChanged')` (DEBT-063). Add a test.
+> - Allowed one-word exception: `src/lib/analyticsIntelligence.ts:840` "FitWizardly" → "FitWizard" (DEBT-062).
+
+
 For each screen, a first-time user should see one sentence explaining what will appear and one clear button for the next step. Use the existing card and button components, semantic colours, and `emptyStates.*` keys.
 
 | Screen | Condition | Message | Action |
