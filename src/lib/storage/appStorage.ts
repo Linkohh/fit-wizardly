@@ -149,6 +149,8 @@ export async function getStorageBackendKind(): Promise<StorageBackend['kind']> {
   return (await getBackend()).kind;
 }
 
+let persistenceRequested = false;
+
 /** Async storage for Zustand persist. Never throws: failures are logged, reads return null. */
 export const appStorage: StateStorage = {
   async getItem(name) {
@@ -162,6 +164,13 @@ export const appStorage: StateStorage = {
   async setItem(name, value) {
     try {
       await (await getBackend()).setItem(name, value);
+      // After the first save, ask the browser not to evict the app's data
+      // (roadmap 1.1, DEBT-076 in Lane A's log). Once per session; the
+      // function itself remembers that it already asked.
+      if (!persistenceRequested) {
+        persistenceRequested = true;
+        void requestPersistentStorage();
+      }
     } catch (error) {
       console.error(`[FitWizard] Could not save "${name}" to device storage.`, error);
     }
@@ -299,4 +308,5 @@ export function createUserDataStorage<S>(): PersistStorage<S> | undefined {
 /** Test helper: forget the chosen backend so the next call picks again. */
 export function resetAppStorageForTests(): void {
   backendPromise = null;
+  persistenceRequested = false;
 }

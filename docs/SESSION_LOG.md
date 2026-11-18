@@ -163,9 +163,10 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
   - A two-device sync through the fake database.
   - The first-sign-in upload.
   - Three deliberate tracker bugs, each caught by a test.
-  - **982/982 tests.** Lint 0 errors / 4 warnings. Typecheck clean. Build passes. Startup bundle unchanged against `preview_b` (358.2 vs 358.3 KB).
+  - **983/983 tests.** Lint 0 errors / 4 warnings. Typecheck clean. Build passes. Startup bundle unchanged against `preview_b` (358.2 vs 358.3 KB).
 - **Corrected the Day 6 brief:** guest items are not already dirty; call `markAllCollectionsDirty()` on the first sign-in.
-- **New:** DEBT-076 (startup bundle baseline to confirm after Day 2).
+- **Also fixed:** persistent storage was never requested, so the browser could evict saved data. This was a Lane E Day 1 miss, found by Lane A as their DEBT-076 in #63. The browser is now asked after the first save.
+- **New:** DEBT-078 (startup bundle baseline to confirm after Day 2). Numbered to avoid Lane A's DEBT-076 and DEBT-077 in #63.
 - **Next steps:**
   1. Review and merge the Day 3 PRs.
   2. Gate 1.
@@ -877,7 +878,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-072 | CSP `connect-src` still allows `wger.de`; no browser code needs it | `vercel.json` | Lane H, later, after checking production. |
 | DEBT-073 | `/api/*` rate limit is in memory and per instance | `api/_lib/guard.ts` | Add a Vercel firewall rate-limit rule before launch (Lincoln / Lane H). |
 | DEBT-074 | The dev wger proxy returns `err.message`; production returns a generic 502 | `vite.config.ts:104` | Lane D Day 3. |
-| DEBT-076 | Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4 | build | Lane D: confirm the cause (likely the self-hosted font CSS) and record the new baseline. |
+| DEBT-078 | Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4 | build | Lane D: confirm the cause (likely the self-hosted font CSS) and record the new baseline. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |

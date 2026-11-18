@@ -211,6 +211,21 @@ describe('requestPersistentStorage', () => {
     expect(persisted).toHaveBeenCalledTimes(1);
   });
 
+  it('is asked for after the first save, once per session', async () => {
+    const persist = vi.fn(async () => true);
+    const persisted = vi.fn(async () => true);
+    Object.defineProperty(navigator, 'storage', { value: { persist, persisted }, configurable: true });
+    const { appStorage } = await loadAppStorage({ native: false });
+    expect(persist).not.toHaveBeenCalled();
+
+    await appStorage.setItem('fitwizard-test-persist', '1');
+    await appStorage.setItem('fitwizard-test-persist', '2');
+
+    await vi.waitFor(() => expect(persist).toHaveBeenCalledTimes(1));
+    expect(persisted).not.toHaveBeenCalled();
+    await appStorage.removeItem('fitwizard-test-persist');
+  });
+
   it('does nothing on native', async () => {
     const persist = vi.fn(async () => true);
     Object.defineProperty(navigator, 'storage', { value: { persist }, configurable: true });
