@@ -837,7 +837,7 @@ export function buildWeeklyCoachSummary({
   if (thisWeekLogs.length === 0) {
     return {
       title: 'Build your first weekly signal',
-      summary: 'Log a workout this week and FitWizardly will turn the pattern into coach notes.',
+      summary: 'Log a workout this week and FitWizard will turn the pattern into coach notes.',
       highlights: ['No completed sessions in the last 7 days.', 'Readiness and workload need more signal.'],
       nextWeekFocus: 'Start with one repeatable session and one readiness check-in.',
       confidence: 'low',

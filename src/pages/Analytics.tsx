@@ -16,7 +16,14 @@ import { usePlanStore } from '@/stores/planStore';
 import { useReadinessStore } from '@/stores/readinessStore';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { isFeatureEnabled } from '@/lib/featureFlags';
-import { BarChart2, Compass, Dumbbell, Target } from 'lucide-react';
+import { BarChart2, Compass, Dumbbell, LineChart, Target } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { WorkoutEmptyState } from '@/components/empty-states/WorkoutEmptyState';
+import { PlanSkeleton } from '@/components/plan/PlanSkeleton';
+import { useStoresHydrated } from '@/hooks/useStoresHydrated';
+
+/** Trends need at least two sessions to compare. */
+const MIN_WORKOUTS_FOR_TRENDS = 2;
 
 function TodayNextAction() {
     const workoutLogs = usePlanStore((state) => state.workoutLogs);
@@ -62,13 +69,20 @@ function TodayNextAction() {
 }
 
 export default function Analytics() {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState('today');
+    const storesHydrated = useStoresHydrated();
+    const workoutCount = usePlanStore((state) => state.workoutLogs.length);
     const user = useAuthStore((state) => state.user);
     const profile = useAuthStore((state) => state.profile);
     const isTrainerMode = useTrainerStore((state) => state.isTrainerMode);
     const isTrainerAuthorized = !user || profile?.is_trainer === true;
     // Coach UI only exists while the coach flag is on (contract #1).
     const isTrainerEnabled = isFeatureEnabled('coach') && isTrainerAuthorized && isTrainerMode;
+
+    if (!storesHydrated) {
+        return <PlanSkeleton />;
+    }
 
     return (
         <div className="container mx-auto max-w-7xl px-4 py-8 space-y-8 pb-24">
@@ -83,60 +97,68 @@ export default function Analytics() {
                 </p>
             </motion.div>
 
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3 glass-card border border-primary/15 p-1 lg:w-[520px]">
-                    <TabsTrigger value="today" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-secondary/20 data-[state=active]:text-primary data-[state=active]:shadow-[0_0_12px_hsl(var(--primary)/0.25)]">
-                        <Compass className="h-3.5 w-3.5 mr-1.5" />
-                        Today
-                    </TabsTrigger>
-                    <TabsTrigger value="strength" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-secondary/20 data-[state=active]:text-primary data-[state=active]:shadow-[0_0_12px_hsl(var(--primary)/0.25)]">
-                        <Dumbbell className="h-3.5 w-3.5 mr-1.5" />
-                        Strength
-                    </TabsTrigger>
-                    <TabsTrigger value="load" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-secondary/20 data-[state=active]:to-primary/20 data-[state=active]:text-secondary data-[state=active]:shadow-[0_0_12px_hsl(var(--secondary)/0.25)]">
-                        <BarChart2 className="h-3.5 w-3.5 mr-1.5" />
-                        Load
-                    </TabsTrigger>
-                </TabsList>
+            {workoutCount < MIN_WORKOUTS_FOR_TRENDS ? (
+                <WorkoutEmptyState
+                    icon={LineChart}
+                    testId="analytics-empty-state"
+                    message={t('emptyStates.analytics.message', 'Log two workouts to see your trends.')}
+                />
+            ) : (
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                    <TabsList className="grid w-full grid-cols-3 glass-card border border-primary/15 p-1 lg:w-[520px]">
+                        <TabsTrigger value="today" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-secondary/20 data-[state=active]:text-primary data-[state=active]:shadow-[0_0_12px_hsl(var(--primary)/0.25)]">
+                            <Compass className="h-3.5 w-3.5 mr-1.5" />
+                            Today
+                        </TabsTrigger>
+                        <TabsTrigger value="strength" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/20 data-[state=active]:to-secondary/20 data-[state=active]:text-primary data-[state=active]:shadow-[0_0_12px_hsl(var(--primary)/0.25)]">
+                            <Dumbbell className="h-3.5 w-3.5 mr-1.5" />
+                            Strength
+                        </TabsTrigger>
+                        <TabsTrigger value="load" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-secondary/20 data-[state=active]:to-primary/20 data-[state=active]:text-secondary data-[state=active]:shadow-[0_0_12px_hsl(var(--secondary)/0.25)]">
+                            <BarChart2 className="h-3.5 w-3.5 mr-1.5" />
+                            Load
+                        </TabsTrigger>
+                    </TabsList>
 
-                <TabsContent value="today" className="space-y-6">
-                    {activeTab === 'today' && (
-                        <>
-                            <TodayNextAction />
-                            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)]">
-                                <TrainingCompassCard className="min-w-0" />
-                                <div className="grid min-w-0 gap-6">
-                                    <SessionRescueCard />
-                                    <PlanFitReviewCard />
+                    <TabsContent value="today" className="space-y-6">
+                        {activeTab === 'today' && (
+                            <>
+                                <TodayNextAction />
+                                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)]">
+                                    <TrainingCompassCard className="min-w-0" />
+                                    <div className="grid min-w-0 gap-6">
+                                        <SessionRescueCard />
+                                        <PlanFitReviewCard />
+                                    </div>
                                 </div>
-                            </div>
-                            <WeeklyChangeBriefCard />
-                        </>
-                    )}
-                </TabsContent>
+                                <WeeklyChangeBriefCard />
+                            </>
+                        )}
+                    </TabsContent>
 
-                <TabsContent value="strength" className="space-y-6">
-                    {activeTab === 'strength' && (
-                        <div className="grid gap-6 lg:grid-cols-2">
-                            <StrengthCurve />
-                            <LiftTruthMeterCard />
-                        </div>
-                    )}
-                </TabsContent>
-
-                <TabsContent value="load" className="space-y-6">
-                    {activeTab === 'load' && (
-                        <>
-                            <PlanFitReviewCard />
+                    <TabsContent value="strength" className="space-y-6">
+                        {activeTab === 'strength' && (
                             <div className="grid gap-6 lg:grid-cols-2">
-                                <VolumeHealth />
-                                <ReadinessTrend />
+                                <StrengthCurve />
+                                <LiftTruthMeterCard />
                             </div>
-                            {isTrainerEnabled && <WeeklyCoachSummaryCard />}
-                        </>
-                    )}
-                </TabsContent>
-            </Tabs>
+                        )}
+                    </TabsContent>
+
+                    <TabsContent value="load" className="space-y-6">
+                        {activeTab === 'load' && (
+                            <>
+                                <PlanFitReviewCard />
+                                <div className="grid gap-6 lg:grid-cols-2">
+                                    <VolumeHealth />
+                                    <ReadinessTrend />
+                                </div>
+                                {isTrainerEnabled && <WeeklyCoachSummaryCard />}
+                            </>
+                        )}
+                    </TabsContent>
+                </Tabs>
+            )}
         </div>
     );
 }

@@ -80,6 +80,20 @@ i18n
         },
     });
 
+/**
+ * Keeps `<html lang>` in step with the UI language so screen readers pronounce
+ * text correctly and the browser offers the right spell-check and translation.
+ */
+export function syncDocumentLanguage(lang: string | undefined = i18n.language) {
+    if (typeof document === 'undefined' || !lang) {
+        return;
+    }
+    document.documentElement.lang = lang;
+}
+
+syncDocumentLanguage();
+i18n.on('languageChanged', syncDocumentLanguage);
+
 export default i18n;
 
 // Helper to get current language
