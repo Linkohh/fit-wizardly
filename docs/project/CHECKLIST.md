@@ -2,7 +2,7 @@
 
 > The quick view: what's done, what's in progress, and what's left. It's updated after every step.
 > `BOARD.md` has the full day-by-day grid and the gate checklists; this page is the short version.
-> **Last updated:** 2026-11-18, after Lane E Day 5 (sync collections), with Wave 1 / Day 3 running.
+> **Last updated:** 2026-11-18, after #62 and #64 merged and Lane E Day 6 (sync turned on), with Wave 1 / Day 3 running.
 
 ## Done
 
@@ -38,15 +38,18 @@
 | 28 | **Merged #56** Lane A: iOS guide merged, data inventory written, `.claude/` audited | `ac525a5` |
 | 29 | Carry-overs written into each lane's next brief; DEBT-058 to DEBT-075 logged; 12 old issues closed | Lane briefs, `SESSION_LOG.md` |
 | 30 | **Merged #61**: the docs above | `172c428` |
-| 31 | Lane E Day 5: workouts, PRs, meals, nutrition settings, measurements, check-ins and achievements can now sync. Every change is tracked automatically. Two-device test passes. Also: the browser is now asked not to evict saved data (missed on Day 1). One review finding fixed. 984/984 tests | #64 |
+| 31 | Lane E Day 5: workouts, PRs, meals, nutrition settings, measurements, check-ins and achievements can now sync. Every change is tracked automatically. Two-device test passes. Also: the browser is now asked not to evict saved data (missed on Day 1). One review finding fixed. 984/984 tests | **Merged #64** `a621a4f` |
+| 32 | **Merged #62** Lane H Day 3: sign in with a 6-digit email code (needs L11 to work for real); iPhone live reload | `4b3bb21` |
+| 33 | Fresh Day 3 sessions for B, C, D, F, started at your "keep it going", and resumed after the usage limit | 4 sessions |
+| 34 | Lane E Day 6: sync turned on for signed-in users (sign-in, back online, back in the app, 2 s after a change); first sign-in backs up this device's data; Profile shows Synced / Saving / Offline / Problem. Two review findings (data-loss risks) fixed first. 1017/1017 tests | #66 |
 
 ## In progress
 
 | What | Status |
 |---|---|
-| Wave 1 / Day 3, lanes A, D, H | Running (restarted after the usage limit) |
-| Wave 1 / Day 3, lanes B, C, F | **Waiting for you:** reply "go" in each of those three sessions. They won't start a push and PR on a message from another session alone |
-| Lane E Day 5: sync collections | PR open; merge after CI |
+| Wave 1 / Day 3, lanes B, C, D, F | Running in fresh sessions (the old blocked ones can be ignored) |
+| Lane A Day 3 (#63) | Open; merges last, after it folds in the other Day 3 handoffs |
+| Lane E Day 6: sync turned on | PR open; merge after CI and review |
 
 ## Next up, in order
 
@@ -57,7 +60,7 @@
    - D: PDF export fixes; dev proxy error text
    - F: delete-account function
    - H: sign in with a 6-digit email code (needs L11)
-2. **Lane E Day 6:** start sync on sign-in, coming back online and app resume; first-sign-in upload; Synced / Saving / Offline on Profile.
+2. **Lane E Day 7:** sync before sign-out with an unsent-changes warning, then clear the device; move plans onto the sync engine.
 3. **Review and merge each Day 3 PR as it arrives**, then **Gate 1**: a beta smoke test, plus migrations 007 and 008 on a staging Supabase project (L10).
 
 ## Still remaining
@@ -76,7 +79,7 @@
 - [x] F2 Access-rule fixes (migration 008)
 - [ ] F3 Delete-account function
 - [x] H2 Self-hosted fonts and API hardening
-- [ ] H3 Sign in with an email code
+- [x] H3 Sign in with an email code
 - [ ] **Gate 1:** beta smoke test; staging database
 
 ### Wave 2: Sync, accounts, native, observability (Days 4–7)

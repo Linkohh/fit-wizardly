@@ -262,6 +262,12 @@ Then:
 
 ## Day 7: Move plans onto the engine (1.4 part 4)
 
+> **Carried over from Day 6 (coordinator):** Day 6 step 4 (sync on sign-out, with a warning) moved here. It needs the sign-out buttons in `Header.tsx` and `CommandPalette.tsx` (Lane C) and `authStore.signOut` (Lane H) to call one shared helper.
+> - Add `prepareSignOut(userId)` in `src/lib/sync/` that runs `syncAll` and returns how many changes are still unsent.
+> - Add a confirm dialog ("3 changes haven't synced. Sign out anyway?") used by every sign-out entry point.
+> - After sign-out, call `clearLocalUserData()`. This closes DEBT-045.
+> - Ask Lanes C and H in your handoff to switch their buttons to it, or get Lincoln's OK to edit those lines.
+
 Start this only after Lane F's Day 5 (Express retirement) has merged, so `plansClient.ts` is in its final shape. Rebase first.
 
 1. Add a `plans` collection backed by the existing `plans` table (migration 004: `(user_id, id)`, `plan jsonb`, `schema_version`). Migration 007 adds `deleted_at` to `plans` (contract #3), so plans use the same tombstone rule as everything else.

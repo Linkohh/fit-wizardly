@@ -863,5 +863,17 @@
         "resent": "We sent a new code.",
         "different_email": "Use a different email",
         "close": "Close"
+    },
+    "sync": {
+        "first_upload": "Your training on this device is now backed up to your account.",
+        "first_upload_failed": "Some of your training couldn't be backed up yet. We'll keep trying.",
+        "title": "Cloud backup",
+        "synced": "Synced",
+        "saving": "Saving…",
+        "offline": "Offline. Changes will sync when you're back online.",
+        "error": "Sync problem. Your data is still saved on this device.",
+        "signed_out": "Sign in to back up your training.",
+        "retry": "Retry",
+        "sign_in": "Sign in"
     }
 }

@@ -22,6 +22,15 @@ type Outbox = Record<string, Record<string, OutboxEntry>>;
 let outbox: Outbox = {};
 let loadPromise: Promise<void> | null = null;
 let saveChain: Promise<void> = Promise.resolve();
+const dirtyListeners = new Set<() => void>();
+
+/** Calls `listener` after every markDirty(). Used by the debounced sync trigger. Returns an unsubscribe. */
+export function subscribeToDirty(listener: () => void): () => void {
+  dirtyListeners.add(listener);
+  return () => {
+    dirtyListeners.delete(listener);
+  };
+}
 
 function isOutbox(value: unknown): value is Outbox {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -75,6 +84,7 @@ export function markDirty(table: string, key: string, options: { deleted?: boole
     [table]: { ...(outbox[table] ?? {}), [key]: { deleted: options.deleted === true, at: new Date().toISOString() } },
   };
   scheduleSave();
+  dirtyListeners.forEach((listener) => listener());
 }
 
 export function getOutboxEntries(table: string): Record<string, OutboxEntry> {
@@ -110,6 +120,7 @@ export async function clearOutbox(): Promise<void> {
 
 /** Test helper. */
 export function resetOutboxForTests(): void {
+  dirtyListeners.clear();
   outbox = {};
   loadPromise = null;
   saveChain = Promise.resolve();
