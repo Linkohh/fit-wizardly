@@ -5,7 +5,6 @@ import type { SyncResult } from '@/lib/sync/types';
 const mocks = vi.hoisted(() => ({
   syncAll: vi.fn(),
   startSyncCollections: vi.fn(async () => () => undefined),
-  markAllCollectionsDirty: vi.fn(() => 3),
   toastSuccess: vi.fn(),
   toastError: vi.fn(),
 }));
@@ -13,7 +12,6 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/lib/sync/engine', () => ({ syncAll: mocks.syncAll }));
 vi.mock('@/lib/sync/collections', () => ({
   startSyncCollections: mocks.startSyncCollections,
-  markAllCollectionsDirty: mocks.markAllCollectionsDirty,
 }));
 vi.mock('sonner', () => ({ toast: { success: mocks.toastSuccess, error: mocks.toastError } }));
 vi.mock('@/lib/platform', () => ({ isNativeApp: () => false }));
@@ -39,7 +37,6 @@ describe('sync triggers', () => {
 
   beforeEach(async () => {
     mocks.syncAll.mockReset().mockResolvedValue(OK);
-    mocks.markAllCollectionsDirty.mockClear();
     mocks.startSyncCollections.mockClear();
     mocks.toastSuccess.mockClear();
     mocks.toastError.mockClear();
@@ -54,30 +51,38 @@ describe('sync triggers', () => {
     vi.useRealTimers();
   });
 
-  it('uploads everything on the first sign-in on this device, once per account', async () => {
+  it('does a first upload on the first sign-in on this device, once per account', async () => {
+    mocks.syncAll.mockResolvedValue({ pulled: 2, pushed: 3, failed: 0 });
     let sync = await load();
     stop = sync.startSync('user-1');
     await settle();
 
     expect(mocks.startSyncCollections).toHaveBeenCalled();
-    expect(mocks.markAllCollectionsDirty).toHaveBeenCalledTimes(1);
-    expect(mocks.syncAll).toHaveBeenCalledWith('user-1', { client: undefined });
+    expect(mocks.syncAll).toHaveBeenCalledWith('user-1', { client: undefined, uploadLocalOnly: true });
     expect(mocks.toastSuccess).toHaveBeenCalledTimes(1);
     stop();
 
-    // Signing in again (or restarting) doesn't re-upload.
+    // Signing in again (or restarting) is a normal sync, not another first upload.
     sync = await load();
     stop = sync.startSync('user-1');
     await settle();
-    expect(mocks.markAllCollectionsDirty).toHaveBeenCalledTimes(1);
-    expect(mocks.syncAll).toHaveBeenCalledTimes(2);
+    expect(mocks.syncAll).toHaveBeenLastCalledWith('user-1', { client: undefined });
+    expect(mocks.toastSuccess).toHaveBeenCalledTimes(1);
     stop();
 
-    // A different account on the same device does.
+    // A different account on the same device gets its own first upload.
     sync = await load();
     stop = sync.startSync('user-2');
     await settle();
-    expect(mocks.markAllCollectionsDirty).toHaveBeenCalledTimes(2);
+    expect(mocks.syncAll).toHaveBeenLastCalledWith('user-2', { client: undefined, uploadLocalOnly: true });
+  });
+
+  it("doesn't announce a backup when the device had nothing of its own to upload", async () => {
+    mocks.syncAll.mockResolvedValue({ pulled: 5, pushed: 0, failed: 0 });
+    const sync = await load();
+    stop = sync.startSync('user-1');
+    await settle();
+    expect(mocks.toastSuccess).not.toHaveBeenCalled();
   });
 
   it("keeps trying the first upload if it didn't fully succeed", async () => {
@@ -89,11 +94,11 @@ describe('sync triggers', () => {
     expect(mocks.toastSuccess).not.toHaveBeenCalled();
     stop();
 
-    mocks.syncAll.mockResolvedValue(OK);
+    mocks.syncAll.mockResolvedValue({ pulled: 0, pushed: 1, failed: 0 });
     sync = await load();
     stop = sync.startSync('user-1');
     await settle();
-    expect(mocks.markAllCollectionsDirty).toHaveBeenCalledTimes(2);
+    expect(mocks.syncAll).toHaveBeenLastCalledWith('user-1', { client: undefined, uploadLocalOnly: true });
     expect(mocks.toastSuccess).toHaveBeenCalledTimes(1);
   });
 

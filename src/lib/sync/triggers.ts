@@ -2,7 +2,7 @@ import { toast } from 'sonner';
 import { appStorage } from '@/lib/storage/appStorage';
 import { isNativeApp } from '@/lib/platform';
 import { translate } from '@/lib/translate';
-import { markAllCollectionsDirty, startSyncCollections } from '@/lib/sync/collections';
+import { startSyncCollections } from '@/lib/sync/collections';
 import { syncAll } from '@/lib/sync/engine';
 import { subscribeToDirty } from '@/lib/sync/outbox';
 import type { SyncClient, SyncResult } from '@/lib/sync/types';
@@ -96,13 +96,15 @@ export function startSync(userId: string, options: StartSyncOptions = {}): () =>
       return;
     }
 
-    // First sign-in on this device for this account: data saved as a guest or
-    // before sync existed has no outbox entry, so queue all of it.
-    const count = markAllCollectionsDirty();
+    // First sign-in on this device for this account. Pull everything first, so
+    // records the cloud already has keep the cloud copy, then upload only what
+    // exists solely on this device (data saved as a guest or before sync).
+    // Marking every local record dirty instead would let a fresh device's
+    // defaults overwrite the account (review finding on #66).
     running = true;
     let result: SyncResult | null = null;
     try {
-      result = await runOnce();
+      result = stopped || isOffline() ? null : await syncAll(userId, { client: options.client, uploadLocalOnly: true });
     } finally {
       running = false;
     }
@@ -110,7 +112,7 @@ export function startSync(userId: string, options: StartSyncOptions = {}): () =>
 
     if (result.failed === 0) {
       await markUploaded(userId);
-      if (count > 0) {
+      if (result.pushed > 0) {
         toast.success(translate('sync.first_upload', 'Your training on this device is now backed up to your account.'));
       }
     } else {

@@ -367,6 +367,18 @@ const App = () => {
     }
   }, [user, isLoading, syncWithBackend]);
 
+  // Track local changes from app start, signed in or not, so edits made while
+  // signed out are still sent after the next sign-in (review finding on #66).
+  // Only the network sync below waits for a signed-in user.
+  useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      return;
+    }
+    void import('@/lib/sync/collections')
+      .then(({ startSyncCollections }) => startSyncCollections())
+      .catch((error) => console.error('[FitWizard] Could not start change tracking.', error));
+  }, []);
+
   // Cloud sync for training data (Lane E Day 6): runs on sign-in, coming back
   // online, returning to the app, and 2 s after a change. Loaded lazily so the
   // sync engine and collections stay out of the startup bundle.

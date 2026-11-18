@@ -174,7 +174,6 @@ Behaviour:
 - A collection that fails is counted in `failed`, and the rest still sync. Overlapping `syncAll` calls share one run.
 - **Collections (Day 5):** `src/lib/sync/collections/` holds one collection per 007 table: `workout_logs`, `personal_records`, `nutrition_days`, `nutrition_settings` (one row), `body_measurements`, `readiness_entries`, `user_state` (one row: achievements and custom exercises).
   - `startSyncCollections()` registers them all and starts tracking.
-  - `markAllCollectionsDirty()` queues every local record, for the first sign-in.
   - Import from `@/lib/sync/collections`, not `@/lib/sync`, so the engine doesn't pull the stores into the startup bundle.
 - **How changes are marked (Day 5):** a tracker watches each store, compares records before and after every change, and calls `markDirty` for the changed keys (or `{ deleted: true }` for removed ones).
   - It catches every store action, so actions don't call `markDirty` themselves.
@@ -185,7 +184,8 @@ Behaviour:
   - It syncs on sign-in, on the `online` event, on returning to the app (`visibilitychange` on web; `appStateChange` with `isActive` on native), and 2 s after the last `markDirty`.
   - Runs never overlap; triggers during a run collapse into one follow-up.
   - It doesn't run while `navigator.onLine` is false.
-  - The **first sign-in on a device for an account** calls `markAllCollectionsDirty()` and uploads. The account id is then recorded in `fitwizard-sync-first-upload`, which erase-on-device clears. If the upload partly fails, it isn't recorded, so it retries on the next start.
+  - The **first sign-in on a device for an account** runs `syncAll(userId, { uploadLocalOnly: true })`. It pulls everything (ignoring the cursor), keeps the cloud copy for every record the cloud has (even over a pending local edit), and then uploads only device-only records. The account id is then recorded in `fitwizard-sync-first-upload`, which erase-on-device clears. If the upload partly fails, it isn't recorded, so it retries on the next start.
+  - **Change tracking starts at app start**, signed in or not (`App.tsx`), so edits made while signed out are sent after the next sign-in.
   - `retrySync(userId)` is for the Profile Retry button.
 - **Indicator (Day 6):** `src/components/sync/SyncStatusRow.tsx` on Profile shows Synced, Saving…, Offline, Sync problem (with Retry), or a sign-in prompt. It's hidden in demo mode (no Supabase).
 - **Not yet built (Day 7):** sync before sign-out with an unsent-changes warning, and clearing device data after sign-out (DEBT-045). Plans move onto the engine.

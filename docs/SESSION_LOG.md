@@ -162,9 +162,10 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
   - Details: `docs/project/handoffs/2026-11-18-lane-e-day-6.md`.
 - **Moved to Day 7:** sync on sign-out with an unsent-changes warning, and clearing device data (DEBT-045). It needs Lane C's and Lane H's sign-out buttons to share one helper.
 - **Verification:**
-  - 14 new tests. The trigger file passed five runs in a row.
+  - 16 new tests. The sync tests passed several runs in a row.
+  - Two P1 review findings fixed before merging: a fresh second device could overwrite the account's achievements, and edits made while signed out could be lost. Each has a test that fails without the fix.
   - Three deliberate trigger bugs, each caught by a test.
-  - **1015/1015 tests.** Lint 0 errors / 4 warnings. Build passes. Day 6 adds 0.4 KB to the startup download.
+  - **1017/1017 tests.** Lint 0 errors / 4 warnings. Build passes. Day 6 adds 0.4 KB to the startup download.
 - **New:** DEBT-079 (email-code step in the startup bundle, about 6 KB, Lane H).
 - **Next steps:**
   1. Review and merge the B, C, D and F Day 3 PRs, then #63 (Lane A).

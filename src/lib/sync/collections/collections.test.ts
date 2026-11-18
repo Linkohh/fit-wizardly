@@ -180,21 +180,59 @@ describe('sync collections', () => {
     expect(app.countPendingChanges()).toBe(0);
   });
 
-  it('uploads records saved before tracking started once everything is marked dirty (first sign-in)', async () => {
+  it("doesn't let a fresh second device overwrite the account on its first upload", async () => {
+    const server = new FakeServer();
+
+    // Phone A has real history in the cloud.
+    let app = await startApp();
+    app.achievements.setState({ currentStreak: 7, longestStreak: 9, totalPlansGenerated: 4 });
+    app.measurements.getState().addMeasurement(measurement);
+    await app.syncAll(FAKE_USER, { client: server.client() });
+    expect(server.rows('user_state')).toHaveLength(1);
+
+    // Phone B: fresh, used as a guest for a moment (a pending edit on the
+    // one-row user_state, plus a measurement only this phone has).
+    await eraseDevice();
+    app = await startApp();
+    // m-2 was saved before sync existed on this phone: nothing is queued for it.
+    app.measurements.getState().addMeasurement({ ...measurement, id: 'm-2', date: '2026-11-18T07:30:00.000Z' });
+    await vi.waitFor(async () => {
+      const { appStorage } = await import('@/lib/storage/appStorage');
+      expect(await appStorage.getItem('fitwizard-measurements')).toContain('m-2');
+    });
+    await app.clearOutbox();
+    app = await startApp();
+    expect(app.countPendingChanges()).toBe(0);
+    app.achievements.setState({ totalPlansGenerated: 1 });
+    expect(app.getOutboxEntries('user_state').state).toBeDefined();
+
+    const result = await app.syncAll(FAKE_USER, { client: server.client(), uploadLocalOnly: true });
+    expect(result.failed).toBe(0);
+
+    // The account's achievements win, on the phone and in the cloud.
+    expect(app.achievements.getState().currentStreak).toBe(7);
+    expect(app.achievements.getState().totalPlansGenerated).toBe(4);
+    expect((server.rows('user_state')[0].achievements as { currentStreak: number }).currentStreak).toBe(7);
+    // The phone-only measurement is uploaded, and both phones' measurements are here.
+    expect(server.rows('body_measurements').map((row) => row.id).sort()).toEqual(['m-1', 'm-2']);
+    expect(app.measurements.getState().measurements.map((m) => m.id).sort()).toEqual(['m-1', 'm-2']);
+    expect(app.countPendingChanges()).toBe(0);
+  });
+
+  it('sends edits made while signed out on the next sync', async () => {
     const server = new FakeServer();
     let app = await startApp();
     app.measurements.getState().addMeasurement(measurement);
-    await vi.waitFor(async () => {
-      const { appStorage } = await import('@/lib/storage/appStorage');
-      expect(await appStorage.getItem('fitwizard-measurements')).toContain('m-1');
-    });
-    await app.clearOutbox();
-
-    app = await startApp();
-    expect(app.countPendingChanges()).toBe(0);
-    expect(app.markAllCollectionsDirty()).toBeGreaterThanOrEqual(1);
     await app.syncAll(FAKE_USER, { client: server.client() });
-    expect(server.rows('body_measurements').map((row) => row.id)).toEqual(['m-1']);
+
+    // Restart signed out (tracking runs anyway), edit, then sign back in.
+    app = await startApp();
+    app.measurements.getState().updateMeasurement('m-1', { weight: 80 });
+    expect(app.getOutboxEntries('body_measurements')['m-1']).toBeDefined();
+    await app.syncAll(FAKE_USER, { client: server.client() });
+
+    expect((server.rows('body_measurements')[0].data as BodyMeasurement).weight).toBe(80);
+    expect(app.measurements.getState().measurements[0].weight).toBe(80);
   });
 
   it('keeps workouts, records and measurements newest first after a pull', async () => {

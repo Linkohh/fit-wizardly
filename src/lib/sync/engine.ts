@@ -66,8 +66,13 @@ async function pullRows(client: SyncClient, table: string, userId: string, curso
   }
 }
 
-/** Applies pulled rows to local items. Returns the number of local changes. */
-function mergeRows<T>(collection: SyncCollection<T>, rows: SyncRow[]): number {
+/** Applies pulled rows to local items. Returns the number of local changes and the keys the cloud sent. */
+function mergeRows<T>(
+  collection: SyncCollection<T>,
+  rows: SyncRow[],
+  preferRemote = false,
+): { changes: number; remoteKeys: Set<string> } {
+  const remoteKeys = new Set<string>();
   const byKey = new Map<string, T>();
   for (const item of collection.readLocal()) byKey.set(collection.key(item), item);
   const pending = getOutboxEntries(collection.table);
@@ -82,8 +87,13 @@ function mergeRows<T>(collection: SyncCollection<T>, rows: SyncRow[]): number {
       continue;
     }
     const key = collection.key(remoteItem);
+    remoteKeys.add(key);
     const local = byKey.get(key);
-    const entry: OutboxEntry | undefined = pending[key];
+    // First upload: for a record the cloud already has, the cloud copy wins even
+    // over a pending local edit (for example a guest's achievements must not
+    // overwrite the account's on a second device).
+    if (preferRemote && pending[key]) clearOutboxEntry(collection.table, key, pending[key]);
+    const entry: OutboxEntry | undefined = preferRemote ? undefined : pending[key];
     const remoteTime = toTime(row.updated_at);
     const localTime = local ? toTime(collection.getUpdatedAt(local)) : 0;
 
@@ -125,7 +135,20 @@ function mergeRows<T>(collection: SyncCollection<T>, rows: SyncRow[]): number {
   }
 
   if (changes > 0) collection.writeLocal([...byKey.values()]);
-  return changes;
+  return { changes, remoteKeys };
+}
+
+/**
+ * First upload from a device (Lane E Day 6): after the pull, queue the local
+ * records the cloud didn't send. Records the cloud has keep the cloud copy
+ * (merged above); only data that exists solely on this device is uploaded.
+ */
+function markLocalOnlyDirty<T>(collection: SyncCollection<T>, remoteKeys: Set<string>): void {
+  const pending = getOutboxEntries(collection.table);
+  for (const item of collection.readLocal()) {
+    const key = collection.key(item);
+    if (!remoteKeys.has(key) && !pending[key]) markDirty(collection.table, key);
+  }
 }
 
 /** Pushes the collection's outbox. Returns how many changes were sent. */
@@ -179,7 +202,17 @@ let running: Promise<SyncResult> | null = null;
  * Syncs every registered collection for the signed-in user. Calls made while
  * a sync is running share it. One collection failing doesn't stop the others.
  */
-export function syncAll(userId: string, options: { client?: SyncClient } = {}): Promise<SyncResult> {
+export interface SyncOptions {
+  /** Tests only. */
+  client?: SyncClient;
+  /**
+   * First sync of this device for this account: also upload local records the
+   * cloud doesn't have (data saved as a guest or before sync existed).
+   */
+  uploadLocalOnly?: boolean;
+}
+
+export function syncAll(userId: string, options: SyncOptions = {}): Promise<SyncResult> {
   if (running) return running;
 
   // The generated Database types can't express "any table by name"; the
@@ -197,8 +230,12 @@ export function syncAll(userId: string, options: { client?: SyncClient } = {}): 
 
       for (const collection of getRegisteredCollections()) {
         try {
-          const rows = await pullRows(client, collection.table, userId, cursors[collection.table]);
-          mergeRows(collection, rows);
+          // A first upload pulls everything, so "the cloud didn't send it" really
+          // means the cloud doesn't have it (an earlier attempt may have left a cursor).
+          const cursor = options.uploadLocalOnly ? undefined : cursors[collection.table];
+          const rows = await pullRows(client, collection.table, userId, cursor);
+          const { remoteKeys } = mergeRows(collection, rows, options.uploadLocalOnly === true);
+          if (options.uploadLocalOnly) markLocalOnlyDirty(collection, remoteKeys);
           result.pulled += rows.length;
           const newest = rows.reduce<string | undefined>(
             (latest, row) => (!latest || toTime(row.updated_at) > toTime(latest) ? row.updated_at : latest),

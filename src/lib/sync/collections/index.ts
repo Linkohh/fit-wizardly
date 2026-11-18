@@ -1,4 +1,3 @@
-import { markDirty } from '@/lib/sync/outbox';
 import { registerCollection } from '@/lib/sync/registry';
 import type { StoreCollection } from '@/lib/sync/storeCollection';
 import { bodyMeasurementsCollection, readinessEntriesCollection } from '@/lib/sync/collections/body';
@@ -26,8 +25,8 @@ function registerAndTrack<T>(collection: StoreCollection<T>): Promise<() => void
 
 /**
  * Registers every collection with the engine and starts tracking local
- * changes. Safe to call more than once. Lane E Day 6 calls it at startup,
- * before the sync triggers.
+ * changes. Safe to call more than once. App.tsx calls it at startup, signed in
+ * or not; the sync triggers call it again before their first run.
  */
 export function startSyncCollections(): Promise<() => void> {
   if (!started) {
@@ -49,27 +48,4 @@ export function startSyncCollections(): Promise<() => void> {
     })();
   }
   return started;
-}
-
-function markCollectionDirty<T>(collection: StoreCollection<T>): number {
-  const items = collection.readLocal();
-  for (const item of items) markDirty(collection.table, collection.key(item));
-  return items.length;
-}
-
-/**
- * Marks every local record as changed, so the next sync uploads it. For the
- * first sign-in on a device (Lane E Day 6): records saved before tracking
- * started, or as a guest, have no outbox entry. Returns how many were marked.
- */
-export function markAllCollectionsDirty(): number {
-  return [
-    markCollectionDirty(workoutLogsCollection),
-    markCollectionDirty(personalRecordsCollection),
-    markCollectionDirty(nutritionDaysCollection),
-    markCollectionDirty(nutritionSettingsCollection),
-    markCollectionDirty(bodyMeasurementsCollection),
-    markCollectionDirty(readinessEntriesCollection),
-    markCollectionDirty(userStateCollection),
-  ].reduce((total, count) => total + count, 0);
 }
