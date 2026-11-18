@@ -146,7 +146,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
-### 2026-11-18 — Lane A Day 3: Wave 1 Paperwork, README, 1.1.0 Notes Draft (branch `lane-a/day-3`, from `preview_b` @ `172c428`, rebased onto `4b3bb21` after #64 and #62)
+### 2026-11-18 — Lane A Day 3: Wave 1 Paperwork, README, 1.1.0 Notes Draft (branch `lane-a/day-3`, from `preview_b` @ `172c428`, rebased onto `521be87` after #64, #62 and #65)
 
 - **What was done:**
   - `docs/store/DATA_INVENTORY.md`:
@@ -158,6 +158,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
     - Corrected my own Day 2 row: `fitwizard-storage-persist-requested` was never written, because nothing called `requestPersistentStorage()` (DEBT-076). #64 fixed that, so the row is now Now.
     - Folded in the Lane E Day 5 handoff (#64): sync collections exist for all seven 007 tables but aren't started until Day 6, and the persistent-storage row is Now.
     - Folded in the Lane H Day 3 handoff (#62, `4b3bb21`): email-code sign-in is Now (no new stored data; the code isn't stored); release notes list it under New. Board row H Day 3 is ✅. DEBT-058 resolved; DEBT-079 and DEBT-080 added from that handoff. DEBT-075 stays open until Lincoln sets `ALLOWED_ORIGINS`.
+    - Folded in the Lane F Day 3 handoff (#65, `521be87`): the inventory's account-deletion row describes the built (not yet deployed) function and its cascade; board row F Day 3 is ✅. No new stored data or third party. DEBT-081 to DEBT-083 added. Lane E Day 6 (#66) is still open, so its new key `fitwizard-sync-first-upload` and sync going live are not folded in yet.
   - `CLAUDE.md` golden paths (DEBT-069): replaced the unused `fitness.ts` with `planStore.persistence.ts` (saved-data checks) and `useSculptPrefs.ts` (a small Zod schema in use). In `.claude/rules.md`, the same swap, and the Hook example is now `useCountUp.ts`. The old one, `useWizardForm.ts`, uses `as any`.
   - `.claude/*.md` added to Lane A's "Owns" list in `LANE-A.md`. The README ownership table already had it.
   - `README.md` → Features: "Saving workout logs…" is now ✅. Cloud sync is now 🟡, with the engine merged (#59).
@@ -936,6 +937,9 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-078 | Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4 | build | Lane D: confirm the cause (likely the self-hosted font CSS) and record the new baseline. |
 | DEBT-079 | `EMAIL_CODE_TTL_MS` (10 minutes) has to match Supabase's Email OTP Expiration by hand; nothing checks it | `src/components/auth/EmailCodeStep.tsx` | Lincoln sets 600 s in L11; any change must update both. |
 | DEBT-080 | Send errors in the sign-in dialog show Supabase's English message as is (for example the rate-limit text) | `src/components/auth/AuthModal.tsx` | Lane H or J1: map known error codes to `auth.*` keys. |
+| DEBT-081 | The Deno tests for `delete-account` (15) don't run in CI | `.github/workflows/ci.yml` | Lane D, Wave 2: add `npx -y deno@2 test --no-config supabase/functions/delete-account/`. |
+| DEBT-082 | If the Supabase project moves to asymmetric JWT signing keys, the gateway's `verify_jwt` may reject valid tokens; the function verifies the token itself either way | Supabase project, `supabase/functions/delete-account/` | Lincoln at staging deploy: switch to `--no-verify-jwt` only if valid tokens are rejected. |
+| DEBT-083 | `ORCHESTRATION.md` still documents the nonexistent `SUPABASE_SERVICE_KEY` and `FRONTEND_URL` (it carries the stale-doc banner) | `docs/ORCHESTRATION.md` (lines ~82–85, ~419) | Lane A, when that doc is rewritten; `docs/SECURITY.md` (#65) has the correct env table. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |

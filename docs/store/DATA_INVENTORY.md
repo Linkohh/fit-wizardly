@@ -2,7 +2,7 @@
 
 The single source for the privacy policy (`src/pages/Legal.tsx`, `docs/privacy-policy.md`), Apple's App Privacy answers and Google Play's Data safety form. When you add stored data or a new third party, add a row here in the same PR (ADR 10).
 
-- **Built from:** the code on `preview_b` at 2026-11-17 (every persisted store in `src/stores/`, every `fetch` and Supabase call in `src/` and `api/`, the CSP in `vercel.json`, `index.html`, `api/_lib/guard.ts`), plus the Lane D Day 1, Lane E Day 2–5 and Lane H Day 1–3 handoffs. Updated 2026-11-18 for Wave 1 Day 2 (self-hosted fonts, wger through the proxy, sync keys, API limits).
+- **Built from:** the code on `preview_b` at 2026-11-17 (every persisted store in `src/stores/`, every `fetch` and Supabase call in `src/` and `api/`, the CSP in `vercel.json`, `index.html`, `api/_lib/guard.ts`), plus the Lane D Day 1, Lane E Day 2–5, Lane F Day 3 and Lane H Day 1–3 handoffs. Updated 2026-11-18 for Wave 1 Day 2 (self-hosted fonts, wger through the proxy, sync keys, API limits).
 - **Status:** **Now** means it's in the code today. **After Wave N** means planned in the launch project and not built yet.
 - **Device storage** means IndexedDB database `fitwizard`, store `kv`, on the web, and `Directory.Data/stores/<key>.json` (Capacitor Filesystem) on iOS and Android. It is never localStorage (ADR 11).
 - **"Signed in"** means Supabase is configured and the user has signed in with email. Guests never send training data to Supabase.
@@ -43,7 +43,7 @@ Every row in this table except exercise interactions (which live only in memory 
 |---|---|---|---|---|---|---|---|
 | Account email | email address | Supabase Auth; session tokens on the device (Supabase client) | Supabase (sign-in emails are sent by Supabase) | Sign-in | Until account deletion | No | **Now** |
 | Profile | display name (from the email's local part or auth metadata), timezone, role (`client`), avatar URL (empty) | Supabase table `profiles` (`src/stores/authStore.ts`) | Supabase | Account | Until account deletion (cascade from `auth.users`) | No | **Now** |
-| Account deletion | — | — | Supabase function `delete-account` | Right to delete | Deletes the account and every row (cascade) | — | **After Wave 2** (Lane F Day 3–4) |
+| Account deletion | the signed-in user's access token (no body) | — | Supabase Edge Function `delete-account` (`supabase/functions/delete-account/`): verifies the token, then deletes that user with the service-role key, which exists only as a secret in this function | Right to delete | Deletes the account and every row that references it (cascade; checked by `supabase/tests/delete_account.test.sql`). Circles and challenges the user created survive with `created_by` cleared | — | **After Wave 2**. Function built (#65, Lane F Day 3) but not deployed; the in-app button, guest erase and export v3 come on Lane F Day 4 |
 | Email-code sign-in | 6-digit code sent in the sign-in email (with the link, which web users can still tap) | Not stored by the app; typed into the sign-in dialog and sent once to Supabase (`verifyEmailCode` in `src/stores/authStore.ts`) | Supabase Auth | Sign-in on web and native (the only path on native) | Single use; expires after 10 minutes once L11 sets Supabase's code lifetime to 600 seconds | — | **Now** (#62, Lane H Day 3). No new stored data |
 
 ## Consent and app settings (on the device, no personal data)
