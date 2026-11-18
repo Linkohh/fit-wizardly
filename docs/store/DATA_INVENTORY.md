@@ -2,7 +2,7 @@
 
 The single source for the privacy policy (`src/pages/Legal.tsx`, `docs/privacy-policy.md`), Apple's App Privacy answers and Google Play's Data safety form. When you add stored data or a new third party, add a row here in the same PR (ADR 10).
 
-- **Built from:** the code on `preview_b` at 2026-11-17 (every persisted store in `src/stores/`, every `fetch` and Supabase call in `src/` and `api/`, the CSP in `vercel.json`, `index.html`), plus the Lane D Day 1, Lane E Day 2–3 and Lane H Day 1 handoffs.
+- **Built from:** the code on `preview_b` at 2026-11-17 (every persisted store in `src/stores/`, every `fetch` and Supabase call in `src/` and `api/`, the CSP in `vercel.json`, `index.html`, `api/_lib/guard.ts`), plus the Lane D Day 1, Lane E Day 2–4 and Lane H Day 1–2 handoffs. Updated 2026-11-18 for Wave 1 Day 2 (self-hosted fonts, wger through the proxy, sync keys, API limits).
 - **Status:** **Now** means it's in the code today. **After Wave N** means planned in the launch project and not built yet.
 - **Device storage** means IndexedDB database `fitwizard`, store `kv`, on the web, and `Directory.Data/stores/<key>.json` (Capacitor Filesystem) on iOS and Android. It is never localStorage (ADR 11).
 - **"Signed in"** means Supabase is configured and the user has signed in with email. Guests never send training data to Supabase.
@@ -28,8 +28,10 @@ The single source for the privacy policy (`src/pages/Legal.tsx`, `docs/privacy-p
 | Exercise interactions | exercise ID, interaction type (for example `view`), time | In memory queue | Supabase `exercise_interactions` when signed in (`src/hooks/useExerciseInteraction.ts`) | Exercise stats and badges | Until account deletion | No | **Now** |
 | Wizard answers in progress | goal, experience, constraints (for example `no_overhead`), equipment, muscles, schedule | localStorage `fitwizard-wizard` | Nobody | Resume the wizard | Cleared on sign-out, or when the wizard is reset | No | **Now** |
 | Onboarding answers | avatar emoji, role, goals of interest (display name is **not** saved) | localStorage `fitwizard-onboarding` | Nobody | Personalise the home screen | Cleared on sign-out | No | **Now** |
+| Sync outbox | which items changed (collection and item ID) and when; **no content** | Device storage, `fitwizard-sync-outbox` | Nobody (it tells the sync engine what to upload) | Upload changes made offline | Until the change is uploaded, or erased | No | **Now** (engine merged, Lane E Day 4; not yet switched on for any collection) |
+| Sync cursor | the last pull position per table (timestamps) | Device storage, `fitwizard-sync-cursor` | Nobody | Pull only what changed | Until erased | No | **Now** (same as above) |
 
-Every row in this table except exercise interactions is erased by `clearLocalUserData()` (`src/lib/storage/clearLocalUserData.ts`), which "Erase data on this device" and account deletion use (Lane F, Wave 2). Wizard and onboarding keys are cleared by sign-out (`clearSensitiveStorage` in `src/stores/authStore.ts`).
+Every row in this table except exercise interactions (which live only in memory and in Supabase) is erased by `clearLocalUserData()` (`src/lib/storage/clearLocalUserData.ts`). That covers the nine stores in `USER_DATA_STORES` (including `fitwizard-wizard` and `fitwizard-onboarding`, since #59) and both sync keys, and it also empties the outbox in memory. "Erase data on this device" and account deletion use it (Lane F, Wave 2). Sign-out separately clears the wizard and onboarding keys (`clearSensitiveStorage` in `src/stores/authStore.ts`).
 
 **Sign-out keeps training data on the device** until cloud sync ships (Lane E Day 3, DEBT-045). The privacy text must say so until Wave 2.
 
@@ -56,7 +58,7 @@ Every row in this table except exercise interactions is erased by `clearLocalUse
 | Install coach | `fitwizard-install-coach-v1` (localStorage), `fitwizard-install-coach-visit` (sessionStorage) | Browser storage | Nobody | **Now** |
 | Motion tilt permission | `fitwizard-motion-granted` | localStorage | Nobody | **Now** |
 | Anatomy view preferences | `fitwizard.mcl.sculpt.v1` | localStorage | Nobody | **Now** |
-| Persistent-storage request made | `fitwizard-storage-persist-requested` | localStorage | Nobody | **Now** |
+| Persistent-storage request made | `fitwizard-storage-persist-requested` | localStorage | Nobody | Code exists (`requestPersistentStorage()` in `src/lib/storage/appStorage.ts`), but **nothing calls it yet**, so the key is never written |
 | Pending circle invite code | `pendingInviteCode` | sessionStorage | Nobody | **Now** (Circles is off by default) |
 
 ## Caches (public content, no personal data)
@@ -74,18 +76,18 @@ Every row in this table except exercise interactions is erased by `clearLocalUse
 | Data | Example fields | Sent to | How | Why | Consent | Retention | Status |
 |---|---|---|---|---|---|---|---|
 | Barcode and food search | barcode number or search text | Open Food Facts (`world.openfoodfacts.org`), images from `images.openfoodfacts.org` | Direct from the app (`src/lib/openFoodFacts.ts`) | Food lookup | Yes: the food lookup opt-in. Without it, no request is made | Open Food Facts' policy; the app keeps no log | **Now** |
-| Exercise catalogue requests | page URL, search text | wger (`wger.de`) | Web: through the Vercel function `/api/proxy-wger`; native: direct today (Lane H plans to route it through the proxy). Search (`WgerAdapter.search`) calls wger directly on both | Exercise library | No (public catalogue; no personal data is sent) | wger's policy | **Now** |
+| Exercise catalogue requests | page URL, search text | wger (`wger.de`), through the Vercel function `/api/proxy-wger` | Server side on web and native, for both the catalogue sync and live search (`apiUrl()`, Lane H Day 2). wger sees Vercel's IP, not the user's | Exercise library | No (public catalogue; no personal data is sent) | wger's policy | **Now** |
+| Exercise images | image URL | wger (`wger.de`) | Loaded directly by the browser or WebView (`img-src` allows `wger.de`), so wger sees the user's IP and user agent | Exercise pictures | No | wger's policy | **Now** |
 | Exercise search fallback | search text | API Ninjas (`api.api-ninjas.com`) through the Vercel function `/api/exercise-search-ninjas` | Server side; the user's IP stays with Vercel | Search when wger fails | No (no personal data) | API Ninjas' policy | **Now** |
 | Daily quote | none | API Ninjas through `/api/motivation-quote` | Server side | Motivation | No | — | **Now** |
 | Page views | page path, referrer, device type, country (from IP) | Vercel Web Analytics (same origin, `/_vercel/insights`) | `@vercel/analytics`, mounted only with consent (`src/App.tsx`) | Product analytics | Yes: analytics opt-in | Vercel's policy | **Now** |
-| Fonts | IP address, user agent | Google Fonts (`fonts.googleapis.com`, `fonts.gstatic.com`) | `index.html` stylesheet link | Typography | No | Google's policy | **Now**. **Remove this row when Lane H's Day 2 (self-hosted fonts) merges** |
 | Crash reports | error, stack trace, device and OS, app version; no health values | Sentry | `src/lib/monitoring.ts` (contract 8) | Fix crashes | Yes: opt-in, off by default | Sentry plan default | **After Wave 1** (Lane C Day 3) |
 | Product analytics events | event name (for example `plan_generated`, `workout_completed`), simple properties; never weights, measurements, readiness or food | PostHog | `src/lib/analytics/track.ts` (contract 9) | Product decisions | Yes: analytics opt-in | PostHog plan default | **After Wave 2** (Lane C Day 4) |
 | Workout reminders and rest timer alerts | reminder days and time, rest end time | Nobody: local notifications, on the device only | `useLocalNotifications` (contract 10) | Reminders | OS notification permission | Until cancelled | **After Wave 2** (Lane H Days 5–6) |
 | Circles (social groups) | circle membership, activity posts, reactions, comments | Supabase (`circles`, `circle_members`, `circle_activities`, `activity_reactions`, `activity_comments`, `circle_challenges`) | Supabase client | Social feature | — | Until deleted | Code exists, but **off** (`VITE_FEATURE_CIRCLES` defaults to false). Not in v1 |
 | Coach portal | trainer mode, client list | localStorage `fitwizard-trainer`; Supabase `profiles` (`is_trainer`) | Supabase | Coach feature | — | Cleared on sign-out | Code exists, but **off** (`VITE_FEATURE_COACH` defaults to false). Not in v1 |
 
-Not active, recorded so nobody discloses them by mistake: `src/stores/favorites-store.ts` (`fitwizard-favorites`) is imported nowhere (DEBT-044, Lane D deletes it); `src/lib/analytics.ts` (wizard funnel events) only logs to the console in development and has no endpoint; the `analyticsStore` event queue has no upload (the `fetch` is commented out); `src/components/ErrorBoundary.tsx` sends nothing.
+Not active, recorded so nobody discloses them by mistake: `src/lib/analytics.ts` (wizard funnel events) only logs to the console in development and has no endpoint; the `analyticsStore` event queue has no upload (the `fetch` is commented out); `src/components/ErrorBoundary.tsx` sends nothing.
 
 ## How this maps to the iOS privacy manifest
 
@@ -108,14 +110,20 @@ Checks for whoever fills in the forms:
 | Name | Purpose | Data sent | Region | Privacy policy | Status |
 |---|---|---|---|---|---|
 | Supabase | Accounts, database, sign-in emails | Email, profile, synced training data, exercise preferences and interactions | Lincoln to provide (project region) | [supabase.com/privacy](https://supabase.com/privacy) | **Now** |
-| Vercel | Hosting, serverless functions, Web Analytics | Every request (IP, user agent); page views with consent | Vercel's global network; function region not set in `vercel.json` | [vercel.com/legal/privacy-policy](https://vercel.com/legal/privacy-policy) | **Now** |
+| Vercel | Hosting, serverless functions (`/api/*`), Web Analytics | Every request (IP, user agent); page views with consent | Vercel's global network; function region not set in `vercel.json` | [vercel.com/legal/privacy-policy](https://vercel.com/legal/privacy-policy) | **Now** |
 | Open Food Facts | Barcode and food search | Barcode or search text, IP | France (Open Food Facts is a French non-profit) | [world.openfoodfacts.org/privacy](https://world.openfoodfacts.org/privacy) | **Now**, with consent |
-| wger | Exercise catalogue | Page and search requests, IP (direct calls) or Vercel's IP (proxied calls) | Germany (wger.de), not verified | [wger.de](https://wger.de) (policy URL not verified) | **Now** |
+| wger | Exercise catalogue and images | Catalogue and search requests from Vercel's servers (Vercel's IP); image requests from the user's device (the user's IP) | Germany (wger.de), not verified | [wger.de](https://wger.de) (policy URL not verified) | **Now** |
 | API Ninjas | Exercise search fallback, daily quotes | Search text, from Vercel's servers only | Unknown | [api-ninjas.com](https://api-ninjas.com) (policy URL not verified) | **Now** |
-| Google Fonts | Web fonts | IP, user agent | Google's global network | [policies.google.com/privacy](https://policies.google.com/privacy) | **Now**, until Lane H Day 2 merges |
 | Sentry | Crash reports | Error details, device and OS, app version | Chosen when Lincoln creates the project (US or EU) | [sentry.io/privacy](https://sentry.io/privacy/) | **After Wave 1**, opt-in |
 | PostHog | Product analytics | Event names and simple properties, no health values | Chosen when Lincoln creates the project (US or EU) | [posthog.com/privacy](https://posthog.com/privacy) | **After Wave 2**, opt-in |
 | Apple / Google | App distribution; native local notifications are scheduled by the OS on the device | Nothing from the app beyond what the stores collect themselves | — | — | **After Wave 2** |
+
+### Our own API functions (`/api/*`)
+
+`api/_lib/guard.ts` (Lane H Day 2) protects every Vercel function:
+- **Origin allowlist:** only `ALLOWED_ORIGINS`, the deployment's own Vercel URLs, `capacitor://localhost` and `https://localhost` may call them from a browser. Any other origin gets a 403. Requests with no `Origin` header (same-origin) pass.
+- **Rate limit:** 60 requests a minute per IP address. To enforce it, each function instance keeps the caller's **IP address in memory for the one-minute window** (at most 10,000 at once). The guard never writes it to disk, logs it or sends it anywhere, and it's gone when the window ends or the instance stops. Vercel's own platform request logs are separate and follow Vercel's policy. Over the limit, the reply is a 429.
+- The functions store nothing else about the caller. Upstream services (wger, API Ninjas) see Vercel's IP, not the user's.
 
 The policy links were written from known URLs. This environment couldn't reach them, so Lane A Day 4 should open each one before the privacy policy cites it.
 

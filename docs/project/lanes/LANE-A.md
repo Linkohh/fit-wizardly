@@ -11,7 +11,7 @@
 - `docs/ABOUT_PAGE.md` (the release steps)
 
 ## Owns
-- `README.md`, `CLAUDE.md`, `AGENTS.md`, `IOS_XCODE_COMPATIBILITY.md`
+- `README.md`, `CLAUDE.md`, `.claude/*.md` (from Day 3), `AGENTS.md`, `IOS_XCODE_COMPATIBILITY.md`
 - `docs/**` except `docs/DECISIONS.md` (append-only for everyone) and `docs/project/handoffs/*` (written by each lane)
 - `docs/SESSION_LOG.md`, `docs/project/BOARD.md`. Only Lane A edits these two.
 - `src/pages/Legal.tsx` from Wave 2 onward. In Wave 1, Lane B edits only the AI wording in it.

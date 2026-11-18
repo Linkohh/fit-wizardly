@@ -52,7 +52,8 @@ These files represent the **canonical patterns** for this codebase. Study them b
 | **Component Architecture** | [WelcomeHero.tsx](src/components/motivation/WelcomeHero.tsx) | Props, Styling, Animation, Composition |
 | **State Management** | [authStore.ts](src/stores/authStore.ts) | Zustand patterns, Persistence, Supabase Integration |
 | **Page Structure** | [Wizard.tsx](src/pages/Wizard.tsx) | Complex State, Layout, Multi-step Forms |
-| **Validation Schemas** | [fitness.ts](src/lib/validation/fitness.ts) | Zod patterns, Type inference, API payloads |
+| **Saved-data checks** | [planStore.persistence.ts](src/stores/planStore.persistence.ts) | Checking data read back from device storage: drop malformed entries, never throw; versioned store names (ADR 11) |
+| **Zod Schemas** | [useSculptPrefs.ts](src/features/mcl/hooks/useSculptPrefs.ts) | `z.object`, `z.infer` type inference, `safeParse` with a safe default |
 | **Custom Hooks** | [useCountUp.ts](src/hooks/useCountUp.ts) | Hook patterns, Cleanup, Dependencies |
 
 ---
