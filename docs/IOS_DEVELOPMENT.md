@@ -88,7 +88,7 @@ The script starts the dev server and launches the app pointed at it. Code change
 
 `npm run ios:dev` also works once signing is set up; pick the iPhone from its list.
 
-Live reload on a physical iPhone is **not verified yet**. `npm run ios:live` now gives Capacitor the Mac's LAN address (for example `192.168.1.20`) instead of `localhost`, so the iPhone can reach the dev server as long as both are on the same Wi-Fi and the network allows device-to-device traffic (guest and office networks often don't). `npm run ios:live:cap` still uses `localhost` and works only in the Simulator. Until someone checks this on a device, the bundled build is the safe choice on a phone.
+Live reload on a physical iPhone is **not verified yet**. `npm run ios:live` now gives Capacitor the Mac's LAN address (for example `192.168.1.20`) instead of `localhost` whenever the dev server listens on it, so the iPhone can reach the dev server as long as both are on the same Wi-Fi and the network allows device-to-device traffic (guest and office networks often don't). If it reuses a Vite server that is localhost-only (a plain `npm run dev`), it falls back to `localhost` and warns: the Simulator still works, and for an iPhone you restart that server with `npm run dev -- --host ::`. `npm run ios:live:cap` still uses `localhost` and works only in the Simulator. Until someone checks this on a device, the bundled build is the safe choice on a phone.
 
 ## Auth email (sign-in code)
 

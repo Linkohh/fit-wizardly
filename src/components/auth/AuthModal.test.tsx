@@ -1,7 +1,9 @@
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import '@/lib/i18n';
 import { AuthModal } from './AuthModal';
+import { sameOriginPath } from './sameOriginPath';
 import { EMAIL_CODE_TTL_MS, RESEND_COOLDOWN_SECONDS } from './EmailCodeStep';
 import { isNativeApp } from '@/lib/platform';
 
@@ -9,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   signInWithEmail: vi.fn(),
   verifyEmailCode: vi.fn(),
   setShowAuthModal: vi.fn(),
+  setRedirectUrl: vi.fn(),
+  redirectUrl: null as string | null,
 }));
 
 vi.mock('@/lib/platform', () => ({
@@ -22,8 +26,27 @@ vi.mock('@/stores/authStore', () => ({
     signInWithEmail: mocks.signInWithEmail,
     verifyEmailCode: mocks.verifyEmailCode,
     isConfigured: true,
+    redirectUrl: mocks.redirectUrl,
+    setRedirectUrl: mocks.setRedirectUrl,
   }),
 }));
+
+function LocationProbe() {
+  const location = useLocation();
+  return <div data-testid="location">{`${location.pathname}${location.search}${location.hash}`}</div>;
+}
+
+/** AuthModal lives inside the app's router (App.tsx), so render it inside one here too. */
+function renderModal(initialPath = '/') {
+  return render(
+    <MemoryRouter initialEntries={[initialPath]}>
+      <AuthModal />
+      <Routes>
+        <Route path="*" element={<LocationProbe />} />
+      </Routes>
+    </MemoryRouter>
+  );
+}
 
 function codeInput() {
   return screen.getByLabelText('Sign-in code');
@@ -52,6 +75,7 @@ describe('AuthModal email-code sign-in', () => {
     vi.mocked(isNativeApp).mockReturnValue(false);
     mocks.signInWithEmail.mockResolvedValue({ error: null });
     mocks.verifyEmailCode.mockResolvedValue({ error: null });
+    mocks.redirectUrl = null;
   });
 
   afterEach(() => {
@@ -59,7 +83,7 @@ describe('AuthModal email-code sign-in', () => {
   });
 
   it('moves to the code step after a successful send', async () => {
-    render(<AuthModal />);
+    renderModal();
 
     await sendCodeTo(' lifter@example.com ');
 
@@ -72,7 +96,7 @@ describe('AuthModal email-code sign-in', () => {
 
   it('stays on the email step and shows the error when sending fails', async () => {
     mocks.signInWithEmail.mockResolvedValue({ error: new Error('Email rate limit exceeded') });
-    render(<AuthModal />);
+    renderModal();
 
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'lifter@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: /email me a code/i }));
@@ -82,7 +106,7 @@ describe('AuthModal email-code sign-in', () => {
   });
 
   it('submits automatically once six digits are entered, then closes', async () => {
-    render(<AuthModal />);
+    renderModal();
     await sendCodeTo();
 
     typeCode('12345');
@@ -95,7 +119,7 @@ describe('AuthModal email-code sign-in', () => {
   });
 
   it('ignores non-digit input', async () => {
-    render(<AuthModal />);
+    renderModal();
     await sendCodeTo();
 
     typeCode('12ab56');
@@ -105,7 +129,7 @@ describe('AuthModal email-code sign-in', () => {
 
   it('says the code is wrong when verification fails within the code lifetime', async () => {
     mocks.verifyEmailCode.mockResolvedValue({ error: new Error('Token has expired or is invalid') });
-    render(<AuthModal />);
+    renderModal();
     await sendCodeTo();
 
     typeCode('000000');
@@ -118,7 +142,7 @@ describe('AuthModal email-code sign-in', () => {
     const start = new Date('2026-11-18T10:00:00Z').getTime();
     vi.useFakeTimers({ shouldAdvanceTime: true, now: start });
     mocks.verifyEmailCode.mockResolvedValue({ error: new Error('Token has expired or is invalid') });
-    render(<AuthModal />);
+    renderModal();
     await sendCodeTo();
 
     vi.setSystemTime(start + EMAIL_CODE_TTL_MS + 1000);
@@ -129,7 +153,7 @@ describe('AuthModal email-code sign-in', () => {
 
   it('keeps "Resend code" disabled for 60 seconds with a countdown', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: false });
-    render(<AuthModal />);
+    renderModal();
 
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'lifter@example.com' } });
     await act(async () => {
@@ -159,7 +183,7 @@ describe('AuthModal email-code sign-in', () => {
   });
 
   it('"Use a different email" goes back to the email step', async () => {
-    render(<AuthModal />);
+    renderModal();
     await sendCodeTo();
 
     fireEvent.click(screen.getByRole('button', { name: 'Use a different email' }));
@@ -169,15 +193,62 @@ describe('AuthModal email-code sign-in', () => {
   });
 
   it('mentions the email link on the web but only the code on native', async () => {
-    const { unmount } = render(<AuthModal />);
+    const { unmount } = renderModal();
     await sendCodeTo();
     expect(screen.getByText(/or tap the link in the email/)).toBeInTheDocument();
     unmount();
 
     vi.mocked(isNativeApp).mockReturnValue(true);
-    render(<AuthModal />);
+    renderModal();
     await sendCodeTo();
     expect(screen.getByText(/We sent a 6-digit code to lifter@example.com\. Enter it below\.$/)).toBeInTheDocument();
     expect(screen.queryByText(/tap the link/)).not.toBeInTheDocument();
+  });
+  it('returns to the saved same-origin redirect after the code is verified, and clears it', async () => {
+    mocks.redirectUrl = `${window.location.origin}/circles/abc/feed?tab=latest#top`;
+    renderModal('/');
+    await sendCodeTo();
+
+    typeCode('123456');
+
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/circles/abc/feed?tab=latest#top'));
+    expect(mocks.setRedirectUrl).toHaveBeenCalledWith(null);
+    expect(mocks.setShowAuthModal).toHaveBeenCalledWith(false);
+  });
+
+  it('stays put when there is no saved redirect', async () => {
+    renderModal('/plan');
+    await sendCodeTo();
+
+    typeCode('123456');
+
+    await waitFor(() => expect(mocks.setShowAuthModal).toHaveBeenCalledWith(false));
+    expect(screen.getByTestId('location')).toHaveTextContent('/plan');
+  });
+
+  it('does not navigate after a failed verification', async () => {
+    mocks.redirectUrl = `${window.location.origin}/circles/abc/feed`;
+    mocks.verifyEmailCode.mockResolvedValue({ error: new Error('Token has expired or is invalid') });
+    renderModal('/');
+    await sendCodeTo();
+
+    typeCode('000000');
+
+    expect(await screen.findByText("That code isn't right.")).toBeInTheDocument();
+    expect(screen.getByTestId('location')).toHaveTextContent(/^\/$/);
+    expect(mocks.setRedirectUrl).not.toHaveBeenCalled();
+  });
+});
+
+describe('sameOriginPath', () => {
+  it('keeps path, query and hash for same-origin URLs', () => {
+    expect(sameOriginPath(`${window.location.origin}/history?week=2#day3`)).toBe('/history?week=2#day3');
+  });
+
+  it('rejects other origins, empty values and junk', () => {
+    expect(sameOriginPath('https://evil.example/steal')).toBeNull();
+    expect(sameOriginPath('javascript:alert(1)')).toBeNull();
+    expect(sameOriginPath(null)).toBeNull();
+    expect(sameOriginPath('')).toBeNull();
   });
 });

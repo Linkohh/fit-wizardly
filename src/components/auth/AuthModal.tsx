@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Loader2, Mail, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { useAuthStore } from '@/stores/authStore';
 import { EmailCodeStep } from './EmailCodeStep';
+import { sameOriginPath } from './sameOriginPath';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -23,7 +25,16 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export function AuthModal() {
   const { t } = useTranslation();
-  const { showAuthModal, setShowAuthModal, signInWithEmail, verifyEmailCode, isConfigured } = useAuthStore();
+  const navigate = useNavigate();
+  const {
+    showAuthModal,
+    setShowAuthModal,
+    signInWithEmail,
+    verifyEmailCode,
+    isConfigured,
+    redirectUrl,
+    setRedirectUrl,
+  } = useAuthStore();
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   /** When the current code was sent; null while on the email step. */
@@ -62,6 +73,16 @@ export function AuthModal() {
     setEmail('');
     setSentAt(null);
     setError(null);
+  };
+
+  // The magic link returns to redirectUrl through emailRedirectTo; the code
+  // path has to do the same itself (for example back to a protected route
+  // that RequireAuth sent to /).
+  const handleVerified = () => {
+    const destination = sameOriginPath(redirectUrl);
+    setRedirectUrl(null);
+    handleClose();
+    if (destination) navigate(destination, { replace: true });
   };
 
   if (!isConfigured) {
@@ -145,7 +166,7 @@ export function AuthModal() {
               setSentAt(null);
               setError(null);
             }}
-            onVerified={handleClose}
+            onVerified={handleVerified}
             onClose={handleClose}
           />
         )}
