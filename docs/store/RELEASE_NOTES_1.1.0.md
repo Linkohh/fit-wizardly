@@ -1,6 +1,6 @@
 # Release notes: FitWizard 1.1.0 (draft)
 
-> **Draft, 2026-11-18 (Lane A, Day 3).** Built from the Wave 1 work merged into `preview_b` (#44–#61). Wave 2 adds more before release (see "Still to come"). On Day 7, Lane A finishes this file and copies it into `src/data/changelog.ts`, whose test requires the top entry to match `package.json`.
+> **Draft, 2026-11-18 (Lane A, Day 3).** Built from the Wave 1 work merged into `preview_b` (#44–#62, #64). Wave 2 adds more before release (see "Still to come"). On Day 7, Lane A finishes this file and copies it into `src/data/changelog.ts`, whose test requires the top entry to match `package.json`.
 >
 > The sections match `ChangelogHighlights` in `src/data/changelog.ts`: **New**, **Improved**, **Fixed**. Keep bullets short and in user language. Don't mention AI, and don't make medical claims.
 
@@ -10,6 +10,7 @@
 - Your workouts, plans, personal records, meals, body measurements, readiness check-ins and badges are now saved on your device. They're still there after you close the app or restart your phone.
 - If the app closes mid-workout, you can pick up where you left off. If you start a different workout instead, FitWizard asks whether to resume the unfinished one or discard it.
 - Earning a badge now shows a notification.
+- Sign in with a 6-digit code from your email. Type it in the app, or tap the link in the email on the web. If the code doesn't arrive, you can ask for a new one after a minute.
 
 ## Improved
 - Your weekly goal now counts finished workouts, not generated plans. It's set from your plan's training days, and it starts fresh every Monday.
@@ -30,7 +31,6 @@
 Add these on Day 7 if they merge:
 - Cloud sync of your training data across devices (Lane E, Days 5–7).
 - Delete your account from inside the app, and erase data on this device (Lane F, Day 4).
-- Sign in with a 6-digit email code (Lane H, Day 3).
 - Optional crash reports and product analytics, both off unless you opt in (Lane C, Days 3–5).
 - Clearer empty screens for History, Analytics and Nutrition (Lane B, Day 3).
 - PDF export fixes (Lane D, Day 3).

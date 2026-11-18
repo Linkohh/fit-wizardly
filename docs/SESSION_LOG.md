@@ -146,7 +146,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
-### 2026-11-18 — Lane A Day 3: Wave 1 Paperwork, README, 1.1.0 Notes Draft (branch `lane-a/day-3`, from `preview_b` @ `172c428`, rebased onto `a621a4f` after #64)
+### 2026-11-18 — Lane A Day 3: Wave 1 Paperwork, README, 1.1.0 Notes Draft (branch `lane-a/day-3`, from `preview_b` @ `172c428`, rebased onto `4b3bb21` after #64 and #62)
 
 - **What was done:**
   - `docs/store/DATA_INVENTORY.md`:
@@ -157,6 +157,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
     - New "Our own API functions" section: the origin allowlist, plus the per-IP rate limit. It keeps IPs in memory for up to the life of the function instance (pruned only at 10,000 entries) and never logs or stores them.
     - Corrected my own Day 2 row: `fitwizard-storage-persist-requested` was never written, because nothing called `requestPersistentStorage()` (DEBT-076). #64 fixed that, so the row is now Now.
     - Folded in the Lane E Day 5 handoff (#64): sync collections exist for all seven 007 tables but aren't started until Day 6, and the persistent-storage row is Now.
+    - Folded in the Lane H Day 3 handoff (#62, `4b3bb21`): email-code sign-in is Now (no new stored data; the code isn't stored); release notes list it under New. Board row H Day 3 is ✅. DEBT-058 resolved; DEBT-079 and DEBT-080 added from that handoff. DEBT-075 stays open until Lincoln sets `ALLOWED_ORIGINS`.
   - `CLAUDE.md` golden paths (DEBT-069): replaced the unused `fitness.ts` with `planStore.persistence.ts` (saved-data checks) and `useSculptPrefs.ts` (a small Zod schema in use). In `.claude/rules.md`, the same swap, and the Hook example is now `useCountUp.ts`. The old one, `useWizardForm.ts`, uses `as any`.
   - `.claude/*.md` added to Lane A's "Owns" list in `LANE-A.md`. The README ownership table already had it.
   - `README.md` → Features: "Saving workout logs…" is now ✅. Cloud sync is now 🟡, with the engine merged (#59).
@@ -911,7 +912,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-055 | **RESOLVED 2026-11-18** (Lane H Day 2 (#60) fixed it). ~~`WgerAdapter.search` calls wger directly on the web, bypassing the proxy allowlist~~ | `src/lib/services/api/exerciseApiAdapter.ts:26` | Lane H Day 2. |
 | DEBT-056 | **RESOLVED 2026-11-18** (Lane A Day 2 (#56) audited it). ~~`.claude/*.md` not audited; probably repeat the old stack and locales~~ | `.claude/` | Lane A Day 2. |
 | DEBT-057 | **RESOLVED 2026-11-18** (Lane D Day 2 (#54) deleted the Wisdom UI; the leftover store is DEBT-067). ~~Unreachable Wisdom UI still says "AI"~~ | `src/components/wisdom/*`, `src/pages/Plan.tsx` | Lane D Day 2: delete. |
-| DEBT-058 | `ios:live:cap` uses `--host=localhost`, so live reload can't reach a physical iPhone | `package.json`, `scripts/dev-ios-live.mjs` | Lane H Day 3. |
+| DEBT-058 | **RESOLVED 2026-11-18** (Lane H Day 3, #62: `ios:live` uses the Mac's LAN address when the dev server listens on the LAN; `ios:live:cap` stays Simulator only). ~~`ios:live:cap` uses `--host=localhost`, so live reload can't reach a physical iPhone~~ | `package.json`, `scripts/dev-ios-live.mjs` | Lane H Day 3. |
 | DEBT-059 | Export v2 omits achievements, custom exercises, exercise favourites and collections, and the profile | `src/lib/dataExport.ts` | Lane F Day 4 (export v3). |
 | DEBT-060 | `tailwind.config.ts` isn't loaded by Tailwind 4; only `components.json` points at it | `tailwind.config.ts` | Lane D Day 3 checks whether shadcn's CLI needs it. |
 | DEBT-061 | Analytics consent stored twice (`fitwizard-analytics.hasConsented`, `fitwizard_analytics_consent`) | `src/stores/analyticsStore.ts`, `src/lib/consent.ts` | Lane C Days 3–5: settle on one key. |
@@ -933,6 +934,8 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 
 | DEBT-079 | The email-code step (`input-otp`) is in the startup bundle, about 6 KB gzip | `src/components/auth/AuthModal.tsx` | Lane H: lazy-load `EmailCodeStep`. |
 | DEBT-078 | Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4 | build | Lane D: confirm the cause (likely the self-hosted font CSS) and record the new baseline. |
+| DEBT-079 | `EMAIL_CODE_TTL_MS` (10 minutes) has to match Supabase's Email OTP Expiration by hand; nothing checks it | `src/components/auth/EmailCodeStep.tsx` | Lincoln sets 600 s in L11; any change must update both. |
+| DEBT-080 | Send errors in the sign-in dialog show Supabase's English message as is (for example the rate-limit text) | `src/components/auth/AuthModal.tsx` | Lane H or J1: map known error codes to `auth.*` keys. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |

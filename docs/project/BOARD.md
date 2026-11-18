@@ -28,6 +28,8 @@ All seven lanes run in parallel. There are no dependencies between them.
 | **D** | ✅ PR #52 · 0.7 Icons, logo, PWA runtime caching, manifest text | ✅ PR #54 · 0.8 knip cleanup, deletions, ESLint ignores | ⬜ 3.6b PDF export fixes |
 | **E** | ✅ 1.1 `appStorage`, `HydrationGate`, date reviver (trial lane; PR #45, `5984b86`) | ✅ 1.2 part 1: plan and measurement stores; 0.3 counters; circles gate (PR #46, `803842e`) | ✅ 1.2 part 2: other stores, localStorage copy, `clearSensitiveStorage`, ADR 11 (PR #53, `7ef77e5`) |
 | **F** | ✅ PR #50 · Supabase CLI, local Postgres harness, naming check; 1.3 migration 007 and types | ✅ PR #57 · 1.6 migration 008 and policy tests | ⬜ 1.5 part 1: `delete-account` function, cascade check, docs |
+| **H** | ✅ PR #48 · 0.6 name; 2.5/2.6 native project fixes | ✅ PR #60 · 2.5 self-hosted fonts and CSP; 2.3 `apiBase` and API hardening | ✅ PR #62 (`4b3bb21`) · 2.1 Email-code sign-in (contract #7); iPhone live reload (DEBT-058) |
+
 | **H** | ✅ PR #48 · 0.6 name; 2.5/2.6 native project fixes | ✅ PR #60 · 2.5 self-hosted fonts and CSP; 2.3 `apiBase` and API hardening | ✅ PR #62 (`4b3bb21`) · 2.1 Email-code sign-in |
 
 ### Gate 1 checklist (Lincoln, end of Day 3)
