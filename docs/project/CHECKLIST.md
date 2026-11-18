@@ -2,7 +2,7 @@
 
 > The quick view: what's done, what's in progress, and what's left. It's updated after every step.
 > `BOARD.md` has the full day-by-day grid and the gate checklists; this page is the short version.
-> **Last updated:** 2026-11-17, after Wave 1 / Day 1 merged (#47–#53).
+> **Last updated:** 2026-11-18, after Lane E Day 4 (sync engine core), with Wave 1 / Day 2 running.
 
 ## Done
 
@@ -27,25 +27,28 @@
 | 17 | **Merged #53** Lane E Day 3: nutrition, readiness, achievements and custom exercises saved on the device; erase-all; sign-out keeps data; ADR 11; 2 review findings fixed | (this PR) |
 | 18 | Final combined check: 891/891 tests, lint, typecheck and build. Browser checks pass: no AI wording, Circles hidden, coach pages 404, plan and achievements survive reload, nothing stored in localStorage | This session |
 | 19 | Each lane's carry-over items written into its next brief; new issues DEBT-046 to DEBT-057 logged | Lane briefs, `SESSION_LOG.md` |
+| 20 | Wave 1 / Day 2 started for A, B, C, D, F, H. The first attempt hit the usage limit before any work was done (no branches were pushed), so all six were restarted once the limit reset | 6 sessions |
+| 21 | Lane E Day 4: cloud sync engine core (pull, merge, push, outbox, status), 13 tests that catch deliberately introduced bugs, and the 3 unearnable "Wisdom AI" badges removed | Day 4 PR |
 
 ## In progress
 
 | What | Status |
 |---|---|
-| Wave 1 / Day 2 for lanes A, B, C, D, F, H | Starting next, as six parallel sessions |
-| Lane E Day 4: sync engine core | Starting next, in this session |
+| Wave 1 / Day 2 for lanes A, B, C, D, F, H | Running in six parallel sessions (restarted after the usage limit) |
+| Lane E Day 4: sync engine core | PR open, all checks green. Merge after CI |
 
 ## Next up, in order
 
-1. **Day 2 for each lane**
+1. **Review and merge each Day 2 PR as it arrives.** Then start Day 3 for those lanes.
+2. **Lane E Day 5:** sync collections for logs, PRs, nutrition, measurements, readiness and user state.
+3. **Day 2 contents per lane** (running now)
    - A: iOS docs, data inventory, `.claude/` audit
    - B: language picker, auth-modal wording
    - C: coach mode off everywhere, onboarding, broken command-palette links
    - D: dead code, including the Wisdom UI and the unused favourites store
    - F: migration 008 access-rule fixes
    - H: self-hosted fonts, API hardening, wger through the proxy, `test:db` script
-2. **Lane E Day 4:** sync engine core, and remove the 3 "Wisdom AI" badges no one can earn.
-3. **Day 3 for each lane**, then **Gate 1**: a beta smoke test, plus migrations 007 and 008 on a staging Supabase project.
+4. **Day 3 for each lane**, then **Gate 1**: a beta smoke test, plus migrations 007 and 008 on a staging Supabase project.
 
 ## Still remaining
 
@@ -61,7 +64,8 @@
 - [ ] **Gate 1:** beta smoke test; staging database
 
 ### Wave 2: Sync, accounts, native, observability (Days 4–7)
-- [ ] Cloud sync engine (Lane E, Days 4–7); after this, account sign-out can clear device data
+- [x] Sync engine core (Lane E Day 4)
+- [ ] Sync collections, triggers, plans on the engine (Lane E, Days 5–7); after this, account sign-out can clear device data
 - [ ] Account deletion in the app (Lane F)
 - [ ] Sessions that last; native plugins and notifications (Lane H)
 - [ ] Analytics and consent (Lane C); end-to-end test and accessibility (Lane D)

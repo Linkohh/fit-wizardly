@@ -15,9 +15,16 @@ const USER_DATA_STORES = [
   // Exercise favourites, collections and settings. Kept in localStorage and
   // synced to Supabase (user_exercise_preferences); removed here for erase/delete.
   { name: 'fitwizard-preferences', load: async () => (await import('@/stores/preferencesStore')).usePreferencesStore },
+  // Answers in progress (goal, constraints such as injuries, equipment) and
+  // onboarding answers. Kept in localStorage; sign-out also clears them.
+  { name: 'fitwizard-wizard', load: async () => (await import('@/stores/wizardStore')).useWizardStore },
+  { name: 'fitwizard-onboarding', load: async () => (await import('@/stores/onboardingStore')).useOnboardingStore },
 ] as const;
 
 export const USER_DATA_STORE_NAMES: readonly string[] = USER_DATA_STORES.map((store) => store.name);
+
+/** Sync bookkeeping saved on the device (Lane E Day 4): unsent changes and pull positions. */
+const SYNC_STORAGE_KEYS = ['fitwizard-sync-outbox', 'fitwizard-sync-cursor'] as const;
 
 interface ResettableStore {
   getInitialState: () => object;
@@ -52,4 +59,11 @@ export async function clearLocalUserData(): Promise<void> {
       await migratingAppStorage.removeItem(name);
     }
   }
+
+  for (const key of SYNC_STORAGE_KEYS) {
+    await migratingAppStorage.removeItem(key);
+  }
+  // Forget unsent changes held in memory too, not just the saved copy.
+  const { clearOutbox } = await import('@/lib/sync/outbox');
+  await clearOutbox();
 }

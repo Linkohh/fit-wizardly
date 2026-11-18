@@ -88,7 +88,7 @@ Stores, the sync engine, native files, `supabase/`, and docs other than your han
    
    Run `npx knip`.
 2. **Do not delete**, even if `knip` lists them:
-   - `src/lib/offlineSave.ts` and `src/lib/planMigrations.ts` (Lane E uses them)
+   - `src/lib/planMigrations.ts` (Lane E uses it). `src/lib/offlineSave.ts` was replaced by `src/lib/sync/outbox.ts` and deleted on Lane E Day 4
    - anything under `src/components/circles/`, `src/components/trainer/`, `src/pages/Clients*`, `src/pages/Revenue.tsx`, `src/pages/TemplateLibrary.tsx` (flagged off, kept for later)
    - `src/stores/*`, except `favorites-store.ts`, which is listed under the expected deletions
    - `src/components/nutrition/NutritionSkeleton.tsx` and `src/components/plan/PlanSkeleton.tsx` (Lane B uses them on Day 3)
