@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 import type { Goal, ExperienceLevel, Equipment, MuscleGroup, Constraint, WizardSelections } from '@/types/fitness';
 import { determineOptPhase } from '@/lib/phaseMapper';
 
@@ -227,6 +228,17 @@ export const useWizardStore = create<WizardState>()(
         currentStep: state.currentStep,
         currentStepIndex: state.currentStepIndex,
       }),
+      // A user who turned coach mode on before the coach flag existed may have
+      // isTrainer: true saved. With the flag off it loads as false (DEBT-065).
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<WizardState>;
+        const selections = { ...current.selections, ...(saved.selections ?? {}) };
+        return {
+          ...current,
+          ...saved,
+          selections: { ...selections, isTrainer: isFeatureEnabled('coach') && selections.isTrainer === true },
+        };
+      },
     }
   )
 );

@@ -34,7 +34,7 @@ export const CUSTOM_EXERCISES_STORE_NAME = 'fitwizard-custom-exercises';
 
 type PersistedCustomExerciseState = Pick<CustomExerciseState, 'customExercises'>;
 
-function sanitizeCustomExercise(value: unknown): Exercise | null {
+export function sanitizeCustomExercise(value: unknown): Exercise | null {
     if (!isRecord(value) || typeof value.id !== 'string' || typeof value.name !== 'string') {
         return null;
     }

@@ -16,7 +16,6 @@ const mocks = vi.hoisted(() => ({
   clearCurrentPlan: vi.fn(),
   swapExercise: vi.fn(),
   resetWizard: vi.fn(),
-  setContext: vi.fn(),
 }));
 
 const trainerState = vi.hoisted(() => ({ isTrainerMode: false }));
@@ -65,10 +64,6 @@ vi.mock('@/stores/wizardStore', () => ({
     selectState({ resetWizard: mocks.resetWizard }, selector),
 }));
 
-vi.mock('@/stores/wisdomStore', () => ({
-  useWisdomStore: <T,>(selector?: Selector<{ setContext: typeof mocks.setContext }, T>) =>
-    selectState({ setContext: mocks.setContext }, selector),
-}));
 
 vi.mock('@/lib/progressionEngine', () => ({
   detectMRVWarnings: () => [],

@@ -226,6 +226,11 @@ Then:
 
 ## Day 6: Triggers, first sign-in, indicator (1.4 part 3)
 
+> **Notes from Day 5 (coordinator):**
+> - Call `startSyncCollections()` from `@/lib/sync/collections` once at startup, before any trigger. Load it lazily so the stores stay out of the engine's import path.
+> - **Correction to step 2:** local items are **not** all dirty already. Records saved before tracking started (or before Day 5 shipped) have no outbox entry. On the first sign-in on a device, call `markAllCollectionsDirty()` before the first `syncAll`. Its return value is the count for the toast.
+> - Record "this device has done its first upload for this account" per user id, so it doesn't re-upload on every sign-in.
+
 ### Steps
 1. Triggers, in `src/lib/sync/triggers.ts`, started once from `src/App.tsx` (lines 345–349, the existing `syncWithBackend(user.id)` effect; add `startSync(user.id)` next to it):
    - On sign-in.
