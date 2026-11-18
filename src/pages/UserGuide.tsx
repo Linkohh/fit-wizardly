@@ -4,8 +4,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Trophy, Users, Dumbbell, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BackButton } from '@/components/navigation/BackButton';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 
 export default function UserGuide() {
+    // Circles is hidden in v1 (contract #1). With only one tab left, the tab bar is dropped too.
+    const circlesEnabled = isFeatureEnabled('circles');
+
     return (
         <main className="container max-w-4xl mx-auto px-4 py-12">
             <BackButton className="mb-4" />
@@ -17,6 +21,7 @@ export default function UserGuide() {
             </div>
 
             <Tabs defaultValue="workouts" className="space-y-8">
+                {circlesEnabled && (
                 <TabsList className="grid w-full grid-cols-1 md:grid-cols-2 h-auto p-1 bg-muted/50 gap-1 rounded-xl">
                     <TabsTrigger value="workouts" className="data-[state=active]:bg-background data-[state=active]:shadow-sm py-3 rounded-lg">
                         <Dumbbell className="h-4 w-4 mr-2" />
@@ -27,6 +32,7 @@ export default function UserGuide() {
                         Social Circles
                     </TabsTrigger>
                 </TabsList>
+                )}
 
                 {/* WORKOUTS SECTION */}
                 <TabsContent value="workouts" className="space-y-6">
@@ -87,6 +93,7 @@ export default function UserGuide() {
 
 
                 {/* CIRCLES SECTION */}
+                {circlesEnabled && (
                 <TabsContent value="circles" className="space-y-6">
                     <Card>
                         <CardHeader>
@@ -131,6 +138,7 @@ export default function UserGuide() {
                         </Button>
                     </div>
                 </TabsContent>
+                )}
 
             </Tabs>
         </main>

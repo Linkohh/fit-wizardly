@@ -3,6 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { Client, Assignment, Template, Plan, Message } from '@/types/fitness';
 import { useAuthStore } from '@/stores/authStore';
 import { useWizardStore } from '@/stores/wizardStore';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 
 interface TrainerState {
   isTrainerMode: boolean;
@@ -43,11 +44,20 @@ const generateId = () => Math.random().toString(36).substr(2, 9);
 
 type PersistedTrainerState = Pick<TrainerState, 'isTrainerMode'>;
 
+/**
+ * Coach mode is part of the coach surface, which is off in v1 (contract #1).
+ * While the flag is off, `isTrainerMode` is always false: in the initial state,
+ * after rehydration and from every setter. The flag is read on each call so
+ * tests can stub it with `vi.stubEnv`.
+ */
+const isCoachFeatureEnabled = () => isFeatureEnabled('coach');
+
 const sanitizeTrainerPersistedState = (state: Partial<TrainerState> | undefined): PersistedTrainerState => ({
-  isTrainerMode: Boolean(state?.isTrainerMode),
+  isTrainerMode: isCoachFeatureEnabled() && Boolean(state?.isTrainerMode),
 });
 
 const isTrainerAuthorized = () => {
+  if (!isCoachFeatureEnabled()) return false;
   const { user, profile } = useAuthStore.getState();
   if (!user) return true;
   return profile?.is_trainer === true;

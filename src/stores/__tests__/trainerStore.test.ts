@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useAuthStore } from '@/stores/authStore';
 import { useTrainerStore } from '@/stores/trainerStore';
 import { useWizardStore } from '@/stores/wizardStore';
@@ -23,8 +23,70 @@ const buildPlan = (): Plan =>
     notes: [],
   }) as unknown as Plan;
 
+const resetStores = () => {
+  window.localStorage.clear();
+  useAuthStore.setState({
+    user: null,
+    session: null,
+    profile: null,
+    isLoading: false,
+    isConfigured: true,
+    showAuthModal: false,
+    redirectUrl: null,
+  });
+  useTrainerStore.setState({
+    isTrainerMode: false,
+    clients: [],
+    selectedClientId: null,
+    assignments: [],
+    templates: [],
+    messages: [],
+  });
+  useWizardStore.getState().setIsTrainer(false);
+};
+
+describe('trainerStore with the coach flag off', () => {
+  beforeEach(() => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'false');
+    resetStores();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('starts with coach mode off', () => {
+    expect(useTrainerStore.getState().isTrainerMode).toBe(false);
+  });
+
+  it('keeps coach mode off when setTrainerMode(true) is called', () => {
+    useTrainerStore.getState().setTrainerMode(true);
+
+    expect(useTrainerStore.getState().isTrainerMode).toBe(false);
+    expect(useWizardStore.getState().selections.isTrainer).toBe(false);
+  });
+
+  it('keeps coach mode off when toggled', () => {
+    useTrainerStore.getState().toggleTrainerMode();
+
+    expect(useTrainerStore.getState().isTrainerMode).toBe(false);
+  });
+
+  it('ignores a persisted isTrainerMode: true on rehydration', async () => {
+    window.localStorage.setItem(
+      'fitwizard-trainer',
+      JSON.stringify({ state: { isTrainerMode: true }, version: 0 }),
+    );
+
+    await useTrainerStore.persist.rehydrate();
+
+    expect(useTrainerStore.getState().isTrainerMode).toBe(false);
+  });
+});
+
 describe('trainerStore persistence', () => {
   beforeEach(() => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'true');
     window.localStorage.clear();
     useAuthStore.setState({
       user: null,
@@ -44,6 +106,21 @@ describe('trainerStore persistence', () => {
       messages: [],
     });
     useWizardStore.getState().setIsTrainer(false);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('restores a persisted isTrainerMode: true on rehydration', async () => {
+    window.localStorage.setItem(
+      'fitwizard-trainer',
+      JSON.stringify({ state: { isTrainerMode: true }, version: 0 }),
+    );
+
+    await useTrainerStore.persist.rehydrate();
+
+    expect(useTrainerStore.getState().isTrainerMode).toBe(true);
   });
 
   it('does not persist client, template, or message records', () => {

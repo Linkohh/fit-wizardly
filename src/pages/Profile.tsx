@@ -28,6 +28,7 @@ import { usePreferencesStore } from '@/hooks/useUserPreferences';
 import { useMotionPreferences } from '@/hooks/use-motion-preferences';
 import { useMotionTiltStatus } from '@/hooks/use-motion-tilt-status';
 import { useTrainerStore } from '@/stores/trainerStore';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 import { usePlanStore } from '@/stores/planStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useReadinessStore } from '@/stores/readinessStore';
@@ -70,7 +71,9 @@ export function Profile() {
     const profile = useAuthStore((state) => state.profile);
     const signOut = useAuthStore((state) => state.signOut);
     const isTrainerAuthorized = !user || profile?.is_trainer === true;
-    const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
+    // Coach mode is hidden in v1 unless the coach flag is on (contract #1).
+    const coachFeatureEnabled = isFeatureEnabled('coach');
+    const isTrainerEnabled = coachFeatureEnabled && isTrainerAuthorized && isTrainerMode;
 
     const handleExportData = () => {
         try {
@@ -339,10 +342,11 @@ export function Profile() {
                                     </div>
                                 </div>
 
-                                <Separator />
-
                                 {/* Coach Mode */}
-                                <div className="flex items-center justify-between">
+                                {coachFeatureEnabled && (
+                                <>
+                                <Separator />
+                                <div className="flex items-center justify-between" data-testid="profile-coach-mode">
                                     <div className="space-y-0.5">
                                         <Label className="text-base">{t('header.trainer_mode', 'Coach Mode')}</Label>
                                         <p className="text-sm text-muted-foreground">
@@ -355,6 +359,8 @@ export function Profile() {
                                         onCheckedChange={setTrainerMode}
                                     />
                                 </div>
+                                </>
+                                )}
 
                             </CardContent>
                         </Card>

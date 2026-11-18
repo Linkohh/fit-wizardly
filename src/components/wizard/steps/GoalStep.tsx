@@ -14,6 +14,7 @@ import { shakeVariants } from '@/lib/formAnimations';
 import { cn } from '@/lib/utils';
 import { getExperienceLevels, getGoals } from '@/lib/wizardConstants';
 import { useTrainerStore } from '@/stores/trainerStore';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 import { useWizardStore } from '@/stores/wizardStore';
 import type { ExperienceLevel, Goal } from '@/types/fitness';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +33,9 @@ export function GoalStep() {
   } = useWizardStore();
   const { isTrainerMode, setTrainerMode } = useTrainerStore();
   const isTrainerAuthorized = useAuthStore((state) => !state.user || state.profile?.is_trainer === true);
-  const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
+  // The trainer toggle and coach notes are part of the coach surface (off in v1).
+  const coachFeatureEnabled = isFeatureEnabled('coach');
+  const isTrainerEnabled = coachFeatureEnabled && isTrainerAuthorized && isTrainerMode;
   const goals = getGoals(t);
   const experienceLevels = getExperienceLevels(t);
   const shouldStartPersonalizedOpen = Boolean(
@@ -408,7 +411,8 @@ export function GoalStep() {
                   </div>
                 </div>
 
-                <div className="space-y-5 rounded-[1.5rem] border border-border/60 bg-background/20 p-5">
+                {coachFeatureEnabled && (
+                <div className="space-y-5 rounded-[1.5rem] border border-border/60 bg-background/20 p-5" data-testid="goal-step-trainer-section">
                   <Controller
                     name="isTrainer"
                     control={control}
@@ -504,6 +508,7 @@ export function GoalStep() {
                     )}
                   </AnimatePresence>
                 </div>
+                )}
               </div>
             </motion.div>
           )}

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { Profile } from './Profile';
 
@@ -209,5 +209,30 @@ describe('Profile about & support group', () => {
 
     fireEvent.click(screen.getByTestId('profile-version-row'));
     expect(screen.getByRole('dialog', { name: 'about.whats_new.title' })).toBeInTheDocument();
+  });
+});
+
+describe('Profile coach mode toggle', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it('hides the Coach Mode toggle when the coach flag is off', () => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'false');
+
+    render(<Profile />, { wrapper: MemoryRouter });
+
+    expect(screen.queryByTestId('profile-coach-mode')).not.toBeInTheDocument();
+    expect(screen.queryByText('Coach Mode')).not.toBeInTheDocument();
+  });
+
+  it('shows the Coach Mode toggle when the coach flag is on', () => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'true');
+
+    render(<Profile />, { wrapper: MemoryRouter });
+
+    const coachRow = screen.getByTestId('profile-coach-mode');
+    expect(within(coachRow).getByText('Coach Mode')).toBeInTheDocument();
+    expect(within(coachRow).getByRole('switch')).toBeInTheDocument();
   });
 });

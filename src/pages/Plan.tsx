@@ -21,6 +21,7 @@ import { useWizardStore } from '@/stores/wizardStore';
 import { PlanNavigation } from '@/components/plan/PlanNavigation';
 import { SaveTemplateDialog } from '@/components/plan/SaveTemplateDialog';
 import { useTrainerStore } from '@/stores/trainerStore';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 import { PeriodizationTimeline } from '@/components/plan/PeriodizationTimeline';
 import { NoPlanEmptyState } from '@/components/plan/NoPlanEmptyState';
 import { WeeklyProgressCard } from '@/components/plan/WeeklyProgressCard';
@@ -46,7 +47,8 @@ export default function PlanPage() {
   const [swapTarget, setSwapTarget] = useState<{ dayIndex: number; exerciseIndex: number; exercise: ExercisePrescription } | null>(null);
   const setContext = useWisdomStore((state) => state.setContext);
   const activePlan = currentPlan ?? planHistory[0] ?? null;
-  const isTrainerEnabled = isTrainerAuthorized && isTrainerMode;
+  // Coach UI only exists while the coach flag is on (contract #1).
+  const isTrainerEnabled = isFeatureEnabled('coach') && isTrainerAuthorized && isTrainerMode;
 
   useEffect(() => {
     if (!currentPlan && planHistory.length > 0) {

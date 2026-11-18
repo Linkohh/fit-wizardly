@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useTrainerStore } from '@/stores/trainerStore';
+import { isFeatureEnabled } from '@/lib/featureFlags';
 
 // Onboarding steps in order
 export type OnboardingStep = 'welcome' | 'role' | 'goals' | 'import';
@@ -56,10 +57,20 @@ interface OnboardingState {
 // Step order - coach has extra step
 const USER_STEPS: OnboardingStep[] = ['welcome', 'role', 'goals'];
 const COACH_STEPS: OnboardingStep[] = ['welcome', 'role', 'goals', 'import'];
+// With the coach flag off there is no role to choose, so the role step is skipped.
+const COACH_OFF_STEPS: OnboardingStep[] = ['welcome', 'goals'];
+
+// Read on each call (not at module level) so tests can stub the flag.
+const isCoachFeatureEnabled = () => isFeatureEnabled('coach');
 
 const getStepsForRole = (role: UserRole): OnboardingStep[] => {
+    if (!isCoachFeatureEnabled()) return COACH_OFF_STEPS;
     return role === 'coach' ? COACH_STEPS : USER_STEPS;
 };
+
+/** Coach is only a valid role while the coach flag is on. */
+const resolveRole = (role: UserRole): UserRole =>
+    isCoachFeatureEnabled() ? role : 'user';
 
 const initialUserData: OnboardingUserData = {
     displayName: '',
@@ -86,7 +97,9 @@ const isInterestGoal = (value: unknown): value is InterestGoal =>
     value === 'flexibility';
 
 const sanitizeOnboardingPersistedState = (state: Partial<OnboardingState> | undefined) => {
-    const role = isUserRole(state?.userData?.role) ? state.userData.role : initialUserData.role;
+    const role = resolveRole(
+        isUserRole(state?.userData?.role) ? state.userData.role : initialUserData.role
+    );
 
     return {
         isComplete: Boolean(state?.isComplete),
@@ -160,7 +173,8 @@ export const useOnboardingStore = create<OnboardingState>()(
                 userData: { ...state.userData, avatarEmoji }
             })),
 
-            setRole: (role) => {
+            setRole: (requestedRole) => {
+                const role = resolveRole(requestedRole);
                 set((state) => ({
                     userData: { ...state.userData, role }
                 }));

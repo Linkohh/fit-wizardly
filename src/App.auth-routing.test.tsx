@@ -271,8 +271,9 @@ vi.mock('./components/circles/JoinCircleHandler', () => ({
   JoinCircleHandler: () => <div>Join Circle Handler</div>,
 }));
 
+// App.tsx lazy-loads the named `CircleLayout` export, so the mock must provide it.
 vi.mock('./components/circles/CircleLayout', () => ({
-  default: () => (
+  CircleLayout: () => (
     <div>
       Circle Layout
       <Outlet />

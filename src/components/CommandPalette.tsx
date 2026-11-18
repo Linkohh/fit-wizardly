@@ -16,10 +16,8 @@ import {
   User,
   BookOpen,
   Info,
-  Settings,
   LogOut,
   Home,
-  Trophy,
   Target,
   Calendar
 } from 'lucide-react';
@@ -35,7 +33,7 @@ export function CommandPalette() {
   const navigate = useNavigate();
   const { currentPlan } = usePlanStore();
   const { circles } = useCircleStore();
-  const { user, signOut } = useAuthStore();
+  const { user, signOut, setShowAuthModal } = useAuthStore();
   // Build-time flag; read on render so tests can stub the env per case.
   const circlesEnabled = isFeatureEnabled('circles');
 
@@ -106,13 +104,6 @@ export function CommandPalette() {
               <span className="text-xs">⌘</span>E
             </kbd>
           </CommandItem>
-
-          <CommandItem
-            onSelect={() => handleCommand(() => navigate('/achievements'))}
-          >
-            <Trophy className="mr-2 h-4 w-4" />
-            <span>{t('commands.achievements')}</span>
-          </CommandItem>
         </CommandGroup>
 
         <CommandSeparator />
@@ -177,13 +168,6 @@ export function CommandPalette() {
               </CommandItem>
 
               <CommandItem
-                onSelect={() => handleCommand(() => navigate('/settings'))}
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                <span>{t('commands.settings')}</span>
-              </CommandItem>
-
-              <CommandItem
                 onSelect={() => handleCommand(() => signOut())}
                 className="text-destructive"
               >
@@ -193,7 +177,7 @@ export function CommandPalette() {
             </>
           ) : (
             <CommandItem
-              onSelect={() => handleCommand(() => navigate('/auth'))}
+              onSelect={() => handleCommand(() => setShowAuthModal(true))}
             >
               <User className="mr-2 h-4 w-4" />
               <span>{t('commands.sign_in')}</span>
@@ -206,7 +190,7 @@ export function CommandPalette() {
         {/* Help & Resources */}
         <CommandGroup heading={t('commands.help_heading')}>
           <CommandItem
-            onSelect={() => handleCommand(() => window.open('https://docs.fitwizardly.com', '_blank'))}
+            onSelect={() => handleCommand(() => navigate('/guide'))}
           >
             <BookOpen className="mr-2 h-4 w-4" />
             <span>{t('commands.documentation')}</span>
