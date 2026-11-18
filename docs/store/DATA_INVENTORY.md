@@ -2,7 +2,7 @@
 
 The single source for the privacy policy (`src/pages/Legal.tsx`, `docs/privacy-policy.md`), Apple's App Privacy answers and Google Play's Data safety form. When you add stored data or a new third party, add a row here in the same PR (ADR 10).
 
-- **Built from:** the code on `preview_b` at 2026-11-17 (every persisted store in `src/stores/`, every `fetch` and Supabase call in `src/` and `api/`, the CSP in `vercel.json`, `index.html`, `api/_lib/guard.ts`), plus the Lane D Day 1, Lane E Day 2–4 and Lane H Day 1–2 handoffs. Updated 2026-11-18 for Wave 1 Day 2 (self-hosted fonts, wger through the proxy, sync keys, API limits).
+- **Built from:** the code on `preview_b` at 2026-11-17 (every persisted store in `src/stores/`, every `fetch` and Supabase call in `src/` and `api/`, the CSP in `vercel.json`, `index.html`, `api/_lib/guard.ts`), plus the Lane D Day 1, Lane E Day 2–5 and Lane H Day 1–2 handoffs. Updated 2026-11-18 for Wave 1 Day 2 (self-hosted fonts, wger through the proxy, sync keys, API limits).
 - **Status:** **Now** means it's in the code today. **After Wave N** means planned in the launch project and not built yet.
 - **Device storage** means IndexedDB database `fitwizard`, store `kv`, on the web, and `Directory.Data/stores/<key>.json` (Capacitor Filesystem) on iOS and Android. It is never localStorage (ADR 11).
 - **"Signed in"** means Supabase is configured and the user has signed in with email. Guests never send training data to Supabase.
@@ -33,6 +33,8 @@ The single source for the privacy policy (`src/pages/Legal.tsx`, `docs/privacy-p
 
 Every row in this table except exercise interactions (which live only in memory and in Supabase) is erased by `clearLocalUserData()` (`src/lib/storage/clearLocalUserData.ts`). That covers the nine stores in `USER_DATA_STORES` (including `fitwizard-wizard` and `fitwizard-onboarding`, since #59) and both sync keys, and it also empties the outbox in memory. "Erase data on this device" and account deletion use it (Lane F, Wave 2). Sign-out separately clears the wizard and onboarding keys (`clearSensitiveStorage` in `src/stores/authStore.ts`).
 
+**Cloud sync status (Lane E Day 5, #64):** a sync collection now exists for each of the seven migration 007 tables (`src/lib/sync/collections/`). Nothing starts them until Day 6, so the "Supabase after Wave 2" rows above are still not sent. Items whose day can't be stored stay on the device only. Rows pulled from the cloud go through the same load checks as the device copy. Exercise favourites keep their existing separate sync (`user_exercise_preferences`).
+
 **Sign-out keeps training data on the device** until cloud sync ships (Lane E Day 3, DEBT-045). The privacy text must say so until Wave 2.
 
 ## Account data
@@ -58,7 +60,7 @@ Every row in this table except exercise interactions (which live only in memory 
 | Install coach | `fitwizard-install-coach-v1` (localStorage), `fitwizard-install-coach-visit` (sessionStorage) | Browser storage | Nobody | **Now** |
 | Motion tilt permission | `fitwizard-motion-granted` | localStorage | Nobody | **Now** |
 | Anatomy view preferences | `fitwizard.mcl.sculpt.v1` | localStorage | Nobody | **Now** |
-| Persistent-storage request made | `fitwizard-storage-persist-requested` | localStorage | Nobody | **Now** once #64 merges: the browser is asked after the first save (`src/lib/storage/appStorage.ts`). Before #64 nothing called `requestPersistentStorage()`, so the key was never written (DEBT-076) |
+| Persistent-storage request made | `fitwizard-storage-persist-requested` | localStorage | Nobody | **Now** (#64, Lane E Day 5): the browser is asked once, after the first save, not to evict the app's saved data (`requestPersistentStorage()` in `src/lib/storage/appStorage.ts`) |
 | Pending circle invite code | `pendingInviteCode` | sessionStorage | Nobody | **Now** (Circles is off by default) |
 
 ## Caches (public content, no personal data)

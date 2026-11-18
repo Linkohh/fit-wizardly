@@ -146,7 +146,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
-### 2026-11-18 — Lane A Day 3: Wave 1 Paperwork, README, 1.1.0 Notes Draft (branch `lane-a/day-3`, from `preview_b` @ `172c428`)
+### 2026-11-18 — Lane A Day 3: Wave 1 Paperwork, README, 1.1.0 Notes Draft (branch `lane-a/day-3`, from `preview_b` @ `172c428`, rebased onto `a621a4f` after #64)
 
 - **What was done:**
   - `docs/store/DATA_INVENTORY.md`:
@@ -155,7 +155,8 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
     - Added the sync keys `fitwizard-sync-outbox` and `fitwizard-sync-cursor`, both erased by `clearLocalUserData()`.
     - Re-checked the erase line against the code: the nine stores, both sync keys, and the outbox in memory.
     - New "Our own API functions" section: the origin allowlist, plus the per-IP rate limit. It keeps IPs in memory for up to the life of the function instance (pruned only at 10,000 entries) and never logs or stores them.
-    - Corrected my own Day 2 row: `fitwizard-storage-persist-requested` is never written, because nothing calls `requestPersistentStorage()`.
+    - Corrected my own Day 2 row: `fitwizard-storage-persist-requested` was never written, because nothing called `requestPersistentStorage()` (DEBT-076). #64 fixed that, so the row is now Now.
+    - Folded in the Lane E Day 5 handoff (#64): sync collections exist for all seven 007 tables but aren't started until Day 6, and the persistent-storage row is Now.
   - `CLAUDE.md` golden paths (DEBT-069): replaced the unused `fitness.ts` with `planStore.persistence.ts` (saved-data checks) and `useSculptPrefs.ts` (a small Zod schema in use). In `.claude/rules.md`, the same swap, and the Hook example is now `useCountUp.ts`. The old one, `useWizardForm.ts`, uses `as any`.
   - `.claude/*.md` added to Lane A's "Owns" list in `LANE-A.md`. The README ownership table already had it.
   - `README.md` → Features: "Saving workout logs…" is now ✅. Cloud sync is now 🟡, with the engine merged (#59).
@@ -927,11 +928,12 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-072 | CSP `connect-src` still allows `wger.de`; no browser code needs it | `vercel.json` | Lane H, later, after checking production. |
 | DEBT-073 | `/api/*` rate limit is in memory and per instance | `api/_lib/guard.ts` | Add a Vercel firewall rate-limit rule before launch (Lincoln / Lane H). |
 | DEBT-074 | The dev wger proxy returns `err.message`; production returns a generic 502 | `vite.config.ts:104` | Lane D Day 3. |
+| DEBT-076 | **RESOLVED 2026-11-18** (Lane E Day 5, #64: the browser is asked after the first save). ~~**MEDIUM.** `requestPersistentStorage()` is never called, so browsers may still evict IndexedDB data under storage pressure (ADR 11 meant it to run after the first save)~~ | `src/lib/storage/appStorage.ts` | Lane E Day 5 or 6: call it once after the first user-data save. |
+| DEBT-077 | `SCHEMAS.md`, `TESTING.md`, `SECURITY.md`, `ENGINEERING.md` and `AI_GUIDELINES.md` still use the unused `src/lib/validation/fitness.ts` in examples (they carry the stale-doc banner) | `docs/*.md` | Lane A, when each doc's area is worked on. |
+
 | DEBT-079 | The email-code step (`input-otp`) is in the startup bundle, about 6 KB gzip | `src/components/auth/AuthModal.tsx` | Lane H: lazy-load `EmailCodeStep`. |
 | DEBT-078 | Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4 | build | Lane D: confirm the cause (likely the self-hosted font CSS) and record the new baseline. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
-| DEBT-076 | **RESOLVED 2026-11-18** (coordinator #64: the browser is asked after the first save). ~~**MEDIUM.** `requestPersistentStorage()` is never called, so browsers may still evict IndexedDB data under storage pressure (ADR 11 meant it to run after the first save)~~ | `src/lib/storage/appStorage.ts` | Lane E Day 5 or 6: call it once after the first user-data save. |
-| DEBT-077 | `SCHEMAS.md`, `TESTING.md`, `SECURITY.md`, `ENGINEERING.md` and `AI_GUIDELINES.md` still use the unused `src/lib/validation/fitness.ts` in examples (they carry the stale-doc banner) | `docs/*.md` | Lane A, when each doc's area is worked on. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
 | DEBT-025 | Enter on a focused muscle can advance the wizard after selecting it | `src/pages/Wizard.tsx` | The existing window-level shortcut handles Enter after the focused SVG control has already handled it. |
