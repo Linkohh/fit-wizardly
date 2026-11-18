@@ -7,6 +7,7 @@ import "./styles/fonts.css";
 import "./index.css";
 import "./lib/i18n"; // Initialize i18n
 import { startInstallPromptCapture } from "./lib/install-prompt-capture";
+import { initMonitoring } from "./lib/monitoring";
 
 // Catch the browser's install offer before React mounts; it fires once per load.
 startInstallPromptCapture();
@@ -64,6 +65,9 @@ if (import.meta.env.PROD) {
 }
 
 applyInitialTheme();
+
+// Crash reporting: no-op without VITE_SENTRY_DSN and consent; the SDK loads lazily.
+initMonitoring();
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>

@@ -422,5 +422,13 @@
         },
         "failure": "VERSAGEN",
         "dayLabel": "TAG {{number}}"
+    },
+    "errors": {
+        "route": {
+            "title": "Auf dieser Seite ist ein Problem aufgetreten.",
+            "description": "Der Rest der App funktioniert weiterhin. Versuche es erneut oder kehre zur Startseite zurück.",
+            "try_again": "Erneut versuchen",
+            "go_home": "Zur Startseite"
+        }
     }
 }
