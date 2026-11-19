@@ -23,7 +23,7 @@ All seven lanes run in parallel. There are no dependencies between them.
 | Lane | Day 1 | Day 2 | Day 3 |
 |---|---|---|---|
 | **A** | ✅ PR #47 · 0.9 Fix `CLAUDE.md`; add stale-doc banners; handle `AGENTS.md` (D6) | ✅ PR #56 · 0.9 Merge iOS docs; draft `docs/store/DATA_INVENTORY.md` | 🔵 PR #63 · Inventory, golden path, README, 1.1.0 notes draft; Gate 1 checklist in the PR. Other lanes' Day 3 handoffs folded in when they arrive |
-| **B** | ✅ PR #51 · 0.1 AI claim (except `vite.config.ts`); 0.5 fake content | ✅ PR #55 · 0.4 Language picker; `pt.json` duplicate key; Profile labels | ⬜ 3.6a Empty states (History, Analytics, Nutrition) |
+| **B** | ✅ PR #51 · 0.1 AI claim (except `vite.config.ts`); 0.5 fake content | ✅ PR #55 · 0.4 Language picker; `pt.json` duplicate key; Profile labels | ✅ PR #68 (`421a453`) · 3.6a Empty states (History, Analytics, Nutrition); `<html lang>` (DEBT-063); DEBT-062 |
 | **C** | ✅ PR #49 · 0.2 part 1: routes, every nav entry point, flag tests | ✅ PR #58 · 0.2 part 2: coach toggles, onboarding skip, `trainerStore`, badge filter | ✅ PR #69 (`57e92ac`) · 3.1 Sentry (`monitoring.ts`, `main.tsx`, `ErrorBoundary`, per-route boundaries, CSP); consent-order fix |
 | **D** | ✅ PR #52 · 0.7 Icons, logo, PWA runtime caching, manifest text | ✅ PR #54 · 0.8 knip cleanup, deletions, ESLint ignores | ✅ PR #67 (`3d95fed`) · 3.6b PDF export fixes (doubled day titles, wrapped headers, emoji); DEBT-074; bundle baseline (DEBT-078) |
 | **E** | ✅ 1.1 `appStorage`, `HydrationGate`, date reviver (trial lane; PR #45, `5984b86`) | ✅ 1.2 part 1: plan and measurement stores; 0.3 counters; circles gate (PR #46, `803842e`) | ✅ 1.2 part 2: other stores, localStorage copy, `clearSensitiveStorage`, ADR 11 (PR #53, `7ef77e5`) |

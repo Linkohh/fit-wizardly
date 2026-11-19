@@ -1,6 +1,6 @@
 # Release notes: FitWizard 1.1.0 (draft)
 
-> **Draft, 2026-11-18 (Lane A, Day 3).** Built from the Wave 1 work merged into `preview_b` (#44–#62, #64–#67). Wave 2 adds more before release (see "Still to come"). On Day 7, Lane A finishes this file and copies it into `src/data/changelog.ts`, whose test requires the top entry to match `package.json`.
+> **Draft, 2026-11-18 (Lane A, Day 3).** Built from the Wave 1 work merged into `preview_b` (#44–#69). Wave 2 adds more before release (see "Still to come"). On Day 7, Lane A finishes this file and copies it into `src/data/changelog.ts`, whose test requires the top entry to match `package.json`.
 >
 > The sections match `ChangelogHighlights` in `src/data/changelog.ts`: **New**, **Improved**, **Fixed**. Keep bullets short and in user language. Don't mention AI, and don't make medical claims.
 
@@ -17,6 +17,8 @@
 - Your weekly goal now counts finished workouts, not generated plans. It's set from your plan's training days, and it starts fresh every Monday.
 - Signing out keeps your training data on this device, and the app tells you so.
 - The language menu offers English and Español. Other languages return when their translations are complete.
+- Screen readers now pronounce the app in the language you picked.
+- New-user screens are clearer: History, Analytics and Nutrition tell you what to do next, with one button to create a plan, start today's workout or log a meal.
 - Faster to load and smaller to install: icons and the logo are a fraction of their old size, and the exercise catalogue downloads only when you open the library.
 - The exercise library works offline after you've opened it once.
 - Fonts now load from FitWizard itself, so opening the app no longer contacts Google.
@@ -34,7 +36,6 @@ Add these on Day 7 if they merge:
 - Syncing your changes before you sign out, with a warning if some haven't been sent (Lane E, Day 7).
 - Delete your account from inside the app, and erase data on this device (Lane F, Day 4).
 - Optional crash reports and product analytics, both off unless you opt in (Lane C, Days 3–5).
-- Clearer empty screens for History, Analytics and Nutrition (Lane B, Day 3).
 - Rewritten privacy policy and terms (Lane A, Day 4).
 
 ## Left out on purpose
