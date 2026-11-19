@@ -5,6 +5,7 @@ import i18n, {
   LAUNCH_LANGUAGES,
   changeLanguage,
   getInitialLanguage,
+  syncDocumentLanguage,
 } from '@/lib/i18n';
 
 describe('launch languages (decision D3)', () => {
@@ -52,5 +53,29 @@ describe('changeLanguage', () => {
     expect(localStorage.getItem(LANGUAGE_STORAGE_KEY)).toBe('es');
     expect(i18n.language).toBe('es');
     expect(getInitialLanguage(localStorage.getItem(LANGUAGE_STORAGE_KEY), 'en-US')).toBe('es');
+  });
+});
+
+describe('<html lang> (DEBT-063)', () => {
+  afterEach(async () => {
+    localStorage.removeItem(LANGUAGE_STORAGE_KEY);
+    await i18n.changeLanguage('en');
+  });
+
+  it('is set from the starting language', () => {
+    expect(document.documentElement.lang).toBe(i18n.language);
+  });
+
+  it('follows every language change', async () => {
+    await changeLanguage('es');
+    expect(document.documentElement.lang).toBe('es');
+
+    await changeLanguage('en');
+    expect(document.documentElement.lang).toBe('en');
+  });
+
+  it('syncDocumentLanguage writes the given code', () => {
+    syncDocumentLanguage('es');
+    expect(document.documentElement.lang).toBe('es');
   });
 });

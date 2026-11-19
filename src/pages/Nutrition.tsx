@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNutritionStore } from "@/stores/nutritionStore";
 import { Link } from "react-router-dom";
 import {
@@ -9,7 +10,7 @@ import { format, parseISO, isToday as isDayToday, addDays, subDays } from "date-
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ProgressRing } from "@/components/ui/ProgressRing";
 import { HydrationTracker } from "@/components/nutrition/HydrationTracker";
-import { FoodLogger } from "@/components/nutrition/FoodLogger";
+import { FoodLogger, type FoodLoggerHandle } from "@/components/nutrition/FoodLogger";
 import { NutritionInsights } from "@/components/nutrition/NutritionInsights";
 import { NutritionLearn } from "@/components/nutrition/NutritionLearn";
 import { SmartRemaining } from "@/components/nutrition/SmartRemaining";
@@ -20,6 +21,9 @@ import { formatIdentifierLabel } from "@/lib/displayText";
 import type { MacroTargets, UserNutritionProfile } from "@/types/nutrition";
 import { toast } from "sonner";
 import { useHaptics } from "@/hooks/useHaptics";
+import { useStoresHydrated } from "@/hooks/useStoresHydrated";
+import { Button } from "@/components/ui/button";
+import { NutritionSkeleton } from "@/components/nutrition/NutritionSkeleton";
 
 export default function NutritionPage() {
     // Store Integration
@@ -33,6 +37,10 @@ export default function NutritionPage() {
     const removeMeal = useNutritionStore((state) => state.removeMeal);
     const [isEditingCalculator, setIsEditingCalculator] = useState(false);
     const { impact, notification } = useHaptics();
+    const { t } = useTranslation();
+    const storesHydrated = useStoresHydrated();
+    const foodLoggerRef = useRef<FoodLoggerHandle>(null);
+    const foodLoggerContainerRef = useRef<HTMLDivElement>(null);
 
     // Subscribe to the selected day's log so the page re-renders when a meal or
     // water is logged. getCurrentLog is a stable function and does not trigger renders.
@@ -74,7 +82,15 @@ export default function NutritionPage() {
         }
     };
 
-    // ... (handlers)
+    // Opens the existing food logger and brings it into view. Never closes it.
+    const openFoodLogger = () => {
+        foodLoggerRef.current?.openLogger();
+        foodLoggerContainerRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+    };
+
+    if (!storesHydrated) {
+        return <NutritionSkeleton />;
+    }
 
     return (
         <div className="container-full py-8 space-y-8 animate-in fade-in duration-500">
@@ -196,10 +212,13 @@ export default function NutritionPage() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <HydrationTracker />
-                                    <FoodLogger
-                                        onLogMeal={logMeal}
-                                        dayTotal={currentTotals}
-                                    />
+                                    <div ref={foodLoggerContainerRef}>
+                                        <FoodLogger
+                                            ref={foodLoggerRef}
+                                            onLogMeal={logMeal}
+                                            dayTotal={currentTotals}
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* Today's Log */}
@@ -209,17 +228,19 @@ export default function NutritionPage() {
                                     </div>
 
                                     {dailyLog.meals.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center h-48 text-muted-foreground space-y-4 animate-in fade-in zoom-in duration-500">
-                                            <div className="relative w-24 h-24">
-                                                <div className="absolute inset-0 bg-primary/10 rounded-full blur-xl" />
-                                                <div className="relative bg-muted/30 p-5 rounded-full border border-border flex items-center justify-center w-full h-full">
-                                                    <UtensilsCrossed className="w-10 h-10 opacity-50 text-foreground/50" />
-                                                </div>
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="font-medium text-foreground/80">Your plate is empty!</p>
-                                                <p className="text-sm">Log your first meal to start hitting your goals.</p>
-                                            </div>
+                                        <div
+                                            data-testid="nutrition-empty-state"
+                                            className="flex flex-col items-center justify-center gap-4 py-10 text-center"
+                                        >
+                                            <UtensilsCrossed className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
+                                            <p className="text-base text-foreground">
+                                                {isToday
+                                                    ? t('emptyStates.nutrition.message', 'Nothing logged today.')
+                                                    : t('emptyStates.nutrition.message_other_day', 'Nothing logged on this day.')}
+                                            </p>
+                                            <Button onClick={openFoodLogger}>
+                                                {t('emptyStates.nutrition.action', 'Log a meal')}
+                                            </Button>
                                         </div>
                                     ) : (
                                         <div className="space-y-6">

@@ -4,11 +4,20 @@ import { ArrowLeft, History as HistoryIcon, CalendarRange } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "react-i18next";
+import { WorkoutEmptyState } from "@/components/empty-states/WorkoutEmptyState";
+import { PlanSkeleton } from "@/components/plan/PlanSkeleton";
+import { useStoresHydrated } from "@/hooks/useStoresHydrated";
+
 export default function HistoryPage() {
     const { t } = useTranslation();
     const { workoutLogs } = usePlanStore();
+    const storesHydrated = useStoresHydrated();
 
     const hasLogs = workoutLogs.length > 0;
+
+    if (!storesHydrated) {
+        return <PlanSkeleton />;
+    }
 
     return (
         <div className="min-h-screen bg-background pb-20">
@@ -61,18 +70,11 @@ export default function HistoryPage() {
                     </div>
 
                     {!hasLogs ? (
-                        <div className="flex flex-col items-center justify-center py-12 text-center space-y-4 opacity-50">
-                            <CalendarRange className="w-16 h-16 text-muted-foreground" />
-                            <div className="space-y-1">
-                                <h3 className="text-lg font-medium">No History Yet</h3>
-                                <p className="text-sm text-muted-foreground max-w-[200px]">
-                                    Complete your first workout to see your history here!
-                                </p>
-                            </div>
-                            <Link to="/plan">
-                                <Button>Start Workout</Button>
-                            </Link>
-                        </div>
+                        <WorkoutEmptyState
+                            icon={CalendarRange}
+                            testId="history-empty-state"
+                            message={t('emptyStates.history.message', 'Your finished workouts will show up here.')}
+                        />
                     ) : (
                         <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             {workoutLogs.map((log) => (

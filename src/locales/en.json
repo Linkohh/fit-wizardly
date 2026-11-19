@@ -575,6 +575,21 @@
         "create_plan": "Create Plan",
         "exercise_library": "Exercise Library"
     },
+    "emptyStates": {
+        "start_workout": "Start today's workout",
+        "create_plan": "Create a plan",
+        "history": {
+            "message": "Your finished workouts will show up here."
+        },
+        "analytics": {
+            "message": "Log two workouts to see your trends."
+        },
+        "nutrition": {
+            "message": "Nothing logged today.",
+            "message_other_day": "Nothing logged on this day.",
+            "action": "Log a meal"
+        }
+    },
     "error": {
         "title": "Something went wrong",
         "description": "We encountered an unexpected error. Please try refreshing the page.",

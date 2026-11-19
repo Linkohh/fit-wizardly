@@ -508,6 +508,21 @@
         "create_plan": "Crear Plan",
         "exercise_library": "Biblioteca de Ejercicios"
     },
+    "emptyStates": {
+        "start_workout": "Empezar el entrenamiento de hoy",
+        "create_plan": "Crear un plan",
+        "history": {
+            "message": "Tus entrenamientos terminados aparecerán aquí."
+        },
+        "analytics": {
+            "message": "Registra dos entrenamientos para ver tus tendencias."
+        },
+        "nutrition": {
+            "message": "No has registrado nada hoy.",
+            "message_other_day": "No hay nada registrado este día.",
+            "action": "Registrar una comida"
+        }
+    },
     "error": {
         "title": "Algo salió mal",
         "description": "Encontramos un error inesperado. Por favor, intenta refrescar la página.",

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Analytics from './Analytics';
 
@@ -21,6 +22,38 @@ const mocks = vi.hoisted(() => ({
     value: 'today',
     onValueChange: undefined as ((value: string) => void) | undefined,
   },
+  planState: {
+    workoutLogs: [] as Array<{ id: string }>,
+    currentPlan: null as { id: string } | null,
+  },
+  hydrated: true,
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, fallback?: string) => fallback ?? key,
+  }),
+}));
+
+vi.mock('@/hooks/useStoresHydrated', () => ({
+  useStoresHydrated: () => mocks.hydrated,
+}));
+
+vi.mock('@/stores/planStore', () => ({
+  usePlanStore: <T,>(selector?: Selector<typeof mocks.planState, T>) =>
+    selectState(mocks.planState, selector),
+}));
+
+vi.mock('@/stores/readinessStore', () => ({
+  useReadinessStore: <T,>(selector?: Selector<{ logs: unknown[] }, T>) => selectState({ logs: [] }, selector),
+}));
+
+vi.mock('@/lib/analyticsIntelligence', () => ({
+  buildTrainingCompass: () => ({
+    nextAction: 'Train upper body today.',
+    score: 72,
+    metrics: { recentWorkouts: 2 },
+  }),
 }));
 
 vi.mock('framer-motion', () => ({
@@ -141,6 +174,9 @@ describe('Analytics page command center', () => {
     mocks.trainerState.isTrainerMode = false;
     mocks.tabsState.value = 'today';
     mocks.tabsState.onValueChange = undefined;
+    mocks.planState.workoutLogs = [{ id: 'log-1' }, { id: 'log-2' }];
+    mocks.planState.currentPlan = { id: 'plan-1' };
+    mocks.hydrated = true;
   });
 
   it('uses intent-based tabs and leads with today signals', () => {
@@ -212,5 +248,54 @@ describe('Analytics page command center', () => {
     fireEvent.click(screen.getByText('Load'));
 
     expect(screen.getByText('Coach Notes')).toBeInTheDocument();
+  });
+});
+
+describe('Analytics page empty state', () => {
+  beforeEach(() => {
+    mocks.planState.workoutLogs = [];
+    mocks.planState.currentPlan = null;
+    mocks.hydrated = true;
+  });
+
+  function renderAnalytics() {
+    return render(
+      <MemoryRouter initialEntries={['/analytics']}>
+        <Analytics />
+      </MemoryRouter>,
+    );
+  }
+
+  it('asks for two workouts and points a user with no plan to the wizard', () => {
+    renderAnalytics();
+
+    expect(screen.getByTestId('analytics-empty-state')).toHaveTextContent('Log two workouts to see your trends.');
+    expect(screen.getByRole('link', { name: 'Create a plan' })).toHaveAttribute('href', '/wizard');
+    expect(screen.queryByText('Daily Training Compass Card')).not.toBeInTheDocument();
+  });
+
+  it("still shows the empty state after one workout, with a link to today's workout", () => {
+    mocks.planState.workoutLogs = [{ id: 'log-1' }];
+    mocks.planState.currentPlan = { id: 'plan-1' };
+    renderAnalytics();
+
+    expect(screen.getByTestId('analytics-empty-state')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: "Start today's workout" })).toHaveAttribute('href', '/plan');
+  });
+
+  it('shows the trends once two workouts are logged', () => {
+    mocks.planState.workoutLogs = [{ id: 'log-1' }, { id: 'log-2' }];
+    renderAnalytics();
+
+    expect(screen.queryByTestId('analytics-empty-state')).not.toBeInTheDocument();
+    expect(screen.getByText('Daily Training Compass Card')).toBeInTheDocument();
+  });
+
+  it('shows a skeleton while stores are still loading', () => {
+    mocks.hydrated = false;
+    renderAnalytics();
+
+    expect(screen.queryByTestId('analytics-empty-state')).not.toBeInTheDocument();
+    expect(screen.queryByText('Analytics Command Center')).not.toBeInTheDocument();
   });
 });
