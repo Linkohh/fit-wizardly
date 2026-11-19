@@ -93,20 +93,8 @@ describe('monitoring', () => {
       );
     });
 
-    it('starts once the user consents later', async () => {
-      vi.stubEnv('VITE_SENTRY_DSN', DSN);
-      const { initMonitoring } = await loadMonitoring();
-
-      initMonitoring();
-      await flush();
-      expect(sentry.init).not.toHaveBeenCalled();
-
-      window.localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
-      window.dispatchEvent(new Event(CONSENT_RESOLVED_EVENT));
-      await flush();
-
-      expect(sentry.init).toHaveBeenCalledTimes(1);
-    });
+    // Starting after a later opt-in is covered through the real ConsentModal in
+    // monitoring.consent.test.tsx, so the storage/event order matches the app.
 
     it('initialises only once', async () => {
       vi.stubEnv('VITE_SENTRY_DSN', DSN);
