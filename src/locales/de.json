@@ -411,5 +411,16 @@
         "resent": "Wir haben dir einen neuen Code geschickt.",
         "different_email": "Andere E-Mail verwenden",
         "close": "Schließen"
+    },
+    "pdfExport": {
+        "headers": {
+            "exercise": "ÜBUNG",
+            "sets": "SÄTZE",
+            "reps": "WDH.",
+            "rir": "RIR",
+            "rest": "PAUSE"
+        },
+        "failure": "VERSAGEN",
+        "dayLabel": "TAG {{number}}"
     }
 }

@@ -411,5 +411,16 @@
         "resent": "Enviamos um novo código.",
         "different_email": "Usar outro e-mail",
         "close": "Fechar"
+    },
+    "pdfExport": {
+        "headers": {
+            "exercise": "EXERCÍCIO",
+            "sets": "SÉRIES",
+            "reps": "REPS",
+            "rir": "RIR",
+            "rest": "DESCANSO"
+        },
+        "failure": "FALHA",
+        "dayLabel": "DIA {{number}}"
     }
 }
