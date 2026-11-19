@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -30,7 +31,7 @@ async function flush() {
   await Promise.resolve();
 }
 
-async function openTrayAndAgree(ConsentModal: () => JSX.Element | null, optIntoAnalytics: boolean) {
+async function openTrayAndAgree(ConsentModal: ComponentType, optIntoAnalytics: boolean) {
   render(
     <MemoryRouter>
       <ConsentModal />
