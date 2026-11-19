@@ -755,5 +755,13 @@
         },
         "failure": "FALLO",
         "dayLabel": "DÍA {{number}}"
+    },
+    "errors": {
+        "route": {
+            "title": "Esta página tuvo un problema.",
+            "description": "El resto de la app sigue funcionando. Inténtalo de nuevo o vuelve al inicio.",
+            "try_again": "Intentar de nuevo",
+            "go_home": "Ir al inicio"
+        }
     }
 }

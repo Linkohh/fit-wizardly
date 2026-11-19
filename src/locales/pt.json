@@ -422,5 +422,13 @@
         },
         "failure": "FALHA",
         "dayLabel": "DIA {{number}}"
+    },
+    "errors": {
+        "route": {
+            "title": "Esta página teve um problema.",
+            "description": "O resto do app continua funcionando. Tente novamente ou volte ao início.",
+            "try_again": "Tentar novamente",
+            "go_home": "Ir para o início"
+        }
     }
 }

@@ -11,7 +11,8 @@ import { EdgeSwipeBack } from "@/components/navigation/EdgeSwipeBack";
 import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
 import { useThemeStore } from "@/stores/themeStore";
 import { PageTransition } from "@/components/ui/page-transition";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ErrorBoundary, type ErrorFallbackProps } from "@/components/ErrorBoundary";
+import { RouteErrorFallback } from "@/components/RouteErrorFallback";
 import { TrainerGuard } from "./components/TrainerGuard";
 import { OnboardingGuard } from "./components/OnboardingGuard";
 import { useAuthStore } from "./stores/authStore";
@@ -198,6 +199,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+const renderRouteFallback = (props: ErrorFallbackProps) => <RouteErrorFallback {...props} />;
+
 function AnimatedRoutes() {
   const location = useLocation();
   // Feature flags are build-time values. They are read on render (a cheap env lookup)
@@ -212,11 +215,13 @@ function AnimatedRoutes() {
       <NavigationDirectionProvider>
         <AnimatePresence mode="wait" initial={false}>
           <PageTransition key={location.pathname}>
-            <Suspense fallback={<LoadingScreen />}>
-              <Routes location={location}>
-                <Route path="/onboarding" element={<OnboardingPage />} />
-              </Routes>
-            </Suspense>
+            <ErrorBoundary key={location.pathname} renderFallback={renderRouteFallback}>
+              <Suspense fallback={<LoadingScreen />}>
+                <Routes location={location}>
+                  <Route path="/onboarding" element={<OnboardingPage />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
           </PageTransition>
         </AnimatePresence>
       </NavigationDirectionProvider>
@@ -228,89 +233,93 @@ function AnimatedRoutes() {
       <OnboardingGuard>
         <AnimatePresence mode="wait" initial={false}>
           <PageTransition key={location.pathname}>
-            <Suspense fallback={<LoadingScreen />}>
-              <Routes location={location}>
-                <Route path="/" element={<Index />} />
-                <Route path="/wizard" element={<WizardPage />} />
+            {/* Per-route boundary: a crash in one page leaves the header and shell working.
+                Keyed by pathname so navigating away clears the error. */}
+            <ErrorBoundary key={location.pathname} renderFallback={renderRouteFallback}>
+              <Suspense fallback={<LoadingScreen />}>
+                <Routes location={location}>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/wizard" element={<WizardPage />} />
 
-                <Route path="/plan" element={<PlanPage />} />
-                <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
-                <Route path="/nutrition" element={<NutritionPage />} />
-                <Route path="/history" element={<HistoryPage />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/exercises" element={<ExerciseLibraryPage />} />
-
-                {/* Auth-backed trainer routes (coach feature flag) */}
-                {coachEnabled && (
-                  <>
-                    <Route path="/clients">
-                      <Route index element={
+                  <Route path="/plan" element={<PlanPage />} />
+                  <Route path="/workout/:planId/:dayIndex" element={<WorkoutLogger />} />
+                  <Route path="/nutrition" element={<NutritionPage />} />
+                  <Route path="/history" element={<HistoryPage />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/exercises" element={<ExerciseLibraryPage />} />
+  
+                  {/* Auth-backed trainer routes (coach feature flag) */}
+                  {coachEnabled && (
+                    <>
+                      <Route path="/clients">
+                        <Route index element={
+                          <RequireAuth>
+                            <TrainerGuard>
+                              <ClientsPage />
+                            </TrainerGuard>
+                          </RequireAuth>
+                        } />
+                        <Route path=":clientId" element={
+                          <RequireAuth>
+                            <TrainerGuard>
+                              <ClientDetailsPage />
+                            </TrainerGuard>
+                          </RequireAuth>
+                        } />
+                      </Route>
+                      <Route path="/templates" element={
                         <RequireAuth>
                           <TrainerGuard>
-                            <ClientsPage />
+                            <TemplateLibrary />
                           </TrainerGuard>
                         </RequireAuth>
                       } />
-                      <Route path=":clientId" element={
+                      <Route path="/revenue" element={
                         <RequireAuth>
                           <TrainerGuard>
-                            <ClientDetailsPage />
+                            <Revenue />
                           </TrainerGuard>
                         </RequireAuth>
                       } />
+                    </>
+                  )}
+  
+                  {/* Demo landing + auth-backed circle membership routes (circles feature flag) */}
+                  {circlesEnabled && (
+                    <Route path="/circles">
+                      <Route index element={<CirclesPage />} />
+  
+                      <Route path="join/:inviteCode" element={
+                        <JoinCircleHandler />
+                      } />
+  
+                      <Route path=":circleId" element={
+                        <RequireAuth>
+                          <CircleLayout />
+                        </RequireAuth>
+                      }>
+                        <Route index element={<CircleDashboardTab />} />
+                        <Route path="feed" element={<CircleFeedTab />} />
+                        <Route path="leaderboard" element={<CircleLeaderboardTab />} />
+                        <Route path="challenges" element={<CircleChallengesTab />} />
+                        <Route path="members" element={<CircleMembersTab />} />
+                        <Route path="settings" element={<CircleSettingsTab />} />
+                      </Route>
                     </Route>
-                    <Route path="/templates" element={
-                      <RequireAuth>
-                        <TrainerGuard>
-                          <TemplateLibrary />
-                        </TrainerGuard>
-                      </RequireAuth>
-                    } />
-                    <Route path="/revenue" element={
-                      <RequireAuth>
-                        <TrainerGuard>
-                          <Revenue />
-                        </TrainerGuard>
-                      </RequireAuth>
-                    } />
-                  </>
-                )}
-
-                {/* Demo landing + auth-backed circle membership routes (circles feature flag) */}
-                {circlesEnabled && (
-                  <Route path="/circles">
-                    <Route index element={<CirclesPage />} />
-
-                    <Route path="join/:inviteCode" element={
-                      <JoinCircleHandler />
-                    } />
-
-                    <Route path=":circleId" element={
-                      <RequireAuth>
-                        <CircleLayout />
-                      </RequireAuth>
-                    }>
-                      <Route index element={<CircleDashboardTab />} />
-                      <Route path="feed" element={<CircleFeedTab />} />
-                      <Route path="leaderboard" element={<CircleLeaderboardTab />} />
-                      <Route path="challenges" element={<CircleChallengesTab />} />
-                      <Route path="members" element={<CircleMembersTab />} />
-                      <Route path="settings" element={<CircleSettingsTab />} />
-                    </Route>
-                  </Route>
-                )}
-
-                {MCLIntegrationTest && (
-                  <Route path="/mcl" element={<MCLIntegrationTest />} />
-                )}
-
-                <Route path="/legal" element={<LegalPage />} />
-                <Route path="/guide" element={<UserGuide />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+                  )}
+  
+                  {MCLIntegrationTest && (
+                    <Route path="/mcl" element={<MCLIntegrationTest />} />
+                  )}
+  
+                  <Route path="/legal" element={<LegalPage />} />
+                  <Route path="/guide" element={<UserGuide />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
+            </ErrorBoundary>
           </PageTransition>
         </AnimatePresence>
       </OnboardingGuard>

@@ -56,9 +56,9 @@ export function ConsentModal() {
   }, []);
 
   const handleAgree = () => {
+    // Write every consent key first. CONSENT_RESOLVED_EVENT listeners (crash reporting,
+    // food lookup, install prompt) read storage when the event fires, so it goes last.
     localStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
-    window.dispatchEvent(new Event(CONSENT_RESOLVED_EVENT));
-    setConsent(analyticsOptIn);
 
     if (analyticsOptIn) {
       localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
@@ -71,6 +71,9 @@ export function ConsentModal() {
     } else {
       localStorage.removeItem(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY);
     }
+
+    setConsent(analyticsOptIn);
+    window.dispatchEvent(new Event(CONSENT_RESOLVED_EVENT));
 
     setOpen(false);
   };

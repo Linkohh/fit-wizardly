@@ -3,10 +3,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { devLog } from '@/lib/devLog';
+import { captureError } from '@/lib/monitoring';
+
+export interface ErrorFallbackProps {
+    error?: Error;
+    /** Clears the boundary so its children render again. */
+    reset: () => void;
+}
 
 interface Props {
     children: ReactNode;
     fallback?: ReactNode;
+    /** Renders a fallback that can reset the boundary. Takes precedence over `fallback`. */
+    renderFallback?: (props: ErrorFallbackProps) => ReactNode;
 }
 
 interface State {
@@ -15,14 +24,9 @@ interface State {
     errorInfo?: ErrorInfo;
 }
 
-// Log error to external service (stub for now)
+// Sends to Sentry when crash reporting is on (contract #8), otherwise logs to the console.
 function logErrorToService(error: Error, errorInfo: ErrorInfo) {
-    // In production, send to Sentry, LogRocket, etc.
-    console.error('[ErrorBoundary] Caught error:', error);
-    console.error('[ErrorBoundary] Component stack:', errorInfo.componentStack);
-
-    // Could send to external service here:
-    // fetch('/api/errors', { method: 'POST', body: JSON.stringify({ error, errorInfo }) })
+    captureError(error, { componentStack: errorInfo.componentStack ?? '' });
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -46,6 +50,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
     render() {
         if (this.state.hasError) {
+            if (this.props.renderFallback) {
+                return this.props.renderFallback({ error: this.state.error, reset: this.handleReset });
+            }
+
             if (this.props.fallback) {
                 return this.props.fallback;
             }

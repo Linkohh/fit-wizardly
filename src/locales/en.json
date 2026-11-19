@@ -886,5 +886,13 @@
         },
         "failure": "FAILURE",
         "dayLabel": "DAY {{number}}"
+    },
+    "errors": {
+        "route": {
+            "title": "This page hit a problem.",
+            "description": "The rest of the app still works. Try again, or go back home.",
+            "try_again": "Try again",
+            "go_home": "Go home"
+        }
     }
 }
