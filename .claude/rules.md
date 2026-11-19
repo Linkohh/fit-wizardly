@@ -65,8 +65,9 @@ When unsure about patterns, reference these exemplary files:
 | Component | `src/components/motivation/WelcomeHero.tsx` |
 | Store | `src/stores/authStore.ts` |
 | Page | `src/pages/Wizard.tsx` |
-| Validation | `src/lib/validation/fitness.ts` |
-| Hook | `src/hooks/useWizardForm.ts` |
+| Saved-data checks | `src/stores/planStore.persistence.ts` |
+| Zod schema | `src/features/mcl/hooks/useSculptPrefs.ts` |
+| Hook | `src/hooks/useCountUp.ts` |
 | Test | `src/test/onboardingStore.test.ts` |
 
 ## Import Order

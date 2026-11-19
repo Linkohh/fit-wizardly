@@ -92,12 +92,13 @@ You may edit **only** files your lane owns in the current wave, plus the listed 
 
 1. **Lockfile:** never hand-merge `package-lock.json`. On conflict, take `preview_b`'s version, then run `npm install <your packages>` again and commit.
 2. **Locales:** add keys only inside your own namespace object (for example `featureFlags.*`, `sync.*`). On conflict, keep both sides. **Never rewrite a locale file through a JSON parser** (Python `json`, `JSON.parse` + `JSON.stringify`). `pt.json` has a duplicate `"wizard"` key, and parsers silently drop the first copy. Edit the text directly and check that `git diff` shows only your lines.
-3. **`.env.example`:** add variables in your own labelled block. On conflict, keep both.
-4. **Rebase** onto `origin/preview_b` just before opening the PR, and again if Lincoln asks after an earlier merge.
-5. **One PR per lane per day.** Title: `[Lane X · Day N] short summary`. Link the handoff note in the body.
-6. **Missing contract:** if a contract you need hasn't merged yet, code against the shape in `CONTRACTS.md` with a local stub, and say so in your handoff. Don't wait, and don't redefine it.
-7. **Changing a published contract** needs a handoff note and Lincoln's OK before merge.
-8. **Finished early?** Write up next-day prep in your handoff. Do not start another lane's work.
+3. **New locale namespaces:** add a new top-level namespace (for example `"pdfExport": { … }`) **in alphabetical order among the top-level keys** of each locale file, never appended at the end. Appending at the end makes every lane's PR conflict on the same closing lines (four PRs collided there in Wave 1 / Day 3). Keys inside an existing namespace keep their current order. The parser rule above still applies: insert the block as text.
+4. **`.env.example`:** add variables in your own labelled block. On conflict, keep both.
+5. **Rebase** onto `origin/preview_b` just before opening the PR, and again if Lincoln asks after an earlier merge.
+6. **One PR per lane per day.** Title: `[Lane X · Day N] short summary`. Link the handoff note in the body.
+7. **Missing contract:** if a contract you need hasn't merged yet, code against the shape in `CONTRACTS.md` with a local stub, and say so in your handoff. Don't wait, and don't redefine it.
+8. **Changing a published contract** needs a handoff note and Lincoln's OK before merge.
+9. **Finished early?** Write up next-day prep in your handoff. Do not start another lane's work.
 
 ## Daily cycle
 

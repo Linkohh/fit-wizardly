@@ -117,7 +117,7 @@ Data stores other than `trainerStore` and `onboardingStore`, the sync code, nati
 1. `npm install @sentry/react`. Don't add `@sentry/capacitor` yet; native setup is a Lane H follow-up after Gate 2. Note this in your handoff.
 2. Create `src/lib/monitoring.ts` (contract #8):
    - `initMonitoring()` runs `Sentry.init` only when `import.meta.env.VITE_SENTRY_DSN` is set **and** `hasAnalyticsConsent()` returns true (`src/lib/consent.ts`). Use a separate `crashReportsConsent` key if you add one on Day 5. Until then, reuse the analytics consent.
-   - Set `release: __APP_VERSION__`, `environment: import.meta.env.MODE`, `tracesSampleRate: 0` (errors only), and `sendDefaultPii: false`.
+   - Set `release: __APP_VERSION__`, `environment: import.meta.env.MODE`, `tracesSampleRate: 0` (errors only), and the strictest `dataCollection` setting (Sentry SDK v11 removed `sendDefaultPii`; see the Lane C Day 3 handoff).
    - `beforeSend`: strip query strings and drop any `extra` keys that look like health data (weights, measurements, food).
    - `captureError(error, context?)` always works. It forwards to Sentry if initialised, otherwise `console.error`.
    - Listen for `CONSENT_RESOLVED_EVENT` so monitoring starts as soon as the user consents.

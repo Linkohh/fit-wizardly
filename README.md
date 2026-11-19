@@ -52,8 +52,8 @@ FitWizard is **free**. Most of the app works without an account (guest mode). An
 | Light and dark themes | ✅ Shipped | |
 | Languages | ⚠️ Partial | English is complete. Spanish, German and Portuguese are partly translated; v1 targets English and Spanish (roadmap 3.3) |
 | Cloud sync of plans for signed-in users | ✅ Shipped | |
-| **Saving workout logs, nutrition and measurements between sessions** | ⚠️ **Not yet** | Today these are kept in memory only and are lost when the app closes. This is the top launch item (roadmap Phase 1, project Wave 1) |
-| Cloud sync of logs, nutrition, measurements and readiness | 🗓️ Planned | Roadmap 1.4 |
+| Saving workout logs, nutrition, measurements, readiness and achievements between sessions | ✅ Shipped | Kept on the device (IndexedDB on the web, app storage on iOS and Android), never in localStorage. See ADR 11 and `docs/store/DATA_INVENTORY.md` |
+| Cloud sync of logs, nutrition, measurements, readiness, achievements and custom exercises | ✅ Shipped (signed-in users) | On since #66. Syncing before sign-out, with an unsent-changes warning, is still to come (roadmap 1.4, Lane E Day 7) |
 | Account deletion | 🗓️ Planned | Roadmap 1.5 |
 | Circles (social groups, feed, challenges) | 🚩 Behind a flag (`VITE_FEATURE_CIRCLES`) | Not part of v1 |
 | Coach portal (clients, templates, revenue) | 🚩 Behind a flag (`VITE_FEATURE_COACH`) | Not part of v1; parts use sample data |
