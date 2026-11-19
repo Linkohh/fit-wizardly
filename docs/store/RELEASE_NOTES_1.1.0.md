@@ -1,6 +1,6 @@
 # Release notes: FitWizard 1.1.0 (draft)
 
-> **Draft, 2026-11-18 (Lane A, Day 3).** Built from the Wave 1 work merged into `preview_b` (#44–#62, #64–#66). Wave 2 adds more before release (see "Still to come"). On Day 7, Lane A finishes this file and copies it into `src/data/changelog.ts`, whose test requires the top entry to match `package.json`.
+> **Draft, 2026-11-18 (Lane A, Day 3).** Built from the Wave 1 work merged into `preview_b` (#44–#62, #64–#67). Wave 2 adds more before release (see "Still to come"). On Day 7, Lane A finishes this file and copies it into `src/data/changelog.ts`, whose test requires the top entry to match `package.json`.
 >
 > The sections match `ChangelogHighlights` in `src/data/changelog.ts`: **New**, **Improved**, **Fixed**. Keep bullets short and in user language. Don't mention AI, and don't make medical claims.
 
@@ -27,6 +27,7 @@
 - Hidden features (social circles and the coach tools) no longer appear in menus, search, the guide or your badge list.
 - The command palette no longer links to pages that don't exist.
 - Badges that couldn't be earned have been removed.
+- Exported PDF plans read cleanly: day titles no longer repeat ("Day 1: Day 1"), column headings stay on one line, and emoji no longer print as stray symbols.
 
 ## Still to come before 1.1.0 ships (Wave 2, not merged yet)
 Add these on Day 7 if they merge:
@@ -34,7 +35,6 @@ Add these on Day 7 if they merge:
 - Delete your account from inside the app, and erase data on this device (Lane F, Day 4).
 - Optional crash reports and product analytics, both off unless you opt in (Lane C, Days 3–5).
 - Clearer empty screens for History, Analytics and Nutrition (Lane B, Day 3).
-- PDF export fixes (Lane D, Day 3).
 - Rewritten privacy policy and terms (Lane A, Day 4).
 
 ## Left out on purpose

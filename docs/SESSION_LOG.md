@@ -146,7 +146,7 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
-### 2026-11-18 — Lane A Day 3: Wave 1 Paperwork, README, 1.1.0 Notes Draft (branch `lane-a/day-3`, from `preview_b` @ `172c428`, rebased onto `12fbcbb` after #64, #62, #65 and #66)
+### 2026-11-18 — Lane A Day 3: Wave 1 Paperwork, README, 1.1.0 Notes Draft (branch `lane-a/day-3`, from `preview_b` @ `172c428`, rebased onto `3d95fed` after #64, #62, #65, #66 and #67)
 
 - **What was done:**
   - `docs/store/DATA_INVENTORY.md`:
@@ -160,15 +160,16 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
     - Folded in the Lane H Day 3 handoff (#62, `4b3bb21`): email-code sign-in is Now (no new stored data; the code isn't stored); release notes list it under New. Board row H Day 3 is ✅. DEBT-058 resolved; DEBT-084 and DEBT-085 added from that handoff (renumbered from 079/080: the coordinator's Lane E Day 6 entry already uses DEBT-079). DEBT-075 stays open until Lincoln sets `ALLOWED_ORIGINS`.
     - Folded in the Lane F Day 3 handoff (#65, `521be87`): the inventory's account-deletion row describes the built (not yet deployed) function and its cascade; board row F Day 3 is ✅. No new stored data or third party. DEBT-086 to DEBT-088 added.
     - Folded in the Lane E Day 6 handoff (#66, `12fbcbb`): sync is on for signed-in users, so the seven 007 tables' Supabase rows are Now. New device key `fitwizard-sync-first-upload` (erased by `clearLocalUserData`). The sign-out note now says syncing before sign-out moved to Lane E Day 7. Release notes and README list cloud sync as shipped. Board row E Day 6 is ✅.
+    - Folded in the Lane D Day 3 handoff (#67, `3d95fed`): PDF export fixes listed under Fixed in the release notes; board row D Day 3 is ✅. DEBT-074 and DEBT-078 resolved (new startup baseline 365.2 KB gzip), DEBT-060 updated with the shadcn finding. Lane D's proposed DEBT-079/080 logged as DEBT-089/090. No new stored data or third party.
   - `CLAUDE.md` golden paths (DEBT-069): replaced the unused `fitness.ts` with `planStore.persistence.ts` (saved-data checks) and `useSculptPrefs.ts` (a small Zod schema in use). In `.claude/rules.md`, the same swap, and the Hook example is now `useCountUp.ts`. The old one, `useWizardForm.ts`, uses `as any`.
   - `.claude/*.md` added to Lane A's "Owns" list in `LANE-A.md`. The README ownership table already had it.
   - `README.md` → Features: "Saving workout logs…" is now ✅. Cloud sync is now 🟡, with the engine merged (#59).
   - New `docs/store/RELEASE_NOTES_1.1.0.md` (draft, user language). It covers Wave 1 and lists the Wave 2 items to add on Day 7.
-- **Bookkeeping:** when this PR was opened, no other lane had a Day 3 PR. Since then, H (#62), F (#65), E Day 5 (#64) and E Day 6 (#66) merged and are folded in below; B, C and D are still to come.
+- **Bookkeeping:** when this PR was opened, no other lane had a Day 3 PR. Since then, H (#62), F (#65), E Day 5 (#64), E Day 6 (#66) and D (#67) merged and are folded in below; B and C are still to come.
 - **Verification:** lint 0 errors / 4 warnings, typecheck clean, tests pass (count in the handoff), 0 broken relative links.
 - **New issues:** DEBT-076 (since fixed by the coordinator in #64), DEBT-077. **Resolved:** DEBT-069, DEBT-076. DEBT-078 is reserved for the coordinator's Day 5 bundle-size note.
 - **Next steps:**
-  1. Fold the Day 3 handoffs from B, C and D.
+  1. Fold the Day 3 handoffs from B and C.
   2. Gate 1 (Lincoln).
   3. Lane A Day 4: privacy policy, using `DATA_INVENTORY.md`.
 
@@ -916,7 +917,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-057 | **RESOLVED 2026-11-18** (Lane D Day 2 (#54) deleted the Wisdom UI; the leftover store is DEBT-067). ~~Unreachable Wisdom UI still says "AI"~~ | `src/components/wisdom/*`, `src/pages/Plan.tsx` | Lane D Day 2: delete. |
 | DEBT-058 | **RESOLVED 2026-11-18** (Lane H Day 3, #62: `ios:live` uses the Mac's LAN address when the dev server listens on the LAN; `ios:live:cap` stays Simulator only). ~~`ios:live:cap` uses `--host=localhost`, so live reload can't reach a physical iPhone~~ | `package.json`, `scripts/dev-ios-live.mjs` | Lane H Day 3. |
 | DEBT-059 | Export v2 omits achievements, custom exercises, exercise favourites and collections, and the profile | `src/lib/dataExport.ts` | Lane F Day 4 (export v3). |
-| DEBT-060 | `tailwind.config.ts` isn't loaded by Tailwind 4; only `components.json` points at it | `tailwind.config.ts` | Lane D Day 3 checks whether shadcn's CLI needs it. |
+| DEBT-060 | `tailwind.config.ts` isn't loaded by Tailwind 4; only `components.json` points at it | `tailwind.config.ts` | **Checked by Lane D Day 3 (#67): shadcn's CLI doesn't need it.** With `"config": ""` in `components.json`, `shadcn info` reports Tailwind v4 and `src/index.css`. Follow-up (next owner): blank `config`, delete `tailwind.config.ts`, remove its block in `eslint.config.js` (line 28). |
 | DEBT-061 | Analytics consent stored twice (`fitwizard-analytics.hasConsented`, `fitwizard_analytics_consent`) | `src/stores/analyticsStore.ts`, `src/lib/consent.ts` | Lane C Days 3–5: settle on one key. |
 | DEBT-062 | "FitWizardly" in a user-visible coach note | `src/lib/analyticsIntelligence.ts:840` | Lane B Day 3 (one-word exception). |
 | DEBT-063 | `<html lang>` doesn't change with the language (screen readers) | `src/lib/i18n.ts` | Lane B Day 3. |
@@ -930,17 +931,19 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-071 | A circle whose only admin deletes their account has no admin left | circles | Lane F Day 6 (Circles is off in v1). |
 | DEBT-072 | CSP `connect-src` still allows `wger.de`; no browser code needs it | `vercel.json` | Lane H, later, after checking production. |
 | DEBT-073 | `/api/*` rate limit is in memory and per instance | `api/_lib/guard.ts` | Add a Vercel firewall rate-limit rule before launch (Lincoln / Lane H). |
-| DEBT-074 | The dev wger proxy returns `err.message`; production returns a generic 502 | `vite.config.ts:104` | Lane D Day 3. |
+| DEBT-074 | **RESOLVED 2026-11-18** (Lane D Day 3, #67: the dev proxy now returns 502 `Upstream request failed`, matching production). ~~The dev wger proxy returns `err.message`; production returns a generic 502~~ | `vite.config.ts:104` | Lane D Day 3. |
 | DEBT-076 | **RESOLVED 2026-11-18** (Lane E Day 5, #64: the browser is asked after the first save). ~~**MEDIUM.** `requestPersistentStorage()` is never called, so browsers may still evict IndexedDB data under storage pressure (ADR 11 meant it to run after the first save)~~ | `src/lib/storage/appStorage.ts` | Lane E Day 5 or 6: call it once after the first user-data save. |
 | DEBT-077 | `SCHEMAS.md`, `TESTING.md`, `SECURITY.md`, `ENGINEERING.md` and `AI_GUIDELINES.md` still use the unused `src/lib/validation/fitness.ts` in examples (they carry the stale-doc banner) | `docs/*.md` | Lane A, when each doc's area is worked on. |
 
 | DEBT-079 | The email-code step (`input-otp`) is in the startup bundle, about 6 KB gzip | `src/components/auth/AuthModal.tsx` | Lane H: lazy-load `EmailCodeStep`. |
-| DEBT-078 | Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4 | build | Lane D: confirm the cause (likely the self-hosted font CSS) and record the new baseline. |
+| DEBT-078 | **RESOLVED 2026-11-18** (Lane D Day 3, #67). ~~Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4~~ Cause confirmed: the self-hosted font CSS (36 `@font-face` rules, +14.2 KB gzip) and #62's email-code sign-in (+6.3 KB). **New baseline: 365.2 KB gzip** (1365.4 KB raw, 5 files) on `12fbcbb` plus #67, via `npm run bundle:report`. | build | — |
 | DEBT-084 | `EMAIL_CODE_TTL_MS` (10 minutes) has to match Supabase's Email OTP Expiration by hand; nothing checks it | `src/components/auth/EmailCodeStep.tsx` | Lincoln sets 600 s in L11; any change must update both. |
 | DEBT-085 | Send errors in the sign-in dialog show Supabase's English message as is (for example the rate-limit text) | `src/components/auth/AuthModal.tsx` | Lane H or J1: map known error codes to `auth.*` keys. |
 | DEBT-086 | The Deno tests for `delete-account` (15) don't run in CI | `.github/workflows/ci.yml` | Lane D, Wave 2: add `npx -y deno@2 test --no-config supabase/functions/delete-account/`. |
 | DEBT-087 | If the Supabase project moves to asymmetric JWT signing keys, the gateway's `verify_jwt` may reject valid tokens; the function verifies the token itself either way | Supabase project, `supabase/functions/delete-account/` | Lincoln at staging deploy: switch to `--no-verify-jwt` only if valid tokens are rejected. |
 | DEBT-088 | `ORCHESTRATION.md` still documents the nonexistent `SUPABASE_SERVICE_KEY` and `FRONTEND_URL` (it carries the stale-doc banner) | `docs/ORCHESTRATION.md` (lines ~82–85, ~419) | Lane A, when that doc is rewritten; `docs/SECURITY.md` (#65) has the correct env table. |
+| DEBT-089 | PDF cover page and section labels (`WARM UP`, `COOL DOWN`, `Generated on`, `ATHLETE`, `Days / Week`) are hardcoded English; the date uses `en-US` | `src/lib/pdfExport.ts` | Lane J1 (Wave 3), or Lane D. Proposed by Lane D as DEBT-079; renumbered because 079 is taken. |
+| DEBT-090 | PDF warm-up, cool-down and goal note are drawn as one unwrapped line, so very long text can run off the page; jsPDF's standard fonts can't draw non-WinAnsi scripts (fine for en/es) | `src/lib/pdfExport.ts` | Lane D, Wave 2 or later. Proposed by Lane D as DEBT-080; renumbered. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
