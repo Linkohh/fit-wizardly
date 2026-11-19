@@ -2,7 +2,7 @@
 
 The single source for the privacy policy (`src/pages/Legal.tsx`, `docs/privacy-policy.md`), Apple's App Privacy answers and Google Play's Data safety form. When you add stored data or a new third party, add a row here in the same PR (ADR 10).
 
-- **Built from:** the code on `preview_b` at 2026-11-17 (every persisted store in `src/stores/`, every `fetch` and Supabase call in `src/` and `api/`, the CSP in `vercel.json`, `index.html`, `api/_lib/guard.ts`), plus the Lane D Day 1, Lane E Day 2–6, Lane F Day 3 and Lane H Day 1–3 handoffs. Updated 2026-11-18 for Wave 1 Day 2 (self-hosted fonts, wger through the proxy, sync keys, API limits).
+- **Built from:** the code on `preview_b` at 2026-11-17 (every persisted store in `src/stores/`, every `fetch` and Supabase call in `src/` and `api/`, the CSP in `vercel.json`, `index.html`, `api/_lib/guard.ts`), plus the Lane D Day 1, Lane C Day 3, Lane D Day 3, Lane E Day 2–6, Lane F Day 3 and Lane H Day 1–3 handoffs. Updated 2026-11-18 for Wave 1 Day 2 (self-hosted fonts, wger through the proxy, sync keys, API limits).
 - **Status:** **Now** means it's in the code today. **After Wave N** means planned in the launch project and not built yet.
 - **Device storage** means IndexedDB database `fitwizard`, store `kv`, on the web, and `Directory.Data/stores/<key>.json` (Capacitor Filesystem) on iOS and Android. It is never localStorage (ADR 11).
 - **"Signed in"** means Supabase is configured and the user has signed in with email. Guests never send training data to Supabase.
@@ -54,7 +54,7 @@ Every row in this table except exercise interactions (which live only in memory 
 | Consent given (timestamp) | `fitwizard_consent_v1` | localStorage | Nobody | **Now** |
 | Analytics opt-in | `fitwizard_analytics_consent` and `fitwizard-analytics` (`hasConsented`) | localStorage | Nobody | **Now** |
 | Food lookup opt-in (Open Food Facts) | `fitwizard_nutrition_lookup_consent` | localStorage | Nobody | **Now** |
-| Crash reporting opt-in | set by Lane C | localStorage | Nobody | **After Wave 1** (Lane C Day 3) |
+| Crash-report opt-in | `fitwizard_analytics_consent`, shared with analytics until Lane C Day 5 adds its own toggle (then `fitwizard_crash_reports_consent`) | localStorage | Nobody | **Now** (shared key, #69) |
 | Language | `fitwizard-language` | localStorage | Nobody | **Now** |
 | Theme | `fitwizard-theme` | localStorage | Nobody | **Now** |
 | About and What's new seen | `fitwizard-about-seen`, `fitwizard-changelog-seen` | localStorage | Nobody | **Now** |
@@ -84,13 +84,13 @@ Every row in this table except exercise interactions (which live only in memory 
 | Exercise search fallback | search text | API Ninjas (`api.api-ninjas.com`) through the Vercel function `/api/exercise-search-ninjas` | Server side; the user's IP stays with Vercel | Search when wger fails | No (no personal data) | API Ninjas' policy | **Now** |
 | Daily quote | none | API Ninjas through `/api/motivation-quote` | Server side | Motivation | No | — | **Now** |
 | Page views | page path, referrer, device type, country (from IP) | Vercel Web Analytics (same origin, `/_vercel/insights`) | `@vercel/analytics`, mounted only with consent (`src/App.tsx`) | Product analytics | Yes: analytics opt-in | Vercel's policy | **Now** |
-| Crash reports | error, stack trace, device and OS, app version; no health values | Sentry | `src/lib/monitoring.ts` (contract 8) | Fix crashes | Yes: opt-in, off by default | Sentry plan default | **After Wave 1** (Lane C Day 3) |
+| Crash reports | error message, stack trace, component stack, app version, browser and OS, page path without query string or hash. No name, email, account ID, cookies or workout, body or nutrition data; health-like `extra` keys and console breadcrumbs are dropped before sending | Sentry (`*.ingest.sentry.io`; region set by the DSN). Sentry sees the IP address when a report is sent; the project should be set not to store it (L6) | `@sentry/browser`, loaded only when a DSN is set at build time **and** the user opted in (`src/lib/monitoring.ts`, contract 8); route error boundaries report through `captureError()` | Fix crashes | Yes: the analytics opt-in for now; its own toggle from Lane C Day 5. Not yet stopped when consent is revoked mid-session (Day 5) | Sentry's default (about 90 days on most plans; Lincoln confirms at L6) | **Built, off until L6** (#69): no DSN is set, and the production build contains no Sentry code |
 | Product analytics events | event name (for example `plan_generated`, `workout_completed`), simple properties; never weights, measurements, readiness or food | PostHog | `src/lib/analytics/track.ts` (contract 9) | Product decisions | Yes: analytics opt-in | PostHog plan default | **After Wave 2** (Lane C Day 4) |
 | Workout reminders and rest timer alerts | reminder days and time, rest end time | Nobody: local notifications, on the device only | `useLocalNotifications` (contract 10) | Reminders | OS notification permission | Until cancelled | **After Wave 2** (Lane H Days 5–6) |
 | Circles (social groups) | circle membership, activity posts, reactions, comments | Supabase (`circles`, `circle_members`, `circle_activities`, `activity_reactions`, `activity_comments`, `circle_challenges`) | Supabase client | Social feature | — | Until deleted | Code exists, but **off** (`VITE_FEATURE_CIRCLES` defaults to false). Not in v1 |
 | Coach portal | trainer mode, client list | localStorage `fitwizard-trainer`; Supabase `profiles` (`is_trainer`) | Supabase | Coach feature | — | Cleared on sign-out | Code exists, but **off** (`VITE_FEATURE_COACH` defaults to false). Not in v1 |
 
-Not active, recorded so nobody discloses them by mistake: `src/lib/analytics.ts` (wizard funnel events) only logs to the console in development and has no endpoint; the `analyticsStore` event queue has no upload (the `fetch` is commented out); `src/components/ErrorBoundary.tsx` sends nothing.
+Not active, recorded so nobody discloses them by mistake: `src/lib/analytics.ts` (wizard funnel events) only logs to the console in development and has no endpoint; the `analyticsStore` event queue has no upload (the `fetch` is commented out). `src/components/ErrorBoundary.tsx` now reports through `captureError()`, which sends nothing until Sentry is configured and consented (see Crash reports).
 
 ## How this maps to the iOS privacy manifest
 
@@ -117,7 +117,7 @@ Checks for whoever fills in the forms:
 | Open Food Facts | Barcode and food search | Barcode or search text, IP | France (Open Food Facts is a French non-profit) | [world.openfoodfacts.org/privacy](https://world.openfoodfacts.org/privacy) | **Now**, with consent |
 | wger | Exercise catalogue and images | Catalogue and search requests from Vercel's servers (Vercel's IP); image requests from the user's device (the user's IP) | Germany (wger.de), not verified | [wger.de](https://wger.de) (policy URL not verified) | **Now** |
 | API Ninjas | Exercise search fallback, daily quotes | Search text, from Vercel's servers only | Unknown | [api-ninjas.com](https://api-ninjas.com) (policy URL not verified) | **Now** |
-| Sentry | Crash reports | Error details, device and OS, app version | Chosen when Lincoln creates the project (US or EU) | [sentry.io/privacy](https://sentry.io/privacy/) | **After Wave 1**, opt-in |
+| Sentry (Functional Software, Inc.) | Crash reports | Errors only, opt-in; no PII and no health data (see the crash-reports row) | Region of the DSN; EU recommended; Lincoln picks at L6 | [sentry.io/privacy](https://sentry.io/privacy/) | **Built, off until L6** (#69) |
 | PostHog | Product analytics | Event names and simple properties, no health values | Chosen when Lincoln creates the project (US or EU) | [posthog.com/privacy](https://posthog.com/privacy) | **After Wave 2**, opt-in |
 | Apple / Google | App distribution; native local notifications are scheduled by the OS on the device | Nothing from the app beyond what the stores collect themselves | — | — | **After Wave 2** |
 
