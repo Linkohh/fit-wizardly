@@ -157,6 +157,70 @@ describe('one-time move from sessionStorage', () => {
   });
 });
 
+describe('when localStorage is unavailable', () => {
+  function blockStorage(kind: 'localStorage' | 'sessionStorage') {
+    vi.spyOn(window, kind, 'get').mockImplementation(() => {
+      throw new DOMException('Site data is blocked', 'SecurityError');
+    });
+  }
+
+  it('keeps the old sessionStorage session and new writes for this tab', async () => {
+    window.sessionStorage.setItem(KEY, 'old-session');
+    blockStorage('localStorage');
+
+    const storage = createAuthSessionStorage(KEY);
+    await expect(storage.getItem(KEY)).resolves.toBe('old-session');
+    expect(window.sessionStorage.getItem(KEY)).toBe('old-session');
+
+    await storage.setItem(KEY, 'fresh-session');
+    await expect(storage.getItem(KEY)).resolves.toBe('fresh-session');
+  });
+
+  it('keeps sessions in memory for the page when no web storage works', async () => {
+    blockStorage('localStorage');
+    blockStorage('sessionStorage');
+
+    const storage = createAuthSessionStorage(KEY);
+    await storage.setItem(KEY, 'fresh-session');
+    await expect(storage.getItem(KEY)).resolves.toBe('fresh-session');
+
+    await storage.removeItem(KEY);
+    await expect(storage.getItem(KEY)).resolves.toBeNull();
+  });
+
+  it('keeps the migrated session when localStorage writes fail', async () => {
+    window.sessionStorage.setItem(KEY, 'old-session');
+    const realSetItem = Storage.prototype.setItem;
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (this: Storage, key, value) {
+      // Probe writes succeed; the real session write hits a full quota.
+      if (this === window.localStorage && key === KEY) {
+        throw new DOMException('Quota exceeded', 'QuotaExceededError');
+      }
+      realSetItem.call(this, key, value);
+    });
+
+    const storage = createAuthSessionStorage(KEY);
+    await expect(storage.getItem(KEY)).resolves.toBe('old-session');
+    // Only memory holds it, so the tab's copy is kept for a reload.
+    expect(window.sessionStorage.getItem(KEY)).toBe('old-session');
+
+    await storage.setItem(KEY, 'fresh-session');
+    await expect(storage.getItem(KEY)).resolves.toBe('fresh-session');
+  });
+
+  it('does not delete the old copy when the new storage did not save it', async () => {
+    mocks.nativeApp = true;
+    window.sessionStorage.setItem(KEY, 'old-session');
+    mocks.Preferences.set.mockRejectedValueOnce(new Error('disk full'));
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const storage = createAuthSessionStorage(KEY);
+    await storage.getItem(KEY);
+
+    expect(window.sessionStorage.getItem(KEY)).toBe('old-session');
+  });
+});
+
 describe('with a real Supabase client', () => {
   function makeClient(fetchImpl: typeof fetch) {
     return createClient(SUPABASE_URL, 'anon-key', {

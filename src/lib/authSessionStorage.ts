@@ -5,7 +5,9 @@
  *   SharedPreferences on Android). The WebView's own storage can be cleared by
  *   the OS, so the session is kept outside it. The plugin is loaded lazily.
  * - Web: `window.localStorage`, the Supabase default, so a closed tab or a
- *   browser restart no longer signs people out.
+ *   browser restart no longer signs people out. If localStorage can't be used
+ *   (site data blocked), the session stays in `sessionStorage` for the tab, or
+ *   in memory for the page, rather than being lost.
  *
  * Before this change the session lived in `sessionStorage`. The first time the
  * adapter is used it moves any session found there into the new storage, so
@@ -67,8 +69,11 @@ function loadPreferences(): Promise<PreferencesPlugin> {
   return preferencesPromise;
 }
 
-function createNativeStorage(): AuthSessionStorage {
+function createNativeStorage(): TargetStorage {
   return {
+    async isSavedDurably(key) {
+      return (await this.getItem(key)) !== null;
+    },
     async getItem(key) {
       const { value } = await (await loadPreferences()).get({ key });
       return value ?? null;
@@ -82,16 +87,78 @@ function createNativeStorage(): AuthSessionStorage {
   };
 }
 
-function createWebStorage(): AuthSessionStorage {
+/** Returns the storage only if it can actually be written (it can throw when site data is blocked). */
+function getWritableStorage(kind: 'localStorage' | 'sessionStorage'): Storage | null {
+  const storage = getWindowStorage(kind);
+  if (!storage) return null;
+  try {
+    const probeKey = '__fitwizard_auth_probe__';
+    storage.setItem(probeKey, '1');
+    storage.removeItem(probeKey);
+    return storage;
+  } catch {
+    return null;
+  }
+}
+
+/** Internal: also says whether a key is saved somewhere that outlives the page. */
+interface TargetStorage extends AuthSessionStorage {
+  isSavedDurably(key: string): Promise<boolean>;
+}
+
+interface WebStorageChoice {
+  storage: TargetStorage;
+  /** True when localStorage is unusable and the session stays in sessionStorage. */
+  usesLegacyStore: boolean;
+}
+
+/**
+ * localStorage when it works. If it doesn't (site data blocked, private modes
+ * that throw), sessionStorage, which still keeps the user signed in for this
+ * tab. Any write that still fails goes to memory, so the session lasts at least
+ * for the current page instead of being lost.
+ */
+function createWebStorage(): WebStorageChoice {
+  const local = getWritableStorage('localStorage');
+  const backend = local ?? getWritableStorage('sessionStorage');
+  const memory = new Map<string, string>();
+
   return {
-    async getItem(key) {
-      return getWindowStorage('localStorage')?.getItem(key) ?? null;
-    },
-    async setItem(key, value) {
-      getWindowStorage('localStorage')?.setItem(key, value);
-    },
-    async removeItem(key) {
-      getWindowStorage('localStorage')?.removeItem(key);
+    usesLegacyStore: !local && backend !== null,
+    storage: {
+      async isSavedDurably(key) {
+        if (memory.has(key)) return false;
+        try {
+          return (backend?.getItem(key) ?? null) !== null;
+        } catch {
+          return false;
+        }
+      },
+      async getItem(key) {
+        if (memory.has(key)) return memory.get(key) ?? null;
+        try {
+          return backend?.getItem(key) ?? null;
+        } catch {
+          return null;
+        }
+      },
+      async setItem(key, value) {
+        try {
+          if (!backend) throw new Error('No writable web storage');
+          backend.setItem(key, value);
+          memory.delete(key);
+        } catch {
+          memory.set(key, value);
+        }
+      },
+      async removeItem(key) {
+        memory.delete(key);
+        try {
+          backend?.removeItem(key);
+        } catch {
+          // Nothing stored there to remove.
+        }
+      },
     },
   };
 }
@@ -99,10 +166,12 @@ function createWebStorage(): AuthSessionStorage {
 /**
  * Copies every `sessionStorage` entry that belongs to this Supabase session
  * (the token and its `-user` / `-code-verifier` companions) into `target`,
- * unless `target` already holds a value, then removes the old copy.
+ * unless `target` already holds a value. The old copy is removed only once
+ * `target` reads it back from durable storage (not the in-memory fallback),
+ * so a failed write never loses the session.
  */
 async function migrateFromSessionStorage(
-  target: AuthSessionStorage,
+  target: TargetStorage,
   storageKey: string,
 ): Promise<void> {
   const legacy = getWindowStorage('sessionStorage');
@@ -116,10 +185,13 @@ async function migrateFromSessionStorage(
 
   for (const key of legacyKeys) {
     const value = legacy.getItem(key);
-    if (value !== null && (await target.getItem(key)) === null) {
+    if (value === null) continue;
+    if ((await target.getItem(key)) === null) {
       await target.setItem(key, value);
     }
-    legacy.removeItem(key);
+    if (await target.isSavedDurably(key)) {
+      legacy.removeItem(key);
+    }
   }
 }
 
@@ -129,12 +201,24 @@ async function migrateFromSessionStorage(
  * start-up already sees a session that was moved.
  */
 export function createAuthSessionStorage(storageKey: string): AuthSessionStorage {
-  const target = isNativeApp() ? createNativeStorage() : createWebStorage();
+  let target: TargetStorage;
+  let skipMigration = false;
+  if (isNativeApp()) {
+    target = createNativeStorage();
+  } else {
+    const web = createWebStorage();
+    target = web.storage;
+    // Already in sessionStorage: there is nothing to move.
+    skipMigration = web.usesLegacyStore;
+  }
 
   let migration: Promise<void> | null = null;
   const ready = (): Promise<void> => {
     if (!migration) {
-      migration = migrateFromSessionStorage(target, storageKey).catch((error: unknown) => {
+      migration = (skipMigration
+        ? Promise.resolve()
+        : migrateFromSessionStorage(target, storageKey)
+      ).catch((error: unknown) => {
         // A failed move must not block sign-in; the user can sign in again.
         console.error('[FitWizard] Could not move the saved session.', error);
       });
