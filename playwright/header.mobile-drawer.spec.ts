@@ -304,17 +304,17 @@ test.describe('mobile header drawer flow', () => {
 
     const footer = page.getByTestId('mobile-drawer-footer');
     await expect(footer.getByText('FitWizard')).toBeVisible();
-    await expect(footer.getByText('Motion Tilt')).toBeVisible();
+    await expect(footer.getByText('Motion Tilt', { exact: true })).toBeVisible();
     await expect(footer.getByText('Settings & Profile')).toBeVisible();
-    await expect(footer.getByText('Coach Mode')).toBeVisible();
+    // The coach feature is flagged off by default (contract #1), so its toggle is hidden.
+    await expect(footer.getByText('Coach Mode')).toHaveCount(0);
     await expect(footer.getByText('Quick Controls')).toBeVisible();
     const themePillOrder = await footer
       .getByTestId('mobile-drawer-theme-toggle')
       .getByRole('button')
       .evaluateAll((buttons) => buttons.map((button) => button.getAttribute('aria-label')));
     expect(themePillOrder).toEqual(['Light', 'System', 'Dark']);
-    await expect(footer.getByRole('switch', { name: /coach mode/i })).not.toBeChecked();
-    await expect(footer.getByRole('switch', { name: /coach mode/i })).toBeEnabled();
+    await expect(footer.getByRole('switch', { name: /coach mode/i })).toHaveCount(0);
 
     await page.keyboard.press('Escape');
     await expect(drawer).toHaveCount(0);

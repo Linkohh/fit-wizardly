@@ -222,6 +222,12 @@ export default defineConfig(({ mode }) => {
           }
 
           if (id.includes("node_modules")) {
+            // Sentry (lazy, consent + DSN gated). First, so "/react/" in
+            // @sentry/react paths can't pull it into vendor-react (DEBT-091).
+            if (id.includes("/node_modules/@sentry/")) {
+              return "vendor-sentry";
+            }
+
             // Core React ecosystem (Critical)
             if (
               id.includes("react-router") ||
@@ -279,6 +285,7 @@ export default defineConfig(({ mode }) => {
               !dep.includes("vendor-pdf") &&
               !dep.includes("vendor-charts") &&
               !dep.includes("vendor-auth") &&
+              !dep.includes("vendor-sentry") &&
               !dep.includes("feature-exercises")
             );
           });

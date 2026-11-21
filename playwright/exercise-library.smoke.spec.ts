@@ -42,6 +42,20 @@ async function openExercises(page: Page) {
   await expect(page.getByText(/backup boot sequence active/i)).toBeVisible();
 }
 
+/** Exercise cards only. On phones the header's "Open menu" button also starts with "Open". */
+function catalogCards(page: Page) {
+  return page.getByRole('button', { name: /^Open (?!menu$)/ });
+}
+
+/**
+ * Headings named after the exercise inside the detail dialog. There are two: the visually
+ * hidden dialog title and the visible one, so open checks use `.first()` and close checks
+ * expect none.
+ */
+function detailHeading(page: Page, exerciseName: string) {
+  return page.getByRole('dialog').getByRole('heading', { name: exerciseName, exact: true });
+}
+
 async function closeExerciseDetails(page: Page) {
   const phoneCloseButton = page.getByRole('button', { name: /close exercise details/i });
   const standardCloseButton = page.getByRole('button', { name: /^close$/i });
@@ -61,14 +75,14 @@ test.describe('exercise library smoke', () => {
     test('renders the desktop catalog and opens/closes a detail surface', async ({ page }) => {
       await openExercises(page);
 
-      const firstCard = page.getByRole('button', { name: /^Open / }).first();
+      const firstCard = catalogCards(page).first();
       const accessibleName = await firstCard.getAttribute('aria-label');
       const exerciseName = accessibleName?.replace(/^Open\s+/, '') ?? '';
 
       await firstCard.click();
-      await expect(page.getByRole('heading', { name: exerciseName, exact: true })).toBeVisible();
+      await expect(detailHeading(page, exerciseName).first()).toBeVisible();
       await closeExerciseDetails(page);
-      await expect(page.getByRole('heading', { name: exerciseName, exact: true })).toHaveCount(0);
+      await expect(detailHeading(page, exerciseName)).toHaveCount(0);
     });
   });
 
@@ -85,7 +99,7 @@ test.describe('exercise library smoke', () => {
       const search = page.getByRole('textbox', { name: /search exercise library/i });
       await search.fill('press');
       await expect(search).toHaveValue('press');
-      await expect(page.getByRole('button', { name: /^Open / }).first()).toBeVisible();
+      await expect(catalogCards(page).first()).toBeVisible();
     });
   });
 
@@ -100,7 +114,7 @@ test.describe('exercise library smoke', () => {
     test('uses the phone detail drawer and preserves local-first fallback behavior', async ({ page }) => {
       await openExercises(page);
 
-      const firstCard = page.getByRole('button', { name: /^Open / }).first();
+      const firstCard = catalogCards(page).first();
       await firstCard.click();
 
       await expect(page.getByRole('button', { name: /close exercise details/i })).toBeVisible();

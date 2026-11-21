@@ -2,6 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 const PORT = 5173;
 const useExistingServer = process.env.PLAYWRIGHT_USE_EXISTING_SERVER === '1';
+// Optional: run against an already-installed Chromium (e.g. a sandbox with a preinstalled
+// browser that doesn't match this Playwright version). CI leaves it unset.
+const chromiumExecutable = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
 
 export default defineConfig({
   testDir: './playwright',
@@ -28,6 +31,7 @@ export default defineConfig({
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        ...(chromiumExecutable ? { launchOptions: { executablePath: chromiumExecutable } } : {}),
       },
     },
     {

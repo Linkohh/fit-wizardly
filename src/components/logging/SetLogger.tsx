@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { PlateCalculatorDialog } from '@/components/tools/PlateCalculator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,10 @@ interface SetLoggerProps {
     setNumber: number;
     targetReps: string;
     targetRIR: number;
+    /** The set before this one; used to prefill weight, reps and effort. */
     previousSet?: SetLog;
+    /** This set's own saved log, if any. A completed log shows the set as done (e.g. after a reload). */
+    loggedSet?: SetLog;
     lastPerformance?: SetLog;
     defaultWeightUnit?: WeightUnit;
     onComplete: (setLog: SetLog) => void;
@@ -25,33 +28,57 @@ export function SetLogger({
     targetReps,
     targetRIR,
     previousSet,
+    loggedSet,
     lastPerformance,
     defaultWeightUnit = 'lbs',
     onComplete,
     isActive = false,
 }: SetLoggerProps) {
-    const [weight, setWeight] = useState(previousSet?.weight ?? lastPerformance?.weight ?? 0);
-    const [reps, setReps] = useState(previousSet?.reps ?? lastPerformance?.reps ?? 0);
-    const [rir, setRIR] = useState(previousSet?.rir ?? targetRIR);
-    const [effortMode, setEffortMode] = useState<'rir' | 'rpe'>(previousSet?.effortMode ?? 'rir');
-    const [rpe, setRPE] = useState<number>(previousSet?.rpe ?? Math.max(6, Math.min(10, 10 - targetRIR)));
-    const [completed, setCompleted] = useState(previousSet?.completed ?? false);
+    const savedLog = loggedSet?.completed ? loggedSet : undefined;
+    const seed = savedLog ?? previousSet;
+    const [weight, setWeight] = useState(seed?.weight ?? lastPerformance?.weight ?? 0);
+    const [reps, setReps] = useState(seed?.reps ?? lastPerformance?.reps ?? 0);
+    const [rir, setRIR] = useState(seed?.rir ?? targetRIR);
+    const [effortMode, setEffortMode] = useState<'rir' | 'rpe'>(seed?.effortMode ?? 'rir');
+    const [rpe, setRPE] = useState<number>(seed?.rpe ?? Math.max(6, Math.min(10, 10 - (seed?.rir ?? targetRIR))));
+    // previousSet is the set before this one (a prefill hint), never this set's own log,
+    // so its `completed` flag must not carry over. Copying it locked every second set.
+    const [completed, setCompleted] = useState(Boolean(savedLog));
+    const fieldId = useId();
+    const weightInputId = `${fieldId}-weight`;
+    const repsInputId = `${fieldId}-reps`;
 
     // Parse target reps range
     const repRange = targetReps.includes('-')
         ? targetReps.split('-').map(Number)
         : [Number(targetReps), Number(targetReps)];
 
+    // Follow this set's saved log when the caller provides one (it changes when the logger
+    // moves to another exercise and reuses this component).
     useEffect(() => {
-        if (previousSet) {
+        if (!loggedSet) return;
+        if (loggedSet.completed) {
+            setWeight(loggedSet.weight);
+            setReps(loggedSet.reps);
+            setRIR(loggedSet.rir);
+            setEffortMode(loggedSet.effortMode ?? 'rir');
+            setRPE(loggedSet.rpe ?? Math.max(6, Math.min(10, 10 - loggedSet.rir)));
+            setCompleted(true);
+        } else {
+            setCompleted(false);
+        }
+    }, [loggedSet]);
+
+    // Prefill from the previous set until this set is logged; a logged set keeps its own values.
+    useEffect(() => {
+        if (previousSet && !completed) {
             setWeight(previousSet.weight);
             setReps(previousSet.reps);
             setRIR(previousSet.rir);
             setEffortMode(previousSet.effortMode ?? 'rir');
             setRPE(previousSet.rpe ?? Math.max(6, Math.min(10, 10 - previousSet.rir)));
-            setCompleted(previousSet.completed);
         }
-    }, [previousSet]);
+    }, [previousSet, completed]);
 
     const handleComplete = () => {
         const derivedRIR = effortMode === 'rpe'
@@ -108,6 +135,8 @@ export function SetLogger({
 
     return (
         <div
+            role="group"
+            aria-label={`Set ${setNumber}`}
             className={cn(
                 'p-4 rounded-xl border transition-all duration-300',
                 isActive
@@ -141,7 +170,7 @@ export function SetLogger({
                     )}
                 </div>
                 {completed && (
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check className="h-5 w-5 text-green-500" role="img" aria-label="Set completed" />
                 )}
             </div>
 
@@ -149,7 +178,7 @@ export function SetLogger({
             <div className="grid grid-cols-2 gap-4 mb-4">
                 {/* Weight Input */}
                 <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
+                    <label htmlFor={weightInputId} className="text-xs text-muted-foreground mb-1 block">
                         Weight ({defaultWeightUnit})
                     </label>
                     <div className="flex items-center gap-1">
@@ -159,12 +188,15 @@ export function SetLogger({
                             className="h-12 w-12 shrink-0"
                             onClick={() => adjustWeight(-1)}
                             disabled={completed}
+                            aria-label="Decrease weight"
                         >
                             <ChevronDown className="h-6 w-6" />
                         </Button>
                         <div className="relative">
                             <Input
+                                id={weightInputId}
                                 type="number"
+                                inputMode="decimal"
                                 value={weight}
                                 onChange={(e) => setWeight(Number(e.target.value))}
                                 className="h-12 w-20 text-center text-xl font-semibold px-0 z-10"
@@ -183,6 +215,7 @@ export function SetLogger({
                             className="h-12 w-12 shrink-0"
                             onClick={() => adjustWeight(1)}
                             disabled={completed}
+                            aria-label="Increase weight"
                         >
                             <ChevronUp className="h-6 w-6" />
                         </Button>
@@ -191,7 +224,7 @@ export function SetLogger({
 
                 {/* Reps Input */}
                 <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
+                    <label htmlFor={repsInputId} className="text-xs text-muted-foreground mb-1 block">
                         Reps
                     </label>
                     <div className="flex items-center gap-1">
@@ -201,11 +234,14 @@ export function SetLogger({
                             className="h-12 w-12 shrink-0"
                             onClick={() => adjustReps(-1)}
                             disabled={completed}
+                            aria-label="Decrease reps"
                         >
                             <ChevronDown className="h-6 w-6" />
                         </Button>
                         <Input
+                            id={repsInputId}
                             type="number"
+                            inputMode="numeric"
                             value={reps}
                             onChange={(e) => setReps(Number(e.target.value))}
                             className={cn(
@@ -224,6 +260,7 @@ export function SetLogger({
                             className="h-12 w-12 shrink-0"
                             onClick={() => adjustReps(1)}
                             disabled={completed}
+                            aria-label="Increase reps"
                         >
                             <ChevronUp className="h-6 w-6" />
                         </Button>
@@ -243,6 +280,7 @@ export function SetLogger({
                             className="h-7 px-3 text-xs"
                             onClick={() => setEffortMode('rir')}
                             disabled={completed}
+                            aria-pressed={effortMode === 'rir'}
                         >
                             RIR
                         </Button>
@@ -253,6 +291,7 @@ export function SetLogger({
                             className="h-7 px-3 text-xs"
                             onClick={() => setEffortMode('rpe')}
                             disabled={completed}
+                            aria-pressed={effortMode === 'rpe'}
                         >
                             RPE
                         </Button>
