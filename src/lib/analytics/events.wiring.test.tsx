@@ -6,6 +6,7 @@ import { usePlanStore } from '@/stores/planStore';
 import { useNutritionStore } from '@/stores/nutritionStore';
 import type { ActiveWorkout } from '@/stores/planStore.types';
 import type { MealEntry } from '@/types/nutrition';
+import { ANALYTICS_CONSENT_STORAGE_KEY } from '@/lib/consent';
 import { usePageViews } from './usePageViews';
 
 const mocks = vi.hoisted(() => ({ track: vi.fn() }));
@@ -50,7 +51,8 @@ describe('analytics event wiring', () => {
     expect(mocks.track).toHaveBeenCalledWith('meal_logged');
   });
 
-  it('sends one $pageview per route change', () => {
+  it('sends one $pageview per route change once consented', () => {
+    localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
     let go: ((path: string) => void) | null = null;
     function Probe() {
       usePageViews();
@@ -73,5 +75,6 @@ describe('analytics event wiring', () => {
     act(() => go?.('/plan?tab=week'));
 
     expect(mocks.track).toHaveBeenCalledTimes(2);
+    localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
   });
 });

@@ -1,8 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CaptureResult } from 'posthog-js';
 import { ANALYTICS_CONSENT_STORAGE_KEY } from '@/lib/consent';
+import appSource from '@/App.tsx?raw';
+import { generateRandomCode } from '@/stores/circles/utils';
 import {
   ALLOWED_PROP_KEYS,
+  KNOWN_PATH_SEGMENTS,
   POSTHOG_API_HOST,
   analyticsLoadingForTests,
   buildPostHogConfig,
@@ -182,13 +185,37 @@ describe('sanitizeProps', () => {
 });
 
 describe('URL scrubbing', () => {
-  it('drops query strings and hashes and masks id-like segments', () => {
+  it('drops query strings and hashes and masks every route parameter', () => {
     expect(scrubUrl('https://fitwizard.app/plan?weight=80#top')).toBe('https://fitwizard.app/plan');
-    expect(scrubUrl('https://fitwizard.app/history/3f2b8c1e-1a2b-4c3d-8e9f-0a1b2c3d4e5f')).toBe(
-      'https://fitwizard.app/history/:id',
+    expect(scrubUrl('https://fitwizard.app/clients/3f2b8c1e-1a2b-4c3d-8e9f-0a1b2c3d4e5f')).toBe(
+      'https://fitwizard.app/clients/:id',
     );
-    expect(scrubUrl('/circles/join/ABCDEFGHIJKLMNOPQRSTUV')).toBe('/circles/join/:id');
+    expect(scrubUrl('/workout/plan_abc/0')).toBe('/workout/:id/:id');
+    expect(scrubUrl('/circles/abcdefgh/members')).toBe('/circles/:id/members');
+    expect(scrubUrl('/some-new-route')).toBe('/:id');
     expect(scrubUrl('https://fitwizard.app')).toBe('https://fitwizard.app');
+  });
+
+  it('masks invite codes in the app\'s real format', () => {
+    // Codes grant access to a circle. Try many, including letter-only and lowercase ones.
+    for (let i = 0; i < 200; i += 1) {
+      const code = generateRandomCode();
+      expect(scrubUrl(`https://fitwizard.app/circles/join/${code}`)).toBe('https://fitwizard.app/circles/join/:code');
+      expect(scrubUrl(`/circles/join/${code.toLowerCase()}`)).toBe('/circles/join/:code');
+    }
+    expect(scrubUrl('/circles/join/ABCDEFGH')).toBe('/circles/join/:code');
+    expect(scrubUrl('/circles/join/plan')).toBe('/circles/join/:code');
+  });
+
+  it('knows every fixed route word in App.tsx', () => {
+    const routeWords = [...appSource.matchAll(/path="([^"]+)"/g)]
+      .flatMap(([, path]) => path.split('/'))
+      .filter((segment) => segment !== '' && segment !== '*' && !segment.startsWith(':'));
+
+    expect(routeWords.length).toBeGreaterThan(10);
+    for (const word of routeWords) {
+      expect(KNOWN_PATH_SEGMENTS.has(word), `add "${word}" to KNOWN_PATH_SEGMENTS`).toBe(true);
+    }
   });
 
   it('scrubs URL properties in before_send', () => {

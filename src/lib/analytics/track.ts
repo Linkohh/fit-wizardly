@@ -80,9 +80,32 @@ export function sanitizeProps(props: Record<string, unknown> | undefined): Analy
   return safe;
 }
 
-const ID_SEGMENT = /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\d{4,}|[A-Za-z0-9_-]{20,})$/i;
+/**
+ * The fixed words of every route in App.tsx. Any other path segment is a parameter
+ * (plan id, day index, circle or client id, invite code) and is masked, so only the
+ * route pattern leaves the device. A route added later is masked until its words are
+ * listed here: that fails safe.
+ */
+export const KNOWN_PATH_SEGMENTS: ReadonlySet<string> = new Set([
+  'about', 'analytics', 'challenges', 'circles', 'clients', 'exercises', 'feed', 'guide',
+  'history', 'join', 'leaderboard', 'legal', 'mcl', 'members', 'nutrition', 'onboarding',
+  'plan', 'profile', 'revenue', 'settings', 'templates', 'wizard', 'workout',
+]);
 
-/** Drops `?query` and `#hash`, and replaces id-like path segments with `:id`. */
+/** Segments after these are secrets that grant access, not just ids. */
+const SECRET_AFTER: ReadonlySet<string> = new Set(['join']);
+
+function maskSegment(segment: string, previous: string | undefined): string {
+  if (segment === '') {
+    return segment;
+  }
+  if (previous !== undefined && SECRET_AFTER.has(previous)) {
+    return ':code';
+  }
+  return KNOWN_PATH_SEGMENTS.has(segment) ? segment : ':id';
+}
+
+/** Drops `?query` and `#hash`, and masks every path segment that isn't a known route word. */
 export function scrubUrl(url: string): string {
   const cut = url.search(/[?#]/);
   const base = cut === -1 ? url : url.slice(0, cut);
@@ -95,7 +118,7 @@ export function scrubUrl(url: string): string {
   const path = base
     .slice(originEnd)
     .split('/')
-    .map((segment) => (ID_SEGMENT.test(segment) ? ':id' : segment))
+    .map((segment, index, segments) => maskSegment(segment, segments[index - 1]))
     .join('/');
   return origin + path;
 }

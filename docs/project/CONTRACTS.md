@@ -228,7 +228,7 @@ export function track(event: AnalyticsEvent, props?: Record<string, string | num
 Behaviour (merged on Lane C Day 4):
 - No-op, and nothing is loaded, unless `VITE_POSTHOG_KEY` is set **and** `hasAnalyticsConsent()` is true (`fitwizard_analytics_consent`, the same key crash reports use). PostHog (EU cloud) is loaded with a dynamic import on the first allowed event.
 - Only these property keys are sent: `step`, `goal`, `days_per_week`, `exercise_count`, `duration_min`, `source`, `platform`. Values must be strings (cut to 64 characters), finite numbers or booleans. Everything else is dropped silently. `platform` (`web`, `ios`, `android`) is added to every event.
-- Page URLs lose their query string and hash, and id-like path segments become `:id`.
+- Page URLs lose their query string and hash. Only the fixed route words from `App.tsx` are kept (`KNOWN_PATH_SEGMENTS` in `track.ts`). Every other segment becomes `:id`, and invite codes become `:code`. A new route's words must be added to that list (a test fails otherwise).
 - Safe to call from stores: `track.ts` imports nothing heavy.
 
 ## 10. Native helpers: `src/hooks/`
