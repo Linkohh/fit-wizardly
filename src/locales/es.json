@@ -770,7 +770,11 @@
         "resend_in": "Reenviar código en {{seconds}} s",
         "resent": "Te enviamos un código nuevo.",
         "different_email": "Usar otro correo",
-        "close": "Cerrar"
+        "close": "Cerrar",
+        "send_error_rate_limit": "Has pedido demasiados códigos. Espera un minuto y vuelve a intentarlo.",
+        "send_error_invalid_email": "No podemos enviar un código a esa dirección. Revísala y vuelve a intentarlo.",
+        "send_error_offline": "No tienes conexión. Conéctate a internet y vuelve a intentarlo.",
+        "send_error_generic": "No pudimos enviar el código. Vuelve a intentarlo."
     },
     "sync": {
         "first_upload": "Tu entrenamiento de este dispositivo ya tiene copia de seguridad en tu cuenta.",

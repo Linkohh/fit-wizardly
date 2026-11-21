@@ -108,15 +108,34 @@ describe('AuthModal email-code sign-in', () => {
     expect(codeInput()).toHaveAttribute('maxlength', '6');
   });
 
-  it('stays on the email step and shows the error when sending fails', async () => {
-    mocks.signInWithEmail.mockResolvedValue({ error: new Error('Email rate limit exceeded') });
+  it('stays on the email step and shows a translated error when sending fails', async () => {
+    const rateLimited = Object.assign(new Error('Email rate limit exceeded'), {
+      status: 429,
+      code: 'over_email_send_rate_limit',
+    });
+    mocks.signInWithEmail.mockResolvedValue({ error: rateLimited });
     renderModal();
 
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'lifter@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: /email me a code/i }));
 
-    expect(await screen.findByText('Email rate limit exceeded')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Too many codes requested. Wait a minute, then try again.')
+    ).toBeInTheDocument();
+    // Supabase's own English text is never shown (DEBT-085).
+    expect(screen.queryByText('Email rate limit exceeded')).not.toBeInTheDocument();
     expect(screen.queryByText('Check your email')).not.toBeInTheDocument();
+  });
+
+  it('shows a generic translated error for an unknown send failure', async () => {
+    mocks.signInWithEmail.mockResolvedValue({ error: new Error('Something odd from Supabase') });
+    renderModal();
+
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'lifter@example.com' } });
+    fireEvent.click(screen.getByRole('button', { name: /email me a code/i }));
+
+    expect(await screen.findByText("We couldn't send the code. Please try again.")).toBeInTheDocument();
+    expect(screen.queryByText('Something odd from Supabase')).not.toBeInTheDocument();
   });
 
   it('submits automatically once six digits are entered, then closes', async () => {

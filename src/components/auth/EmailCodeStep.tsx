@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { isNativeApp } from '@/lib/platform';
+import { sendErrorKey } from './sendErrorKey';
 
 export const EMAIL_CODE_LENGTH = 6;
 export const RESEND_COOLDOWN_SECONDS = 60;
@@ -89,7 +90,7 @@ export function EmailCodeStep({
     setIsResending(false);
 
     if (error) {
-      setResendError(error.message);
+      setResendError(t(sendErrorKey(error)));
       return;
     }
     setCode('');

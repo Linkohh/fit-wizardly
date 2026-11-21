@@ -901,7 +901,11 @@
         "resend_in": "Resend code in {{seconds}}s",
         "resent": "We sent a new code.",
         "different_email": "Use a different email",
-        "close": "Close"
+        "close": "Close",
+        "send_error_rate_limit": "Too many codes requested. Wait a minute, then try again.",
+        "send_error_invalid_email": "We can't send a code to that address. Check it and try again.",
+        "send_error_offline": "You're offline. Connect to the internet, then try again.",
+        "send_error_generic": "We couldn't send the code. Please try again."
     },
     "sync": {
         "first_upload": "Your training on this device is now backed up to your account.",

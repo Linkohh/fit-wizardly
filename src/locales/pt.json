@@ -434,7 +434,11 @@
         "resend_in": "Reenviar código em {{seconds}} s",
         "resent": "Enviamos um novo código.",
         "different_email": "Usar outro e-mail",
-        "close": "Fechar"
+        "close": "Fechar",
+        "send_error_rate_limit": "Muitos códigos solicitados. Aguarde um minuto e tente de novo.",
+        "send_error_invalid_email": "Não conseguimos enviar um código para esse endereço. Confira e tente de novo.",
+        "send_error_offline": "Você está offline. Conecte-se à internet e tente de novo.",
+        "send_error_generic": "Não conseguimos enviar o código. Tente de novo."
     },
     "pdfExport": {
         "headers": {
