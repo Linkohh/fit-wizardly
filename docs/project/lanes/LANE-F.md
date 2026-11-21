@@ -138,6 +138,13 @@ Write `008_policy_fixes.sql`, re-runnable, with a test file for each fix.
 
 ## Day 4: Deletion UI, guest erase, export v3 (1.5 part 2)
 
+> **Carried over from Day 3 handoffs (added 2026-11-21 by the coordinator).** Do these too:
+> - The function is merged (#65) but not deployed. Code the UI against contract #4 and test it with a mocked `fetch`. The real end-to-end check happens at Gate 1, after L10.
+> - After a `204`, call `clearLocalUserData()` (contract #2) and sign out. It erases the 9 stores, the outbox, the pull cursor and `fitwizard-sync-first-upload`.
+> - Export v3 must add achievements, custom exercises, exercise favourites and collections, and the profile (DEBT-059).
+> - Send Lane A the user-facing deletion text, for the policy and Play's web deletion section, in your handoff.
+
+
 1. Create `src/lib/account/deleteAccount.ts` (contract #4 client):
    - `fetch(`${VITE_SUPABASE_URL}/functions/v1/delete-account`, { method: 'POST', headers: { Authorization: `Bearer ${session.access_token}`, apikey } })`.
    - On 204, call `await clearLocalUserData()` (contract #2), then `useAuthStore.getState().signOut()`, then navigate to `/`.

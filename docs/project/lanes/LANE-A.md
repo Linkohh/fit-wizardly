@@ -129,6 +129,16 @@ Lane A consumes none. When it writes the privacy text, it relies on what each la
 
 ## Day 4: Privacy policy and terms (roadmap 4.1)
 
+> **Carried over from Day 3 handoffs (added 2026-11-21 by the coordinator).** Do these too:
+> - Write the policy from `docs/store/DATA_INVENTORY.md` (current through #69). Since Wave 1 the policy must cover four new things:
+>   - cloud sync of the seven 007 tables for signed-in users (#66)
+>   - crash reports to Sentry: opt-in, off until L6 (#69)
+>   - the `/api` per-IP rate limit, which keeps an IP in memory for up to the life of the function instance
+>   - account deletion (the `delete-account` function, #65)
+> - **Play's web deletion section:** describe deleting in the app (Lane F Day 4 builds the screen) and a way to ask by email for people who can't sign in. Use the deletion text Lane F sends in its Day 4 handoff. Until it arrives, stub it from contract #4.
+> - Supabase region is still unanswered. Keep the placeholder and list it under Questions for Lincoln.
+
+
 > This is a draft for a qualified reviewer (task L9). It is not legal advice; say so in the PR body.
 
 ### Steps
