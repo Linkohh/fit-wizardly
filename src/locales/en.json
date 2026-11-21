@@ -839,6 +839,30 @@
         "away_one": "Just 1 more workout to hit your weekly goal!",
         "away_other": "{{count}} workouts away from your weekly goal"
     },
+    "account": {
+        "cancel": "Cancel",
+        "download_first": "Download your data first",
+        "retry": "Try again",
+        "type_to_confirm": "Type {{word}} to confirm",
+        "delete": {
+            "button": "Delete account",
+            "title": "Delete your account?",
+            "body": "This permanently deletes your FitWizard account and everything synced to it: plans, workout history, personal records, nutrition, body measurements, readiness check-ins, achievements and custom exercises. FitWizard data on this device is erased too. This can't be undone.",
+            "confirm": "Delete account",
+            "pending": "Deleting…",
+            "success": "Your account and all its data have been deleted.",
+            "error": "We couldn't delete your account. Check your connection and try again."
+        },
+        "erase": {
+            "button": "Erase data on this device",
+            "title": "Erase data on this device?",
+            "body": "This removes your plans, workout history, personal records, nutrition, body measurements, readiness check-ins, achievements, custom exercises and exercise favourites from this device. You aren't signed in, so there is no cloud copy. This can't be undone.",
+            "confirm": "Erase data",
+            "pending": "Erasing…",
+            "success": "All FitWizard data on this device has been erased.",
+            "error": "We couldn't erase this device. Please try again."
+        }
+    },
     "achievements": {
         "badge_unlocked": "Badge unlocked: {{name}}"
     },

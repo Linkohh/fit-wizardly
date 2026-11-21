@@ -711,6 +711,30 @@
         "away_one": "¡Solo 1 entrenamiento más para tu meta semanal!",
         "away_other": "Te faltan {{count}} entrenamientos para tu meta semanal"
     },
+    "account": {
+        "cancel": "Cancelar",
+        "download_first": "Descarga tus datos primero",
+        "retry": "Reintentar",
+        "type_to_confirm": "Escribe {{word}} para confirmar",
+        "delete": {
+            "button": "Eliminar cuenta",
+            "title": "¿Eliminar tu cuenta?",
+            "body": "Esto elimina para siempre tu cuenta de FitWizard y todo lo sincronizado con ella: planes, historial de entrenamientos, récords personales, nutrición, medidas corporales, registros de preparación, logros y ejercicios personalizados. También se borran los datos de FitWizard de este dispositivo. No se puede deshacer.",
+            "confirm": "Eliminar cuenta",
+            "pending": "Eliminando…",
+            "success": "Tu cuenta y todos sus datos se han eliminado.",
+            "error": "No pudimos eliminar tu cuenta. Revisa tu conexión e inténtalo de nuevo."
+        },
+        "erase": {
+            "button": "Borrar los datos de este dispositivo",
+            "title": "¿Borrar los datos de este dispositivo?",
+            "body": "Esto elimina de este dispositivo tus planes, historial de entrenamientos, récords personales, nutrición, medidas corporales, registros de preparación, logros, ejercicios personalizados y ejercicios favoritos. No has iniciado sesión, así que no hay copia en la nube. No se puede deshacer.",
+            "confirm": "Borrar datos",
+            "pending": "Borrando…",
+            "success": "Se han borrado todos los datos de FitWizard de este dispositivo.",
+            "error": "No pudimos borrar este dispositivo. Inténtalo de nuevo."
+        }
+    },
     "achievements": {
         "badge_unlocked": "Insignia desbloqueada: {{name}}"
     },
