@@ -180,6 +180,13 @@
                 }
             }
         },
+        "anatomy": {
+            "auto_pick": "Lass FitWizard wählen",
+            "auto_pick_hint": "Wählt einen ausgewogenen Ganzkörper-Fokus. Du kannst ihn auf der Karte ändern."
+        },
+        "constraints": {
+            "no_injuries_continue": "Keine Verletzungen, weiter"
+        },
         "schedule": {
             "title": "Trainingsplan festlegen",
             "subtitle": "Wie oft und wie lange kannst du trainieren?",

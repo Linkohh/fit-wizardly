@@ -3,6 +3,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { OnboardingFlow } from './OnboardingFlow';
 import { useOnboardingStore } from '@/stores/onboardingStore';
+import { useWizardStore } from '@/stores/wizardStore';
 
 const mocks = vi.hoisted(() => ({
   fireConfetti: vi.fn(),
@@ -196,8 +197,9 @@ describe('OnboardingFlow', () => {
       fireEvent.click(screen.getByRole('button', { name: "Let's go" }));
     });
 
+    // A lifter who finishes the goals step goes straight into the wizard (3.6c).
     await waitFor(() => {
-      expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
+      expect(mocks.navigate).toHaveBeenCalledWith('/wizard', { replace: true });
     });
 
     expect(useOnboardingStore.getState().isComplete).toBe(true);
@@ -285,5 +287,63 @@ describe('OnboardingFlow', () => {
     expect(useOnboardingStore.getState().currentStep).toBe('goals');
     expect(within(screen.getByTestId('onboarding-top-row')).getByText('2/2')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: "Let's go" })).toBeInTheDocument();
+  });
+
+  it('carries the onboarding goal into the wizard and skips its goal step', async () => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'false');
+    useWizardStore.getState().resetWizard();
+    act(() => {
+      useOnboardingStore.setState({
+        currentStep: 'goals',
+        userData: {
+          avatarEmoji: '💪',
+          displayName: 'Alex',
+          interestedGoals: ['strength'],
+          role: 'user',
+        },
+      });
+    });
+
+    await renderOnboardingFlow();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: "Let's go" }));
+    });
+
+    await waitFor(() => {
+      expect(mocks.navigate).toHaveBeenCalledWith('/wizard', { replace: true });
+    });
+
+    const wizard = useWizardStore.getState();
+    expect(wizard.selections.goal).toBe('strength');
+    expect(wizard.currentStep).toBe('constraints');
+    expect(wizard.selections.sessionDuration).toBe(45);
+  });
+
+  it('sends a skipped onboarding home without touching the wizard', async () => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'false');
+    useWizardStore.getState().resetWizard();
+    act(() => {
+      useOnboardingStore.setState({
+        currentStep: 'goals',
+        userData: {
+          avatarEmoji: '💪',
+          displayName: 'Alex',
+          interestedGoals: ['strength'],
+          role: 'user',
+        },
+      });
+    });
+
+    await renderOnboardingFlow();
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Skip for now' }));
+    });
+
+    await waitFor(() => {
+      expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
+    });
+    expect(useWizardStore.getState().currentStep).toBe('goal');
   });
 });

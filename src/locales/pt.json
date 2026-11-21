@@ -180,6 +180,13 @@
                 }
             }
         },
+        "anatomy": {
+            "auto_pick": "Deixe o FitWizard escolher",
+            "auto_pick_hint": "Escolhe um foco equilibrado de corpo inteiro. Você pode mudar no mapa."
+        },
+        "constraints": {
+            "no_injuries_continue": "Sem lesões, continuar"
+        },
         "schedule": {
             "title": "Defina seu cronograma",
             "subtitle": "Com que frequência e por quanto tempo você pode treinar?",
