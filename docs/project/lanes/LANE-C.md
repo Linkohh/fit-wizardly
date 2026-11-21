@@ -143,6 +143,13 @@ Data stores other than `trainerStore` and `onboardingStore`, the sync code, nati
 
 ## Day 4: Product analytics (3.2)
 
+> **Carried over from Day 3 handoffs (added 2026-11-21 by the coordinator).** Do these too:
+> - `signed_in`: track it in the `SIGNED_IN` branch of the auth listener in `authStore.ts`, so magic-link and email-code sign-ins both count (Lane H Day 3). That's a one-line exception in Lane H's file; note it in the handoff.
+> - Use the **one** consent key Lane C Day 3 chose for crash reports (`fitwizard_analytics_consent`) for analytics too. Retire the duplicate `fitwizard-analytics.hasConsented` on Day 5 (DEBT-061).
+> - Never put health values (weights, reps, body data, meals) in event properties. `captureError` only drops health-looking **keys**, not values.
+> - Events Lane E wanted to call (`workout_started`, `workout_completed`, `meal_logged`): wire them yourself at the call sites, or list the exact lines in your handoff.
+
+
 Decision **D5**. Default: PostHog, EU region.
 
 ### Steps

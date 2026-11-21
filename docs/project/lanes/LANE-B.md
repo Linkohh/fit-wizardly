@@ -118,6 +118,11 @@ For each screen, a first-time user should see one sentence explaining what will 
 
 ## Day 4: Fewer taps to the first plan (3.6c)
 
+> **Carried over from Day 3 handoffs (added 2026-11-21 by the coordinator).** Do these too:
+> - `FoodLogger` is now a `forwardRef` component with `openLogger()` (#68). Keep that handle if you touch Nutrition.
+> - Don't change the onboarding role step or coach paths. They're hidden by the flags (Lane C), so count taps on the lifter path only.
+
+
 ### Steps
 1. **Measure first.** On a phone-sized viewport (390×844), count taps and screens from a fresh install to the generated plan:
    - onboarding: welcome → role → goals (role is skipped when the coach flag is off, after Lane C's Day 2)

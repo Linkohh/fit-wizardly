@@ -136,6 +136,12 @@ Then:
 
 ## Day 4: End-to-end lifter loop (3.5)
 
+> **Carried over from Day 3 handoffs (added 2026-11-21 by the coordinator).** Do these too:
+> - **Buffer, before L6 sets a Sentry DSN (DEBT-091, MEDIUM):** in `vite.config.ts` `manualChunks`, add `if (id.includes('/node_modules/@sentry/')) return 'vendor-sentry';` first in the `node_modules` branch, and exclude `vendor-sentry` from `modulePreload.resolveDependencies`. Check with `VITE_SENTRY_DSN=https://public@o1.ingest.de.sentry.io/1 npx vite build`: `vendor-react` and `vendor-data` must match the no-DSN sizes. Then tell Lane C it can switch to `@sentry/react` (DEBT-092). This is an allowed exception: in Wave 2 `vite.config.ts` is Lane F's, but F only removes the dev proxy block (Day 5), so touch only `build.rollupOptions` and `modulePreload`.
+> - CI: add the Deno tests for `delete-account` (`npx -y deno@2 test --no-config supabase/functions/delete-account/`, about 10 s) to `.github/workflows/ci.yml` (DEBT-086).
+> - The E2E test runs as a guest, without Supabase. Sync shows nothing in demo mode, so don't assert the sync row.
+
+
 1. New spec `playwright/lifter-loop.spec.ts`, using the `chromium` project only:
    1. Fresh context, so storage is empty. Go through onboarding.
    2. Wizard: choose a goal, pick muscles (use the muscle search or a preset, not pixel clicks), and generate the plan.

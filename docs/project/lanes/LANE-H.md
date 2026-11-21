@@ -181,6 +181,12 @@ Stores other than `authStore`'s sign-in area, sync code, `supabase/`, routing.
 
 ## Day 4: Sessions that last (2.2; decision D2, default yes)
 
+> **Carried over from Day 3 handoffs (added 2026-11-21 by the coordinator).** Do these too:
+> - Lazy-load `EmailCodeStep` (`input-otp`) so it leaves the startup bundle: about 6 KB (DEBT-079).
+> - Translate the sign-in send errors instead of showing Supabase's English text (DEBT-085), if it fits today. Otherwise leave it for Lane J.
+> - Sync (#66) starts from `App.tsx` on `user.id`. A restored session must set `user` the same way a fresh sign-in does, so sync starts after a restart. Add a test for that.
+
+
 ### Steps
 1. In `src/lib/supabase.ts` (lines 68–74):
    - **Native:** a storage adapter built on `@capacitor/preferences` (`npm install @capacitor/preferences`), with `getItem`/`setItem`/`removeItem` mapped to `Preferences.get/set/remove`. Load it lazily.
