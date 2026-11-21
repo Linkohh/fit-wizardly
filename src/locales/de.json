@@ -372,6 +372,30 @@
         "away_one": "Nur noch 1 Training bis zu deinem Wochenziel!",
         "away_other": "Noch {{count}} Trainings bis zu deinem Wochenziel"
     },
+    "account": {
+        "cancel": "Abbrechen",
+        "download_first": "Lade zuerst deine Daten herunter",
+        "retry": "Erneut versuchen",
+        "type_to_confirm": "Gib {{word}} ein, um zu bestätigen",
+        "delete": {
+            "button": "Konto löschen",
+            "title": "Dein Konto löschen?",
+            "body": "Dadurch werden dein FitWizard-Konto und alles, was damit synchronisiert ist, dauerhaft gelöscht: Pläne, Trainingsverlauf, persönliche Rekorde, Ernährung, Körpermaße, Bereitschafts-Check-ins, Erfolge und eigene Übungen. Die FitWizard-Daten auf diesem Gerät werden ebenfalls gelöscht. Das lässt sich nicht rückgängig machen.",
+            "confirm": "Konto löschen",
+            "pending": "Wird gelöscht…",
+            "success": "Dein Konto und alle zugehörigen Daten wurden gelöscht.",
+            "error": "Dein Konto konnte nicht gelöscht werden. Prüfe deine Verbindung und versuche es erneut."
+        },
+        "erase": {
+            "button": "Daten auf diesem Gerät löschen",
+            "title": "Daten auf diesem Gerät löschen?",
+            "body": "Dadurch werden deine Pläne, dein Trainingsverlauf, persönliche Rekorde, Ernährung, Körpermaße, Bereitschafts-Check-ins, Erfolge, eigene Übungen und Lieblingsübungen von diesem Gerät entfernt. Du bist nicht angemeldet, daher gibt es keine Cloud-Kopie. Das lässt sich nicht rückgängig machen.",
+            "confirm": "Daten löschen",
+            "pending": "Wird gelöscht…",
+            "success": "Alle FitWizard-Daten auf diesem Gerät wurden gelöscht.",
+            "error": "Die Daten auf diesem Gerät konnten nicht gelöscht werden. Bitte versuche es erneut."
+        }
+    },
     "achievements": {
         "badge_unlocked": "Abzeichen freigeschaltet: {{name}}"
     },

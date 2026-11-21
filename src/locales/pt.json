@@ -372,6 +372,30 @@
         "away_one": "Só mais 1 treino para a sua meta semanal!",
         "away_other": "Faltam {{count}} treinos para a sua meta semanal"
     },
+    "account": {
+        "cancel": "Cancelar",
+        "download_first": "Baixe seus dados primeiro",
+        "retry": "Tentar novamente",
+        "type_to_confirm": "Digite {{word}} para confirmar",
+        "delete": {
+            "button": "Excluir conta",
+            "title": "Excluir sua conta?",
+            "body": "Isso exclui permanentemente sua conta FitWizard e tudo o que está sincronizado com ela: planos, histórico de treinos, recordes pessoais, nutrição, medidas corporais, check-ins de prontidão, conquistas e exercícios personalizados. Os dados do FitWizard neste dispositivo também são apagados. Não é possível desfazer.",
+            "confirm": "Excluir conta",
+            "pending": "Excluindo…",
+            "success": "Sua conta e todos os seus dados foram excluídos.",
+            "error": "Não foi possível excluir sua conta. Verifique sua conexão e tente novamente."
+        },
+        "erase": {
+            "button": "Apagar dados deste dispositivo",
+            "title": "Apagar dados deste dispositivo?",
+            "body": "Isso remove deste dispositivo seus planos, histórico de treinos, recordes pessoais, nutrição, medidas corporais, check-ins de prontidão, conquistas, exercícios personalizados e exercícios favoritos. Você não está conectado, então não há cópia na nuvem. Não é possível desfazer.",
+            "confirm": "Apagar dados",
+            "pending": "Apagando…",
+            "success": "Todos os dados do FitWizard neste dispositivo foram apagados.",
+            "error": "Não foi possível apagar este dispositivo. Tente novamente."
+        }
+    },
     "achievements": {
         "badge_unlocked": "Conquista desbloqueada: {{name}}"
     },
