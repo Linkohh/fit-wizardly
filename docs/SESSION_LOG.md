@@ -146,6 +146,25 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-21 — Lane A Day 4: Privacy Policy and Terms Rewritten (branch `lane-a/day-4`, from `preview_b` @ `44e1d31`, rebased onto `1708d12` after #73)
+
+- **What was done:**
+  - `src/pages/Legal.tsx`: the Privacy Policy and Terms of Service tabs are rewritten from `docs/store/DATA_INVENTORY.md`, in short plain-language sections, and clearly marked as a **draft for qualified review (L9)**. The old "your data stays 100% on your device" and "anonymous analytics" claims are gone.
+    - Privacy covers what we collect, where it is stored (device; Supabase region placeholder), who receives it (Supabase, Vercel, Open Food Facts, wger, API Ninjas, Sentry, planned PostHog), why, how long (including the in-memory IP for the `/api` rate limit and sync tombstones), your choices, **Delete your account**, security, children, contact and changes.
+    - **Delete your account** has the stable anchor `/legal?tab=privacy#delete-account` (Google Play's web deletion page). `#delete-account` alone also opens the privacy tab. The text is Lane F's Day 4 wording, matched to the merged screen.
+    - Terms: not medical advice, user responsibility, accounts, acceptable use, licence, no warranty, liability, changes, governing-law placeholder.
+    - Placeholders (region, support email, governing law, age, backup period, effective date) are one constant, `POLICY_VALUES`.
+    - All text goes through `t()` with an English fallback; 106 `legal.*` keys in `en` and a Spanish draft in `es`. German and Portuguese fall back to English (ratchet +103 each, DEBT-098).
+  - `src/pages/Legal.test.tsx`: tests for the anchor (scrolls to the section), the `#delete-account`-only link, the three deletion paths, and the draft notice.
+  - `docs/privacy-policy.md`: the same English text, generated from `Legal.tsx`, plus a placeholders table and reviewer notes that map each claim to the code. `{TODAY}` and the fake email are gone.
+  - Folded in the Lane F Day 4 handoff (#73, `1708d12`): deletion UI, guest erase and export v3. Inventory: account deletion is Now (in code), export version 3, and "In export?" is Yes for the rows v3 added. Board row F Day 4 is ✅. `src/components/account/*` and `src/lib/account/*` added to the ownership table as F. DEBT-059 resolved; DEBT-094 to DEBT-096 added from that handoff.
+- **Bookkeeping:** when this PR was opened, Lane F Day 4 (#73) had merged. Lane H (#74), Lane C (#75) and Lane B (#76) were open, so the board shows them as 🔵 and their handoffs are folded in when they merge. Lane C's PostHog disclosure will change the policy's "planned" wording.
+- **Verification:** lint 0 errors / 4 warnings (pre-existing), typecheck clean, all tests pass (count in the handoff), 0 broken relative links.
+- **New issues:** DEBT-097 (sync tombstones keep content), DEBT-098 (de/pt legal copy).
+- **Next steps:**
+  1. Lincoln: fill in the placeholders (support email blocks Play's deletion form) and start L9.
+  2. Lane A Day 5: store form answer sheets.
+
 ### 2026-11-18 — Lane A Day 3: Wave 1 Paperwork, README, 1.1.0 Notes Draft (branch `lane-a/day-3`, from `preview_b` @ `172c428`, rebased onto `421a453` after #62 and #64–#69)
 
 - **What was done:**
@@ -865,6 +884,8 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 
 | ID | Issue | File(s) | Notes |
 |----|-------|---------|-------|
+| DEBT-095 | After account deletion, other signed-in devices keep their local copy, and their sync fails with 401 | sync (`src/lib/sync/`) | Lane E Day 7 sign-out work: treat a 401 after deletion as signed out and erase, or sign out quietly. The privacy policy discloses it. From the Lane F Day 4 handoff. |
+| DEBT-097 | Deleting a synced item only sets `deleted_at`; its content stays in Supabase until the account is deleted | `src/lib/sync/engine.ts`, migration 007 | Disclosed in the privacy policy. Lincoln/L9: decide whether tombstones should be purged (for example, content cleared, or rows removed after all devices have synced). Lane E/F. |
 | DEBT-002 | `analyticsStore.ts` analytics events fire to nowhere | `src/stores/analyticsStore.ts:121` | TODO comment: "Send to PostHog or custom backend". No external destination wired. |
 | DEBT-033 | Streak, plans-generated and weekly-progress counters are never updated (no callers) | `src/stores/achievementStore.ts` | Roadmap 0.3 (Lane E). |
 | DEBT-034 | Fake data on real screens: Revenue totals, client progress from `Math.random()`, hard-coded circle stats, exercise badges chosen by id length | `Revenue.tsx:48`, `ClientProgress.tsx`, `CircleDashboardTab.tsx`, `ExerciseBadges.tsx:10` | Coach and Circles hidden by flags; badges removed (roadmap 0.5). |
@@ -917,7 +938,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-056 | **RESOLVED 2026-11-18** (Lane A Day 2 (#56) audited it). ~~`.claude/*.md` not audited; probably repeat the old stack and locales~~ | `.claude/` | Lane A Day 2. |
 | DEBT-057 | **RESOLVED 2026-11-18** (Lane D Day 2 (#54) deleted the Wisdom UI; the leftover store is DEBT-067). ~~Unreachable Wisdom UI still says "AI"~~ | `src/components/wisdom/*`, `src/pages/Plan.tsx` | Lane D Day 2: delete. |
 | DEBT-058 | **RESOLVED 2026-11-18** (Lane H Day 3, #62: `ios:live` uses the Mac's LAN address when the dev server listens on the LAN; `ios:live:cap` stays Simulator only). ~~`ios:live:cap` uses `--host=localhost`, so live reload can't reach a physical iPhone~~ | `package.json`, `scripts/dev-ios-live.mjs` | Lane H Day 3. |
-| DEBT-059 | Export v2 omits achievements, custom exercises, exercise favourites and collections, and the profile | `src/lib/dataExport.ts` | Lane F Day 4 (export v3). |
+| DEBT-059 | **RESOLVED 2026-11-21** (export v3, #73). ~~Export v2 omits achievements, custom exercises, exercise favourites and collections, and the profile~~ | `src/lib/dataExport.ts` | Lane F Day 4. |
 | DEBT-060 | `tailwind.config.ts` isn't loaded by Tailwind 4; only `components.json` points at it | `tailwind.config.ts` | **Checked by Lane D Day 3 (#67): shadcn's CLI doesn't need it.** With `"config": ""` in `components.json`, `shadcn info` reports Tailwind v4 and `src/index.css`. Follow-up (next owner): blank `config`, delete `tailwind.config.ts`, remove its block in `eslint.config.js` (line 28). |
 | DEBT-061 | Analytics consent stored twice (`fitwizard-analytics.hasConsented`, `fitwizard_analytics_consent`) | `src/stores/analyticsStore.ts`, `src/lib/consent.ts` | Lane C Days 3–5: settle on one key. |
 | DEBT-062 | **RESOLVED 2026-11-19** (Lane B Day 3, #68: now "FitWizard"; the last "FitWizardly" in `src/`). ~~"FitWizardly" in a user-visible coach note~~ | `src/lib/analyticsIntelligence.ts:840` | Lane B Day 3 (one-word exception). |
@@ -948,6 +969,9 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-091 | **MEDIUM.** `manualChunks` substring rules (`"/react/"`, `"zod"`) catch `@sentry/react` and `@sentry/core/.../zoderrors.js` and pull Sentry into preloaded vendor chunks (about +20 KB, or +440 KB with `@sentry/react`) once a DSN is set | `vite.config.ts` | Lane D, **before L6 sets a DSN**: add `if (id.includes("/node_modules/@sentry/")) return "vendor-sentry";` first in the `node_modules` branch, and exclude `vendor-sentry` from `modulePreload.resolveDependencies` (Lane C Day 3 handoff). |
 | DEBT-092 | `@sentry/react` is installed but unused; `monitoring.ts` imports `@sentry/browser` until DEBT-091 is fixed | `package.json`, `src/lib/monitoring.ts` | Lane C, after DEBT-091: switch the import and drop `@sentry/browser`. |
 | DEBT-093 | `PlanSkeleton` renders its own `<main>`, so inside a page that already has a `main` landmark there could be two (not checked with a screen reader) | `src/components/plan/PlanSkeleton.tsx` | Lane D, Wave 2 accessibility pass (3.4). |
+| DEBT-094 | `signOut()` always shows "Your training data stays on this device"; account deletion overrides it by reusing the toast id | `src/stores/authStore.ts`, `src/components/account/AccountDeletionSection.tsx` | Lane H: export the toast id or add `signOut({ silent })`. From the Lane F Day 4 handoff. |
+| DEBT-096 | Export v3 has no import or restore path; "backup" in the file name may suggest one | `src/lib/dataExport.ts` | Product decision (Lincoln). From the Lane F Day 4 handoff. |
+| DEBT-098 | `legal.*` has no German or Portuguese copy (103 keys each in `localeGaps.json`), and `de.json`/`pt.json` still hold unused old `legal.privacy.*` strings ("100% on your device") | `src/locales/de.json`, `src/locales/pt.json` | Lane J, or a human translator after L9. Not launch languages (D3), and the old strings are never rendered. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
@@ -964,7 +988,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Privacy Policy published | Done | `docs/privacy-policy.md` + `/legal` page |
+| Privacy Policy published | Draft | Rewritten 2026-11-21 from `docs/store/DATA_INVENTORY.md` (Lane A Day 4): `docs/privacy-policy.md` and `/legal`. Waiting on Lincoln's placeholders and the L9 review |
 | GDPR Art. 13 — workout/fitness data disclosed | Done | "What We Store" section in Legal.tsx |
 | GDPR Art. 13 — readiness/recovery data disclosed | Done | Added 2026-04-30 |
 | GDPR Art. 13 — nutrition data disclosed | Partial | Mentioned in "What We Store"; OpenFoodFacts disclosure added 2026-04-29 |
@@ -979,7 +1003,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | ConsentModal dismissible | Done | Fixed 2026-04-29 |
 | OpenFoodFacts IP address disclosed in consent | Done | Added 2026-04-29 |
 | OpenFoodFacts disclosed in Legal page | Done | Added 2026-04-29 |
-| Data deletion on request | Not implemented | Profile page has placeholder. Backend deletion endpoint missing. |
+| Data deletion on request | Built, not deployed | In-app Delete account and guest Erase data on this device (#73); `delete-account` function (#65) deployed at L10. Web deletion section at `/legal?tab=privacy#delete-account`; the email path needs Lincoln's support address |
 | Supabase key rotated in Vercel | Done | 2026-04-27 |
 | Legacy key revoked in Supabase dashboard | PENDING | Must happen after new deployment verified live (SEC-001) |
 | Medical disclaimer | Done | Prominent disclaimer tab in Legal.tsx. Since 2026-09-26 it is also directly linked from the footer (`/legal?tab=disclaimer`). |

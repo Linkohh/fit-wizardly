@@ -54,7 +54,7 @@ FitWizard does not access your location, contacts, camera, photos, or health rec
 - In our cloud database, if you sign in: we use Supabase, and your data is stored in [Supabase region: Lincoln to provide]. Each account can read and change only its own records.
 - What syncs: your plans, workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises and favourite exercises. The app syncs when you sign in, when your device comes back online, when you return to the app, and shortly after each change. Nothing is sent while you are offline or signed out; changes made while signed out are sent the next time you sign in.
 - The first time you sign in on a device, the app keeps your account's copy of any record that exists in both places, and uploads only the records that exist only on that device.
-- Signing out does not yet remove your training data from the device. To remove it, use Erase data on this device (see Delete your account below).
+- Signing out does not yet remove your training data from the device. After signing out, you can remove it with Erase data on this device (see Delete your account below).
 - Some of the services listed below are in other countries, so your data may be processed outside the country where you live.
 
 ## Who receives your data
@@ -96,8 +96,8 @@ We do not sell or rent your data, and we do not share it for advertising.
 
 ## Your choices
 
-- Privacy settings: choose whether to allow analytics (which also covers crash reports for now) and food lookup. Change them at any time in Profile, under Privacy Settings. If you say no, those services receive nothing from you.
-- Export: Profile, then Export Data, saves a file with your plans, workout logs, personal records, nutrition, body measurements, readiness check-ins and settings. Achievements, custom exercises and favourite exercises are not in the file yet.
+- Privacy settings: choose whether to allow analytics (which also covers crash reports for now) and food lookup. Change them at any time in Profile → Details → Privacy Settings. If you say no, those services receive nothing from you.
+- Export: Profile → Details → Export Data (JSON) saves a file with what the app keeps about you: plans (including a workout in progress), workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises, exercise favourites and collections, your wizard and onboarding answers, your privacy choices and settings, and, if you are signed in, your account email and profile.
 - Delete items: you can delete plans, meals, custom foods, saved meals and body measurements in the app.
 - No account: use FitWizard without signing in, and your training data stays on your device.
 - Depending on where you live, you may have the right to access, correct, delete or move your data, or to object to how we use it. Contact us to use these rights.
@@ -108,10 +108,11 @@ We do not sell or rent your data, and we do not share it for advertising.
 
 You can delete your account and your data at any time.
 
-- In the app: sign in, open Profile, choose Delete account, and confirm. This deletes your account and everything stored with it in our cloud database straight away, and erases your data on that device.
-- Without an account: open Profile and choose Erase data on this device. This removes your plans, logs and other data from the device. Uninstalling the app, or clearing the site's data in your browser, also removes it.
+- In the app: open Profile, go to Details, tap Delete account, type DELETE and confirm. This permanently deletes your account and everything stored with it on our servers: your email address and profile, plans, workout history, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises, exercise favourites and collections, and the record of which exercises you viewed. The FitWizard data on that device is erased at the same time. Deletion happens straight away and can't be undone, so download a copy first with Profile → Details → Export Data (JSON).
+- Not signed in? Your data is only on your device. Remove it with Profile → Details → Erase data on this device (type DELETE to confirm), or by uninstalling the app or clearing the site's data in your browser.
 - Can't sign in, or don't have the app? Email [support email: Lincoln to provide] from the address on your account, with the subject 'Delete my account'. We will confirm that the address is yours and delete the account within 30 days.
-- What is deleted: your email address, your profile and every record linked to your account. Group challenges or circles you created stay for their other members, without your name.
+- If you created a circle or challenge, it stays for its other members, with you removed as its creator.
+- Other devices where you were signed in keep their copy on the device until you sign out and erase it there, or uninstall the app.
 - What may remain: copies in our database provider's routine backups until they expire ([backup period: Lincoln to confirm]), and data already sent to the services listed above, which they keep under their own policies.
 
 ## Security
@@ -198,12 +199,13 @@ These are the facts in the code that the text above relies on, so the reviewer c
 | What syncs, and when | Contract 5 in [`docs/project/CONTRACTS.md`](project/CONTRACTS.md); plans through `src/lib/plans/`, favourites through `user_exercise_preferences` |
 | Deleted synced items are marked, not removed, until account deletion | The sync engine sets `deleted_at` and never hard-deletes (`src/lib/sync/engine.ts`); plans are hard-deleted (`src/lib/plans/supabasePlansRepo.ts`) |
 | Account deletion removes every linked row | `supabase/functions/delete-account/` and the cascade checked by `supabase/tests/delete_account.test.sql` (contract 4) |
-| In-app Delete account and Erase data on this device | **Stubbed from contract 4.** Lane F Day 4 builds both controls on Profile. Re-check the wording against the merged screen |
+| In-app Delete account and Erase data on this device | Profile → Details (`src/components/account/AccountDeletionSection.tsx`, Lane F Day 4, #73); wording from the Lane F Day 4 handoff. Not yet run against the deployed function (Gate 1, after L10) |
 | Email deletion within 30 days | Default chosen here; Lincoln to confirm the process and time |
 | IP kept in memory for the rate limit | `api/_lib/guard.ts`; see "Our own API functions" in `DATA_INVENTORY.md` |
 | Crash reports: opt-in, not switched on | `src/lib/monitoring.ts` (contract 8); no DSN set until L6 |
 | PostHog and local notifications | Planned (Lane C Day 4, Lane H Days 5–6); the text says so |
-| Export contents | `buildUserDataExport` in `src/lib/dataExport.ts` (version 2); achievements, custom exercises and favourites arrive with export v3 (Lane F) |
+| Export contents | `buildUserDataExport` in `src/lib/dataExport.ts`, export version 3 (#73) |
 | No camera, location or contacts access | No camera, location or contacts API is used in `src/`, and the native projects declare no such permissions |
+| Other devices keep their copy after deletion | Lane F Day 4 handoff (new issue); Lane E Day 7 sign-out work |
 
 The third-party privacy links were written from known URLs. This environment couldn't reach those sites, so they are not verified yet.

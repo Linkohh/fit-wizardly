@@ -632,7 +632,7 @@
                 "cloud": "En nuestra base de datos en la nube, si inicias sesión: usamos Supabase, y tus datos se guardan en {{region}}. Cada cuenta solo puede leer y cambiar sus propios registros.",
                 "sync": "Qué se sincroniza: tus planes, registros de entrenamientos, récords personales, registros y ajustes de nutrición, medidas corporales, registros de preparación, logros, ejercicios personalizados y ejercicios favoritos. La app sincroniza al iniciar sesión, cuando tu dispositivo vuelve a tener conexión, cuando vuelves a la app y poco después de cada cambio. No se envía nada sin conexión ni con la sesión cerrada; los cambios hechos con la sesión cerrada se envían la próxima vez que inicias sesión.",
                 "first_sign_in": "La primera vez que inicias sesión en un dispositivo, la app conserva la copia de tu cuenta de cualquier registro que exista en ambos lugares y solo sube los registros que existen únicamente en ese dispositivo.",
-                "sign_out": "Cerrar sesión todavía no elimina tus datos de entrenamiento del dispositivo. Para eliminarlos, usa Borrar datos de este dispositivo (consulta Eliminar tu cuenta más abajo).",
+                "sign_out": "Cerrar sesión todavía no elimina tus datos de entrenamiento del dispositivo. Después de cerrar sesión, puedes eliminarlos con Borrar los datos de este dispositivo (consulta Eliminar tu cuenta más abajo).",
                 "transfers": "Algunos de los servicios indicados abajo están en otros países, así que tus datos pueden tratarse fuera del país donde vives."
             },
             "recipients": {
@@ -661,7 +661,7 @@
             },
             "retention": {
                 "title": "Cuánto tiempo los guardamos",
-                "device": "En tu dispositivo: hasta que los elimines en la app, uses Borrar datos de este dispositivo, borres los datos de la app o del navegador, o desinstales la app.",
+                "device": "En tu dispositivo: hasta que los elimines en la app, uses Borrar los datos de este dispositivo, borres los datos de la app o del navegador, o desinstales la app.",
                 "cloud": "En tu cuenta: hasta que los elimines o elimines tu cuenta. Los planes eliminados se borran de inmediato. Los demás elementos sincronizados se marcan como eliminados para que tus otros dispositivos también los quiten; el registro marcado se borra definitivamente cuando eliminas tu cuenta.",
                 "account": "Tu correo, tu perfil y el registro de qué ejercicios viste se guardan hasta que eliminas tu cuenta.",
                 "code": "Los códigos de inicio de sesión sirven una sola vez y caducan al poco tiempo.",
@@ -670,8 +670,8 @@
             },
             "choices": {
                 "title": "Tus opciones",
-                "consent": "Ajustes de privacidad: elige si permites las analíticas (que por ahora también cubren los informes de errores) y la búsqueda de alimentos. Cámbialos cuando quieras en Perfil, en Ajustes de privacidad. Si dices que no, esos servicios no reciben nada de ti.",
-                "export": "Exportar: Perfil, luego Exportar datos, guarda un archivo con tus planes, registros de entrenamientos, récords personales, nutrición, medidas corporales, registros de preparación y ajustes. Los logros, los ejercicios personalizados y los ejercicios favoritos aún no están en el archivo.",
+                "consent": "Ajustes de privacidad: elige si permites las analíticas (que por ahora también cubren los informes de errores) y la búsqueda de alimentos. Cámbialos cuando quieras en Perfil → Detalles → Ajustes de privacidad. Si dices que no, esos servicios no reciben nada de ti.",
+                "export": "Exportar: Perfil → Detalles → Exportar datos (JSON) guarda un archivo con lo que la app guarda sobre ti: planes (incluido un entrenamiento en curso), registros de entrenamientos, récords personales, registros y ajustes de nutrición, medidas corporales, registros de preparación, logros, ejercicios personalizados, ejercicios favoritos y colecciones, tus respuestas del asistente y de la bienvenida, tus opciones de privacidad y ajustes y, si has iniciado sesión, el correo y el perfil de tu cuenta.",
                 "delete_items": "Eliminar elementos: puedes eliminar planes, comidas, alimentos personalizados, comidas guardadas y medidas corporales en la app.",
                 "guest": "Sin cuenta: usa FitWizard sin iniciar sesión y tus datos de entrenamiento se quedan en tu dispositivo.",
                 "rights": "Según dónde vivas, puedes tener derecho a acceder, corregir, eliminar o trasladar tus datos, o a oponerte a cómo los usamos. Contáctanos para ejercer estos derechos."
@@ -679,10 +679,11 @@
             "delete_account": {
                 "title": "Eliminar tu cuenta",
                 "intro": "Puedes eliminar tu cuenta y tus datos en cualquier momento.",
-                "in_app": "En la app: inicia sesión, abre Perfil, elige Eliminar cuenta y confirma. Esto elimina de inmediato tu cuenta y todo lo guardado con ella en nuestra base de datos en la nube, y borra tus datos en ese dispositivo.",
-                "guest": "Sin cuenta: abre Perfil y elige Borrar datos de este dispositivo. Esto elimina tus planes, registros y demás datos del dispositivo. Desinstalar la app, o borrar los datos del sitio en tu navegador, también los elimina.",
+                "in_app": "En la app: abre Perfil, ve a Detalles, toca Eliminar cuenta, escribe DELETE y confirma. Esto elimina para siempre tu cuenta y todo lo guardado con ella en nuestros servidores: tu correo y tu perfil, planes, historial de entrenamientos, récords personales, registros y ajustes de nutrición, medidas corporales, registros de preparación, logros, ejercicios personalizados, ejercicios favoritos y colecciones, y el registro de qué ejercicios viste. Los datos de FitWizard en ese dispositivo se borran al mismo tiempo. La eliminación es inmediata y no se puede deshacer, así que descarga antes una copia con Perfil → Detalles → Exportar datos (JSON).",
+                "guest": "¿No has iniciado sesión? Tus datos están solo en tu dispositivo. Elimínalos con Perfil → Detalles → Borrar los datos de este dispositivo (escribe DELETE para confirmar), o desinstalando la app o borrando los datos del sitio en tu navegador.",
                 "by_email": "¿No puedes iniciar sesión o no tienes la app? Escribe a {{email}} desde la dirección de tu cuenta, con el asunto «Eliminar mi cuenta». Confirmaremos que la dirección es tuya y eliminaremos la cuenta en un plazo de 30 días.",
-                "what_is_deleted": "Qué se elimina: tu correo, tu perfil y todos los registros vinculados a tu cuenta. Los retos de grupo o círculos que creaste se mantienen para sus demás miembros, sin tu nombre.",
+                "circles": "Si creaste un círculo o un reto, se mantiene para sus demás miembros, y dejas de figurar como su creador.",
+                "other_devices": "Otros dispositivos en los que habías iniciado sesión conservan su copia hasta que cierres sesión y borres los datos allí, o desinstales la app.",
                 "what_may_remain": "Qué puede quedar: copias en las copias de seguridad habituales de nuestro proveedor de base de datos hasta que caduquen ({{backup}}), y los datos ya enviados a los servicios indicados arriba, que los guardan según sus propias políticas."
             },
             "security": {
