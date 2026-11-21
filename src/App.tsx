@@ -29,7 +29,8 @@ import { LoadingScreen } from "@/components/ui/loading-screen";
 import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
 import { AuthModal } from "@/components/auth/AuthModal";
-import { useAnalyticsStore } from "@/stores/analyticsStore";
+import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
+import { usePageViews } from "@/lib/analytics/usePageViews";
 import { useScrollActivity } from "@/hooks/use-scroll-activity";
 import { NavigationDirectionProvider } from "@/contexts/navigation-direction-context";
 import { isFeatureEnabled } from "@/lib/featureFlags";
@@ -333,7 +334,9 @@ const App = () => {
   useScrollActivity();
   useAndroidBackButton();
   const nativeApp = isNativeApp();
-  const hasAnalyticsConsent = useAnalyticsStore((state) => state.hasConsented);
+  usePageViews();
+  // One consent key for every analytics tool (DEBT-061): fitwizard_analytics_consent.
+  const hasAnalyticsConsent = useAnalyticsConsent();
   const [shouldRenderLivingBackground, setShouldRenderLivingBackground] = useState(false);
 
   // Handle post-login redirects for invites

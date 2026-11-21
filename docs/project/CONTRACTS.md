@@ -223,6 +223,14 @@ export function track(event: AnalyticsEvent, props?: Record<string, string | num
 // No-op without analytics consent. Never pass health values (weights, body measurements, readiness, food).
 ```
 
+> **Change on Lane C Day 4 (needs Lincoln's OK):** `'$pageview'` joins the union. `usePageViews()` (`src/lib/analytics/usePageViews.ts`, mounted in `App.tsx`) sends it on every route change, because PostHog's own pageview capture is off.
+
+Behaviour (merged on Lane C Day 4):
+- No-op, and nothing is loaded, unless `VITE_POSTHOG_KEY` is set **and** `hasAnalyticsConsent()` is true (`fitwizard_analytics_consent`, the same key crash reports use). PostHog (EU cloud) is loaded with a dynamic import on the first allowed event.
+- Only these property keys are sent: `step`, `goal`, `days_per_week`, `exercise_count`, `duration_min`, `source`, `platform`. Values must be strings (cut to 64 characters), finite numbers or booleans. Everything else is dropped silently. `platform` (`web`, `ios`, `android`) is added to every event.
+- Page URLs lose their query string and hash, and id-like path segments become `:id`.
+- Safe to call from stores: `track.ts` imports nothing heavy.
+
 ## 10. Native helpers: `src/hooks/`
 
 Every helper is a no-op on the web, using a dynamic `import()` like `useHaptics.ts`.

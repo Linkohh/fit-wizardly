@@ -37,6 +37,7 @@ import {
 import { createUserDataStorage } from '@/lib/storage/appStorage';
 import { hydrationTracking, waitForHydration } from '@/lib/storage/hydration';
 import { isFeatureEnabled } from '@/lib/featureFlags';
+import { track } from '@/lib/analytics/track';
 import {
   MAX_PERSONAL_RECORDS,
   MAX_WORKOUT_LOGS,
@@ -338,6 +339,7 @@ export const usePlanStore = create<PlanState>()(
             restTimerEndTime: null,
           },
         });
+        track('workout_started', { exercise_count: exercises.length });
       },
 
       cancelWorkout: () => {
@@ -442,6 +444,7 @@ export const usePlanStore = create<PlanState>()(
           // Streak and weekly goal count finished workouts. Loaded on demand
           // so the badge catalogue stays out of the start-up bundle.
           void recordWorkoutForAchievements();
+          track('workout_completed', { exercise_count: workoutLog.exercises.length, duration_min: workoutLog.duration });
 
           if (isFeatureEnabled('circles')) {
             // Post workout to user's circles (fire-and-forget)

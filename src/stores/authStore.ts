@@ -11,6 +11,7 @@ import { translate } from '@/lib/translate';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Profile } from '@/types/supabase';
 import type { User, Session } from '@supabase/supabase-js';
+import { track } from '@/lib/analytics/track';
 
 let authSubscription: { unsubscribe: () => void } | null = null;
 
@@ -173,6 +174,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
                 try {
                     if (event === 'SIGNED_IN' && session?.user) {
+                        track('signed_in'); // Lane C Day 4: covers magic-link and email-code sign-in
                         // Fetch or create profile
                         const { data: existingProfile, error: fetchError } = await supabase
                             .from('profiles')
