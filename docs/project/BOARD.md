@@ -48,7 +48,7 @@ All seven lanes run in parallel. There are no dependencies between them.
 
 | Lane | Day 4 | Day 5 | Day 6 | Day 7 |
 |---|---|---|---|---|
-| **A** | 🔵 PR (this one) · 4.1 Privacy policy and terms rewritten from the inventory, web deletion section `#delete-account`; draft for L9 | ⬜ 4.2 Store form answer sheets | ⬜ 4.3 Listing copy; screenshot script | ⬜ 1.8 v1.1.0 changelog and version bumps; Gate 2 checklist |
+| **A** | 🔵 PR #77 · 4.1 Privacy policy and terms rewritten from the inventory, web deletion section `#delete-account`; draft for L9 | ⬜ 4.2 Store form answer sheets | ⬜ 4.3 Listing copy; screenshot script | ⬜ 1.8 v1.1.0 changelog and version bumps; Gate 2 checklist |
 | **B** | 🔵 PR #76 · 3.6c Fewer taps to the first plan (14 → 11) | ⬜ Buffer: Gate 1 bugs | ➖ | ➖ |
 | **C** | 🔵 PR #75 · 3.2 `track()` and PostHog EU adapter; wire events | ⬜ Consent entries; disclosure text to Lane A | ⬜ Error-boundary tests; source maps (if L6 done) | ➖ |
 | **D** | ⬜ 3.5 Playwright lifter loop with reload; CI job. **Buffer, before L6 sets a DSN:** `vite.config.ts` `manualChunks` → `vendor-sentry` chunk, excluded from preload (DEBT-091; one-line fix in the Lane C Day 3 handoff) | ⬜ 3.4 RIR labels, 44 px targets, `MotionConfig`, DEBT-021 | ⬜ 3.4 Wizard Enter key (DEBT-025) | ⬜ 4.5 `npm audit` gate; Dependabot |
