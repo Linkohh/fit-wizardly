@@ -30,3 +30,14 @@
   - Until sync exists, signing out keeps data on the device and says so, because clearing it would delete data that exists nowhere else. After sync (Lane E Day 6), account sign-out clears device copies once they are synced. Guests keep their data.
   - Account deletion and "Erase data on this device" use `clearLocalUserData()`.
 - **Code**: `src/lib/storage/appStorage.ts`, `src/lib/storage/hydration.ts`, `src/lib/storage/clearLocalUserData.ts`, `src/stores/*.persistence.ts`.
+
+## 12. Persistent sessions (2026-11)
+- **Decision**: The session token lives in `@capacitor/preferences` on native and in `localStorage` on the web, so users stay signed in across restarts (decision D2).
+- **Why**: Keeping it in `sessionStorage` signed people out every time the app or tab closed. This trades a larger window if an XSS occurs (mitigated by the strict CSP and no third-party scripts) for an app that doesn't sign people out every time it closes.
+- **Consequences**:
+  - Sessions saved in `sessionStorage` by older versions are moved once to the new storage on first start, and the old copy is removed, so nobody is signed out by the update.
+  - Sign-out (`supabase.auth.signOut()`) removes the token from the new storage.
+  - Only the Supabase session (`sb-<project>-auth-token` and its companions) is stored there. ADR 11 still holds: user data never goes to `localStorage`.
+  - On iOS, `@capacitor/preferences` uses UserDefaults, covered by reason `CA92.1` in `PrivacyInfo.xcprivacy`.
+  - Revisit with a cookie-based backend if one is added.
+- **Code**: `src/lib/authSessionStorage.ts`, `src/lib/supabase.ts`.

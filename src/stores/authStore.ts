@@ -57,7 +57,11 @@ function stripTrainerFields(updates: Partial<Profile>): Partial<Profile> {
     return safeUpdates;
 }
 
-function clearSensitiveStorage(): void {
+// Set by signOut({ quiet: true }) so the SIGNED_OUT event that follows doesn't
+// show the "data stays on this device" toast either.
+let quietSignOutPending = false;
+
+function clearSensitiveStorage({ quiet = false }: { quiet?: boolean } = {}): void {
     if (typeof window === 'undefined') {
         return;
     }
@@ -68,6 +72,10 @@ function clearSensitiveStorage(): void {
 
     for (const key of SENSITIVE_SESSION_STORAGE_KEYS) {
         window.sessionStorage.removeItem(key);
+    }
+
+    if (quiet) {
+        return;
     }
 
     // Same id: signOut() and the SIGNED_OUT event both call this; show one toast.
@@ -89,7 +97,8 @@ interface AuthState {
     initialize: () => Promise<void>;
     signInWithEmail: (email: string) => Promise<{ error: Error | null }>;
     verifyEmailCode: (email: string, code: string) => Promise<{ error: Error | null }>;
-    signOut: () => Promise<void>;
+    /** `quiet` skips the "data stays on this device" toast (for example after account deletion). */
+    signOut: (options?: { quiet?: boolean }) => Promise<void>;
     updateProfile: (updates: Partial<Profile>) => Promise<{ error: Error | null }>;
 
     // UI state
@@ -212,7 +221,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
                             showAuthModal: false,
                         });
                     } else if (event === 'SIGNED_OUT') {
-                        clearSensitiveStorage();
+                        clearSensitiveStorage({ quiet: quietSignOutPending });
+                        quietSignOutPending = false;
                         set({
                             user: null,
                             session: null,
@@ -268,8 +278,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     },
 
     // Sign out
-    signOut: async () => {
-        clearSensitiveStorage();
+    signOut: async ({ quiet = false } = {}) => {
+        clearSensitiveStorage({ quiet });
         set({
             user: null,
             session: null,
@@ -280,6 +290,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
         if (!isSupabaseConfigured()) return;
 
+        quietSignOutPending = quiet;
         try {
             const { error } = await supabase.auth.signOut();
             if (error) {
@@ -289,6 +300,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } catch (error) {
             console.error('Sign out error:', error);
             toast.error('Failed to sign out');
+        } finally {
+            quietSignOutPending = false;
         }
 
     },

@@ -7,6 +7,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
+import { createAuthSessionStorage, getAuthStorageKey } from '@/lib/authSessionStorage';
 
 type RemoteUrlValidationOptions = {
   allowRelative?: boolean;
@@ -61,16 +62,22 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
+const resolvedSupabaseUrl = supabaseUrl || 'https://placeholder.supabase.co';
+const authStorageKey = getAuthStorageKey(resolvedSupabaseUrl);
+
 export const supabase = createClient<Database>(
-  supabaseUrl || 'https://placeholder.supabase.co',
+  resolvedSupabaseUrl,
   supabaseAnonKey || 'placeholder-key',
   {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
-      // Use sessionStorage instead of localStorage to prevent JWT theft via XSS.
-      storage: typeof window !== 'undefined' ? window.sessionStorage : undefined,
+      // Sessions last across restarts (ADR 12): @capacitor/preferences on
+      // native, localStorage on the web. Sessions saved in sessionStorage by
+      // older versions are moved over once.
+      storageKey: authStorageKey,
+      storage: typeof window !== 'undefined' ? createAuthSessionStorage(authStorageKey) : undefined,
     },
   }
 );

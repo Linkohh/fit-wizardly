@@ -434,7 +434,11 @@
         "resend_in": "Code erneut senden in {{seconds}} s",
         "resent": "Wir haben dir einen neuen Code geschickt.",
         "different_email": "Andere E-Mail verwenden",
-        "close": "Schließen"
+        "close": "Schließen",
+        "send_error_rate_limit": "Zu viele Codes angefordert. Warte eine Minute und versuche es dann erneut.",
+        "send_error_invalid_email": "An diese Adresse können wir keinen Code senden. Prüfe sie und versuche es erneut.",
+        "send_error_offline": "Du bist offline. Verbinde dich mit dem Internet und versuche es erneut.",
+        "send_error_generic": "Der Code konnte nicht gesendet werden. Bitte versuche es erneut."
     },
     "pdfExport": {
         "headers": {

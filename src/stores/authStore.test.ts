@@ -403,6 +403,35 @@ describe('authStore.signOut', () => {
       { id: 'fitwizard-data-kept-on-device' },
     );
   });
+
+  it('signOut({ quiet: true }) clears storage without the toast, including from SIGNED_OUT', async () => {
+    window.localStorage.setItem('fitwizard-wizard', '1');
+    let authHandler: ((event: string, session: null) => Promise<void>) | null = null;
+    mocks.getSession.mockResolvedValue({ data: { session: null }, error: null });
+    mocks.onAuthStateChange.mockImplementation((handler: typeof authHandler) => {
+      authHandler = handler;
+      return { data: { subscription: { unsubscribe: vi.fn() } } };
+    });
+    // Supabase emits SIGNED_OUT while signOut() runs.
+    mocks.signOut.mockImplementation(async () => {
+      await authHandler?.('SIGNED_OUT', null);
+      return { error: null };
+    });
+
+    const { useAuthStore } = await loadAuthStore();
+    await useAuthStore.getState().initialize();
+    await useAuthStore.getState().signOut({ quiet: true });
+
+    expect(window.localStorage.getItem('fitwizard-wizard')).toBeNull();
+    expect(toastMocks.info).not.toHaveBeenCalled();
+
+    // The next ordinary sign-out shows it again (signOut and SIGNED_OUT share one toast id).
+    await useAuthStore.getState().signOut();
+    expect(toastMocks.info).toHaveBeenCalledWith(
+      'Signed out. Your training data stays on this device.',
+      { id: 'fitwizard-data-kept-on-device' },
+    );
+  });
 });
 
 describe('authStore.updateProfile', () => {

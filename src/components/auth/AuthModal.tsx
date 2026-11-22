@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Mail, Sparkles } from 'lucide-react';
@@ -13,8 +13,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAuthStore } from '@/stores/authStore';
-import { EmailCodeStep } from './EmailCodeStep';
 import { sameOriginPath } from './sameOriginPath';
+import { sendErrorKey } from './sendErrorKey';
+
+// The code step pulls in input-otp; load it only once a code has been sent
+// (DEBT-079), so it stays out of the startup bundle.
+const loadEmailCodeStep = () => import('./EmailCodeStep');
+const EmailCodeStep = lazy(() =>
+  loadEmailCodeStep().then((module) => ({ default: module.EmailCodeStep }))
+);
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -62,10 +69,12 @@ export function AuthModal() {
 
     setIsLoading(true);
     setError(null);
+    // Fetch the code step while the email is being sent.
+    void loadEmailCodeStep().catch(() => undefined);
     const { error: sendError } = await sendCode();
     setIsLoading(false);
 
-    if (sendError) setError(sendError.message);
+    if (sendError) setError(t(sendErrorKey(sendError)));
   };
 
   const handleClose = () => {
@@ -157,18 +166,26 @@ export function AuthModal() {
             </form>
           </>
         ) : (
-          <EmailCodeStep
-            email={email.trim()}
-            sentAt={sentAt}
-            verifyEmailCode={verifyEmailCode}
-            onResend={sendCode}
-            onUseDifferentEmail={() => {
-              setSentAt(null);
-              setError(null);
-            }}
-            onVerified={handleVerified}
-            onClose={handleClose}
-          />
+          <Suspense
+            fallback={
+              <div className="flex justify-center py-10" role="status" aria-label={t('auth.code_title')}>
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            }
+          >
+            <EmailCodeStep
+              email={email.trim()}
+              sentAt={sentAt}
+              verifyEmailCode={verifyEmailCode}
+              onResend={sendCode}
+              onUseDifferentEmail={() => {
+                setSentAt(null);
+                setError(null);
+              }}
+              onVerified={handleVerified}
+              onClose={handleClose}
+            />
+          </Suspense>
         )}
       </DialogContent>
     </Dialog>
