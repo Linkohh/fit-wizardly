@@ -6,6 +6,7 @@ import { useWizardForm, scheduleStepSchema } from '@/hooks/useWizardForm';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { FIRST_PLAN_DAYS_PER_WEEK, FIRST_PLAN_SESSION_MINUTES } from './firstPlanDefaults';
 
 const DAYS_OPTIONS = [2, 3, 4, 5, 6] as const;
 const DURATION_OPTIONS = [30, 45, 60, 75, 90] as const;
@@ -67,8 +68,8 @@ export function ScheduleStep() {
   };
 
   const handleReset = () => {
-    setValue('daysPerWeek', 3);
-    setValue('sessionDuration', 60);
+    setValue('daysPerWeek', FIRST_PLAN_DAYS_PER_WEEK);
+    setValue('sessionDuration', FIRST_PLAN_SESSION_MINUTES);
     trigger();
   };
 
@@ -80,7 +81,7 @@ export function ScheduleStep() {
       </div>
 
       <AnimatePresence>
-        {(watchedDays !== 3 || watchedDuration !== 60) && (
+        {(watchedDays !== FIRST_PLAN_DAYS_PER_WEEK || watchedDuration !== FIRST_PLAN_SESSION_MINUTES) && (
           <motion.div
             className="flex justify-start"
             initial={{ opacity: 0, height: 0 }}

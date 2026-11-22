@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useWizardStore } from '@/stores/wizardStore';
@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 
 export function ConstraintsStep() {
   const { t } = useTranslation();
-  const { selections, setConstraints } = useWizardStore();
+  const { selections, setConstraints, nextStep } = useWizardStore();
 
   // React Hook Form integration with Zustand sync
   const { watch, setValue, trigger } = useWizardForm({
@@ -43,6 +43,18 @@ export function ConstraintsStep() {
         <h2 className="text-2xl font-bold text-foreground">{t('wizard.constraints.title')}</h2>
         <p className="text-muted-foreground mt-1">{t('wizard.constraints.subtitle')}</p>
       </div>
+
+      {/* Most people have nothing to flag: one tap confirms "none" and moves on (3.6c). */}
+      {watchedConstraints.length === 0 && (
+        <Button
+          variant="outline"
+          onClick={nextStep}
+          className="touch-target w-full justify-between border-primary/40 text-foreground hover:bg-primary/10"
+        >
+          <span>{t('wizard.constraints.no_injuries_continue', 'No injuries, continue')}</span>
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Button>
+      )}
 
       <AnimatePresence>
         {watchedConstraints.length > 0 && (

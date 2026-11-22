@@ -300,7 +300,9 @@
             "selected_empty": "Choose at least one focus area to shape the split.",
             "equipment_title": "Available tools",
             "coaching_note_title": "Coach note",
-            "coaching_note_copy": "Your selections here drive exercise choice, weekly volume, and how each day in the split is balanced."
+            "coaching_note_copy": "Your selections here drive exercise choice, weekly volume, and how each day in the split is balanced.",
+            "auto_pick": "Let FitWizard choose",
+            "auto_pick_hint": "Picks a balanced full-body focus. You can change it on the map."
         },
         "equipment": {
             "title": "What equipment do you have?",
@@ -316,6 +318,7 @@
             "subtitle": "Flag anything that should shape the plan before we choose exercises or weekly volume.",
             "clear_selections": "Clear selections",
             "no_constraints": "No restrictions selected yet. We can use the full exercise pool.",
+            "no_injuries_continue": "No injuries, continue",
             "count_one": "{{count}} restriction will guide exercise filtering",
             "count_other": "{{count}} restrictions will guide exercise filtering",
             "selected": "(selected)"

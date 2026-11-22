@@ -222,7 +222,9 @@
         },
         "anatomy": {
             "title": "Selecciona los Músculos Objetivo",
-            "subtitle": "Haz clic en el diagrama o la lista para elegir los grupos musculares que deseas entrenar."
+            "subtitle": "Haz clic en el diagrama o la lista para elegir los grupos musculares que deseas entrenar.",
+            "auto_pick": "Que FitWizard elija",
+            "auto_pick_hint": "Elige un enfoque equilibrado de cuerpo completo. Puedes cambiarlo en el mapa."
         },
         "equipment": {
             "title": "¿Qué equipamiento tienes?",
@@ -238,6 +240,7 @@
             "subtitle": "Selecciona las que apliquen - opcional",
             "clear_selections": "Borrar selecciones",
             "no_constraints": "Sin restricciones - todos los ejercicios disponibles",
+            "no_injuries_continue": "Sin lesiones, continuar",
             "count_one": "Se aplicará {{count}} filtro",
             "count_other": "Se aplicarán {{count}} filtros",
             "selected": "(seleccionado)"
