@@ -382,7 +382,10 @@
     "wizard.toast.error_description",
     "wizard.toast.error_title",
     "wizard.toast.success_description",
-    "wizard.toast.success_title"
+    "wizard.toast.success_title",
+    "workoutLogger.finish",
+    "workoutLogger.next_exercise",
+    "workoutLogger.previous_exercise"
   ],
   "es": [
     "about.closing.guide",
@@ -896,6 +899,9 @@
     "wizard.toast.error_description",
     "wizard.toast.error_title",
     "wizard.toast.success_description",
-    "wizard.toast.success_title"
+    "wizard.toast.success_title",
+    "workoutLogger.finish",
+    "workoutLogger.next_exercise",
+    "workoutLogger.previous_exercise"
   ]
 }

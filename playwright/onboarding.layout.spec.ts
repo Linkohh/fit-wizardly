@@ -48,7 +48,7 @@ async function expectTopRowBelowHeader(page: Page) {
   const appShell = page.getByTestId('app-shell');
   const topRow = page.getByTestId('onboarding-top-row');
   const skipButton = page.getByRole('button', { name: /skip for now/i });
-  const progressCounter = topRow.getByText(/^1\/3$/);
+  const progressCounter = topRow.getByText(/^1\/2$/);
 
   await expect(topRow).toBeVisible();
   await expect(skipButton).toBeVisible();

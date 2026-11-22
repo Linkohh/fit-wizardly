@@ -47,3 +47,53 @@ jobs:
 
       - name: Build server
         run: npm --prefix server run build
+
+  edge-functions:
+    # Deno tests for the delete-account edge function (DEBT-086).
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test delete-account function
+        run: npx -y deno@2 test --no-config supabase/functions/delete-account/
+
+  e2e:
+    # Playwright lifter loop (guest, chromium only). Roadmap 3.5.
+    # Pinned: Playwright 1.59 has no chromium build for ubuntu-latest (26.04).
+    runs-on: ubuntu-24.04
+    needs: test
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright (chromium)
+        run: npx playwright test --project=chromium --trace off
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

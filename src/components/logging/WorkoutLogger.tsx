@@ -82,7 +82,8 @@ export function WorkoutLogger() {
 
     // Start workout on mount only after readiness check is resolved.
     useEffect(() => {
-        if (!planId || activeWorkout) {
+        // Once finished, activeWorkout is cleared; don't start a new one behind the summary.
+        if (!planId || activeWorkout || completedLog) {
             return;
         }
 
@@ -100,7 +101,7 @@ export function WorkoutLogger() {
         if (planId && !activeWorkout) {
             startWorkout(planId, dayIndexNum);
         }
-    }, [planId, dayIndexNum, activeWorkout, startWorkout, getTodayLog, readinessResolved]);
+    }, [planId, dayIndexNum, activeWorkout, startWorkout, getTodayLog, readinessResolved, completedLog]);
 
     const handleReadinessComplete = (entry: ReadinessEntry) => {
         setReadinessEntry(entry);
@@ -173,6 +174,17 @@ export function WorkoutLogger() {
                     </CardContent>
                 </Card>
             </div>
+        );
+    }
+
+    // Before the !activeWorkout branch: finishing clears activeWorkout.
+    if (showSummary && completedLog) {
+        return (
+            <WorkoutSummary
+                log={completedLog}
+                plan={plan}
+                onClose={() => navigate('/plan')}
+            />
         );
     }
 
@@ -304,17 +316,8 @@ export function WorkoutLogger() {
     const allSetsCompleted = currentExercise?.sets.every(s => s.completed) || currentExercise?.skipped;
     const isLastExercise = currentExerciseIndex === totalExercises - 1;
     const allExercisesCompleted = completedExercises === totalExercises;
+    const hasLoggedSet = activeWorkout.exercises.some(exercise => exercise.sets.some(set => set.completed));
     const lastPerformance = getLastPerformance(currentExercise.exerciseId);
-
-    if (showSummary && completedLog) {
-        return (
-            <WorkoutSummary
-                log={completedLog}
-                plan={plan}
-                onClose={() => navigate('/plan')}
-            />
-        );
-    }
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
@@ -387,6 +390,7 @@ export function WorkoutLogger() {
                         size="icon"
                         onClick={handlePrevExercise}
                         disabled={currentExerciseIndex === 0}
+                        aria-label={t('workoutLogger.previous_exercise', 'Previous exercise')}
                     >
                         <ChevronLeft className="h-6 w-6" />
                     </Button>
@@ -403,6 +407,7 @@ export function WorkoutLogger() {
                         size="icon"
                         onClick={handleNextExercise}
                         disabled={currentExerciseIndex === totalExercises - 1}
+                        aria-label={t('workoutLogger.next_exercise', 'Next exercise')}
                     >
                         <ChevronRight className="h-6 w-6" />
                     </Button>
@@ -419,6 +424,7 @@ export function WorkoutLogger() {
                             previousSet={
                                 idx > 0 ? currentExercise.sets[idx - 1] : undefined
                             }
+                            loggedSet={set}
                             lastPerformance={lastPerformance?.sets[idx]}
                             defaultWeightUnit={preferredWeightUnit}
                             onComplete={handleSetComplete}
@@ -428,10 +434,19 @@ export function WorkoutLogger() {
                 </div>
 
                 {/* Buttons */}
-                <div className="mt-8 flex justify-center gap-4">
+                <div className="mt-8 flex flex-wrap justify-center gap-4">
                     <Button variant="outline" onClick={handleSkipExercise}>
                         <SkipForward className="mr-2 h-4 w-4" />
                         {t('workout.skip_exercise', 'Skip Exercise')}
+                    </Button>
+                    {/* Opens the difficulty rating, which saves the workout (DEBT-094). */}
+                    <Button
+                        variant={allExercisesCompleted ? 'default' : 'secondary'}
+                        onClick={() => handleFinishWorkout()}
+                        disabled={!hasLoggedSet}
+                    >
+                        <Trophy className="mr-2 h-4 w-4" />
+                        {t('workoutLogger.finish', 'Finish workout')}
                     </Button>
                 </div>
 
