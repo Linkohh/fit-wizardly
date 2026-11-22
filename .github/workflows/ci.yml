@@ -66,7 +66,8 @@ jobs:
 
   e2e:
     # Playwright lifter loop (guest, chromium only). Roadmap 3.5.
-    runs-on: ubuntu-latest
+    # Pinned: Playwright 1.59 has no chromium build for ubuntu-latest (26.04).
+    runs-on: ubuntu-24.04
     needs: test
     timeout-minutes: 15
 

@@ -71,14 +71,15 @@ export function SetLogger({
 
     // Prefill from the previous set until this set is logged; a logged set keeps its own values.
     useEffect(() => {
-        if (previousSet && !completed) {
+        // A saved log wins; both effects run in the same commit when the row is reused.
+        if (previousSet && !completed && !loggedSet?.completed) {
             setWeight(previousSet.weight);
             setReps(previousSet.reps);
             setRIR(previousSet.rir);
             setEffortMode(previousSet.effortMode ?? 'rir');
             setRPE(previousSet.rpe ?? Math.max(6, Math.min(10, 10 - previousSet.rir)));
         }
-    }, [previousSet, completed]);
+    }, [previousSet, completed, loggedSet]);
 
     const handleComplete = () => {
         const derivedRIR = effortMode === 'rpe'

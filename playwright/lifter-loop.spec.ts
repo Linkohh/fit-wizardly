@@ -3,8 +3,8 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 /**
  * Lifter loop, as a guest with no Supabase (roadmap 3.5, Lane D Day 4).
  *
- * onboarding → wizard → plan → start day 1 → log two sets → reload → new page on the
- * same saved storage. Saved data lives in IndexedDB (`fitwizard` / `kv`, contract #2),
+ * onboarding → wizard → plan → start day 1 → log two sets → reload partway → finish and
+ * rate → reload (History, Plan) → new page on the same saved storage. Saved data lives in IndexedDB (`fitwizard` / `kv`, contract #2),
  * so the storage-state hand-off includes IndexedDB.
  *
  * Sync shows nothing in demo mode, so the sync row is not asserted.
@@ -27,7 +27,8 @@ async function completeOnboarding(page: Page) {
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: /^Gain Muscle/ }).click();
   await page.getByRole('button', { name: "Let's Go!" }).click();
-  await expect(page).toHaveURL(/\/$/);
+  // Onboarding hands over to the wizard with the goal filled in from the interest (#76).
+  await expect(page).toHaveURL(/\/wizard$/);
 }
 
 async function wizardStep(page: Page, stepNumber: number) {
@@ -35,11 +36,14 @@ async function wizardStep(page: Page, stepNumber: number) {
 }
 
 async function generatePlanWithWizard(page: Page) {
-  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Create Plan' }).click();
-  await wizardStep(page, 1);
+  await wizardStep(page, 2);
   const next = page.getByRole('button', { name: 'Next', exact: true });
 
-  // 1. Goal. The radio input is visually hidden; the card heading is what a user clicks.
+  // 1. Goal: pre-filled as Muscle Growth; go back and choose Strength. The radio input
+  //    is visually hidden; the card heading is what a user clicks.
+  await page.getByRole('navigation', { name: 'Plan progress' }).getByRole('button', { name: /^Training Goal/ }).click();
+  await wizardStep(page, 1);
+  await expect(page.getByRole('radio', { name: /Muscle Growth/ })).toBeChecked();
   await page.getByRole('heading', { name: 'Strength', exact: true }).click();
   await expect(page.getByRole('radio', { name: /Strength/ })).toBeChecked();
   await next.click();
@@ -104,8 +108,13 @@ async function logSet(page: Page, setNumber: number, weight: string, reps: strin
   await expect(set.getByRole('img', { name: 'Set completed' })).toBeVisible();
 }
 
-/** Completed sets of the first exercise in the saved in-progress workout (IndexedDB). */
-async function savedCompletedSets(page: Page): Promise<Array<{ weight: number; reps: number; rir: number }>> {
+interface SavedPlanState {
+  activeWorkout?: { exercises?: Array<{ sets?: Array<{ completed?: boolean; weight: number; reps: number; rir: number }> }> } | null;
+  workoutLogs?: Array<{ dayName?: string }>;
+}
+
+/** The plan store as saved in IndexedDB (`fitwizard` / `kv`, contract #2). */
+async function savedPlanState(page: Page): Promise<SavedPlanState> {
   return page.evaluate(async (key) => {
     const db = await new Promise<IDBDatabase>((resolve, reject) => {
       const request = indexedDB.open('fitwizard');
@@ -113,22 +122,29 @@ async function savedCompletedSets(page: Page): Promise<Array<{ weight: number; r
       request.onerror = () => reject(request.error);
     });
     try {
-      if (!db.objectStoreNames.contains('kv')) return [];
+      if (!db.objectStoreNames.contains('kv')) return {};
       const raw = await new Promise<unknown>((resolve, reject) => {
         const request = db.transaction('kv', 'readonly').objectStore('kv').get(key);
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
       });
-      if (typeof raw !== 'string') return [];
-      const parsed = JSON.parse(raw) as {
-        state?: { activeWorkout?: { exercises?: Array<{ sets?: Array<{ completed?: boolean; weight: number; reps: number; rir: number }> }> } };
-      };
-      const sets = parsed.state?.activeWorkout?.exercises?.[0]?.sets ?? [];
-      return sets.filter((set) => set.completed).map(({ weight, reps, rir }) => ({ weight, reps, rir }));
+      if (typeof raw !== 'string') return {};
+      return ((JSON.parse(raw) as { state?: unknown }).state ?? {}) as Record<string, unknown>;
     } finally {
       db.close();
     }
-  }, PLAN_STORE_KEY);
+  }, PLAN_STORE_KEY) as Promise<SavedPlanState>;
+}
+
+/** Completed sets of the first exercise in the saved in-progress workout. */
+async function savedCompletedSets(page: Page): Promise<Array<{ weight: number; reps: number; rir: number }>> {
+  const sets = (await savedPlanState(page)).activeWorkout?.exercises?.[0]?.sets ?? [];
+  return sets.filter((set) => set.completed).map(({ weight, reps, rir }) => ({ weight, reps, rir }));
+}
+
+/** Day names of the saved finished workouts. */
+async function savedWorkoutLogDays(page: Page): Promise<string[]> {
+  return ((await savedPlanState(page)).workoutLogs ?? []).map((log) => log.dayName ?? '');
 }
 
 const EXPECTED_SETS = [
@@ -136,18 +152,35 @@ const EXPECTED_SETS = [
   { weight: 42.5, reps: 8, rir: 3 },
 ];
 
-/**
- * After a reload, the first unlogged set (3) is prefilled from saved set 2. This holds both
- * before and after WorkoutLogger passes `loggedSet` (DEBT-095), unlike checks on sets 1–2.
- */
-async function expectSavedSetsPrefilled(page: Page) {
+/** After a reload partway through: both saved sets show as done, set 3 is next and prefilled. */
+async function expectSavedSetsShown(page: Page) {
   await expect(page.getByRole('heading', { name: DAY_ONE, level: 1 })).toBeVisible();
-  await expect(setGroup(page, 3).getByRole('spinbutton', { name: 'Weight (lbs)' })).toHaveValue('42.5');
-  await expect(setGroup(page, 3).getByRole('spinbutton', { name: 'Reps' })).toHaveValue('8');
+  for (const [index, saved] of EXPECTED_SETS.entries()) {
+    const set = setGroup(page, index + 1);
+    await expect(set.getByRole('img', { name: 'Set completed' })).toBeVisible();
+    await expect(set.getByRole('spinbutton', { name: 'Weight (lbs)' })).toHaveValue(String(saved.weight));
+    await expect(set.getByRole('spinbutton', { name: 'Reps' })).toHaveValue(String(saved.reps));
+  }
+  const third = setGroup(page, 3);
+  await expect(third.getByRole('button', { name: 'Complete Set' })).toBeVisible();
+  await expect(third.getByRole('spinbutton', { name: 'Weight (lbs)' })).toHaveValue('42.5');
+}
+
+async function finishAndRate(page: Page) {
+  await page.getByRole('button', { name: 'Finish workout', exact: true }).click();
+  const rating = page.getByRole('alertdialog', { name: 'How was the workout?' });
+  await rating.getByRole('button', { name: 'Just Right' }).click();
+  await expect(page.getByRole('heading', { name: /Workout Complete!/ })).toBeVisible();
+}
+
+async function expectHistoryShowsWorkout(page: Page) {
+  await expect(page).toHaveURL(/\/history$/);
+  await expect(page.getByTestId('history-empty-state')).toHaveCount(0);
+  await expect(page.getByText(DAY_ONE).first()).toBeVisible();
 }
 
 test.describe('lifter loop (guest)', () => {
-  test('plans, logs two sets, and keeps them through a reload and a new page', async ({ page, browser }) => {
+  test('plans, logs, reloads partway, finishes, and keeps it all on a new page', async ({ page, browser }) => {
     await acceptConsent(page);
     await completeOnboarding(page);
     await generatePlanWithWizard(page);
@@ -158,13 +191,22 @@ test.describe('lifter loop (guest)', () => {
     await logSet(page, 2, '42.5', '8');
     await expect.poll(() => savedCompletedSets(page)).toEqual(EXPECTED_SETS);
 
-    // Reload partway through the workout.
+    // Reload partway through the workout: the saved sets come back as done.
     const workoutUrl = page.url();
     await page.reload();
     await expect(page).toHaveURL(workoutUrl);
-    await expectSavedSetsPrefilled(page);
-    expect(await savedCompletedSets(page)).toEqual(EXPECTED_SETS);
+    await expectSavedSetsShown(page);
 
+    await finishAndRate(page);
+    await page.getByRole('button', { name: 'Done' }).click();
+    await expectPlanShown(page);
+    await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'History' }).click();
+    await expectHistoryShowsWorkout(page);
+    await expect.poll(() => savedWorkoutLogDays(page)).toEqual([DAY_ONE]);
+
+    // Reload: History still has the workout and Plan still has the plan.
+    await page.reload();
+    await expectHistoryShowsWorkout(page);
     await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'View Plan' }).click();
     await expectPlanShown(page);
 
@@ -175,54 +217,13 @@ test.describe('lifter loop (guest)', () => {
     const nextContext = await browser.newContext({ storageState });
     try {
       const nextPage = await nextContext.newPage();
+      await nextPage.goto('/history');
+      await expectHistoryShowsWorkout(nextPage);
+      expect(await savedWorkoutLogDays(nextPage)).toEqual([DAY_ONE]);
       await nextPage.goto('/plan');
       await expectPlanShown(nextPage);
-      expect(await savedCompletedSets(nextPage)).toEqual(EXPECTED_SETS);
-
-      await nextPage.goto(workoutUrl);
-      await expectSavedSetsPrefilled(nextPage);
     } finally {
       await nextContext.close();
     }
-  });
-
-  // DEBT-095: SetLogger can show a saved set as done (`loggedSet`, Lane D Day 4), but
-  // WorkoutLogger.tsx doesn't pass it yet, so after a reload the saved sets look unlogged.
-  test.fixme('shows saved sets as completed after a reload', async ({ page }) => {
-    await acceptConsent(page);
-    await completeOnboarding(page);
-    await generatePlanWithWizard(page);
-    await startDayOne(page);
-    await logSet(page, 1, '40', '10');
-    await logSet(page, 2, '42.5', '8');
-    await expect.poll(() => savedCompletedSets(page)).toEqual(EXPECTED_SETS);
-
-    await page.reload();
-    await expect(setGroup(page, 1).getByRole('img', { name: 'Set completed' })).toBeVisible();
-    await expect(setGroup(page, 2).getByRole('img', { name: 'Set completed' })).toBeVisible();
-    await expect(setGroup(page, 3).getByRole('button', { name: 'Complete Set' })).toBeVisible();
-  });
-
-  // DEBT-094: nothing in WorkoutLogger.tsx opens the "How was the workout?" dialog, so a
-  // workout can't be finished or rated from the UI. Persistence (contract #2) has merged;
-  // this step is blocked by the missing control, not by storage.
-  test.fixme('finishes and rates the workout, and History keeps it after a reload', async ({ page }) => {
-    await acceptConsent(page);
-    await completeOnboarding(page);
-    await generatePlanWithWizard(page);
-    await startDayOne(page);
-    await logSet(page, 1, '40', '10');
-    await logSet(page, 2, '42.5', '8');
-
-    await page.getByRole('button', { name: /finish workout/i }).click();
-    const rating = page.getByRole('alertdialog', { name: 'How was the workout?' });
-    await rating.getByRole('button', { name: 'Just Right' }).click();
-
-    await page.goto('/history');
-    await page.reload();
-    await expect(page.getByRole('main').getByText(DAY_ONE)).toBeVisible();
-
-    await page.goto('/plan');
-    await expectPlanShown(page);
   });
 });

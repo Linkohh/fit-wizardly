@@ -741,6 +741,11 @@
     "achievements": {
         "badge_unlocked": "Insignia desbloqueada: {{name}}"
     },
+    "workoutLogger": {
+        "finish": "Terminar entrenamiento",
+        "previous_exercise": "Ejercicio anterior",
+        "next_exercise": "Siguiente ejercicio"
+    },
     "workoutResume": {
         "title": "Tienes un entrenamiento sin terminar",
         "body": "{{unfinished}} sigue en curso. Reanúdalo o descártalo y empieza {{requested}}.",
