@@ -160,6 +160,11 @@ Then:
 
 ## Day 5: Accessibility, part 1 (3.4)
 
+> **Carried over from Day 4 handoffs (added 2026-11-23 by the coordinator).** Do these too:
+> - Accessible names are missing on the 4 readiness sliders (`ReadinessCheck.tsx`), the plate-calculator button, and the RIR slider thumb in `SetLogger.tsx` (shadcn `Slider` puts `aria-label` on the root, not the thumb; pass it to the thumb without editing `src/components/ui/*`). Fix all three, and add the checks to the E2E or a unit test.
+> - Keep the lifter-loop E2E green. If you change any labels it uses, update its locators in the same PR.
+
+
 1. `SetLogger.tsx`:
    - RIR (reps in reserve) levels are shown by colour only. Add the `getRIRLabel()` text visibly next to the number, or as `aria-label` plus a visible short label.
    - Keep the 44 px minimum touch targets (`min-h-[44px] min-w-[44px]`).
