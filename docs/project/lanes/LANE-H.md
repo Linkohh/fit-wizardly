@@ -206,6 +206,11 @@ Stores other than `authStore`'s sign-in area, sync code, `supabase/`, routing.
 
 ## Day 5: Native helpers, part 1 (2.4)
 
+> **Carried over from Day 4 handoffs (added 2026-11-23 by the coordinator).** Do these too:
+> - Check the real Supabase error codes behind `sendErrorKey.ts` once staging exists (Gate 1). Until then, leave the mapping as is.
+> - Sessions now last across restarts (#74), so `startSync` runs at every app start for signed-in users. Keep `appStateChange` wiring that Lane E's sync triggers already use (#66) working when you add the status bar, splash and keyboard plugins.
+
+
 1. Install the plugins:
    ```sh
    npm install @capacitor/status-bar @capacitor/splash-screen @capacitor/keyboard @capacitor/share
