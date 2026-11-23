@@ -49,6 +49,9 @@
 | 39 | **Merged #63** Lane A Day 3: data inventory, release-notes draft, Gate 1 checklist, locale-placement rule | `f983e20` |
 | 40 | Final Wave 1 check on `preview_b`: 1056/1056 tests, lint, typecheck, build. Browser: no AI wording, Circles and coach pages 404, empty states show, no training data in localStorage, opens offline, no errors | This session |
 | 41 | **Merged #73** Lane F Day 4: Delete account and guest Erase data on this device on Profile → Details; export v3 covers everything stored | `1708d12` |
+| 42 | **Merged #74** Lane H Day 4: you stay signed in after closing the app or browser (ADR 12); translated sign-in errors | `d2a49ae` |
+| 43 | **Merged #76** Lane B Day 4: 14 → 11 taps to the first plan | `6c63b2a` |
+| 44 | **Merged #78** Lane D Day 4: lifter-loop end-to-end test in CI; every set loggable; finish and rate a workout | `5acbeac` |
 
 ## In progress
 
@@ -87,8 +90,8 @@
 - [x] Sync triggers, first upload, Profile indicator (Lane E Day 6)
 - [ ] Sync on sign-out, plans on the engine (Lane E Day 7); after this, account sign-out can clear device data
 - [x] Account deletion in the app (Lane F, #73; the function is deployed at L10)
-- [ ] Sessions that last; native plugins and notifications (Lane H)
-- [ ] Analytics and consent (Lane C); end-to-end test and accessibility (Lane D)
+- [ ] Sessions that last (✅ #74); native plugins and notifications (Lane H)
+- [ ] Analytics and consent (Lane C, #75 open); end-to-end test (✅ #78) and accessibility (Lane D)
 - [ ] Privacy policy, store forms, listing copy (Lane A)
 - [ ] **Gate 2:** production database, v1.1.0 to `main`, first store test builds (needs L4)
 

@@ -51,6 +51,7 @@ FitWizard does not access your location, contacts, camera, photos, or health rec
 ## Where your data is stored
 
 - On your device: in the app's own storage (IndexedDB in a browser, app storage files on iPhone and Android) and, for small settings, in browser storage. FitWizard adds no encryption of its own; your device's protections, such as a screen lock, apply.
+- Your sign-in: when you sign in, a sign-in token from our authentication provider (Supabase) is saved on your device so you stay signed in after you close the app or browser. In a browser it's kept in this site's local storage; in the iPhone and Android apps it's kept in the app's private preferences. It identifies your session only and holds no workout or health data. Signing out deletes it from your device.
 - In our cloud database, if you sign in: we use Supabase, and your data is stored in [Supabase region: Lincoln to provide]. Each account can read and change only its own records.
 - What syncs: your plans, workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises and favourite exercises. The app syncs when you sign in, when your device comes back online, when you return to the app, and shortly after each change. Nothing is sent while you are offline or signed out; changes made while signed out are sent the next time you sign in.
 - The first time you sign in on a device, the app keeps your account's copy of any record that exists in both places, and uploads only the records that exist only on that device.
@@ -91,6 +92,7 @@ We do not sell or rent your data, and we do not share it for advertising.
 - In your account: until you delete it, or delete your account. Deleted plans are removed straight away. Other synced items are marked as deleted so that your other devices remove them too; the marked record is removed for good when you delete your account.
 - Your email address, your profile and the record of which exercises you viewed are kept until you delete your account.
 - Sign-in codes work once and expire after a short time.
+- The sign-in token on your device: until you sign out, delete your account, or clear the app's or the browser's data.
 - To limit each address to 60 requests a minute, our server functions keep your IP address in memory with a request count. They never write it to disk, log it or share it, but it can stay in memory until that server instance shuts down. Vercel's own request logs follow Vercel's policy.
 - Sentry keeps crash reports for about 90 days. Vercel Web Analytics, Open Food Facts, wger and API Ninjas keep what they receive under their own policies.
 
@@ -207,5 +209,6 @@ These are the facts in the code that the text above relies on, so the reviewer c
 | Export contents | `buildUserDataExport` in `src/lib/dataExport.ts`, export version 3 (#73) |
 | No camera, location or contacts access | No camera, location or contacts API is used in `src/`, and the native projects declare no such permissions |
 | Other devices keep their copy after deletion | Lane F Day 4 handoff (new issue); Lane E Day 7 sign-out work |
+| Sign-in token kept on the device until sign-out | `src/lib/authSessionStorage.ts` (Lane H Day 4, #74; ADR 12): localStorage on the web, `@capacitor/preferences` in the apps |
 
 The third-party privacy links were written from known URLs. This environment couldn't reach those sites, so they are not verified yet.

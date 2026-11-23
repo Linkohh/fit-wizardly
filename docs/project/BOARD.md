@@ -49,12 +49,12 @@ All seven lanes run in parallel. There are no dependencies between them.
 | Lane | Day 4 | Day 5 | Day 6 | Day 7 |
 |---|---|---|---|---|
 | **A** | 🔵 PR #77 · 4.1 Privacy policy and terms rewritten from the inventory, web deletion section `#delete-account`; draft for L9 | ⬜ 4.2 Store form answer sheets | ⬜ 4.3 Listing copy; screenshot script | ⬜ 1.8 v1.1.0 changelog and version bumps; Gate 2 checklist |
-| **B** | 🔵 PR #76 · 3.6c Fewer taps to the first plan (14 → 11) | ⬜ Buffer: Gate 1 bugs | ➖ | ➖ |
+| **B** | ✅ PR #76 (`6c63b2a`) · 3.6c Fewer taps to the first plan (14 → 11) | ⬜ Buffer: Gate 1 bugs | ➖ | ➖ |
 | **C** | 🔵 PR #75 · 3.2 `track()` and PostHog EU adapter; wire events | ⬜ Consent entries; disclosure text to Lane A | ⬜ Error-boundary tests; source maps (if L6 done) | ➖ |
-| **D** | ⬜ 3.5 Playwright lifter loop with reload; CI job. **Buffer, before L6 sets a DSN:** `vite.config.ts` `manualChunks` → `vendor-sentry` chunk, excluded from preload (DEBT-091; one-line fix in the Lane C Day 3 handoff) | ⬜ 3.4 RIR labels, 44 px targets, `MotionConfig`, DEBT-021 | ⬜ 3.4 Wizard Enter key (DEBT-025) | ⬜ 4.5 `npm audit` gate; Dependabot |
+| **D** | ✅ PR #78 (`5acbeac`) · 3.5 Playwright lifter loop with reload; `e2e` and `edge-functions` CI jobs; finish-workout and set-logger fixes; `vendor-sentry` chunk (DEBT-091) | ⬜ 3.4 RIR labels, 44 px targets, `MotionConfig`, DEBT-021 | ⬜ 3.4 Wizard Enter key (DEBT-025) | ⬜ 4.5 `npm audit` gate; Dependabot |
 | **E** | ✅ PR #59 (`0513fd0`) · 1.4 part 1: sync engine, outbox, tests; 3 review findings fixed | ✅ PR #64 (`a621a4f`) · 1.4 part 2: seven collections and change tracking | ✅ PR #66 (`12fbcbb`) · 1.4 part 3: triggers, first sign-in upload, indicator; 2 review findings fixed (sign-out step moved to Day 7) | ⬜ 1.4 part 4: plans move onto the engine |
 | **F** | ✅ PR #73 (`1708d12`) · 1.5 part 2: deletion UI, guest erase, export v3 (DEBT-059 closed) | ⬜ 1.7 Retire Express (D1) | ⬜ Circles queries checked against migration 008 | ➖ Buffer |
-| **H** | 🔵 PR #74 · 2.2 Session storage adapter; ADR 12 | ⬜ 2.4 part 1: preferences, status bar, splash, keyboard, share | ⬜ 2.4 part 2: local notifications | ⬜ 4.5 Android CI job; iOS archive guide |
+| **H** | ✅ PR #74 (`d2a49ae`) · 2.2 Session storage adapter; ADR 12; DEBT-079, DEBT-085 | ⬜ 2.4 part 1: preferences, status bar, splash, keyboard, share | ⬜ 2.4 part 2: local notifications | ⬜ 4.5 Android CI job; iOS archive guide |
 
 ### Gate 2 checklist (Lincoln, end of Day 7)
 - [ ] All Wave 2 PRs merged in merge order; CI green, including the Playwright job
