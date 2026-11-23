@@ -69,7 +69,7 @@ FitWizard is **free**. Most of the app works without an account (guest mode). An
 | Styling | Tailwind CSS 4 (tokens in `src/index.css`), shadcn/ui on Radix, Framer Motion 12 |
 | State | Zustand 5 (persist middleware), TanStack Query 5 |
 | Routing | React Router 7 |
-| Validation | Zod 4 (client), Zod 3 (local server) |
+| Validation | Zod 4 |
 | Backend | Supabase: Postgres with row-level security on every table, Auth (email), Realtime |
 | Serverless | Vercel functions in `api/` (exercise search, quotes, wger proxy) |
 | Native | Capacitor 8 (iOS with Swift Package Manager, Android with Gradle) |
@@ -102,15 +102,11 @@ Put real values in `.env.local` for local work and in Vercel project settings fo
 |---|---|---|
 | `VITE_SUPABASE_URL` | Client (public) | Supabase project URL. Must be HTTPS outside localhost |
 | `VITE_SUPABASE_ANON_KEY` | Client (public) | Supabase publishable key (`sb_publishable_…`) or legacy anon key |
-| `VITE_PLANS_PROVIDER` | Client | `auto` (default: Supabase when configured), `supabase`, or `api` |
-| `VITE_USE_API` | Client | `true` to call the local Express API outside dev |
-| `VITE_API_URL` | Client | Express API base; same-origin or localhost only |
 | `VITE_SHARE_BASE_URL` | Client | Base URL for shared workout links |
 | `VITE_FEATURE_CIRCLES` | Client | `true` to show Circles. Default off |
 | `VITE_FEATURE_COACH` | Client | `true` to show the coach portal. Default off |
 | `VITE_TRAINER_ACCESS_USERNAME`, `VITE_TRAINER_ACCESS_PASSCODE` | Client | Present in `.env.example`; not read by current code |
-| `ALLOWED_ORIGINS` | Local Express server | Comma-separated CORS allowlist |
-| `TRUST_PROXY` | Local Express server | `false`, `true`, or a hop count |
+| `ALLOWED_ORIGINS` | Vercel functions (server only) | Comma-separated CORS allowlist for `api/` (native and deployment origins are always allowed) |
 | `API_NINJAS_API_KEY` | Vercel functions (server only) | Key for exercise search and quotes. **Never prefix with `VITE_`** |
 
 Anything starting with `VITE_` is bundled into the app and visible to users. Only put public values there.
@@ -119,15 +115,6 @@ Anything starting with `VITE_` is bundled into the app and visible to users. Onl
 
 Create a Supabase project, then apply the SQL files in `supabase/migrations/` **in order** (`001` to `006`) in the Supabase SQL editor. [`docs/SUPABASE_MIGRATIONS.md`](docs/SUPABASE_MIGRATIONS.md) explains which files can be re-run and how to check what is already applied.
 
-### Optional local API
-
-`server/` is a small Express API for plan storage (`/plans`, `/health`), used only in local development. Production writes to Supabase directly. Its future is decision D1 in the roadmap.
-
-```sh
-npm --prefix server ci
-npm run server:dev      # http://localhost:3001 (Vite proxies /plans and /health)
-```
-
 ---
 
 ## Scripts
@@ -135,11 +122,10 @@ npm run server:dev      # http://localhost:3001 (Vite proxies /plans and /health
 | Group | Command | What it does |
 |---|---|---|
 | Develop | `npm run dev` | Vite dev server on port 8080 |
-| | `npm run server:dev` / `server:build` / `server:start` | Local Express API |
 | Quality | `npm run lint` | ESLint |
 | | `npm run typecheck` | TypeScript, no emit |
 | | `npm run test` / `npm run test:run` | Vitest in watch mode / once |
-| | `npm --prefix server test` | Server tests |
+| | `npm run test:db` | Database policy tests against a local Postgres (`supabase/tests/run.sh`) |
 | | `npm run test:playwright` (`:headed`) | Playwright smoke tests (builds and previews on port 5173) |
 | | `npm run test:exercise-library` | Exercise library tests only |
 | Build | `npm run build` / `build:dev` | Production / development build into `dist/` |
@@ -151,7 +137,7 @@ npm run server:dev      # http://localhost:3001 (Vite proxies /plans and /health
 | | `npm run ios:live` | Run with live reload from the dev server |
 | | `npm run ios:open` | Open the Xcode project |
 
-CI (`.github/workflows/ci.yml`) runs lint, typecheck, client tests, the client build, server tests and the server build on every push to `main` or `preview_b` and on every pull request.
+CI (`.github/workflows/ci.yml`) runs lint, typecheck, client tests and the client build, the delete-account function's Deno tests, and the Playwright end-to-end tests on every push to `main` or `preview_b` and on every pull request.
 
 ---
 
@@ -202,7 +188,6 @@ android/, ios/       Capacitor native projects
 docs/                Documentation (see index below)
 public/              Static assets, icons, bundled exercise data
 scripts/             Dev and data scripts (iOS live reload, wger sync, bundle report)
-server/              Optional local Express API
 src/
   components/        Feature components (ui/ holds shadcn primitives: do not edit)
   features/          Self-contained features: mcl (anatomy selector), exercise-library

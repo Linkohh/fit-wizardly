@@ -92,7 +92,6 @@ describe('AccountDeletionSection, signed in', () => {
         expect(mocks.clearLocalUserData).not.toHaveBeenCalled(); // deleteAccount() erases the device itself
         expect(mocks.toastSuccess).toHaveBeenCalledWith(
             'Your account and all its data have been deleted.',
-            { id: 'fitwizard-data-kept-on-device' },
         );
     });
 
@@ -142,7 +141,6 @@ describe('AccountDeletionSection, guest', () => {
         expect(await screen.findByText('Home page')).toBeInTheDocument();
         expect(mocks.toastSuccess).toHaveBeenCalledWith(
             'All FitWizard data on this device has been erased.',
-            { id: 'fitwizard-data-kept-on-device' },
         );
     });
 
