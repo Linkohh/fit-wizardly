@@ -91,7 +91,7 @@ Circles is behind `VITE_FEATURE_CIRCLES` and off in v1. Its policies are still e
 
 - **Function:** `supabase/functions/delete-account/` (contract #4). Deploy steps and a curl test are in its [README](../supabase/functions/delete-account/README.md).
 - **Flow:** it verifies the caller's token with the anon key, then calls `auth.admin.deleteUser(<id from the token>)` with the service role. Every row goes through the foreign-key cascades above. It returns `204`, `401` or `500 {"error":"Deletion failed"}`, and never returns internal details.
-- **The service-role key exists only as a Supabase function secret (`SUPABASE_SERVICE_ROLE_KEY`, injected by Supabase), used only by this one function.** It is not in `.env*`, Vercel, `api/`, `server/` or the app bundle. If you ever see it anywhere else, rotate it in the Supabase dashboard (Settings → API) and remove it.
+- **The service-role key exists only as a Supabase function secret (`SUPABASE_SERVICE_ROLE_KEY`, injected by Supabase), used only by this one function.** It is not in `.env*`, Vercel, `api/` or the app bundle. If you ever see it anywhere else, rotate it in the Supabase dashboard (Settings → API) and remove it.
 - **CORS:** `capacitor://localhost` and `https://localhost` are always allowed, plus the `ALLOWED_ORIGINS` function secret. CORS is not the boundary; the token is.
 - **Client:** `src/lib/account/deleteAccount.ts` and the Profile → Account → Delete account button (Lane F, Day 4). After `204`, the client clears device data (`clearLocalUserData()`) and signs out.
 - **Guests:** "Erase data on this device" calls `clearLocalUserData()` (`src/lib/storage/clearLocalUserData.ts`). No server call is needed because nothing was uploaded.
@@ -112,7 +112,7 @@ All three use `api/_lib/guard.ts`:
 
 None of them touch user data or Supabase.
 
-The optional Express API in `server/` is **dev only**, not deployed, and is being removed on Lane F Day 5 (decision D1).
+There is no other server. The dev-only Express API (`server/`) was removed on Lane F Day 5 (decision D1, roadmap 1.7); plans are written straight to Supabase under RLS.
 
 ---
 

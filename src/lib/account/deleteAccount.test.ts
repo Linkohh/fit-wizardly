@@ -72,6 +72,7 @@ describe('deleteAccount (contract #4 client)', () => {
 
         expect(result.error).toBeNull();
         expect(mocks.calls).toEqual(['clear', 'signOut']);
+        expect(mocks.signOut).toHaveBeenCalledWith({ quiet: true });
     });
 
     it('still signs out and reports success if erasing the device throws after deletion', async () => {

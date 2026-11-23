@@ -1,61 +1,35 @@
 import type { Plan } from '@/types/fitness';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import {
-  deletePlanApi as deletePlanApiClient,
-  getPlan as getPlanApiClient,
-  getPlans as getPlansApiClient,
-  isApiEnabled,
-  savePlan as savePlanApiClient,
-} from '@/lib/apiClient';
-import {
   deletePlanSupabase,
   getPlanSupabase,
   listPlansSupabase,
   upsertPlanSupabase,
 } from '@/lib/plans/supabasePlansRepo';
 
-type PlansProvider = 'auto' | 'api' | 'supabase';
+// Supabase is the only remote for plans (the Express API was retired on Lane F Day 5,
+// roadmap 1.7). Lane E Day 7 moves plans onto the sync engine (src/lib/sync).
 
-function getPlansProvider(): PlansProvider {
-  const raw = (import.meta.env.VITE_PLANS_PROVIDER as string | undefined)?.toLowerCase();
-  if (raw === 'api' || raw === 'supabase') return raw;
-  return 'auto';
-}
-
-function shouldUseSupabase(): boolean {
-  const provider = getPlansProvider();
-  if (provider === 'supabase') return true;
-  if (provider === 'api') return false;
+export function isPlansRemoteEnabled(): boolean {
   return isSupabaseConfigured();
 }
 
-export function isPlansRemoteEnabled(): boolean {
-  return shouldUseSupabase() ? isSupabaseConfigured() : isApiEnabled();
-}
-
+/**
+ * `userId` is kept so callers don't change; Supabase RLS (auth.uid() = user_id)
+ * and supabase.auth.getUser() identify the user, so it isn't forwarded.
+ */
 export async function savePlanRemote(plan: Plan, userId?: string): Promise<Plan> {
-  return shouldUseSupabase()
-    ? upsertPlanSupabase(plan)
-    : savePlanApiClient(plan, userId);
+  return upsertPlanSupabase(plan);
 }
 
 export async function getPlansRemote(userId?: string): Promise<Plan[]> {
-  // In Supabase mode, userId is intentionally not forwarded: listPlansSupabase()
-  // calls supabase.auth.getUser() and Supabase RLS (auth.uid() = user_id) scopes
-  // the query to the authenticated user automatically.
-  return shouldUseSupabase()
-    ? listPlansSupabase()
-    : getPlansApiClient(userId);
+  return listPlansSupabase();
 }
 
 export async function getPlanRemote(id: string): Promise<Plan> {
-  return shouldUseSupabase()
-    ? getPlanSupabase(id)
-    : getPlanApiClient(id);
+  return getPlanSupabase(id);
 }
 
 export async function deletePlanRemote(id: string): Promise<void> {
-  return shouldUseSupabase()
-    ? deletePlanSupabase(id)
-    : deletePlanApiClient(id);
+  return deletePlanSupabase(id);
 }

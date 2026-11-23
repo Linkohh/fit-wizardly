@@ -2,44 +2,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Plan } from '@/types/fitness';
 
 const mocks = vi.hoisted(() => ({
-  savePlanApi: vi.fn(),
-  getPlansApi: vi.fn(),
-  getPlanApi: vi.fn(),
-  deletePlanApi: vi.fn(),
-  isApiEnabled: vi.fn(),
   upsertPlanSupabase: vi.fn(),
   listPlansSupabase: vi.fn(),
   getPlanSupabase: vi.fn(),
   deletePlanSupabase: vi.fn(),
 }));
 
-async function loadPlansClient({
-  provider,
-  supabaseConfigured,
-  apiEnabled = true,
-}: {
-  provider?: string;
-  supabaseConfigured: boolean;
-  apiEnabled?: boolean;
-}) {
-  if (provider) {
-    vi.stubEnv('VITE_PLANS_PROVIDER', provider);
-  } else {
-    vi.unstubAllEnvs();
-  }
-
+async function loadPlansClient({ supabaseConfigured }: { supabaseConfigured: boolean }) {
   vi.doMock('@/lib/supabase', () => ({
     isSupabaseConfigured: () => supabaseConfigured,
-  }));
-
-  mocks.isApiEnabled.mockReturnValue(apiEnabled);
-
-  vi.doMock('@/lib/apiClient', () => ({
-    savePlan: mocks.savePlanApi,
-    getPlans: mocks.getPlansApi,
-    getPlan: mocks.getPlanApi,
-    deletePlanApi: mocks.deletePlanApi,
-    isApiEnabled: mocks.isApiEnabled,
   }));
 
   vi.doMock('@/lib/plans/supabasePlansRepo', () => ({
@@ -52,38 +23,49 @@ async function loadPlansClient({
   return import('./plansClient');
 }
 
-describe('plansClient provider selection', () => {
+describe('plansClient (Supabase only)', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
   });
 
-  it('prefers direct Supabase in auto mode when Supabase is configured', async () => {
+  it('is enabled only when Supabase is configured', async () => {
+    expect((await loadPlansClient({ supabaseConfigured: true })).isPlansRemoteEnabled()).toBe(true);
+    vi.resetModules();
+    expect((await loadPlansClient({ supabaseConfigured: false })).isPlansRemoteEnabled()).toBe(false);
+  });
+
+  it('saves a plan through Supabase without forwarding the user id', async () => {
     const plan = { id: 'plan-1' } as Plan;
     mocks.upsertPlanSupabase.mockResolvedValue(plan);
 
-    const { savePlanRemote } = await loadPlansClient({
-      supabaseConfigured: true,
-    });
+    const { savePlanRemote } = await loadPlansClient({ supabaseConfigured: true });
 
-    await savePlanRemote(plan, 'user-1');
-
+    await expect(savePlanRemote(plan, 'user-1')).resolves.toBe(plan);
     expect(mocks.upsertPlanSupabase).toHaveBeenCalledWith(plan);
-    expect(mocks.savePlanApi).not.toHaveBeenCalled();
   });
 
-  it('falls back to the API client in auto mode when Supabase is unavailable', async () => {
+  it('lists, reads and deletes plans through Supabase', async () => {
     const plan = { id: 'plan-2' } as Plan;
-    mocks.savePlanApi.mockResolvedValue(plan);
+    mocks.listPlansSupabase.mockResolvedValue([plan]);
+    mocks.getPlanSupabase.mockResolvedValue(plan);
+    mocks.deletePlanSupabase.mockResolvedValue(undefined);
 
-    const { savePlanRemote } = await loadPlansClient({
-      supabaseConfigured: false,
-      apiEnabled: true,
-    });
+    const client = await loadPlansClient({ supabaseConfigured: true });
 
-    await savePlanRemote(plan, 'user-2');
+    await expect(client.getPlansRemote('user-2')).resolves.toEqual([plan]);
+    expect(mocks.listPlansSupabase).toHaveBeenCalledWith();
+    await expect(client.getPlanRemote('plan-2')).resolves.toBe(plan);
+    expect(mocks.getPlanSupabase).toHaveBeenCalledWith('plan-2');
+    await client.deletePlanRemote('plan-2');
+    expect(mocks.deletePlanSupabase).toHaveBeenCalledWith('plan-2');
+  });
 
-    expect(mocks.savePlanApi).toHaveBeenCalledWith(plan, 'user-2');
-    expect(mocks.upsertPlanSupabase).not.toHaveBeenCalled();
+  it('passes Supabase errors through to the caller', async () => {
+    mocks.upsertPlanSupabase.mockRejectedValue(new Error('Supabase not configured'));
+
+    const { savePlanRemote } = await loadPlansClient({ supabaseConfigured: false });
+
+    await expect(savePlanRemote({ id: 'plan-3' } as Plan)).rejects.toThrow('Supabase not configured');
   });
 });

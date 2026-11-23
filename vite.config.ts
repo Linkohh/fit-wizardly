@@ -131,12 +131,8 @@ export default defineConfig(({ mode }) => {
       // devices can connect during Capacitor live reload. Vite's default host
       // check (localhost + direct IPs) stays active to block DNS rebinding.
       host: "localhost",
-      // 8080 stays the default (ngrok, ios:live, server CORS); PORT lets parallel worktrees run side by side.
+      // 8080 stays the default (ngrok, ios:live); PORT lets parallel worktrees run side by side.
       port: Number(process.env.PORT) || 8080,
-      proxy: {
-        "/plans": "http://localhost:3001",
-        "/health": "http://localhost:3001",
-      },
     },
     plugins: [
       wgerProxyPlugin(),
