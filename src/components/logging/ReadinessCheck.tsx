@@ -3,7 +3,7 @@ import { Battery, Brain, Moon, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
+import { LabelledSlider } from '@/components/a11y/LabelledSlider';
 import { useReadinessStore } from '@/stores/readinessStore';
 import type { ReadinessEntry, ReadinessRating } from '@/types/readiness';
 
@@ -53,7 +53,9 @@ export function ReadinessCheck({ onComplete, onSkip }: ReadinessCheckProps) {
                                 <Label className="flex items-center gap-2"><Moon className="h-4 w-4 text-indigo-500" /> Sleep Quality</Label>
                                 <span className="text-sm text-muted-foreground">{sleepQuality}/5</span>
                             </div>
-                            <Slider
+                            <LabelledSlider
+                                thumbLabel="Sleep quality"
+                                thumbValueText={`${sleepQuality} of 5`}
                                 value={[sleepQuality]}
                                 min={1}
                                 max={5}
@@ -67,7 +69,9 @@ export function ReadinessCheck({ onComplete, onSkip }: ReadinessCheckProps) {
                                 <Label className="flex items-center gap-2"><Battery className="h-4 w-4 text-emerald-500" /> Energy Level</Label>
                                 <span className="text-sm text-muted-foreground">{energyLevel}/5</span>
                             </div>
-                            <Slider
+                            <LabelledSlider
+                                thumbLabel="Energy level"
+                                thumbValueText={`${energyLevel} of 5`}
                                 value={[energyLevel]}
                                 min={1}
                                 max={5}
@@ -81,7 +85,9 @@ export function ReadinessCheck({ onComplete, onSkip }: ReadinessCheckProps) {
                                 <Label className="flex items-center gap-2"><Zap className="h-4 w-4 text-orange-500" /> Muscle Soreness</Label>
                                 <span className="text-sm text-muted-foreground">{muscleSoreness}/5</span>
                             </div>
-                            <Slider
+                            <LabelledSlider
+                                thumbLabel="Muscle soreness"
+                                thumbValueText={`${muscleSoreness} of 5`}
                                 value={[muscleSoreness]}
                                 min={1}
                                 max={5}
@@ -95,7 +101,9 @@ export function ReadinessCheck({ onComplete, onSkip }: ReadinessCheckProps) {
                                 <Label className="flex items-center gap-2"><Brain className="h-4 w-4 text-rose-500" /> Stress Level</Label>
                                 <span className="text-sm text-muted-foreground">{stressLevel}/5</span>
                             </div>
-                            <Slider
+                            <LabelledSlider
+                                thumbLabel="Stress level"
+                                thumbValueText={`${stressLevel} of 5`}
                                 value={[stressLevel]}
                                 min={1}
                                 max={5}

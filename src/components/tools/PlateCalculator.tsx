@@ -201,8 +201,14 @@ export const PlateCalculatorDialog = ({
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
-                    <Calculator className="h-4 w-4" />
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                    aria-label="Open plate calculator"
+                    title="Plate calculator"
+                >
+                    <Calculator className="h-4 w-4" aria-hidden="true" />
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
