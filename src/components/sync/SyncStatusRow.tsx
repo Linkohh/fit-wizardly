@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AlertTriangle, CheckCircle2, CloudOff, Loader2, UploadCloud } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CloudOff, Loader2, LogOut, UploadCloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSafeSignOut } from '@/components/sync/SignOutDialog';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { useSyncStatus } from '@/lib/sync/status';
 import { useAuthStore } from '@/stores/authStore';
@@ -26,6 +27,7 @@ export function SyncStatusRow() {
   const userId = useAuthStore((state) => state.user?.id ?? null);
   const setShowAuthModal = useAuthStore((state) => state.setShowAuthModal);
   const [retrying, setRetrying] = useState(false);
+  const { requestSignOut, busy: signingOut, dialog: signOutDialog } = useSafeSignOut();
 
   const labels: Record<SyncStatus, string> = {
     synced: t('sync.synced', 'Synced'),
@@ -81,6 +83,17 @@ export function SyncStatusRow() {
           {t('sync.sign_in', 'Sign in')}
         </Button>
       )}
+      {status !== 'signed-out' && (
+        <Button variant="ghost" size="sm" onClick={requestSignOut} disabled={signingOut} data-testid="profile-sign-out">
+          {signingOut ? (
+            <Loader2 aria-hidden="true" className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <LogOut aria-hidden="true" className="h-4 w-4 mr-2" />
+          )}
+          {signingOut ? t('sync.signing_out', 'Saving your changes…') : t('sync.sign_out', 'Sign out')}
+        </Button>
+      )}
+      {signOutDialog}
     </div>
   );
 }
