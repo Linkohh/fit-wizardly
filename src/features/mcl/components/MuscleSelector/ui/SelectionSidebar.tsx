@@ -66,7 +66,7 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
           <h3 className="text-fluid-lg font-semibold text-foreground">
             Selected Muscles
           </h3>
-          <span className="px-2 py-0.5 bg-primary/20 text-primary-300 text-fluid-sm rounded-full tabular-nums">
+          <span className="px-2 py-0.5 bg-primary/20 text-primary text-fluid-sm rounded-full tabular-nums">
             {selectedMuscles.length}
           </span>
         </div>
@@ -105,7 +105,7 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
             title="No muscles selected yet"
             description="Tap the body map to build your target list."
             compact
-            className="bg-transparent border-white/10 shadow-none"
+            className="bg-transparent border-border/40 shadow-none"
           />
         ) : (
           <div className="space-y-4">
@@ -123,7 +123,7 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
                       className="w-2 h-2 rounded-full"
                       style={{ backgroundColor: getMuscleGroupColor(group) }}
                     />
-                    <span className="text-fluid-sm font-medium text-gray-400 uppercase tracking-wide">
+                    <span className="text-fluid-sm font-medium text-muted-foreground uppercase tracking-wide">
                       {getMuscleGroupName(group)}
                     </span>
                   </div>
@@ -139,27 +139,27 @@ export const SelectionSidebar: React.FC<SelectionSidebarProps> = ({
                         transition={getTimedTransition('fast', reduceMotion)}
                         className="flex items-center justify-between p-3 rounded-xl surface-premium surface-premium-stroke group transition-colors"
                       >
-                        <span className="text-fluid-sm text-gray-200 truncate flex-1 font-medium">
+                        <span className="text-fluid-sm text-foreground truncate flex-1 font-medium">
                           {muscle.name}
                         </span>
                         <div className={`flex items-center gap-1 transition-opacity ${mobileSheetMode || touchActions ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                           <button
                             onClick={() => onViewInfo(muscle)}
-                            className="min-h-[36px] min-w-[36px] p-1.5 hover:bg-gray-200/10 rounded"
+                            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-1.5 hover:bg-muted rounded"
                             aria-label={`View info for ${muscle.name}`}
                             data-click-feedback="off"
                             data-interaction-feedback="explicit"
                           >
-                            <Info className="w-3.5 h-3.5 text-gray-300" />
+                            <Info className="w-3.5 h-3.5 text-muted-foreground" />
                           </button>
                           <button
                             onClick={() => onRemoveMuscle(muscle.id)}
-                            className="min-h-[36px] min-w-[36px] p-1.5 hover:bg-red-900/30 rounded"
+                            className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center p-1.5 hover:bg-destructive/15 rounded"
                             aria-label={`Remove ${muscle.name}`}
                             data-click-feedback="off"
                             data-interaction-feedback="explicit"
                           >
-                            <X className="w-3.5 h-3.5 text-gray-300 hover:text-red-300" />
+                            <X className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
                           </button>
                         </div>
                       </motion.div>

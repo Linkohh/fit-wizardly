@@ -2,7 +2,7 @@ import { useState, useEffect, useId } from 'react';
 import { PlateCalculatorDialog } from '@/components/tools/PlateCalculator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
+import { LabelledSlider } from '@/components/a11y/LabelledSlider';
 import { Badge } from '@/components/ui/badge';
 import { Check, ChevronUp, ChevronDown } from 'lucide-react';
 import type { SetLog, WeightUnit } from '@/types/fitness';
@@ -113,10 +113,11 @@ export function SetLogger({
         const displayRIR = effortMode === 'rpe'
             ? Math.max(0, Math.min(5, Math.round((10 - rpe) * 2) / 2))
             : rir;
-        if (displayRIR <= 1) return 'text-red-500';
-        if (displayRIR <= 2) return 'text-orange-500';
-        if (displayRIR <= 3) return 'text-yellow-500';
-        return 'text-green-500';
+        // -700 shades in light theme for WCAG AA contrast; the label text carries the meaning too.
+        if (displayRIR <= 1) return 'text-red-700 dark:text-red-400';
+        if (displayRIR <= 2) return 'text-orange-700 dark:text-orange-400';
+        if (displayRIR <= 3) return 'text-amber-700 dark:text-yellow-400';
+        return 'text-green-700 dark:text-green-400';
     };
 
     const getRIRLabel = () => {
@@ -248,10 +249,10 @@ export function SetLogger({
                             className={cn(
                                 'h-12 text-center text-xl font-semibold px-0',
                                 reps >= repRange[0] && reps <= repRange[1]
-                                    ? 'text-green-600 dark:text-green-400'
+                                    ? 'text-green-700 dark:text-green-400'
                                     : reps < repRange[0]
-                                        ? 'text-yellow-600 dark:text-yellow-400'
-                                        : 'text-blue-600 dark:text-blue-400'
+                                        ? 'text-amber-700 dark:text-yellow-400'
+                                        : 'text-blue-700 dark:text-blue-400'
                             )}
                             disabled={completed}
                         />
@@ -310,7 +311,7 @@ export function SetLogger({
                         {effortMode === 'rir' ? `${rir}` : `${rpe.toFixed(1)} RPE`} - {getRIRLabel()}
                     </span>
                 </div>
-                <Slider
+                <LabelledSlider
                     value={[effortMode === 'rir' ? rir : rpe]}
                     onValueChange={(value) => {
                         if (effortMode === 'rir') {
@@ -324,8 +325,8 @@ export function SetLogger({
                     step={effortMode === 'rir' ? 1 : 0.5}
                     disabled={completed}
                     className="w-full"
-                    aria-label={`Effort: ${effortMode === 'rir' ? rir : rpe} - ${getRIRLabel()}`}
-                    aria-valuetext={getRIRLabel()}
+                    thumbLabel={effortMode === 'rir' ? 'Reps in reserve' : 'Rate of perceived exertion'}
+                    thumbValueText={`${effortMode === 'rir' ? rir : rpe.toFixed(1)} - ${getRIRLabel()}`}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     {effortMode === 'rir' ? (

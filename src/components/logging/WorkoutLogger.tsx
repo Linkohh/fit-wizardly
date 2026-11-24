@@ -353,6 +353,7 @@ export function WorkoutLogger() {
                     <Progress
                         value={(completedExercises / totalExercises) * 100}
                         className="h-2"
+                        aria-label="Workout progress"
                     />
                 </div>
             </div>

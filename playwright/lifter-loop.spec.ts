@@ -1,4 +1,5 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import { expect, test, type Locator, type Page, type TestInfo } from '@playwright/test';
 
 /**
  * Lifter loop, as a guest with no Supabase (roadmap 3.5, Lane D Day 4).
@@ -91,6 +92,58 @@ async function startDayOne(page: Page) {
   await expect(page.getByRole('heading', { name: DAY_ONE, level: 1 })).toBeVisible();
 }
 
+interface AxeFinding {
+  screen: string;
+  id: string;
+  impact: string;
+  help: string;
+  targets: string[];
+  html: string[];
+}
+
+/**
+ * Serious or critical axe findings that are known and owned (handoff 2026-11-24-lane-d-day-5.md).
+ * Format: `screen:rule`.
+ */
+const KNOWN_AXE_FINDINGS = new Set([
+  // Footer text (muted on the living background): Lane C.
+  'wizard:color-contrast',
+  'workout:color-contrast',
+  // Toast close button has no name; it lives in src/components/ui/toast.tsx: coordinator decision.
+  'plan:button-name',
+  'workout:button-name',
+  // Plan week cards (white text on bg-primary/55): Lane B.
+  'plan:color-contrast',
+  // History page (text-primary/60, text-cyan-400, "Toggle exercise stats" chip): unassigned.
+  'history:color-contrast',
+  'history:label-content-name-mismatch',
+]);
+
+/**
+ * Axe pass (roadmap 3.4, Lane D Day 5): serious and critical WCAG 2.1 A/AA violations on one screen.
+ * Results are attached to the test report; the test asserts on them at the end.
+ */
+async function axeScan(page: Page, testInfo: TestInfo, screen: string): Promise<AxeFinding[]> {
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  const findings = results.violations
+    .filter((violation) => violation.impact === 'serious' || violation.impact === 'critical')
+    .map((violation) => ({
+      screen,
+      id: violation.id,
+      impact: violation.impact ?? 'unknown',
+      help: violation.help,
+      targets: violation.nodes.slice(0, 5).map((node) => node.target.join(' ')),
+      html: violation.nodes.slice(0, 5).map((node) => node.html.slice(0, 160)),
+    }));
+  await testInfo.attach(`axe-${screen}`, {
+    body: JSON.stringify(findings, null, 2),
+    contentType: 'application/json',
+  });
+  return findings;
+}
+
 function setGroup(page: Page, setNumber: number): Locator {
   return page.getByRole('group', { name: `Set ${setNumber}`, exact: true });
 }
@@ -180,13 +233,17 @@ async function expectHistoryShowsWorkout(page: Page) {
 }
 
 test.describe('lifter loop (guest)', () => {
-  test('plans, logs, reloads partway, finishes, and keeps it all on a new page', async ({ page, browser }) => {
+  test('plans, logs, reloads partway, finishes, and keeps it all on a new page', async ({ page, browser }, testInfo) => {
+    const axeFindings: AxeFinding[] = [];
     await acceptConsent(page);
     await completeOnboarding(page);
+    axeFindings.push(...(await axeScan(page, testInfo, 'wizard')));
     await generatePlanWithWizard(page);
     await expectPlanShown(page);
+    axeFindings.push(...(await axeScan(page, testInfo, 'plan')));
 
     await startDayOne(page);
+    axeFindings.push(...(await axeScan(page, testInfo, 'workout')));
     await logSet(page, 1, '40', '10');
     await logSet(page, 2, '42.5', '8');
     await expect.poll(() => savedCompletedSets(page)).toEqual(EXPECTED_SETS);
@@ -202,6 +259,7 @@ test.describe('lifter loop (guest)', () => {
     await expectPlanShown(page);
     await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'History' }).click();
     await expectHistoryShowsWorkout(page);
+    axeFindings.push(...(await axeScan(page, testInfo, 'history')));
     await expect.poll(() => savedWorkoutLogDays(page)).toEqual([DAY_ONE]);
 
     // Reload: History still has the workout and Plan still has the plan.
@@ -225,5 +283,11 @@ test.describe('lifter loop (guest)', () => {
     } finally {
       await nextContext.close();
     }
+
+    // No serious or critical axe violations on Wizard, Plan, Workout or History beyond the
+    // known ones below, each listed with its owner in the Lane D Day 5 handoff. Remove an
+    // entry when its fix merges; a new violation fails here.
+    const unexpected = axeFindings.filter((finding) => !KNOWN_AXE_FINDINGS.has(`${finding.screen}:${finding.id}`));
+    expect(unexpected, JSON.stringify(unexpected, null, 2)).toEqual([]);
   });
 });

@@ -1,4 +1,4 @@
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, MotionConfig } from "framer-motion";
 import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/toaster";
@@ -421,6 +421,8 @@ const App = () => {
   }, [user, syncWithBackend]);
 
   return (
+    // reducedMotion="user": every Framer Motion animation honours the OS "reduce motion" setting (roadmap 3.4).
+    <MotionConfig reducedMotion="user">
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -457,6 +459,7 @@ const App = () => {
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
+    </MotionConfig>
   );
 };
 
