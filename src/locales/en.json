@@ -171,6 +171,16 @@
             "next": "Next",
             "generate": "Generate Plan"
         },
+        "start_over": {
+            "button": "Start Over",
+            "title": "Start Over?",
+            "description": "This will clear all your current selections (Goal, Equipment, Muscles) and return you to the beginning.",
+            "question": "Are you sure you want to continue?",
+            "cancel": "Cancel",
+            "confirm": "Yes, Start Over",
+            "toast_title": "Wizard Reset",
+            "toast_description": "Ready for a fresh start! 🚀"
+        },
         "progress": "{{percent}}% complete",
         "toast": {
             "success_title": "Plan Generated!",
@@ -414,9 +424,9 @@
             "coaching_cues": "Coaching Cues",
             "why_exercise": "Why this exercise?",
             "sets": "{{count}} sets",
-            "reps": "{{count}} reps",
+            "reps": "{{range}} reps",
             "rir": "RIR {{count}}",
-            "rest": "{{count}}s rest"
+            "rest": "{{seconds}}s rest"
         },
         "exercise_swap": {
             "title": "Swap Exercise",
@@ -868,6 +878,21 @@
     },
     "achievements": {
         "badge_unlocked": "Badge unlocked: {{name}}"
+    },
+    "workout": {
+        "loading": "Loading workout...",
+        "preparing": "Preparing your session",
+        "cancel": "Cancel",
+        "cancel_dialog_title": "Cancel workout?",
+        "cancel_dialog_desc": "Your progress will be lost. Are you sure you want to cancel this workout?",
+        "cancel_dialog_continue": "Keep going",
+        "cancel_dialog_confirm": "Cancel workout",
+        "skip_exercise": "Skip Exercise",
+        "notes": "Workout Notes",
+        "notes_placeholder": "How did it feel? Any issues?",
+        "difficulty_title": "How was the workout?",
+        "difficulty_desc": "Rate the overall perceived difficulty.",
+        "rest_timer": "Rest"
     },
     "workoutLogger": {
         "finish": "Finish workout",

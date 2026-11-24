@@ -189,7 +189,8 @@ function selectExercisesForMuscle(
   availableExercises: Exercise[],
   targetSets: number,
   usedExerciseIds: Set<string>,
-  phase: OptPhase // NEW argument
+  phase: OptPhase, // NEW argument
+  weeklyUsage: ReadonlyMap<string, number> = new Map()
 ): { exercises: ExercisePrescription[]; setsAssigned: number } {
   const settings = getPhaseVariables(phase);
 
@@ -216,12 +217,14 @@ function selectExercisesForMuscle(
   let setsAssigned = 0;
   let supersetCounter = 1;
 
-  // Sort by priority (Compound > Isolation)
+  // Sort by priority (Compound > Isolation), then by how rarely the exercise
+  // has been used this week, so each day rotates through the catalog.
   // For Phase 5, we specifically need Strength first, then Power
   const sortedExercises = [...muscleExercises].sort((a, b) => {
     const aIsCompound = a.patterns.includes('isolation') ? 1 : 0;
     const bIsCompound = b.patterns.includes('isolation') ? 1 : 0;
-    return aIsCompound - bIsCompound;
+    if (aIsCompound !== bIsCompound) return aIsCompound - bIsCompound;
+    return (weeklyUsage.get(a.id) ?? 0) - (weeklyUsage.get(b.id) ?? 0);
   });
 
   for (let i = 0; i < sortedExercises.length; i++) {
@@ -471,9 +474,27 @@ export function generatePlanFromExercises(
   const weeklyVolumeTracker: Record<MuscleGroup, number> = {} as Record<MuscleGroup, number>;
   targetMuscles.forEach(m => { weeklyVolumeTracker[m] = 0; });
 
+  // Muscles trained on each day, and how many days a week each muscle is trained.
+  // The weekly cap is spread over the days that actually train the muscle, so a
+  // full body plan doesn't spend the whole cap on its first days and leave the
+  // last one empty.
+  const musclesByDay = dayStructures.map(dayStructure =>
+    getMusclesForDay(dayStructure.focusTags, targetMuscles, splitType)
+  );
+  const trainingDaysPerMuscle = new Map<MuscleGroup, number>();
+  musclesByDay.forEach(dayMuscles => {
+    dayMuscles.forEach(muscle => {
+      trainingDaysPerMuscle.set(muscle, (trainingDaysPerMuscle.get(muscle) ?? 0) + 1);
+    });
+  });
+
+  // How often each exercise has been used this week, so later days rotate to
+  // exercises the earlier days didn't use, when the catalog has them.
+  const weeklyExerciseUsage = new Map<string, number>();
+
   // Generate workout days
   const workoutDays: WorkoutDay[] = dayStructures.map((dayStructure, dayIndex) => {
-    const dayMuscles = getMusclesForDay(dayStructure.focusTags, targetMuscles, splitType);
+    const dayMuscles = musclesByDay[dayIndex];
     const usedExerciseIds = new Set<string>();
     const exercises: ExercisePrescription[] = [];
     const setBudget = Math.max(1, Math.floor(sessionDuration / 3));
@@ -490,7 +511,7 @@ export function generatePlanFromExercises(
       if (remainingCap <= 0) continue;
 
       const targetSetsForDay = Math.min(
-        Math.ceil(cap / Math.max(1, Math.ceil(daysPerWeek / 2))),
+        Math.ceil(cap / Math.max(1, trainingDaysPerMuscle.get(muscle) ?? 1)),
         remainingCap,
         setBudget - totalSets
       );
@@ -502,7 +523,8 @@ export function generatePlanFromExercises(
         availableExercises,
         targetSetsForDay,
         usedExerciseIds,
-        currentPhase // pass phase
+        currentPhase, // pass phase
+        weeklyExerciseUsage
       );
 
       // Update rep ranges and rest based on goal
@@ -513,6 +535,10 @@ export function generatePlanFromExercises(
       // Actually we should just leave them be as selectExercises... does it better now.
 
       exercises.push(...muscleExercises);
+      muscleExercises.forEach(prescription => {
+        const id = prescription.exercise.id;
+        weeklyExerciseUsage.set(id, (weeklyExerciseUsage.get(id) ?? 0) + 1);
+      });
       weeklyVolumeTracker[muscle] = (weeklyVolumeTracker[muscle] || 0) + setsAssigned;
       totalSets += setsAssigned;
     }

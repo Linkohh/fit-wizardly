@@ -112,6 +112,45 @@ describe('planGenerator', () => {
         });
     });
 
+    describe('a single target muscle on a full body split', () => {
+        const chestOnly: WizardSelections = {
+            ...validSelections,
+            equipment: [...validSelections.equipment, 'bodyweight'],
+            targetMuscles: ['chest'],
+            daysPerWeek: 3,
+        };
+
+        it('gives every day exercises (no empty "Full Body C")', () => {
+            for (const experienceLevel of ['beginner', 'intermediate', 'advanced'] as const) {
+                for (const goal of ['hypertrophy', 'strength', 'general'] as const) {
+                    const plan = generatePlan({ ...chestOnly, experienceLevel, goal });
+                    expect(plan.workoutDays.map(day => day.name)).toEqual([
+                        'Full Body A',
+                        'Full Body B',
+                        'Full Body C',
+                    ]);
+                    plan.workoutDays.forEach(day => {
+                        expect(day.exercises.length, `${experienceLevel}/${goal} ${day.name}`).toBeGreaterThan(0);
+                    });
+                    plan.weeklyVolume.forEach(volume => {
+                        expect(volume.isWithinCap).toBe(true);
+                    });
+                }
+            }
+        });
+
+        it('rotates exercises across days when the catalog has more than one day needs', () => {
+            const bench = EXERCISE_DATABASE.find(exercise => exercise.id === 'barbell_bench_press');
+            expect(bench).toBeDefined();
+            const presses = ['press_a', 'press_b', 'press_c'].map(id => ({ ...bench!, id, name: id }));
+
+            const plan = generatePlanFromExercises(presses, chestOnly);
+            const firstExercisePerDay = plan.workoutDays.map(day => day.exercises[0]?.exercise.id);
+
+            expect(new Set(firstExercisePerDay).size).toBe(3);
+        });
+    });
+
     describe('validateWizardInputs', () => {
         it('validates correct inputs', () => {
             const result = validateWizardInputs(validSelections);
