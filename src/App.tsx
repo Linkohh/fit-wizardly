@@ -9,6 +9,7 @@ import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { EdgeSwipeBack } from "@/components/navigation/EdgeSwipeBack";
 import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
+import { useStatusBarTheme } from "@/hooks/useStatusBarTheme";
 import { useThemeStore } from "@/stores/themeStore";
 import { PageTransition } from "@/components/ui/page-transition";
 import { ErrorBoundary, type ErrorFallbackProps } from "@/components/ErrorBoundary";
@@ -332,6 +333,7 @@ const App = () => {
   useGlobalClickFeedback();
   useScrollActivity();
   useAndroidBackButton();
+  useStatusBarTheme();
   const nativeApp = isNativeApp();
   const hasAnalyticsConsent = useAnalyticsStore((state) => state.hasConsented);
   const [shouldRenderLivingBackground, setShouldRenderLivingBackground] = useState(false);
