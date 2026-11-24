@@ -1,7 +1,9 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import { EXERCISE_DATABASE } from '@/test/fixtures/exercises';
 import { generatePlanFromExercises, validateWizardInputs } from '@/lib/planGenerator';
-import type { WizardSelections } from '@/types/fitness';
+import type { Exercise, MuscleGroup, WizardSelections } from '@/types/fitness';
 
 describe('planGenerator', () => {
     const validSelections: WizardSelections = {
@@ -148,6 +150,55 @@ describe('planGenerator', () => {
             const firstExercisePerDay = plan.workoutDays.map(day => day.exercises[0]?.exercise.id);
 
             expect(new Set(firstExercisePerDay).size).toBe(3);
+        });
+    });
+
+    describe('session budget is shared across the muscles trained that day', () => {
+        // The real catalog, as the app ships it, so this checks the exercises users actually get.
+        const catalog = JSON.parse(
+            readFileSync(resolve(__dirname, '../../../public/exercise-data/legacy-exercises.v1.json'), 'utf-8'),
+        ) as Exercise[];
+        const allEquipment = [...new Set(catalog.flatMap(exercise => exercise.equipment))];
+        const targetSets: MuscleGroup[][] = [
+            ['quads', 'hamstrings', 'glutes'],
+            ['chest', 'upper_back', 'lats', 'quads', 'hamstrings'],
+        ];
+
+        it.each([3, 4, 5, 6])('gives every target muscle at least 1 set a week on %i days', (daysPerWeek) => {
+            for (const targetMuscles of targetSets) {
+                const plan = generatePlanFromExercises(catalog, {
+                    ...validSelections,
+                    equipment: allEquipment,
+                    targetMuscles,
+                    daysPerWeek,
+                    sessionDuration: 45,
+                });
+                const starved = plan.weeklyVolume.filter(volume => volume.sets < 1).map(volume => volume.muscleGroup);
+                expect(starved, `${targetMuscles.join('+')} on ${daysPerWeek} days`).toEqual([]);
+                plan.weeklyVolume.forEach(volume => expect(volume.isWithinCap).toBe(true));
+                plan.workoutDays.forEach(day => {
+                    const daySets = day.exercises.reduce((sum, prescription) => sum + prescription.sets, 0);
+                    expect(daySets).toBeLessThanOrEqual(15);
+                });
+            }
+        });
+
+        it('never gives two separate supersets on one day the same group number', () => {
+            const plan = generatePlanFromExercises(catalog, {
+                ...validSelections,
+                goal: 'strength',
+                equipment: allEquipment,
+                targetMuscles: ['chest', 'upper_back', 'lats'],
+                daysPerWeek: 3,
+            });
+            const supersetCount = plan.workoutDays.flatMap(day => day.exercises).filter(prescription => prescription.supersetGroup !== undefined).length;
+            expect(supersetCount).toBeGreaterThan(2);
+            plan.workoutDays.forEach(day => {
+                const groups = day.exercises.map(prescription => prescription.supersetGroup).filter(group => group !== undefined);
+                const counts = new Map<number, number>();
+                groups.forEach(group => counts.set(group, (counts.get(group) ?? 0) + 1));
+                counts.forEach(count => expect(count).toBeLessThanOrEqual(2));
+            });
         });
     });
 

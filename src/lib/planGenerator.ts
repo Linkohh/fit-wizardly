@@ -496,52 +496,64 @@ export function generatePlanFromExercises(
   const workoutDays: WorkoutDay[] = dayStructures.map((dayStructure, dayIndex) => {
     const dayMuscles = musclesByDay[dayIndex];
     const usedExerciseIds = new Set<string>();
-    const exercises: ExercisePrescription[] = [];
+    const exercisesByMuscle = new Map<MuscleGroup, ExercisePrescription[]>();
+    const setsToday = new Map<MuscleGroup, number>();
     const setBudget = Math.max(1, Math.floor(sessionDuration / 3));
     let totalSets = 0;
+    let supersetOffset = 0;
 
-    // Allocate exercises per muscle
-    for (const muscle of dayMuscles) {
-      if (totalSets >= setBudget) break;
-
+    // Give one muscle up to `maxSets` more sets today, within its weekly cap,
+    // its per-day share and the session budget.
+    const allocate = (muscle: MuscleGroup, maxSets: number) => {
       const cap = volumeCaps[muscle] || 10;
-      const currentVolume = weeklyVolumeTracker[muscle] || 0;
-      const remainingCap = cap - currentVolume;
-
-      if (remainingCap <= 0) continue;
-
-      const targetSetsForDay = Math.min(
-        Math.ceil(cap / Math.max(1, trainingDaysPerMuscle.get(muscle) ?? 1)),
+      const remainingCap = cap - (weeklyVolumeTracker[muscle] || 0);
+      const perDayTarget = Math.ceil(cap / Math.max(1, trainingDaysPerMuscle.get(muscle) ?? 1));
+      const targetSets = Math.min(
+        maxSets,
+        perDayTarget - (setsToday.get(muscle) ?? 0),
         remainingCap,
         setBudget - totalSets
       );
-
-      if (targetSetsForDay <= 0) break;
+      if (targetSets <= 0) return;
 
       const { exercises: muscleExercises, setsAssigned } = selectExercisesForMuscle(
         muscle,
         availableExercises,
-        targetSetsForDay,
+        targetSets,
         usedExerciseIds,
-        currentPhase, // pass phase
+        currentPhase,
         weeklyExerciseUsage
       );
 
-      // Update rep ranges and rest based on goal
-      // Update rep ranges and rest based on goal (LEGACY OVERRIDE CHECK)
-      // We rely on selectExercisesForMuscle to set these now via getPhaseVariables, 
-      // so we largely skip this or just ensure nothing is wildly off.
-      // muscleExercises.forEach(ex => { ... }); 
-      // Actually we should just leave them be as selectExercises... does it better now.
+      // Each call numbers its supersets from 1; offset them so two calls never
+      // share a group number and render as one superset.
+      let highestGroup = 0;
+      const numbered = muscleExercises.map(prescription => {
+        if (prescription.supersetGroup === undefined) return prescription;
+        highestGroup = Math.max(highestGroup, prescription.supersetGroup);
+        return { ...prescription, supersetGroup: prescription.supersetGroup + supersetOffset };
+      });
+      supersetOffset += highestGroup;
 
-      exercises.push(...muscleExercises);
-      muscleExercises.forEach(prescription => {
+      exercisesByMuscle.set(muscle, [...(exercisesByMuscle.get(muscle) ?? []), ...numbered]);
+      numbered.forEach(prescription => {
         const id = prescription.exercise.id;
         weeklyExerciseUsage.set(id, (weeklyExerciseUsage.get(id) ?? 0) + 1);
       });
+      setsToday.set(muscle, (setsToday.get(muscle) ?? 0) + setsAssigned);
       weeklyVolumeTracker[muscle] = (weeklyVolumeTracker[muscle] || 0) + setsAssigned;
       totalSets += setsAssigned;
-    }
+    };
+
+    // Pass 1: an equal share of the session for every muscle trained today, so
+    // the first muscle in the list can't take the whole budget.
+    const fairShare = Math.max(1, Math.floor(setBudget / Math.max(1, dayMuscles.length)));
+    dayMuscles.forEach(muscle => allocate(muscle, fairShare));
+    // Pass 2: top muscles up toward their per-day target with what's left.
+    dayMuscles.forEach(muscle => allocate(muscle, Infinity));
+
+    // Keep each muscle's exercises together, in the day's muscle order.
+    const exercises = dayMuscles.flatMap(muscle => exercisesByMuscle.get(muscle) ?? []);
 
     // Estimate duration (3 min per set average)
     const estimatedDuration = Math.round(totalSets * 3);
