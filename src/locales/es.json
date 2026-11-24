@@ -807,7 +807,14 @@
         "error": "Problema de sincronización. Tus datos siguen guardados en este dispositivo.",
         "signed_out": "Inicia sesión para guardar una copia de tu entrenamiento.",
         "retry": "Reintentar",
-        "sign_in": "Iniciar sesión"
+        "sign_in": "Iniciar sesión",
+        "signed_out_erased": "Sesión cerrada. Tu entrenamiento está guardado en tu cuenta y se eliminó de este dispositivo.",
+        "sign_out": "Cerrar sesión",
+        "signing_out": "Guardando tus cambios…",
+        "sign_out_unsent_title": "Algunos cambios no tienen copia de seguridad",
+        "sign_out_unsent_body": "{{count}} cambios aún no se guardaron en tu cuenta. Al cerrar sesión, tu entrenamiento se elimina de este dispositivo y se perderán. Conéctate a internet y espera un momento para conservarlos.",
+        "sign_out_keep": "Seguir conectado",
+        "sign_out_anyway": "Cerrar sesión de todos modos"
     },
     "pdfExport": {
         "headers": {

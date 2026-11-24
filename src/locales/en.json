@@ -950,7 +950,14 @@
         "error": "Sync problem. Your data is still saved on this device.",
         "signed_out": "Sign in to back up your training.",
         "retry": "Retry",
-        "sign_in": "Sign in"
+        "sign_in": "Sign in",
+        "signed_out_erased": "Signed out. Your training is saved in your account and removed from this device.",
+        "sign_out": "Sign out",
+        "signing_out": "Saving your changes…",
+        "sign_out_unsent_title": "Some changes aren't backed up",
+        "sign_out_unsent_body": "{{count}} changes haven't been saved to your account yet. Signing out removes your training from this device, so they'll be lost. Connect to the internet and wait a moment to keep them.",
+        "sign_out_keep": "Stay signed in",
+        "sign_out_anyway": "Sign out anyway"
     },
     "pdfExport": {
         "headers": {

@@ -178,6 +178,11 @@ export function startSync(userId: string, options: StartSyncOptions = {}): () =>
   return stop;
 }
 
+/** Stops the current account's sync triggers (sign-out, before the device is erased). */
+export function stopSync(): void {
+  stopCurrent?.();
+}
+
 /** Runs a sync now for the signed-in user, for the Profile Retry button. */
 export function retrySync(userId: string): Promise<SyncResult> {
   return syncAll(userId);

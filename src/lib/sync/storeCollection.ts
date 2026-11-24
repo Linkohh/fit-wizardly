@@ -44,6 +44,13 @@ export interface StoreCollectionOptions<T> {
   fromRow: (row: SyncRow) => T;
   /** Whether two versions of a record are the same. Defaults to `===`. */
   isSame?: (a: T, b: T) => boolean;
+  /**
+   * Whether a record disappearing from the store counts as a delete. Defaults to
+   * true. Plans set it to false: plan history keeps the latest 20 on the device,
+   * and dropping the 21st is not a delete, so `deletePlanFromHistory()` marks real
+   * deletes itself.
+   */
+  trackDeletions?: boolean;
 }
 
 export interface StoreCollection<T> extends SyncCollection<T> {
@@ -96,8 +103,10 @@ export function createStoreCollection<T>(options: StoreCollectionOptions<T>): St
             const before = previous.get(itemKey);
             if (!before || !isSame(before, item)) markDirty(options.table, itemKey);
           }
-          for (const itemKey of previous.keys()) {
-            if (!next.has(itemKey)) markDirty(options.table, itemKey, { deleted: true });
+          if (options.trackDeletions !== false) {
+            for (const itemKey of previous.keys()) {
+              if (!next.has(itemKey)) markDirty(options.table, itemKey, { deleted: true });
+            }
           }
         }
         previous = next;

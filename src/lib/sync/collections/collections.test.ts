@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SyncRow } from '@/lib/sync/types';
-import type { BodyMeasurement, WorkoutLog, PersonalRecord } from '@/types/fitness';
+import type { BodyMeasurement, Plan, WorkoutLog, PersonalRecord } from '@/types/fitness';
 import type { MealEntry } from '@/types/nutrition';
 import { FAKE_USER, FakeServer } from '@/test/sync/fakeServer';
 
@@ -72,6 +72,16 @@ const meal: MealEntry = {
   timestamp: new Date('2026-11-17T08:00:00.000Z'),
 };
 
+function buildPlan(id: string, createdAt: string): Plan {
+  return {
+    id,
+    name: `Plan ${id}`,
+    createdAt: new Date(createdAt),
+    workoutDays: [{ dayIndex: 0, name: 'Day 1', exercises: [] }],
+    selections: { goal: 'hypertrophy' },
+  } as unknown as Plan;
+}
+
 const workoutLog = {
   id: 'log-1',
   planId: 'plan_abc',
@@ -106,6 +116,7 @@ describe('sync collections', () => {
   it('round-trips every collection through its cloud row', async () => {
     const app = await startApp();
     app.plan.setState({ workoutLogs: [workoutLog], personalRecords: [personalRecord] });
+    app.plan.getState().savePlanToHistory(buildPlan('plan-rt', '2026-11-10T10:00:00.000Z'));
     app.nutrition.getState().logMeal(meal);
     app.nutrition.getState().setProfile(
       { age: 30, gender: 'male', height: 180, weight: 82, activityLevel: 'moderate', goal: 'maintain' } as never,
@@ -123,7 +134,13 @@ describe('sync collections', () => {
         const row = (collection.toRow as (item: unknown, userId: string) => Omit<SyncRow, 'updated_at'>)(item, FAKE_USER);
         expect(row.user_id).toBe(FAKE_USER);
         const back = (collection.fromRow as (row: SyncRow) => unknown)(asServerRow(row));
-        expect(JSON.stringify(back), collection.table).toBe(JSON.stringify(item));
+        // A pulled plan also carries the server's userId / updatedAt / schemaVersion (rowToPlan).
+        const withoutServerFields = (value: unknown) => {
+          if (collection.table !== 'plans' || !value || typeof value !== 'object') return value;
+          const { userId: _u, updatedAt: _t, schemaVersion: _v, ...rest } = value as Record<string, unknown>;
+          return rest;
+        };
+        expect(JSON.stringify(withoutServerFields(back)), collection.table).toBe(JSON.stringify(withoutServerFields(item)));
         expect((collection.key as (item: unknown) => string)(back)).toBe((collection.key as (item: unknown) => string)(item));
       }
     }
@@ -258,6 +275,40 @@ describe('sync collections', () => {
     expect(app.plan.getState().personalRecords.map((record) => record.id)).toEqual(['pr-1', 'pr-0']);
     expect(app.measurements.getState().measurements.map((m) => m.id)).toEqual(['m-1', 'm-0']);
     expect(app.measurements.getState().getLatestMeasurement()?.id).toBe('m-1');
+  });
+
+  it('syncs plans between devices, including a delete, and follows the current plan', async () => {
+    const server = new FakeServer();
+    let app = await startApp();
+    const plan = buildPlan('plan-1', '2026-11-20T10:00:00.000Z');
+    app.plan.getState().savePlanToHistory(plan);
+    app.plan.getState().setCurrentPlan(plan);
+    await app.syncAll(FAKE_USER, { client: server.client() });
+    expect(server.rows('plans').map((row) => row.id)).toEqual(['plan-1']);
+
+    // Phone B: the plan arrives and becomes the current plan.
+    await eraseDevice();
+    app = await startApp();
+    await app.syncAll(FAKE_USER, { client: server.client() });
+    expect(app.plan.getState().planHistory.map((p) => p.id)).toEqual(['plan-1']);
+    expect(app.plan.getState().currentPlan?.id).toBe('plan-1');
+    expect(app.plan.getState().currentPlan?.createdAt).toBeInstanceOf(Date);
+
+    // Phone B deletes it: a tombstone, not a hard delete.
+    app.plan.getState().deletePlanFromHistory('plan-1');
+    await app.syncAll(FAKE_USER, { client: server.client() });
+    expect(server.rows('plans')).toHaveLength(1);
+    expect(server.rows('plans')[0].deleted_at).not.toBeNull();
+  });
+
+  it("never deletes cloud plans when an old plan drops off the 20-plan device history", async () => {
+    const app = await startApp();
+    for (let i = 0; i < 21; i += 1) {
+      app.plan.getState().savePlanToHistory(buildPlan(`plan-${i}`, `2026-11-${String(i + 1).padStart(2, '0')}T10:00:00.000Z`));
+    }
+    expect(app.plan.getState().planHistory).toHaveLength(20);
+    const planEntries = Object.values(app.getOutboxEntries('plans'));
+    expect(planEntries.some((entry) => entry.deleted)).toBe(false);
   });
 
   it("doesn't push back records it has just pulled", async () => {
