@@ -188,7 +188,8 @@ Behaviour:
   - **Change tracking starts at app start**, signed in or not (`App.tsx`), so edits made while signed out are sent after the next sign-in.
   - `retrySync(userId)` is for the Profile Retry button.
 - **Indicator (Day 6):** `src/components/sync/SyncStatusRow.tsx` on Profile shows Synced, Saving…, Offline, Sync problem (with Retry), or a sign-in prompt. It's hidden in demo mode (no Supabase).
-- **Not yet built (Day 7):** sync before sign-out with an unsent-changes warning, and clearing device data after sign-out (DEBT-045). Plans move onto the engine.
+- **Safe sign-out (Day 7 part 1):** every sign-out entry point uses `useSafeSignOut()` (`src/components/sync/SignOutDialog.tsx`). `prepareSignOut(userId)` syncs, then returns `{ pending }`. `completeSignOut()` runs `stopSync()`, then `waitForRunningSync()`, then `signOut({ quiet: true })`, then `clearLocalUserData()`. A dialog warns when `pending > 0`.
+- **Not yet built (Day 7 part 2):** plans move onto the engine (tombstones instead of hard deletes in `supabasePlansRepo`).
 
 ## 6. API base: `src/lib/apiBase.ts`
 

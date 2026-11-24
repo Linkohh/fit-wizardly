@@ -7,14 +7,20 @@ const mocks = vi.hoisted(() => ({
   configured: true,
   retrySync: vi.fn(async () => ({ pulled: 0, pushed: 0, failed: 0 })),
   setShowAuthModal: vi.fn(),
+  prepareSignOut: vi.fn(),
+  completeSignOut: vi.fn(),
 }));
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (_key: string, fallback: string) => fallback }),
+  useTranslation: () => ({
+    t: (_key: string, fallback: string, options?: { count?: number }) =>
+      options?.count === undefined ? fallback : fallback.replace('{{count}}', String(options.count)),
+  }),
 }));
 vi.mock('@/lib/supabase', () => ({ isSupabaseConfigured: () => mocks.configured }));
 vi.mock('@/lib/sync/status', () => ({ useSyncStatus: () => mocks.status }));
 vi.mock('@/lib/sync/triggers', () => ({ retrySync: mocks.retrySync }));
+vi.mock('@/lib/sync/signOut', () => ({ prepareSignOut: mocks.prepareSignOut, completeSignOut: mocks.completeSignOut }));
 vi.mock('@/stores/authStore', () => ({
   useAuthStore: <T,>(selector: (state: { user: { id: string } | null; setShowAuthModal: () => void }) => T) =>
     selector({ user: mocks.status === 'signed-out' ? null : { id: 'user-1' }, setShowAuthModal: mocks.setShowAuthModal }),
@@ -59,5 +65,34 @@ describe('SyncStatusRow', () => {
     mocks.configured = false;
     const { container } = render(<SyncStatusRow />);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it('signs out straight away when everything is backed up', async () => {
+    mocks.status = 'synced';
+    mocks.prepareSignOut.mockResolvedValue({ pending: 0 });
+    mocks.completeSignOut.mockResolvedValue(undefined);
+    render(<SyncStatusRow />);
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+    await vi.waitFor(() => expect(mocks.completeSignOut).toHaveBeenCalledTimes(1));
+    expect(mocks.prepareSignOut).toHaveBeenCalledWith('user-1');
+  });
+
+  it('warns before signing out when changes are not backed up, and can stay signed in', async () => {
+    mocks.status = 'offline';
+    mocks.prepareSignOut.mockResolvedValue({ pending: 3 });
+    mocks.completeSignOut.mockReset().mockResolvedValue(undefined);
+    render(<SyncStatusRow />);
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+
+    expect(await screen.findByText(/3 changes haven't been saved/)).toBeInTheDocument();
+    expect(mocks.completeSignOut).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Stay signed in' }));
+    await vi.waitFor(() => expect(screen.queryByText(/3 changes haven't been saved/)).not.toBeInTheDocument());
+    expect(mocks.completeSignOut).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Sign out anyway' }));
+    await vi.waitFor(() => expect(mocks.completeSignOut).toHaveBeenCalledTimes(1));
   });
 });
