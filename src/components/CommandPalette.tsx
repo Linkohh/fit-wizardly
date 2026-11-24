@@ -24,6 +24,7 @@ import {
 import { usePlanStore } from '@/stores/planStore';
 import { useCircleStore } from '@/stores/circleStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useSafeSignOut } from '@/components/sync/SignOutDialog';
 import { useTranslation } from 'react-i18next';
 import { isFeatureEnabled } from '@/lib/featureFlags';
 
@@ -33,7 +34,9 @@ export function CommandPalette() {
   const navigate = useNavigate();
   const { currentPlan } = usePlanStore();
   const { circles } = useCircleStore();
-  const { user, signOut, setShowAuthModal } = useAuthStore();
+  const { user, setShowAuthModal } = useAuthStore();
+  // Signing out syncs first and erases this device's training data (Lane E Day 7, DEBT-045).
+  const { requestSignOut, dialog: signOutDialog } = useSafeSignOut();
   // Build-time flag; read on render so tests can stub the env per case.
   const circlesEnabled = isFeatureEnabled('circles');
 
@@ -56,6 +59,7 @@ export function CommandPalette() {
   };
 
   return (
+    <>
     <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput placeholder={t('commands.placeholder')} />
       <CommandList>
@@ -168,7 +172,7 @@ export function CommandPalette() {
               </CommandItem>
 
               <CommandItem
-                onSelect={() => handleCommand(() => signOut())}
+                onSelect={() => handleCommand(() => requestSignOut())}
                 className="text-destructive"
               >
                 <LogOut className="mr-2 h-4 w-4" />
@@ -212,5 +216,7 @@ export function CommandPalette() {
         </CommandGroup>
       </CommandList>
     </CommandDialog>
+    {signOutDialog}
+    </>
   );
 }

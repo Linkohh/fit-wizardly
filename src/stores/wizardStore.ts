@@ -56,7 +56,7 @@ const initialSelections: WizardSelections = {
   targetMuscles: [],
   constraints: [],
   daysPerWeek: 3,
-  sessionDuration: 60,
+  sessionDuration: 45, // first-plan default (Lane B Day 4): 3 days × 45 minutes
 };
 
 export const useWizardStore = create<WizardState>()(

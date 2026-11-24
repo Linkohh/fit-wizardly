@@ -2,11 +2,12 @@ import { registerCollection } from '@/lib/sync/registry';
 import type { StoreCollection } from '@/lib/sync/storeCollection';
 import { bodyMeasurementsCollection, readinessEntriesCollection } from '@/lib/sync/collections/body';
 import { nutritionDaysCollection, nutritionSettingsCollection } from '@/lib/sync/collections/nutrition';
-import { personalRecordsCollection, workoutLogsCollection } from '@/lib/sync/collections/training';
+import { personalRecordsCollection, plansCollection, workoutLogsCollection } from '@/lib/sync/collections/training';
 import { userStateCollection } from '@/lib/sync/collections/userState';
 
-/** Every collection in migration 007, in the order they sync. Plans join on Day 7. */
+/** Every synced table (plans from 004, the rest from 007), in the order they sync. */
 export const SYNC_COLLECTIONS = [
+  plansCollection,
   workoutLogsCollection,
   personalRecordsCollection,
   nutritionDaysCollection,
@@ -33,6 +34,7 @@ export function startSyncCollections(): Promise<() => void> {
     started = (async () => {
       // One call per collection keeps each one's item type (no casts).
       const stops = await Promise.all([
+        registerAndTrack(plansCollection),
         registerAndTrack(workoutLogsCollection),
         registerAndTrack(personalRecordsCollection),
         registerAndTrack(nutritionDaysCollection),
