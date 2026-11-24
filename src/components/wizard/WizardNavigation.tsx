@@ -56,37 +56,37 @@ export function WizardNavigation({
               variant="ghost"
               size="sm"
               className="text-muted-foreground hover:text-destructive h-10 px-3 -ml-2"
-              aria-label="Start Over"
+              aria-label={t('wizard.start_over.button', 'Start Over')}
             >
               <RotateCcw className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Start Over</span>
+              <span className="hidden sm:inline">{t('wizard.start_over.button', 'Start Over')}</span>
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent className="glass-static border-white/10">
             <AlertDialogHeader>
               <div className="flex items-center gap-2">
                 <RotateCcw className="h-5 w-5 text-destructive" />
-                <AlertDialogTitle className="text-xl">Start Over?</AlertDialogTitle>
+                <AlertDialogTitle className="text-xl">{t('wizard.start_over.title', 'Start Over?')}</AlertDialogTitle>
               </div>
               <AlertDialogDescription className="text-base text-muted-foreground pt-2">
-                This will clear all your current selections (Goal, Equipment, Muscles) and return you to the beginning.
+                {t('wizard.start_over.description', 'This will clear all your current selections (Goal, Equipment, Muscles) and return you to the beginning.')}
                 <br /><br />
-                Are you sure you want to continue?
+                {t('wizard.start_over.question', 'Are you sure you want to continue?')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="mt-4">
-              <AlertDialogCancel className="hover:bg-white/10">Cancel</AlertDialogCancel>
+              <AlertDialogCancel className="hover:bg-white/10">{t('wizard.start_over.cancel', 'Cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => {
                   onStartOver();
                   toast({
-                    title: "Wizard Reset",
-                    description: "Ready for a fresh start! 🚀",
+                    title: t('wizard.start_over.toast_title', 'Wizard Reset'),
+                    description: t('wizard.start_over.toast_description', 'Ready for a fresh start! 🚀'),
                   });
                 }}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90 px-6 font-semibold"
               >
-                Yes, Start Over
+                {t('wizard.start_over.confirm', 'Yes, Start Over')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

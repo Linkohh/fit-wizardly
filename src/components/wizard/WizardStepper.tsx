@@ -55,11 +55,11 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
                     isClickable && "cursor-pointer",
                     !isClickable && "cursor-default"
                   )}
-                  aria-label={`${step.label}${isComplete ? ` (${t('wizard.stepper.completed')})` : isCurrent ? ` (${t('wizard.stepper.current')})` : ''}`}
                   aria-current={isCurrent ? 'step' : undefined}
                 >
-                  {/* Step indicator */}
+                  {/* Step indicator (decorative: the list order and the label carry the meaning) */}
                   <motion.div
+                    aria-hidden="true"
                     className={cn(
                       "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-colors duration-300",
                       isComplete && "border-success bg-success text-primary-foreground",
@@ -113,6 +113,17 @@ export function WizardStepper({ currentStep, currentStepIndex, onStepClick }: Wi
                   >
                     {step.shortLabel}
                   </span>
+                  {/* Status for screen readers. The accessible name is the visible label
+                      plus this, so it always starts with the text on screen. The locale
+                      values already include the brackets, e.g. "(current)". */}
+                  {(isComplete || isCurrent) && (
+                    <>
+                      {' '}
+                      <span className="sr-only">
+                        {isComplete ? t('wizard.stepper.completed', '(completed)') : t('wizard.stepper.current', '(current)')}
+                      </span>
+                    </>
+                  )}
                 </button>
               </div>
 
