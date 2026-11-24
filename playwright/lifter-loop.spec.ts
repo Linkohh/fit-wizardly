@@ -108,6 +108,9 @@ interface AxeFinding {
 const KNOWN_AXE_FINDINGS = new Set([
   // Footer text (muted on the living background): Lane C.
   'wizard:color-contrast',
+  // WizardStepper step buttons: aria-label is the long label, visible text the short one
+  // (src/components/wizard/WizardStepper.tsx:58): Lane B, DEBT-106.
+  'wizard:label-content-name-mismatch',
   'workout:color-contrast',
   // Toast close button has no name; it lives in src/components/ui/toast.tsx: coordinator decision.
   'plan:button-name',
@@ -120,10 +123,32 @@ const KNOWN_AXE_FINDINGS = new Set([
 ]);
 
 /**
+ * Wait until finite CSS/Web Animations have finished, so axe sees settled colours and
+ * visibility (e.g. the wizard stepper's colour transition). Infinite animations (pulses,
+ * the living background) are ignored, since they never finish.
+ */
+async function waitForAnimationsToSettle(page: Page) {
+  await page.waitForFunction(
+    () =>
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getComputedTiming().endTime !== Infinity)
+        .every((animation) => animation.playState !== 'running' && animation.playState !== 'pending'),
+    undefined,
+    { timeout: 10_000 },
+  );
+  // Two frames for animations driven from requestAnimationFrame to write their last values.
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+  );
+}
+
+/**
  * Axe pass (roadmap 3.4, Lane D Day 5): serious and critical WCAG 2.1 A/AA violations on one screen.
  * Results are attached to the test report; the test asserts on them at the end.
  */
 async function axeScan(page: Page, testInfo: TestInfo, screen: string): Promise<AxeFinding[]> {
+  await waitForAnimationsToSettle(page);
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze();
@@ -234,6 +259,8 @@ async function expectHistoryShowsWorkout(page: Page) {
 
 test.describe('lifter loop (guest)', () => {
   test('plans, logs, reloads partway, finishes, and keeps it all on a new page', async ({ page, browser }, testInfo) => {
+    // The full loop plus four axe scans (about 2 s each) runs close to the 30 s default.
+    test.setTimeout(90_000);
     const axeFindings: AxeFinding[] = [];
     await acceptConsent(page);
     await completeOnboarding(page);
