@@ -111,6 +111,16 @@
             "next": "Siguiente",
             "generate": "Generar Plan"
         },
+        "start_over": {
+            "button": "Empezar de nuevo",
+            "title": "¿Empezar de nuevo?",
+            "description": "Esto borrará todas tus selecciones actuales (objetivo, equipo, músculos) y te llevará al principio.",
+            "question": "¿Seguro que quieres continuar?",
+            "cancel": "Cancelar",
+            "confirm": "Sí, empezar de nuevo",
+            "toast_title": "Asistente reiniciado",
+            "toast_description": "¡Listo para empezar de cero! 🚀"
+        },
         "progress": "{{percent}}% completado",
         "toast": {
             "success_title": "¡Plan Generado!",
@@ -328,9 +338,9 @@
             "coaching_cues": "Indicaciones",
             "why_exercise": "¿Por qué este ejercicio?",
             "sets": "{{count}} series",
-            "reps": "{{count}} reps",
+            "reps": "{{range}} reps",
             "rir": "RIR {{count}}",
-            "rest": "{{count}}s descanso"
+            "rest": "{{seconds}}s descanso"
         },
         "exercise_swap": {
             "title": "Cambiar Ejercicio",
@@ -500,7 +510,10 @@
         "next": "Siguiente",
         "skip_exercise": "Saltar Ejercicio",
         "notes": "Notas del Entrenamiento",
-        "notes_placeholder": "¿Cómo te sentiste? ¿Algún problema?"
+        "notes_placeholder": "¿Cómo te sentiste? ¿Algún problema?",
+        "difficulty_title": "¿Qué tal el entrenamiento?",
+        "difficulty_desc": "Valora la dificultad percibida en general.",
+        "rest_timer": "Descanso"
     },
     "notfound": {
         "title": "Parece que te has desviado del camino",
@@ -938,7 +951,14 @@
         "error": "Problema de sincronización. Tus datos siguen guardados en este dispositivo.",
         "signed_out": "Inicia sesión para guardar una copia de tu entrenamiento.",
         "retry": "Reintentar",
-        "sign_in": "Iniciar sesión"
+        "sign_in": "Iniciar sesión",
+        "signed_out_erased": "Sesión cerrada. Tu entrenamiento está guardado en tu cuenta y se eliminó de este dispositivo.",
+        "sign_out": "Cerrar sesión",
+        "signing_out": "Guardando tus cambios…",
+        "sign_out_unsent_title": "Algunos cambios no tienen copia de seguridad",
+        "sign_out_unsent_body": "{{count}} cambios aún no se guardaron en tu cuenta. Al cerrar sesión, tu entrenamiento se elimina de este dispositivo y se perderán. Conéctate a internet y espera un momento para conservarlos.",
+        "sign_out_keep": "Seguir conectado",
+        "sign_out_anyway": "Cerrar sesión de todos modos"
     },
     "pdfExport": {
         "headers": {

@@ -24,13 +24,6 @@ import { useAuthStore } from '@/stores/authStore';
 /** The word the user types to confirm. Kept in English in every language so support can quote it. */
 export const DELETE_CONFIRMATION_WORD = 'DELETE';
 
-/**
- * signOut() shows "Signed out. Your training data stays on this device." under
- * this toast id (authStore.ts). After deletion or erase that is untrue, so the
- * success toast reuses the id and replaces it.
- */
-const SIGNED_OUT_TOAST_ID = 'fitwizard-data-kept-on-device';
-
 interface AccountDeletionSectionProps {
     /** The Profile "Export data" action, offered before anything is deleted. */
     onExportData: () => void;
@@ -99,7 +92,6 @@ export function AccountDeletionSection({ onExportData }: AccountDeletionSectionP
             isSignedIn
                 ? t('account.delete.success', 'Your account and all its data have been deleted.')
                 : t('account.erase.success', 'All FitWizard data on this device has been erased.'),
-            { id: SIGNED_OUT_TOAST_ID },
         );
         navigate('/');
     };

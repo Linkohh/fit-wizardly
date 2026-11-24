@@ -149,6 +149,16 @@
             "next": "Próximo",
             "generate": "Gerar Plano"
         },
+        "start_over": {
+            "button": "Recomeçar",
+            "title": "Recomeçar?",
+            "description": "Isso vai apagar todas as suas seleções atuais (objetivo, equipamento, músculos) e levar você de volta ao início.",
+            "question": "Tem certeza de que deseja continuar?",
+            "cancel": "Cancelar",
+            "confirm": "Sim, recomeçar",
+            "toast_title": "Assistente reiniciado",
+            "toast_description": "Pronto para um novo começo! 🚀"
+        },
         "progress": "{{percent}}% completo",
         "goal": {
             "options": {
@@ -405,6 +415,21 @@
     },
     "achievements": {
         "badge_unlocked": "Conquista desbloqueada: {{name}}"
+    },
+    "workout": {
+        "loading": "Carregando treino...",
+        "preparing": "Preparando sua sessão",
+        "cancel": "Cancelar",
+        "cancel_dialog_title": "Cancelar treino?",
+        "cancel_dialog_desc": "Seu progresso será perdido. Tem certeza de que deseja cancelar este treino?",
+        "cancel_dialog_continue": "Continuar treinando",
+        "cancel_dialog_confirm": "Cancelar treino",
+        "skip_exercise": "Pular exercício",
+        "notes": "Notas do treino",
+        "notes_placeholder": "Como você se sentiu? Algum problema?",
+        "difficulty_title": "Como foi o treino?",
+        "difficulty_desc": "Avalie a dificuldade percebida no geral.",
+        "rest_timer": "Descanso"
     },
     "workoutResume": {
         "title": "Você tem um treino não terminado",

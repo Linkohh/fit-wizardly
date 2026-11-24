@@ -53,7 +53,7 @@ export const LayerToggle: React.FC<LayerToggleProps> = ({ value, onChange }) => 
             onClick={() => onChange(option.id)}
             onKeyDown={(e) => handleKeyDown(e, index)}
             className={`
-              relative px-2.5 py-2 text-fluid-sm font-semibold rounded-lg transition-colors
+              relative inline-flex min-h-[44px] min-w-[44px] items-center justify-center px-2.5 py-2 text-fluid-sm font-semibold rounded-lg transition-colors
               focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2
               focus:ring-offset-black/50
               ${selected ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}

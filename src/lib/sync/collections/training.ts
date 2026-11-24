@@ -4,10 +4,14 @@ import {
   MAX_WORKOUT_LOGS,
   PLAN_STORE_NAME,
   sanitizePersonalRecord,
+  sanitizePlan,
   sanitizeWorkoutLog,
 } from '@/stores/planStore.persistence';
+import { MAX_PLAN_HISTORY } from '@/lib/plans/planSyncService';
+import { planToRow, rowToPlan } from '@/lib/plans/supabasePlansRepo';
+import type { Database } from '@/types/supabase';
 import { createStoreCollection, required } from '@/lib/sync/storeCollection';
-import type { PersonalRecord, WorkoutLog } from '@/types/fitness';
+import type { PersonalRecord, Plan, WorkoutLog } from '@/types/fitness';
 
 const planStores = [{ store: usePlanStore, persistName: PLAN_STORE_NAME }];
 
@@ -63,4 +67,41 @@ export const personalRecordsCollection = createStoreCollection<PersonalRecord>({
     deleted_at: null,
   }),
   fromRow: (row) => required(sanitizePersonalRecord(row.record), 'personal_records row'),
+});
+
+type PlansRow = Database['public']['Tables']['plans']['Row'];
+
+/**
+ * `plans` (migration 004, plus `deleted_at` from 007): saved plans, keyed by plan id.
+ * Replaces the old plan-only sync (`planSyncService.syncPlanStateWithRemote`).
+ *
+ * - Deletions are marked by `deletePlanFromHistory()`, not by the tracker: the device
+ *   keeps the latest 20 plans, and a plan dropping off that list is not a delete.
+ * - After a pull, the current plan follows the merged copy. If it was deleted on
+ *   another device it is cleared, and a device with no current plan takes the newest.
+ */
+export const plansCollection = createStoreCollection<Plan>({
+  table: 'plans',
+  keyColumn: 'id',
+  onConflict: 'user_id,id',
+  stores: planStores,
+  trackDeletions: false,
+  readItems: () => usePlanStore.getState().planHistory,
+  writeItems: (plans) => {
+    const { currentPlan, planHistory } = usePlanStore.getState();
+    const history = newestFirst(plans, (plan) => plan.createdAt, MAX_PLAN_HISTORY);
+    let nextCurrent: Plan | null = currentPlan;
+    if (currentPlan) {
+      const merged = plans.find((plan) => plan.id === currentPlan.id);
+      if (merged) nextCurrent = merged;
+      else if (planHistory.some((plan) => plan.id === currentPlan.id)) nextCurrent = null; // deleted elsewhere
+    } else {
+      nextCurrent = history[0] ?? null;
+    }
+    usePlanStore.setState({ planHistory: history, currentPlan: nextCurrent });
+  },
+  key: (plan) => plan.id,
+  toRow: (plan, userId) => ({ ...planToRow(plan, userId), deleted_at: null }),
+  // rowToPlan reads only the plans columns; sanitizePlan checks the result like a device load.
+  fromRow: (row) => required(sanitizePlan(rowToPlan(row as unknown as PlansRow)), 'plans row'),
 });

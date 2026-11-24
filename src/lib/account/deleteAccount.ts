@@ -72,7 +72,8 @@ export async function deleteAccount(): Promise<{ error: Error | null }> {
         console.error('[FitWizard] Account deleted, but erasing this device failed.', error);
     }
     try {
-        await useAuthStore.getState().signOut();
+        // quiet: skip the "your data stays on this device" toast, which is untrue here.
+        await useAuthStore.getState().signOut({ quiet: true });
     } catch (error) {
         console.error('[FitWizard] Account deleted, but signing out failed.', error);
     }

@@ -1,4 +1,4 @@
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, MotionConfig } from "framer-motion";
 import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,6 +9,7 @@ import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { EdgeSwipeBack } from "@/components/navigation/EdgeSwipeBack";
 import { useAndroidBackButton } from "@/hooks/useAndroidBackButton";
+import { useStatusBarTheme } from "@/hooks/useStatusBarTheme";
 import { useThemeStore } from "@/stores/themeStore";
 import { PageTransition } from "@/components/ui/page-transition";
 import { ErrorBoundary, type ErrorFallbackProps } from "@/components/ErrorBoundary";
@@ -332,13 +333,13 @@ const App = () => {
   useGlobalClickFeedback();
   useScrollActivity();
   useAndroidBackButton();
+  useStatusBarTheme();
   const nativeApp = isNativeApp();
   const hasAnalyticsConsent = useAnalyticsStore((state) => state.hasConsented);
   const [shouldRenderLivingBackground, setShouldRenderLivingBackground] = useState(false);
 
   // Handle post-login redirects for invites
   const { user, isLoading } = useAuthStore();
-  const syncWithBackend = usePlanStore((state) => state.syncWithBackend);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -369,12 +370,6 @@ const App = () => {
       }
     }
   }, [circlesEnabled, user, isLoading, navigate]);
-
-  useEffect(() => {
-    if (!isLoading && user) {
-      syncWithBackend(user.id);
-    }
-  }, [user, isLoading, syncWithBackend]);
 
   // Track local changes from app start, signed in or not, so edits made while
   // signed out are still sent after the next sign-in (review finding on #66).
@@ -409,18 +404,9 @@ const App = () => {
     };
   }, [signedInUserId]);
 
-  useEffect(() => {
-    const handleOnline = () => {
-      if (user) {
-        syncWithBackend(user.id);
-      }
-    };
-
-    window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
-  }, [user, syncWithBackend]);
-
   return (
+    // reducedMotion="user": every Framer Motion animation honours the OS "reduce motion" setting (roadmap 3.4).
+    <MotionConfig reducedMotion="user">
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -457,6 +443,7 @@ const App = () => {
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
+    </MotionConfig>
   );
 };
 

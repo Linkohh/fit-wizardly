@@ -146,4 +146,12 @@ For each screen, a first-time user should see one sentence explaining what will 
 
 ## Day 5: Buffer
 
+> **Carried over from Day 4 handoffs (added 2026-11-23 by the coordinator).** Do these too:
+> - **Plan card shows literal placeholders** (MEDIUM, from Lane D Day 4): `src/components/plan/WorkoutDayCard.tsx` ~188–190 shows "{{count}} reps" and "{{count}}s rest". The code passes `{ range }` and `{ seconds }`, but the `plan.workout_day.*` strings use `{{count}}`. Fix the strings in all four locales (text edits only, no parser), and add a test that renders real numbers.
+> - **Raw keys in the workout logger** (MEDIUM, Lane D Day 4): `workout.cancel`, `workout.notes` and `workout.notes_placeholder` show as keys, because only `es.json` has a top-level `workout` namespace. Add it to en (and record the de/pt gaps), placed alphabetically. `WorkoutLogger.tsx` has no Wave 2 owner, so this is an allowed exception.
+> - **Plan engine: empty Full Body C day** (MEDIUM, Lane D Day 4): a 3-day Full Body plan with only Pectoralis Major gave "Full Body C" with no exercises, and A and B were identical. It was seen before #76, so first reproduce it on current `preview_b` with a unit test in `src/lib/planGenerator.test.ts`. If it reproduces, fix it in `src/lib/planGenerator.ts` (allowed exception; no other lane owns it in Wave 2). If it doesn't, say so in the handoff.
+> - Once Lane C's #75 (contract #9) is merged: add `track('onboarding_completed')` in `OnboardingFlow.tsx` `finishOnboarding`, and `track('wizard_step_completed', { step })` plus `track('plan_generated', { goal, days_per_week })` in `Wizard.tsx`. Then delete the old `src/lib/analytics.ts` stub. Check that onboarding is counted only once. If #75 hasn't merged when you start, skip this and say so.
+> - The "Start Over" dialog and toast in `WizardNavigation.tsx` are hardcoded English. Move them to `t()`.
+
+
 Fix bugs Lincoln files from the Gate 1 smoke test that fall in Lane B's files. If there are none, use the time to finish converting the remaining hard-coded English on the screens you touched to `t()`.

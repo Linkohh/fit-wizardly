@@ -14,8 +14,7 @@ import type {
   WeightUnit,
   PerceivedDifficulty,
 } from '@/types/fitness';
-import { deletePlanRemote, getPlansRemote, isPlansRemoteEnabled, savePlanRemote } from '@/lib/plans/plansClient';
-import { useAuthStore } from '@/stores/authStore';
+import { markDirty } from '@/lib/sync/outbox';
 import {
   postWorkoutToCircles,
   postPRToCircles,
@@ -31,7 +30,6 @@ import {
 } from '@/lib/plans/planAnalytics';
 import {
   removePlanFromHistory,
-  syncPlanStateWithRemote,
   upsertPlanHistory,
 } from '@/lib/plans/planSyncService';
 import { createUserDataStorage } from '@/lib/storage/appStorage';
@@ -48,21 +46,6 @@ import {
 } from '@/stores/planStore.persistence';
 
 // Helper for async operations with error handling
-const handleAsyncOperation = async <T>(
-  operation: Promise<T>,
-  onSuccess?: (result: T) => void,
-  errorMessage = 'Operation failed'
-): Promise<T | null> => {
-  try {
-    const result = await operation;
-    if (onSuccess) onSuccess(result);
-    return result;
-  } catch (error) {
-    console.error(errorMessage, error);
-    toast.error(errorMessage);
-    return null;
-  }
-};
 
 // ============================================
 // ACTIVE WORKOUT STATE
@@ -110,7 +93,6 @@ interface PlanState {
   savePlanToHistory: (plan: Plan) => void;
   deletePlanFromHistory: (planId: string) => void;
   getPlanById: (planId: string) => Plan | undefined;
-  syncWithBackend: (userId?: string) => Promise<void>;
   updateExercisePrescription: (
     dayIndex: number,
     exerciseIndex: number,
@@ -168,24 +150,11 @@ export const usePlanStore = create<PlanState>()(
 
       clearCurrentPlan: () => set({ currentPlan: null }),
 
+      // Cloud sync picks this up through the plans collection (src/lib/sync/collections).
       savePlanToHistory: (plan) => {
         set((state) => ({
           planHistory: upsertPlanHistory(state.planHistory, plan)
         }));
-        const userId = useAuthStore.getState().user?.id;
-        if (!userId || !isPlansRemoteEnabled()) return;
-
-        // Save to backend with error handling
-        handleAsyncOperation(
-          savePlanRemote(plan, userId),
-          (savedPlan) => {
-            set((state) => ({
-              planHistory: upsertPlanHistory(state.planHistory, savedPlan),
-              currentPlan: state.currentPlan?.id === savedPlan.id ? savedPlan : state.currentPlan,
-            }));
-          },
-          'Failed to save plan. Changes saved locally.'
-        );
       },
 
       deletePlanFromHistory: (planId) => {
@@ -195,41 +164,14 @@ export const usePlanStore = create<PlanState>()(
           // Also clean up workout logs for this plan
           workoutLogs: state.workoutLogs.filter(log => log.planId !== planId),
         }));
-        const userId = useAuthStore.getState().user?.id;
-        if (!userId || !isPlansRemoteEnabled()) return;
-
-        // Delete from backend with error handling
-        handleAsyncOperation(deletePlanRemote(planId), undefined, 'Failed to delete plan from server. Removed locally.');
+        // A real delete: the plans collection doesn't treat history drops as deletes.
+        markDirty('plans', planId, { deleted: true });
       },
 
       getPlanById: (planId) => {
         const { currentPlan, planHistory } = get();
         if (currentPlan?.id === planId) return currentPlan;
         return planHistory.find(p => p.id === planId);
-      },
-
-      syncWithBackend: async (userId?: string) => {
-        if (!userId || !isPlansRemoteEnabled()) return;
-        if (!useAuthStore.getState().user) return;
-
-        try {
-          const { mergedPlanHistory, nextCurrentPlan, failedMigrationCount } =
-            await syncPlanStateWithRemote(userId, get().planHistory, get().currentPlan);
-
-          if (failedMigrationCount > 0) {
-            toast.error(`Failed to migrate ${failedMigrationCount} plan(s) to your account`);
-          }
-
-          if (mergedPlanHistory.length === 0) return;
-
-          set({
-            currentPlan: nextCurrentPlan,
-            planHistory: mergedPlanHistory,
-          });
-        } catch (error) {
-          console.error('Sync failed:', error);
-          toast.error('Failed to sync plans');
-        }
       },
 
       updateExercisePrescription: (dayIndex, exerciseIndex, updates) => {
@@ -248,21 +190,8 @@ export const usePlanStore = create<PlanState>()(
           });
 
           const updatedPlan = { ...state.currentPlan, workoutDays: newWorkoutDays };
-          const userId = useAuthStore.getState().user?.id;
-          if (userId && isPlansRemoteEnabled()) {
-            handleAsyncOperation(
-              savePlanRemote(updatedPlan, userId),
-              (savedPlan) => {
-                set((s) => ({
-                  currentPlan: savedPlan,
-                  planHistory: upsertPlanHistory(s.planHistory, savedPlan),
-                }));
-              },
-              'Failed to save exercise changes'
-            );
-          }
 
-          return { currentPlan: updatedPlan };
+          return { currentPlan: updatedPlan, planHistory: upsertPlanHistory(state.planHistory, updatedPlan) };
         });
       },
 
@@ -282,21 +211,8 @@ export const usePlanStore = create<PlanState>()(
           });
 
           const updatedPlan = { ...state.currentPlan, workoutDays: newWorkoutDays };
-          const userId = useAuthStore.getState().user?.id;
-          if (userId && isPlansRemoteEnabled()) {
-            handleAsyncOperation(
-              savePlanRemote(updatedPlan, userId),
-              (savedPlan) => {
-                set((s) => ({
-                  currentPlan: savedPlan,
-                  planHistory: upsertPlanHistory(s.planHistory, savedPlan),
-                }));
-              },
-              'Failed to save exercise swap'
-            );
-          }
 
-          return { currentPlan: updatedPlan };
+          return { currentPlan: updatedPlan, planHistory: upsertPlanHistory(state.planHistory, updatedPlan) };
         });
       },
 
@@ -504,25 +420,10 @@ export const usePlanStore = create<PlanState>()(
             recommendations,
             state.preferredWeightUnit,
           );
-          const userId = useAuthStore.getState().user?.id;
-          if (userId && isPlansRemoteEnabled()) {
-            handleAsyncOperation(
-              savePlanRemote(updatedPlan, userId),
-              (savedPlan) => {
-                set((s) => ({
-                  currentPlan: savedPlan,
-                  planHistory: upsertPlanHistory(s.planHistory, savedPlan),
-                }));
-                toast.success('Progression recommendations applied');
-              },
-              'Failed to save progression recommendations'
-            );
-          } else {
-            toast.success('Progression recommendations applied');
-          }
 
-          return { currentPlan: updatedPlan };
+          return { currentPlan: updatedPlan, planHistory: upsertPlanHistory(state.planHistory, updatedPlan) };
         });
+        toast.success('Progression recommendations applied');
       },
 
       // ========================================
