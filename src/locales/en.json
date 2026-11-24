@@ -710,7 +710,7 @@
                 "cloud": "In our cloud database, if you sign in: we use Supabase, and your data is stored in {{region}}. Each account can read and change only its own records.",
                 "sync": "What syncs: your plans, workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises and favourite exercises. The app syncs when you sign in, when your device comes back online, when you return to the app, and shortly after each change. Nothing is sent while you are offline or signed out; changes made while signed out are sent the next time you sign in.",
                 "first_sign_in": "The first time you sign in on a device, the app keeps your account's copy of any record that exists in both places, and uploads only the records that exist only on that device.",
-                "sign_out": "Signing out does not yet remove your training data from the device. After signing out, you can remove it with Erase data on this device (see Delete your account below).",
+                "sign_out": "Signing out: the app syncs one last time, warns you if any changes haven't been backed up yet, and then erases your training data from the device. Your account keeps the synced copy.",
                 "transfers": "Some of the services listed below are in other countries, so your data may be processed outside the country where you live."
             },
             "recipients": {
@@ -740,7 +740,7 @@
             "retention": {
                 "title": "How long we keep it",
                 "device": "On your device: until you delete it in the app, use Erase data on this device, clear the app's or the browser's data, or uninstall the app.",
-                "cloud": "In your account: until you delete it, or delete your account. Deleted plans are removed straight away. Other synced items are marked as deleted so that your other devices remove them too; the marked record is removed for good when you delete your account.",
+                "cloud": "In your account: until you delete it, or delete your account. When you delete a synced item, including a plan, it is marked as deleted so that it is removed from all your devices; the marked record is removed for good when you delete your account. Your device keeps only your latest 20 plans, but older plans stay in your account.",
                 "account": "Your email address, your profile and the record of which exercises you viewed are kept until you delete your account.",
                 "code": "Sign-in codes work once and expire after a short time.",
                 "session": "The sign-in token on your device: until you sign out, delete your account, or clear the app's or the browser's data.",
@@ -762,7 +762,7 @@
                 "guest": "Not signed in? Your data is only on your device. Remove it with Profile → Details → Erase data on this device (type DELETE to confirm), or by uninstalling the app or clearing the site's data in your browser.",
                 "by_email": "Can't sign in, or don't have the app? Email {{email}} from the address on your account, with the subject 'Delete my account'. We will confirm that the address is yours and delete the account within 30 days.",
                 "circles": "If you created a circle or challenge, it stays for its other members, with you removed as its creator.",
-                "other_devices": "Other devices where you were signed in keep their copy on the device until you sign out and erase it there, or uninstall the app.",
+                "other_devices": "Other devices where you were signed in keep their copy on the device until you sign out there, or uninstall the app.",
                 "what_may_remain": "What may remain: copies in our database provider's routine backups until they expire ({{backup}}), and data already sent to the services listed above, which they keep under their own policies."
             },
             "security": {

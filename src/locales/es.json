@@ -646,7 +646,7 @@
                 "cloud": "En nuestra base de datos en la nube, si inicias sesión: usamos Supabase, y tus datos se guardan en {{region}}. Cada cuenta solo puede leer y cambiar sus propios registros.",
                 "sync": "Qué se sincroniza: tus planes, registros de entrenamientos, récords personales, registros y ajustes de nutrición, medidas corporales, registros de preparación, logros, ejercicios personalizados y ejercicios favoritos. La app sincroniza al iniciar sesión, cuando tu dispositivo vuelve a tener conexión, cuando vuelves a la app y poco después de cada cambio. No se envía nada sin conexión ni con la sesión cerrada; los cambios hechos con la sesión cerrada se envían la próxima vez que inicias sesión.",
                 "first_sign_in": "La primera vez que inicias sesión en un dispositivo, la app conserva la copia de tu cuenta de cualquier registro que exista en ambos lugares y solo sube los registros que existen únicamente en ese dispositivo.",
-                "sign_out": "Cerrar sesión todavía no elimina tus datos de entrenamiento del dispositivo. Después de cerrar sesión, puedes eliminarlos con Borrar los datos de este dispositivo (consulta Eliminar tu cuenta más abajo).",
+                "sign_out": "Cerrar sesión: la app sincroniza una última vez, te avisa si algún cambio aún no se ha guardado en tu cuenta y después borra tus datos de entrenamiento del dispositivo. Tu cuenta conserva la copia sincronizada.",
                 "transfers": "Algunos de los servicios indicados abajo están en otros países, así que tus datos pueden tratarse fuera del país donde vives."
             },
             "recipients": {
@@ -676,7 +676,7 @@
             "retention": {
                 "title": "Cuánto tiempo los guardamos",
                 "device": "En tu dispositivo: hasta que los elimines en la app, uses Borrar los datos de este dispositivo, borres los datos de la app o del navegador, o desinstales la app.",
-                "cloud": "En tu cuenta: hasta que los elimines o elimines tu cuenta. Los planes eliminados se borran de inmediato. Los demás elementos sincronizados se marcan como eliminados para que tus otros dispositivos también los quiten; el registro marcado se borra definitivamente cuando eliminas tu cuenta.",
+                "cloud": "En tu cuenta: hasta que los elimines o elimines tu cuenta. Cuando eliminas un elemento sincronizado, incluido un plan, se marca como eliminado para que desaparezca de todos tus dispositivos; el registro marcado se borra definitivamente cuando eliminas tu cuenta. Tu dispositivo guarda solo tus 20 planes más recientes, pero los anteriores siguen en tu cuenta.",
                 "account": "Tu correo, tu perfil y el registro de qué ejercicios viste se guardan hasta que eliminas tu cuenta.",
                 "code": "Los códigos de inicio de sesión sirven una sola vez y caducan al poco tiempo.",
                 "session": "El token de inicio de sesión en tu dispositivo: hasta que cierres sesión, elimines tu cuenta o borres los datos de la app o del navegador.",
@@ -698,7 +698,7 @@
                 "guest": "¿No has iniciado sesión? Tus datos están solo en tu dispositivo. Elimínalos con Perfil → Detalles → Borrar los datos de este dispositivo (escribe DELETE para confirmar), o desinstalando la app o borrando los datos del sitio en tu navegador.",
                 "by_email": "¿No puedes iniciar sesión o no tienes la app? Escribe a {{email}} desde la dirección de tu cuenta, con el asunto «Eliminar mi cuenta». Confirmaremos que la dirección es tuya y eliminaremos la cuenta en un plazo de 30 días.",
                 "circles": "Si creaste un círculo o un reto, se mantiene para sus demás miembros, y dejas de figurar como su creador.",
-                "other_devices": "Otros dispositivos en los que habías iniciado sesión conservan su copia hasta que cierres sesión y borres los datos allí, o desinstales la app.",
+                "other_devices": "Otros dispositivos en los que habías iniciado sesión conservan su copia hasta que cierres sesión en ellos, o desinstales la app.",
                 "what_may_remain": "Qué puede quedar: copias en las copias de seguridad habituales de nuestro proveedor de base de datos hasta que caduquen ({{backup}}), y los datos ya enviados a los servicios indicados arriba, que los guardan según sus propias políticas."
             },
             "security": {

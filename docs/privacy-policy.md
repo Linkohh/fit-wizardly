@@ -55,7 +55,7 @@ FitWizard does not access your location, contacts, camera, photos, or health rec
 - In our cloud database, if you sign in: we use Supabase, and your data is stored in [Supabase region: Lincoln to provide]. Each account can read and change only its own records.
 - What syncs: your plans, workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises and favourite exercises. The app syncs when you sign in, when your device comes back online, when you return to the app, and shortly after each change. Nothing is sent while you are offline or signed out; changes made while signed out are sent the next time you sign in.
 - The first time you sign in on a device, the app keeps your account's copy of any record that exists in both places, and uploads only the records that exist only on that device.
-- Signing out does not yet remove your training data from the device. After signing out, you can remove it with Erase data on this device (see Delete your account below).
+- Signing out: the app syncs one last time, warns you if any changes haven't been backed up yet, and then erases your training data from the device. Your account keeps the synced copy.
 - Some of the services listed below are in other countries, so your data may be processed outside the country where you live.
 
 ## Who receives your data
@@ -89,7 +89,7 @@ We do not sell or rent your data, and we do not share it for advertising.
 ## How long we keep it
 
 - On your device: until you delete it in the app, use Erase data on this device, clear the app's or the browser's data, or uninstall the app.
-- In your account: until you delete it, or delete your account. Deleted plans are removed straight away. Other synced items are marked as deleted so that your other devices remove them too; the marked record is removed for good when you delete your account.
+- In your account: until you delete it, or delete your account. When you delete a synced item, including a plan, it is marked as deleted so that it is removed from all your devices; the marked record is removed for good when you delete your account. Your device keeps only your latest 20 plans, but older plans stay in your account.
 - Your email address, your profile and the record of which exercises you viewed are kept until you delete your account.
 - Sign-in codes work once and expire after a short time.
 - The sign-in token on your device: until you sign out, delete your account, or clear the app's or the browser's data.
@@ -114,7 +114,7 @@ You can delete your account and your data at any time.
 - Not signed in? Your data is only on your device. Remove it with Profile → Details → Erase data on this device (type DELETE to confirm), or by uninstalling the app or clearing the site's data in your browser.
 - Can't sign in, or don't have the app? Email [support email: Lincoln to provide] from the address on your account, with the subject 'Delete my account'. We will confirm that the address is yours and delete the account within 30 days.
 - If you created a circle or challenge, it stays for its other members, with you removed as its creator.
-- Other devices where you were signed in keep their copy on the device until you sign out and erase it there, or uninstall the app.
+- Other devices where you were signed in keep their copy on the device until you sign out there, or uninstall the app.
 - What may remain: copies in our database provider's routine backups until they expire ([backup period: Lincoln to confirm]), and data already sent to the services listed above, which they keep under their own policies.
 
 ## Security
@@ -198,8 +198,9 @@ These are the facts in the code that the text above relies on, so the reviewer c
 | Claim | Where it comes from |
 |---|---|
 | Guests send no training data to us | Sync runs only for a signed-in user with Supabase configured (`src/lib/sync/triggers.ts`); `DATA_INVENTORY.md` "Signed in" |
-| What syncs, and when | Contract 5 in [`docs/project/CONTRACTS.md`](project/CONTRACTS.md); plans through `src/lib/plans/`, favourites through `user_exercise_preferences` |
-| Deleted synced items are marked, not removed, until account deletion | The sync engine sets `deleted_at` and never hard-deletes (`src/lib/sync/engine.ts`); plans are hard-deleted (`src/lib/plans/supabasePlansRepo.ts`) |
+| What syncs, and when | Contract 5 in [`docs/project/CONTRACTS.md`](project/CONTRACTS.md); plans through the same engine (`plansCollection` in `src/lib/sync/collections/training.ts`, #81), favourites through `user_exercise_preferences` |
+| Deleted synced items, plans included, are marked, not removed, until account deletion | The sync engine sets `deleted_at` and never hard-deletes (`src/lib/sync/engine.ts`). Plans use it too since #81 (`plansCollection` in `src/lib/sync/collections/training.ts`); `deletePlanFromHistory()` marks real deletes, and the 20-plan device cap never deletes from the account (`trackDeletions: false`) |
+| Sign-out syncs, warns about unsent changes, then erases the device | `prepareSignOut()` and `completeSignOut()` in `src/lib/sync/signOut.ts` (#81) |
 | Account deletion removes every linked row | `supabase/functions/delete-account/` and the cascade checked by `supabase/tests/delete_account.test.sql` (contract 4) |
 | In-app Delete account and Erase data on this device | Profile → Details (`src/components/account/AccountDeletionSection.tsx`, Lane F Day 4, #73); wording from the Lane F Day 4 handoff. Not yet run against the deployed function (Gate 1, after L10) |
 | Email deletion within 30 days | Default chosen here; Lincoln to confirm the process and time |

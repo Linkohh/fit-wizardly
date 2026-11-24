@@ -13,7 +13,7 @@ The single source for the privacy policy (`src/pages/Legal.tsx`, `docs/privacy-p
 
 | Data | Example fields | Where stored | Sent to | Why | Retention | In export? | Status |
 |---|---|---|---|---|---|---|---|
-| Workout plans | goal, split, days, exercises, sets, reps, RIR | Device storage, key `fitwizard-plans` (current plan and plan history) | Supabase table `plans` when signed in (`src/lib/plans/`) | Core feature | Until the user deletes the plan or erases data | Yes (`planHistory`, `currentPlan`) | **Now** |
+| Workout plans | goal, split, days, exercises, sets, reps, RIR | Device storage, key `fitwizard-plans` (current plan and plan history) | Supabase table `plans` when signed in, through the sync engine like the other tables (`plansCollection` in `src/lib/sync/collections/training.ts`, #81). A delete is marked with `deleted_at` and reaches every signed-in device; the device keeps the newest 20 plans, and older ones stay in the account | Core feature | Until the user deletes the plan or erases data | Yes (`planHistory`, `currentPlan`) | **Now** |
 | Workout logs | per set: reps, weight, RIR; date, total volume | Device storage, `fitwizard-plans` (up to 1,000 logs) | Supabase `workout_logs` when signed in | Core feature, history, analytics | Until deleted | Yes | **Now**: device, and Supabase when signed in (sync on since #66, Lane E Day 6) |
 | In-progress workout | sets logged so far, start time | Device storage, `fitwizard-plans` (`activeWorkout`) | Nobody | Resume after a crash or restart | Until the workout is finished or discarded | Yes (`activeWorkout`) | **Now** |
 | Personal records | exercise, type (weight, reps, volume), value, date | Device storage, `fitwizard-plans` (up to 500) | Supabase `personal_records` when signed in | Progress tracking | Until deleted | Yes | **Now**: device, and Supabase when signed in (sync on since #66) |
@@ -36,7 +36,7 @@ Every row in this table except exercise interactions (which live only in memory 
 
 **Cloud sync (on since #66, Lane E Day 6):** for a signed-in user, the seven migration 007 tables sync with Supabase: on sign-in, when the device comes back online, when the app returns to the foreground, and 2 seconds after a change. Nothing is sent while offline or signed out; changes made while signed out are tracked and sent at the next sign-in. On the **first sign-in on a device**, the app pulls the account first and uploads only records that exist solely on this device (the cloud copy wins where both exist), then shows a toast. One trade-off: badges and streaks earned as a guest on a second device are replaced by the account's. Items whose day can't be stored stay on the device only. Rows pulled from the cloud go through the same load checks as the device copy. Exercise favourites keep their existing separate sync (`user_exercise_preferences`). The Profile page shows the sync status.
 
-**Sign-out keeps training data on the device** (Lane E Day 3, DEBT-045). Syncing before sign-out with an unsent-changes warning, and then clearing the device, moved to Lane E Day 7. Until that lands, the privacy text must say that signing out leaves data on the device.
+**Sign-out erases training data from the device** (#81, Lane E Day 7, DEBT-045 closed). Profile → **Sign out** syncs one last time, warns if some changes are still unsent (for example offline), then runs `clearLocalUserData()` (`src/lib/sync/signOut.ts`). The account keeps the synced copy.
 
 ## Account data
 
