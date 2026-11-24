@@ -6,6 +6,7 @@ import { syncAll, waitForRunningSync } from '@/lib/sync/engine';
 import { countPendingChanges, loadOutbox } from '@/lib/sync/outbox';
 import { stopSync } from '@/lib/sync/triggers';
 import { useAuthStore } from '@/stores/authStore';
+import { usePreferencesStore } from '@/stores/preferencesStore';
 
 /**
  * Safe sign-out (Lane E Day 7, DEBT-045). Two steps so the UI can warn in between:
@@ -29,9 +30,16 @@ export async function prepareSignOut(userId: string): Promise<{ pending: number 
     } catch (error) {
       console.error('[FitWizard] Sync before sign-out failed.', error);
     }
+    // Exercise favourites and library settings have their own cloud path
+    // (user_exercise_preferences); send its queue too.
+    try {
+      await usePreferencesStore.getState().syncToCloud();
+    } catch (error) {
+      console.error('[FitWizard] Preferences sync before sign-out failed.', error);
+    }
   }
   await loadOutbox();
-  return { pending: countPendingChanges() };
+  return { pending: countPendingChanges() + usePreferencesStore.getState().offlineQueue.length };
 }
 
 /** Signs out and erases this device's copy of the training data. */

@@ -189,7 +189,8 @@ Behaviour:
   - `retrySync(userId)` is for the Profile Retry button.
 - **Indicator (Day 6):** `src/components/sync/SyncStatusRow.tsx` on Profile shows Synced, Saving…, Offline, Sync problem (with Retry), or a sign-in prompt. It's hidden in demo mode (no Supabase).
 - **Safe sign-out (Day 7 part 1):** every sign-out entry point uses `useSafeSignOut()` (`src/components/sync/SignOutDialog.tsx`). `prepareSignOut(userId)` syncs, then returns `{ pending }`. `completeSignOut()` runs `stopSync()`, then `waitForRunningSync()`, then `signOut({ quiet: true })`, then `clearLocalUserData()`. A dialog warns when `pending > 0`.
-- **Not yet built (Day 7 part 2):** plans move onto the engine (tombstones instead of hard deletes in `supabasePlansRepo`).
+- **Plans (Day 7 part 2):** `plansCollection` syncs the `plans` table through the engine. Deletes are tombstones, marked by `deletePlanFromHistory()`. The collection uses `trackDeletions: false`, so the device's 20-plan history cap never deletes from the account. `planStore.syncWithBackend`, `plansClient.ts` and the plan-only sync helpers are gone.
+- **Sign-out also flushes and counts** the exercise-preferences queue (`preferencesStore.offlineQueue`), which has its own cloud path. Late preference loads are dropped if the user changed while they were in flight.
 
 ## 6. API base: `src/lib/apiBase.ts`
 

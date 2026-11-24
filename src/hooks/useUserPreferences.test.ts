@@ -110,6 +110,20 @@ describe('useUserPreferences store behavior', () => {
     );
   });
 
+  it("ignores a cloud load that finishes after the user signed out", async () => {
+    const { usePreferencesStore } = await loadPreferencesModule({
+      singleResponse: {
+        data: { favorites: ['ex-old-account'], collections: {}, filter_presets: {}, settings: null, recently_viewed: [], updated_at: '2026-03-20T00:00:00.000Z' },
+        error: null,
+      },
+    });
+    const pending = usePreferencesStore.getState().loadFromCloud();
+    mocks.authUser = null; // signed out while the request was in flight
+    await pending;
+
+    expect(usePreferencesStore.getState().favorites).not.toContain('ex-old-account');
+  });
+
   it('keeps a change that is queued while a sync is in flight', async () => {
     const { usePreferencesStore } = await loadPreferencesModule();
     usePreferencesStore.setState({ favorites: [], offlineQueue: [] });

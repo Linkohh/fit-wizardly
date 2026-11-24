@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   stopSync: vi.fn(),
   waitForRunningSync: vi.fn(),
   toastSuccess: vi.fn(),
+  prefsQueue: [] as unknown[],
+  prefsSync: vi.fn(),
 }));
 
 vi.mock('@/lib/supabase', () => ({ isSupabaseConfigured: () => mocks.configured }));
@@ -20,6 +22,9 @@ vi.mock('@/lib/sync/triggers', () => ({ stopSync: mocks.stopSync }));
 vi.mock('@/lib/storage/clearLocalUserData', () => ({ clearLocalUserData: mocks.clearLocalUserData }));
 vi.mock('@/stores/authStore', () => ({ useAuthStore: { getState: () => ({ signOut: mocks.signOut }) } }));
 vi.mock('sonner', () => ({ toast: { success: mocks.toastSuccess } }));
+vi.mock('@/stores/preferencesStore', () => ({
+  usePreferencesStore: { getState: () => ({ syncToCloud: mocks.prefsSync, offlineQueue: mocks.prefsQueue }) },
+}));
 
 import { completeSignOut, prepareSignOut } from './signOut';
 
@@ -34,6 +39,8 @@ describe('safe sign-out', () => {
     mocks.stopSync.mockReset().mockImplementation(() => calls.push('stopSync'));
     mocks.waitForRunningSync.mockReset().mockImplementation(async () => calls.push('waitForSync'));
     mocks.toastSuccess.mockReset();
+    mocks.prefsQueue = [];
+    mocks.prefsSync.mockReset().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'onLine', { value: true, configurable: true });
   });
 
@@ -41,6 +48,13 @@ describe('safe sign-out', () => {
     mocks.pending = 3;
     await expect(prepareSignOut('user-1')).resolves.toEqual({ pending: 3 });
     expect(mocks.syncAll).toHaveBeenCalledWith('user-1');
+  });
+
+  it('also sends and counts queued exercise-favourite changes', async () => {
+    mocks.pending = 1;
+    mocks.prefsQueue = [{ id: 'a' }, { id: 'b' }];
+    await expect(prepareSignOut('user-1')).resolves.toEqual({ pending: 3 });
+    expect(mocks.prefsSync).toHaveBeenCalledTimes(1);
   });
 
   it("doesn't try to sync while offline, but still counts what's unsent", async () => {

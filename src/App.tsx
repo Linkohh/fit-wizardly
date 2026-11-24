@@ -338,7 +338,6 @@ const App = () => {
 
   // Handle post-login redirects for invites
   const { user, isLoading } = useAuthStore();
-  const syncWithBackend = usePlanStore((state) => state.syncWithBackend);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -369,12 +368,6 @@ const App = () => {
       }
     }
   }, [circlesEnabled, user, isLoading, navigate]);
-
-  useEffect(() => {
-    if (!isLoading && user) {
-      syncWithBackend(user.id);
-    }
-  }, [user, isLoading, syncWithBackend]);
 
   // Track local changes from app start, signed in or not, so edits made while
   // signed out are still sent after the next sign-in (review finding on #66).
@@ -408,17 +401,6 @@ const App = () => {
       stopSync?.();
     };
   }, [signedInUserId]);
-
-  useEffect(() => {
-    const handleOnline = () => {
-      if (user) {
-        syncWithBackend(user.id);
-      }
-    };
-
-    window.addEventListener('online', handleOnline);
-    return () => window.removeEventListener('online', handleOnline);
-  }, [user, syncWithBackend]);
 
   return (
     <ErrorBoundary>
