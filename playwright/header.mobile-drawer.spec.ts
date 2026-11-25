@@ -472,10 +472,13 @@ test.describe('mobile header drawer flow', () => {
     });
 
     expect(atTap.supportsViewTransitions).toBe(true);
-    // The fade starts on the tap, and the theme applies within a few frames, under the fade.
+    // The fade starts on the tap, and the theme applies under the fade, not after it.
+    // fadeWhenApplied proves the order. The time bound is the fade length, not a
+    // tighter guess: the browser captures the old screen first, which took 50–75 ms
+    // locally but 266–289 ms on the shared CI runner (software rendering).
     expect(atTap.fadeRightAfterTap).toBe('to-dark');
     expect(atTap.fadeWhenApplied).toBe('to-dark');
-    expect(atTap.msToApply).toBeLessThan(250);
+    expect(atTap.msToApply).toBeLessThan(920);
     // The legacy snap rules stay off.
     expect(atTap.legacyTransition).toBeNull();
 
