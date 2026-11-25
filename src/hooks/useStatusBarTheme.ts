@@ -18,6 +18,9 @@ import { useThemeStore } from '@/stores/themeStore';
  * with a dynamic `import()` only on native, so none of it is in the web
  * startup bundle. On the web this hook does nothing.
  *
+ * Also starts the rest-timer notification listener (restNotificationSync.ts)
+ * once the stores have loaded.
+ *
  * Mount once, in `src/App.tsx`.
  */
 
@@ -40,5 +43,12 @@ export function useStatusBarTheme(): void {
   useEffect(() => {
     if (!storesHydrated || !isNativeApp()) return;
     void loadNativeChrome().then((chrome) => chrome?.hideSplashScreen());
+    // Rest-timer notification listener (Lane H Day 6). Started here because
+    // this hook is the native app-start hook and runs once the stores have
+    // loaded: it keeps the notification in step even when the workout is
+    // changed without RestTimer on screen, including after a restart.
+    void import('./restNotificationSync')
+      .then((sync) => sync.startRestNotificationSync())
+      .catch((error: unknown) => console.error('[Notifications] Rest sync unavailable:', error));
   }, [storesHydrated]);
 }

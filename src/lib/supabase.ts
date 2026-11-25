@@ -9,10 +9,6 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
 import { createAuthSessionStorage, getAuthStorageKey } from '@/lib/authSessionStorage';
 
-type RemoteUrlValidationOptions = {
-  allowRelative?: boolean;
-};
-
 function isLoopbackHost(hostname: string) {
   const normalized = hostname.replace(/^\[/, '').replace(/\]$/, '');
   return (
@@ -23,17 +19,9 @@ function isLoopbackHost(hostname: string) {
   );
 }
 
-export function validateRemoteEndpoint(
-  value: string | undefined,
-  label: string,
-  options: RemoteUrlValidationOptions = {}
-) {
+export function validateRemoteEndpoint(value: string | undefined, label: string) {
   if (!value) {
     return null;
-  }
-
-  if (options.allowRelative && value.startsWith('/') && !value.startsWith('//')) {
-    return value.length > 1 ? value.replace(/\/$/, '') : value;
   }
 
   let parsed: URL;

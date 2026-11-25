@@ -359,6 +359,17 @@
         "tooltip_score": "Pontuação:",
         "tooltip_status": "Estado:"
     },
+    "notifications": {
+        "rest_end_body": "Descanso terminado. Hora da próxima série.",
+        "reminder_body": "Hora de treinar. Seu treino está pronto.",
+        "reminders_title": "Lembretes de treino",
+        "reminders_description": "Um lembrete nos seus dias de treino, no horário que você escolher.",
+        "reminders_toggle": "Lembrar nos dias de treino",
+        "reminders_days": "Dias",
+        "reminders_no_days": "Escolha pelo menos um dia para receber lembretes.",
+        "reminders_time": "Horário",
+        "permission_denied": "As notificações do FitWizard estão desativadas. Ative-as nos Ajustes do seu celular."
+    },
     "nutrition": {
         "shortcuts": {
             "copy_yesterday": "Copiar ontem",
