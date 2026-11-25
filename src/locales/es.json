@@ -524,6 +524,17 @@
         "create_plan": "Crear Plan",
         "exercise_library": "Biblioteca de Ejercicios"
     },
+    "notifications": {
+        "rest_end_body": "Descanso terminado. Es hora de tu siguiente serie.",
+        "reminder_body": "Hora de entrenar. Tu entrenamiento está listo.",
+        "reminders_title": "Recordatorios de entrenamiento",
+        "reminders_description": "Un recordatorio en tus días de entrenamiento, a la hora que elijas.",
+        "reminders_toggle": "Recordarme los días de entrenamiento",
+        "reminders_days": "Días",
+        "reminders_no_days": "Elige al menos un día para recibir recordatorios.",
+        "reminders_time": "Hora",
+        "permission_denied": "Las notificaciones de FitWizard están desactivadas. Actívalas en los Ajustes de tu teléfono."
+    },
     "emptyStates": {
         "start_workout": "Empezar el entrenamiento de hoy",
         "create_plan": "Crear un plan",

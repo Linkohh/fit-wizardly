@@ -359,6 +359,17 @@
             "unread": "Neue Versionshinweise"
         }
     },
+    "notifications": {
+        "rest_end_body": "Pause vorbei. Zeit für deinen nächsten Satz.",
+        "reminder_body": "Zeit zum Trainieren. Dein Workout ist bereit.",
+        "reminders_title": "Trainingserinnerungen",
+        "reminders_description": "Eine Erinnerung an deinen Trainingstagen, zur Uhrzeit deiner Wahl.",
+        "reminders_toggle": "An Trainingstagen erinnern",
+        "reminders_days": "Tage",
+        "reminders_no_days": "Wähle mindestens einen Tag für Erinnerungen.",
+        "reminders_time": "Uhrzeit",
+        "permission_denied": "Mitteilungen für FitWizard sind aus. Schalte sie in den Einstellungen deines Telefons ein."
+    },
     "nutrition": {
         "shortcuts": {
             "copy_yesterday": "Gestern kopieren",

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Minus, SkipForward } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useInteractionFeedback } from '@/hooks/useInteractionFeedback';
+import { ensureNotificationPermissionOnce, useLocalNotifications } from '@/hooks/useLocalNotifications';
 
 export function RestTimer() {
   const { t } = useTranslation();
@@ -11,6 +12,42 @@ export function RestTimer() {
   const { emit } = useInteractionFeedback();
   const [timeLeft, setTimeLeft] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const { scheduleRestEnd, cancelRestEnd } = useLocalNotifications();
+  const restEndTime = activeWorkout?.restTimerEndTime ?? null;
+
+  // Native only (no-ops on the web): a notification at the end of the rest, so
+  // it still arrives with the app in the background. Starting, adjusting
+  // (a new end time reschedules id 1001) and skipping (end time cleared) all
+  // pass through here. The first rest ever asks for permission, once.
+  useEffect(() => {
+    if (!restEndTime) {
+      void cancelRestEnd();
+      return;
+    }
+
+    let isCancelled = false;
+    void (async () => {
+      const granted = await ensureNotificationPermissionOnce();
+      if (isCancelled || !granted) return;
+      await scheduleRestEnd(
+        new Date(restEndTime),
+        t('notifications.rest_end_body', 'Rest over. Time for your next set.'),
+      );
+    })();
+    return () => {
+      isCancelled = true;
+    };
+  }, [restEndTime, scheduleRestEnd, cancelRestEnd, t]);
+
+  // Leaving the workout (finish or discard) clears the rest in the store
+  // before this unmounts: drop the pending notification too. Navigating away
+  // mid-rest keeps it, which is the point of the notification.
+  useEffect(
+    () => () => {
+      if (!usePlanStore.getState().activeWorkout?.restTimerEndTime) void cancelRestEnd();
+    },
+    [cancelRestEnd],
+  );
 
   useEffect(() => {
     if (!activeWorkout?.restTimerEndTime) {
