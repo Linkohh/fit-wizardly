@@ -229,6 +229,11 @@ Stores other than `authStore`'s sign-in area, sync code, `supabase/`, routing.
 
 ## Day 6: Local notifications (2.4)
 
+> **Carried over from Day 5 merges (added 2026-11-25 by the coordinator).**
+> - **Storage:** keep `fitwizard-notif-asked` and the reminder settings in device storage (`@capacitor/preferences` on native, the existing `appStorage` pattern), not `localStorage` (ADR 11). They are settings, not training data, so they don't sync.
+> - **Optional, Lane F #80 handoff:** `validateRemoteEndpoint`'s `allowRelative` option in `src/lib/supabase.ts` lost its only caller (`apiClient.ts`). Remove it and its test in `src/lib/supabase.test.ts`, or leave both and say why.
+> - **Splash fallback:** stays as is (default, no change in `main.tsx`) until Lincoln answers your Day 5 question.
+
 1. Run `npm install @capacitor/local-notifications`, then `npx cap sync`.
 2. `useLocalNotifications()` (contract #10):
    - `requestPermission()`.
