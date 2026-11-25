@@ -181,6 +181,11 @@ Then:
 
 ## Day 6: Wizard Enter key (DEBT-025)
 
+> **Carried over from Day 5 merges (added 2026-11-25 by the coordinator).** Do these too:
+> - **Keyboard on phones (Lane H #83 handoff):** in `src/components/logging/SetLogger.tsx`, call `useKeyboard()` once at the top (`import { useKeyboard } from '@/hooks/useKeyboard';`). If the "Log set" button can be covered, pad the scroll container with `isOpen ? height : undefined`. It does nothing on the web; add a unit test that the hook is mounted, and keep the lifter-loop E2E green.
+> - **DEBT-106 is fixed (#82):** remove `'wizard:label-content-name-mismatch'` from `KNOWN_AXE_FINDINGS` in `playwright/lifter-loop.spec.ts`, then run the lifter loop with `--repeat-each=5` and report the result.
+> - **Theme fade (#85):** taps on Light/System/Dark now run a View Transition (`src/lib/themeFade.ts`). If your axe scans or new tests change the theme, read the theme after the change has applied, as `armThemeSyncProbe` in `playwright/header.mobile-drawer.spec.ts` now does.
+
 - **Problem:** pressing Enter on a focused muscle in the anatomy step selects it **and** advances the wizard. The window-level shortcut in `src/pages/Wizard.tsx` sees the event after the SVG control has already handled it.
 - **Fix:** in the window `keydown` handler, ignore events where `event.defaultPrevented` is true, or whose target is inside the muscle canvas or any `[role="button"]`, `input`, `textarea` or `select`. Make sure the MCL control calls `preventDefault()` when it handles Enter.
 - **Test:** focus a muscle, press Enter. The muscle is selected and the step does not change. Pressing Enter on the page background still advances.

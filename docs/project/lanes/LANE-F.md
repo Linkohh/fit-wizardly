@@ -197,6 +197,10 @@ If D1 is **yes** (the default):
 
 ## Day 6: Circles compatibility under migration 008
 
+> **Carried over from Day 7 Lane E (#81, added 2026-11-25 by the coordinator).** Do this too:
+> - Plans now sync through the engine, and a delete is an upsert with `deleted_at` set (`plansCollection` in `src/lib/sync/collections/training.ts`, `onConflict: 'user_id,id'`). Add harness tests on the `plans` table: the owner can upsert a row with `deleted_at` set and read it back; another user can neither upsert nor read it. If 007 already covers this, point to the test in your handoff instead.
+> - Client-side changes to `src/stores/circles/*.ts` go to the coordinator (Lane E is complete; the coordinator owns its files now), in your handoff.
+
 Circles is off in v1, but 008 must not break it for later.
 
 1. With `VITE_FEATURE_CIRCLES=true` locally, trace every circle query in `src/stores/circles/*.ts` (`.from(...)`, `.rpc(...)`).
