@@ -175,8 +175,17 @@ export default function WizardPage() {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if focus is in an input field (allow native behavior)
-      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) {
+      // A control already handled this key (the muscle canvas calls preventDefault on Enter).
+      if (e.defaultPrevented) return;
+      const target = e.target instanceof Element ? e.target : null;
+      // Form fields keep native behaviour for every key.
+      if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
+      // Enter on a focused control (button, link, the muscle canvas) belongs to that control.
+      // Only Enter on the page background advances the wizard (DEBT-025).
+      if (
+        e.key === 'Enter' &&
+        target?.closest('button, a[href], [role="button"], svg, [data-wizard-keys="off"]')
+      ) {
         return;
       }
 

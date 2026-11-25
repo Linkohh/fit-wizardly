@@ -8,6 +8,7 @@ import { Check, ChevronUp, ChevronDown } from 'lucide-react';
 import type { SetLog, WeightUnit } from '@/types/fitness';
 import { cn } from '@/lib/utils';
 import { calculateOneRepMax } from '@/lib/progressionEngine';
+import { useKeyboard } from '@/hooks/useKeyboard';
 
 interface SetLoggerProps {
     setNumber: number;
@@ -34,6 +35,11 @@ export function SetLogger({
     onComplete,
     isActive = false,
 }: SetLoggerProps) {
+    // Native keyboard (contract #10): scrolls the focused field into view; does nothing on the web.
+    const keyboard = useKeyboard();
+    // The hook is global and the logger renders one card per set, so only the card holding
+    // focus gets the keyboard clearance.
+    const [hasFocus, setHasFocus] = useState(false);
     const savedLog = loggedSet?.completed ? loggedSet : undefined;
     const seed = savedLog ?? previousSet;
     const [weight, setWeight] = useState(seed?.weight ?? lastPerformance?.weight ?? 0);
@@ -139,6 +145,13 @@ export function SetLogger({
         <div
             role="group"
             aria-label={`Set ${setNumber}`}
+            onFocus={() => setHasFocus(true)}
+            onBlur={(event) => {
+                const next = event.relatedTarget;
+                if (!(next instanceof Node && event.currentTarget.contains(next))) setHasFocus(false);
+            }}
+            // Room below "Complete Set" so the open keyboard can't cover it.
+            style={keyboard.isOpen && hasFocus ? { paddingBottom: keyboard.height } : undefined}
             className={cn(
                 'p-4 rounded-xl border transition-all duration-300',
                 isActive

@@ -99,6 +99,8 @@ interface AxeFinding {
   help: string;
   targets: string[];
   html: string[];
+  /** Opening markup of every failing node (not only the first five), for per-element allowances. */
+  allHtml: string[];
 }
 
 /**
@@ -108,9 +110,6 @@ interface AxeFinding {
 const KNOWN_AXE_FINDINGS = new Set([
   // Footer text (muted on the living background): Lane C.
   'wizard:color-contrast',
-  // WizardStepper step buttons: aria-label is the long label, visible text the short one
-  // (src/components/wizard/WizardStepper.tsx:58): Lane B, DEBT-106.
-  'wizard:label-content-name-mismatch',
   'workout:color-contrast',
   // Toast close button has no name; it lives in src/components/ui/toast.tsx: coordinator decision.
   'plan:button-name',
@@ -121,6 +120,32 @@ const KNOWN_AXE_FINDINGS = new Set([
   'history:color-contrast',
   'history:label-content-name-mismatch',
 ]);
+
+/**
+ * Known findings allowed only on specific elements, so the same rule elsewhere on the screen
+ * still fails. A finding is known when every failing node's markup contains `htmlIncludes`.
+ */
+const KNOWN_AXE_ELEMENT_FINDINGS: Array<{ key: string; htmlIncludes: string; owner: string }> = [
+  // Limitations step cards: aria-label is the constraint name, the visible text is name plus
+  // description (src/components/wizard/steps/ConstraintsStep.tsx:97): Lane B. The stepper
+  // buttons (DEBT-106, fixed in #82) are not covered, so a regression there fails.
+  {
+    key: 'wizard:label-content-name-mismatch',
+    htmlIncludes: 'focus-visible:ring-warning',
+    owner: 'Lane B',
+  },
+];
+
+function isKnownAxeFinding(finding: AxeFinding): boolean {
+  const key = `${finding.screen}:${finding.id}`;
+  if (KNOWN_AXE_FINDINGS.has(key)) return true;
+  return KNOWN_AXE_ELEMENT_FINDINGS.some(
+    (allowance) =>
+      allowance.key === key &&
+      finding.allHtml.length > 0 &&
+      finding.allHtml.every((html) => html.includes(allowance.htmlIncludes)),
+  );
+}
 
 /**
  * Wait until finite CSS/Web Animations have finished, so axe sees settled colours and
@@ -161,6 +186,7 @@ async function axeScan(page: Page, testInfo: TestInfo, screen: string): Promise<
       help: violation.help,
       targets: violation.nodes.slice(0, 5).map((node) => node.target.join(' ')),
       html: violation.nodes.slice(0, 5).map((node) => node.html.slice(0, 160)),
+      allHtml: violation.nodes.map((node) => node.html.slice(0, 400)),
     }));
   await testInfo.attach(`axe-${screen}`, {
     body: JSON.stringify(findings, null, 2),
@@ -314,7 +340,7 @@ test.describe('lifter loop (guest)', () => {
     // No serious or critical axe violations on Wizard, Plan, Workout or History beyond the
     // known ones below, each listed with its owner in the Lane D Day 5 handoff. Remove an
     // entry when its fix merges; a new violation fails here.
-    const unexpected = axeFindings.filter((finding) => !KNOWN_AXE_FINDINGS.has(`${finding.screen}:${finding.id}`));
+    const unexpected = axeFindings.filter((finding) => !isKnownAxeFinding(finding));
     expect(unexpected, JSON.stringify(unexpected, null, 2)).toEqual([]);
   });
 });
