@@ -48,13 +48,15 @@ All seven lanes run in parallel. There are no dependencies between them.
 
 | Lane | Day 4 | Day 5 | Day 6 | Day 7 |
 |---|---|---|---|---|
-| **A** | 🔵 PR #77 · 4.1 Privacy policy and terms rewritten from the inventory, web deletion section `#delete-account`; draft for L9 | ⬜ 4.2 Store form answer sheets | ⬜ 4.3 Listing copy; screenshot script | ⬜ 1.8 v1.1.0 changelog and version bumps; Gate 2 checklist |
-| **B** | ✅ PR #76 (`6c63b2a`) · 3.6c Fewer taps to the first plan (14 → 11) | ⬜ Buffer: Gate 1 bugs | ➖ | ➖ |
-| **C** | 🔵 PR #75 · 3.2 `track()` and PostHog EU adapter; wire events | ⬜ Consent entries; disclosure text to Lane A | ⬜ Error-boundary tests; source maps (if L6 done) | ➖ |
-| **D** | ✅ PR #78 (`5acbeac`) · 3.5 Playwright lifter loop with reload; `e2e` and `edge-functions` CI jobs; finish-workout and set-logger fixes; `vendor-sentry` chunk (DEBT-091) | ⬜ 3.4 RIR labels, 44 px targets, `MotionConfig`, DEBT-021 | ⬜ 3.4 Wizard Enter key (DEBT-025) | ⬜ 4.5 `npm audit` gate; Dependabot |
-| **E** | ✅ PR #59 (`0513fd0`) · 1.4 part 1: sync engine, outbox, tests; 3 review findings fixed | ✅ PR #64 (`a621a4f`) · 1.4 part 2: seven collections and change tracking | ✅ PR #66 (`12fbcbb`) · 1.4 part 3: triggers, first sign-in upload, indicator; 2 review findings fixed (sign-out step moved to Day 7) | ⬜ 1.4 part 4: plans move onto the engine |
-| **F** | ✅ PR #73 (`1708d12`) · 1.5 part 2: deletion UI, guest erase, export v3 (DEBT-059 closed) | ⬜ 1.7 Retire Express (D1) | ⬜ Circles queries checked against migration 008 | ➖ Buffer |
-| **H** | ✅ PR #74 (`d2a49ae`) · 2.2 Session storage adapter; ADR 12; DEBT-079, DEBT-085 | ⬜ 2.4 part 1: preferences, status bar, splash, keyboard, share | ⬜ 2.4 part 2: local notifications | ⬜ 4.5 Android CI job; iOS archive guide |
+| **A** | ✅ PR #77 (`7a04c58`) · 4.1 Privacy policy and terms rewritten from the inventory, web deletion section `#delete-account`; draft for L9 | 🔵 PR #__ · 4.2 Store form answer sheets (`APPLE_PRIVACY.md`, `GOOGLE_DATA_SAFETY.md`, `COMPLIANCE.md`); Day 5 handoffs folded in | ⬜ 4.3 Listing copy; screenshot script | ⬜ 1.8 v1.1.0 changelog and version bumps; Gate 2 checklist |
+| **B** | ✅ PR #76 (`6c63b2a`) · 3.6c Fewer taps to the first plan (14 → 11) | ✅ PR #82 (`354edc6`) · Buffer: plan card numbers, logger strings, no empty Full Body day and fair session volume, Start Over i18n, stepper names (DEBT-105, 106, 108, 102 closed) | ➖ | ➖ |
+| **C** | 🔵 PR #75 · 3.2 `track()` and PostHog EU adapter; wire events. **Held for Lincoln's OK on the contract #9 `$pageview` change** | ⬜ Consent entries; disclosure text to Lane A (after #75) | ⬜ Error-boundary tests; source maps (if L6 done) | ➖ |
+| **D** | ✅ PR #78 (`5acbeac`) · 3.5 Playwright lifter loop with reload; `e2e` and `edge-functions` CI jobs; finish-workout and set-logger fixes; `vendor-sentry` chunk (DEBT-091) | ✅ PR #84 (`9d23b1b`) · 3.4 part 1: named sliders, RIR contrast, 44 px targets, `MotionConfig`, MCL theme (DEBT-020 targets, DEBT-021, DEBT-107 closed); axe scan in the E2E | ⬜ 3.4 Wizard Enter key (DEBT-025) | ⬜ 4.5 `npm audit` gate; Dependabot |
+| **E** | ✅ PR #59 (`0513fd0`) · 1.4 part 1: sync engine, outbox, tests; 3 review findings fixed | ✅ PR #64 (`a621a4f`) · 1.4 part 2: seven collections and change tracking | ✅ PR #66 (`12fbcbb`) · 1.4 part 3: triggers, first sign-in upload, indicator; 2 review findings fixed | ✅ PR #81 (`2b4d190`) · 1.4 part 4: safe sign-out (sync, warn, erase; DEBT-045 closed); plans on the engine; 2 review findings fixed. **Lane E's Wave 2 is done** |
+| **F** | ✅ PR #73 (`1708d12`) · 1.5 part 2: deletion UI, guest erase, export v3 (DEBT-059 closed) | ✅ PR #80 (`bea0fb7`) · 1.7 Express retired (D1): `server/`, `apiClient`, CI server steps and dev proxy removed | ⬜ Circles queries checked against migration 008 | ➖ Buffer |
+| **H** | ✅ PR #74 (`d2a49ae`) · 2.2 Session storage adapter; ADR 12; DEBT-079, DEBT-085 | ✅ PR #83 (`8a92b6a`) · 2.4 part 1: status bar, splash, keyboard and share helpers (contract #10); native unverified on devices | ⬜ 2.4 part 2: local notifications | ⬜ 4.5 Android CI job; iOS archive guide |
+
+**Also merged in Wave 2:** coordinator PR #85 (`35a52f1`), the Light / System / Dark crossfade restored (`src/lib/themeFade.ts`), and #86 (`aaa63b7`), Day 6 briefs with the Day 5 carry-overs for D, F and H.
 
 ### Gate 2 checklist (Lincoln, end of Day 7)
 - [ ] All Wave 2 PRs merged in merge order; CI green, including the Playwright job
