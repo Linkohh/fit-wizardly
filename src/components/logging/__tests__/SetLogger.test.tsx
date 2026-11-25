@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { SetLog } from '@/types/fitness';
 import { SetLogger } from '../SetLogger';
@@ -139,8 +139,34 @@ describe('SetLogger with its own saved log', () => {
     it('pads below Complete Set by the keyboard height while the keyboard is open', () => {
         keyboardMock.useKeyboard.mockReturnValue({ isOpen: true, height: 320 });
         render(<SetLogger setNumber={1} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />);
+        fireEvent.focus(screen.getByRole('spinbutton', { name: 'Reps' }));
 
         expect(screen.getByRole('group', { name: 'Set 1' }).style.paddingBottom).toBe('320px');
+        keyboardMock.useKeyboard.mockReturnValue({ isOpen: false, height: 0 });
+    });
+
+    it('pads only the set card that holds focus while the keyboard is open', () => {
+        keyboardMock.useKeyboard.mockReturnValue({ isOpen: true, height: 300 });
+        render(
+            <div>
+                <SetLogger setNumber={1} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />
+                <SetLogger setNumber={2} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />
+                <SetLogger setNumber={3} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />
+                <textarea aria-label="Workout notes" />
+            </div>,
+        );
+        const padding = () =>
+            [1, 2, 3].map((n) => screen.getByRole('group', { name: `Set ${n}` }).style.paddingBottom);
+
+        const setTwo = screen.getByRole('group', { name: 'Set 2' });
+        fireEvent.focus(within(setTwo).getByRole('spinbutton', { name: 'Reps' }));
+        expect(padding()).toEqual(['', '300px', '']);
+
+        fireEvent.blur(within(setTwo).getByRole('spinbutton', { name: 'Reps' }), {
+            relatedTarget: screen.getByRole('textbox', { name: 'Workout notes' }),
+        });
+        fireEvent.focus(screen.getByRole('textbox', { name: 'Workout notes' }));
+        expect(padding()).toEqual(['', '', '']);
         keyboardMock.useKeyboard.mockReturnValue({ isOpen: false, height: 0 });
     });
 });
