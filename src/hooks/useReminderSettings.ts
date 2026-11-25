@@ -64,6 +64,11 @@ export async function writeReminderSettings(settings: ReminderSettings): Promise
 export interface UseReminderSettingsResult {
   /** Null until the saved settings have loaded. */
   settings: ReminderSettings | null;
+  /** Shows `next` at once, without saving it. */
+  update(next: ReminderSettings): void;
+  /** Saves `next` to device storage. */
+  persist(next: ReminderSettings): Promise<void>;
+  /** `update` then `persist`. */
   save(next: ReminderSettings): Promise<void>;
 }
 
@@ -85,10 +90,12 @@ export function useReminderSettings(daysPerWeek?: number | null): UseReminderSet
     };
   }, [daysPerWeek]);
 
+  const update = useCallback((next: ReminderSettings) => setSettings(next), []);
+  const persist = useCallback((next: ReminderSettings) => writeReminderSettings(next), []);
   const save = useCallback(async (next: ReminderSettings) => {
     setSettings(next);
     await writeReminderSettings(next);
   }, []);
 
-  return { settings, save };
+  return { settings, update, persist, save };
 }

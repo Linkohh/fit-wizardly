@@ -190,6 +190,44 @@ describe('useLocalNotifications', () => {
       errorSpy.mockRestore();
     });
 
+    it('a cancel queued while a schedule waits on permission wins (PR #89 review)', async () => {
+      let grant: () => void = () => undefined;
+      mocks.checkPermissions.mockImplementationOnce(
+        () => new Promise((resolve) => {
+          grant = () => resolve({ display: 'granted' });
+        }),
+      );
+      const scheduling = scheduleWorkoutReminders([1, 3], 18, 0, 'Train');
+      // The schedule is running and waiting on permission when "off" arrives.
+      await vi.waitFor(() => expect(mocks.checkPermissions).toHaveBeenCalled());
+      const cancelling = cancelWorkoutReminders();
+      grant();
+      await Promise.all([scheduling, cancelling]);
+
+      expect(mocks.schedule).not.toHaveBeenCalled();
+      expect(mocks.cancel).toHaveBeenCalledTimes(2);
+    });
+
+    it('a later rest replaces an earlier one still waiting on permission', async () => {
+      let grant: () => void = () => undefined;
+      mocks.checkPermissions.mockImplementationOnce(
+        () => new Promise((resolve) => {
+          grant = () => resolve({ display: 'granted' });
+        }),
+      );
+      mocks.display = 'granted';
+      const first = new Date(Date.now() + 60_000);
+      const second = new Date(Date.now() + 90_000);
+      const a = scheduleRestEnd(first, 'Rest over');
+      await vi.waitFor(() => expect(mocks.checkPermissions).toHaveBeenCalled());
+      const b = scheduleRestEnd(second, 'Rest over');
+      grant();
+      await Promise.all([a, b]);
+
+      expect(mocks.schedule).toHaveBeenCalledTimes(1);
+      expect(mocks.schedule.mock.calls[0]).toMatchObject([{ notifications: [{ schedule: { at: second } }] }]);
+    });
+
     describe('permission prompt', () => {
       it('asks only the first time and records it in device storage', async () => {
         await expect(ensureNotificationPermissionOnce()).resolves.toBe(true);

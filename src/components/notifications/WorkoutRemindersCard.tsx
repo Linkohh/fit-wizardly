@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Bell } from 'lucide-react';
 import { toast } from 'sonner';
@@ -8,7 +8,11 @@ import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { isNativeApp } from '@/lib/platform';
 import { usePlanStore } from '@/stores/planStore';
-import { ensureNotificationPermissionOnce, useLocalNotifications } from '@/hooks/useLocalNotifications';
+import {
+  createLatestWinsQueue,
+  ensureNotificationPermissionOnce,
+  useLocalNotifications,
+} from '@/hooks/useLocalNotifications';
 import { useReminderSettings, type ReminderSettings } from '@/hooks/useReminderSettings';
 
 /** Monday first, as most of our launch locales expect. 0 = Sunday … 6 = Saturday. */
@@ -50,20 +54,26 @@ export function WorkoutRemindersSettings() {
   const daysPerWeek = usePlanStore(
     (state) => state.currentPlan?.selections.daysPerWeek ?? state.currentPlan?.workoutDays.length ?? null,
   );
-  const { settings, save } = useReminderSettings(daysPerWeek);
+  const { settings, update, persist } = useReminderSettings(daysPerWeek);
   const { scheduleWorkoutReminders, cancelWorkoutReminders } = useLocalNotifications();
   const [isBusy, setIsBusy] = useState(false);
   const labels = useMemo(() => weekdayLabels(i18n.language || 'en'), [i18n.language]);
+  // One change at a time, latest wins: a day or time edit that is still
+  // saving or scheduling can't land after a later "off" (PR #89 review).
+  const applyQueue = useRef(createLatestWinsQueue('Reminder settings')).current;
 
   if (!settings) return null;
 
-  const apply = async (next: ReminderSettings) => {
-    await save(next);
-    if (next.enabled && next.days.length > 0) {
-      await scheduleWorkoutReminders(next.days, next.hour, next.minute);
-    } else {
-      await cancelWorkoutReminders();
-    }
+  const apply = (next: ReminderSettings) => {
+    update(next);
+    return applyQueue(async () => {
+      await persist(next);
+      if (next.enabled && next.days.length > 0) {
+        await scheduleWorkoutReminders(next.days, next.hour, next.minute);
+      } else {
+        await cancelWorkoutReminders();
+      }
+    });
   };
 
   const handleToggle = async (enabled: boolean) => {

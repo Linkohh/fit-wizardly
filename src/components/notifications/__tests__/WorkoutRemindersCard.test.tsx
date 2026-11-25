@@ -38,12 +38,14 @@ vi.mock('@/stores/planStore', () => ({
     selector({ currentPlan: { selections: { daysPerWeek: 3 }, workoutDays: [] } }),
 }));
 
-vi.mock('@/hooks/useLocalNotifications', () => {
+vi.mock('@/hooks/useLocalNotifications', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/hooks/useLocalNotifications')>();
   const api = {
     scheduleWorkoutReminders: mocks.scheduleWorkoutReminders,
     cancelWorkoutReminders: mocks.cancelWorkoutReminders,
   };
   return {
+    createLatestWinsQueue: actual.createLatestWinsQueue,
     ensureNotificationPermissionOnce: mocks.ensurePermission,
     useLocalNotifications: () => api,
   };

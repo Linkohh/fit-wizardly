@@ -35,6 +35,36 @@ const ALL_REMINDER_IDS = Array.from({ length: 7 }, (_, weekday) => WORKOUT_REMIN
 
 type NotificationsModule = typeof import('@capacitor/local-notifications');
 
+/**
+ * Runs tasks one at a time, latest wins: a task that is still waiting when a
+ * newer one is queued is skipped, and a running task can check `isLatest()`
+ * before doing more work. Used so that an earlier "schedule" that is still
+ * waiting on the plugin can't land after a later "cancel" (PR #89 review).
+ */
+export type LatestWinsQueue = (task: (isLatest: () => boolean) => Promise<void>) => Promise<void>;
+
+export function createLatestWinsQueue(label: string): LatestWinsQueue {
+  let tail: Promise<void> = Promise.resolve();
+  let latestTicket = 0;
+  return (task) => {
+    const ticket = ++latestTicket;
+    const isLatest = () => ticket === latestTicket;
+    const run = tail.then(async () => {
+      if (!isLatest()) return;
+      try {
+        await task(isLatest);
+      } catch (error) {
+        console.error(`[Notifications] ${label} failed:`, error);
+      }
+    });
+    tail = run;
+    return run;
+  };
+}
+
+let restQueue = createLatestWinsQueue('Rest notification');
+let reminderQueue = createLatestWinsQueue('Workout reminders');
+
 let pluginPromise: Promise<NotificationsModule | null> | null = null;
 let pendingPermissionCheck: Promise<boolean> | null = null;
 
@@ -53,6 +83,8 @@ function loadPlugin(): Promise<NotificationsModule | null> {
 export function resetLocalNotificationsForTests(): void {
   pluginPromise = null;
   pendingPermissionCheck = null;
+  restQueue = createLatestWinsQueue('Rest notification');
+  reminderQueue = createLatestWinsQueue('Workout reminders');
 }
 
 async function nativePlugin(): Promise<NotificationsModule['LocalNotifications'] | null> {
@@ -137,33 +169,37 @@ async function cancelIds(ids: number[]): Promise<void> {
   }
 }
 
-export async function scheduleRestEnd(at: Date, body: string): Promise<void> {
-  const plugin = await nativePlugin();
-  if (!plugin) return;
-  if (Number.isNaN(at.getTime()) || at.getTime() <= Date.now()) return;
-  if (!(await hasNotificationPermission())) return;
-
-  try {
+export function scheduleRestEnd(at: Date, body: string): Promise<void> {
+  if (!isNativeApp()) return Promise.resolve();
+  return restQueue(async (isLatest) => {
+    const plugin = await nativePlugin();
+    if (!plugin) return;
     // Same id replaces any earlier rest notification (an adjusted timer).
-    await plugin.cancel({ notifications: [{ id: REST_END_NOTIFICATION_ID }] });
-    await plugin.schedule({
-      notifications: [
-        {
-          id: REST_END_NOTIFICATION_ID,
-          title: NOTIFICATION_TITLE,
-          body,
-          schedule: { at, allowWhileIdle: true },
-          isExactNotification: false,
-        },
-      ],
-    });
-  } catch (error) {
-    console.error('[Notifications] Could not schedule the rest notification:', error);
-  }
+    await cancelIds([REST_END_NOTIFICATION_ID]);
+    if (Number.isNaN(at.getTime()) || at.getTime() <= Date.now()) return;
+    if (!(await hasNotificationPermission()) || !isLatest()) return;
+
+    try {
+      await plugin.schedule({
+        notifications: [
+          {
+            id: REST_END_NOTIFICATION_ID,
+            title: NOTIFICATION_TITLE,
+            body,
+            schedule: { at, allowWhileIdle: true },
+            isExactNotification: false,
+          },
+        ],
+      });
+    } catch (error) {
+      console.error('[Notifications] Could not schedule the rest notification:', error);
+    }
+  });
 }
 
 export function cancelRestEnd(): Promise<void> {
-  return cancelIds([REST_END_NOTIFICATION_ID]);
+  if (!isNativeApp()) return Promise.resolve();
+  return restQueue(() => cancelIds([REST_END_NOTIFICATION_ID]));
 }
 
 /** Valid weekdays (0 = Sunday … 6 = Saturday), sorted, without duplicates. */
@@ -178,41 +214,45 @@ export function normalizeWeekdays(days: number[]): number[] {
  * `days` (0 = Sunday … 6 = Saturday) at `hour`:`minute` local time.
  * An empty `days` list just cancels them.
  */
-export async function scheduleWorkoutReminders(
+export function scheduleWorkoutReminders(
   days: number[],
   hour: number,
   minute: number,
   body: string,
 ): Promise<void> {
-  const plugin = await nativePlugin();
-  if (!plugin) return;
+  if (!isNativeApp()) return Promise.resolve();
+  return reminderQueue(async (isLatest) => {
+    const plugin = await nativePlugin();
+    if (!plugin) return;
 
-  await cancelIds(ALL_REMINDER_IDS);
+    await cancelIds(ALL_REMINDER_IDS);
 
-  const weekdays = normalizeWeekdays(days);
-  const validTime =
-    Number.isInteger(hour) && hour >= 0 && hour <= 23 && Number.isInteger(minute) && minute >= 0 && minute <= 59;
-  if (weekdays.length === 0 || !validTime) return;
-  if (!(await hasNotificationPermission())) return;
+    const weekdays = normalizeWeekdays(days);
+    const validTime =
+      Number.isInteger(hour) && hour >= 0 && hour <= 23 && Number.isInteger(minute) && minute >= 0 && minute <= 59;
+    if (weekdays.length === 0 || !validTime) return;
+    if (!(await hasNotificationPermission()) || !isLatest()) return;
 
-  try {
-    await plugin.schedule({
-      notifications: weekdays.map((weekday) => ({
-        id: WORKOUT_REMINDER_BASE_ID + weekday,
-        title: NOTIFICATION_TITLE,
-        body,
-        // The plugin's Weekday enum is 1 = Sunday … 7 = Saturday.
-        schedule: { on: { weekday: weekday + 1, hour, minute }, allowWhileIdle: true },
-        isExactNotification: false,
-      })),
-    });
-  } catch (error) {
-    console.error('[Notifications] Could not schedule workout reminders:', error);
-  }
+    try {
+      await plugin.schedule({
+        notifications: weekdays.map((weekday) => ({
+          id: WORKOUT_REMINDER_BASE_ID + weekday,
+          title: NOTIFICATION_TITLE,
+          body,
+          // The plugin's Weekday enum is 1 = Sunday … 7 = Saturday.
+          schedule: { on: { weekday: weekday + 1, hour, minute }, allowWhileIdle: true },
+          isExactNotification: false,
+        })),
+      });
+    } catch (error) {
+      console.error('[Notifications] Could not schedule workout reminders:', error);
+    }
+  });
 }
 
 export function cancelWorkoutReminders(): Promise<void> {
-  return cancelIds(ALL_REMINDER_IDS);
+  if (!isNativeApp()) return Promise.resolve();
+  return reminderQueue(() => cancelIds(ALL_REMINDER_IDS));
 }
 
 export interface UseLocalNotificationsResult {
