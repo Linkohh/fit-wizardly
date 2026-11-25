@@ -2,7 +2,7 @@
 
 > The quick view: what's done, what's in progress, and what's left. It's updated after every step.
 > `BOARD.md` has the full day-by-day grid and the gate checklists; this page is the short version.
-> **Last updated:** 2026-11-25. **Wave 1 is complete** (all PRs through #69 merged); Gate 1 is waiting on Lincoln's L10 and L11. **Wave 2 Day 5 is merged** (#80–#86) except Lane C's #75, which waits on your `$pageview` decision.
+> **Last updated:** 2026-11-25. **Wave 1 is complete** (all PRs through #69 merged); Gate 1 is waiting on Lincoln's L10 and L11. **Wave 2 Day 5 is merged** (#80–#86), and Day 6 for D, F and H (#87, #89, #90), except Lane C's #75, which waits on your `$pageview` decision.
 
 ## Done
 
@@ -60,7 +60,10 @@
 | 50 | **Merged #84** Lane D Day 5: named sliders, readable RIR colours, 44 px targets, Reduce Motion, muscle selector follows the theme; accessibility scan in the E2E | `9d23b1b` |
 | 51 | **Merged #85** Coordinator: the Light / System / Dark crossfade is back | `35a52f1` |
 | 52 | **Merged #86** Coordinator: Day 6 briefs with Day 5 carry-overs for D, F, H | `aaa63b7` |
-| 53 | Lane A Day 5: Apple and Google privacy form answers and the compliance sheet (age rating, health declaration, disclaimer, deletion, encryption) | `docs/store/` (#88) |
+| 53 | **Merged #87** Lane F Day 6: circle queries and plan deletions tested against the access rules; no new migration needed | `cb93576` |
+| 54 | **Merged #89** Lane H Day 6: rest-over notification and workout reminders on your training days (phones only; unverified on devices) | `0ce6a64` |
+| 55 | **Merged #90** Lane D Day 6: Enter in the plan builder no longer skips a step; the keyboard no longer hides Complete Set | `e88c727` |
+| 56 | Lane A Day 5: Apple and Google privacy form answers and the compliance sheet (age rating, health declaration, disclaimer, deletion, encryption) | `docs/store/` (#88) |
 
 ## In progress
 
@@ -72,7 +75,7 @@
 
 ## Next up, in order
 
-0. **Day 6 for each lane:** listing copy and screenshots (A), Circles queries (F), local notifications (H), Wizard Enter key (D).
+0. **Day 6 left:** listing copy and screenshots (Lane A). Then Day 7: v1.1.0 (A), audit gate (D), Android CI (H).
 1. **Gate 1 (you):** create the staging Supabase project and apply migrations 001–008 (repair 001–006 first; steps in `docs/SUPABASE_MIGRATIONS.md`), add the email-code template (`docs/IOS_DEVELOPMENT.md`, "Auth email"), deploy `delete-account` (its README), then run the checklist in `BOARD.md`.
 2. **Wave 2 / Day 4 for each lane** after Gate 1: privacy policy (A), fewer taps to a first plan (B), analytics (C), end-to-end test (D), deletion UI and export v3 (F), lasting sessions (H).
 3. **Lane E Day 7:** sync before sign-out with an unsent-changes warning, then clear the device; move plans onto the sync engine.
@@ -102,7 +105,7 @@
 - [x] Sync triggers, first upload, Profile indicator (Lane E Day 6)
 - [x] Sync on sign-out, plans on the engine (Lane E Day 7, #81); sign-out now clears device data
 - [x] Account deletion in the app (Lane F, #73; the function is deployed at L10)
-- [ ] Sessions that last (✅ #74); native plugins (✅ #83); notifications (Lane H Day 6)
+- [ ] Sessions that last (✅ #74); native plugins (✅ #83); notifications (✅ #89)
 - [ ] Analytics and consent (Lane C, #75 open); end-to-end test (✅ #78) and accessibility part 1 (✅ #84)
 - [ ] Privacy policy (✅ #77), store forms (#88), listing copy (Lane A Day 6)
 - [x] Express retired (Lane F Day 5, #80)

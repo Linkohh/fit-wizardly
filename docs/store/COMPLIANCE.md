@@ -53,7 +53,7 @@ Play Console has a **Health apps** declaration under App content (as last known;
 | Nutrition and weight management | **Yes**: meal and calorie logging, macro targets, body weight and measurements | `src/stores/nutritionStore*`, `fitwizard-measurements` |
 | Sleep management, stress management | **No** (Lincoln to confirm): readiness asks for a 1–5 rating of sleep and stress to suggest training intensity; it doesn't track or manage sleep or stress | `readiness-storage`, `src/components/recovery/*` |
 | Medical device, clinical, disease management, medication, period tracking, health research | No | |
-| Health Connect permissions | **None requested**. The app doesn't read or write Health Connect | `AndroidManifest.xml` has only `INTERNET` |
+| Health Connect permissions | **None requested**. The app doesn't read or write Health Connect | `AndroidManifest.xml` requests `INTERNET` and `POST_NOTIFICATIONS` only (#89 removes `SCHEDULE_EXACT_ALARM`) |
 
 If the declaration asks for a disclaimer, use the one below.
 

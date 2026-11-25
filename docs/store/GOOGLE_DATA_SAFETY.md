@@ -17,7 +17,7 @@
 | Question (as last known) | Answer | Source |
 |---|---|---|
 | Does your app collect or share any of the required user data types? | **Yes** | Account email and synced training data (Supabase) when signed in |
-| Is all of the user data collected by your app encrypted in transit? | **Yes** | Every remote call is HTTPS: Supabase (`src/lib/supabase.ts`), `/api/*` on Vercel, Open Food Facts, wger. The Android manifest requests only `INTERNET`, sets no `usesCleartextTraffic` and has no network security config; `capacitor.config.ts` uses `androidScheme: 'https'`. Live reload (`ios:live`, dev only) is iOS and not part of release builds |
+| Is all of the user data collected by your app encrypted in transit? | **Yes** | Every remote call is HTTPS: Supabase (`src/lib/supabase.ts`), `/api/*` on Vercel, Open Food Facts, wger. The Android manifest requests `INTERNET` and `POST_NOTIFICATIONS` (and removes the plugin's `SCHEDULE_EXACT_ALARM`), sets no `usesCleartextTraffic` and has no network security config; `capacitor.config.ts` uses `androidScheme: 'https'`. Live reload (`ios:live`, dev only) is iOS and not part of release builds |
 | Which methods of account creation does your app support? | **Username and other authentication** (email with a one-time code). No password, no OAuth | `src/stores/authStore.ts` (email code, contract 7) |
 | Do you provide a way for users to request that their data is deleted? | **Yes** | In app: Profile → Details → **Delete account** (type DELETE), `src/components/account/AccountDeletionSection.tsx`. Guests: **Erase data on this device** |
 | Delete account URL (web) | `https://[domain: Lincoln to provide, L3]/legal?tab=privacy#delete-account` | Section `delete-account` in `src/pages/Legal.tsx` (Day 4). It covers in-app deletion, guest erasure and an email request for people who can't sign in. **Needs the support email** (placeholder in `POLICY_VALUES`) |
@@ -44,6 +44,7 @@ For each type: collected, shared, processed ephemerally, required or optional, p
 | **App info and performance → Diagnostics** | **Only if L6 sets a Sentry DSN** | No | No | Optional | App functionality | Sentry reports include app version, browser and OS (inventory "Crash reports"). No performance tracing (`tracesSampleRate: 0`) |
 | **Device or other IDs** | No | — | — | — | — | No advertising ID or device ID |
 | **Location → Approximate / Precise** | No | — | — | — | — | No location API. Timezone only |
+| **Workout reminders and rest alerts** (not a Google data type) | No | — | — | — | — | Local notifications scheduled by the OS on the device (#89). The reminder days and time stay in device storage (`fitwizard-reminders`) and are never sent. Nothing to declare. `POST_NOTIFICATIONS` is a normal runtime permission; no exact-alarm declaration is needed because `SCHEDULE_EXACT_ALARM` is removed from the manifest |
 | **Financial info, Messages, Photos and videos, Audio, Files and docs, Calendar, Contacts, Web browsing, Installed apps** | No | — | — | — | — | Not in the code. Circles (messages) are off in v1. Shared workout cards are written to the cache only for the share sheet the user opens (Lane H Day 5) |
 
 ### Product analytics (PostHog), depends on #75 and L6
