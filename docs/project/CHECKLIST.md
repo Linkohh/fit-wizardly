@@ -60,7 +60,7 @@
 | 50 | **Merged #84** Lane D Day 5: named sliders, readable RIR colours, 44 px targets, Reduce Motion, muscle selector follows the theme; accessibility scan in the E2E | `9d23b1b` |
 | 51 | **Merged #85** Coordinator: the Light / System / Dark crossfade is back | `35a52f1` |
 | 52 | **Merged #86** Coordinator: Day 6 briefs with Day 5 carry-overs for D, F, H | `aaa63b7` |
-| 53 | Lane A Day 5: Apple and Google privacy form answers and the compliance sheet (age rating, health declaration, disclaimer, deletion, encryption) | `docs/store/` (this PR) |
+| 53 | Lane A Day 5: Apple and Google privacy form answers and the compliance sheet (age rating, health declaration, disclaimer, deletion, encryption) | `docs/store/` (#88) |
 
 ## In progress
 
@@ -104,7 +104,7 @@
 - [x] Account deletion in the app (Lane F, #73; the function is deployed at L10)
 - [ ] Sessions that last (✅ #74); native plugins (✅ #83); notifications (Lane H Day 6)
 - [ ] Analytics and consent (Lane C, #75 open); end-to-end test (✅ #78) and accessibility part 1 (✅ #84)
-- [ ] Privacy policy (✅ #77), store forms (this PR), listing copy (Lane A Day 6)
+- [ ] Privacy policy (✅ #77), store forms (#88), listing copy (Lane A Day 6)
 - [x] Express retired (Lane F Day 5, #80)
 - [ ] **Gate 2:** production database, v1.1.0 to `main`, first store test builds (needs L4)
 
