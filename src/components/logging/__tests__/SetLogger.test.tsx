@@ -7,6 +7,11 @@ vi.mock('@/components/tools/PlateCalculator', () => ({
     PlateCalculatorDialog: () => null,
 }));
 
+const keyboardMock = vi.hoisted(() => ({
+    useKeyboard: vi.fn(() => ({ isOpen: false, height: 0 })),
+}));
+vi.mock('@/hooks/useKeyboard', () => keyboardMock);
+
 const completedPreviousSet: SetLog = {
     setNumber: 1,
     weight: 50,
@@ -121,5 +126,21 @@ describe('SetLogger with its own saved log', () => {
         expect(screen.queryByRole('img', { name: 'Set completed' })).not.toBeInTheDocument();
         expect(screen.getByRole('spinbutton', { name: 'Weight (lbs)' })).toBeEnabled();
         expect(screen.getByRole('button', { name: 'Complete Set' })).toBeInTheDocument();
+    });
+
+    it('mounts the native keyboard hook and leaves the layout alone while it is closed', () => {
+        keyboardMock.useKeyboard.mockClear();
+        render(<SetLogger setNumber={1} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />);
+
+        expect(keyboardMock.useKeyboard).toHaveBeenCalled();
+        expect(screen.getByRole('group', { name: 'Set 1' }).style.paddingBottom).toBe('');
+    });
+
+    it('pads below Complete Set by the keyboard height while the keyboard is open', () => {
+        keyboardMock.useKeyboard.mockReturnValue({ isOpen: true, height: 320 });
+        render(<SetLogger setNumber={1} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />);
+
+        expect(screen.getByRole('group', { name: 'Set 1' }).style.paddingBottom).toBe('320px');
+        keyboardMock.useKeyboard.mockReturnValue({ isOpen: false, height: 0 });
     });
 });
