@@ -34,7 +34,12 @@ type DocumentWithViewTransitions = Document & {
   startViewTransition?: (callback: () => void) => ViewTransitionLike;
 };
 
-let latestFade = 0;
+/**
+ * Every selection gets a number. A fade's change runs a frame late (the browser
+ * captures the old screen first), so a newer tap can land in between; the late
+ * change then does nothing, and the newest choice wins.
+ */
+let latestSelection = 0;
 
 function prefersReducedMotion(): boolean {
   return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -59,25 +64,29 @@ function currentTheme(): ResolvedTheme {
  */
 export function changeThemeWithFade(nextTheme: ResolvedTheme, applyChange: () => void): void {
   const doc = document as DocumentWithViewTransitions;
+  const root = document.documentElement;
+  const selectionId = ++latestSelection;
   const canFade =
     typeof doc.startViewTransition === 'function' && !prefersReducedMotion() && nextTheme !== currentTheme();
 
   if (!canFade) {
+    // Also ends any earlier fade's attribute: that fade's own clear() no longer matches.
+    root.removeAttribute(THEME_FADE_ATTRIBUTE);
     applyChange();
     return;
   }
 
-  const fadeId = ++latestFade;
-  const root = document.documentElement;
   root.setAttribute(THEME_FADE_ATTRIBUTE, nextTheme === 'dark' ? 'to-dark' : 'to-light');
 
   const clear = () => {
     // A newer tap may have started its own fade; only the latest one clears.
-    if (fadeId === latestFade) root.removeAttribute(THEME_FADE_ATTRIBUTE);
+    if (selectionId === latestSelection) root.removeAttribute(THEME_FADE_ATTRIBUTE);
   };
 
   try {
     const transition = doc.startViewTransition!(() => {
+      // Stale: a newer tap has already chosen. Skip, so it can't be overwritten.
+      if (selectionId !== latestSelection) return;
       flushSync(applyChange);
     });
     transition.finished.then(clear, clear);

@@ -99,6 +99,31 @@ describe('changeThemeWithFade', () => {
     consoleError.mockRestore();
   });
 
+  it('keeps the latest choice when a second tap lands before the first fade has applied', async () => {
+    // Real browsers run the callback a frame later, after capturing the old screen.
+    const pending: Array<() => void> = [];
+    setViewTransitions((callback) => {
+      pending.push(callback);
+      return { finished: Promise.resolve() };
+    });
+    let chosen = 'light';
+    const choose = (mode: 'light' | 'dark') => () => {
+      chosen = mode;
+      document.documentElement.classList.toggle('dark', mode === 'dark');
+    };
+
+    changeThemeWithFade('dark', choose('dark')); // deferred
+    changeThemeWithFade('light', choose('light')); // <html> is still light: applies at once
+    expect(chosen).toBe('light');
+
+    pending.forEach((callback) => callback()); // the stale Dark callback runs late
+    expect(chosen).toBe('light');
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(document.documentElement.hasAttribute(THEME_FADE_ATTRIBUTE)).toBe(false);
+  });
+
   it('lets only the latest of two quick taps clear the attribute', async () => {
     const resolvers: Array<() => void> = [];
     setViewTransitions((callback) => {

@@ -7,7 +7,7 @@
 - **Checks:**
   - lint: 0 errors, 4 warnings (the existing ones)
   - typecheck: pass
-  - tests: **1175/1175**
+  - tests: **1176/1176**
   - build: pass
   - Playwright chromium: **12 passed** (2 new)
 
@@ -28,7 +28,7 @@
     - the browser has no View Transitions (older iOS Safari, for example)
     - the visible theme doesn't change (for example System while the OS is light)
     - starting the transition throws
-  - With quick repeat taps, only the latest fade clears the attribute.
+  - **Quick repeat taps (review fix, PR #85):** every selection gets a number. A fade's change runs a frame late, after the browser captures the old screen, so it is skipped if a newer tap has landed. The newest choice always wins and is the one saved. Only the latest selection clears the attribute, and a no-fade selection also clears it.
   - OS theme changes in System mode are not faded, as before.
 - **`src/components/theme/ThemeModePill.tsx`:** the click goes through `changeThemeWithFade`. It covers every pill: the desktop header, the mobile header, the drawer quick controls and Profile. No changes in `Header.tsx`, `Profile.tsx` or `themeStore.ts`.
 - **`src/index.css`:**
@@ -37,13 +37,14 @@
   - `::view-transition { pointer-events: none }`, so the drawer stays tappable during the fade
 
 ## Tests
-- **`src/lib/themeFade.test.ts` (6 tests):**
+- **`src/lib/themeFade.test.ts` (7 tests):**
   - fades, and applies inside the transition
   - Reduce Motion: immediate, no fade
   - no View Transitions: immediate
   - same visible theme: no fade
   - a throw falls back to immediate
   - two quick taps: only the latest clears the attribute
+  - Dark then Light before the first fade applies: Light wins (fails without the fix, checked)
 - **`playwright/header.mobile-drawer.spec.ts`:**
   - **New:** "crossfades a tapped theme change while the theme itself applies at once". The fade attribute is set on tap, the theme applies in under 250 ms, every view-transition animation is 920 ms, the legacy attribute stays null, and the attribute clears afterwards.
   - **New:** "applies a tapped theme change with no crossfade when Reduce Motion is on".
