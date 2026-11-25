@@ -146,14 +146,27 @@ async function armThemeSyncProbe(page: Page) {
       };
     };
 
+    // A tapped theme change can apply one frame late: the crossfade
+    // (src/lib/themeFade.ts) lets the browser capture the old screen first.
+    // So read the frame after both elements have changed (or after 1.5 s),
+    // and keep checking that they changed together.
     document.addEventListener(
       'click',
       () => {
-        requestAnimationFrame(() => {
-          rootObserver.disconnect();
-          drawerObserver?.disconnect();
-          probeWindow.__fitWizardThemeProbe = readFrame();
-        });
+        const clickedAt = performance.now();
+        const readWhenChanged = () => {
+          const changed = mutationTimes.root !== null && mutationTimes.drawer !== null;
+          if (!changed && performance.now() - clickedAt < 1500) {
+            requestAnimationFrame(readWhenChanged);
+            return;
+          }
+          requestAnimationFrame(() => {
+            rootObserver.disconnect();
+            drawerObserver?.disconnect();
+            probeWindow.__fitWizardThemeProbe = readFrame();
+          });
+        };
+        requestAnimationFrame(readWhenChanged);
       },
       { capture: true, once: true },
     );
@@ -418,6 +431,98 @@ test.describe('mobile header drawer flow', () => {
     await expect(drawer).toHaveAttribute('data-theme-mode', 'dark');
     await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
     await expect(darkButton).toHaveAttribute('data-selected', 'true');
+  });
+
+  test('crossfades a tapped theme change while the theme itself applies at once', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference' });
+    await seedMobileDrawerState(page, { themeMode: 'light' });
+    await page.goto('/');
+
+    await page.getByRole('button', { name: /open menu/i }).click();
+    const drawer = page.locator('.aetheric-drawer');
+    await expect(drawer).toBeVisible();
+    const footer = page.getByTestId('mobile-drawer-footer');
+
+    // Tap Dark, then watch <html> until the theme class flips.
+    const atTap = await footer.getByRole('button', { name: 'Dark' }).evaluate(async (button) => {
+      const root = document.documentElement;
+      const tappedAt = performance.now();
+      let fadeWhenApplied: string | null = null;
+      const applied = new Promise<number>((resolve) => {
+        const observer = new MutationObserver(() => {
+          if (root.classList.contains('dark')) {
+            fadeWhenApplied = root.getAttribute('data-theme-fade');
+            observer.disconnect();
+            resolve(performance.now() - tappedAt);
+          }
+        });
+        observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+      });
+      (button as HTMLButtonElement).click();
+      const fadeRightAfterTap = root.getAttribute('data-theme-fade');
+      const msToApply = await applied;
+      return {
+        supportsViewTransitions:
+          typeof (document as Document & { startViewTransition?: unknown }).startViewTransition === 'function',
+        fadeRightAfterTap,
+        fadeWhenApplied,
+        msToApply,
+        legacyTransition: root.getAttribute('data-theme-transition'),
+      };
+    });
+
+    expect(atTap.supportsViewTransitions).toBe(true);
+    // The fade starts on the tap, and the theme applies under the fade, not after it.
+    // fadeWhenApplied proves the order. The time bound is the fade length, not a
+    // tighter guess: the browser captures the old screen first, which took 50–75 ms
+    // locally but 266–289 ms on the shared CI runner (software rendering).
+    expect(atTap.fadeRightAfterTap).toBe('to-dark');
+    expect(atTap.fadeWhenApplied).toBe('to-dark');
+    expect(atTap.msToApply).toBeLessThan(920);
+    // The legacy snap rules stay off.
+    expect(atTap.legacyTransition).toBeNull();
+
+    // The crossfade runs for the restored 920 ms.
+    const durations = await page.evaluate(async () => {
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      return document
+        .getAnimations()
+        .filter((animation) => {
+          const effect = animation.effect as KeyframeEffect | null;
+          return Boolean(effect?.pseudoElement?.startsWith('::view-transition'));
+        })
+        .map((animation) => Number(animation.effect?.getTiming().duration));
+    });
+    expect(durations.length).toBeGreaterThan(0);
+    expect(durations.every((duration) => duration === 920)).toBe(true);
+
+    // The drawer stays usable during the fade, and the fade cleans up after itself.
+    await expect(drawer).toHaveAttribute('data-resolved-theme', 'dark');
+    await expect.poll(() => page.evaluate(() => document.documentElement.getAttribute('data-theme-fade'))).toBeNull();
+    await expect(footer.getByRole('button', { name: 'Dark' })).toHaveAttribute('data-selected', 'true');
+  });
+
+  test('applies a tapped theme change with no crossfade when Reduce Motion is on', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+    await seedMobileDrawerState(page, { themeMode: 'light' });
+    await page.goto('/');
+
+    await page.getByRole('button', { name: /open menu/i }).click();
+    const footer = page.getByTestId('mobile-drawer-footer');
+    const atTap = await footer.getByRole('button', { name: 'Dark' }).evaluate(async (button) => {
+      (button as HTMLButtonElement).click();
+      const fadeRightAfterTap = document.documentElement.getAttribute('data-theme-fade');
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      return {
+        fadeRightAfterTap,
+        rootDark: document.documentElement.classList.contains('dark'),
+        viewTransitionAnimations: document
+          .getAnimations()
+          .filter((animation) => Boolean((animation.effect as KeyframeEffect | null)?.pseudoElement?.startsWith('::view-transition')))
+          .length,
+      };
+    });
+    expect(atTap).toEqual({ fadeRightAfterTap: null, rootDark: true, viewTransitionAnimations: 0 });
   });
 
   test('keeps theme sync transition-free when navigating away after a theme switch', async ({ page }) => {

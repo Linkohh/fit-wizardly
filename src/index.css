@@ -1028,6 +1028,9 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
     --elevation-floating: 0 16px 40px -20px hsl(270 30% 50% / 0.12);
     --theme-transition-duration: 50ms;
     --theme-transition-ease: ease;
+    /* Theme crossfade on tap (src/lib/themeFade.ts): the pre-May-2026 feel. */
+    --theme-fade-duration: 920ms;
+    --theme-fade-ease: cubic-bezier(0.22, 1, 0.36, 1);
 
   }
 
@@ -1191,6 +1194,28 @@ html[data-scroll-active='true'] *::-webkit-scrollbar-thumb,
     background:
       radial-gradient(circle at 50% 14%, rgba(255, 255, 255, 0.24), transparent 44%),
       linear-gradient(180deg, rgba(255, 204, 242, 0.1), rgba(255, 255, 255, 0.05));
+  }
+
+  /*
+   * Theme crossfade for Light / System / Dark taps (src/lib/themeFade.ts).
+   * Restores the 920 ms fade removed in May 2026 (commit 32a89e8). The theme
+   * class still changes in one step; this only crossfades the old and new
+   * snapshots. The overlay ignores pointer events so the drawer stays usable.
+   */
+  html[data-theme-fade]::view-transition {
+    pointer-events: none;
+  }
+
+  html[data-theme-fade]::view-transition-group(root) {
+    animation-duration: var(--theme-fade-duration);
+    animation-timing-function: var(--theme-fade-ease);
+  }
+
+  html[data-theme-fade]::view-transition-old(root),
+  html[data-theme-fade]::view-transition-new(root) {
+    animation-duration: var(--theme-fade-duration);
+    animation-timing-function: var(--theme-fade-ease);
+    mix-blend-mode: normal;
   }
 
   /* Accessibility: Focus styles */
