@@ -588,6 +588,17 @@
         "create_plan": "Create Plan",
         "exercise_library": "Exercise Library"
     },
+    "notifications": {
+        "rest_end_body": "Rest over. Time for your next set.",
+        "reminder_body": "Time to train. Your workout is ready.",
+        "reminders_title": "Workout reminders",
+        "reminders_description": "A reminder on your training days, at the time you choose.",
+        "reminders_toggle": "Remind me on training days",
+        "reminders_days": "Days",
+        "reminders_no_days": "Pick at least one day to get reminders.",
+        "reminders_time": "Time",
+        "permission_denied": "Notifications are off for FitWizard. Turn them on in your phone's Settings."
+    },
     "emptyStates": {
         "start_workout": "Start today's workout",
         "create_plan": "Create a plan",

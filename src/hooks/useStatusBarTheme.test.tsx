@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   setStyle: vi.fn(async () => undefined),
   setBackgroundColor: vi.fn(async () => undefined),
   hide: vi.fn(async () => undefined),
+  startRestSync: vi.fn(),
 }));
 
 vi.mock('@/lib/platform', () => ({
@@ -25,6 +26,10 @@ vi.mock('@/hooks/useStoresHydrated', () => ({
 vi.mock('@capacitor/status-bar', () => ({
   StatusBar: { setStyle: mocks.setStyle, setBackgroundColor: mocks.setBackgroundColor },
   Style: { Dark: 'DARK', Light: 'LIGHT', Default: 'DEFAULT' },
+}));
+
+vi.mock('./restNotificationSync', () => ({
+  startRestNotificationSync: mocks.startRestSync,
 }));
 
 vi.mock('@capacitor/splash-screen', () => ({
@@ -44,6 +49,7 @@ describe('useStatusBarTheme', () => {
     mocks.setStyle.mockClear();
     mocks.setBackgroundColor.mockClear();
     mocks.hide.mockClear();
+    mocks.startRestSync.mockClear();
     act(() => useThemeStore.getState().setMode('dark'));
   });
 
@@ -89,5 +95,23 @@ describe('useStatusBarTheme', () => {
     renderHook(() => useStatusBarTheme());
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(mocks.hide).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts the rest-notification listener once the stores have hydrated, on native only', async () => {
+    setNative('android');
+    mocks.hydrated = false;
+    const { rerender } = renderHook(() => useStatusBarTheme());
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(mocks.startRestSync).not.toHaveBeenCalled();
+
+    mocks.hydrated = true;
+    rerender();
+    await waitFor(() => expect(mocks.startRestSync).toHaveBeenCalled());
+  });
+
+  it('does not start the rest-notification listener on the web', async () => {
+    renderHook(() => useStatusBarTheme());
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(mocks.startRestSync).not.toHaveBeenCalled();
   });
 });

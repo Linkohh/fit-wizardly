@@ -37,6 +37,8 @@ import { BodyTracker } from '@/components/measurements/BodyTracker';
 import { requestConsentModal } from '@/lib/consent';
 import { AboutSupportCard } from '@/components/about/AboutSupportCard';
 import { SyncStatusRow } from '@/components/sync/SyncStatusRow';
+import { WorkoutRemindersCard } from '@/components/notifications/WorkoutRemindersCard';
+import { isNativeApp } from '@/lib/platform';
 import { LAUNCH_LANGUAGES, changeLanguage, isLaunchLanguage } from '@/lib/i18n';
 
 export function Profile() {
@@ -353,6 +355,13 @@ export function Profile() {
                             </CardContent>
                         </Card>
                     </motion.div>
+
+                    {/* Workout reminders (Lane H; native only, web push is out of scope) */}
+                    {isNativeApp() && (
+                        <motion.div variants={itemVariants}>
+                            <WorkoutRemindersCard />
+                        </motion.div>
+                    )}
 
                     {/* Data & Privacy */}
                     <motion.div variants={itemVariants}>

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import type { SetLog } from '@/types/fitness';
 import { SetLogger } from '../SetLogger';
@@ -6,6 +6,11 @@ import { SetLogger } from '../SetLogger';
 vi.mock('@/components/tools/PlateCalculator', () => ({
     PlateCalculatorDialog: () => null,
 }));
+
+const keyboardMock = vi.hoisted(() => ({
+    useKeyboard: vi.fn(() => ({ isOpen: false, height: 0 })),
+}));
+vi.mock('@/hooks/useKeyboard', () => keyboardMock);
 
 const completedPreviousSet: SetLog = {
     setNumber: 1,
@@ -121,5 +126,47 @@ describe('SetLogger with its own saved log', () => {
         expect(screen.queryByRole('img', { name: 'Set completed' })).not.toBeInTheDocument();
         expect(screen.getByRole('spinbutton', { name: 'Weight (lbs)' })).toBeEnabled();
         expect(screen.getByRole('button', { name: 'Complete Set' })).toBeInTheDocument();
+    });
+
+    it('mounts the native keyboard hook and leaves the layout alone while it is closed', () => {
+        keyboardMock.useKeyboard.mockClear();
+        render(<SetLogger setNumber={1} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />);
+
+        expect(keyboardMock.useKeyboard).toHaveBeenCalled();
+        expect(screen.getByRole('group', { name: 'Set 1' }).style.paddingBottom).toBe('');
+    });
+
+    it('pads below Complete Set by the keyboard height while the keyboard is open', () => {
+        keyboardMock.useKeyboard.mockReturnValue({ isOpen: true, height: 320 });
+        render(<SetLogger setNumber={1} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />);
+        fireEvent.focus(screen.getByRole('spinbutton', { name: 'Reps' }));
+
+        expect(screen.getByRole('group', { name: 'Set 1' }).style.paddingBottom).toBe('320px');
+        keyboardMock.useKeyboard.mockReturnValue({ isOpen: false, height: 0 });
+    });
+
+    it('pads only the set card that holds focus while the keyboard is open', () => {
+        keyboardMock.useKeyboard.mockReturnValue({ isOpen: true, height: 300 });
+        render(
+            <div>
+                <SetLogger setNumber={1} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />
+                <SetLogger setNumber={2} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />
+                <SetLogger setNumber={3} targetReps="8-12" targetRIR={2} onComplete={vi.fn()} />
+                <textarea aria-label="Workout notes" />
+            </div>,
+        );
+        const padding = () =>
+            [1, 2, 3].map((n) => screen.getByRole('group', { name: `Set ${n}` }).style.paddingBottom);
+
+        const setTwo = screen.getByRole('group', { name: 'Set 2' });
+        fireEvent.focus(within(setTwo).getByRole('spinbutton', { name: 'Reps' }));
+        expect(padding()).toEqual(['', '300px', '']);
+
+        fireEvent.blur(within(setTwo).getByRole('spinbutton', { name: 'Reps' }), {
+            relatedTarget: screen.getByRole('textbox', { name: 'Workout notes' }),
+        });
+        fireEvent.focus(screen.getByRole('textbox', { name: 'Workout notes' }));
+        expect(padding()).toEqual(['', '', '']);
+        keyboardMock.useKeyboard.mockReturnValue({ isOpen: false, height: 0 });
     });
 });

@@ -230,6 +230,30 @@ them afterwards. Run against 001–007 without 008, the same checks fail on the
 recursion, the streak write, the three profile reads and the deletion. Not yet
 run on staging.
 
+### Circle queries under 008 (Lane F Day 6)
+
+`supabase/tests/circle_queries.test.sql` replays every query in
+`src/stores/circles/*.ts` as the signed-in role: create a private circle (with
+`insert().select()`), list my circles with members and profiles, join by invite
+code, circle by id, the feed, the realtime refetch, the leaderboard inputs,
+reactions, comments, challenges and leaving. **All pass under 008; no 009 was
+needed.** Behaviour worth knowing when Circles is turned on:
+
+- A public circle you're not in shows its row but no members (members are
+  visible to members only).
+- After someone leaves, their old posts stay in the feed but their profile is
+  hidden (no shared circle any more); the feed shows "Someone".
+- Deleting another member's comment matches no rows and returns no error; the
+  UI only offers delete on your own comments.
+- Realtime delivery isn't emulated by the harness. Supabase Realtime applies the
+  same SELECT policy per row, which the feed tests cover.
+- Open: a circle whose only admin deletes their account has no admin (above).
+
+`supabase/tests/plans_tombstone.test.sql` covers the plans sync shapes: the
+owner can upsert a row with `deleted_at` set (insert and update paths), pull it
+back, tombstone with `UPDATE ... SET deleted_at` and revive it; another user can
+do none of that and can't read it.
+
 ### Verification queries (SQL Editor, read-only)
 
 ```sql
