@@ -73,6 +73,7 @@ You may edit **only** files your lane owns in the current wave, plus the listed 
 | `src/pages/Profile.tsx` | B: language, units and theme block. C: coach toggle | F: account block. E: sync indicator. H: reminders block | J |
 | `src/components/Header.tsx`, `src/components/header/*`, `CommandPalette.tsx`, `NotFound.tsx`, `UserGuide.tsx`, `src/contexts/navigation-direction-context.tsx` | C. Exceptions: D changes the logo `src` (around line 558); B edits AI wording in `UserGuide.tsx` on Day 1 | C | J |
 | `src/components/auth/*` | H | H | H |
+| `src/components/account/*`, `src/lib/account/*` | — | F (new on Day 4, #73) | F |
 | `vite.config.ts`, `public/` | D | F removes the dev proxy (Day 5) | — |
 | `vercel.json` | H (Day 2, fonts CSP), then C (Day 3, Sentry) | C | — |
 | `supabase/**`, `src/types/supabase.ts` | F | F | F |

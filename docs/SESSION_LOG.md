@@ -146,6 +146,35 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 
 ## Session History
 
+### 2026-11-23 — Lane A Day 4 (continued): Lanes H, B and D Day 4 Folded In (branch `lane-a/day-4`, rebased onto `5acbeac` after #74, #76 and #78)
+
+- **Lane H Day 4 (#74, `d2a49ae`): sessions last across restarts (D2, ADR 12).** The Supabase token moved from `sessionStorage` to localStorage on the web and `@capacitor/preferences` on native; sign-out removes it; `signOut({ quiet: true })` exists. The privacy policy gains a "Your sign-in" storage line and a retention line (Lane H's wording), the inventory updates the Account email row and adds a Sign-in session row, and `SECURITY.md`'s session row now matches ADR 12. Release notes: "You stay signed in" and translated sign-in errors. DEBT-079 and DEBT-085 resolved; Lane H's DEBT-094 logged as DEBT-099. DEBT-094 (Lane F's toast) now only needs Lane F to call the quiet sign-out.
+- **Lane B Day 4 (#76, `6c63b2a`): 14 → 11 taps to the first plan.** No new stored data or third party. Release notes under Improved. Lane B's DEBT-094 to 096 logged as DEBT-100 to 102.
+- **Lane D Day 4 (#78, `5acbeac`): lifter-loop Playwright test, set logger and finish-workout fixes, `vendor-sentry` chunk, `edge-functions` and `e2e` CI jobs.** No new stored data or third party. Release notes under Fixed: every set loggable, finish and rate a workout, saved sets after a reload. DEBT-086 and DEBT-091 resolved; DEBT-078 baseline now 363.6 KB gzip. Lane D's DEBT-094/095 (fixed in #78) logged as resolved DEBT-103/104, and its 096 to 101 as DEBT-105 to 110. The `e2e` job becomes a required check on Day 7.
+- **Lane F Day 4 (#73)** was folded in on 2026-11-21 (entry below). The release notes now list account deletion and the new privacy policy under New.
+- **Not yet folded:** Lane C Day 4 (#75), which waits on Lincoln's OK for the contract #9 `$pageview` change. When it merges, the policy's "PostHog (planned)" line becomes "built, off until L6", using the disclosure text in Lane C's handoff.
+- **Numbering:** every lane proposed IDs from DEBT-094, and Lane A had already used 094 to 098 on 2026-11-21, so the new IDs are 099 to 110, recorded with their original numbers.
+- **Verification:** see the handoff (`docs/project/handoffs/2026-11-21-lane-a-day-4.md`).
+
+### 2026-11-21 — Lane A Day 4: Privacy Policy and Terms Rewritten (branch `lane-a/day-4`, from `preview_b` @ `44e1d31`, rebased onto `1708d12` after #73)
+
+- **What was done:**
+  - `src/pages/Legal.tsx`: the Privacy Policy and Terms of Service tabs are rewritten from `docs/store/DATA_INVENTORY.md`, in short plain-language sections, and clearly marked as a **draft for qualified review (L9)**. The old "your data stays 100% on your device" and "anonymous analytics" claims are gone.
+    - Privacy covers what we collect, where it is stored (device; Supabase region placeholder), who receives it (Supabase, Vercel, Open Food Facts, wger, API Ninjas, Sentry, planned PostHog), why, how long (including the in-memory IP for the `/api` rate limit and sync tombstones), your choices, **Delete your account**, security, children, contact and changes.
+    - **Delete your account** has the stable anchor `/legal?tab=privacy#delete-account` (Google Play's web deletion page). `#delete-account` alone also opens the privacy tab. The text is Lane F's Day 4 wording, matched to the merged screen.
+    - Terms: not medical advice, user responsibility, accounts, acceptable use, licence, no warranty, liability, changes, governing-law placeholder.
+    - Placeholders (region, support email, governing law, age, backup period, effective date) are one constant, `POLICY_VALUES`.
+    - All text goes through `t()` with an English fallback; 106 `legal.*` keys in `en` and a Spanish draft in `es`. German and Portuguese fall back to English (ratchet +103 each, DEBT-098).
+  - `src/pages/Legal.test.tsx`: tests for the anchor (scrolls to the section), the `#delete-account`-only link, the three deletion paths, and the draft notice.
+  - `docs/privacy-policy.md`: the same English text, generated from `Legal.tsx`, plus a placeholders table and reviewer notes that map each claim to the code. `{TODAY}` and the fake email are gone.
+  - Folded in the Lane F Day 4 handoff (#73, `1708d12`): deletion UI, guest erase and export v3. Inventory: account deletion is Now (in code), export version 3, and "In export?" is Yes for the rows v3 added. Board row F Day 4 is ✅. `src/components/account/*` and `src/lib/account/*` added to the ownership table as F. DEBT-059 resolved; DEBT-094 to DEBT-096 added from that handoff.
+- **Bookkeeping:** when this PR was opened, Lane F Day 4 (#73) had merged. Lane H (#74), Lane C (#75) and Lane B (#76) were open, so the board shows them as 🔵 and their handoffs are folded in when they merge. Lane C's PostHog disclosure will change the policy's "planned" wording.
+- **Verification:** lint 0 errors / 4 warnings (pre-existing), typecheck clean, all tests pass (count in the handoff), 0 broken relative links.
+- **New issues:** DEBT-097 (sync tombstones keep content), DEBT-098 (de/pt legal copy).
+- **Next steps:**
+  1. Lincoln: fill in the placeholders (support email blocks Play's deletion form) and start L9.
+  2. Lane A Day 5: store form answer sheets.
+
 ### 2026-11-18 — Lane A Day 3: Wave 1 Paperwork, README, 1.1.0 Notes Draft (branch `lane-a/day-3`, from `preview_b` @ `172c428`, rebased onto `421a453` after #62 and #64–#69)
 
 - **What was done:**
@@ -848,6 +877,8 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 
 | ID | Issue | File(s) | Notes |
 |----|-------|---------|-------|
+| DEBT-103 | **RESOLVED 2026-11-23** (Lane D Day 4, #78). ~~No control called `handleFinishWorkout()`, so a workout couldn't be finished, rated or saved to History; once wired, the summary didn't render~~ | `src/components/logging/WorkoutLogger.tsx` | Proposed by Lane D as DEBT-094; renumbered. |
+| DEBT-104 | **RESOLVED 2026-11-23** (Lane D Day 4, #78). ~~Sets had no saved state (unlogged after a reload; exercise 2's rows locked), and each set copied the previous set's done flag~~ | `src/components/logging/WorkoutLogger.tsx`, `SetLogger.tsx` | Proposed by Lane D as DEBT-095; renumbered. |
 | SEC-005 | Supabase migrations 002 + 004 may be missing from live schema | `supabase/migrations/` | Plan sync and exercise community stats fail in prod until applied. |
 | DEBT-001 | ~~Pre-existing TypeScript errors~~ **RESOLVED 2026-09-27** | — | `npm run typecheck` is clean and runs in CI. |
 | DEBT-012 | Swipe-back / haptics / Android back not device-verified | `src/hooks/useEdgeSwipeBack.ts`, `src/hooks/useAndroidBackButton.ts` | Unit-tested, and browser-tested with simulated touch. Needs a pass on the iOS Simulator and an Android emulator. |
@@ -865,6 +896,12 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 
 | ID | Issue | File(s) | Notes |
 |----|-------|---------|-------|
+| DEBT-105 | Workout day card shows a literal `{{count}} reps` and `{{count}}s rest`: the code passes `{ range }` and `{ seconds }` | `src/components/plan/WorkoutDayCard.tsx` (188–190), `plan.workout_day.*` | Lane D or J. Proposed by Lane D as DEBT-096. |
+| DEBT-106 | Raw keys `workout.cancel`, `workout.notes`, `workout.notes_placeholder` show in the logger; only `es.json` has a top-level `workout` namespace | `src/locales/en.json`, `de.json`, `pt.json` | Lane J1 (or D). Proposed by Lane D as DEBT-097. |
+| DEBT-107 | Controls with no accessible name: the 4 readiness sliders, the plate calculator button, and the RIR slider thumb (`aria-label` lands on the shadcn `Slider` root) | `ReadinessCheck.tsx`, `PlateCalculator`, `SetLogger.tsx` | Lane D Day 5 (3.4). Proposed by Lane D as DEBT-098. |
+| DEBT-108 | A 3-day Full Body plan with only Pectoralis Major gave "Full Body C" with no exercises, and A and B were identical | plan engine (`src/lib/planGenerator.ts`) | Seen on `1708d12`; not re-checked after #76. Buffer task. Proposed by Lane D as DEBT-099. |
+| DEBT-095 | After account deletion, other signed-in devices keep their local copy, and their sync fails with 401 | sync (`src/lib/sync/`) | Lane E Day 7 sign-out work: treat a 401 after deletion as signed out and erase, or sign out quietly. The privacy policy discloses it. From the Lane F Day 4 handoff. |
+| DEBT-097 | Deleting a synced item only sets `deleted_at`; its content stays in Supabase until the account is deleted | `src/lib/sync/engine.ts`, migration 007 | Disclosed in the privacy policy. Lincoln/L9: decide whether tombstones should be purged (for example, content cleared, or rows removed after all devices have synced). Lane E/F. |
 | DEBT-002 | `analyticsStore.ts` analytics events fire to nowhere | `src/stores/analyticsStore.ts:121` | TODO comment: "Send to PostHog or custom backend". No external destination wired. |
 | DEBT-033 | Streak, plans-generated and weekly-progress counters are never updated (no callers) | `src/stores/achievementStore.ts` | Roadmap 0.3 (Lane E). |
 | DEBT-034 | Fake data on real screens: Revenue totals, client progress from `Math.random()`, hard-coded circle stats, exercise badges chosen by id length | `Revenue.tsx:48`, `ClientProgress.tsx`, `CircleDashboardTab.tsx`, `ExerciseBadges.tsx:10` | Coach and Circles hidden by flags; badges removed (roadmap 0.5). |
@@ -917,7 +954,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-056 | **RESOLVED 2026-11-18** (Lane A Day 2 (#56) audited it). ~~`.claude/*.md` not audited; probably repeat the old stack and locales~~ | `.claude/` | Lane A Day 2. |
 | DEBT-057 | **RESOLVED 2026-11-18** (Lane D Day 2 (#54) deleted the Wisdom UI; the leftover store is DEBT-067). ~~Unreachable Wisdom UI still says "AI"~~ | `src/components/wisdom/*`, `src/pages/Plan.tsx` | Lane D Day 2: delete. |
 | DEBT-058 | **RESOLVED 2026-11-18** (Lane H Day 3, #62: `ios:live` uses the Mac's LAN address when the dev server listens on the LAN; `ios:live:cap` stays Simulator only). ~~`ios:live:cap` uses `--host=localhost`, so live reload can't reach a physical iPhone~~ | `package.json`, `scripts/dev-ios-live.mjs` | Lane H Day 3. |
-| DEBT-059 | Export v2 omits achievements, custom exercises, exercise favourites and collections, and the profile | `src/lib/dataExport.ts` | Lane F Day 4 (export v3). |
+| DEBT-059 | **RESOLVED 2026-11-21** (export v3, #73). ~~Export v2 omits achievements, custom exercises, exercise favourites and collections, and the profile~~ | `src/lib/dataExport.ts` | Lane F Day 4. |
 | DEBT-060 | `tailwind.config.ts` isn't loaded by Tailwind 4; only `components.json` points at it | `tailwind.config.ts` | **Checked by Lane D Day 3 (#67): shadcn's CLI doesn't need it.** With `"config": ""` in `components.json`, `shadcn info` reports Tailwind v4 and `src/index.css`. Follow-up (next owner): blank `config`, delete `tailwind.config.ts`, remove its block in `eslint.config.js` (line 28). |
 | DEBT-061 | Analytics consent stored twice (`fitwizard-analytics.hasConsented`, `fitwizard_analytics_consent`) | `src/stores/analyticsStore.ts`, `src/lib/consent.ts` | Lane C Days 3–5: settle on one key. |
 | DEBT-062 | **RESOLVED 2026-11-19** (Lane B Day 3, #68: now "FitWizard"; the last "FitWizardly" in `src/`). ~~"FitWizardly" in a user-visible coach note~~ | `src/lib/analyticsIntelligence.ts:840` | Lane B Day 3 (one-word exception). |
@@ -936,18 +973,27 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-076 | **RESOLVED 2026-11-18** (Lane E Day 5, #64: the browser is asked after the first save). ~~**MEDIUM.** `requestPersistentStorage()` is never called, so browsers may still evict IndexedDB data under storage pressure (ADR 11 meant it to run after the first save)~~ | `src/lib/storage/appStorage.ts` | Lane E Day 5 or 6: call it once after the first user-data save. |
 | DEBT-077 | `SCHEMAS.md`, `TESTING.md`, `ENGINEERING.md` and `AI_GUIDELINES.md` still use (`SECURITY.md` was cleared by Lane F's rewrite, #65) the unused `src/lib/validation/fitness.ts` in examples (they carry the stale-doc banner) | `docs/*.md` | Lane A, when each doc's area is worked on. |
 
-| DEBT-079 | The email-code step (`input-otp`) is in the startup bundle, about 6 KB gzip | `src/components/auth/AuthModal.tsx` | Lane H: lazy-load `EmailCodeStep`. |
-| DEBT-078 | **RESOLVED 2026-11-18** (Lane D Day 3, #67). ~~Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4~~ Cause confirmed: the self-hosted font CSS (36 `@font-face` rules, +14.2 KB gzip) and #62's email-code sign-in (+6.3 KB). **New baseline: 365.2 KB gzip** (1365.4 KB raw, 5 files) on `12fbcbb` plus #67, via `npm run bundle:report`. | build | — |
+| DEBT-079 | **RESOLVED 2026-11-23** (Lane H Day 4, #74: `EmailCodeStep` is lazy, 5.4 KB gzip chunk of its own). The email-code step (`input-otp`) is in the startup bundle, about 6 KB gzip | `src/components/auth/AuthModal.tsx` | Lane H: lazy-load `EmailCodeStep`. |
+| DEBT-078 | **RESOLVED 2026-11-18** (Lane D Day 3, #67). Startup baseline now **363.6 KB gzip** on `6c63b2a` plus #78, no DSN (Lane D Day 4). ~~Startup download measured 358.3 KB gzip on `preview_b` after Day 2, against 344.3 KB recorded at Day 4~~ Cause confirmed: the self-hosted font CSS (36 `@font-face` rules, +14.2 KB gzip) and #62's email-code sign-in (+6.3 KB). **New baseline: 365.2 KB gzip** (1365.4 KB raw, 5 files) on `12fbcbb` plus #67, via `npm run bundle:report`. | build | — |
 | DEBT-084 | `EMAIL_CODE_TTL_MS` (10 minutes) has to match Supabase's Email OTP Expiration by hand; nothing checks it | `src/components/auth/EmailCodeStep.tsx` | Lincoln sets 600 s in L11; any change must update both. |
-| DEBT-085 | Send errors in the sign-in dialog show Supabase's English message as is (for example the rate-limit text) | `src/components/auth/AuthModal.tsx` | Lane H or J1: map known error codes to `auth.*` keys. |
-| DEBT-086 | The Deno tests for `delete-account` (15) don't run in CI | `.github/workflows/ci.yml` | Lane D, Wave 2: add `npx -y deno@2 test --no-config supabase/functions/delete-account/`. |
+| DEBT-085 | **RESOLVED 2026-11-23** (Lane H Day 4, #74: send errors mapped to translated `auth.send_error_*` keys). Send errors in the sign-in dialog show Supabase's English message as is (for example the rate-limit text) | `src/components/auth/AuthModal.tsx` | Lane H or J1: map known error codes to `auth.*` keys. |
+| DEBT-086 | **RESOLVED 2026-11-23** (Lane D Day 4, #78: CI job `edge-functions`). The Deno tests for `delete-account` (15) don't run in CI | `.github/workflows/ci.yml` | Lane D, Wave 2: add `npx -y deno@2 test --no-config supabase/functions/delete-account/`. |
 | DEBT-087 | If the Supabase project moves to asymmetric JWT signing keys, the gateway's `verify_jwt` may reject valid tokens; the function verifies the token itself either way | Supabase project, `supabase/functions/delete-account/` | Lincoln at staging deploy: switch to `--no-verify-jwt` only if valid tokens are rejected. |
 | DEBT-088 | `ORCHESTRATION.md` still documents the nonexistent `SUPABASE_SERVICE_KEY` and `FRONTEND_URL` (it carries the stale-doc banner) | `docs/ORCHESTRATION.md` (lines ~82–85, ~419) | Lane A, when that doc is rewritten; `docs/SECURITY.md` (#65) has the correct env table. |
 | DEBT-089 | PDF cover page and section labels (`WARM UP`, `COOL DOWN`, `Generated on`, `ATHLETE`, `Days / Week`) are hardcoded English; the date uses `en-US` | `src/lib/pdfExport.ts` | Lane J1 (Wave 3), or Lane D. Proposed by Lane D as DEBT-079; renumbered because 079 is taken. |
 | DEBT-090 | PDF warm-up, cool-down and goal note are drawn as one unwrapped line, so very long text can run off the page; jsPDF's standard fonts can't draw non-WinAnsi scripts (fine for en/es) | `src/lib/pdfExport.ts` | Lane D, Wave 2 or later. Proposed by Lane D as DEBT-080; renumbered. |
-| DEBT-091 | **MEDIUM.** `manualChunks` substring rules (`"/react/"`, `"zod"`) catch `@sentry/react` and `@sentry/core/.../zoderrors.js` and pull Sentry into preloaded vendor chunks (about +20 KB, or +440 KB with `@sentry/react`) once a DSN is set | `vite.config.ts` | Lane D, **before L6 sets a DSN**: add `if (id.includes("/node_modules/@sentry/")) return "vendor-sentry";` first in the `node_modules` branch, and exclude `vendor-sentry` from `modulePreload.resolveDependencies` (Lane C Day 3 handoff). |
+| DEBT-091 | **RESOLVED 2026-11-23** (Lane D Day 4, #78: `vendor-sentry` chunk, excluded from preload; startup 368.3 KB gzip with a test DSN vs 367.5 without). **MEDIUM.** `manualChunks` substring rules (`"/react/"`, `"zod"`) catch `@sentry/react` and `@sentry/core/.../zoderrors.js` and pull Sentry into preloaded vendor chunks (about +20 KB, or +440 KB with `@sentry/react`) once a DSN is set | `vite.config.ts` | Lane D, **before L6 sets a DSN**: add `if (id.includes("/node_modules/@sentry/")) return "vendor-sentry";` first in the `node_modules` branch, and exclude `vendor-sentry` from `modulePreload.resolveDependencies` (Lane C Day 3 handoff). |
 | DEBT-092 | `@sentry/react` is installed but unused; `monitoring.ts` imports `@sentry/browser` until DEBT-091 is fixed | `package.json`, `src/lib/monitoring.ts` | Lane C, after DEBT-091: switch the import and drop `@sentry/browser`. |
 | DEBT-093 | `PlanSkeleton` renders its own `<main>`, so inside a page that already has a `main` landmark there could be two (not checked with a screen reader) | `src/components/plan/PlanSkeleton.tsx` | Lane D, Wave 2 accessibility pass (3.4). |
+| DEBT-094 | `signOut()` always shows "Your training data stays on this device"; account deletion overrides it by reusing the toast id | `src/stores/authStore.ts`, `src/components/account/AccountDeletionSection.tsx` | Lane H added `signOut({ quiet: true })` (#74). Left: Lane F switches deletion to it and drops the hardcoded toast id. From the Lane F Day 4 handoff. |
+| DEBT-096 | Export v3 has no import or restore path; "backup" in the file name may suggest one | `src/lib/dataExport.ts` | Product decision (Lincoln). From the Lane F Day 4 handoff. |
+| DEBT-098 | `legal.*` has no German or Portuguese copy (103 keys each in `localeGaps.json`), and `de.json`/`pt.json` still hold unused old `legal.privacy.*` strings ("100% on your device") | `src/locales/de.json`, `src/locales/pt.json` | Lane J, or a human translator after L9. Not launch languages (D3), and the old strings are never rendered. |
+| DEBT-099 | Sign-in send errors are mapped from documented Supabase codes; only the rate-limit and network cases were seen | `src/components/auth/sendErrorKey.ts` | Lane H: check real codes on the beta site. Proposed by Lane H as DEBT-094. |
+| DEBT-100 | Wizard store default session is 60 min; the first-plan default is now 45, seeded only through onboarding | `src/stores/wizardStore.ts:59` | Lane E: change `sessionDuration: 60` to `45`. Proposed by Lane B as DEBT-094. |
+| DEBT-101 | On a phone, the MCL Presets chip sits off-screen at the end of a scrolled row | `src/features/mcl/*` | "Let FitWizard choose" (#76) covers the common case. Proposed by Lane B as DEBT-095. |
+| DEBT-102 | "Start Over" dialog and toast text are hardcoded English | `src/components/wizard/WizardNavigation.tsx` | Lane J. Proposed by Lane B as DEBT-096. |
+| DEBT-109 | `SetLogger` text, including the new aria labels, is hardcoded English | `src/components/logging/SetLogger.tsx` | Lane J1. Proposed by Lane D as DEBT-100. |
+| DEBT-110 | **Unconfirmed.** A finished workout may be lost if the page navigates or closes right after finishing, before the IndexedDB write lands (seen once in a test) | plan store persistence | Lane E to check. Proposed by Lane D as DEBT-101. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. |
 | DEBT-021 | Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
@@ -964,7 +1010,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Privacy Policy published | Done | `docs/privacy-policy.md` + `/legal` page |
+| Privacy Policy published | Draft | Rewritten 2026-11-21 from `docs/store/DATA_INVENTORY.md` (Lane A Day 4): `docs/privacy-policy.md` and `/legal`. Waiting on Lincoln's placeholders and the L9 review |
 | GDPR Art. 13 — workout/fitness data disclosed | Done | "What We Store" section in Legal.tsx |
 | GDPR Art. 13 — readiness/recovery data disclosed | Done | Added 2026-04-30 |
 | GDPR Art. 13 — nutrition data disclosed | Partial | Mentioned in "What We Store"; OpenFoodFacts disclosure added 2026-04-29 |
@@ -979,7 +1025,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | ConsentModal dismissible | Done | Fixed 2026-04-29 |
 | OpenFoodFacts IP address disclosed in consent | Done | Added 2026-04-29 |
 | OpenFoodFacts disclosed in Legal page | Done | Added 2026-04-29 |
-| Data deletion on request | Not implemented | Profile page has placeholder. Backend deletion endpoint missing. |
+| Data deletion on request | Built, not deployed | In-app Delete account and guest Erase data on this device (#73); `delete-account` function (#65) deployed at L10. Web deletion section at `/legal?tab=privacy#delete-account`; the email path needs Lincoln's support address |
 | Supabase key rotated in Vercel | Done | 2026-04-27 |
 | Legacy key revoked in Supabase dashboard | PENDING | Must happen after new deployment verified live (SEC-001) |
 | Medical disclaimer | Done | Prominent disclaimer tab in Legal.tsx. Since 2026-09-26 it is also directly linked from the footer (`/legal?tab=disclaimer`). |

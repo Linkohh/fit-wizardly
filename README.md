@@ -210,7 +210,7 @@ supabase/migrations/ SQL migrations, applied in order
 | [`docs/SESSION_LOG.md`](docs/SESSION_LOG.md) | Current. Session history and known issues |
 | [`docs/SUPABASE_MIGRATIONS.md`](docs/SUPABASE_MIGRATIONS.md), [`docs/ABOUT_PAGE.md`](docs/ABOUT_PAGE.md), [`docs/VERCEL_SECRET_ROTATION.md`](docs/VERCEL_SECRET_ROTATION.md), [`docs/PERFORMANCE_BASELINE.md`](docs/PERFORMANCE_BASELINE.md) | Current |
 | [`CLAUDE.md`](CLAUDE.md) and the lens docs (`ENGINEERING`, `DESIGN_SYSTEM`, `SECURITY`, `ORCHESTRATION`, `API_REFERENCE`, `SCHEMAS`, `TESTING`, `TROUBLESHOOTING`, `MIGRATION`, `AI_GUIDELINES`) | **Partly out of date.** Some versions, paths and variables they mention do not exist. Corrections are scheduled (roadmap 0.9) |
-| [`docs/privacy-policy.md`](docs/privacy-policy.md) | **Draft, not accurate yet.** Rewrite scheduled (roadmap 4.1) |
+| [`docs/privacy-policy.md`](docs/privacy-policy.md) | Privacy policy and terms, rewritten from `docs/store/DATA_INVENTORY.md` (roadmap 4.1). **Draft for qualified review (L9)**; same text as `/legal` |
 
 ## License
 
