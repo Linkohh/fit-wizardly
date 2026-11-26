@@ -2,6 +2,7 @@ import { MemoryRouter, Outlet } from 'react-router-dom';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
+import { ANALYTICS_CONSENT_STORAGE_KEY } from '@/lib/consent';
 
 type Selector<TState, TResult> = ((state: TState) => TResult) | undefined;
 
@@ -374,12 +375,38 @@ describe('App auth routing', () => {
   });
 
   it('mounts Vercel Analytics once at the app root', async () => {
-    mocks.analyticsState.hasConsented = true;
+    // App reads the single consent key (DEBT-061), not the analyticsStore copy.
+    localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
 
+    try {
+      renderAt('/onboarding');
+
+      expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
+      expect(screen.getAllByTestId('vercel-analytics')).toHaveLength(1);
+    } finally {
+      localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
+    }
+  });
+
+  it('does not mount Vercel Analytics without consent', async () => {
     renderAt('/onboarding');
 
     expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
-    expect(screen.getAllByTestId('vercel-analytics')).toHaveLength(1);
+    expect(screen.queryByTestId('vercel-analytics')).not.toBeInTheDocument();
+  });
+
+  it('does not mount Vercel Analytics inside the native apps, even with consent (DEBT-127)', async () => {
+    mocks.platformState.nativeApp = true;
+    localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
+
+    try {
+      renderAt('/onboarding');
+
+      expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
+      expect(screen.queryByTestId('vercel-analytics')).not.toBeInTheDocument();
+    } finally {
+      localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
+    }
   });
 
   it('uses the native shell offset contract when running inside the app shell', async () => {

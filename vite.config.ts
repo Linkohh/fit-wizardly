@@ -156,6 +156,10 @@ export default defineConfig(({ mode }) => {
         'robots.txt',
       ],
       workbox: {
+        // The PostHog SDK (vendor-posthog) loads only with VITE_POSTHOG_KEY and
+        // analytics consent, so it is never precached on install. The first
+        // entry is workbox's default, kept because setting globIgnores replaces it.
+        globIgnores: ['**/node_modules/**/*', '**/vendor-posthog-*.js'],
         // Exercise data (~3.7 MB) is fetched on demand and cached after the
         // first online load, instead of being precached on install.
         runtimeCaching: [
@@ -224,6 +228,15 @@ export default defineConfig(({ mode }) => {
               return "vendor-sentry";
             }
 
+            // PostHog (lazy, consent + key gated). Named so the service worker
+            // can skip it (globIgnores above) and nothing preloads it.
+            if (
+              id.includes("/node_modules/posthog-js/") ||
+              id.includes("/node_modules/@posthog/")
+            ) {
+              return "vendor-posthog";
+            }
+
             // Core React ecosystem (Critical)
             if (
               id.includes("react-router") ||
@@ -282,6 +295,7 @@ export default defineConfig(({ mode }) => {
               !dep.includes("vendor-charts") &&
               !dep.includes("vendor-auth") &&
               !dep.includes("vendor-sentry") &&
+              !dep.includes("vendor-posthog") &&
               !dep.includes("feature-exercises")
             );
           });

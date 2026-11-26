@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { UserNutritionProfile, MacroTargets, DailyNutritionLog, MealEntry, MealTemplate } from '@/types/nutrition';
 import { copyableMeals } from '@/lib/mealShortcuts';
+import { track } from '@/lib/analytics/track';
 import { createUserDataStorage } from '@/lib/storage/appStorage';
 import { hydrationTracking } from '@/lib/storage/hydration';
 import {
@@ -133,6 +134,7 @@ export const useNutritionStore = create<NutritionState>()(
             }),
 
             logMeal: (mealOrMeals) => set((state) => {
+                track('meal_logged'); // Lane C Day 4: no meal details, only that something was logged
                 const log = get().getCurrentLog();
                 const mealsToAdd = Array.isArray(mealOrMeals) ? mealOrMeals : [mealOrMeals];
                 const dateKey = get().selectedDate;
