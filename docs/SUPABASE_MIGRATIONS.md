@@ -451,9 +451,16 @@ the SQL is checked on the local harness only.
       installed (`supabase --version`).
 - [ ] A backup you can restore: in the dashboard, **Database → Backups**, note
       the latest daily backup time (or the point-in-time-recovery window, if the
-      plan has it). If there's no usable backup, take one first:
-      `supabase db dump --remote -f prod-before-L2.sql` (check the flag with
-      `supabase db dump --help` on your CLI). Keep the file off the repo.
+      plan has it). If there's no usable backup, take one first. A plain
+      `db dump` holds the schema only, **no rows**, so take both files:
+      ```sh
+      supabase db dump --remote -f prod-before-L2-schema.sql
+      supabase db dump --remote --data-only -f prod-before-L2-data.sql
+      ```
+      (check the flags with `supabase db dump --help` on your CLI). To restore
+      rows you need the data file; the schema file rebuilds tables if they were
+      dropped. Before step 5 and step 6, the data file is what makes wiped
+      content recoverable. Keep both files off the repo: they hold user data.
 - [ ] Do it at a quiet time. 007 and 008 take seconds; nothing is locked for long.
 - [ ] 007 and 008 must be on production **before** v1.1.0 (which syncs to the
       007 tables and calls the delete-account function) is promoted to `main`.
