@@ -32,7 +32,7 @@ This application uses **Zod 4** for runtime validation and TypeScript type infer
 |-------|----------|---------|
 | Frontend | `src/lib/validation/fitness.ts` | Domain models, API payloads |
 | Forms | `src/hooks/useWizardForm.ts` | Step-by-step wizard validation |
-| Server | `server/src/index.ts` | API input validation |
+| Server (removed) | `server/src/index.ts`, deleted in #80 (Express retired, D1) | Historical; see [Server Schemas](#server-schemas) |
 
 ### Key Principles
 
@@ -348,7 +348,9 @@ export const scheduleStepSchema = z.object({
 
 ## Server Schemas
 
-**Source**: [`server/src/index.ts`](../server/src/index.ts)
+> **Removed (2026-11-23, #80).** The Express server and `server/src/index.ts` were deleted when Supabase became the only plans remote (decision D1). The schemas below are kept as a record only; nothing in the repo uses them now. Plans sync through the sync engine (`plansCollection` in `src/lib/sync/collections/training.ts`) and are checked on load by `sanitizePlan`. The remaining server code is the Vercel functions in `api/` (see [API_REFERENCE.md](API_REFERENCE.md)).
+
+**Former source**: `server/src/index.ts` (deleted; see git history before `bea0fb7`)
 
 Server-side schemas include `.strict()` to reject unknown fields for security.
 

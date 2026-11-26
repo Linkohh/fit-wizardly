@@ -18,10 +18,7 @@ npm run dev
 ```
 
 ### 2. Verify settings
-Ensure your `.env.local` has an empty API URL, so it uses the local proxy:
-```env
-VITE_API_URL=
-```
+No API URL setting is needed: the Express API and `VITE_API_URL` were removed in #80. `/api` calls go to the Vite dev server's own plugin.
 
 ### 3. Start the Tunnel
 In a **new terminal**, run:

@@ -5,7 +5,7 @@ Use this runbook for the April 2026 Vercel security incident and future hosted-e
 ## Confirmed Local Inventory
 
 - Vercel project: `lins-projects-d5791edf/fit-wizardly`
-- Vercel env names present at audit time: `ALLOWED_ORIGINS`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PLANS_PROVIDER`
+- Vercel env names present at audit time: `ALLOWED_ORIGINS`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PLANS_PROVIDER` (no longer read since #80; Lincoln can delete it from Vercel)
 - Local `.env` values were moved to ignored `.env.local`; the tracked `.env` file must contain placeholders only.
 - Production, Preview, and Development were verified on 2026-04-27 to use Supabase publishable keys for `VITE_SUPABASE_ANON_KEY`.
 
@@ -17,7 +17,7 @@ Use this runbook for the April 2026 Vercel security incident and future hosted-e
 2. Update Vercel env vars for future builds.
    - Update `VITE_SUPABASE_ANON_KEY` in Production, Preview, and Development.
    - Mark Production and Preview secret-like vars as sensitive where Vercel allows it.
-   - Keep `VITE_SUPABASE_URL` and `VITE_PLANS_PROVIDER` as configuration, not secrets.
+   - Keep `VITE_SUPABASE_URL` as configuration, not a secret.
 3. Redeploy from the hardened branch or from `main` after the branch is merged.
 4. Verify login, Supabase reads/writes, plan sync, and any trainer access flow.
 5. Only after the new deployment is live and verified, revoke/deactivate the old Supabase key material.

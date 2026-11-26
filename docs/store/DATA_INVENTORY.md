@@ -2,7 +2,7 @@
 
 The single source for the privacy policy (`src/pages/Legal.tsx`, `docs/privacy-policy.md`), Apple's App Privacy answers and Google Play's Data safety form. When you add stored data or a new third party, add a row here in the same PR (ADR 10).
 
-- **Built from:** the code on `preview_b` at 2026-11-17 (every persisted store in `src/stores/`, every `fetch` and Supabase call in `src/` and `api/`, the CSP in `vercel.json`, `index.html`, `api/_lib/guard.ts`), plus the Lane D Day 1, Lane C Day 3, Lane D Day 3, Lane E Day 2–6, Lane F Day 3–4 and Lane H Day 1–4 handoffs. Updated 2026-11-18 for Wave 1 Day 2 (self-hosted fonts, wger through the proxy, sync keys, API limits), 2026-11-21 for Lane F Day 4 (#73: deletion UI, guest erase, export v3), and 2026-11-23 for Lane H Day 4 (#74: lasting sign-in session). Lanes B (#76) and D (#78) Day 4 add no stored data or third party.
+- **Built from:** the code on `preview_b` at 2026-11-17 (every persisted store in `src/stores/`, every `fetch` and Supabase call in `src/` and `api/`, the CSP in `vercel.json`, `index.html`, `api/_lib/guard.ts`), plus the Lane D Day 1, Lane C Day 3, Lane D Day 3, Lane E Day 2–6, Lane F Day 3–4 and Lane H Day 1–4 handoffs. Updated 2026-11-18 for Wave 1 Day 2 (self-hosted fonts, wger through the proxy, sync keys, API limits), 2026-11-21 for Lane F Day 4 (#73: deletion UI, guest erase, export v3), 2026-11-23 for Lane H Day 4 (#74: lasting sign-in session), and 2026-11-25 for Wave 2 Day 5 (#80–#85: Lane H's share cache; the store-form decisions). Lane F Day 5 (#80), Lane B Day 5 (#82), Lane D Day 5 (#84) and the theme fade (#85) add no stored data or third party. Updated again 2026-11-25 for Day 6: Lane H's two notification keys (#89); Lane F (#87) and Lane D (#90) add nothing. Lanes B (#76) and D (#78) Day 4 add no stored data or third party.
 - **Status:** **Now** means it's in the code today. **After Wave N** means planned in the launch project and not built yet.
 - **Device storage** means IndexedDB database `fitwizard`, store `kv`, on the web, and `Directory.Data/stores/<key>.json` (Capacitor Filesystem) on iOS and Android. It is never localStorage (ADR 11).
 - **"Signed in"** means Supabase is configured and the user has signed in with email. Guests never send training data to Supabase.
@@ -64,8 +64,10 @@ Every row in this table except exercise interactions (which live only in memory 
 | Anatomy view preferences | `fitwizard.mcl.sculpt.v1` | localStorage | Nobody | **Now** |
 | Persistent-storage request made | `fitwizard-storage-persist-requested` | localStorage | Nobody | **Now** (#64, Lane E Day 5): the browser is asked once, after the first save, not to evict the app's saved data (`requestPersistentStorage()` in `src/lib/storage/appStorage.ts`) |
 | Pending circle invite code | `pendingInviteCode` | sessionStorage | Nobody | **Now** (Circles is off by default) |
+| Notification permission asked | `fitwizard-notif-asked` (whether the app has shown the system prompt, and the answer) | Device storage (`appStorage`; native only) | Nobody. Not synced, not linked to an account | **Now** (#89, Lane H Day 6) |
+| Workout reminder settings | `fitwizard-reminders` (on/off, weekdays, time) | Device storage (`appStorage`; native only) | Nobody. Not synced; reminders are local notifications scheduled by the OS on the device | **Now** (#89, Lane H Day 6) |
 
-The consent timestamp and the analytics and food-lookup choices are in the export (`consent`) since #73. The other settings here are not.
+The consent timestamp and the analytics and food-lookup choices are in the export (`consent`) since #73. The other settings here are not. The two notification keys are device settings: deliberately not in `USER_DATA_STORES`, so erase-on-device leaves them (Lane H Day 6).
 
 ## Caches (public content, no personal data)
 
@@ -76,6 +78,7 @@ The consent timestamp and the analytics and food-lookup choices are in the expor
 | Exercise search results | In memory, 10 minutes | wger, API Ninjas | The search text is sent to wger or API Ninjas; see below | **Now** |
 | Daily quote | localStorage `fitwizard:motivation-quote:v1` | API Ninjas through `/api/motivation-quote` | | **Now** |
 | App shell | Service worker precache | Same origin | Scripts, styles, icons | **Now** |
+| Shared workout card | App cache folder: `Caches/share/` (iOS), `cache/share/` (Android). Native only | Made on the device | Written only so the phone's share sheet can read it (`useShare`, `src/hooks/useShare.ts`); leaves the device only if the person picks a share target. The OS may clear it at any time. On the web, the image goes straight to `navigator.share` | **Now** (#83, Lane H Day 5) |
 
 ## Data sent off the device
 
@@ -89,7 +92,7 @@ The consent timestamp and the analytics and food-lookup choices are in the expor
 | Page views | page path, referrer, device type, country (from IP) | Vercel Web Analytics (same origin, `/_vercel/insights`) | `@vercel/analytics`, mounted only with consent (`src/App.tsx`) | Product analytics | Yes: analytics opt-in | Vercel's policy | **Now** |
 | Crash reports | error message, stack trace, component stack, app version, browser and OS, page path without query string or hash. No name, email, account ID, cookies or workout, body or nutrition data; health-like `extra` keys and console breadcrumbs are dropped before sending | Sentry (`*.ingest.sentry.io`; region set by the DSN). Sentry sees the IP address when a report is sent; the project should be set not to store it (L6) | `@sentry/browser`, loaded only when a DSN is set at build time **and** the user opted in (`src/lib/monitoring.ts`, contract 8); route error boundaries report through `captureError()` | Fix crashes | Yes: the analytics opt-in for now; its own toggle from Lane C Day 5. Not yet stopped when consent is revoked mid-session (Day 5) | Sentry's default (about 90 days on most plans; Lincoln confirms at L6) | **Built, off until L6** (#69): no DSN is set, and the production build contains no Sentry code |
 | Product analytics events | event name (for example `plan_generated`, `workout_completed`), simple properties; never weights, measurements, readiness or food | PostHog | `src/lib/analytics/track.ts` (contract 9) | Product decisions | Yes: analytics opt-in | PostHog plan default | **After Wave 2** (Lane C Day 4) |
-| Workout reminders and rest timer alerts | reminder days and time, rest end time | Nobody: local notifications, on the device only | `useLocalNotifications` (contract 10) | Reminders | OS notification permission | Until cancelled | **After Wave 2** (Lane H Days 5–6) |
+| Workout reminders and rest timer alerts | reminder days and time, rest end time | Nobody: local notifications, on the device only | `useLocalNotifications` (contract 10, `src/hooks/useLocalNotifications.ts`); asked once, at the first rest | Reminders | OS notification permission | Until cancelled | **Now** (#89, Lane H Day 6). Native only |
 | Circles (social groups) | circle membership, activity posts, reactions, comments | Supabase (`circles`, `circle_members`, `circle_activities`, `activity_reactions`, `activity_comments`, `circle_challenges`) | Supabase client | Social feature | — | Until deleted | Code exists, but **off** (`VITE_FEATURE_CIRCLES` defaults to false). Not in v1 |
 | Coach portal | trainer mode, client list | localStorage `fitwizard-trainer`; Supabase `profiles` (`is_trainer`) | Supabase | Coach feature | — | Cleared on sign-out | Code exists, but **off** (`VITE_FEATURE_COACH` defaults to false). Not in v1 |
 
@@ -108,8 +111,9 @@ Not active, recorded so nobody discloses them by mistake: `src/lib/analytics.ts`
 
 Checks for whoever fills in the forms:
 - If crash reports or analytics are ever tied to the account ID, both manifest entries must change to **linked**.
-- Food lookups and exercise searches go to third parties but carry no identifier and aren't stored by the app. Decide (Lane A Day 5) whether they count as "collected" under each store's definition. Flag for Lincoln.
-- Nutrition and body measurements are health-adjacent. Google's Data safety form lists "Health info" and "Fitness info" separately; Apple has "Health" and "Fitness". The manifest currently declares Fitness only. Lane A Day 5 must check the current wording and decide whether "Health" also applies.
+- Food lookups and exercise searches: **decided on Day 5** (Lincoln to confirm). Apple: not collected (only used to answer the request in real time; [`APPLE_PRIVACY.md`](APPLE_PRIVACY.md)). Google: declared as in-app search history, processed ephemerally ([`GOOGLE_DATA_SAFETY.md`](GOOGLE_DATA_SAFETY.md)).
+- Nutrition, body measurements and readiness: **recommended on Day 5** to declare as Health as well as Fitness on both forms (Lincoln to confirm). If accepted, Lane H adds Health to the manifest.
+- Day 5 also found the manifest is missing **User ID** (every synced row has the account ID) and **Other User Content** (free-text notes), and that **Product Interaction** is linked (exercise views go to `exercise_interactions` with the account ID). The changes for Lane H are listed in `APPLE_PRIVACY.md` → "Manifest changes".
 
 ## Third parties
 

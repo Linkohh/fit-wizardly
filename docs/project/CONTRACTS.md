@@ -13,7 +13,7 @@ A contract is an interface one lane publishes and others build on. If you need a
 | 7 | Email-code sign-in | H | Day 3 | Auth UI |
 | 8 | Monitoring | C | Day 3 | Everyone (optional) |
 | 9 | Analytics | C | Day 4 | B, E, F, H |
-| 10 | Native helpers | H | Days 5–6 | E, B |
+| 10 | Native helpers | H | Merged: Day 5 (#83: share, status bar, keyboard), Day 6 (#89: notifications) | E, B, D |
 
 ---
 
@@ -229,8 +229,13 @@ export function track(event: AnalyticsEvent, props?: Record<string, string | num
 
 Every helper is a no-op on the web, using a dynamic `import()` like `useHaptics.ts`.
 
+**Status:** `useShare`, `useStatusBarTheme` and `useKeyboard` merged in #83 (Lane H Day 5). `useLocalNotifications` merged in #89 (Lane H Day 6). On the web, `useShare` uses `navigator.share` (with `navigator.canShare` for files) instead of doing nothing; the other helpers are no-ops there. `useStatusBarTheme` also hides the splash screen once the stores have hydrated (`capacitor.config.ts` sets `launchAutoHide: false`).
+
 ```ts
-useShare(): { share(data: { title: string; text?: string; url?: string; files?: File[] }): Promise<boolean> };
+useShare(): {
+  share(data: { title: string; text?: string; url?: string; files?: File[] }): Promise<boolean>;
+  canShare(data?: { title: string; text?: string; url?: string; files?: File[] }): boolean; // added #83
+};
 useLocalNotifications(): {
   requestPermission(): Promise<boolean>;
   scheduleRestEnd(at: Date, body: string): Promise<void>;
@@ -238,5 +243,9 @@ useLocalNotifications(): {
   scheduleWorkoutReminders(days: number[], hour: number, minute: number): Promise<void>;
   cancelWorkoutReminders(): Promise<void>;
 };
+// #89: `days` are 0 = Sunday … 6 = Saturday. Notification ids: rest 1001; reminders 2001 + weekday (2001–2007).
+// Standalone exports (#89): ensureNotificationPermissionOnce(): Promise<boolean> — prompts at most once per install,
+//   recorded under `fitwizard-notif-asked` in device storage; hasNotificationPermission(); the id constants.
 useStatusBarTheme(): void;   // keeps the status bar style in step with themeStore
+useKeyboard(options?: { scrollFocusedIntoView?: boolean }): { isOpen: boolean; height: number }; // added #83; iOS sets resize mode, Android skips the iOS-only calls
 ```

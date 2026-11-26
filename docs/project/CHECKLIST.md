@@ -2,7 +2,7 @@
 
 > The quick view: what's done, what's in progress, and what's left. It's updated after every step.
 > `BOARD.md` has the full day-by-day grid and the gate checklists; this page is the short version.
-> **Last updated:** 2026-11-19. **Wave 1 is complete** (all PRs through #69 merged); Gate 1 is waiting on Lincoln's L10 and L11.
+> **Last updated:** 2026-11-25. **Wave 1 is complete** (all PRs through #69 merged); Gate 1 is waiting on Lincoln's L10 and L11. **Wave 2 Day 5 is merged** (#80–#86), and Day 6 for D, F and H (#87, #89, #90), except Lane C's #75, which waits on your `$pageview` decision.
 
 ## Done
 
@@ -52,15 +52,30 @@
 | 42 | **Merged #74** Lane H Day 4: you stay signed in after closing the app or browser (ADR 12); translated sign-in errors | `d2a49ae` |
 | 43 | **Merged #76** Lane B Day 4: 14 → 11 taps to the first plan | `6c63b2a` |
 | 44 | **Merged #78** Lane D Day 4: lifter-loop end-to-end test in CI; every set loggable; finish and rate a workout | `5acbeac` |
+| 45 | **Merged #77** Lane A Day 4: privacy policy and terms rewritten from the data inventory; web deletion section | `7a04c58` |
+| 46 | **Merged #80** Lane F Day 5: the unused Express server is gone; plans go only to your Supabase account | `bea0fb7` |
+| 47 | **Merged #81** Lane E Day 7: Sign out button on Profile; sign-out syncs, warns about unsent changes, then clears this device; plans on the sync engine. Lane E's Wave 2 is done | `2b4d190` |
+| 48 | **Merged #83** Lane H Day 5: status bar follows the theme, splash waits for your data, keyboard keeps the field in view, native share sheet (unverified on devices) | `8a92b6a` |
+| 49 | **Merged #82** Lane B Day 5: real numbers on plan cards, logger labels, no empty Full Body day, Start Over translated, stepper names for screen readers | `354edc6` |
+| 50 | **Merged #84** Lane D Day 5: named sliders, readable RIR colours, 44 px targets, Reduce Motion, muscle selector follows the theme; accessibility scan in the E2E | `9d23b1b` |
+| 51 | **Merged #85** Coordinator: the Light / System / Dark crossfade is back | `35a52f1` |
+| 52 | **Merged #86** Coordinator: Day 6 briefs with Day 5 carry-overs for D, F, H | `aaa63b7` |
+| 53 | **Merged #87** Lane F Day 6: circle queries and plan deletions tested against the access rules; no new migration needed | `cb93576` |
+| 54 | **Merged #89** Lane H Day 6: rest-over notification and workout reminders on your training days (phones only; unverified on devices) | `0ce6a64` |
+| 55 | **Merged #90** Lane D Day 6: Enter in the plan builder no longer skips a step; the keyboard no longer hides Complete Set | `e88c727` |
+| 56 | Lane A Day 5: Apple and Google privacy form answers and the compliance sheet (age rating, health declaration, disclaimer, deletion, encryption) | `docs/store/` (#88) |
 
 ## In progress
 
 | What | Status |
 |---|---|
 | Gate 1 | **Waiting on you:** L10 (staging Supabase) and L11 (email-code template). Everything else for Gate 1 is merged |
+| Lane C Day 4 (#75) | **Waiting on you:** OK the contract #9 `$pageview` change |
+| Store forms | **Waiting on you:** the questions in `docs/store/APPLE_PRIVACY.md`, `GOOGLE_DATA_SAFETY.md` and `COMPLIANCE.md` (Health, minimum age, L6 keys, domain, support email). Google's wording couldn't be checked from here |
 
 ## Next up, in order
 
+0. **Day 6 left:** listing copy and screenshots (Lane A). Then Day 7: v1.1.0 (A), audit gate (D), Android CI (H).
 1. **Gate 1 (you):** create the staging Supabase project and apply migrations 001–008 (repair 001–006 first; steps in `docs/SUPABASE_MIGRATIONS.md`), add the email-code template (`docs/IOS_DEVELOPMENT.md`, "Auth email"), deploy `delete-account` (its README), then run the checklist in `BOARD.md`.
 2. **Wave 2 / Day 4 for each lane** after Gate 1: privacy policy (A), fewer taps to a first plan (B), analytics (C), end-to-end test (D), deletion UI and export v3 (F), lasting sessions (H).
 3. **Lane E Day 7:** sync before sign-out with an unsent-changes warning, then clear the device; move plans onto the sync engine.
@@ -88,11 +103,12 @@
 - [x] Sync engine core (Lane E Day 4)
 - [x] Sync collections (Lane E Day 5)
 - [x] Sync triggers, first upload, Profile indicator (Lane E Day 6)
-- [ ] Sync on sign-out, plans on the engine (Lane E Day 7); after this, account sign-out can clear device data
+- [x] Sync on sign-out, plans on the engine (Lane E Day 7, #81); sign-out now clears device data
 - [x] Account deletion in the app (Lane F, #73; the function is deployed at L10)
-- [ ] Sessions that last (✅ #74); native plugins and notifications (Lane H)
-- [ ] Analytics and consent (Lane C, #75 open); end-to-end test (✅ #78) and accessibility (Lane D)
-- [ ] Privacy policy, store forms, listing copy (Lane A)
+- [ ] Sessions that last (✅ #74); native plugins (✅ #83); notifications (✅ #89)
+- [ ] Analytics and consent (Lane C, #75 open); end-to-end test (✅ #78) and accessibility part 1 (✅ #84)
+- [ ] Privacy policy (✅ #77), store forms (#88), listing copy (Lane A Day 6)
+- [x] Express retired (Lane F Day 5, #80)
 - [ ] **Gate 2:** production database, v1.1.0 to `main`, first store test builds (needs L4)
 
 ### Wave 3: Devices, translation, submission prep (Days 8–10)
@@ -127,7 +143,7 @@
 ## Open questions for Lincoln
 Each has a default that applies unless you change it.
 1. Weekly progress counts **finished workouts**, with the goal set from your plan's days per week. (Default: yes.)
-2. **Signing out keeps training data on the device** until cloud sync exists. (Default: yes.)
+2. ~~Signing out keeps training data on the device until cloud sync exists.~~ **Superseded by #81:** sign-out now syncs first, warns about unsent changes, then clears the device.
 3. Lane D's icons are about 70 KB against a 60 KB target, because going smaller visibly bands the gradient. (Default: keep them.)
 4. Lane H asks whether to lock Android to portrait as well, to match iOS. (Default: yes. **Done** in #60.)
 5. **Which region is your Supabase project in?** It goes in the privacy policy. (No default; Lane A leaves a placeholder.)
@@ -136,3 +152,7 @@ Each has a default that applies unless you change it.
 8. People who share a circle can see each other's whole profile row (goal, experience, timezone). (Default: yes; revisit when Circles turns on.)
 9. When a circle's creator deletes their account, the circle stays for its other members. (Default: yes.)
 10. Coach mode switched on before the flag existed is switched off and isn't restored if coach is turned on later. (Default: acceptable.)
+11. **Store forms:** declare body measurements, nutrition and readiness as **Health** as well as Fitness? (Default: yes; then Lane H updates the iOS privacy manifest.)
+12. **Minimum age:** 13? (No default; the policy says "13 [Lincoln to confirm]".)
+13. **Support email** for the privacy policy and Play's deletion page. (No default; must not be a personal address.)
+14. **Deleted items in the cloud (DEBT-097):** keep their content until account deletion (Play's "delete data without deleting the account" stays **No**), or purge it when an item is deleted (then **Yes**)? (No default; the form says No until you decide.)

@@ -48,7 +48,7 @@ With fewer agents, coding takes about 2 to 2.5 times as many days. The gates sta
 ## Rules for every agent
 
 1. **Read first:** `CLAUDE.md`, the "Common Gotchas" section of `docs/SESSION_LOG.md`, this file, `CONTRACTS.md`, and your lane brief. Until Lane A's Day 1 lands, treat the older lens docs (`ENGINEERING.md`, `SECURITY.md`, `ORCHESTRATION.md` and the others) as unreliable. The README and the roadmap are accurate.
-2. **Setup:** Node 22, then `npm ci`. Cloud sessions do not come with dependencies installed. Run `npm --prefix server ci` only if your day touches `server/`.
+2. **Setup:** Node 22, then `npm ci`. Cloud sessions do not come with dependencies installed.
 3. **Green before PR:** `npm run lint` (0 errors), `npm run typecheck`, `npm run test:run`. New logic gets a Vitest test beside it.
 4. **UI text** goes through `t('key', 'English fallback')`. Add every new key to `en.json` and `es.json`. The ratchet in `src/test/fixtures/localeGaps.json` may shrink but must never grow.
 5. **Styling:** use semantic tokens only (`bg-muted`, `text-foreground`). Tokens live in the `@theme` block of `src/index.css`. Never edit `src/components/ui/*`.
