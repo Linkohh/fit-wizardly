@@ -206,6 +206,11 @@ Stores other than `authStore`'s sign-in area, sync code, `supabase/`, routing.
 
 ## Day 5: Native helpers, part 1 (2.4)
 
+> **Carried over from Day 4 handoffs (added 2026-11-23 by the coordinator).** Do these too:
+> - Check the real Supabase error codes behind `sendErrorKey.ts` once staging exists (Gate 1). Until then, leave the mapping as is.
+> - Sessions now last across restarts (#74), so `startSync` runs at every app start for signed-in users. Keep `appStateChange` wiring that Lane E's sync triggers already use (#66) working when you add the status bar, splash and keyboard plugins.
+
+
 1. Install the plugins:
    ```sh
    npm install @capacitor/status-bar @capacitor/splash-screen @capacitor/keyboard @capacitor/share
@@ -223,6 +228,11 @@ Stores other than `authStore`'s sign-in area, sync code, `supabase/`, routing.
 ---
 
 ## Day 6: Local notifications (2.4)
+
+> **Carried over from Day 5 merges (added 2026-11-25 by the coordinator).**
+> - **Storage:** keep `fitwizard-notif-asked` and the reminder settings in device storage (`@capacitor/preferences` on native, the existing `appStorage` pattern), not `localStorage` (ADR 11). They are settings, not training data, so they don't sync.
+> - **Optional, Lane F #80 handoff:** `validateRemoteEndpoint`'s `allowRelative` option in `src/lib/supabase.ts` lost its only caller (`apiClient.ts`). Remove it and its test in `src/lib/supabase.test.ts`, or leave both and say why.
+> - **Splash fallback:** stays as is (default, no change in `main.tsx`) until Lincoln answers your Day 5 question.
 
 1. Run `npm install @capacitor/local-notifications`, then `npx cap sync`.
 2. `useLocalNotifications()` (contract #10):

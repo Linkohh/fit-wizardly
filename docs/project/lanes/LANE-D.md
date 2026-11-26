@@ -160,6 +160,11 @@ Then:
 
 ## Day 5: Accessibility, part 1 (3.4)
 
+> **Carried over from Day 4 handoffs (added 2026-11-23 by the coordinator).** Do these too:
+> - Accessible names are missing on the 4 readiness sliders (`ReadinessCheck.tsx`), the plate-calculator button, and the RIR slider thumb in `SetLogger.tsx` (shadcn `Slider` puts `aria-label` on the root, not the thumb; pass it to the thumb without editing `src/components/ui/*`). Fix all three, and add the checks to the E2E or a unit test.
+> - Keep the lifter-loop E2E green. If you change any labels it uses, update its locators in the same PR.
+
+
 1. `SetLogger.tsx`:
    - RIR (reps in reserve) levels are shown by colour only. Add the `getRIRLabel()` text visibly next to the number, or as `aria-label` plus a visible short label.
    - Keep the 44 px minimum touch targets (`min-h-[44px] min-w-[44px]`).
@@ -175,6 +180,11 @@ Then:
 ---
 
 ## Day 6: Wizard Enter key (DEBT-025)
+
+> **Carried over from Day 5 merges (added 2026-11-25 by the coordinator).** Do these too:
+> - **Keyboard on phones (Lane H #83 handoff):** in `src/components/logging/SetLogger.tsx`, call `useKeyboard()` once at the top (`import { useKeyboard } from '@/hooks/useKeyboard';`). If the "Log set" button can be covered, pad the scroll container with `isOpen ? height : undefined`. It does nothing on the web; add a unit test that the hook is mounted, and keep the lifter-loop E2E green.
+> - **DEBT-106 is fixed (#82):** remove `'wizard:label-content-name-mismatch'` from `KNOWN_AXE_FINDINGS` in `playwright/lifter-loop.spec.ts`, then run the lifter loop with `--repeat-each=5` and report the result.
+> - **Theme fade (#85):** taps on Light/System/Dark now run a View Transition (`src/lib/themeFade.ts`). If your axe scans or new tests change the theme, read the theme after the change has applied, as `armThemeSyncProbe` in `playwright/header.mobile-drawer.spec.ts` now does.
 
 - **Problem:** pressing Enter on a focused muscle in the anatomy step selects it **and** advances the wizard. The window-level shortcut in `src/pages/Wizard.tsx` sees the event after the SVG control has already handled it.
 - **Fix:** in the window `keydown` handler, ignore events where `event.defaultPrevented` is true, or whose target is inside the muscle canvas or any `[role="button"]`, `input`, `textarea` or `select`. Make sure the MCL control calls `preventDefault()` when it handles Enter.

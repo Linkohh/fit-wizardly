@@ -1,6 +1,7 @@
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { changeThemeWithFade, themeShownBy } from '@/lib/themeFade';
 import type { ThemeMode } from '@/stores/themeStore';
 
 const THEME_MODE_OPTIONS = [
@@ -49,7 +50,7 @@ export function ThemeModePill({
           type="button"
           aria-label={t(labelKey, fallback)}
           aria-pressed={mode === optionMode}
-          onClick={() => onChange(optionMode)}
+          onClick={() => changeThemeWithFade(themeShownBy(optionMode),() => onChange(optionMode))}
           className={cn(buttonClassName)}
           data-selected={mode === optionMode}
         >

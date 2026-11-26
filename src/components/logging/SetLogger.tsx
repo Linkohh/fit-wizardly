@@ -1,19 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { PlateCalculatorDialog } from '@/components/tools/PlateCalculator';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
+import { LabelledSlider } from '@/components/a11y/LabelledSlider';
 import { Badge } from '@/components/ui/badge';
 import { Check, ChevronUp, ChevronDown } from 'lucide-react';
 import type { SetLog, WeightUnit } from '@/types/fitness';
 import { cn } from '@/lib/utils';
 import { calculateOneRepMax } from '@/lib/progressionEngine';
+import { useKeyboard } from '@/hooks/useKeyboard';
 
 interface SetLoggerProps {
     setNumber: number;
     targetReps: string;
     targetRIR: number;
+    /** The set before this one; used to prefill weight, reps and effort. */
     previousSet?: SetLog;
+    /** This set's own saved log, if any. A completed log shows the set as done (e.g. after a reload). */
+    loggedSet?: SetLog;
     lastPerformance?: SetLog;
     defaultWeightUnit?: WeightUnit;
     onComplete: (setLog: SetLog) => void;
@@ -25,33 +29,63 @@ export function SetLogger({
     targetReps,
     targetRIR,
     previousSet,
+    loggedSet,
     lastPerformance,
     defaultWeightUnit = 'lbs',
     onComplete,
     isActive = false,
 }: SetLoggerProps) {
-    const [weight, setWeight] = useState(previousSet?.weight ?? lastPerformance?.weight ?? 0);
-    const [reps, setReps] = useState(previousSet?.reps ?? lastPerformance?.reps ?? 0);
-    const [rir, setRIR] = useState(previousSet?.rir ?? targetRIR);
-    const [effortMode, setEffortMode] = useState<'rir' | 'rpe'>(previousSet?.effortMode ?? 'rir');
-    const [rpe, setRPE] = useState<number>(previousSet?.rpe ?? Math.max(6, Math.min(10, 10 - targetRIR)));
-    const [completed, setCompleted] = useState(previousSet?.completed ?? false);
+    // Native keyboard (contract #10): scrolls the focused field into view; does nothing on the web.
+    const keyboard = useKeyboard();
+    // The hook is global and the logger renders one card per set, so only the card holding
+    // focus gets the keyboard clearance.
+    const [hasFocus, setHasFocus] = useState(false);
+    const savedLog = loggedSet?.completed ? loggedSet : undefined;
+    const seed = savedLog ?? previousSet;
+    const [weight, setWeight] = useState(seed?.weight ?? lastPerformance?.weight ?? 0);
+    const [reps, setReps] = useState(seed?.reps ?? lastPerformance?.reps ?? 0);
+    const [rir, setRIR] = useState(seed?.rir ?? targetRIR);
+    const [effortMode, setEffortMode] = useState<'rir' | 'rpe'>(seed?.effortMode ?? 'rir');
+    const [rpe, setRPE] = useState<number>(seed?.rpe ?? Math.max(6, Math.min(10, 10 - (seed?.rir ?? targetRIR))));
+    // previousSet is the set before this one (a prefill hint), never this set's own log,
+    // so its `completed` flag must not carry over. Copying it locked every second set.
+    const [completed, setCompleted] = useState(Boolean(savedLog));
+    const fieldId = useId();
+    const weightInputId = `${fieldId}-weight`;
+    const repsInputId = `${fieldId}-reps`;
 
     // Parse target reps range
     const repRange = targetReps.includes('-')
         ? targetReps.split('-').map(Number)
         : [Number(targetReps), Number(targetReps)];
 
+    // Follow this set's saved log when the caller provides one (it changes when the logger
+    // moves to another exercise and reuses this component).
     useEffect(() => {
-        if (previousSet) {
+        if (!loggedSet) return;
+        if (loggedSet.completed) {
+            setWeight(loggedSet.weight);
+            setReps(loggedSet.reps);
+            setRIR(loggedSet.rir);
+            setEffortMode(loggedSet.effortMode ?? 'rir');
+            setRPE(loggedSet.rpe ?? Math.max(6, Math.min(10, 10 - loggedSet.rir)));
+            setCompleted(true);
+        } else {
+            setCompleted(false);
+        }
+    }, [loggedSet]);
+
+    // Prefill from the previous set until this set is logged; a logged set keeps its own values.
+    useEffect(() => {
+        // A saved log wins; both effects run in the same commit when the row is reused.
+        if (previousSet && !completed && !loggedSet?.completed) {
             setWeight(previousSet.weight);
             setReps(previousSet.reps);
             setRIR(previousSet.rir);
             setEffortMode(previousSet.effortMode ?? 'rir');
             setRPE(previousSet.rpe ?? Math.max(6, Math.min(10, 10 - previousSet.rir)));
-            setCompleted(previousSet.completed);
         }
-    }, [previousSet]);
+    }, [previousSet, completed, loggedSet]);
 
     const handleComplete = () => {
         const derivedRIR = effortMode === 'rpe'
@@ -85,10 +119,11 @@ export function SetLogger({
         const displayRIR = effortMode === 'rpe'
             ? Math.max(0, Math.min(5, Math.round((10 - rpe) * 2) / 2))
             : rir;
-        if (displayRIR <= 1) return 'text-red-500';
-        if (displayRIR <= 2) return 'text-orange-500';
-        if (displayRIR <= 3) return 'text-yellow-500';
-        return 'text-green-500';
+        // -700 shades in light theme for WCAG AA contrast; the label text carries the meaning too.
+        if (displayRIR <= 1) return 'text-red-700 dark:text-red-400';
+        if (displayRIR <= 2) return 'text-orange-700 dark:text-orange-400';
+        if (displayRIR <= 3) return 'text-amber-700 dark:text-yellow-400';
+        return 'text-green-700 dark:text-green-400';
     };
 
     const getRIRLabel = () => {
@@ -108,6 +143,15 @@ export function SetLogger({
 
     return (
         <div
+            role="group"
+            aria-label={`Set ${setNumber}`}
+            onFocus={() => setHasFocus(true)}
+            onBlur={(event) => {
+                const next = event.relatedTarget;
+                if (!(next instanceof Node && event.currentTarget.contains(next))) setHasFocus(false);
+            }}
+            // Room below "Complete Set" so the open keyboard can't cover it.
+            style={keyboard.isOpen && hasFocus ? { paddingBottom: keyboard.height } : undefined}
             className={cn(
                 'p-4 rounded-xl border transition-all duration-300',
                 isActive
@@ -141,7 +185,7 @@ export function SetLogger({
                     )}
                 </div>
                 {completed && (
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check className="h-5 w-5 text-green-500" role="img" aria-label="Set completed" />
                 )}
             </div>
 
@@ -149,7 +193,7 @@ export function SetLogger({
             <div className="grid grid-cols-2 gap-4 mb-4">
                 {/* Weight Input */}
                 <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
+                    <label htmlFor={weightInputId} className="text-xs text-muted-foreground mb-1 block">
                         Weight ({defaultWeightUnit})
                     </label>
                     <div className="flex items-center gap-1">
@@ -159,12 +203,15 @@ export function SetLogger({
                             className="h-12 w-12 shrink-0"
                             onClick={() => adjustWeight(-1)}
                             disabled={completed}
+                            aria-label="Decrease weight"
                         >
                             <ChevronDown className="h-6 w-6" />
                         </Button>
                         <div className="relative">
                             <Input
+                                id={weightInputId}
                                 type="number"
+                                inputMode="decimal"
                                 value={weight}
                                 onChange={(e) => setWeight(Number(e.target.value))}
                                 className="h-12 w-20 text-center text-xl font-semibold px-0 z-10"
@@ -183,6 +230,7 @@ export function SetLogger({
                             className="h-12 w-12 shrink-0"
                             onClick={() => adjustWeight(1)}
                             disabled={completed}
+                            aria-label="Increase weight"
                         >
                             <ChevronUp className="h-6 w-6" />
                         </Button>
@@ -191,7 +239,7 @@ export function SetLogger({
 
                 {/* Reps Input */}
                 <div>
-                    <label className="text-xs text-muted-foreground mb-1 block">
+                    <label htmlFor={repsInputId} className="text-xs text-muted-foreground mb-1 block">
                         Reps
                     </label>
                     <div className="flex items-center gap-1">
@@ -201,20 +249,23 @@ export function SetLogger({
                             className="h-12 w-12 shrink-0"
                             onClick={() => adjustReps(-1)}
                             disabled={completed}
+                            aria-label="Decrease reps"
                         >
                             <ChevronDown className="h-6 w-6" />
                         </Button>
                         <Input
+                            id={repsInputId}
                             type="number"
+                            inputMode="numeric"
                             value={reps}
                             onChange={(e) => setReps(Number(e.target.value))}
                             className={cn(
                                 'h-12 text-center text-xl font-semibold px-0',
                                 reps >= repRange[0] && reps <= repRange[1]
-                                    ? 'text-green-600 dark:text-green-400'
+                                    ? 'text-green-700 dark:text-green-400'
                                     : reps < repRange[0]
-                                        ? 'text-yellow-600 dark:text-yellow-400'
-                                        : 'text-blue-600 dark:text-blue-400'
+                                        ? 'text-amber-700 dark:text-yellow-400'
+                                        : 'text-blue-700 dark:text-blue-400'
                             )}
                             disabled={completed}
                         />
@@ -224,6 +275,7 @@ export function SetLogger({
                             className="h-12 w-12 shrink-0"
                             onClick={() => adjustReps(1)}
                             disabled={completed}
+                            aria-label="Increase reps"
                         >
                             <ChevronUp className="h-6 w-6" />
                         </Button>
@@ -243,6 +295,7 @@ export function SetLogger({
                             className="h-7 px-3 text-xs"
                             onClick={() => setEffortMode('rir')}
                             disabled={completed}
+                            aria-pressed={effortMode === 'rir'}
                         >
                             RIR
                         </Button>
@@ -253,6 +306,7 @@ export function SetLogger({
                             className="h-7 px-3 text-xs"
                             onClick={() => setEffortMode('rpe')}
                             disabled={completed}
+                            aria-pressed={effortMode === 'rpe'}
                         >
                             RPE
                         </Button>
@@ -270,7 +324,7 @@ export function SetLogger({
                         {effortMode === 'rir' ? `${rir}` : `${rpe.toFixed(1)} RPE`} - {getRIRLabel()}
                     </span>
                 </div>
-                <Slider
+                <LabelledSlider
                     value={[effortMode === 'rir' ? rir : rpe]}
                     onValueChange={(value) => {
                         if (effortMode === 'rir') {
@@ -284,8 +338,8 @@ export function SetLogger({
                     step={effortMode === 'rir' ? 1 : 0.5}
                     disabled={completed}
                     className="w-full"
-                    aria-label={`Effort: ${effortMode === 'rir' ? rir : rpe} - ${getRIRLabel()}`}
-                    aria-valuetext={getRIRLabel()}
+                    thumbLabel={effortMode === 'rir' ? 'Reps in reserve' : 'Rate of perceived exertion'}
+                    thumbValueText={`${effortMode === 'rir' ? rir : rpe.toFixed(1)} - ${getRIRLabel()}`}
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     {effortMode === 'rir' ? (

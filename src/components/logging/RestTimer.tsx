@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Minus, SkipForward } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useInteractionFeedback } from '@/hooks/useInteractionFeedback';
+import { startRestNotificationSync } from '@/hooks/restNotificationSync';
 
 export function RestTimer() {
   const { t } = useTranslation();
@@ -11,6 +12,13 @@ export function RestTimer() {
   const { emit } = useInteractionFeedback();
   const [timeLeft, setTimeLeft] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  // Native only: the rest-end notification follows the workout's rest timer
+  // through a store listener that outlives this component (see
+  // restNotificationSync.ts). Starting it here is a no-op if the app-start
+  // hook already did.
+  useEffect(() => {
+    startRestNotificationSync();
+  }, []);
 
   useEffect(() => {
     if (!activeWorkout?.restTimerEndTime) {

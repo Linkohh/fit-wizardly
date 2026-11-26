@@ -131,12 +131,8 @@ export default defineConfig(({ mode }) => {
       // devices can connect during Capacitor live reload. Vite's default host
       // check (localhost + direct IPs) stays active to block DNS rebinding.
       host: "localhost",
-      // 8080 stays the default (ngrok, ios:live, server CORS); PORT lets parallel worktrees run side by side.
+      // 8080 stays the default (ngrok, ios:live); PORT lets parallel worktrees run side by side.
       port: Number(process.env.PORT) || 8080,
-      proxy: {
-        "/plans": "http://localhost:3001",
-        "/health": "http://localhost:3001",
-      },
     },
     plugins: [
       wgerProxyPlugin(),
@@ -222,6 +218,12 @@ export default defineConfig(({ mode }) => {
           }
 
           if (id.includes("node_modules")) {
+            // Sentry (lazy, consent + DSN gated). First, so "/react/" in
+            // @sentry/react paths can't pull it into vendor-react (DEBT-091).
+            if (id.includes("/node_modules/@sentry/")) {
+              return "vendor-sentry";
+            }
+
             // Core React ecosystem (Critical)
             if (
               id.includes("react-router") ||
@@ -279,6 +281,7 @@ export default defineConfig(({ mode }) => {
               !dep.includes("vendor-pdf") &&
               !dep.includes("vendor-charts") &&
               !dep.includes("vendor-auth") &&
+              !dep.includes("vendor-sentry") &&
               !dep.includes("feature-exercises")
             );
           });

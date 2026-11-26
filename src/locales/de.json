@@ -149,6 +149,16 @@
             "next": "Weiter",
             "generate": "Plan erstellen"
         },
+        "start_over": {
+            "button": "Neu beginnen",
+            "title": "Neu beginnen?",
+            "description": "Dadurch werden alle aktuellen Auswahlen (Ziel, Ausrüstung, Muskeln) gelöscht und du kehrst zum Anfang zurück.",
+            "question": "Möchtest du wirklich fortfahren?",
+            "cancel": "Abbrechen",
+            "confirm": "Ja, neu beginnen",
+            "toast_title": "Assistent zurückgesetzt",
+            "toast_description": "Bereit für einen Neustart! 🚀"
+        },
         "progress": "{{percent}}% abgeschlossen",
         "goal": {
             "options": {
@@ -179,6 +189,13 @@
                     "description": "Umfangreiche Trainingserfahrung (3+ Jahre)"
                 }
             }
+        },
+        "anatomy": {
+            "auto_pick": "Lass FitWizard wählen",
+            "auto_pick_hint": "Wählt einen ausgewogenen Ganzkörper-Fokus. Du kannst ihn auf der Karte ändern."
+        },
+        "constraints": {
+            "no_injuries_continue": "Keine Verletzungen, weiter"
         },
         "schedule": {
             "title": "Trainingsplan festlegen",
@@ -342,6 +359,17 @@
             "unread": "Neue Versionshinweise"
         }
     },
+    "notifications": {
+        "rest_end_body": "Pause vorbei. Zeit für deinen nächsten Satz.",
+        "reminder_body": "Zeit zum Trainieren. Dein Workout ist bereit.",
+        "reminders_title": "Trainingserinnerungen",
+        "reminders_description": "Eine Erinnerung an deinen Trainingstagen, zur Uhrzeit deiner Wahl.",
+        "reminders_toggle": "An Trainingstagen erinnern",
+        "reminders_days": "Tage",
+        "reminders_no_days": "Wähle mindestens einen Tag für Erinnerungen.",
+        "reminders_time": "Uhrzeit",
+        "permission_denied": "Mitteilungen für FitWizard sind aus. Schalte sie in den Einstellungen deines Telefons ein."
+    },
     "nutrition": {
         "shortcuts": {
             "copy_yesterday": "Gestern kopieren",
@@ -398,6 +426,21 @@
     },
     "achievements": {
         "badge_unlocked": "Abzeichen freigeschaltet: {{name}}"
+    },
+    "workout": {
+        "loading": "Training wird geladen...",
+        "preparing": "Deine Einheit wird vorbereitet",
+        "cancel": "Abbrechen",
+        "cancel_dialog_title": "Training abbrechen?",
+        "cancel_dialog_desc": "Dein Fortschritt geht verloren. Möchtest du dieses Training wirklich abbrechen?",
+        "cancel_dialog_continue": "Weitermachen",
+        "cancel_dialog_confirm": "Training abbrechen",
+        "skip_exercise": "Übung überspringen",
+        "notes": "Trainingsnotizen",
+        "notes_placeholder": "Wie hat es sich angefühlt? Gab es Probleme?",
+        "difficulty_title": "Wie war das Training?",
+        "difficulty_desc": "Bewerte die insgesamt empfundene Anstrengung.",
+        "rest_timer": "Pause"
     },
     "workoutResume": {
         "title": "Du hast ein unvollendetes Training",

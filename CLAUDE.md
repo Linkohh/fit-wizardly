@@ -117,7 +117,6 @@ Routing:      React Router 7
 Styling:      Tailwind CSS 4 (CSS-first; tokens in the @theme block of src/index.css)
               + shadcn/ui + Framer Motion 12
 Serverless:   Vercel functions in api/ (exercise search, quotes, wger proxy)
-Backend:      Optional local Express API (server/src/index.ts) on port 3001, dev only; uses Zod 3
 Database:     Supabase (PostgreSQL + Auth + Realtime)
 Validation:   Zod 4 (client)
 I18n:         i18next (4 locales: en, es, de, pt)
@@ -143,9 +142,7 @@ src/
 ├── locales/            # i18n translation files (en, es, de, pt)
 └── data/               # Static data (changelog, exercise library)
 
-api/                    # Vercel serverless functions
-server/
-└── src/index.ts        # Optional local Express API (single file; plus schemas/ and types/)
+api/                    # Vercel serverless functions (the only server code; Express was retired in #80)
 supabase/
 └── migrations/         # SQL migrations (numbered 001_…, 002_…)
 docs/
@@ -579,7 +576,7 @@ if (result.success) {
 
 | Command | Purpose |
 |---------|---------|
-| `npm run dev` | Start Vite dev server on port 8080 (`npm run server:dev` starts the optional Express API on 3001) |
+| `npm run dev` | Start Vite dev server on port 8080 (its plugin also serves the `/api` exercise search, quotes and wger proxy) |
 | `npm run build` | Production build |
 | `npm run preview` | Preview production build |
 | `npm run test` | Run Vitest in watch mode |

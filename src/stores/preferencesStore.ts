@@ -218,6 +218,7 @@ export const usePreferencesStore = create<PreferencesState>()(
 
         try {
           await syncPreferencesRecord(user.id, snapshot);
+          if (useAuthStore.getState().user?.id !== user.id) return;
           set((state) => ({
             lastSyncedAt: new Date().toISOString(),
             offlineQueue: state.offlineQueue.filter((action) => !syncedIds.has(action.id)),
@@ -242,7 +243,9 @@ export const usePreferencesStore = create<PreferencesState>()(
 
         try {
           const data = await loadPreferencesRecord(user.id);
-          if (!data) {
+          // Signed out (or switched account) while the request was in flight: don't
+          // put the old account's favourites back on the device (review finding on #81).
+          if (!data || useAuthStore.getState().user?.id !== user.id) {
             return;
           }
 

@@ -198,6 +198,11 @@ async function pushChanges<T>(client: SyncClient, collection: SyncCollection<T>,
 
 let running: Promise<SyncResult> | null = null;
 
+/** Resolves when the sync in progress (if any) has finished. Used before erasing the device at sign-out. */
+export async function waitForRunningSync(): Promise<void> {
+  if (running) await running.catch(() => undefined);
+}
+
 /**
  * Syncs every registered collection for the signed-in user. Calls made while
  * a sync is running share it. One collection failing doesn't stop the others.

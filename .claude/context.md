@@ -50,13 +50,12 @@ User views and follows their plan:
 | Styling | Tailwind CSS 4 (CSS-first; tokens in the `@theme` block of `src/index.css`) + shadcn/ui |
 | Animation | Framer Motion 12 |
 | State | Zustand 5 (client) + TanStack Query 5 (server) |
-| Validation | Zod 4 (client); `server/` uses Zod 3 |
+| Validation | Zod 4 |
 | I18n | i18next, 4 locales: `en`, `es`, `de`, `pt` |
 | Testing | Vitest 4 + Testing Library |
 | Auth | Supabase Auth (email sign-in link) |
 | Database | Supabase (PostgreSQL) |
 | Serverless | Vercel functions in `api/` (exercise search, quotes, wger proxy) |
-| Backend | Optional local Express API (`server/src/index.ts`) on port 3001, dev only |
 | Native | Capacitor 8 (iOS uses Swift Package Manager) |
 
 ## Key Directories
@@ -73,9 +72,7 @@ src/
 ├── stores/        # Zustand stores
 └── locales/       # i18n translations (en, es, de, pt)
 
-api/               # Vercel serverless functions
-server/
-└── src/index.ts   # Optional Express API (single file, dev only)
+api/               # Vercel serverless functions (the only server code)
 supabase/
 └── migrations/    # Numbered SQL migrations
 
@@ -100,6 +97,5 @@ See `.env.example` for the full list. The main ones:
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase publishable (anon) key |
 | `VITE_FEATURE_CIRCLES`, `VITE_FEATURE_COACH` | Feature flags, off by default (read through `src/lib/featureFlags.ts`) |
-| `VITE_PLANS_PROVIDER`, `VITE_USE_API`, `VITE_API_URL` | Plans persistence provider and the optional Express API |
 | `API_NINJAS_API_KEY` | Server-only key for the Vercel functions. Never prefix with `VITE_` |
-| `PORT` | Express server port (3001), dev only |
+| `ALLOWED_ORIGINS` | Extra origins allowed to call the Vercel functions (`api/_lib/guard.ts`) |

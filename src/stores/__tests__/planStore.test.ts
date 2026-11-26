@@ -3,10 +3,6 @@ import type { Plan } from '@/types/fitness';
 
 const mocks = vi.hoisted(() => ({
   currentUser: { id: 'user-1' } as { id: string } | null,
-  deletePlanRemote: vi.fn(),
-  getPlansRemote: vi.fn(),
-  isPlansRemoteEnabled: vi.fn(),
-  savePlanRemote: vi.fn(),
   toastError: vi.fn(),
   analyzePerformance: vi.fn(),
   generateWeeklySummary: vi.fn(),
@@ -29,13 +25,6 @@ async function loadPlanStore() {
         user: mocks.currentUser,
       }),
     },
-  }));
-
-  vi.doMock('@/lib/plans/plansClient', () => ({
-    deletePlanRemote: mocks.deletePlanRemote,
-    getPlansRemote: mocks.getPlansRemote,
-    isPlansRemoteEnabled: mocks.isPlansRemoteEnabled,
-    savePlanRemote: mocks.savePlanRemote,
   }));
 
   vi.doMock('@/lib/progressionEngine', () => ({
@@ -80,56 +69,6 @@ describe('planStore syncWithBackend', () => {
     vi.clearAllMocks();
     window.localStorage.clear();
     mocks.currentUser = { id: 'user-1' };
-    mocks.isPlansRemoteEnabled.mockReturnValue(true);
-  });
-
-  it('prefers remote plans in merged history and restores currentPlan to the remote copy', async () => {
-    const remotePlan = buildPlan('plan-1', 'Remote plan');
-    const localPlan = buildPlan('plan-1', 'Local plan');
-    const localOnlyPlan = buildPlan('plan-2', 'Local-only plan');
-    mocks.getPlansRemote.mockResolvedValue([remotePlan]);
-
-    const { usePlanStore } = await loadPlanStore();
-    usePlanStore.setState({
-      currentPlan: localPlan,
-      planHistory: [localPlan, localOnlyPlan],
-      workoutLogs: [],
-      currentWeek: 1,
-      activeWorkout: null,
-      personalRecords: [],
-      preferredWeightUnit: 'lbs',
-    });
-
-    await usePlanStore.getState().syncWithBackend('user-1');
-
-    const state = usePlanStore.getState();
-    expect(state.planHistory).toEqual([remotePlan, localOnlyPlan]);
-    expect(state.currentPlan).toEqual(remotePlan);
-    expect(mocks.savePlanRemote).toHaveBeenCalledTimes(1);
-    expect(mocks.savePlanRemote).toHaveBeenCalledWith(localOnlyPlan, 'user-1');
-  });
-
-  it('restores currentPlan from the first merged plan when no current plan is selected', async () => {
-    const remotePlan = buildPlan('plan-3', 'Remote plan');
-    const localPlan = buildPlan('plan-4', 'Local-only plan');
-    mocks.getPlansRemote.mockResolvedValue([remotePlan]);
-
-    const { usePlanStore } = await loadPlanStore();
-    usePlanStore.setState({
-      currentPlan: null,
-      planHistory: [localPlan],
-      workoutLogs: [],
-      currentWeek: 1,
-      activeWorkout: null,
-      personalRecords: [],
-      preferredWeightUnit: 'lbs',
-    });
-
-    await usePlanStore.getState().syncWithBackend('user-1');
-
-    const state = usePlanStore.getState();
-    expect(state.planHistory).toEqual([remotePlan, localPlan]);
-    expect(state.currentPlan).toEqual(remotePlan);
   });
 
   it('never writes plans or workout data to localStorage', async () => {

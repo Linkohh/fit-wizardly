@@ -12,13 +12,13 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         hideWebViewScrollIndicators();
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         hideWebViewScrollIndicators();
     }

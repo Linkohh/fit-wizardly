@@ -111,6 +111,16 @@
             "next": "Siguiente",
             "generate": "Generar Plan"
         },
+        "start_over": {
+            "button": "Empezar de nuevo",
+            "title": "¿Empezar de nuevo?",
+            "description": "Esto borrará todas tus selecciones actuales (objetivo, equipo, músculos) y te llevará al principio.",
+            "question": "¿Seguro que quieres continuar?",
+            "cancel": "Cancelar",
+            "confirm": "Sí, empezar de nuevo",
+            "toast_title": "Asistente reiniciado",
+            "toast_description": "¡Listo para empezar de cero! 🚀"
+        },
         "progress": "{{percent}}% completado",
         "toast": {
             "success_title": "¡Plan Generado!",
@@ -222,7 +232,9 @@
         },
         "anatomy": {
             "title": "Selecciona los Músculos Objetivo",
-            "subtitle": "Haz clic en el diagrama o la lista para elegir los grupos musculares que deseas entrenar."
+            "subtitle": "Haz clic en el diagrama o la lista para elegir los grupos musculares que deseas entrenar.",
+            "auto_pick": "Que FitWizard elija",
+            "auto_pick_hint": "Elige un enfoque equilibrado de cuerpo completo. Puedes cambiarlo en el mapa."
         },
         "equipment": {
             "title": "¿Qué equipamiento tienes?",
@@ -238,6 +250,7 @@
             "subtitle": "Selecciona las que apliquen - opcional",
             "clear_selections": "Borrar selecciones",
             "no_constraints": "Sin restricciones - todos los ejercicios disponibles",
+            "no_injuries_continue": "Sin lesiones, continuar",
             "count_one": "Se aplicará {{count}} filtro",
             "count_other": "Se aplicarán {{count}} filtros",
             "selected": "(seleccionado)"
@@ -325,9 +338,9 @@
             "coaching_cues": "Indicaciones",
             "why_exercise": "¿Por qué este ejercicio?",
             "sets": "{{count}} series",
-            "reps": "{{count}} reps",
+            "reps": "{{range}} reps",
             "rir": "RIR {{count}}",
-            "rest": "{{count}}s descanso"
+            "rest": "{{seconds}}s descanso"
         },
         "exercise_swap": {
             "title": "Cambiar Ejercicio",
@@ -497,7 +510,10 @@
         "next": "Siguiente",
         "skip_exercise": "Saltar Ejercicio",
         "notes": "Notas del Entrenamiento",
-        "notes_placeholder": "¿Cómo te sentiste? ¿Algún problema?"
+        "notes_placeholder": "¿Cómo te sentiste? ¿Algún problema?",
+        "difficulty_title": "¿Qué tal el entrenamiento?",
+        "difficulty_desc": "Valora la dificultad percibida en general.",
+        "rest_timer": "Descanso"
     },
     "notfound": {
         "title": "Parece que te has desviado del camino",
@@ -507,6 +523,17 @@
         "popular": "Destinos populares:",
         "create_plan": "Crear Plan",
         "exercise_library": "Biblioteca de Ejercicios"
+    },
+    "notifications": {
+        "rest_end_body": "Descanso terminado. Es hora de tu siguiente serie.",
+        "reminder_body": "Hora de entrenar. Tu entrenamiento está listo.",
+        "reminders_title": "Recordatorios de entrenamiento",
+        "reminders_description": "Un recordatorio en tus días de entrenamiento, a la hora que elijas.",
+        "reminders_toggle": "Recordarme los días de entrenamiento",
+        "reminders_days": "Días",
+        "reminders_no_days": "Elige al menos un día para recibir recordatorios.",
+        "reminders_time": "Hora",
+        "permission_denied": "Las notificaciones de FitWizard están desactivadas. Actívalas en los Ajustes de tu teléfono."
     },
     "emptyStates": {
         "start_workout": "Empezar el entrenamiento de hoy",
@@ -596,21 +623,165 @@
             "content_p2": "Siempre consulta a un profesional de la salud calificado antes de comenzar cualquier nuevo programa de ejercicios, especialmente si tienes condiciones de salud preexistentes, lesiones o preocupaciones.",
             "content_p3": "Al usar FitWizard, reconoces que eres responsable de tus propias decisiones de salud y que los creadores de esta aplicación no son responsables de ninguna lesión o problema de salud que pueda resultar de seguir los planes de entrenamiento generados."
         },
+        "draft": {
+            "title": "Borrador para revisión",
+            "text": "Esto es un borrador. Todavía no lo ha revisado un profesional cualificado y puede cambiar antes del lanzamiento. El texto entre corchetes está pendiente de completar. La traducción al español también es un borrador.",
+            "dates": "Última actualización: {{updated}}. Fecha de entrada en vigor: {{effective}}."
+        },
         "privacy": {
-            "title": "Política de Privacidad Local-First",
-            "data_stays_title": "Tus Datos Se Quedan Aquí",
-            "data_stays_text": "No almacenamos tus datos de salud en nuestros servidores. Viven 100% en tu dispositivo.",
-            "what_we_store": "Lo Que Almacenamos Localmente",
-            "what_we_store_text": "Tus preferencias de entrenamiento, planes generados y cualquier nota personal que agregues se almacenan en el almacenamiento local de tu navegador. Estos datos nunca salen de tu dispositivo a menos que los exportes explícitamente.",
-            "analytics": "Analíticas",
-            "analytics_text": "Usamos analíticas anónimas y respetuosas con la privacidad para entender cómo se usa la aplicación. Nunca se transmiten datos personales de salud."
+            "title": "Política de privacidad",
+            "policy_link": "Política de privacidad",
+            "summary": {
+                "title": "En resumen",
+                "p1": "FitWizard funciona sin cuenta. Si no inicias sesión, tus datos de entrenamiento se guardan en tu dispositivo y no se nos envían.",
+                "p2": "Si inicias sesión, tus datos de entrenamiento también se guardan en nuestra base de datos en la nube para que puedas usarlos en otros dispositivos.",
+                "p3": "Algunas funciones opcionales envían datos limitados a otros servicios, y solo después de que las actives. Cada una se indica a continuación. No vendemos tus datos, no mostramos anuncios ni te rastreamos en otras apps o sitios web."
+            },
+            "collect": {
+                "title": "Qué recopilamos",
+                "intro": "Según las funciones que uses, FitWizard guarda:",
+                "training": "Datos de entrenamiento: planes, registros de entrenamientos (series, repeticiones, peso y esfuerzo), un entrenamiento en curso, récords personales, tu semana actual y tu unidad de peso preferida.",
+                "nutrition": "Datos de nutrición: las comidas y alimentos que registras, con calorías y macros, y tu perfil nutricional (edad, sexo, altura, peso, nivel de actividad, objetivo y meta de agua), objetivos, alimentos personalizados, alimentos favoritos y comidas guardadas.",
+                "body": "Datos corporales y de recuperación: medidas corporales (como peso, porcentaje de grasa corporal y medidas con cinta) y registros diarios de preparación (valoraciones de calidad del sueño, dolor muscular, energía y estrés).",
+                "progress": "Datos de progreso y de la biblioteca: logros, insignias y rachas, ejercicios personalizados que creas, ejercicios favoritos, colecciones, filtros guardados, ejercicios vistos recientemente y ajustes de la biblioteca. Cuando has iniciado sesión, también registramos qué ejercicios ves.",
+                "setup": "Respuestas de configuración: tus respuestas en el asistente de planes (objetivo, experiencia, equipo, músculos, horario y limitaciones como evitar ejercicios por encima de la cabeza) y en la bienvenida (avatar, rol e intereses).",
+                "account": "Datos de la cuenta, si inicias sesión: tu correo electrónico y un perfil con un nombre visible (tomado de tu correo) y tu zona horaria. Para iniciar sesión, te enviamos por correo un enlace y un código de 6 dígitos. El código se usa una vez y la app no lo guarda.",
+                "settings": "Ajustes y elecciones: tus opciones de privacidad, idioma, tema y ajustes similares, y los datos de control que necesita la sincronización (qué elementos cambiaron y cuándo, nunca su contenido).",
+                "technical": "Datos técnicos: como en cualquier sitio web, nuestro proveedor de alojamiento recibe tu dirección IP y datos de tu navegador o dispositivo con cada solicitud.",
+                "not_collected": "FitWizard no accede a tu ubicación, contactos, cámara, fotos ni a registros de salud de otras apps."
+            },
+            "storage": {
+                "title": "Dónde se guardan tus datos",
+                "device": "En tu dispositivo: en el almacenamiento propio de la app (IndexedDB en un navegador, archivos de la app en iPhone y Android) y, para ajustes pequeños, en el almacenamiento del navegador. FitWizard no añade cifrado propio; se aplican las protecciones de tu dispositivo, como el bloqueo de pantalla.",
+                "session": "Tu sesión: cuando inicias sesión, se guarda en tu dispositivo un token de inicio de sesión de nuestro proveedor de autenticación (Supabase), para que sigas con la sesión iniciada después de cerrar la app o el navegador. En un navegador se guarda en el almacenamiento local de este sitio; en las apps de iPhone y Android, en las preferencias privadas de la app. Solo identifica tu sesión y no contiene datos de entrenamiento ni de salud. Al cerrar sesión se elimina de tu dispositivo.",
+                "cloud": "En nuestra base de datos en la nube, si inicias sesión: usamos Supabase, y tus datos se guardan en {{region}}. Cada cuenta solo puede leer y cambiar sus propios registros.",
+                "sync": "Qué se sincroniza: tus planes, registros de entrenamientos, récords personales, registros y ajustes de nutrición, medidas corporales, registros de preparación, logros, ejercicios personalizados y ejercicios favoritos. La app sincroniza al iniciar sesión, cuando tu dispositivo vuelve a tener conexión, cuando vuelves a la app y poco después de cada cambio. No se envía nada sin conexión ni con la sesión cerrada; los cambios hechos con la sesión cerrada se envían la próxima vez que inicias sesión.",
+                "first_sign_in": "La primera vez que inicias sesión en un dispositivo, la app conserva la copia de tu cuenta de cualquier registro que exista en ambos lugares y solo sube los registros que existen únicamente en ese dispositivo.",
+                "sign_out": "Cerrar sesión: la app sincroniza una última vez, te avisa si algún cambio aún no se ha guardado en tu cuenta y después borra tus datos de entrenamiento del dispositivo. Tu cuenta conserva la copia sincronizada.",
+                "transfers": "Algunos de los servicios indicados abajo están en otros países, así que tus datos pueden tratarse fuera del país donde vives."
+            },
+            "recipients": {
+                "title": "Quién recibe tus datos",
+                "intro": "Solo compartimos datos con los servicios que hacen funcionar FitWizard:",
+                "supabase": "Supabase gestiona las cuentas, los correos de inicio de sesión y la base de datos en la nube. Recibe tu correo, tu perfil y los datos sincronizados cuando inicias sesión.",
+                "vercel": "Vercel aloja la app y nuestras funciones de servidor. Recibe tu dirección IP y datos de tu dispositivo con cada solicitud. Si permites las analíticas, Vercel Web Analytics también registra las páginas vistas (la página, la página de origen, el tipo de dispositivo y el país).",
+                "open_food_facts": "Open Food Facts ofrece la búsqueda de alimentos, solo si activas la búsqueda de alimentos. Recibe el código de barras o el texto de búsqueda y tu dirección IP. Sin esa opción, no se envía nada.",
+                "wger": "wger ofrece el catálogo de ejercicios. Las solicitudes del catálogo y de búsqueda pasan por nuestros servidores, así que wger ve la dirección de nuestro servidor, no la tuya. Las imágenes de los ejercicios se cargan directamente desde wger, así que wger ve tu dirección IP.",
+                "api_ninjas": "API Ninjas ofrece una búsqueda de ejercicios de respaldo y la frase del día. Las solicitudes pasan por nuestros servidores y solo recibe el texto de búsqueda.",
+                "sentry": "Sentry recibe informes de errores, solo si los permites. Un informe contiene el error, la versión de la app, el tipo de navegador o dispositivo y la página, pero no tu nombre, correo, cuenta ni datos de entrenamiento. Sentry ve tu dirección IP cuando se envía un informe. Los informes de errores aún no están activados.",
+                "posthog": "PostHog (previsto) recibirá eventos de uso si permites las analíticas, como «plan generado» o «entrenamiento completado», nunca pesos, medidas, preparación ni alimentos. Aún no se usa; actualizaremos esta política antes de usarlo.",
+                "app_stores": "Apple y Google distribuyen la app y recopilan sus propios datos según sus propias políticas. Los recordatorios de entrenamiento y las alertas del temporizador de descanso (próximamente) se programan en tu dispositivo y no se envían a nadie.",
+                "off_features": "Los círculos sociales y el portal para entrenadores están desactivados y no recopilan nada. Actualizaremos esta política antes de activar cualquiera de ellos.",
+                "no_sale": "No vendemos ni alquilamos tus datos, ni los compartimos con fines publicitarios."
+            },
+            "purposes": {
+                "title": "Para qué los usamos",
+                "features": "Para ofrecer la app: crear planes, registrar entrenamientos y comidas, y mostrar tu historial y progreso.",
+                "sync": "Para mantener tus datos en tu cuenta y en tus otros dispositivos, si inicias sesión.",
+                "sign_in": "Para iniciar tu sesión y mantener segura tu cuenta.",
+                "lookups": "Para buscar alimentos y ejercicios cuando lo pides.",
+                "crashes": "Para encontrar y corregir errores, si permites los informes de errores.",
+                "analytics": "Para entender qué partes de la app se usan, si permites las analíticas.",
+                "abuse": "Para proteger nuestras funciones de servidor contra abusos (consulta Cuánto tiempo los guardamos)."
+            },
+            "retention": {
+                "title": "Cuánto tiempo los guardamos",
+                "device": "En tu dispositivo: hasta que los elimines en la app, uses Borrar los datos de este dispositivo, borres los datos de la app o del navegador, o desinstales la app.",
+                "cloud": "En tu cuenta: hasta que los elimines o elimines tu cuenta. Cuando eliminas un elemento sincronizado, incluido un plan, se marca como eliminado para que desaparezca de todos tus dispositivos; el registro marcado se borra definitivamente cuando eliminas tu cuenta. Tu dispositivo guarda solo tus 20 planes más recientes, pero los anteriores siguen en tu cuenta.",
+                "account": "Tu correo, tu perfil y el registro de qué ejercicios viste se guardan hasta que eliminas tu cuenta.",
+                "code": "Los códigos de inicio de sesión sirven una sola vez y caducan al poco tiempo.",
+                "session": "El token de inicio de sesión en tu dispositivo: hasta que cierres sesión, elimines tu cuenta o borres los datos de la app o del navegador.",
+                "ip": "Para limitar cada dirección a 60 solicitudes por minuto, nuestras funciones de servidor guardan tu dirección IP en memoria con un contador. Nunca la escriben en disco, la registran ni la comparten, pero puede quedar en memoria hasta que esa instancia del servidor se apague. Los registros de solicitudes propios de Vercel siguen la política de Vercel.",
+                "third_parties": "Sentry guarda los informes de errores unos 90 días. Vercel Web Analytics, Open Food Facts, wger y API Ninjas guardan lo que reciben según sus propias políticas."
+            },
+            "choices": {
+                "title": "Tus opciones",
+                "consent": "Ajustes de privacidad: elige si permites las analíticas (que por ahora también cubren los informes de errores) y la búsqueda de alimentos. Cámbialos cuando quieras en Perfil → Detalles → Ajustes de privacidad. Si dices que no, esos servicios no reciben nada de ti.",
+                "export": "Exportar: Perfil → Detalles → Exportar datos (JSON) guarda un archivo con lo que la app guarda sobre ti: planes (incluido un entrenamiento en curso), registros de entrenamientos, récords personales, registros y ajustes de nutrición, medidas corporales, registros de preparación, logros, ejercicios personalizados, ejercicios favoritos y colecciones, tus respuestas del asistente y de la bienvenida, tus opciones de privacidad y ajustes y, si has iniciado sesión, el correo y el perfil de tu cuenta.",
+                "delete_items": "Eliminar elementos: puedes eliminar planes, comidas, alimentos personalizados, comidas guardadas y medidas corporales en la app.",
+                "guest": "Sin cuenta: usa FitWizard sin iniciar sesión y tus datos de entrenamiento se quedan en tu dispositivo.",
+                "rights": "Según dónde vivas, puedes tener derecho a acceder, corregir, eliminar o trasladar tus datos, o a oponerte a cómo los usamos. Contáctanos para ejercer estos derechos."
+            },
+            "delete_account": {
+                "title": "Eliminar tu cuenta",
+                "intro": "Puedes eliminar tu cuenta y tus datos en cualquier momento.",
+                "in_app": "En la app: abre Perfil, ve a Detalles, toca Eliminar cuenta, escribe DELETE y confirma. Esto elimina para siempre tu cuenta y todo lo guardado con ella en nuestros servidores: tu correo y tu perfil, planes, historial de entrenamientos, récords personales, registros y ajustes de nutrición, medidas corporales, registros de preparación, logros, ejercicios personalizados, ejercicios favoritos y colecciones, y el registro de qué ejercicios viste. Los datos de FitWizard en ese dispositivo se borran al mismo tiempo. La eliminación es inmediata y no se puede deshacer, así que descarga antes una copia con Perfil → Detalles → Exportar datos (JSON).",
+                "guest": "¿No has iniciado sesión? Tus datos están solo en tu dispositivo. Elimínalos con Perfil → Detalles → Borrar los datos de este dispositivo (escribe DELETE para confirmar), o desinstalando la app o borrando los datos del sitio en tu navegador.",
+                "by_email": "¿No puedes iniciar sesión o no tienes la app? Escribe a {{email}} desde la dirección de tu cuenta, con el asunto «Eliminar mi cuenta». Confirmaremos que la dirección es tuya y eliminaremos la cuenta en un plazo de 30 días.",
+                "circles": "Si creaste un círculo o un reto, se mantiene para sus demás miembros, y dejas de figurar como su creador.",
+                "other_devices": "Otros dispositivos en los que habías iniciado sesión conservan su copia hasta que cierres sesión en ellos, o desinstales la app.",
+                "what_may_remain": "Qué puede quedar: copias en las copias de seguridad habituales de nuestro proveedor de base de datos hasta que caduquen ({{backup}}), y los datos ya enviados a los servicios indicados arriba, que los guardan según sus propias políticas."
+            },
+            "security": {
+                "title": "Seguridad",
+                "p1": "Los datos viajan por conexiones cifradas (HTTPS). En nuestra base de datos en la nube, las reglas de acceso permiten que cada cuenta lea y cambie solo sus propios registros, y la clave que puede eliminar cuentas se guarda solo en nuestro servidor. Ningún almacenamiento es perfectamente seguro, así que protege también tu dispositivo y tu cuenta de correo."
+            },
+            "children": {
+                "title": "Menores",
+                "p1": "FitWizard no está dirigido a menores de {{age}} años y no recopilamos sus datos a sabiendas. Si crees que un menor nos ha dado datos, contáctanos y los eliminaremos."
+            },
+            "contact": {
+                "title": "Contacto",
+                "p1": "Preguntas o solicitudes sobre tu privacidad: {{email}}."
+            },
+            "changes": {
+                "title": "Cambios en esta política",
+                "p1": "Actualizaremos esta página cuando cambie lo que la app recopila o comparte, y cambiaremos la fecha de arriba. Si los cambios son importantes, te avisaremos en la app antes de que se apliquen."
+            }
         },
         "terms": {
-            "title": "Términos de Servicio",
-            "acceptance": "Aceptación de Términos",
-            "acceptance_text": "Al acceder y usar FitWizard, aceptas estar sujeto a estos Términos de Servicio y todas las leyes y regulaciones aplicables.",
-            "use": "Licencia de Uso",
-            "use_text": "Se otorga permiso para usar FitWizard para fines personales y no comerciales. Esta licencia no incluye el derecho de modificar, distribuir o crear obras derivadas."
+            "title": "Términos de servicio",
+            "acceptance": {
+                "title": "Aceptación de estos términos",
+                "p1": "Al usar FitWizard, aceptas estos términos y nuestra Política de privacidad. Si no estás de acuerdo, no uses la app."
+            },
+            "not_medical": {
+                "title": "No es consejo médico",
+                "p1": "FitWizard ofrece solo información general de fitness. No es consejo, diagnóstico ni tratamiento médico, y no sustituye a un médico, fisioterapeuta u otro profesional cualificado. Lee el Aviso médico antes de empezar a entrenar."
+            },
+            "responsibility": {
+                "title": "Tu responsabilidad",
+                "check": "Consulta con un profesional de la salud antes de empezar un programa nuevo, sobre todo si tienes una afección o una lesión.",
+                "limits": "Entrena dentro de tus límites, con buena técnica y equipo adecuado, y para si sientes dolor, mareo o falta de aire.",
+                "accuracy": "Introduce información precisa, como tu peso o tus lesiones, porque los planes y objetivos dependen de ella.",
+                "security": "Protege tu dispositivo y la cuenta de correo con la que inicias sesión."
+            },
+            "accounts": {
+                "title": "Cuentas",
+                "p1": "La cuenta es opcional. Para iniciar sesión necesitas acceso a tu correo electrónico. Puedes eliminar tu cuenta en cualquier momento (consulta Eliminar tu cuenta en la Política de privacidad)."
+            },
+            "acceptable_use": {
+                "title": "Uso aceptable",
+                "intro": "Por favor, no:",
+                "unlawful": "uses FitWizard para nada ilegal;",
+                "access": "intentes acceder a cuentas o datos de otras personas, ni eludir la seguridad o los límites de uso de la app;",
+                "overload": "sobrecargues, extraigas datos masivamente ni ataques la app o sus funciones de servidor;",
+                "redistribute": "copies, revendas ni redistribuyas la app, salvo donde sus licencias lo permitan."
+            },
+            "licence": {
+                "title": "Licencia y contenido",
+                "p1": "Puedes usar FitWizard para tus propios fines personales y no comerciales. Los datos de ejercicios vienen de wger y los de alimentos de Open Food Facts. Sus comunidades los ofrecen bajo sus propias licencias, y no podemos garantizar que estén completos o sean exactos."
+            },
+            "warranty": {
+                "title": "Sin garantía",
+                "p1": "FitWizard se ofrece «tal cual» y «según disponibilidad», sin garantías de ningún tipo, en la medida en que la ley lo permita. No prometemos que esté libre de errores o siempre disponible, ni que los datos guardados nunca se pierdan, así que exporta tus datos si son importantes para ti."
+            },
+            "liability": {
+                "title": "Limitación de responsabilidad",
+                "p1": "En la medida en que la ley lo permita, los creadores de FitWizard no son responsables de ninguna lesión, pérdida o daño derivado del uso de la app o de seguir sus planes. Nada en estos términos limita derechos que la ley no permite limitar."
+            },
+            "changes": {
+                "title": "Cambios y finalización",
+                "p1": "Podemos actualizar estos términos. Cambiaremos la fecha de arriba y te avisaremos en la app de los cambios importantes. Puedes dejar de usar FitWizard en cualquier momento, y podemos suspender el acceso por uso indebido."
+            },
+            "law": {
+                "title": "Ley aplicable",
+                "p1": "Estos términos se rigen por las leyes de {{jurisdiction}}."
+            },
+            "contact": {
+                "title": "Contacto",
+                "p1": "Preguntas sobre estos términos: {{email}}."
+            }
         },
         "footer": {
             "guidance": "Los planes son orientación general de fitness, no consejo médico. Consulta con un profesional de la salud antes de comenzar un nuevo programa."
@@ -738,6 +909,11 @@
     "achievements": {
         "badge_unlocked": "Insignia desbloqueada: {{name}}"
     },
+    "workoutLogger": {
+        "finish": "Terminar entrenamiento",
+        "previous_exercise": "Ejercicio anterior",
+        "next_exercise": "Siguiente ejercicio"
+    },
     "workoutResume": {
         "title": "Tienes un entrenamiento sin terminar",
         "body": "{{unfinished}} sigue en curso. Reanúdalo o descártalo y empieza {{requested}}.",
@@ -786,7 +962,14 @@
         "error": "Problema de sincronización. Tus datos siguen guardados en este dispositivo.",
         "signed_out": "Inicia sesión para guardar una copia de tu entrenamiento.",
         "retry": "Reintentar",
-        "sign_in": "Iniciar sesión"
+        "sign_in": "Iniciar sesión",
+        "signed_out_erased": "Sesión cerrada. Tu entrenamiento está guardado en tu cuenta y se eliminó de este dispositivo.",
+        "sign_out": "Cerrar sesión",
+        "signing_out": "Guardando tus cambios…",
+        "sign_out_unsent_title": "Algunos cambios no tienen copia de seguridad",
+        "sign_out_unsent_body": "{{count}} cambios aún no se guardaron en tu cuenta. Al cerrar sesión, tu entrenamiento se elimina de este dispositivo y se perderán. Conéctate a internet y espera un momento para conservarlos.",
+        "sign_out_keep": "Seguir conectado",
+        "sign_out_anyway": "Cerrar sesión de todos modos"
     },
     "pdfExport": {
         "headers": {

@@ -168,6 +168,12 @@ Write `008_policy_fixes.sql`, re-runnable, with a test file for each fix.
 
 ## Day 5: Retire Express (1.7; decision D1, default yes)
 
+> **Carried over from Day 4 handoffs (added 2026-11-23 by the coordinator).** Do these too:
+> - In `AccountDeletionSection.tsx` / `deleteAccount.ts`, replace the hardcoded toast-id workaround with `useAuthStore.getState().signOut({ quiet: true })`, which Lane H added in #74.
+> - When you remove the API branch of `plansClient.ts`, tell Lane E in your handoff exactly which plan-sync code is left. Lane E Day 7 moves plans onto the sync engine right after you.
+> - Lane D added `e2e` and `edge-functions` jobs to `.github/workflows/ci.yml` (#78). When you remove the server steps, keep those jobs.
+
+
 If Lincoln answered D1 with **no**, do this instead: fix the UUID check in `server/src/index.ts` (around lines 68, 349, 380 and 445) to accept the `plan_` id format, add a test that uses a real generated id, and stop there.
 
 If D1 is **yes** (the default):
@@ -190,6 +196,10 @@ If D1 is **yes** (the default):
 ---
 
 ## Day 6: Circles compatibility under migration 008
+
+> **Carried over from Day 7 Lane E (#81, added 2026-11-25 by the coordinator).** Do this too:
+> - Plans now sync through the engine, and a delete is an upsert with `deleted_at` set (`plansCollection` in `src/lib/sync/collections/training.ts`, `onConflict: 'user_id,id'`). Add harness tests on the `plans` table: the owner can upsert a row with `deleted_at` set and read it back; another user can neither upsert nor read it. If 007 already covers this, point to the test in your handoff instead.
+> - Client-side changes to `src/stores/circles/*.ts` go to the coordinator (Lane E is complete; the coordinator owns its files now), in your handoff.
 
 Circles is off in v1, but 008 must not break it for later.
 

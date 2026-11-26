@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useConfetti } from '@/hooks/useConfetti';
+import { seedWizardFromOnboarding } from './wizardSeed';
 
 // Slide animation variants
 const slideVariants = {
@@ -58,18 +59,22 @@ export function OnboardingFlow() {
     const totalSteps = getTotalSteps();
     const progress = (stepIndex / totalSteps) * 100;
 
-    // Navigate home immediately once onboarding is marked complete.
+    // Where to go once onboarding is marked complete. A lifter who finishes the
+    // goals step goes straight into the wizard; skipping (or the coach path) goes home.
+    const destinationRef = useRef<'/' | '/wizard'>('/');
+
     useEffect(() => {
         if (isComplete) {
-            navigate('/', { replace: true });
+            navigate(destinationRef.current, { replace: true });
         }
     }, [isComplete, navigate]);
 
-    const finishOnboarding = useCallback((celebrate = false) => {
+    const finishOnboarding = useCallback((celebrate = false, destination: '/' | '/wizard' = '/') => {
         if (celebrate) {
             fireConfetti();
         }
 
+        destinationRef.current = destination;
         completeOnboarding();
     }, [fireConfetti, completeOnboarding]);
 
@@ -78,7 +83,11 @@ export function OnboardingFlow() {
         currentStep === 'import';
 
     const handleNext = () => {
-        if (isFinalActionStep) {
+        if (currentStep === 'goals' && userData.role === 'user') {
+            // Carry the goal into the wizard so it isn't asked twice (3.6c).
+            seedWizardFromOnboarding(userData.interestedGoals);
+            finishOnboarding(true, '/wizard');
+        } else if (isFinalActionStep) {
             finishOnboarding(true);
         } else {
             nextStep();

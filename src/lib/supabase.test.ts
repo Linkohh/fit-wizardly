@@ -20,11 +20,7 @@ describe('validateRemoteEndpoint', () => {
     );
   });
 
-  it('allows relative API endpoints when explicitly permitted', () => {
-    expect(
-      validateRemoteEndpoint('/api', 'VITE_API_URL', {
-        allowRelative: true,
-      })
-    ).toBe('/api');
+  it('rejects relative paths', () => {
+    expect(() => validateRemoteEndpoint('/api', 'VITE_SUPABASE_URL')).toThrow(/not a valid URL/);
   });
 });
