@@ -155,3 +155,4 @@ Each has a default that applies unless you change it.
 11. **Store forms:** declare body measurements, nutrition and readiness as **Health** as well as Fitness? (Default: yes; then Lane H updates the iOS privacy manifest.)
 12. **Minimum age:** 13? (No default; the policy says "13 [Lincoln to confirm]".)
 13. **Support email** for the privacy policy and Play's deletion page. (No default; must not be a personal address.)
+14. **Deleted items in the cloud (DEBT-097):** keep their content until account deletion (Play's "delete data without deleting the account" stays **No**), or purge it when an item is deleted (then **Yes**)? (No default; the form says No until you decide.)

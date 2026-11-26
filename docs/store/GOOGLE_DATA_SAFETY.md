@@ -21,7 +21,7 @@
 | Which methods of account creation does your app support? | **Username and other authentication** (email with a one-time code). No password, no OAuth | `src/stores/authStore.ts` (email code, contract 7) |
 | Do you provide a way for users to request that their data is deleted? | **Yes** | In app: Profile → Details → **Delete account** (type DELETE), `src/components/account/AccountDeletionSection.tsx`. Guests: **Erase data on this device** |
 | Delete account URL (web) | `https://[domain: Lincoln to provide, L3]/legal?tab=privacy#delete-account` | Section `delete-account` in `src/pages/Legal.tsx` (Day 4). It covers in-app deletion, guest erasure and an email request for people who can't sign in. **Needs the support email** (placeholder in `POLICY_VALUES`) |
-| Data deletion without deleting the account (optional) | **Yes**: users can delete single plans, logs and entries in the app, and guests can erase the device | Store actions in `src/stores/*`; deletions sync as tombstones (`deleted_at`) |
+| Data deletion without deleting the account (optional) | **No (account deletion only). BLOCKED ON LINCOLN** (question 6). Deleting a plan, log or entry while signed in removes it from the app and the user's devices, but the sync engine only marks the cloud row deleted: it sets `deleted_at`, and the row's content stays in Supabase until the account is deleted (DEBT-097). Guests can erase the device, but a guest has no data on our servers | `src/lib/sync/engine.ts` (push sets `deleted_at`, ~168); DEBT-097 |
 | Has your app completed an independent security review (MASA)? | **No** | Optional |
 | Is your app designed for children / in the Families program? | **No** | Not directed at children; minimum age is a Lincoln decision (see `COMPLIANCE.md`) |
 
@@ -66,3 +66,4 @@ For each type: collected, shared, processed ephemerally, required or optional, p
 3. **Search history:** declare as ephemeral (recommended) or leave out?
 4. **L6:** Sentry DSN and PostHog key in the first Play build?
 5. **Domain (L3) and support email** for the deletion URL. Play rejects the form without a working deletion page.
+6. **DEBT-097, deleted items in the cloud:** keep tombstoned content until account deletion (this answer stays **No**), or have the coordinator (Lane E) purge the content when an item is deleted (clear it and keep only the id and `deleted_at`), which would make this answer **Yes**. No default; until you decide, the answer is **No**.
