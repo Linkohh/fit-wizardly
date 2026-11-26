@@ -388,6 +388,27 @@ describe('App auth routing', () => {
     }
   });
 
+  it('does not mount Vercel Analytics without consent', async () => {
+    renderAt('/onboarding');
+
+    expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
+    expect(screen.queryByTestId('vercel-analytics')).not.toBeInTheDocument();
+  });
+
+  it('does not mount Vercel Analytics inside the native apps, even with consent (DEBT-127)', async () => {
+    mocks.platformState.nativeApp = true;
+    localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
+
+    try {
+      renderAt('/onboarding');
+
+      expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
+      expect(screen.queryByTestId('vercel-analytics')).not.toBeInTheDocument();
+    } finally {
+      localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
+    }
+  });
+
   it('uses the native shell offset contract when running inside the app shell', async () => {
     mocks.platformState.nativeApp = true;
 

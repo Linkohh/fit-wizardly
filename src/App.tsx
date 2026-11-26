@@ -440,7 +440,8 @@ const App = () => {
                 {/* Native apps surface About/Help/Legal via the menu drawer and Settings instead. */}
                 {!nativeApp && <Footer />}
               </div>
-              {hasAnalyticsConsent && <VercelAnalytics />}
+              {/* Web only (DEBT-127): Vercel Analytics has no place inside the native apps. */}
+              {!nativeApp && hasAnalyticsConsent && <VercelAnalytics />}
             </AuthProvider>
           </ThemeProvider>
         </TooltipProvider>
