@@ -32,6 +32,7 @@ RERUNNABLE_MIGRATIONS=(
   "004_plans_schema.sql"
   "007_user_data.sql"
   "008_policy_fixes.sql"
+  "009_purge_tombstone_content.sql"
 )
 
 TEMPLATE_DB="fw_test_template"

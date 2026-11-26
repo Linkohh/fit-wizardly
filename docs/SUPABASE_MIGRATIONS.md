@@ -13,12 +13,14 @@ Supabase project (there is no automated pipeline). Apply them in numeric order.
 | 006 | `006_security_hardening.sql` | Tightened RLS policies on circle tables (`circle_members`, `circle_activities`, `circle_challenges`, `activity_comments`, `circle_posts`, `challenge_participants`) and replaced `join_circle_by_invite()` |
 | 007 | `007_user_data.sql` | `workout_logs`, `personal_records`, `nutrition_days`, `nutrition_settings`, `body_measurements`, `readiness_entries`, `user_state`; `plans.deleted_at` (see [007 section](#007-user-data-tables)) |
 | 008 | `008_policy_fixes.sql` | No tables. Membership helpers `is_circle_member()`, `is_circle_admin()`, `shares_circle_with()`; rewrites the circle, social, profile, streak, badge and challenge-score policies; adds DELETE policies; fixes the foreign keys that blocked account deletion (see [008 section](#008-access-rule-fixes)) |
+| 009 | `009_purge_tombstone_content.sql` | No tables. Trigger function `purge_tombstone_content()` on `plans` and the seven 007 tables: a deleted row's content is wiped (see [009 section](#009-wipe-deleted-content-debt-097)). **Production only after the client change that reads empty tombstones has shipped** |
 
 ## Re-run safety
 
-- 002, 004, 007 and 008 are safe to re-run: tables/indexes use `IF NOT EXISTS`, and every
-  policy and trigger is preceded by `DROP ... IF EXISTS`. The local harness
-  (`bash supabase/tests/run.sh`) re-applies all four on every run to prove it.
+- 002, 004, 007, 008 and 009 are safe to re-run: tables/indexes use `IF NOT EXISTS`,
+  functions use `CREATE OR REPLACE`, and every policy and trigger is preceded by
+  `DROP ... IF EXISTS`. The local harness (`bash supabase/tests/run.sh`) re-applies
+  all five on every run to prove it.
 - **Re-running 002 after 008 brings back the client write policies on
   `user_streaks` and `exercise_badges`** that 008 drops. If you ever re-run
   002, re-run 008 straight after it.
@@ -85,12 +87,15 @@ the local rehearsal). Mark what is already live first:
 
 ```sh
 supabase link --project-ref <ref>          # once, on Lincoln's machine
-supabase migration list                     # shows 001–007 as local-only
-supabase migration repair --status applied 001 002 003 004 005 006
+supabase migration list --remote            # shows 001–007 as local-only
+supabase migration repair --remote --status applied 001 002 003 004 005 006
 # Add 007 to that list only if you already pasted 007 into the SQL Editor.
-supabase db push --dry-run                  # must list only the new files
-supabase db push
+supabase db push --remote --dry-run         # must list only the new files
+supabase db push --remote
 ```
+
+(`--remote` added 2026-11-26: CLI 3.2.0 targets the local database without it.
+See the note in [Staging order](#staging-order-at-gate-1-l10).)
 
 Only repair versions you have confirmed are live (use the checks above). This
 exact sequence (manual 001–006, repair, push of 007 plus a timestamped file)
@@ -107,7 +112,7 @@ production.
    `auth.uid()`, `auth.role()` read from `request.jwt.claim.*`), the `anon`,
    `authenticated` and `service_role` roles, the `supabase_realtime`
    publication, and Supabase's default grants, so RLS is what blocks access.
-3. Applies `migrations/*.sql` in order, then re-applies 002, 004, 007 and 008.
+3. Applies `migrations/*.sql` in order, then re-applies 002, 004, 007, 008 and 009.
 4. Runs each `tests/*.test.sql` in its own copy of the database. Tests switch
    identity with `SET ROLE authenticated; SET request.jwt.claim.sub = '<uuid>';`
    and fail with `RAISE EXCEPTION`.
@@ -298,12 +303,23 @@ work), and sign out and confirm the app still loads.
 Do these in order, on **staging** first and production only at Gate 2. Each step
 links to its details above.
 
+> **`--remote` (checked 2026-11-26, CLI 3.2.0).** `migration list`,
+> `migration repair` and `db push` target the **local** database unless you pass
+> `--remote` (the linked project). The commands below and in the production
+> section include it. If your CLI rejects `--remote`, run `supabase --version`
+> and check `supabase db push --help` for the flag it uses instead (older
+> releases used `--linked`).
+
 1. **Repair 001–006 (DEBT-053).** They were applied in the SQL Editor, so the CLI
    doesn't know about them:
-   `supabase migration repair --status applied 001 002 003 004 005 006`
+   `supabase migration repair --remote --status applied 001 002 003 004 005 006`
    (see [Before the first `supabase db push`](#before-the-first-supabase-db-push-on-staging-or-production)).
-2. **Push 007 and 008:** `supabase db push --dry-run` must list exactly
-   `007_user_data.sql` and `008_policy_fixes.sql`, then `supabase db push`.
+2. **Push 007 and 008:** `supabase db push --remote --dry-run` must list exactly
+   `007_user_data.sql` and `008_policy_fixes.sql`, then `supabase db push --remote`.
+   Once 009 is in the checkout, `db push` would apply it too: on staging that's
+   fine only if staging runs a client with the tombstone change (see
+   [009](#009-wipe-deleted-content-debt-097)); otherwise push from a checkout
+   without 009, as in [production step 3](#production-at-gate-2-l2).
    Run the [007](#007-user-data-tables) and [008](#008-access-rule-fixes)
    verification queries.
 3. **Deploy the `delete-account` function** (needs 008; without it, deleting a user
@@ -314,6 +330,301 @@ links to its details above.
 4. **If 002 is ever re-run, re-run 008 straight after it (DEBT-070).** 002 recreates
    the client write policies on `user_streaks` and `exercise_badges` that 008
    drops. The same applies if anyone pastes 002 into the SQL Editor again.
+
+## 009: wipe deleted content (DEBT-097)
+
+Lincoln's decision (2026-11-26): when a signed-in user deletes an item, its
+content is wiped from the cloud straight away, not kept until account deletion.
+
+The sync engine deletes with `UPDATE <table> SET deleted_at = …`
+(`src/lib/sync/engine.ts`, `pushChanges`), and a pushed row can also be an upsert
+that already carries `deleted_at`. 009 adds one `BEFORE INSERT OR UPDATE`
+trigger function, `public.purge_tombstone_content()`, attached to all eight
+synced tables. When `NEW.deleted_at IS NOT NULL` it overwrites every content
+column with an empty or neutral value that still passes the table's `NOT NULL`
+and `CHECK` constraints. Live rows (`deleted_at` NULL) are not touched.
+
+| Table | Cleared (value on a tombstone) | Kept |
+|---|---|---|
+| `plans` | `plan` → `{}`, `schema_version` → 1 | `user_id`, `id`, `created_at`, `updated_at`, `deleted_at` |
+| `workout_logs` | `plan_id` → `''`, `completed_at` → 1970-01-01, `total_volume` → 0, `log` → `{}`, `schema_version` → 1 | `user_id`, `id`, `updated_at`, `deleted_at` |
+| `personal_records` | `exercise_id` → `''`, `type` → `'weight'`, `value` → 0, `achieved_at` → 1970-01-01, `record` → `{}` | `user_id`, `id`, `updated_at`, `deleted_at` |
+| `nutrition_days` | `log` → `{}` | `user_id`, `day`, `updated_at`, `deleted_at` |
+| `nutrition_settings` | `profile` → NULL, `targets` → NULL, `custom_foods` / `favorites` / `saved_meals` → `[]` | `user_id`, `updated_at`, `deleted_at` |
+| `body_measurements` | `measured_on` → 1970-01-01, `data` → `{}` | `user_id`, `id`, `updated_at`, `deleted_at` |
+| `readiness_entries` | `entry` → `{}` | `user_id`, `day`, `updated_at`, `deleted_at` |
+| `user_state` | `achievements` → `{}`, `custom_exercises` / `favorite_exercises` → `[]` | `user_id`, `updated_at`, `deleted_at` |
+
+Why each kept column stays:
+
+- **`user_id`**: the owner. RLS (`auth.uid() = user_id`) and the account-deletion
+  cascade both depend on it, and it is half of every primary key.
+- **`id` / `day`** (the rest of the primary key): the pull needs the key to know
+  *which* local record to delete on other devices, and a revive upsert
+  (`ON CONFLICT (user_id, id|day)`) needs it to find the row. For
+  `nutrition_days` and `readiness_entries` the key is the date, so the date of a
+  deleted day stays; that's the minimum needed to tombstone it.
+- **`deleted_at`**: it is the tombstone. Other devices compare it with their
+  own pending edits ("a delete beats any edit older than itself").
+- **`updated_at`**: the pull cursor (`updated_at >= $cursor`). Without it moving,
+  other devices would never see the delete.
+- **`plans.created_at`** (judgement call, flagged for the coordinator): row
+  metadata, not plan content. The client never sends it (`planToRow` omits it),
+  so wiping it would leave a revived plan with a fake creation date for good.
+  The plan's own `createdAt` lives inside `plan`, which is wiped.
+
+`type` on `personal_records` becomes `'weight'` because its `CHECK` only allows
+`weight`, `reps` or `volume`; on a tombstone it carries no information.
+
+**Undelete still works.** A revive is an upsert with full content and
+`deleted_at = NULL`; the trigger does nothing for it, and `DO UPDATE` writes the
+content back. Tested for every table.
+
+**Client dependency (why production must wait).** Today's client pulls a row
+and calls `fromRow()` *before* it looks at `deleted_at`
+(`mergeRows` in `src/lib/sync/engine.ts`). With 009, `fromRow({ log: {} })`
+fails validation, the row is skipped as "malformed", and **the delete never
+reaches the user's other devices**. The coordinator's Lane E change makes the
+pull handle a tombstone from its key alone. **Apply 009 to production only after
+that client change has shipped to users.**
+
+**Existing tombstones.** 009 only acts on writes made after it is applied.
+Rows deleted before that keep their content until the backfill in
+[production step 6](#production-at-gate-2-l2) is run.
+
+**Re-runnable:** yes (`CREATE OR REPLACE FUNCTION`, `DROP TRIGGER IF EXISTS`).
+Requires 004 and 007.
+
+**Verified locally** (`supabase/tests/009_purge_tombstone_content.test.sql`,
+Postgres 16), for all eight tables: a live row keeps its content; the
+`UPDATE ... SET deleted_at` path and the upsert-with-`deleted_at` path (update
+and insert) wipe it; the key, `user_id` and `deleted_at` survive and
+`updated_at` moves; a revive with full content restores it; another user can't
+read, tombstone, revive or upsert onto the row. A catalog guard fails if any
+synced table gains a column that 009 neither keeps nor clears. **Mutation
+check:** with the `CREATE TRIGGER` statements commented out, the test fails
+("expected 1 purge_tombstone_content trigger, found 0"); with the triggers
+present but the wipe disabled, it fails on "UPDATE tombstone kept content".
+Not yet run on staging.
+
+### Verification queries (SQL Editor, read-only)
+
+```sql
+-- 1. The function exists. Expect 1 row, definer = false.
+select p.proname, p.prosecdef as definer
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+where n.nspname = 'public' and p.proname = 'purge_tombstone_content';
+
+-- 2. One trigger per synced table, enabled. Expect 8 rows, enabled = 'O'.
+select tg.tgrelid::regclass as table_name, tg.tgname, tg.tgenabled as enabled
+from pg_trigger tg join pg_proc p on p.oid = tg.tgfoid
+where p.proname = 'purge_tombstone_content' and not tg.tgisinternal
+order by 1;
+
+-- 3. After a test delete in the app (throwaway account): no tombstone holds
+--    content. Expect 0 in every column.
+select
+  (select count(*) from plans              where deleted_at is not null and plan <> '{}') as plans,
+  (select count(*) from workout_logs       where deleted_at is not null and log <> '{}') as workout_logs,
+  (select count(*) from personal_records   where deleted_at is not null and record <> '{}') as personal_records,
+  (select count(*) from nutrition_days     where deleted_at is not null and log <> '{}') as nutrition_days,
+  (select count(*) from nutrition_settings where deleted_at is not null and (profile is not null or targets is not null or custom_foods <> '[]' or favorites <> '[]' or saved_meals <> '[]')) as nutrition_settings,
+  (select count(*) from body_measurements  where deleted_at is not null and data <> '{}') as body_measurements,
+  (select count(*) from readiness_entries  where deleted_at is not null and entry <> '{}') as readiness_entries,
+  (select count(*) from user_state         where deleted_at is not null and (achievements <> '{}' or custom_exercises <> '[]' or favorite_exercises <> '[]')) as user_state;
+```
+
+Query 3 also counts tombstones written before 009 until the backfill has run.
+
+## Production at Gate 2 (L2)
+
+Exact steps for Lincoln. Production gets **007 and 008 at Gate 2**, and **009
+later**, in a separate session, once the client change for empty tombstones has
+shipped. Nothing here has been run against a real Supabase project by an agent;
+the SQL is checked on the local harness only.
+
+### Before you start
+
+- [ ] Gate 1 is done on **staging**: 007 and 008 pushed and verified, the
+      `delete-account` function deployed and its curl test passed (L10).
+- [ ] You have the production project ref and database password, and the CLI
+      installed (`supabase --version`).
+- [ ] A backup you can restore: in the dashboard, **Database → Backups**, note
+      the latest daily backup time (or the point-in-time-recovery window, if the
+      plan has it). If there's no usable backup, take one first. A plain
+      `db dump` holds the schema only, **no rows**, so take both files:
+      ```sh
+      supabase db dump --remote -f prod-before-L2-schema.sql
+      supabase db dump --remote --data-only -f prod-before-L2-data.sql
+      ```
+      (check the flags with `supabase db dump --help` on your CLI). To restore
+      rows you need the data file; the schema file rebuilds tables if they were
+      dropped. Before step 5 and step 6, the data file is what makes wiped
+      content recoverable. Keep both files off the repo: they hold user data.
+- [ ] Do it at a quiet time. 007 and 008 take seconds; nothing is locked for long.
+- [ ] 007 and 008 must be on production **before** v1.1.0 (which syncs to the
+      007 tables and calls the delete-account function) is promoted to `main`.
+
+### Step 1: link the production project
+
+```sh
+cd fit-wizardly
+git switch preview_b && git pull              # the reviewed migrations
+supabase link --project-ref <prod-ref>        # prompts for the database password
+```
+
+### Step 2: check which migrations are already applied
+
+```sh
+supabase migration list --remote
+```
+
+The "Remote" column shows what the CLI history table records. On production it
+is most likely **empty**, because 001–006 were pasted into the SQL Editor. The
+history table doesn't know about SQL Editor runs, so check the objects too
+(SQL Editor, read-only):
+
+```sql
+-- Which migration's objects exist? Each column should read true for every
+-- migration that is live.
+select
+  to_regclass('public.circle_members')     is not null as m001,
+  to_regclass('public.user_streaks')       is not null as m002,
+  to_regclass('public.activity_reactions') is not null as m003,
+  to_regclass('public.plans')              is not null as m004,
+  exists (select 1 from information_schema.columns
+          where table_schema = 'public' and table_name = 'profiles'
+            and column_name = 'is_trainer')            as m005,
+  exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+          where n.nspname = 'public' and p.proname = 'join_circle_by_invite') as m006,
+  to_regclass('public.workout_logs')       is not null as m007,
+  exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+          where n.nspname = 'public' and p.proname = 'is_circle_member')      as m008,
+  exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+          where n.nspname = 'public' and p.proname = 'purge_tombstone_content') as m009;
+
+-- What the CLI history table records (errors if the CLI has never pushed here;
+-- that means "empty").
+select version, name from supabase_migrations.schema_migrations order by version;
+```
+
+Expected at Gate 2: `m001`–`m006` true, `m007`–`m009` false. If anything else
+shows up, stop and work out why before going on:
+
+- one of `m001`–`m006` false: that migration was never applied to production.
+  Don't repair it; apply it first (SQL Editor, in order) and re-check.
+- `m007` or `m008` true: it was pasted by hand. Include it in the repair below,
+  then re-run its verification queries ([007](#007-user-data-tables),
+  [008](#008-access-rule-fixes)) instead of pushing it.
+
+### Step 3: repair the history, then push 007 and 008 (without 009)
+
+Repair only the versions step 2 showed are live:
+
+```sh
+supabase migration repair --remote --status applied 001 002 003 004 005 006
+supabase migration list --remote             # 001–006 now show as remote
+```
+
+`db push` applies **every** local file the history doesn't have, so from a
+checkout that contains `009_…` it would apply 009 too. Push from a checkout
+without it. `9a1a767` (v1.1.0 on `preview_b`) has 001–008 and no 009:
+
+```sh
+git worktree add ../fw-l2 9a1a767            # a second checkout, 001–008 only
+cd ../fw-l2
+supabase link --project-ref <prod-ref>
+supabase db push --remote --dry-run          # must list exactly 007_user_data.sql and 008_policy_fixes.sql
+supabase db push --remote
+supabase migration list --remote             # 001–008 remote; 009 not listed here
+cd ../fit-wizardly && git worktree remove ../fw-l2
+```
+
+If the dry run lists anything else, stop. Don't push.
+
+### Step 4: verify 007 and 008
+
+Run the read-only queries in the [007](#007-user-data-tables) and
+[008](#008-access-rule-fixes) sections on production; every result must match
+its "Expect" line. Then:
+
+1. deploy the `delete-account` function to production
+   ([`supabase/functions/delete-account/README.md`](../supabase/functions/delete-account/README.md)),
+   with production's `ALLOWED_ORIGINS`;
+2. with a throwaway account on the production web app: sign in, create a plan
+   and log a workout, check they sync (no `401`/`403` in the network tab), open
+   Profile, then delete the account and confirm the query in the function README
+   returns no rows for it.
+
+Tick L2 on the board for 007 and 008 here. 009 is not part of Gate 2.
+
+### Step 5 (later): apply 009, only after the client change has shipped
+
+Preconditions, all true:
+
+- [ ] the coordinator's Lane E change (the pull handles tombstones with empty
+      content) is merged **and released**: live on the production web app, and in
+      the store builds people actually have. A user on an older build would stop
+      receiving deletes from their other devices;
+- [ ] 009 has been applied to **staging** and checked there with that client:
+      delete an item on device A, confirm it disappears on device B, and that the
+      row's content is empty (verification query 3);
+- [ ] a fresh backup (as above). 009 throws data away by design.
+
+Then, from an up-to-date checkout that contains 009:
+
+```sh
+supabase migration list --remote             # 001–008 remote, 009 local only
+supabase db push --remote --dry-run          # must list exactly 009_purge_tombstone_content.sql
+supabase db push --remote
+```
+
+Run the [009 verification queries](#verification-queries-sql-editor-read-only-2)
+1 and 2, then delete something with a throwaway account and run query 3 for that
+user.
+
+### Step 6 (after step 5, optional but recommended): wipe old tombstones
+
+Rows deleted before 009 still hold their content. Re-saving them makes the
+trigger wipe them. It moves their `updated_at`, so every device pulls those
+tombstones once more; with the new client that is harmless (each is already
+deleted locally). Count first, then run in one transaction:
+
+```sql
+-- How many old tombstones, per table.
+select 'plans' t, count(*) from plans where deleted_at is not null
+union all select 'workout_logs', count(*) from workout_logs where deleted_at is not null
+union all select 'personal_records', count(*) from personal_records where deleted_at is not null
+union all select 'nutrition_days', count(*) from nutrition_days where deleted_at is not null
+union all select 'nutrition_settings', count(*) from nutrition_settings where deleted_at is not null
+union all select 'body_measurements', count(*) from body_measurements where deleted_at is not null
+union all select 'readiness_entries', count(*) from readiness_entries where deleted_at is not null
+union all select 'user_state', count(*) from user_state where deleted_at is not null;
+
+begin;
+update plans              set deleted_at = deleted_at where deleted_at is not null;
+update workout_logs       set deleted_at = deleted_at where deleted_at is not null;
+update personal_records   set deleted_at = deleted_at where deleted_at is not null;
+update nutrition_days     set deleted_at = deleted_at where deleted_at is not null;
+update nutrition_settings set deleted_at = deleted_at where deleted_at is not null;
+update body_measurements  set deleted_at = deleted_at where deleted_at is not null;
+update readiness_entries  set deleted_at = deleted_at where deleted_at is not null;
+update user_state         set deleted_at = deleted_at where deleted_at is not null;
+-- 009 verification query 3 must now return 0 in every column, then:
+commit;   -- or rollback; if it doesn't
+```
+
+### Rollback notes
+
+None of these migrations has a down file. Prefer fixing forward with a new
+migration; restore from backup only for a real data problem.
+
+| Migration | To undo | What you lose |
+|---|---|---|
+| 009 | `drop trigger if exists <table>_purge_tombstone_content on <table>;` for the 8 tables, then `drop function if exists public.purge_tombstone_content();` and `supabase migration repair --remote --status reverted 009` | **Wiped content does not come back.** Dropping the trigger only stops future wipes; content cleared before that is gone except from a backup taken before step 5 or 6. The client keeps working without the trigger (tombstones simply keep content again) |
+| 008 | No clean undo. Re-running 002 would bring back the forgeable streak and badge writes; the old public `profiles` policy and the blocking foreign keys come back only by restoring from backup | Undoing it breaks account deletion for anyone who created a circle, and re-opens the access holes. If a policy is wrong, fix it in a new migration |
+| 007 | Only before any client has synced: `drop table` the seven tables and `alter table plans drop column deleted_at`, then `migration repair --remote --status reverted 007` (and 008/009 first, which depend on it) | **All synced user data in those tables.** v1.1.0's sync needs these tables and `plans.deleted_at`, so a rollback also means rolling the web app back to before sync. Practically: fix forward |
+| repair | `supabase migration repair --remote --status reverted <version>` | Only the history row; nothing in the schema changes |
 
 ## Account deletion (delete-account function)
 
