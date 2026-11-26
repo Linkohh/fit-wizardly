@@ -66,6 +66,21 @@ async function pullRows(client: SyncClient, table: string, userId: string, curso
   }
 }
 
+/**
+ * The local key of a deleted row, without reading its content. Keyed tables use
+ * the key column ('id', 'day'). One-row-per-user tables (keyColumn null) have a
+ * single local item, so its key is the one. Returns null when there's nothing
+ * to match (no key, or no local copy of a one-row table).
+ */
+function keyOfTombstone<T>(collection: SyncCollection<T>, row: SyncRow, byKey: Map<string, T>): string | null {
+  if (collection.keyColumn) {
+    const value = row[collection.keyColumn];
+    return typeof value === 'string' && value.length > 0 ? value : null;
+  }
+  const first = byKey.keys().next();
+  return first.done ? null : first.value;
+}
+
 /** Applies pulled rows to local items. Returns the number of local changes and the keys the cloud sent. */
 function mergeRows<T>(
   collection: SyncCollection<T>,
@@ -79,14 +94,24 @@ function mergeRows<T>(
   let changes = 0;
 
   for (const row of rows) {
-    let remoteItem: T;
-    try {
-      remoteItem = collection.fromRow(row);
-    } catch (error) {
-      console.error(`[FitWizard] Skipping a malformed ${collection.table} row.`, error);
-      continue;
+    // A tombstone's content may be wiped on the server (migration 009, DEBT-097),
+    // so it's keyed from its key column, never parsed. Content is only read for
+    // live rows.
+    let remoteItem: T | null = null;
+    let key: string;
+    if (row.deleted_at) {
+      const tombstoneKey = keyOfTombstone(collection, row, byKey);
+      if (tombstoneKey === null) continue;
+      key = tombstoneKey;
+    } else {
+      try {
+        remoteItem = collection.fromRow(row);
+      } catch (error) {
+        console.error(`[FitWizard] Skipping a malformed ${collection.table} row.`, error);
+        continue;
+      }
+      key = collection.key(remoteItem);
     }
-    const key = collection.key(remoteItem);
     remoteKeys.add(key);
     const local = byKey.get(key);
     // First upload: for a record the cloud already has, the cloud copy wins even
@@ -107,6 +132,7 @@ function mergeRows<T>(
       if (!localEditIsNewer && entry) clearOutboxEntry(collection.table, key, entry);
       continue;
     }
+    if (remoteItem === null) continue; // unreachable: only tombstones skip parsing
 
     if (entry?.deleted) {
       // Deleted here; a remote edit made after that deletion brings it back.

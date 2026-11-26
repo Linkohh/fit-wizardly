@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { SyncCollection } from './types';
+import type { SyncCollection, SyncRow } from './types';
 import { FAKE_USER as USER, FakeServer } from '@/test/sync/fakeServer';
 
 vi.mock('@/stores/authStore', () => ({
@@ -17,6 +17,12 @@ interface Note {
   updatedAt: string;
 }
 
+function requiredText(row: SyncRow): string {
+  const text = (row.data as { text?: unknown } | undefined)?.text;
+  if (typeof text !== 'string') throw new Error('note row has no text');
+  return text;
+}
+
 function noteCollection(table: string, local: { items: Note[] }): SyncCollection<Note> {
   return {
     table,
@@ -24,7 +30,8 @@ function noteCollection(table: string, local: { items: Note[] }): SyncCollection
     onConflict: 'user_id,id',
     key: (note) => note.id,
     toRow: (note, userId) => ({ user_id: userId, id: note.id, data: { text: note.text }, deleted_at: null }),
-    fromRow: (row) => ({ id: String(row.id), text: String((row.data as { text: string }).text), updatedAt: row.updated_at }),
+    // Throws on a row without content, like the real collections (`required(...)`).
+    fromRow: (row) => ({ id: String(row.id), text: requiredText(row), updatedAt: row.updated_at }),
     readLocal: () => local.items,
     writeLocal: (items) => {
       local.items = items;
@@ -113,6 +120,47 @@ describe('sync engine', () => {
     expect(local.items).toHaveLength(1);
 
     server.writeFromOtherDevice('notes', { id: 'a', data: { text: 'to delete' }, deleted_at: server.now() });
+    await sync.syncAll(USER, { client: server.client() });
+
+    expect(local.items).toEqual([]);
+  });
+
+  it('removes an item deleted elsewhere even when the server has wiped its content (DEBT-097)', async () => {
+    server.writeFromOtherDevice('notes', { id: 'a', data: { text: 'to delete' } });
+    const sync = await loadEngine();
+    const local = { items: [] as Note[] };
+    sync.registerCollection(noteCollection('notes', local));
+    await sync.syncAll(USER, { client: server.client() });
+    expect(local.items).toHaveLength(1);
+
+    // Migration 009 empties a tombstone's content columns; fromRow would throw on it.
+    server.writeFromOtherDevice('notes', { id: 'a', data: {}, deleted_at: server.now() });
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    await sync.syncAll(USER, { client: server.client() });
+
+    expect(local.items).toEqual([]);
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
+  it('removes a one-row-per-user item deleted elsewhere with its content wiped', async () => {
+    server.rows('settings').push({ user_id: USER, data: { text: 'mine' }, updated_at: server.now(), deleted_at: null });
+    const sync = await loadEngine();
+    const local = { items: [] as Note[] };
+    sync.registerCollection({
+      ...noteCollection('settings', local),
+      keyColumn: null,
+      onConflict: 'user_id',
+      key: () => 'singleton',
+      fromRow: (row) => ({ id: 'singleton', text: requiredText(row), updatedAt: row.updated_at }),
+    });
+    await sync.syncAll(USER, { client: server.client() });
+    expect(local.items).toHaveLength(1);
+
+    const row = server.rows('settings')[0];
+    row.data = {};
+    row.deleted_at = server.now();
+    row.updated_at = server.now();
     await sync.syncAll(USER, { client: server.client() });
 
     expect(local.items).toEqual([]);
