@@ -2,7 +2,7 @@
 
 > The quick view: what's done, what's in progress, and what's left. It's updated after every step.
 > `BOARD.md` has the full day-by-day grid and the gate checklists; this page is the short version.
-> **Last updated:** 2026-11-26. **Wave 1 is complete** (all PRs through #69 merged); Gate 1 is waiting on Lincoln's L10 and L11. **Wave 2 is merged through Day 7 for D and H** (#91, #92), with the npm advisory fix (#93) and Lane A Day 5 (#88). Still open: Lane A Day 6 (listing, this PR), Lane A Day 7 (v1.1.0), and Lane C's #75, which waits on your `$pageview` decision.
+> **Last updated:** 2026-11-26 (Lane A Day 7). **Wave 1 is complete** (all PRs through #69 merged); Gate 1 is waiting on Lincoln's L10 and L11. **Wave 2 is merged** through #94 except Lane C's #75, which waits on your `$pageview` decision and is **not in 1.1.0**. Open: Lane A Day 7 (v1.1.0, this PR). Then Gate 2 (you).
 
 ## Done
 
@@ -67,19 +67,20 @@
 | 57 | **Merged #93** Coordinator: the 3 critical and 11 high npm advisories fixed (Capacitor 8.6.3, React Router 7.18.7) | `fe4789f` |
 | 58 | **Merged #92** Lane H Day 7: Android release bundle built in CI; mobile release guide; iOS privacy manifest matches the store answers; no encryption question on each build; Android compile fix | `2d63859` |
 | 59 | **Merged #91** Lane D Day 7: CI fails on high or critical npm advisories; Dependabot weekly updates | `b7dc219` |
-| 60 | Lane A Day 6: store listing copy (both stores) and a script that captures 24 store screenshots and checks the copy's length and wording | `docs/store/LISTING.md`, `scripts/store-screenshots.mjs` (this PR) |
+| 60 | **Merged #94** Lane A Day 6: store listing copy (both stores) and a script that captures 24 store screenshots and checks the copy's length and wording | `b3ed114` |
+| 61 | Lane A Day 7: **v1.1.0** in `package.json`, iOS and Android; What's new entry; final release notes (analytics not included); screenshot script always stops its server | This PR |
 
 ## In progress
 
 | What | Status |
 |---|---|
 | Gate 1 | **Waiting on you:** L10 (staging Supabase) and L11 (email-code template). Everything else for Gate 1 is merged |
-| Lane C Day 4 (#75) | **Waiting on you:** OK the contract #9 `$pageview` change |
+| Lane C Day 4 (#75) | **Waiting on you:** OK the contract #9 `$pageview` change. Not in 1.1.0; it goes in a later release |
 | Store forms and listing | **Waiting on you:** the questions in `docs/store/APPLE_PRIVACY.md`, `GOOGLE_DATA_SAFETY.md`, `COMPLIANCE.md` and `LISTING.md` (minimum age, L6 keys, domain, support email, copyright holder, name clearance). Health and the encryption exemption were applied with their defaults in #92. Google's wording couldn't be checked from here |
 
 ## Next up, in order
 
-0. **Day 7 left:** v1.1.0 (Lane A: version bumps in `package.json` and both native projects, the changelog entry, Gate 2 checklist). Then Gate 2 (you).
+0. **Gate 2 (you):** merge this PR into `preview_b`, run the Gate 2 checklist in `BOARD.md`, promote `preview_b` to `main` and tag `v1.1.0`.
 1. **Gate 1 (you):** create the staging Supabase project and apply migrations 001–008 (repair 001–006 first; steps in `docs/SUPABASE_MIGRATIONS.md`), add the email-code template (`docs/IOS_DEVELOPMENT.md`, "Auth email"), deploy `delete-account` (its README), then run the checklist in `BOARD.md`.
 2. **Lane C:** #75 (analytics) once you OK the `$pageview` change, then its Day 5 consent entries.
 3. **Wave 3 (Days 8–10):** device checks with Lane H, Spanish (J1, J2), final privacy text, screenshots on the final build, readiness rubric.
@@ -111,7 +112,8 @@
 - [x] Account deletion in the app (Lane F, #73; the function is deployed at L10)
 - [ ] Sessions that last (✅ #74); native plugins (✅ #83); notifications (✅ #89)
 - [ ] Analytics and consent (Lane C, #75 open); end-to-end test (✅ #78) and accessibility part 1 (✅ #84)
-- [ ] Privacy policy (✅ #77), store forms (✅ #88), listing copy and screenshot script (Lane A Day 6, PR open)
+- [x] Privacy policy (#77), store forms (#88), listing copy and screenshot script (#94)
+- [ ] v1.1.0 release: versions, changelog, release notes (Lane A Day 7, PR open)
 - [x] CI gates: npm audit and Dependabot (Lane D, #91); Android release bundle (Lane H, #92)
 - [x] Express retired (Lane F Day 5, #80)
 - [ ] **Gate 2:** production database, v1.1.0 to `main`, first store test builds (needs L4)
