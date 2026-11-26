@@ -88,3 +88,75 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+  android:
+    # Android release bundle (roadmap 4.5, Lane H Day 7). Runs on pushes to
+    # main and preview_b, and on PRs from lane-h/* branches (the native lane),
+    # so other lanes' PRs don't spend minutes on it.
+    # Signed only when the ANDROID_KEYSTORE_* secrets exist; otherwise the
+    # .aab is unsigned (fine for CI, not uploadable to Play). See
+    # docs/RELEASE_MOBILE.md.
+    if: github.event_name == 'push' || startsWith(github.head_ref, 'lane-h/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build web app
+        run: npm run build
+
+      - name: Sync Capacitor (Android)
+        run: npx cap sync android
+
+      - name: Write signing config (if secrets are set)
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ] || [ -z "$ANDROID_KEYSTORE_PASSWORD" ] || [ -z "$ANDROID_KEY_ALIAS" ] || [ -z "$ANDROID_KEY_PASSWORD" ]; then
+            echo "::notice title=Unsigned Android build::ANDROID_KEYSTORE_* secrets are not set, so the .aab is unsigned. See docs/RELEASE_MOBILE.md."
+            exit 0
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/fitwizard-release.jks
+          {
+            echo "storeFile=fitwizard-release.jks"
+            echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
+            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "keyPassword=$ANDROID_KEY_PASSWORD"
+          } > android/keystore.properties
+
+      - name: Build release bundle
+        working-directory: android
+        run: ./gradlew bundleRelease --no-daemon
+
+      - name: Remove signing files
+        if: always()
+        run: rm -f android/keystore.properties android/fitwizard-release.jks
+
+      - name: Upload release bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+          retention-days: 14
