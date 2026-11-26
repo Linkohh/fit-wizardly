@@ -55,6 +55,23 @@ jobs:
       - name: Test delete-account function
         run: npx -y deno@2 test --no-config supabase/functions/delete-account/
 
+  audit:
+    # Dependency audit, root only (server/ was removed in #80). Roadmap 4.5.
+    # Fails on high or critical advisories; don't add ignores, fix the dependency.
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Audit root dependencies
+        run: npm audit --audit-level=high
+
   e2e:
     # Playwright lifter loop (guest, chromium only). Roadmap 3.5.
     # Pinned: Playwright 1.59 has no chromium build for ubuntu-latest (26.04).
