@@ -100,20 +100,23 @@ Not active, recorded so nobody discloses them by mistake: `src/lib/analytics.ts`
 
 ## How this maps to the iOS privacy manifest
 
-`ios/App/App/PrivacyInfo.xcprivacy` (Lane H Day 1) declares tracking: **false**, no tracking domains, and four collected types. The store forms must match it.
+`ios/App/App/PrivacyInfo.xcprivacy` declares tracking: **false**, no tracking domains, and seven collected types (Lane H Day 1; User ID, Health and Other User Content added and Product Interaction made linked in #92, DEBT-126). The store forms must match it.
 
 | Manifest type | Linked to the user | Purpose | Rows above | Optional |
 |---|---|---|---|---|
 | Email address | Yes | App functionality | Account email | No, for accounts (guests give none) |
-| Fitness | Yes | App functionality | Plans, workout logs, personal records, nutrition, measurements, readiness (once synced to Supabase) | Yes: only when signed in |
+| User ID | Yes | App functionality | Every synced row (`user_id`) | Yes: only when signed in |
+| Fitness | Yes | App functionality | Plans, workout logs, personal records, custom exercises, achievements (once synced to Supabase) | Yes: only when signed in |
+| Health | Yes | App functionality | Body measurements, readiness check-ins, nutrition profile and logs (once synced) | Yes: only when signed in |
+| Other user content | Yes | App functionality | Free-text notes, custom exercises, custom foods and saved meals (once synced) | Yes: only when signed in |
 | Crash data | No | App functionality | Crash reports (Sentry) | Yes: opt-in |
-| Product interaction | No | Analytics | Page views (Vercel), product analytics events (PostHog) | Yes: opt-in |
+| Product interaction | Yes | App functionality (Analytics to add when PostHog ships) | Exercise views (`exercise_interactions`), exercise favourites and collections; later, product analytics events (PostHog) | Yes: only when signed in, or opt-in for analytics |
 
 Checks for whoever fills in the forms:
-- If crash reports or analytics are ever tied to the account ID, both manifest entries must change to **linked**.
+- If crash reports are ever tied to the account ID, the Crash data entry must change to **linked**.
+- When PostHog (#75) ships with a key (L6), add the **Analytics** purpose to Product interaction, in the manifest and on both forms.
 - Food lookups and exercise searches: **decided on Day 5** (Lincoln to confirm). Apple: not collected (only used to answer the request in real time; [`APPLE_PRIVACY.md`](APPLE_PRIVACY.md)). Google: declared as in-app search history, processed ephemerally ([`GOOGLE_DATA_SAFETY.md`](GOOGLE_DATA_SAFETY.md)).
-- Nutrition, body measurements and readiness: **recommended on Day 5** to declare as Health as well as Fitness on both forms (Lincoln to confirm). If accepted, Lane H adds Health to the manifest.
-- Day 5 also found the manifest is missing **User ID** (every synced row has the account ID) and **Other User Content** (free-text notes), and that **Product Interaction** is linked (exercise views go to `exercise_interactions` with the account ID). The changes for Lane H are listed in `APPLE_PRIVACY.md` → "Manifest changes".
+- Health (nutrition, body measurements and readiness): declared on both forms and in the manifest with Lincoln's default (yes), applied in #92.
 
 ## Third parties
 

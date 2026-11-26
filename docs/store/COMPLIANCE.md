@@ -64,7 +64,7 @@ If the declaration asks for a disclaimer, use the one below.
 | First run, before using the app | The consent dialog: a required checkbox, "I understand this is **not medical advice**", with links to the terms and privacy policy | `src/components/legal/ConsentModal.tsx` (~146, links ~212–220) |
 | Legal page, Medical Disclaimer tab (opens by default) | `/legal` or `/legal?tab=disclaimer`. Reached from the footer on the web, the menu drawer's quick links and About in the apps | `src/pages/Legal.tsx` (tab `disclaimer`); `src/components/header/DrawerQuickLinks.tsx:11`; `src/pages/About.tsx:27` |
 | Terms of Service | "Not medical advice" section (`terms-not-medical-advice`) | `src/pages/Legal.tsx` ~180 |
-| Store listing text | **To add on Day 6** (`docs/store/LISTING.md`): one closing line, "FitWizard gives general fitness information and is not medical advice. Talk to a doctor before starting a new exercise or nutrition programme." No medical claims anywhere in the listing | Lane A Day 6 |
+| Store listing text | **Added on Day 6** as the last line of the full description in [`LISTING.md`](LISTING.md): "FitWizard gives general fitness information and is not medical advice. Talk to a doctor before starting a new exercise or nutrition programme." No medical claims anywhere in the listing; `scripts/store-screenshots.mjs --check-copy` rejects medical-claim words | `docs/store/LISTING.md` |
 
 ## 4. Account deletion
 
@@ -86,7 +86,7 @@ If the declaration asks for a disclaimer, use the one below.
 |---|---|---|
 | Does your app use encryption? | **Yes**, only through the operating system's HTTPS (TLS) for network calls. Sign-in is a one-time email code checked by Supabase over HTTPS. The app adds no encryption of its own and stores data unencrypted in the app's own storage (privacy policy, "Where your data is stored") | `src/lib/supabase.ts`; no crypto library in `package.json` |
 | Does it qualify for an exemption? | **Yes**: encryption limited to HTTPS through the OS and authentication is exempt. No export documentation needed. **Lincoln confirms** | |
-| `ITSAppUsesNonExemptEncryption` in `Info.plist` | **Not set today** (`ios/App/App/Info.plist`). Lane H can add `<key>ITSAppUsesNonExemptEncryption</key><false/>` so App Store Connect stops asking on every build | Lane H owns `ios/` |
+| `ITSAppUsesNonExemptEncryption` in `Info.plist` | **`false`** since #92 (DEBT-128, 2026-11-26), so App Store Connect shouldn't ask on each build. If Lincoln overrules the exemption, Lane H sets it back and the export documentation is needed | `ios/App/App/Info.plist` |
 | France declaration | Not needed for exempt encryption (as last known) | |
 
 ## Questions for Lincoln
@@ -94,5 +94,5 @@ If the declaration asks for a disclaimer, use the one below.
 1. **Minimum age:** 13 (current draft) or higher? It sets the Google target audience and must match the policy.
 2. **Medical or treatment information** on Apple's questionnaire: "None" or "Infrequent"? Recommended: **Infrequent/mild** if the form counts general training guidance, otherwise None.
 3. **Health declaration:** do readiness ratings count as sleep or stress management? Recommended: **no**.
-4. **Encryption:** confirm the exemption, and whether Lane H should add `ITSAppUsesNonExemptEncryption = NO`.
+4. **Encryption:** confirm the exemption. The default (exempt) is applied: `ITSAppUsesNonExemptEncryption = NO` since #92.
 5. **Support email and domain** (blocks the deletion URL and the email path).

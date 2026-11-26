@@ -2,7 +2,7 @@
 
 > The quick view: what's done, what's in progress, and what's left. It's updated after every step.
 > `BOARD.md` has the full day-by-day grid and the gate checklists; this page is the short version.
-> **Last updated:** 2026-11-25. **Wave 1 is complete** (all PRs through #69 merged); Gate 1 is waiting on Lincoln's L10 and L11. **Wave 2 Day 5 is merged** (#80–#86), and Day 6 for D, F and H (#87, #89, #90), except Lane C's #75, which waits on your `$pageview` decision.
+> **Last updated:** 2026-11-26. **Wave 1 is complete** (all PRs through #69 merged); Gate 1 is waiting on Lincoln's L10 and L11. **Wave 2 is merged through Day 7 for D and H** (#91, #92), with the npm advisory fix (#93) and Lane A Day 5 (#88). Still open: Lane A Day 6 (listing, this PR), Lane A Day 7 (v1.1.0), and Lane C's #75, which waits on your `$pageview` decision.
 
 ## Done
 
@@ -63,7 +63,11 @@
 | 53 | **Merged #87** Lane F Day 6: circle queries and plan deletions tested against the access rules; no new migration needed | `cb93576` |
 | 54 | **Merged #89** Lane H Day 6: rest-over notification and workout reminders on your training days (phones only; unverified on devices) | `0ce6a64` |
 | 55 | **Merged #90** Lane D Day 6: Enter in the plan builder no longer skips a step; the keyboard no longer hides Complete Set | `e88c727` |
-| 56 | Lane A Day 5: Apple and Google privacy form answers and the compliance sheet (age rating, health declaration, disclaimer, deletion, encryption) | `docs/store/` (#88) |
+| 56 | **Merged #88** Lane A Day 5: Apple and Google privacy form answers and the compliance sheet (age rating, health declaration, disclaimer, deletion, encryption) | `5a5b678` |
+| 57 | **Merged #93** Coordinator: the 3 critical and 11 high npm advisories fixed (Capacitor 8.6.3, React Router 7.18.7) | `fe4789f` |
+| 58 | **Merged #92** Lane H Day 7: Android release bundle built in CI; mobile release guide; iOS privacy manifest matches the store answers; no encryption question on each build; Android compile fix | `2d63859` |
+| 59 | **Merged #91** Lane D Day 7: CI fails on high or critical npm advisories; Dependabot weekly updates | `b7dc219` |
+| 60 | Lane A Day 6: store listing copy (both stores) and a script that captures 24 store screenshots and checks the copy's length and wording | `docs/store/LISTING.md`, `scripts/store-screenshots.mjs` (this PR) |
 
 ## In progress
 
@@ -71,14 +75,14 @@
 |---|---|
 | Gate 1 | **Waiting on you:** L10 (staging Supabase) and L11 (email-code template). Everything else for Gate 1 is merged |
 | Lane C Day 4 (#75) | **Waiting on you:** OK the contract #9 `$pageview` change |
-| Store forms | **Waiting on you:** the questions in `docs/store/APPLE_PRIVACY.md`, `GOOGLE_DATA_SAFETY.md` and `COMPLIANCE.md` (Health, minimum age, L6 keys, domain, support email). Google's wording couldn't be checked from here |
+| Store forms and listing | **Waiting on you:** the questions in `docs/store/APPLE_PRIVACY.md`, `GOOGLE_DATA_SAFETY.md`, `COMPLIANCE.md` and `LISTING.md` (minimum age, L6 keys, domain, support email, copyright holder, name clearance). Health and the encryption exemption were applied with their defaults in #92. Google's wording couldn't be checked from here |
 
 ## Next up, in order
 
-0. **Day 6 left:** listing copy and screenshots (Lane A). Then Day 7: v1.1.0 (A), audit gate (D), Android CI (H).
+0. **Day 7 left:** v1.1.0 (Lane A: version bumps in `package.json` and both native projects, the changelog entry, Gate 2 checklist). Then Gate 2 (you).
 1. **Gate 1 (you):** create the staging Supabase project and apply migrations 001–008 (repair 001–006 first; steps in `docs/SUPABASE_MIGRATIONS.md`), add the email-code template (`docs/IOS_DEVELOPMENT.md`, "Auth email"), deploy `delete-account` (its README), then run the checklist in `BOARD.md`.
-2. **Wave 2 / Day 4 for each lane** after Gate 1: privacy policy (A), fewer taps to a first plan (B), analytics (C), end-to-end test (D), deletion UI and export v3 (F), lasting sessions (H).
-3. **Lane E Day 7:** sync before sign-out with an unsent-changes warning, then clear the device; move plans onto the sync engine.
+2. **Lane C:** #75 (analytics) once you OK the `$pageview` change, then its Day 5 consent entries.
+3. **Wave 3 (Days 8–10):** device checks with Lane H, Spanish (J1, J2), final privacy text, screenshots on the final build, readiness rubric.
 
 ## Still remaining
 
@@ -107,7 +111,8 @@
 - [x] Account deletion in the app (Lane F, #73; the function is deployed at L10)
 - [ ] Sessions that last (✅ #74); native plugins (✅ #83); notifications (✅ #89)
 - [ ] Analytics and consent (Lane C, #75 open); end-to-end test (✅ #78) and accessibility part 1 (✅ #84)
-- [ ] Privacy policy (✅ #77), store forms (#88), listing copy (Lane A Day 6)
+- [ ] Privacy policy (✅ #77), store forms (✅ #88), listing copy and screenshot script (Lane A Day 6, PR open)
+- [x] CI gates: npm audit and Dependabot (Lane D, #91); Android release bundle (Lane H, #92)
 - [x] Express retired (Lane F Day 5, #80)
 - [ ] **Gate 2:** production database, v1.1.0 to `main`, first store test builds (needs L4)
 
@@ -139,6 +144,9 @@
 | L7 Test devices | ⬜ Day 8 |
 | L8 Android testers | ⬜ Before Gate 2 |
 | L9 Legal review | ⬜ Days 8–10 |
+| Branch protection on `main` and `preview_b` | ⬜ Require `test`, `e2e`, `edge-functions` and `audit` (steps in `handoffs/2026-11-26-lane-d-day-7.md`) |
+| GitHub repository variables for the Android CI bundle | ⬜ `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PUBLIC_APP_ORIGIN` (production values), before a CI bundle goes to Play |
+| Android signing secrets | ⬜ The four `ANDROID_KEYSTORE_*` secrets (steps in `docs/RELEASE_MOBILE.md`). Without them the CI bundle is unsigned and you upload a locally built one |
 
 ## Open questions for Lincoln
 Each has a default that applies unless you change it.
@@ -156,3 +164,8 @@ Each has a default that applies unless you change it.
 12. **Minimum age:** 13? (No default; the policy says "13 [Lincoln to confirm]".)
 13. **Support email** for the privacy policy and Play's deletion page. (No default; must not be a personal address.)
 14. **Deleted items in the cloud (DEBT-097):** keep their content until account deletion (Play's "delete data without deleting the account" stays **No**), or purge it when an item is deleted (then **Yes**)? (No default; the form says No until you decide.)
+15. **Health (question 11) and the encryption exemption:** applied with their defaults in #92 (manifest has Health; `ITSAppUsesNonExemptEncryption` is NO). Say if either should change.
+16. **Copyright holder** for Apple's Copyright field: your legal name or a company? (No default.)
+17. **Support URL:** use `/about` until there's a support page? (Default: yes.)
+18. **Home screen wording (DEBT-142):** the hero says plans are "Intelligent, personalized, and undeniably effective". Keep it? (Default: keep; the store listing doesn't use it.)
+19. **Android CI on PRs:** runs on pushes to `main`/`preview_b` and on `lane-h/*` PRs. (Default: keep it that way.)

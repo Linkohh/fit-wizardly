@@ -1,6 +1,6 @@
 # Release notes: FitWizard 1.1.0 (draft)
 
-> **Draft, 2026-11-18 (Lane A, Day 3); updated 2026-11-25 (Day 5).** Built from the work merged into `preview_b`: Wave 1 (#44–#69) and Wave 2 so far (#73, #74, #76–#78, #80–#85, #87, #89, #90). Wave 2 adds more before release (see "Still to come"). On Day 7, Lane A finishes this file and copies it into `src/data/changelog.ts`, whose test requires the top entry to match `package.json`.
+> **Draft, 2026-11-18 (Lane A, Day 3); updated 2026-11-26 (Day 6).** Built from the work merged into `preview_b`: Wave 1 (#44–#69) and Wave 2 so far (#73, #74, #76–#78, #80–#93). Wave 2 adds more before release (see "Still to come"). On Day 7, Lane A finishes this file and copies it into `src/data/changelog.ts`, whose test requires the top entry to match `package.json`.
 >
 > The sections match `ChangelogHighlights` in `src/data/changelog.ts`: **New**, **Improved**, **Fixed**. Keep bullets short and in user language. Don't mention AI, and don't make medical claims.
 
@@ -55,6 +55,6 @@ Add these on Day 7 if they merge:
 - Optional crash reports and product analytics, both off unless you opt in (Lane C, Days 4–5; #75 waits on Lincoln's `$pageview` decision).
 
 ## Left out on purpose
-These are internal and mean nothing to users: database migrations 007 and 008, the API origin allowlist and rate limit, dead-code removal, retiring the unused Express server (#80), the accessibility test in CI, and doc fixes.
+These are internal and mean nothing to users: database migrations 007 and 008, the API origin allowlist and rate limit, dead-code removal, retiring the unused Express server (#80), the accessibility test in CI, the dependency security updates and the CI audit gate and Dependabot (#91, #93), the Android CI build (#92), and doc fixes.
 
-The native app items (the FitWizard name, iPhone-only and portrait-only, Android release settings, and from #83 the status bar that follows the theme, the splash screen that waits for your data, the keyboard that keeps the field in view, the phone's own share sheet for workout cards, and from #89 workout reminders on your training days and a notification when your rest is over) go in the store "What's new" text for the first native release, not here. Lane A writes that on Day 6 (`LISTING.md`).
+The native app items (the FitWizard name, iPhone-only and portrait-only, Android release settings, and from #83 the status bar that follows the theme, the splash screen that waits for your data, the keyboard that keeps the field in view, the phone's own share sheet for workout cards, and from #89 workout reminders on your training days and a notification when your rest is over) go in the store "What's new" text for the first native release, not here. Lane A wrote that on Day 6, in [`LISTING.md`](LISTING.md) → "What's new". The iOS privacy manifest and export-compliance changes (#92) are store paperwork, not user-facing.
