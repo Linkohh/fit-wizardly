@@ -57,3 +57,6 @@ install.cmd
 
 # Marketing
 marketing/
+
+# Store screenshots (scripts/store-screenshots.mjs)
+docs/store/screenshots/
