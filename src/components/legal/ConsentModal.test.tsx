@@ -2,13 +2,17 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ConsentModal } from './ConsentModal';
-import { useAnalyticsStore } from '@/stores/analyticsStore';
 import {
   ANALYTICS_CONSENT_STORAGE_KEY,
   CONSENT_REQUEST_EVENT,
+  CONSENT_RESOLVED_EVENT,
   CONSENT_STORAGE_KEY,
+  CRASH_REPORTS_CONSENT_STORAGE_KEY,
   NUTRITION_LOOKUP_CONSENT_STORAGE_KEY,
 } from '@/lib/consent';
+
+const CRASH_LABEL = /Send crash reports/i;
+const ANALYTICS_LABEL = /Share anonymous usage statistics/i;
 
 vi.mock('@/components/ui/sheet', async () => {
   const React = await import('react');
@@ -129,7 +133,6 @@ describe('ConsentModal', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     localStorage.clear();
-    useAnalyticsStore.setState({ hasConsented: false });
   });
 
   afterEach(() => {
@@ -161,7 +164,18 @@ describe('ConsentModal', () => {
     expect(screen.queryByTestId('consent-tray')).not.toBeInTheDocument();
   });
 
-  it('stores consent, opts out of analytics by default, and closes the tray', () => {
+  it('shows the crash-report and usage-statistics toggles separately, both off', () => {
+    renderConsentModal();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(screen.getByRole('checkbox', { name: CRASH_LABEL })).not.toBeChecked();
+    expect(screen.getByRole('checkbox', { name: ANALYTICS_LABEL })).not.toBeChecked();
+  });
+
+  it('stores consent, opts out of crash reports and analytics by default, and closes the tray', () => {
     renderConsentModal();
 
     act(() => {
@@ -172,23 +186,99 @@ describe('ConsentModal', () => {
 
     expect(localStorage.getItem(CONSENT_STORAGE_KEY)).toBeTruthy();
     expect(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY)).toBeNull();
-    expect(useAnalyticsStore.getState().hasConsented).toBe(false);
+    expect(localStorage.getItem(CRASH_REPORTS_CONSENT_STORAGE_KEY)).toBeNull();
     expect(screen.queryByTestId('consent-tray')).not.toBeInTheDocument();
   });
 
-  it('respects analytics opt-in when explicitly enabled', () => {
+  it('stores usage statistics on their own, leaving crash reports off', () => {
     renderConsentModal();
 
     act(() => {
       vi.advanceTimersByTime(500);
     });
 
-    fireEvent.click(screen.getByRole('checkbox', { name: /Help improve FitWizard/i }));
+    fireEvent.click(screen.getByRole('checkbox', { name: ANALYTICS_LABEL }));
     fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
 
     expect(localStorage.getItem(CONSENT_STORAGE_KEY)).toBeTruthy();
     expect(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY)).toBe('true');
-    expect(useAnalyticsStore.getState().hasConsented).toBe(true);
+    expect(localStorage.getItem(CRASH_REPORTS_CONSENT_STORAGE_KEY)).toBeNull();
+  });
+
+  it('stores crash reports on their own, leaving usage statistics off', () => {
+    renderConsentModal();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    fireEvent.click(screen.getByRole('checkbox', { name: CRASH_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
+
+    expect(localStorage.getItem(CRASH_REPORTS_CONSENT_STORAGE_KEY)).toBe('true');
+    expect(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY)).toBeNull();
+  });
+
+  it('no longer writes the legacy analyticsStore copy of consent (DEBT-061)', () => {
+    renderConsentModal();
+
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    fireEvent.click(screen.getByRole('checkbox', { name: ANALYTICS_LABEL }));
+    fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
+
+    expect(localStorage.getItem('fitwizard-analytics')).toBeNull();
+  });
+
+  it('keeps an existing analytics opt-in when reopened from Privacy Settings, with crash reports off', () => {
+    // A user who opted in before crash reports had their own key.
+    localStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
+    localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
+    renderConsentModal();
+
+    act(() => {
+      window.dispatchEvent(new Event(CONSENT_REQUEST_EVENT));
+    });
+
+    expect(screen.getByRole('checkbox', { name: ANALYTICS_LABEL })).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: CRASH_LABEL })).not.toBeChecked();
+
+    fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
+
+    expect(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY)).toBe('true');
+    expect(localStorage.getItem(CRASH_REPORTS_CONSENT_STORAGE_KEY)).toBeNull();
+  });
+
+  it('revokes one toggle from Privacy Settings without touching the other, then tells listeners', () => {
+    localStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
+    localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
+    localStorage.setItem(CRASH_REPORTS_CONSENT_STORAGE_KEY, 'true');
+    const flagsWhenResolved: Array<[string | null, string | null]> = [];
+    const onResolved = () =>
+      flagsWhenResolved.push([
+        localStorage.getItem(CRASH_REPORTS_CONSENT_STORAGE_KEY),
+        localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY),
+      ]);
+    window.addEventListener(CONSENT_RESOLVED_EVENT, onResolved);
+
+    try {
+      renderConsentModal();
+      act(() => {
+        window.dispatchEvent(new Event(CONSENT_REQUEST_EVENT));
+      });
+
+      expect(screen.getByRole('checkbox', { name: CRASH_LABEL })).toBeChecked();
+      fireEvent.click(screen.getByRole('checkbox', { name: CRASH_LABEL }));
+      fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
+
+      // The keys are written before the event, so Sentry/PostHog read the new choice.
+      expect(flagsWhenResolved).toEqual([[null, 'true']]);
+      expect(screen.queryByTestId('consent-tray')).not.toBeInTheDocument();
+    } finally {
+      window.removeEventListener(CONSENT_RESOLVED_EVENT, onResolved);
+    }
   });
 
   it('stores nutrition lookup consent separately when explicitly enabled', () => {

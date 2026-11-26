@@ -452,7 +452,14 @@
         "kept_on_device": "Abgemeldet. Deine Trainingsdaten bleiben auf diesem Gerät."
     },
     "consent": {
-        "welcome_description": "Dein Trainingsplaner ist bereit. Bevor wir beginnen, bestätige bitte diese Grundlagen."
+        "welcome_description": "Dein Trainingsplaner ist bereit. Bevor wir beginnen, bestätige bitte diese Grundlagen.",
+        "diagnostics_heading": "Optionale Datenfreigabe",
+        "diagnostics_intro": "Beides ist aus, bis du es einschaltest. Keine der Optionen sendet jemals deine Trainings, Gewichte, Körpermaße oder Mahlzeiten.",
+        "crash_reports_label": "Absturzberichte senden",
+        "crash_reports_description": "Wenn in der App ein Fehler auftritt, werden Fehlerdetails, App-Version, Browser und Gerätetyp an Sentry gesendet, damit wir ihn beheben können.",
+        "analytics_label": "Anonyme Nutzungsstatistiken teilen",
+        "analytics_description": "Sendet, welche Bildschirme du öffnest und welche Funktionen du nutzt (zum Beispiel, dass ein Plan erstellt wurde), an PostHog (EU) und Vercel Web Analytics, ohne Name oder E-Mail.",
+        "change_later": "Du kannst das jederzeit unter Profil → Details → Datenschutzeinstellungen ändern."
     },
     "auth": {
         "unavailable_title": "Kontofunktionen nicht verfügbar",

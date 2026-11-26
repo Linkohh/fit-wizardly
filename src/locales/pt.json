@@ -452,7 +452,14 @@
         "kept_on_device": "Sessão encerrada. Seus dados de treino continuam neste dispositivo."
     },
     "consent": {
-        "welcome_description": "Seu planejador de treinos está pronto. Antes de começar, confirme estes pontos básicos."
+        "welcome_description": "Seu planejador de treinos está pronto. Antes de começar, confirme estes pontos básicos.",
+        "diagnostics_heading": "Compartilhamento opcional de dados",
+        "diagnostics_intro": "As duas opções ficam desativadas, a menos que você as ative. Nenhuma delas envia seus treinos, pesos, medidas corporais ou refeições.",
+        "crash_reports_label": "Enviar relatórios de falhas",
+        "crash_reports_description": "Quando o app tiver um erro, envia os detalhes do erro, a versão do app, o navegador e o tipo de dispositivo ao Sentry para que possamos corrigi-lo.",
+        "analytics_label": "Compartilhar estatísticas de uso anônimas",
+        "analytics_description": "Envia quais telas você abre e quais recursos usa (por exemplo, que um plano foi criado) ao PostHog (UE) e ao Vercel Web Analytics, sem nome nem e-mail.",
+        "change_later": "Altere isso quando quiser em Perfil → Detalhes → Configurações de privacidade."
     },
     "auth": {
         "unavailable_title": "Recursos de conta indisponíveis",

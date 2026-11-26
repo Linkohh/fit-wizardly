@@ -2,15 +2,16 @@
  * Crash reporting (contract #8, roadmap 3.1).
  *
  * Sentry is opt-in and lazy:
- * - Nothing happens unless VITE_SENTRY_DSN is set AND the user has consented.
+ * - Nothing happens unless VITE_SENTRY_DSN is set AND the user turned on "Send crash
+ *   reports" (`fitwizard_crash_reports_consent` in src/lib/consent.ts, separate from
+ *   analytics since Lane C Day 5).
  * - The SDK is loaded with a dynamic import, so it never sits in the startup bundle.
- * - Until Day 5 adds a separate crash-reports toggle, consent is the analytics
- *   consent key in src/lib/consent.ts (`fitwizard_analytics_consent`).
+ * - Turning the toggle off calls Sentry.close() straight away, without a reload.
  *
  * captureError() is always safe to call. Before Sentry is ready (or when it never
  * starts) it falls back to console.error.
  */
-import { CONSENT_RESOLVED_EVENT, hasAnalyticsConsent } from '@/lib/consent';
+import { hasCrashReportsConsent, onConsentChange } from '@/lib/consent';
 
 type SentryModule = typeof import('@sentry/browser');
 type SentryEvent = Parameters<NonNullable<Parameters<SentryModule['init']>[0]>['beforeSend'] & object>[0];
@@ -19,6 +20,7 @@ type SentryBreadcrumb = Parameters<
 >[0];
 
 let sentryCapture: SentryModule['captureException'] | null = null;
+let sentryClose: SentryModule['close'] | null = null;
 let loading: Promise<void> | null = null;
 let listening = false;
 
@@ -59,8 +61,15 @@ export function scrubExtra(extra: Record<string, unknown> | undefined): Record<s
   return Object.fromEntries(Object.entries(extra).filter(([key]) => !HEALTH_KEY_PATTERN.test(key)));
 }
 
-/** Sentry `beforeSend`: strips query strings and health-looking extras. */
-export function scrubEvent(event: SentryEvent): SentryEvent {
+/**
+ * Sentry `beforeSend`: drops the event if consent was withdrawn, otherwise strips
+ * query strings and health-looking extras.
+ */
+export function scrubEvent(event: SentryEvent): SentryEvent | null {
+  if (!hasCrashReportsConsent()) {
+    return null;
+  }
+
   const scrubbed: SentryEvent = { ...event };
 
   if (scrubbed.request) {
@@ -110,7 +119,7 @@ export function scrubBreadcrumb(breadcrumb: SentryBreadcrumb): SentryBreadcrumb 
 }
 
 function startSentry(): void {
-  if (sentryCapture || loading || !readDsn() || !hasAnalyticsConsent()) {
+  if (sentryCapture || loading || !readDsn() || !hasCrashReportsConsent()) {
     return;
   }
 
@@ -118,7 +127,12 @@ function startSentry(): void {
   // not @sentry/react: vite.config.ts's manualChunks sends any path containing "/react/"
   // to the preloaded vendor-react chunk, which would put the SDK in the startup bundle.
   loading = import('@sentry/browser')
-    .then(({ init, captureException }) => {
+    .then(({ init, captureException, close }) => {
+      // Consent may have been withdrawn while the SDK was loading.
+      if (!hasCrashReportsConsent()) {
+        loading = null;
+        return;
+      }
       init({
         dsn: readDsn(),
         release: __APP_VERSION__,
@@ -131,6 +145,7 @@ function startSentry(): void {
         beforeBreadcrumb: (breadcrumb) => scrubBreadcrumb(breadcrumb),
       });
       sentryCapture = captureException;
+      sentryClose = close;
     })
     .catch((error: unknown) => {
       // Allow a later consent event to try again (for example after a network blip).
@@ -139,7 +154,27 @@ function startSentry(): void {
     });
 }
 
-/** No-op unless VITE_SENTRY_DSN is set AND the user consented. */
+/** Shuts Sentry down at once. A later opt-in starts a fresh client. */
+function stopSentry(): void {
+  const close = sentryClose;
+  sentryCapture = null;
+  sentryClose = null;
+  // A load still in flight checks consent before init, so it bails by itself.
+  if (close) {
+    loading = null;
+    close(2000).catch(() => undefined);
+  }
+}
+
+function syncWithConsent(): void {
+  if (hasCrashReportsConsent()) {
+    startSentry();
+  } else {
+    stopSentry();
+  }
+}
+
+/** No-op unless VITE_SENTRY_DSN is set AND the user opted in to crash reports. */
 export function initMonitoring(): void {
   if (typeof window === 'undefined' || !readDsn()) {
     return;
@@ -147,7 +182,7 @@ export function initMonitoring(): void {
 
   if (!listening) {
     listening = true;
-    window.addEventListener(CONSENT_RESOLVED_EVENT, startSentry);
+    onConsentChange(syncWithConsent);
   }
 
   startSentry();

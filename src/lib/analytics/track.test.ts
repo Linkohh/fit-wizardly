@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CaptureResult } from 'posthog-js';
-import { ANALYTICS_CONSENT_STORAGE_KEY } from '@/lib/consent';
+import { ANALYTICS_CONSENT_STORAGE_KEY, CONSENT_RESOLVED_EVENT } from '@/lib/consent';
 import appSource from '@/App.tsx?raw';
 import { generateRandomCode } from '@/stores/circles/utils';
 import {
@@ -16,13 +16,25 @@ import {
   track,
 } from './track';
 
-const mocks = vi.hoisted(() => ({
-  importCount: 0,
-  posthog: {
-    init: vi.fn(),
-    capture: vi.fn(),
-  },
-}));
+const mocks = vi.hoisted(() => {
+  // Mirrors PostHog's own opt-out flag, which lives in device storage between loads.
+  const state = { optedOut: false };
+  return {
+    importCount: 0,
+    state,
+    posthog: {
+      init: vi.fn(),
+      capture: vi.fn(),
+      has_opted_out_capturing: vi.fn(() => state.optedOut),
+      opt_out_capturing: vi.fn(() => {
+        state.optedOut = true;
+      }),
+      opt_in_capturing: vi.fn(() => {
+        state.optedOut = false;
+      }),
+    },
+  };
+});
 
 vi.mock('posthog-js', () => {
   mocks.importCount += 1;
@@ -40,8 +52,11 @@ function captureResult(properties: Record<string, unknown>): CaptureResult {
 describe('track', () => {
   beforeEach(() => {
     resetAnalyticsForTests();
+    mocks.state.optedOut = false;
     mocks.posthog.init.mockClear();
     mocks.posthog.capture.mockClear();
+    mocks.posthog.opt_out_capturing.mockClear();
+    mocks.posthog.opt_in_capturing.mockClear();
     localStorage.clear();
   });
 
@@ -154,6 +169,81 @@ describe('track', () => {
 
     expect(mocks.posthog.init).not.toHaveBeenCalled();
     expect(mocks.posthog.capture).not.toHaveBeenCalled();
+  });
+});
+
+describe('revoking analytics consent', () => {
+  beforeEach(() => {
+    resetAnalyticsForTests();
+    mocks.state.optedOut = false;
+    vi.clearAllMocks();
+    localStorage.clear();
+    vi.stubEnv('VITE_POSTHOG_KEY', 'phc_test');
+    localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
+  });
+
+  afterEach(() => {
+    resetAnalyticsForTests();
+    vi.unstubAllEnvs();
+    localStorage.clear();
+  });
+
+  async function loadPostHog(): Promise<void> {
+    track('plan_generated', { goal: 'strength' });
+    await settle();
+    expect(mocks.posthog.init).toHaveBeenCalledTimes(1);
+  }
+
+  function changeConsent(optedIn: boolean): void {
+    if (optedIn) {
+      localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
+    } else {
+      localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
+    }
+    window.dispatchEvent(new Event(CONSENT_RESOLVED_EVENT));
+  }
+
+  it('deletes PostHog\'s stored id on opt-out', () => {
+    expect(buildPostHogConfig().opt_out_persistence_by_default).toBe(true);
+  });
+
+  it('calls posthog.opt_out_capturing() as soon as consent is withdrawn, without a reload', async () => {
+    await loadPostHog();
+
+    changeConsent(false);
+
+    expect(mocks.posthog.opt_out_capturing).toHaveBeenCalledTimes(1);
+  });
+
+  it('opts the same client back in, without an $opt_in event, when consent returns', async () => {
+    await loadPostHog();
+    changeConsent(false);
+    mocks.posthog.capture.mockClear();
+
+    changeConsent(true);
+    track('plan_generated');
+
+    expect(mocks.posthog.opt_in_capturing).toHaveBeenCalledWith({ captureEventName: false });
+    expect(mocks.posthog.init).toHaveBeenCalledTimes(1);
+    expect(mocks.posthog.capture).toHaveBeenCalledWith('plan_generated', expect.any(Object));
+  });
+
+  it('clears an opt-out left in storage by an earlier session when the user has consented again', async () => {
+    mocks.state.optedOut = true;
+
+    await loadPostHog();
+
+    expect(mocks.posthog.opt_in_capturing).toHaveBeenCalledWith({ captureEventName: false });
+    expect(mocks.posthog.capture).toHaveBeenCalledWith('plan_generated', expect.any(Object));
+  });
+
+  it('follows a revoke made in another tab', async () => {
+    await loadPostHog();
+
+    localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
+    window.dispatchEvent(new StorageEvent('storage', { key: ANALYTICS_CONSENT_STORAGE_KEY }));
+
+    expect(mocks.posthog.opt_out_capturing).toHaveBeenCalledTimes(1);
   });
 });
 
