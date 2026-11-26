@@ -68,7 +68,7 @@
 | 58 | **Merged #92** Lane H Day 7: Android release bundle built in CI; mobile release guide; iOS privacy manifest matches the store answers; no encryption question on each build; Android compile fix | `2d63859` |
 | 59 | **Merged #91** Lane D Day 7: CI fails on high or critical npm advisories; Dependabot weekly updates | `b7dc219` |
 | 60 | **Merged #94** Lane A Day 6: store listing copy (both stores) and a script that captures 24 store screenshots and checks the copy's length and wording | `b3ed114` |
-| 61 | Lane A Day 7: **v1.1.0** in `package.json`, iOS and Android; What's new entry; final release notes (analytics not included); screenshot script always stops its server | This PR |
+| 61 | Lane A Day 7: **v1.1.0** in `package.json`, iOS and Android; What's new entry; final release notes (analytics not included); screenshot script always stops its server | PR #95 |
 
 ## In progress
 
