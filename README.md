@@ -53,8 +53,8 @@ FitWizard is **free**. Most of the app works without an account (guest mode). An
 | Languages | ⚠️ Partial | English is complete. Spanish, German and Portuguese are partly translated; v1 targets English and Spanish (roadmap 3.3) |
 | Cloud sync of plans for signed-in users | ✅ Shipped | |
 | Saving workout logs, nutrition, measurements, readiness and achievements between sessions | ✅ Shipped | Kept on the device (IndexedDB on the web, app storage on iOS and Android), never in localStorage. See ADR 11 and `docs/store/DATA_INVENTORY.md` |
-| Cloud sync of logs, nutrition, measurements, readiness, achievements and custom exercises | ✅ Shipped (signed-in users) | On since #66. Syncing before sign-out, with an unsent-changes warning, is still to come (roadmap 1.4, Lane E Day 7) |
-| Account deletion | 🗓️ Planned | Roadmap 1.5 |
+| Cloud sync of logs, nutrition, measurements, readiness, achievements and custom exercises | ✅ Shipped (signed-in users) | On since #66. Signing out sends your last changes first and warns about any that couldn't be sent (#81) |
+| Account deletion, and erasing a guest's data on the device | ✅ Shipped | Profile → Details (#73). The `delete-account` function must be deployed to each Supabase project (L2, L10) |
 | Circles (social groups, feed, challenges) | 🚩 Behind a flag (`VITE_FEATURE_CIRCLES`) | Not part of v1 |
 | Coach portal (clients, templates, revenue) | 🚩 Behind a flag (`VITE_FEATURE_COACH`) | Not part of v1; parts use sample data |
 | Pro subscription, Apple Health / Health Connect, AI coach | 🗓️ After launch | Roadmap Phase 6 |

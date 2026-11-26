@@ -1,7 +1,7 @@
 {
   "name": "fitwizard",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "packageManager": "npm@11.12.1",
   "type": "module",
   "scripts": {

@@ -26,6 +26,46 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.1.0',
+    name: 'Your training, kept safe',
+    date: '2026-11',
+    highlights: {
+      new: [
+        'Your workouts, plans, records, meals, measurements, check-ins and badges are saved on your device',
+        'Pick up an unfinished workout, or choose to discard it',
+        'Sign in with a 6-digit code from your email, and stay signed in',
+        'Signed in, your training is backed up and kept in step across your devices',
+        'Sign out safely: your last changes are sent first, then this device is cleared',
+        'Delete your account, or erase everything on this device, from Profile → Details',
+        'Your data export now includes everything the app stores',
+        'A plain-language privacy policy and terms',
+        'A notification when you earn a badge',
+      ],
+      improved: [
+        'Fewer taps to your first plan',
+        'Your weekly goal counts finished workouts and resets every Monday',
+        'Clear next steps on empty History, Analytics and Nutrition screens',
+        'Smaller and faster to load; the exercise library works offline',
+        'Fonts load from FitWizard, so opening the app no longer contacts Google',
+        'Screen readers name every slider and use the language you picked',
+        'Follows your Reduce Motion setting; larger buttons in the muscle selector',
+        'The muscle selector follows the theme, and theme changes fade smoothly again',
+        'Language menu offers English and Español',
+        'Sign-in errors and the Start Over dialog appear in your language',
+      ],
+      fixed: [
+        'Removed wording that promised features the app does not have, and placeholder content',
+        'Hidden features no longer appear in menus, search, the guide or your badges',
+        'Every set in a workout can be logged, and finished workouts appear in History',
+        'Saved sets show as done after a reload',
+        'Plan cards show real reps and rest times',
+        'Full body plans no longer end with an empty day',
+        'Exported PDF plans read cleanly',
+        'Reps-in-reserve colours are easier to read in the light theme',
+      ],
+    },
+  },
+  {
     version: '1.0.0',
     name: 'Launch',
     date: '2026-09',

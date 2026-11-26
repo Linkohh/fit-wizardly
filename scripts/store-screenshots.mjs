@@ -429,6 +429,25 @@ async function captureDevice(browser, device, { baseUrl, storageState, workoutPa
   return problems;
 }
 
+/**
+ * Starts the server, then launches the browser inside the cleanup scope, so a failed launch (or any later
+ * failure) still stops the server. The browser is closed only if it was launched.
+ */
+export async function withServerAndBrowser({ startServer, launchBrowser }, work) {
+  const server = await startServer();
+  let browser;
+  try {
+    browser = await launchBrowser();
+    return await work({ server, browser });
+  } finally {
+    try {
+      if (browser) await browser.close();
+    } finally {
+      server.stop();
+    }
+  }
+}
+
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   console.log('Listing copy (docs/store/LISTING.md):');
@@ -444,28 +463,29 @@ async function main() {
   if (devices.length === 0) throw new Error(`No device matches --devices. Known: ${DEVICES.map((device) => device.id).join(', ')}`);
 
   const { chromium } = await import('playwright');
-  const server = options.baseUrl ? { baseUrl: options.baseUrl, stop: () => {} } : await startPreview();
   const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE;
-  const browser = await chromium.launch(executablePath ? { executablePath } : {});
-  try {
-    console.log(`Seeding demo data at ${server.baseUrl}…`);
-    const { storageState, workoutPath } = await seedDemoData(browser, server.baseUrl, options.theme);
-    rmSync(OUTPUT_DIR, { recursive: true, force: true });
-    const problems = [];
-    for (const device of devices) {
-      console.log(`${device.store}: ${device.label}, ${device.width * device.scale}×${device.height * device.scale}`);
-      problems.push(...(await captureDevice(browser, device, { baseUrl: server.baseUrl, storageState, workoutPath, theme: options.theme })));
-    }
-    if (problems.length > 0) {
-      for (const problem of problems) console.error(`  error: ${problem}`);
-      process.exitCode = 1;
-    } else {
-      console.log(`Wrote ${devices.length * SCREENS.length} screenshots to ${path.relative(ROOT, OUTPUT_DIR)}/`);
-    }
-  } finally {
-    await browser.close();
-    server.stop();
-  }
+  await withServerAndBrowser(
+    {
+      startServer: () => (options.baseUrl ? { baseUrl: options.baseUrl, stop: () => {} } : startPreview()),
+      launchBrowser: () => chromium.launch(executablePath ? { executablePath } : {}),
+    },
+    async ({ server, browser }) => {
+      console.log(`Seeding demo data at ${server.baseUrl}…`);
+      const { storageState, workoutPath } = await seedDemoData(browser, server.baseUrl, options.theme);
+      rmSync(OUTPUT_DIR, { recursive: true, force: true });
+      const problems = [];
+      for (const device of devices) {
+        console.log(`${device.store}: ${device.label}, ${device.width * device.scale}×${device.height * device.scale}`);
+        problems.push(...(await captureDevice(browser, device, { baseUrl: server.baseUrl, storageState, workoutPath, theme: options.theme })));
+      }
+      if (problems.length > 0) {
+        for (const problem of problems) console.error(`  error: ${problem}`);
+        process.exitCode = 1;
+      } else {
+        console.log(`Wrote ${devices.length * SCREENS.length} screenshots to ${path.relative(ROOT, OUTPUT_DIR)}/`);
+      }
+    },
+  );
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

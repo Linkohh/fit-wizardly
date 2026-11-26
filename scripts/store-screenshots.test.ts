@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { describe, expect, it } from 'vitest';
-import { checkListing, countCharacters, DEVICES, jpegSize, parseListingBlocks } from './store-screenshots.mjs';
+import { describe, expect, it, vi } from 'vitest';
+import { checkListing, countCharacters, DEVICES, jpegSize, parseListingBlocks, withServerAndBrowser } from './store-screenshots.mjs';
 
 function block(id: string, max: number, text: string): string {
   return `<!-- listing:${id} max=${max} -->\n\`\`\`text\n${text}\n\`\`\`\n`;
@@ -101,5 +101,61 @@ describe('DEVICES', () => {
       'apple-6.1': '1206x2622',
       'google-phone': '1080x1920',
     });
+  });
+});
+
+describe('withServerAndBrowser', () => {
+  function fakeServer() {
+    return { baseUrl: 'http://127.0.0.1:4317', stop: vi.fn() };
+  }
+
+  it('stops the server when the browser fails to launch', async () => {
+    const server = fakeServer();
+    const work = vi.fn();
+    await expect(
+      withServerAndBrowser(
+        { startServer: async () => server, launchBrowser: async () => { throw new Error('Chromium not found'); } },
+        work,
+      ),
+    ).rejects.toThrow('Chromium not found');
+    expect(server.stop).toHaveBeenCalledTimes(1);
+    expect(work).not.toHaveBeenCalled();
+  });
+
+  it('closes the browser and stops the server when the work fails', async () => {
+    const server = fakeServer();
+    const browser = { close: vi.fn(async () => undefined) };
+    await expect(
+      withServerAndBrowser({ startServer: async () => server, launchBrowser: async () => browser }, async () => {
+        throw new Error('capture failed');
+      }),
+    ).rejects.toThrow('capture failed');
+    expect(browser.close).toHaveBeenCalledTimes(1);
+    expect(server.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('still stops the server when closing the browser fails', async () => {
+    const server = fakeServer();
+    const browser = { close: vi.fn(async () => { throw new Error('close failed'); }) };
+    await expect(
+      withServerAndBrowser({ startServer: async () => server, launchBrowser: async () => browser }, async () => 'done'),
+    ).rejects.toThrow('close failed');
+    expect(server.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns the work result and cleans up after success', async () => {
+    const server = fakeServer();
+    const browser = { close: vi.fn(async () => undefined) };
+    const result = await withServerAndBrowser(
+      { startServer: async () => server, launchBrowser: async () => browser },
+      async ({ server: started, browser: launched }) => {
+        expect(started).toBe(server);
+        expect(launched).toBe(browser);
+        return 'done';
+      },
+    );
+    expect(result).toBe('done');
+    expect(browser.close).toHaveBeenCalledTimes(1);
+    expect(server.stop).toHaveBeenCalledTimes(1);
   });
 });
