@@ -78,6 +78,8 @@ Versions move to 1.2.0 on Day 10 (Lane H, together with Lane A's release PR). Ev
    | `ANDROID_KEY_PASSWORD` | the key password |
 
    Until all four exist, the CI job builds an **unsigned** bundle and says so in a notice. Play rejects unsigned bundles, so use a local build until the secrets are in.
+
+   Also add three repository **variables** (same page, **Variables** tab; they're public values, not secrets): `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and `VITE_PUBLIC_APP_ORIGIN`, with the production values. Vite bakes them into the bundle at build time. Without them the job still builds, but sign-in is off and native `/api` calls have no origin, and the run shows an "Android bundle not release-ready" warning. Don't upload a bundle from a run with that warning.
 4. **Play Console** ([play.google.com/console](https://play.google.com/console)) → **Create app**: name FitWizard, app, free, accept the declarations.
 5. **Play App Signing:** on the first upload to any track, Play offers to manage the app signing key. Accept **Let Google manage and protect your app signing key** (the default). Your keystore then becomes the *upload* key only.
 6. Complete the **App content** forms (privacy policy URL, data safety, ads: none, target audience, health apps declaration) from `docs/store/`.
@@ -85,7 +87,7 @@ Versions move to 1.2.0 on Day 10 (Lane H, together with Lane A's release PR). Ev
 ### Each release
 
 1. Get a signed `.aab`, either:
-   - **CI:** push to `preview_b` or `main` (or open a `lane-h/*` PR). On the run's summary page, download the **android-release-aab** artifact (kept 14 days) and unzip it to get `app-release.aab`. Check the run's notices: if it says "Unsigned Android build", the secrets aren't set.
+   - **CI:** push to `preview_b` or `main` (or open a `lane-h/*` PR). On the run's summary page, download the **android-release-aab** artifact (kept 14 days) and unzip it to get `app-release.aab`. Check the run's notices: if it says "Unsigned Android build", the secrets aren't set. If it says "Android bundle not release-ready", the variables aren't set.
    - **Local:**
 
      ```sh

@@ -121,7 +121,19 @@ jobs:
         run: npm ci
 
       - name: Build web app
-        run: npm run build
+        # Vite bakes these into the bundle, so they must be set here, not at
+        # signing time. They are public values (VITE_*), kept as repository
+        # variables. Without them the bundle compiles but sign-in is off and
+        # native /api calls have no origin: fine for CI, not for Play.
+        env:
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_PUBLIC_APP_ORIGIN: ${{ vars.VITE_PUBLIC_APP_ORIGIN }}
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ] || [ -z "$VITE_PUBLIC_APP_ORIGIN" ]; then
+            echo "::warning title=Android bundle not release-ready::VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY or VITE_PUBLIC_APP_ORIGIN is not set as a repository variable. Don't upload this .aab to Play. See docs/RELEASE_MOBILE.md."
+          fi
+          npm run build
 
       - name: Sync Capacitor (Android)
         run: npx cap sync android
