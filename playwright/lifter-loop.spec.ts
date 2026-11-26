@@ -127,8 +127,8 @@ const KNOWN_AXE_FINDINGS = new Set([
  */
 const KNOWN_AXE_ELEMENT_FINDINGS: Array<{ key: string; htmlIncludes: string; owner: string }> = [
   // Limitations step cards: aria-label is the constraint name, the visible text is name plus
-  // description (src/components/wizard/steps/ConstraintsStep.tsx:97): Lane B. The stepper
-  // buttons (DEBT-106, fixed in #82) are not covered, so a regression there fails.
+  // description (src/components/wizard/steps/ConstraintsStep.tsx:97): DEBT-135, Lane B. The
+  // stepper buttons (fixed in #82) are not covered, so a regression there fails.
   {
     key: 'wizard:label-content-name-mismatch',
     htmlIncludes: 'focus-visible:ring-warning',
