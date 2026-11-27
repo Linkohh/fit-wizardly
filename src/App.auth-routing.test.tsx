@@ -2,7 +2,7 @@ import { MemoryRouter, Outlet } from 'react-router-dom';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
-import { ANALYTICS_CONSENT_STORAGE_KEY } from '@/lib/consent';
+import { ANALYTICS_CONSENT_STORAGE_KEY, CONSENT_RESOLVED_EVENT } from '@/lib/consent';
 
 type Selector<TState, TResult> = ((state: TState) => TResult) | undefined;
 
@@ -383,6 +383,25 @@ describe('App auth routing', () => {
 
       expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
       expect(screen.getAllByTestId('vercel-analytics')).toHaveLength(1);
+    } finally {
+      localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
+    }
+  });
+
+  it('unmounts Vercel Analytics without a reload when consent is withdrawn', async () => {
+    localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
+
+    try {
+      renderAt('/onboarding');
+      expect(await screen.findByTestId('vercel-analytics')).toBeInTheDocument();
+
+      // What ConsentModal does when "Share anonymous usage statistics" is turned off.
+      act(() => {
+        localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
+        window.dispatchEvent(new Event(CONSENT_RESOLVED_EVENT));
+      });
+
+      expect(screen.queryByTestId('vercel-analytics')).not.toBeInTheDocument();
     } finally {
       localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
     }

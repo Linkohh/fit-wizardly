@@ -487,6 +487,13 @@
     },
     "consent": {
         "welcome_description": "Tu planificador de entrenamiento está listo. Antes de empezar, confirma estos puntos básicos.",
+        "diagnostics_heading": "Datos opcionales que compartes",
+        "diagnostics_intro": "Ambas opciones están desactivadas a menos que las actives. Ninguna envía nunca tus entrenamientos, pesos, medidas corporales ni comidas.",
+        "crash_reports_label": "Enviar informes de errores",
+        "crash_reports_description": "Cuando la app tenga un error, envía los detalles del error, la versión de la app, el navegador y el tipo de dispositivo a Sentry para que podamos corregirlo.",
+        "analytics_label": "Compartir estadísticas de uso anónimas",
+        "analytics_description": "Envía qué pantallas abres y qué funciones usas (por ejemplo, que se creó un plan) a PostHog (UE) y Vercel Web Analytics, sin nombre ni correo electrónico.",
+        "change_later": "Puedes cambiarlo cuando quieras en Perfil → Detalles → Configuración de privacidad.",
         "medical": "Entiendo que esto <strong>no es consejo médico</strong>.",
         "consult": "Consultaré a un médico antes de iniciar nuevos ejercicios.",
         "local": "Mis datos se almacenan <strong>localmente</strong> en este dispositivo."

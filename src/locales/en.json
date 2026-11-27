@@ -1064,7 +1064,14 @@
         "kept_on_device": "Signed out. Your training data stays on this device."
     },
     "consent": {
-        "welcome_description": "Your workout planner is ready. Before we begin, confirm these basics."
+        "welcome_description": "Your workout planner is ready. Before we begin, confirm these basics.",
+        "diagnostics_heading": "Optional data sharing",
+        "diagnostics_intro": "Both are off unless you turn them on. Neither one ever sends your workouts, weights, body measurements or meals.",
+        "crash_reports_label": "Send crash reports",
+        "crash_reports_description": "When the app hits an error, send the error details, app version, browser and device type to Sentry so we can fix it.",
+        "analytics_label": "Share anonymous usage statistics",
+        "analytics_description": "Send which screens you open and which features you use (for example, that a plan was made) to PostHog (EU) and Vercel Web Analytics, with no name or email.",
+        "change_later": "Change these at any time in Profile → Details → Privacy Settings."
     },
     "auth": {
         "unavailable_title": "Account features unavailable",

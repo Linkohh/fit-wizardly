@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BarChart3, ShieldAlert } from 'lucide-react';
+import { BarChart3, Bug, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -13,21 +13,31 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
-import { useAnalyticsStore } from '@/stores/analyticsStore';
 import {
   ANALYTICS_CONSENT_STORAGE_KEY,
   CONSENT_REQUEST_EVENT,
   CONSENT_RESOLVED_EVENT,
   CONSENT_STORAGE_KEY,
+  CRASH_REPORTS_CONSENT_STORAGE_KEY,
   NUTRITION_LOOKUP_CONSENT_STORAGE_KEY,
 } from '@/lib/consent';
+
+/** Stores an opt-in as 'true', or removes the key for "no". */
+function writeOptIn(key: string, optedIn: boolean): void {
+  if (optedIn) {
+    localStorage.setItem(key, 'true');
+  } else {
+    localStorage.removeItem(key);
+  }
+}
 
 export function ConsentModal() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  // Every opt-in starts off. Nothing is pre-ticked for new users.
+  const [crashReportsOptIn, setCrashReportsOptIn] = useState(false);
   const [analyticsOptIn, setAnalyticsOptIn] = useState(false);
   const [nutritionLookupOptIn, setNutritionLookupOptIn] = useState(false);
-  const { setConsent } = useAnalyticsStore();
 
   useEffect(() => {
     const hasConsented = localStorage.getItem(CONSENT_STORAGE_KEY);
@@ -44,6 +54,7 @@ export function ConsentModal() {
     const openConsentTray = () => {
       const hasStoredConsent = localStorage.getItem(CONSENT_STORAGE_KEY);
       if (hasStoredConsent) {
+        setCrashReportsOptIn(localStorage.getItem(CRASH_REPORTS_CONSENT_STORAGE_KEY) === 'true');
         setAnalyticsOptIn(localStorage.getItem(ANALYTICS_CONSENT_STORAGE_KEY) === 'true');
         setNutritionLookupOptIn(localStorage.getItem(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY) === 'true');
       }
@@ -57,22 +68,14 @@ export function ConsentModal() {
 
   const handleAgree = () => {
     // Write every consent key first. CONSENT_RESOLVED_EVENT listeners (crash reporting,
-    // food lookup, install prompt) read storage when the event fires, so it goes last.
+    // analytics, food lookup, install prompt) read storage when the event fires, so it
+    // goes last. Turning a toggle off stops that tool at once: Sentry.close(),
+    // posthog.opt_out_capturing() and unmounting Vercel Analytics all run from it.
     localStorage.setItem(CONSENT_STORAGE_KEY, new Date().toISOString());
+    writeOptIn(CRASH_REPORTS_CONSENT_STORAGE_KEY, crashReportsOptIn);
+    writeOptIn(ANALYTICS_CONSENT_STORAGE_KEY, analyticsOptIn);
+    writeOptIn(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY, nutritionLookupOptIn);
 
-    if (analyticsOptIn) {
-      localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
-    } else {
-      localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
-    }
-
-    if (nutritionLookupOptIn) {
-      localStorage.setItem(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY, 'true');
-    } else {
-      localStorage.removeItem(NUTRITION_LOOKUP_CONSENT_STORAGE_KEY);
-    }
-
-    setConsent(analyticsOptIn);
     window.dispatchEvent(new Event(CONSENT_RESOLVED_EVENT));
 
     setOpen(false);
@@ -159,12 +162,51 @@ export function ConsentModal() {
               </ul>
             </section>
 
-            <section className="rounded-[1.45rem] border border-primary/12 bg-gradient-to-r from-primary/[0.08] via-fuchsia-500/[0.07] to-secondary/[0.08] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] backdrop-blur dark:border-white/8 dark:from-primary/10 dark:via-fuchsia-500/[0.09] dark:to-secondary/10 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <section
+              aria-label={t('consent.diagnostics_heading', 'Optional data sharing')}
+              className="space-y-3 rounded-[1.45rem] border border-primary/12 bg-gradient-to-r from-primary/[0.08] via-fuchsia-500/[0.07] to-secondary/[0.08] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.4)] backdrop-blur dark:border-white/8 dark:from-primary/10 dark:via-fuchsia-500/[0.09] dark:to-secondary/10 dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+            >
+              <p className="text-xs leading-5 text-muted-foreground sm:text-[0.82rem]">
+                {t(
+                  'consent.diagnostics_intro',
+                  'Both are off unless you turn them on. Neither one ever sends your workouts, weights, body measurements or meals.',
+                )}
+              </p>
+
+              <div className="flex items-start gap-3">
+                <Checkbox
+                  id="crash-reports-consent"
+                  checked={crashReportsOptIn}
+                  onCheckedChange={(checked) => setCrashReportsOptIn(checked === true)}
+                  aria-describedby="crash-reports-consent-description"
+                  className="mt-1 h-5 w-5 rounded-md border-primary/50 bg-white/85 dark:bg-black/20"
+                />
+                <div className="min-w-0">
+                  <Label
+                    htmlFor="crash-reports-consent"
+                    className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-foreground"
+                  >
+                    <Bug className="h-4 w-4 text-primary" aria-hidden="true" />
+                    {t('consent.crash_reports_label', 'Send crash reports')}
+                  </Label>
+                  <p
+                    id="crash-reports-consent-description"
+                    className="mt-1 text-xs leading-5 text-muted-foreground sm:text-[0.82rem]"
+                  >
+                    {t(
+                      'consent.crash_reports_description',
+                      'When the app hits an error, send the error details, app version, browser and device type to Sentry so we can fix it.',
+                    )}
+                  </p>
+                </div>
+              </div>
+
               <div className="flex items-start gap-3">
                 <Checkbox
                   id="analytics-consent"
                   checked={analyticsOptIn}
                   onCheckedChange={(checked) => setAnalyticsOptIn(checked === true)}
+                  aria-describedby="analytics-consent-description"
                   className="mt-1 h-5 w-5 rounded-md border-primary/50 bg-white/85 dark:bg-black/20"
                 />
                 <div className="min-w-0">
@@ -172,14 +214,24 @@ export function ConsentModal() {
                     htmlFor="analytics-consent"
                     className="flex cursor-pointer items-center gap-2 text-sm font-semibold text-foreground"
                   >
-                    <BarChart3 className="h-4 w-4 text-primary" />
-                    Help improve FitWizard
+                    <BarChart3 className="h-4 w-4 text-primary" aria-hidden="true" />
+                    {t('consent.analytics_label', 'Share anonymous usage statistics')}
                   </Label>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-[0.82rem]">
-                    Share anonymous usage data to help us make the app better. No personal info is collected.
+                  <p
+                    id="analytics-consent-description"
+                    className="mt-1 text-xs leading-5 text-muted-foreground sm:text-[0.82rem]"
+                  >
+                    {t(
+                      'consent.analytics_description',
+                      'Send which screens you open and which features you use (for example, that a plan was made) to PostHog (EU) and Vercel Web Analytics, with no name or email.',
+                    )}
                   </p>
                 </div>
               </div>
+
+              <p className="text-xs leading-5 text-muted-foreground sm:text-[0.82rem]">
+                {t('consent.change_later', 'Change these at any time in Profile → Details → Privacy Settings.')}
+              </p>
             </section>
 
             <section className="rounded-[1.45rem] border border-primary/12 bg-white/58 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur dark:border-white/8 dark:bg-white/[0.055] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">

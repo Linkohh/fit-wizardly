@@ -2,8 +2,11 @@
  * Product analytics (contract #9, roadmap 3.2, decision D5: PostHog, EU region).
  *
  * PostHog is opt-in and lazy:
- * - track() does nothing unless VITE_POSTHOG_KEY is set AND the user has opted in
- *   (`fitwizard_analytics_consent` in src/lib/consent.ts, the same key crash reports use).
+ * - track() does nothing unless VITE_POSTHOG_KEY is set AND the user turned on "Share
+ *   anonymous usage statistics" (`fitwizard_analytics_consent` in src/lib/consent.ts).
+ *   Crash reports have their own key since Lane C Day 5.
+ * - Turning the toggle off calls posthog.opt_out_capturing() straight away, without a
+ *   reload, which also deletes PostHog's stored anonymous id (opt_out_persistence_by_default).
  * - The SDK is loaded with a dynamic import on the first allowed event, so it never sits
  *   in the startup bundle. With no key at build time, Vite inlines the empty value and
  *   the import is dropped as dead code.
@@ -12,7 +15,7 @@
  * - Page URLs lose their query string and hash, and id-like path segments are masked.
  */
 import type { CaptureResult, PostHog, PostHogConfig } from 'posthog-js';
-import { hasAnalyticsConsent } from '@/lib/consent';
+import { hasAnalyticsConsent, onConsentChange } from '@/lib/consent';
 import { getNativePlatform } from '@/lib/platform';
 
 export type AnalyticsEvent =
@@ -50,6 +53,7 @@ const MAX_PENDING_EVENTS = 50;
 let client: PostHog | null = null;
 let loading: Promise<void> | null = null;
 let pending: Array<{ event: AnalyticsEvent; props: AnalyticsProps }> = [];
+let stopListening: (() => void) | null = null;
 
 function readKey(): string {
   const value = import.meta.env.VITE_POSTHOG_KEY;
@@ -179,6 +183,8 @@ export function buildPostHogConfig(): Partial<PostHogConfig> {
     // Anonymous events only: no person profiles, and identify() is never called.
     person_profiles: 'never',
     mask_personal_data_properties: true,
+    // Opting out also deletes PostHog's stored anonymous id from the device.
+    opt_out_persistence_by_default: true,
     before_send: scrubCapture,
   };
 }
@@ -191,6 +197,24 @@ function flushPending(): void {
   pending = [];
   for (const { event, props } of queued) {
     client.capture(event, props);
+  }
+}
+
+/**
+ * Applies the current analytics consent to a loaded PostHog client. Revoking opts
+ * out at once; opting back in re-enables the same client without an `$opt_in` event.
+ */
+export function syncAnalyticsConsent(): void {
+  if (!hasAnalyticsConsent()) {
+    pending = [];
+    if (client && !client.has_opted_out_capturing()) {
+      client.opt_out_capturing();
+    }
+    return;
+  }
+
+  if (client?.has_opted_out_capturing()) {
+    client.opt_in_capturing({ captureEventName: false });
   }
 }
 
@@ -209,6 +233,9 @@ function loadClient(): void {
       }
       posthog.init(readKey(), buildPostHogConfig());
       client = posthog;
+      // A past revoke leaves PostHog's opt-out flag in storage; our consent key wins.
+      syncAnalyticsConsent();
+      stopListening ??= onConsentChange(syncAnalyticsConsent);
       flushPending();
     })
     .catch((error: unknown) => {
@@ -248,6 +275,8 @@ export function track(event: AnalyticsEvent, props?: AnalyticsProps): void {
 
 /** Tests only: forget the loaded client and any queued events. */
 export function resetAnalyticsForTests(): void {
+  stopListening?.();
+  stopListening = null;
   client = null;
   loading = null;
   pending = [];

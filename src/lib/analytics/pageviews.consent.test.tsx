@@ -11,7 +11,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({
   importCount: 0,
-  posthog: { init: vi.fn(), capture: vi.fn() },
+  posthog: {
+    init: vi.fn(),
+    capture: vi.fn(),
+    has_opted_out_capturing: vi.fn(() => false),
+    opt_out_capturing: vi.fn(),
+    opt_in_capturing: vi.fn(),
+  },
 }));
 
 vi.mock('posthog-js', () => {
@@ -50,7 +56,7 @@ async function renderFirstVisit(
 
 async function agree(optIntoAnalytics: boolean) {
   if (optIntoAnalytics) {
-    fireEvent.click(screen.getByRole('checkbox', { name: /Help improve FitWizard/i }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /Share anonymous usage statistics/i }));
   }
   fireEvent.click(screen.getByRole('button', { name: /I Agree & Continue/i }));
   await vi.dynamicImportSettled();
