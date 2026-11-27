@@ -21,9 +21,12 @@ const LIFTER_VISIBLE_KEYS = [
     'analytics.header.subtitle',
     'analytics.weekly_notes.title',
     'analytics.weekly_notes.description',
+    'plan.noplan.kicker',
 ] as const;
 
 const COACH_WORD = /coach|entrenador|trainer|treinador/i;
+/** Paid-tier wording: the app is free, so no lifter-visible string may imply a premium tier. */
+const PREMIUM_WORD = /premium|prémium|pro plan|upgrade/i;
 
 function lookup(tree: unknown, path: string): unknown {
     return path.split('.').reduce<unknown>(
@@ -44,6 +47,7 @@ describe.each([
         if (value === undefined) return;
         expect(typeof value).toBe('string');
         expect(value).not.toMatch(COACH_WORD);
+        expect(value).not.toMatch(PREMIUM_WORD);
     });
 });
 
