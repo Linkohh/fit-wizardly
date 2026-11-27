@@ -377,6 +377,7 @@
         "confirm": "Confirmar"
     },
     "header": {
+        "intake_mode": "Configuración guiada",
         "logo_tooltip": "Tu camino hacia el máximo potencial fitness",
         "theme": {
             "light": "Claro",

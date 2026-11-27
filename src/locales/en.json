@@ -541,6 +541,7 @@
         "about": "About FitWizard"
     },
     "header": {
+        "intake_mode": "Guided setup",
         "logo_tooltip": "Your path to peak fitness potential",
         "theme": {
             "light": "Light",

@@ -325,6 +325,7 @@
         "swipe_back": "Deslize para voltar"
     },
     "header": {
+        "intake_mode": "Configuração guiada",
         "quick_links": {
             "label": "Sobre e ajuda",
             "about": "Sobre",

@@ -22,6 +22,7 @@ const LIFTER_VISIBLE_KEYS = [
     'analytics.weekly_notes.title',
     'analytics.weekly_notes.description',
     'plan.noplan.kicker',
+    'header.intake_mode',
 ] as const;
 
 const COACH_WORD = /coach|entrenador|trainer|treinador/i;

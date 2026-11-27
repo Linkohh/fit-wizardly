@@ -340,6 +340,7 @@
         }
     },
     "header": {
+        "intake_mode": "Geführte Einrichtung",
         "quick_links": {
             "label": "Info und Hilfe",
             "about": "Über uns",
