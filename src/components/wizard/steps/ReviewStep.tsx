@@ -69,13 +69,13 @@ export function ReviewStep() {
     <div className="space-y-6">
       <div className="max-w-2xl">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary/70">
-          {t('wizard.review.coach_summary', 'Coach summary')}
+          {t('wizard.review.coach_summary', 'Plan summary')}
         </p>
         <h2 className="mt-3 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           {t('wizard.review.title')}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-          {t('wizard.review.coach_summary_copy', 'Scan the prescription like a coach would: confirm the goal, weekly commitment, equipment, muscle focus, and any guardrails before the plan is generated.')}
+          {t('wizard.review.coach_summary_copy', 'Check the goal, weekly commitment, equipment, muscle focus, and any guardrails before the plan is generated.')}
         </p>
       </div>
 

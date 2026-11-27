@@ -1,4 +1,14 @@
 {
+    "analytics": {
+        "header": {
+            "title": "Analyse-Zentrale",
+            "subtitle": "Trainingssignale: was sich geändert hat, was zählt und dein nächster sinnvoller Schritt."
+        },
+        "weekly_notes": {
+            "title": "Wochennotizen",
+            "description": "Ein Wochenüberblick in klarer Sprache."
+        }
+    },
     "app": {
         "name": "FitWizard",
         "tagline": "Wissenschaftlich fundierte Trainingspläne, auf dich zugeschnitten."
@@ -133,6 +143,9 @@
         },
         "cta": "Kostenlos starten",
         "no_credit_card": "Keine Kreditkarte erforderlich • Erstelle deinen Plan in Sekunden"
+    },
+    "hero": {
+        "tagline": "Wissenschaftlich fundierte Trainingspläne, auf dich zugeschnitten."
     },
     "wizard": {
         "title": "Erstelle deinen Trainingsplan",
