@@ -14,17 +14,31 @@ type LegalTab = (typeof LEGAL_TABS)[number];
 const DELETE_ACCOUNT_SECTION_ID = 'delete-account';
 
 /**
- * Values still to come from Lincoln (L9 review). Each is shown in square
- * brackets so the draft is obviously unfinished. Replace here, in one place.
+ * Values still to come from Lincoln or the reviewer (L9). Each is shown in square
+ * brackets so the draft is obviously unfinished. Replace here, in one place; a
+ * value that becomes confirmed with nothing to add (for example `wipe`) becomes ''.
+ * See docs/store/GDPR_PRE_REVIEW.md for where each one is decided.
  */
 const POLICY_VALUES = {
-    region: '[Supabase region: Lincoln to provide]',
-    email: '[support email: Lincoln to provide]',
-    jurisdiction: '[governing law: Lincoln to provide]',
-    effective: '[set at launch]',
-    updated: '2026-11-21',
-    age: '13 [Lincoln to confirm]',
-    backup: '[backup period: Lincoln to confirm]',
+    region: '[Lincoln confirms: Supabase project region]',
+    email: '[Lincoln confirms: public support email]',
+    jurisdiction: '[Lincoln confirms: governing law]',
+    effective: '[Lincoln confirms: effective date, set at launch]',
+    updated: '2026-11-28',
+    age: '13 [Lincoln confirms: minimum age; 16 recommended for the EU]',
+    backup: '[Lincoln confirms: Supabase backup period]',
+    controller: '[Lincoln confirms: name and postal address of the person or company responsible]',
+    transfers: '[Lincoln confirms: each DPA accepted, and the transfer mechanism per provider]',
+    basis: '[lawyer confirms]',
+    syncConsent: '[Lincoln confirms: the explicit-consent step at first sign-in is built before launch]',
+    wipe: '[Lincoln confirms: live once migration 009 is applied to production]',
+    sentryRegion: '[Lincoln confirms: EU (Frankfurt) or US]',
+    sentryRetention: '[Lincoln confirms: 90 days, the plan default]',
+    sentryIp: '[Lincoln confirms: the Sentry setting at L6]',
+    posthogIp: '[Lincoln confirms: "Discard client IP data" at L6]',
+    posthogRetention: '[Lincoln confirms: the plan default]',
+    vercelRegion: "[Lincoln confirms: Vercel's infrastructure, region from the dashboard]",
+    vercelRetention: '[Lincoln confirms: the plan default]',
 } as const;
 
 /** One translated string: i18n key plus its English fallback. */
@@ -76,7 +90,7 @@ const PRIVACY_SECTIONS: readonly PolicySection[] = [
             ['legal.privacy.storage.sync', 'What syncs: your plans, workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises and favourite exercises. The app syncs when you sign in, when your device comes back online, when you return to the app, and shortly after each change. Nothing is sent while you are offline or signed out; changes made while signed out are sent the next time you sign in.'],
             ['legal.privacy.storage.first_sign_in', "The first time you sign in on a device, the app keeps your account's copy of any record that exists in both places, and uploads only the records that exist only on that device."],
             ['legal.privacy.storage.sign_out', "Signing out: the app syncs one last time, warns you if any changes haven't been backed up yet, and then erases your training data from the device. Your account keeps the synced copy."],
-            ['legal.privacy.storage.transfers', 'Some of the services listed below are in other countries, so your data may be processed outside the country where you live.'],
+            ['legal.privacy.storage.transfers', "Some of the services listed below are in other countries, so your data may be processed outside the country where you live. Supabase, Vercel, Sentry and PostHog are companies based in the United States. Where your data leaves the European Economic Area or the UK, it is protected by the European Commission's Standard Contractual Clauses or the EU-US Data Privacy Framework, as set out in each provider's data processing agreement. {{transfers}}"],
         ],
     },
     {
@@ -85,15 +99,15 @@ const PRIVACY_SECTIONS: readonly PolicySection[] = [
         paragraphs: [['legal.privacy.recipients.intro', "We share data only with the services that run FitWizard's features:"]],
         items: [
             ['legal.privacy.recipients.supabase', 'Supabase runs accounts, sign-in emails and the cloud database. It receives your email address, profile and synced data when you sign in.', 'https://supabase.com/privacy'],
-            ['legal.privacy.recipients.vercel', 'Vercel hosts the app and our server functions. It receives your IP address and device details with every request. If you allow analytics, Vercel Web Analytics also records page views (the page, the referring page, device type and country).', 'https://vercel.com/legal/privacy-policy'],
+            ['legal.privacy.recipients.vercel', "Vercel (Vercel Inc.) hosts the app and our server functions. It receives your IP address and device details with every request. Usage statistics on the website (Vercel Web Analytics), only if you turn on \"Share anonymous usage statistics\": to count page visits and see which pages are used, it receives the page address and the page you came from, your browser, operating system and device type, and the country worked out from your IP address. It sets no cookies, and visits aren't linked to your IP address; to count unique visits it uses a hash of the request that resets every day. It isn't used in the iPhone and Android apps. Where: {{vercelRegion}}. How long: {{vercelRetention}}. It is off unless you turn it on, and turning the switch off in Profile → Details → Privacy Settings stops it straight away, with no reload.", 'https://vercel.com/legal/privacy-policy'],
             ['legal.privacy.recipients.open_food_facts', 'Open Food Facts provides food search, only if you turn on food lookup. It receives the barcode or search text and your IP address. Without food lookup, nothing is sent.', 'https://world.openfoodfacts.org/privacy'],
             ['legal.privacy.recipients.wger', "wger provides the exercise catalogue. Catalogue and search requests go through our servers, so wger sees our server's address, not yours. Exercise pictures load directly from wger, so wger sees your IP address.", 'https://wger.de'],
             ['legal.privacy.recipients.api_ninjas', 'API Ninjas provides a backup exercise search and the daily quote. Requests go through our servers, and it receives only the search text.', 'https://api-ninjas.com'],
-            ['legal.privacy.recipients.sentry', 'Sentry receives crash reports, only if you allow them. A report contains the error, the app version, your browser or device type and the page, but not your name, email address, account or training data. Sentry sees your IP address when a report is sent. Crash reporting is not switched on yet.', 'https://sentry.io/privacy/'],
-            ['legal.privacy.recipients.posthog', "PostHog (planned) will receive product events if you allow analytics, such as 'plan generated' or 'workout completed', never weights, measurements, readiness or food. It is not in use yet; we will update this policy before it is.", 'https://posthog.com/privacy'],
+            ['legal.privacy.recipients.sentry', "Crash reports (Sentry, from Functional Software, Inc.), only if you turn on \"Send crash reports\": to find and fix errors that break the app. Only when the app hits an error, Sentry receives the error message and stack trace, the part of the screen where it happened, the app version, your browser and operating system, and the page path without query strings. Crash reports never include your name, email address, account ID, cookies, or any workout, body, readiness or nutrition data. Sentry sees your IP address when a report arrives, but our project is set not to store it {{sentryIp}}. Where: Sentry's {{sentryRegion}} data region. How long: {{sentryRetention}}. It is off unless you turn it on, and turning it off in Profile → Details → Privacy Settings stops reporting straight away, with no reload.", 'https://sentry.io/privacy/'],
+            ['legal.privacy.recipients.posthog', "Usage statistics (PostHog, from PostHog Inc.), only if you turn on \"Share anonymous usage statistics\": to learn which features people use, so we know what to improve. PostHog receives events without your name or email: which screens you open, and when you finish steps such as creating a plan, starting or finishing a workout, logging a meal or signing in. Events can include a few general details: your goal type, days per week, number of exercises, workout length in minutes, and whether you use the web, iPhone or Android app. They never include your name, email address, account ID, weights, reps, body measurements, readiness answers or what you eat. Page addresses are sent without query strings, and IDs and invite codes in them are removed. PostHog keeps a random identifier in the app's local storage to group events from one device; it is deleted when you turn usage statistics off. Session recording, automatic click tracking and surveys are off. PostHog sees your IP address when an event arrives, but our project is set not to store it {{posthogIp}}. Where: PostHog EU Cloud (Frankfurt, Germany). How long: {{posthogRetention}}. This is the same switch as Vercel Web Analytics; it is off unless you turn it on, and turning it off in Profile → Details → Privacy Settings stops sending straight away, with no reload.", 'https://posthog.com/privacy'],
         ],
         closing: [
-            ['legal.privacy.recipients.app_stores', 'Apple and Google distribute the app and collect their own data under their own policies. Workout reminders and rest-timer alerts (coming soon) are scheduled on your device and are not sent to anyone.'],
+            ['legal.privacy.recipients.app_stores', "Apple and Google distribute the app and collect their own data under their own policies. Workout reminders and rest-timer alerts in the iPhone and Android apps are local notifications: the app schedules them on your device, only after you allow notifications, and nothing about them leaves your device. Your reminder settings stay on the device and are not synced."],
             ['legal.privacy.recipients.off_features', 'Social circles and the coach portal are switched off and collect nothing. We will update this policy before turning either on.'],
             ['legal.privacy.recipients.no_sale', 'We do not sell or rent your data, and we do not share it for advertising.'],
         ],
@@ -102,13 +116,13 @@ const PRIVACY_SECTIONS: readonly PolicySection[] = [
         id: 'why-we-use-it',
         title: ['legal.privacy.purposes.title', 'Why we use it'],
         items: [
-            ['legal.privacy.purposes.features', 'To provide the app: build plans, log workouts and meals, and show your history and progress.'],
-            ['legal.privacy.purposes.sync', 'To keep your data in your account and on your other devices, if you sign in.'],
-            ['legal.privacy.purposes.sign_in', 'To sign you in and keep your account secure.'],
-            ['legal.privacy.purposes.lookups', 'To look up foods and exercises when you ask.'],
-            ['legal.privacy.purposes.crashes', 'To find and fix crashes, if you allow crash reports.'],
-            ['legal.privacy.purposes.analytics', 'To understand which parts of the app are used, if you allow analytics.'],
-            ['legal.privacy.purposes.abuse', 'To protect our server functions from abuse (see How long we keep it).'],
+            ['legal.privacy.purposes.features', "To provide the app: build plans, log workouts and meals, and show your history and progress. Without an account this happens only on your device. Legal basis: providing the service you asked for {{basis}}."],
+            ['legal.privacy.purposes.sync', "To keep your data in your account and on your other devices, if you sign in. Because this includes health-related data (such as body measurements, readiness check-ins and nutrition), the legal basis is your explicit consent, which you can withdraw at any time {{basis}} {{syncConsent}}."],
+            ['legal.privacy.purposes.sign_in', "To sign you in and keep your account secure. Legal basis: providing the service you asked for {{basis}}."],
+            ['legal.privacy.purposes.lookups', "To look up foods and exercises when you ask. Food lookup is used only with your consent; exercise search sends no personal data {{basis}}."],
+            ['legal.privacy.purposes.crashes', "To find and fix crashes, if you turn on crash reports. Legal basis: your consent {{basis}}."],
+            ['legal.privacy.purposes.analytics', "To understand which parts of the app are used, if you turn on usage statistics. Legal basis: your consent {{basis}}."],
+            ['legal.privacy.purposes.abuse', "To protect our server functions from abuse (see How long we keep it). Legal basis: our legitimate interest in keeping the service available and secure {{basis}}."],
         ],
     },
     {
@@ -116,23 +130,23 @@ const PRIVACY_SECTIONS: readonly PolicySection[] = [
         title: ['legal.privacy.retention.title', 'How long we keep it'],
         items: [
             ['legal.privacy.retention.device', "On your device: until you delete it in the app, use Erase data on this device, clear the app's or the browser's data, or uninstall the app."],
-            ['legal.privacy.retention.cloud', 'In your account: until you delete it, or delete your account. When you delete a synced item, including a plan, it is marked as deleted so that it is removed from all your devices; the marked record is removed for good when you delete your account. Your device keeps only your latest 20 plans, but older plans stay in your account.'],
+            ['legal.privacy.retention.cloud', "In your account: until you delete it, or delete your account. When you delete a synced item, including a plan, its content is wiped from our servers straight away. Only a deletion marker stays (the item's ID, or for a daily log its date, and the time it was deleted), so that your other devices remove the item too; the marker is removed when you delete your account {{wipe}}. Your device keeps only your latest 20 plans, but older plans stay in your account."],
             ['legal.privacy.retention.account', 'Your email address, your profile and the record of which exercises you viewed are kept until you delete your account.'],
             ['legal.privacy.retention.code', 'Sign-in codes work once and expire after a short time.'],
             ['legal.privacy.retention.session', "The sign-in token on your device: until you sign out, delete your account, or clear the app's or the browser's data."],
             ['legal.privacy.retention.ip', "To limit each address to 60 requests a minute, our server functions keep your IP address in memory with a request count. They never write it to disk, log it or share it, but it can stay in memory until that server instance shuts down. Vercel's own request logs follow Vercel's policy."],
-            ['legal.privacy.retention.third_parties', 'Sentry keeps crash reports for about 90 days. Vercel Web Analytics, Open Food Facts, wger and API Ninjas keep what they receive under their own policies.'],
+            ['legal.privacy.retention.third_parties', "Sentry keeps crash reports for {{sentryRetention}}. PostHog keeps usage events for {{posthogRetention}}, and Vercel Web Analytics keeps page-view statistics for {{vercelRetention}}. Open Food Facts, wger and API Ninjas keep what they receive under their own policies."],
         ],
     },
     {
         id: 'your-choices',
         title: ['legal.privacy.choices.title', 'Your choices'],
         items: [
-            ['legal.privacy.choices.consent', 'Privacy settings: choose whether to allow analytics (which also covers crash reports for now) and food lookup. Change them at any time in Profile → Details → Privacy Settings. If you say no, those services receive nothing from you.'],
-            ['legal.privacy.choices.export', 'Export: Profile → Details → Export Data (JSON) saves a file with what the app keeps about you: plans (including a workout in progress), workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises, exercise favourites and collections, your wizard and onboarding answers, your privacy choices and settings, and, if you are signed in, your account email and profile.'],
-            ['legal.privacy.choices.delete_items', 'Delete items: you can delete plans, meals, custom foods, saved meals and body measurements in the app.'],
-            ['legal.privacy.choices.guest', 'No account: use FitWizard without signing in, and your training data stays on your device.'],
-            ['legal.privacy.choices.rights', 'Depending on where you live, you may have the right to access, correct, delete or move your data, or to object to how we use it. Contact us to use these rights.'],
+            ['legal.privacy.choices.consent', "Privacy settings: choose separately whether to send crash reports, share anonymous usage statistics, and allow food lookup. All three are off unless you turn them on. Change them at any time in Profile → Details → Privacy Settings. Turning one off takes effect straight away. If you say no, that service receives nothing from you."],
+            ['legal.privacy.choices.export', "Export: Profile → Details → Export Data (JSON) saves a file, in a common machine-readable format, with what the app keeps about you: plans (including a workout in progress), workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises, exercise favourites and collections, your wizard and onboarding answers, the date you agreed to these terms and your usage-statistics and food-lookup choices, and, if you are signed in, your account email and profile."],
+            ['legal.privacy.choices.delete_items', "Delete items: you can delete plans, meals, custom foods, saved meals and body measurements in the app. If you are signed in, the item's content is wiped from our servers straight away, and only a deletion marker stays so your other devices remove it too {{wipe}}."],
+            ['legal.privacy.choices.guest', "No account: use FitWizard without signing in, and your training data stays on your device. To remove it, use Profile → Details → Erase data on this device."],
+            ['legal.privacy.choices.rights', "Your rights: depending on where you live (for example in the EU, the UK or some US states), you can ask to see your data, correct it, delete it or get a copy of it, ask us to limit or stop using it, and withdraw any consent at any time (this doesn't affect what was done before). You can do much of this yourself in the app: export, edit, delete items, or delete your account. For anything else, email {{email}}; we reply within one month. You can also complain to your local data protection authority."],
         ],
     },
     {
@@ -161,7 +175,7 @@ const PRIVACY_SECTIONS: readonly PolicySection[] = [
     {
         id: 'contact',
         title: ['legal.privacy.contact.title', 'Contact'],
-        paragraphs: [['legal.privacy.contact.p1', 'Questions or requests about your privacy: {{email}}.']],
+        paragraphs: [['legal.privacy.contact.p1', "FitWizard is run by {{controller}}, who is responsible for your data (the data controller). Questions or requests about your privacy: {{email}}."]],
     },
     {
         id: 'changes',

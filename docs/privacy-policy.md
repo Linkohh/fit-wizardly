@@ -2,24 +2,33 @@
 
 > **Draft for review (Lincoln's task L9).** This is not legal advice and has not been reviewed by a qualified professional. Text in square brackets is still to be filled in. The Spanish copy in the app is a draft too.
 
-- **Last updated:** 2026-11-21 (draft)
-- **Effective date:** [set at launch]
+- **Last updated:** 2026-11-28 (draft; Lane A Day 8)
+- **Effective date:** [Lincoln confirms: effective date, set at launch]
 - **In the app:** [`src/pages/Legal.tsx`](../src/pages/Legal.tsx) (Privacy Policy and Terms of Service tabs). This file is the same English text; change both together, and the `legal.*` keys in `src/locales/en.json` and `es.json`.
 - **Account-deletion page for Google Play:** `/legal?tab=privacy#delete-account` on the production web origin.
-- **Source:** [`docs/store/DATA_INVENTORY.md`](store/DATA_INVENTORY.md), current through #69. When the inventory changes, update this policy in the same PR (ADR 10).
+- **Source:** [`docs/store/DATA_INVENTORY.md`](store/DATA_INVENTORY.md), current through #100 (crash-report and analytics consent split, #98; PostHog, #75; deleted-item wipe, #96 and #97; local notifications, #89).
+- **GDPR pre-review:** [`docs/store/GDPR_PRE_REVIEW.md`](store/GDPR_PRE_REVIEW.md). The clean copy for the reviewer is [`docs/store/PRIVACY_FOR_REVIEW.md`](store/PRIVACY_FOR_REVIEW.md).
 
 ## Values still to fill in
 
-Each one is a single constant, `POLICY_VALUES` in `src/pages/Legal.tsx`.
+Each one is a single constant, `POLICY_VALUES` in `src/pages/Legal.tsx`. When one is confirmed, replace its text there (and here); a note that only says something is now true, such as `wipe`, becomes an empty string.
 
-| Value | Current placeholder | Who |
+| Key | Current placeholder | Who |
 |---|---|---|
-| Supabase project region | [Supabase region: Lincoln to provide] | Lincoln |
-| Public support email (not a personal address) | [support email: Lincoln to provide] | Lincoln |
-| Governing law | [governing law: Lincoln to provide] | Lincoln |
-| Minimum age | 13 [Lincoln to confirm] | Lincoln; 16 may be needed for some EU countries |
-| Database backup period | [backup period: Lincoln to confirm] | Lincoln, from the Supabase plan |
-| Effective date | [set at launch] | Lincoln |
+| `controller` | [Lincoln confirms: name and postal address of the person or company responsible] | Lincoln (Art. 13(1)(a)) |
+| `region` | [Lincoln confirms: Supabase project region] | Lincoln, from the Supabase dashboard |
+| `email` | [Lincoln confirms: public support email] | Lincoln (not a personal address) |
+| `jurisdiction` | [Lincoln confirms: governing law] | Lincoln, with the lawyer |
+| `age` | 13 [Lincoln confirms: minimum age; 16 recommended for the EU] | Lincoln (see the pre-review, Art. 8) |
+| `backup` | [Lincoln confirms: Supabase backup period] | Lincoln, from the Supabase plan |
+| `transfers` | [Lincoln confirms: each DPA accepted, and the transfer mechanism per provider] | Lincoln (pre-review, Art. 28 and Arts. 44–49) |
+| `basis` | [lawyer confirms] | The reviewer (each legal basis is a proposal) |
+| `syncConsent` | [Lincoln confirms: the explicit-consent step at first sign-in is built before launch] | Lincoln; not built yet (pre-review, Art. 9) |
+| `wipe` | [Lincoln confirms: live once migration 009 is applied to production] | Lincoln, at L2 step 5 |
+| `sentryRegion`, `sentryRetention`, `sentryIp` | EU (Frankfurt) or US; 90 days; the IP setting | Lincoln at L6 |
+| `posthogIp`, `posthogRetention` | "Discard client IP data"; the plan default | Lincoln at L6 |
+| `vercelRegion`, `vercelRetention` | region from the dashboard; the plan default | Lincoln |
+| `effective` | [Lincoln confirms: effective date, set at launch] | Lincoln |
 
 ---
 
@@ -52,25 +61,25 @@ FitWizard does not access your location, contacts, camera, photos, or health rec
 
 - On your device: in the app's own storage (IndexedDB in a browser, app storage files on iPhone and Android) and, for small settings, in browser storage. FitWizard adds no encryption of its own; your device's protections, such as a screen lock, apply.
 - Your sign-in: when you sign in, a sign-in token from our authentication provider (Supabase) is saved on your device so you stay signed in after you close the app or browser. In a browser it's kept in this site's local storage; in the iPhone and Android apps it's kept in the app's private preferences. It identifies your session only and holds no workout or health data. Signing out deletes it from your device.
-- In our cloud database, if you sign in: we use Supabase, and your data is stored in [Supabase region: Lincoln to provide]. Each account can read and change only its own records.
+- In our cloud database, if you sign in: we use Supabase, and your data is stored in [Lincoln confirms: Supabase project region]. Each account can read and change only its own records.
 - What syncs: your plans, workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises and favourite exercises. The app syncs when you sign in, when your device comes back online, when you return to the app, and shortly after each change. Nothing is sent while you are offline or signed out; changes made while signed out are sent the next time you sign in.
 - The first time you sign in on a device, the app keeps your account's copy of any record that exists in both places, and uploads only the records that exist only on that device.
 - Signing out: the app syncs one last time, warns you if any changes haven't been backed up yet, and then erases your training data from the device. Your account keeps the synced copy.
-- Some of the services listed below are in other countries, so your data may be processed outside the country where you live.
+- Some of the services listed below are in other countries, so your data may be processed outside the country where you live. Supabase, Vercel, Sentry and PostHog are companies based in the United States. Where your data leaves the European Economic Area or the UK, it is protected by the European Commission's Standard Contractual Clauses or the EU-US Data Privacy Framework, as set out in each provider's data processing agreement. [Lincoln confirms: each DPA accepted, and the transfer mechanism per provider]
 
 ## Who receives your data
 
 We share data only with the services that run FitWizard's features:
 
 - Supabase runs accounts, sign-in emails and the cloud database. It receives your email address, profile and synced data when you sign in. [Privacy policy](https://supabase.com/privacy)
-- Vercel hosts the app and our server functions. It receives your IP address and device details with every request. If you allow analytics, Vercel Web Analytics also records page views (the page, the referring page, device type and country). [Privacy policy](https://vercel.com/legal/privacy-policy)
+- Vercel (Vercel Inc.) hosts the app and our server functions. It receives your IP address and device details with every request. Usage statistics on the website (Vercel Web Analytics), only if you turn on "Share anonymous usage statistics": to count page visits and see which pages are used, it receives the page address and the page you came from, your browser, operating system and device type, and the country worked out from your IP address. It sets no cookies, and visits aren't linked to your IP address; to count unique visits it uses a hash of the request that resets every day. It isn't used in the iPhone and Android apps. Where: [Lincoln confirms: Vercel's infrastructure, region from the dashboard]. How long: [Lincoln confirms: the plan default]. It is off unless you turn it on, and turning the switch off in Profile → Details → Privacy Settings stops it straight away, with no reload. [Privacy policy](https://vercel.com/legal/privacy-policy)
 - Open Food Facts provides food search, only if you turn on food lookup. It receives the barcode or search text and your IP address. Without food lookup, nothing is sent. [Privacy policy](https://world.openfoodfacts.org/privacy)
 - wger provides the exercise catalogue. Catalogue and search requests go through our servers, so wger sees our server's address, not yours. Exercise pictures load directly from wger, so wger sees your IP address. [Privacy policy](https://wger.de)
 - API Ninjas provides a backup exercise search and the daily quote. Requests go through our servers, and it receives only the search text. [Privacy policy](https://api-ninjas.com)
-- Sentry receives crash reports, only if you allow them. A report contains the error, the app version, your browser or device type and the page, but not your name, email address, account or training data. Sentry sees your IP address when a report is sent. Crash reporting is not switched on yet. [Privacy policy](https://sentry.io/privacy/)
-- PostHog (planned) will receive product events if you allow analytics, such as 'plan generated' or 'workout completed', never weights, measurements, readiness or food. It is not in use yet; we will update this policy before it is. [Privacy policy](https://posthog.com/privacy)
+- Crash reports (Sentry, from Functional Software, Inc.), only if you turn on "Send crash reports": to find and fix errors that break the app. Only when the app hits an error, Sentry receives the error message and stack trace, the part of the screen where it happened, the app version, your browser and operating system, and the page path without query strings. Crash reports never include your name, email address, account ID, cookies, or any workout, body, readiness or nutrition data. Sentry sees your IP address when a report arrives, but our project is set not to store it [Lincoln confirms: the Sentry setting at L6]. Where: Sentry's [Lincoln confirms: EU (Frankfurt) or US] data region. How long: [Lincoln confirms: 90 days, the plan default]. It is off unless you turn it on, and turning it off in Profile → Details → Privacy Settings stops reporting straight away, with no reload. [Privacy policy](https://sentry.io/privacy/)
+- Usage statistics (PostHog, from PostHog Inc.), only if you turn on "Share anonymous usage statistics": to learn which features people use, so we know what to improve. PostHog receives events without your name or email: which screens you open, and when you finish steps such as creating a plan, starting or finishing a workout, logging a meal or signing in. Events can include a few general details: your goal type, days per week, number of exercises, workout length in minutes, and whether you use the web, iPhone or Android app. They never include your name, email address, account ID, weights, reps, body measurements, readiness answers or what you eat. Page addresses are sent without query strings, and IDs and invite codes in them are removed. PostHog keeps a random identifier in the app's local storage to group events from one device; it is deleted when you turn usage statistics off. Session recording, automatic click tracking and surveys are off. PostHog sees your IP address when an event arrives, but our project is set not to store it [Lincoln confirms: "Discard client IP data" at L6]. Where: PostHog EU Cloud (Frankfurt, Germany). How long: [Lincoln confirms: the plan default]. This is the same switch as Vercel Web Analytics; it is off unless you turn it on, and turning it off in Profile → Details → Privacy Settings stops sending straight away, with no reload. [Privacy policy](https://posthog.com/privacy)
 
-Apple and Google distribute the app and collect their own data under their own policies. Workout reminders and rest-timer alerts (coming soon) are scheduled on your device and are not sent to anyone.
+Apple and Google distribute the app and collect their own data under their own policies. Workout reminders and rest-timer alerts in the iPhone and Android apps are local notifications: the app schedules them on your device, only after you allow notifications, and nothing about them leaves your device. Your reminder settings stay on the device and are not synced.
 
 Social circles and the coach portal are switched off and collect nothing. We will update this policy before turning either on.
 
@@ -78,31 +87,31 @@ We do not sell or rent your data, and we do not share it for advertising.
 
 ## Why we use it
 
-- To provide the app: build plans, log workouts and meals, and show your history and progress.
-- To keep your data in your account and on your other devices, if you sign in.
-- To sign you in and keep your account secure.
-- To look up foods and exercises when you ask.
-- To find and fix crashes, if you allow crash reports.
-- To understand which parts of the app are used, if you allow analytics.
-- To protect our server functions from abuse (see How long we keep it).
+- To provide the app: build plans, log workouts and meals, and show your history and progress. Without an account this happens only on your device. Legal basis: providing the service you asked for [lawyer confirms].
+- To keep your data in your account and on your other devices, if you sign in. Because this includes health-related data (such as body measurements, readiness check-ins and nutrition), the legal basis is your explicit consent, which you can withdraw at any time [lawyer confirms] [Lincoln confirms: the explicit-consent step at first sign-in is built before launch].
+- To sign you in and keep your account secure. Legal basis: providing the service you asked for [lawyer confirms].
+- To look up foods and exercises when you ask. Food lookup is used only with your consent; exercise search sends no personal data [lawyer confirms].
+- To find and fix crashes, if you turn on crash reports. Legal basis: your consent [lawyer confirms].
+- To understand which parts of the app are used, if you turn on usage statistics. Legal basis: your consent [lawyer confirms].
+- To protect our server functions from abuse (see How long we keep it). Legal basis: our legitimate interest in keeping the service available and secure [lawyer confirms].
 
 ## How long we keep it
 
 - On your device: until you delete it in the app, use Erase data on this device, clear the app's or the browser's data, or uninstall the app.
-- In your account: until you delete it, or delete your account. When you delete a synced item, including a plan, it is marked as deleted so that it is removed from all your devices; the marked record is removed for good when you delete your account. Your device keeps only your latest 20 plans, but older plans stay in your account.
+- In your account: until you delete it, or delete your account. When you delete a synced item, including a plan, its content is wiped from our servers straight away. Only a deletion marker stays (the item's ID, or for a daily log its date, and the time it was deleted), so that your other devices remove the item too; the marker is removed when you delete your account [Lincoln confirms: live once migration 009 is applied to production]. Your device keeps only your latest 20 plans, but older plans stay in your account.
 - Your email address, your profile and the record of which exercises you viewed are kept until you delete your account.
 - Sign-in codes work once and expire after a short time.
 - The sign-in token on your device: until you sign out, delete your account, or clear the app's or the browser's data.
 - To limit each address to 60 requests a minute, our server functions keep your IP address in memory with a request count. They never write it to disk, log it or share it, but it can stay in memory until that server instance shuts down. Vercel's own request logs follow Vercel's policy.
-- Sentry keeps crash reports for about 90 days. Vercel Web Analytics, Open Food Facts, wger and API Ninjas keep what they receive under their own policies.
+- Sentry keeps crash reports for [Lincoln confirms: 90 days, the plan default]. PostHog keeps usage events for [Lincoln confirms: the plan default], and Vercel Web Analytics keeps page-view statistics for [Lincoln confirms: the plan default]. Open Food Facts, wger and API Ninjas keep what they receive under their own policies.
 
 ## Your choices
 
-- Privacy settings: choose whether to allow analytics (which also covers crash reports for now) and food lookup. Change them at any time in Profile → Details → Privacy Settings. If you say no, those services receive nothing from you.
-- Export: Profile → Details → Export Data (JSON) saves a file with what the app keeps about you: plans (including a workout in progress), workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises, exercise favourites and collections, your wizard and onboarding answers, your privacy choices and settings, and, if you are signed in, your account email and profile.
-- Delete items: you can delete plans, meals, custom foods, saved meals and body measurements in the app.
-- No account: use FitWizard without signing in, and your training data stays on your device.
-- Depending on where you live, you may have the right to access, correct, delete or move your data, or to object to how we use it. Contact us to use these rights.
+- Privacy settings: choose separately whether to send crash reports, share anonymous usage statistics, and allow food lookup. All three are off unless you turn them on. Change them at any time in Profile → Details → Privacy Settings. Turning one off takes effect straight away. If you say no, that service receives nothing from you.
+- Export: Profile → Details → Export Data (JSON) saves a file, in a common machine-readable format, with what the app keeps about you: plans (including a workout in progress), workout logs, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises, exercise favourites and collections, your wizard and onboarding answers, the date you agreed to these terms and your usage-statistics and food-lookup choices, and, if you are signed in, your account email and profile.
+- Delete items: you can delete plans, meals, custom foods, saved meals and body measurements in the app. If you are signed in, the item's content is wiped from our servers straight away, and only a deletion marker stays so your other devices remove it too [Lincoln confirms: live once migration 009 is applied to production].
+- No account: use FitWizard without signing in, and your training data stays on your device. To remove it, use Profile → Details → Erase data on this device.
+- Your rights: depending on where you live (for example in the EU, the UK or some US states), you can ask to see your data, correct it, delete it or get a copy of it, ask us to limit or stop using it, and withdraw any consent at any time (this doesn't affect what was done before). You can do much of this yourself in the app: export, edit, delete items, or delete your account. For anything else, email [Lincoln confirms: public support email]; we reply within one month. You can also complain to your local data protection authority.
 
 <a id="delete-account"></a>
 
@@ -112,10 +121,10 @@ You can delete your account and your data at any time.
 
 - In the app: open Profile, go to Details, tap Delete account, type DELETE and confirm. This permanently deletes your account and everything stored with it on our servers: your email address and profile, plans, workout history, personal records, nutrition logs and settings, body measurements, readiness check-ins, achievements, custom exercises, exercise favourites and collections, and the record of which exercises you viewed. The FitWizard data on that device is erased at the same time. Deletion happens straight away and can't be undone, so download a copy first with Profile → Details → Export Data (JSON).
 - Not signed in? Your data is only on your device. Remove it with Profile → Details → Erase data on this device (type DELETE to confirm), or by uninstalling the app or clearing the site's data in your browser.
-- Can't sign in, or don't have the app? Email [support email: Lincoln to provide] from the address on your account, with the subject 'Delete my account'. We will confirm that the address is yours and delete the account within 30 days.
+- Can't sign in, or don't have the app? Email [Lincoln confirms: public support email] from the address on your account, with the subject 'Delete my account'. We will confirm that the address is yours and delete the account within 30 days.
 - If you created a circle or challenge, it stays for its other members, with you removed as its creator.
 - Other devices where you were signed in keep their copy on the device until you sign out there, or uninstall the app.
-- What may remain: copies in our database provider's routine backups until they expire ([backup period: Lincoln to confirm]), and data already sent to the services listed above, which they keep under their own policies.
+- What may remain: copies in our database provider's routine backups until they expire ([Lincoln confirms: Supabase backup period]), and data already sent to the services listed above, which they keep under their own policies.
 
 ## Security
 
@@ -123,11 +132,11 @@ Data travels over encrypted connections (HTTPS). In our cloud database, access r
 
 ## Children
 
-FitWizard is not directed at children under 13 [Lincoln to confirm], and we do not knowingly collect their data. If you believe a child has given us data, contact us and we will delete it.
+FitWizard is not directed at children under 13 [Lincoln confirms: minimum age; 16 recommended for the EU], and we do not knowingly collect their data. If you believe a child has given us data, contact us and we will delete it.
 
 ## Contact
 
-Questions or requests about your privacy: [support email: Lincoln to provide].
+FitWizard is run by [Lincoln confirms: name and postal address of the person or company responsible], who is responsible for your data (the data controller). Questions or requests about your privacy: [Lincoln confirms: public support email].
 
 ## Changes to this policy
 
@@ -183,11 +192,11 @@ We may update these terms. We will change the date at the top and tell you in th
 
 ### Governing law
 
-These terms are governed by the laws of [governing law: Lincoln to provide].
+These terms are governed by the laws of [Lincoln confirms: governing law].
 
 ### Contact
 
-Questions about these terms: [support email: Lincoln to provide].
+Questions about these terms: [Lincoln confirms: public support email].
 
 ---
 
@@ -199,17 +208,19 @@ These are the facts in the code that the text above relies on, so the reviewer c
 |---|---|
 | Guests send no training data to us | Sync runs only for a signed-in user with Supabase configured (`src/lib/sync/triggers.ts`); `DATA_INVENTORY.md` "Signed in" |
 | What syncs, and when | Contract 5 in [`docs/project/CONTRACTS.md`](project/CONTRACTS.md); plans through the same engine (`plansCollection` in `src/lib/sync/collections/training.ts`, #81), favourites through `user_exercise_preferences` |
-| Deleted synced items, plans included, are marked, not removed, until account deletion | The sync engine sets `deleted_at` and never hard-deletes (`src/lib/sync/engine.ts`). Plans use it too since #81 (`plansCollection` in `src/lib/sync/collections/training.ts`); `deletePlanFromHistory()` marks real deletes, and the 20-plan device cap never deletes from the account (`trackDeletions: false`) |
+| Deleting a synced item wipes its content on the server; only the key, `user_id`, `deleted_at` and `updated_at` remain, and other devices remove the item | Migration `supabase/migrations/009_purge_tombstone_content.sql` (#97; trigger on `plans` and the seven 007 tables; `plans.created_at` also kept) and `keyOfTombstone()` in `src/lib/sync/engine.ts` (#96). The client change must ship before 009 reaches production (`docs/SUPABASE_MIGRATIONS.md`, L2 step 5); until then the `wipe` placeholder stays. Plans use the engine since #81; the 20-plan device cap never deletes from the account (`trackDeletions: false`) |
 | Sign-out syncs, warns about unsent changes, then erases the device | `prepareSignOut()` and `completeSignOut()` in `src/lib/sync/signOut.ts` (#81) |
 | Account deletion removes every linked row | `supabase/functions/delete-account/` and the cascade checked by `supabase/tests/delete_account.test.sql` (contract 4) |
 | In-app Delete account and Erase data on this device | Profile → Details (`src/components/account/AccountDeletionSection.tsx`, Lane F Day 4, #73); wording from the Lane F Day 4 handoff. Not yet run against the deployed function (Gate 1, after L10) |
 | Email deletion within 30 days | Default chosen here; Lincoln to confirm the process and time |
 | IP kept in memory for the rate limit | `api/_lib/guard.ts`; see "Our own API functions" in `DATA_INVENTORY.md` |
-| Crash reports: opt-in, not switched on | `src/lib/monitoring.ts` (contract 8); no DSN set until L6 |
-| PostHog and local notifications | Planned (Lane C Day 4, Lane H Days 5–6); the text says so |
-| Export contents | `buildUserDataExport` in `src/lib/dataExport.ts`, export version 3 (#73) |
+| Crash reports and usage statistics are separate opt-ins, both off by default, revoked without a reload | `src/components/legal/ConsentModal.tsx`, `src/lib/consent.ts` (`fitwizard_crash_reports_consent`, `fitwizard_analytics_consent`), `Sentry.close()` in `src/lib/monitoring.ts`, `opt_out_capturing()` in `src/lib/analytics/track.ts`, Vercel Analytics unmount in `src/App.tsx` (#98). Nothing is sent until L6 sets the DSN and key |
+| PostHog EU, no person profiles, allow-listed properties, URLs reduced to route patterns | `buildPostHogConfig` and `scrubUrl` in `src/lib/analytics/track.ts` (#75): `api_host` `eu.i.posthog.com`, `person_profiles: 'never'`, `opt_out_persistence_by_default: true` |
+| Vercel Web Analytics: no cookies, daily-resetting hash, web only | Vercel's Web Analytics privacy page (checked by search 2026-11-28; it does not say outright that the raw IP is dropped, hence "not linked to your IP"); `!nativeApp` in `src/App.tsx` (DEBT-127, #75). Full URLs are still sent until DEBT-149 is fixed (Lane C Day 6) |
+| Local notifications stay on the device | `src/hooks/useLocalNotifications.ts` (contract 10, #89); `fitwizard-reminders` and `fitwizard-notif-asked` are device-only and not synced |
+| Export contents | `buildUserDataExport` in `src/lib/dataExport.ts`, export version 3 (#73). The `consent` block has the consent date, analytics and food lookup, **not** the crash-report flag yet (Lane C Day 5 asked Lane F to add it; DEBT-150), so the text names only those |
 | No camera, location or contacts access | No camera, location or contacts API is used in `src/`, and the native projects declare no such permissions |
 | Other devices keep their copy after deletion | Lane F Day 4 handoff (new issue); Lane E Day 7 sign-out work |
 | Sign-in token kept on the device until sign-out | `src/lib/authSessionStorage.ts` (Lane H Day 4, #74; ADR 12): localStorage on the web, `@capacitor/preferences` in the apps |
 
-The third-party privacy links were written from known URLs. This environment couldn't reach those sites, so they are not verified yet.
+The third-party privacy links were written from known URLs and are not verified yet. Vendor transfer facts (DPAs, SCCs, DPF, regions) are checked in the GDPR pre-review, with sources.

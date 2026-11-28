@@ -2,7 +2,7 @@
 
 > Read this file at the start of every session before touching any code.
 > Update it at session end using `/after-report`.
-> Last updated: 2026-11-25
+> Last updated: 2026-11-28
 > **Launch project:** work is now scheduled in [`docs/project/BOARD.md`](project/BOARD.md) (lanes, days, gates). Agents write handoffs; Lane A folds them in here.
 
 ---
@@ -145,6 +145,45 @@ server/src/        # Express backend (createApp/createRouteHandlers/startServer 
 ---
 
 ## Session History
+
+### 2026-11-28 — Lane A Day 8: GDPR Pre-Review; Privacy Text for Review (L9); Wave 2 Bookkeeping (branch `lane-a/day-8`, from `preview_b` @ `cffb4a7`)
+
+- **Preparation for legal review, not legal advice.** Lincoln said go on L9 (2026-11-27): GDPR plus the US state laws that apply.
+- **Privacy text (`Legal.tsx`, `docs/privacy-policy.md`, `legal.*` in en and es):**
+  - Lane C's disclosure blocks for Sentry, PostHog EU and Vercel Web Analytics: separate switches, off by default, revoked in Profile → Details → Privacy Settings with immediate effect.
+  - Deletion: an item's content is wiped on the server at once, and only a marker (ID or date, and the time) stays (009). Account deletion and guest erase are unchanged.
+  - Local notifications: nothing leaves the device.
+  - Also: export is machine-readable, rights now include the complaint right and one-month reply, proposed legal bases per purpose, the controller line, and the transfer safeguards.
+  - Every unconfirmed value is a `POLICY_VALUES` entry shown as `[Lincoln confirms: …]` or `[lawyer confirms]`.
+  - Only existing keys were reworded, as text, so the de/pt gap ratchet doesn't grow.
+  - One new test in `Legal.test.tsx`.
+- **`docs/store/GDPR_PRE_REVIEW.md` (new):**
+  - One row per requirement: Arts. 5, 6, 7–8, 9, 12–14, 15–22, 25, 27, 28, 30 (draft ROPA), 33–34 (procedure), 35 (DPIA outline), and ePrivacy.
+  - A US quick check: VCDPA, CCPA/CPRA, and a flag on Washington's My Health My Data Act.
+  - 11 questions for the lawyer and 12 decisions for Lincoln, each with a default.
+  - Vendor facts (DPAs, SCCs, DPF, regions) are from vendor pages found by search on 2026-11-28, marked verify.
+- **Biggest finding:** no explicit Art. 9 consent before health data syncs (DEBT-155, HIGH).
+- **`docs/store/PRIVACY_FOR_REVIEW.md` (new):** pre-review summary plus the clean policy and terms.
+- **Store docs:**
+  - `DATA_INVENTORY.md`: Lane C's rows, the PostHog rows, and the deleted-items note.
+  - `GOOGLE_DATA_SAFETY.md`: "delete data without deleting the account" becomes **Yes** once 009 is on production.
+- **Folded in:**
+  - **#75** (Lane C Day 4, `8c97252`): PostHog EU, `track()`, `$pageview` approved, DEBT-127 fixed, `vendor-posthog` not precached.
+  - **#96** (coordinator, `dbcf484`): tombstones matched by key.
+  - **#97** (Lane F Day 7, `20bf477`): migration 009; L2 in two parts; DEBT-146 fixed.
+  - **#98** (Lane C Day 5, `12be8f5`): separate consent, revoke without a reload.
+  - **#99** (Lane B Day 6, `79c03ab`): DEBT-140 and DEBT-142 resolved; the kicker issue found and fixed (DEBT-148).
+  - **#100** (coordinator, `cffb4a7`): Gate 1 results and Lincoln's decisions.
+  - Lane C Day 6 had not merged when this PR was opened.
+- **Wave 2:** all merged except Lane C Day 6 (in progress).
+- **Gate 1:** app checks pass; database checks wait on L10 and L11.
+- **Lincoln's decisions (2026-11-27):**
+  - On hold: L4, L7 and L10 (staging).
+  - Gate 3 waits.
+  - L9 is go.
+  - D3 = English + Spanish.
+- **Numbering:** Lane B's kicker issue is DEBT-148, and Lane C's Vercel URL masking is DEBT-149. Lane C's other proposals are DEBT-151 (tray text) and DEBT-152 to 154 (Day 4). Lane F's are DEBT-146 and 147. Lane A's own are DEBT-150, 155 and 156.
+- **Verification:** see the handoff (`docs/project/handoffs/2026-11-28-lane-a-day-8.md`).
 
 ### 2026-11-26 — Lane A Day 7: v1.1.0 Release Prepared; Wave 2 Bookkeeping; Gate 2 (branch `lane-a/day-7`, from `preview_b` @ `b3ed114`)
 
@@ -924,6 +963,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 
 | ID | Issue | File(s) | Notes |
 |----|-------|---------|-------|
+| DEBT-155 | No explicit consent before health data (body measurements, readiness, nutrition, probably workouts) syncs to Supabase. The sign-in flow has no consent wording, and the welcome tray's "I Agree" bundles the Terms and Policy (GDPR Art. 9; Virginia VCDPA sensitive data) | `src/components/auth/*`, `src/lib/sync/triggers.ts` (`startSync`), `supabase/migrations/` | Minimal fix in `docs/store/GDPR_PRE_REVIEW.md` §A row 9.3: one consent screen after the first sign-in, before sync; record version and time in `user_state`; "Stop cloud backup" to withdraw. Lanes H, E, F. Lincoln decision D-6 (default: build before launch). Found by Lane A Day 8. |
 | DEBT-103 | **RESOLVED 2026-11-23** (Lane D Day 4, #78). ~~No control called `handleFinishWorkout()`, so a workout couldn't be finished, rated or saved to History; once wired, the summary didn't render~~ | `src/components/logging/WorkoutLogger.tsx` | Proposed by Lane D as DEBT-094; renumbered. |
 | DEBT-104 | **RESOLVED 2026-11-23** (Lane D Day 4, #78). ~~Sets had no saved state (unlogged after a reload; exercise 2's rows locked), and each set copied the previous set's done flag~~ | `src/components/logging/WorkoutLogger.tsx`, `SetLogger.tsx` | Proposed by Lane D as DEBT-095; renumbered. |
 | SEC-005 | Supabase migrations 002 + 004 may be missing from live schema | `supabase/migrations/` | Plan sync and exercise community stats fail in prod until applied. |
@@ -943,6 +983,8 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 
 | ID | Issue | File(s) | Notes |
 |----|-------|---------|-------|
+| DEBT-149 | `<VercelAnalytics />` has no `beforeSend`, so with consent it sends full URLs, including plan and circle IDs and `/join/<code>` invite codes. PostHog already masks them | `src/App.tsx` (~line 444) | Lane C Day 6 (in progress): `beforeSend` with `scrubUrl` from `@/lib/analytics/track`. Proposed by Lane C Day 5. |
+| DEBT-146 | **RESOLVED 2026-11-26** (#97). ~~Staging steps ran `supabase migration list/repair` and `db push` without `--remote`, so they hit the local database~~ | `docs/SUPABASE_MIGRATIONS.md` | If Lincoln ran the old Gate 1 steps, check with `supabase migration list --remote`. Found by Lane F Day 7. |
 | DEBT-105 | **RESOLVED 2026-11-25** (Lane B Day 5, #82: `{{range}}` and `{{seconds}}` strings, with a test). ~~Workout day card shows a literal `{{count}} reps` and `{{count}}s rest`: the code passes `{ range }` and `{ seconds }`~~ | `src/components/plan/WorkoutDayCard.tsx` (188–190), `plan.workout_day.*` | Lane D or J. Proposed by Lane D as DEBT-096. |
 | DEBT-106 | **RESOLVED 2026-11-25** (Lane B Day 5, #82: `workout` namespace in en, de and pt, with a test). ~~Raw keys `workout.cancel`, `workout.notes`, `workout.notes_placeholder` show in the logger; only `es.json` has a top-level `workout` namespace~~ | `src/locales/en.json`, `de.json`, `pt.json` | Lane J1 (or D). Proposed by Lane D as DEBT-097. |
 | DEBT-107 | **RESOLVED 2026-11-25** (Lane D Day 5, #84: `LabelledSlider` names the thumbs; plate button named). ~~Controls with no accessible name: the 4 readiness sliders, the plate calculator button, and the RIR slider thumb (`aria-label` lands on the shadcn `Slider` root)~~ | `ReadinessCheck.tsx`, `PlateCalculator`, `SetLogger.tsx` | Lane D Day 5 (3.4). Proposed by Lane D as DEBT-098. |
@@ -955,7 +997,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-126 | **RESOLVED 2026-11-26** (Lane H Day 7, #92: User ID, Health and Other User Content added, all linked, App Functionality; Product Interaction linked, App Functionality, with Analytics to add when PostHog ships). ~~The iOS privacy manifest doesn't match the Day 5 store answers~~ | `ios/App/App/PrivacyInfo.xcprivacy` | Found by Lane A Day 5. |
 | DEBT-141 | At 360 CSS px wide (a common Android width) the workout logger overflows on the right: the RIR/RPE switch and the effort label are cut off | `src/components/logging/SetLogger.tsx` (layout) | Lane D, Day 8 device triage. Seen in a 360 px screenshot on Lane A Day 6; the store script uses 432 px for Google to avoid it. Found by Lane A Day 6. |
 | DEBT-132 | No monochrome Android notification icon (`ic_stat_*`) and no `LocalNotifications.smallIcon`; Android shows a plain square | `android/app/src/main/res/`, `capacitor.config.ts` | Lincoln or Lane D supplies a 24 dp white-on-transparent icon; Lane H wires it. Proposed by Lane H Day 6. |
-| DEBT-097 | Deleting a synced item only sets `deleted_at`; its content stays in Supabase until the account is deleted | `src/lib/sync/engine.ts`, migration 007 | Disclosed in the privacy policy. Lincoln/L9: decide whether tombstones should be purged (for example, content cleared, or rows removed after all devices have synced). Lane E/F. 2026-11-25: this now decides Play Data safety's "delete data without deleting the account" answer, which is **No** until purging exists (`docs/store/GOOGLE_DATA_SAFETY.md`). |
+| DEBT-097 | **RESOLVED IN CODE 2026-11-26** (Lincoln: wipe; migration 009, #97; client #96). Production waits on L2 step 5 (009 after the client ships). ~~Deleting a synced item only sets `deleted_at`; its content stays in Supabase until the account is deleted~~ | `src/lib/sync/engine.ts`, migration 007 | Disclosed in the privacy policy. Lincoln/L9: decide whether tombstones should be purged (for example, content cleared, or rows removed after all devices have synced). Lane E/F. 2026-11-25: this now decides Play Data safety's "delete data without deleting the account" answer, which is **No** until purging exists (`docs/store/GOOGLE_DATA_SAFETY.md`). |
 | DEBT-002 | `analyticsStore.ts` analytics events fire to nowhere | `src/stores/analyticsStore.ts:121` | TODO comment: "Send to PostHog or custom backend". No external destination wired. |
 | DEBT-033 | Streak, plans-generated and weekly-progress counters are never updated (no callers) | `src/stores/achievementStore.ts` | Roadmap 0.3 (Lane E). |
 | DEBT-034 | Fake data on real screens: Revenue totals, client progress from `Math.random()`, hard-coded circle stats, exercise badges chosen by id length | `Revenue.tsx:48`, `ClientProgress.tsx`, `CircleDashboardTab.tsx`, `ExerciseBadges.tsx:10` | Coach and Circles hidden by flags; badges removed (roadmap 0.5). |
@@ -1010,7 +1052,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-058 | **RESOLVED 2026-11-18** (Lane H Day 3, #62: `ios:live` uses the Mac's LAN address when the dev server listens on the LAN; `ios:live:cap` stays Simulator only). ~~`ios:live:cap` uses `--host=localhost`, so live reload can't reach a physical iPhone~~ | `package.json`, `scripts/dev-ios-live.mjs` | Lane H Day 3. |
 | DEBT-059 | **RESOLVED 2026-11-21** (export v3, #73). ~~Export v2 omits achievements, custom exercises, exercise favourites and collections, and the profile~~ | `src/lib/dataExport.ts` | Lane F Day 4. |
 | DEBT-060 | `tailwind.config.ts` isn't loaded by Tailwind 4; only `components.json` points at it | `tailwind.config.ts` | **Checked by Lane D Day 3 (#67): shadcn's CLI doesn't need it.** With `"config": ""` in `components.json`, `shadcn info` reports Tailwind v4 and `src/index.css`. Follow-up (next owner): blank `config`, delete `tailwind.config.ts`, remove its block in `eslint.config.js` (line 28). |
-| DEBT-061 | Analytics consent stored twice (`fitwizard-analytics.hasConsented`, `fitwizard_analytics_consent`) | `src/stores/analyticsStore.ts`, `src/lib/consent.ts` | Lane C Days 3–5: settle on one key. |
+| DEBT-061 | Analytics consent stored twice (`fitwizard-analytics.hasConsented`, `fitwizard_analytics_consent`) | `src/stores/analyticsStore.ts`, `src/lib/consent.ts` | Lane C Days 3–5: settle on one key. 2026-11-28: read side (#75) and write side (#98) done; nothing reads or writes `hasConsented` now. Left for Lane E: remove `hasConsented`/`setConsent` and the `persist` wrapper from `analyticsStore.ts`, and clear the legacy `fitwizard-analytics` key. |
 | DEBT-062 | **RESOLVED 2026-11-19** (Lane B Day 3, #68: now "FitWizard"; the last "FitWizardly" in `src/`). ~~"FitWizardly" in a user-visible coach note~~ | `src/lib/analyticsIntelligence.ts:840` | Lane B Day 3 (one-word exception). |
 | DEBT-063 | **RESOLVED 2026-11-19** (Lane B Day 3, #68: `syncDocumentLanguage()` sets `<html lang>` at startup and on every language change). ~~`<html lang>` doesn't change with the language (screen readers)~~ | `src/lib/i18n.ts` | Lane B Day 3. |
 | DEBT-064 | Profile strings outside Lane B's block are hardcoded ("Sound Effects", "Haptics", "Guest User", "Local Account") | `src/pages/Profile.tsx` | Lane J2. |
@@ -1059,7 +1101,7 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-122 | A chosen muscle with no exercise for the chosen equipment yields an empty day with no message | `src/lib/planGenerator.ts` | Lane B. Proposed by Lane B Day 5. |
 | DEBT-123 | Share strings ("Workout Complete!", the share text, "Stats copied to clipboard!") are hardcoded English | `src/components/logging/WorkoutSummary.tsx` | Lane J. Proposed by Lane H Day 5. |
 | DEBT-124 | Cancelling the image-card share sheet opens the text sheet straight after | `src/components/logging/WorkoutSummary.tsx` | Existing behaviour, kept. Proposed by Lane H Day 5. |
-| DEBT-127 | Vercel Web Analytics is mounted with consent in the native apps too, where its script path doesn't exist; expected to send nothing, unverified on a device | `src/App.tsx:440` | Lane C: mount only when `!nativeApp`, so the store forms don't depend on it. Found by Lane A Day 5. |
+| DEBT-127 | **RESOLVED 2026-11-26** (#75: mounted only when `!isNativeApp()` and consent, with a test). ~~Vercel Web Analytics is mounted with consent in the native apps too, where its script path doesn't exist; expected to send nothing, unverified on a device~~ | `src/App.tsx:440` | Lane C: mount only when `!nativeApp`, so the store forms don't depend on it. Found by Lane A Day 5. |
 | DEBT-128 | **RESOLVED 2026-11-26** (Lane H Day 7, #92: `ITSAppUsesNonExemptEncryption` = `false`; HTTPS through the OS only). ~~`ITSAppUsesNonExemptEncryption` isn't set~~ | `ios/App/App/Info.plist` | Found by Lane A Day 5. Lincoln can still overrule the exemption (`COMPLIANCE.md` §5). |
 | DEBT-129 | **RESOLVED 2026-11-26** (Lane D Day 7, #91: the comment at `lifter-loop.spec.ts:130-131` now cites DEBT-135 for the constraint cards). ~~The E2E allow-list comment cites the wrong DEBT ID~~ | `playwright/lifter-loop.spec.ts` | Found by Lane A Day 5. |
 | DEBT-130 | A circle whose only admin deletes their account is left with no admin (members can still use it) | `supabase/migrations/008_policy_fixes.sql` (behaviour) | Product decision before Circles ships (Lane F question 1; default: leave as is). Proposed by Lane F Day 6. |
@@ -1071,11 +1113,19 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 | DEBT-137 | In-range moderates (dompurify, which is in the PDF export path, so take it first; typescript-eslint, vitest, fflate, @humanfs/node) and lows need a lockfile refresh with npm 10 | `package-lock.json` | Whoever next touches dependencies; re-resolve within ranges as #93 did. Proposed by Lane D Day 7. |
 | DEBT-138 | **RESOLVED 2026-11-26** (Lane A Day 7: `package.json` 1.1.0, iOS `MARKETING_VERSION = 1.1.0` / `CURRENT_PROJECT_VERSION = 2`, Android `versionName "1.1.0"` / `versionCode 2`). ~~Native versions lag `package.json`: Android `versionName "1.0"` / `versionCode 1`, iOS `MARKETING_VERSION = 1.0`~~ | `android/app/build.gradle`, `ios/App/App.xcodeproj/project.pbxproj` | Lane A Day 7 bumps all three to 1.1.0 (release exception). Proposed by Lane H Day 7. |
 | DEBT-139 | CI uses `actions/*@v4`; newer majors may be wanted repo-wide | `.github/workflows/ci.yml` | Dependabot's `github-actions` updates will propose them once `dependabot.yml` is on `main`. Proposed by Lane H Day 7. |
-| DEBT-140 | Coach wording shows while the coach flag is off: "Coach-built intake" (wizard header), "Coach-guided intake" (goal step), "Coach Notes" and "Coaching signals" (Analytics). It appears in the store screenshots and doesn't match the listing | `src/locales/en.json` (`wizard.eyebrow`, `wizard.goal.personalize_badge`), `src/components/analytics/WeeklyCoachSummaryCard.tsx:37-39` (hardcoded), `src/pages/Analytics.tsx` | Lane B (wording) or J. Found by Lane A Day 6. |
-| DEBT-142 | The home hero calls plans "Intelligent, personalized, and undeniably effective", which is close to the AI and outcome claims the listing avoids | `src/locales/en.json` (`hero.intelligent`, `hero.effective`), shown by `src/components/motivation/WelcomeHero.tsx` | Lincoln decides whether to keep it (question in the Lane A Day 6 handoff); Lane B changes it. Found by Lane A Day 6. |
+| DEBT-140 | **RESOLVED 2026-11-27** (Lane B Day 6, #99; `coachWording.test.ts`). Fallbacks in `AnatomyPanel.tsx:139` and `Header.tsx:566` still say "Coach note"/"Coach Intake" (Lane J/C; never shown while en has the keys). ~~Coach wording shows while the coach flag is off: "Coach-built intake" (wizard header), "Coach-guided intake" (goal step), "Coach Notes" and "Coaching signals" (Analytics). It appears in the store screenshots and doesn't match the listing~~ | `src/locales/en.json` (`wizard.eyebrow`, `wizard.goal.personalize_badge`), `src/components/analytics/WeeklyCoachSummaryCard.tsx:37-39` (hardcoded), `src/pages/Analytics.tsx` | Lane B (wording) or J. Found by Lane A Day 6. |
+| DEBT-142 | **RESOLVED 2026-11-27** (#99: "Science-based workout plans, built around you."). ~~The home hero calls plans "Intelligent, personalized, and undeniably effective", which is close to the AI and outcome claims the listing avoids~~ | `src/locales/en.json` (`hero.intelligent`, `hero.effective`), shown by `src/components/motivation/WelcomeHero.tsx` | Lincoln decides whether to keep it (question in the Lane A Day 6 handoff); Lane B changes it. Found by Lane A Day 6. |
 | DEBT-143 | **RESOLVED 2026-11-26** (Lane A Day 7: both rows now say Shipped). ~~README Features is stale: "Account deletion" says Planned (shipped in #73) and the sync row says sign-out sync is still to come (shipped in #81)~~ | `README.md` | Lane A, Day 7 bookkeeping. Found by Lane A Day 6. |
 | DEBT-144 | If the preview server never answers (`waitForServer` times out), `startPreview()` throws without killing the `npm run preview` process it spawned, so it stays alive. A failed Chromium launch is fixed (Lane A Day 7); this earlier failure isn't | `scripts/store-screenshots.mjs` (`startPreview`) | Lane A, Day 9 (when the script is next run). Found by Lane A Day 7. |
 | DEBT-145 | README's CI sentence lists lint, typecheck, tests, build, the Deno tests and Playwright, but not the `audit` job (#91) or the `android` job (#92) | `README.md` (Development → CI) | Lane A, next docs pass. Found by Lane A Day 7. |
+| DEBT-147 | Rows deleted before migration 009 keep their content until the optional backfill (runbook step 6) runs | `supabase/migrations/009_purge_tombstone_content.sql`, `docs/SUPABASE_MIGRATIONS.md` | Lincoln at L2; default yes (his decision was to wipe). Found by Lane F Day 7. |
+| DEBT-148 | **RESOLVED 2026-11-27** (#99, in review). ~~Empty Plan screen said "PREMIUM COACH INTAKE" with the coach flag off, implying a paid tier~~ | `src/locales/en.json` (`plan.noplan.kicker`) | Now "GUIDED SETUP" (es "CONFIGURACIÓN GUIADA"); covered by `coachWording.test.ts`. Found by Lane B Day 6. |
+| DEBT-150 | The export's `consent` block has no `crashReports` flag (ADR 10) | `src/lib/dataExport.ts` (~line 222) | Lane F: `crashReports: readLocalStorage(CRASH_REPORTS_CONSENT_STORAGE_KEY) === 'true'`. Asked in the Lane C Day 5 handoff. The policy names only the flags that are exported. |
+| DEBT-151 | The rest of the welcome tray (title, "Before we start" bullets, food-search toggle, "I Agree & Continue", the terms line) and Profile's "Privacy Settings" button are hard-coded English | `src/components/legal/ConsentModal.tsx`, `src/pages/Profile.tsx:397` | Lane J (Wave 3). `es.json` has orphaned `consent.medical`, `consent.consult`, `consent.local`. Proposed by Lane C Day 5. |
+| DEBT-152 | Old wizard funnel stub discards every event in production; `Wizard.tsx` is its only user | `src/lib/analytics.ts` | Lane B or J: replace with `track()` (lines in the Lane C Day 4 handoff), then delete the file. Proposed by Lane C Day 4. |
+| DEBT-153 | `SIGNED_IN` can fire on session restore or tab refocus, so the `signed_in` event may over-count | `src/stores/authStore.ts` | Accepted for now (Lane C Day 4 question 4). |
+| DEBT-154 | Four App tests still mock `@/stores/analyticsStore` with `hasConsented`, which `App.tsx` no longer imports | `src/App.*.test.tsx` | Remove with DEBT-061's store change (Lane E). Proposed by Lane C Day 4. |
+| DEBT-156 | Consent records keep a timestamp and `'true'` flags only, not which policy or tray version was agreed to (GDPR Art. 7(1) proof) | `src/components/legal/ConsentModal.tsx`, `src/lib/consent.ts` | Store a version with the timestamp; do it with DEBT-155. Found by Lane A Day 8. |
 | DEBT-075 | A custom domain must be listed in `ALLOWED_ORIGINS`, or `/api/*` calls from it get 403 | Vercel env | Lincoln, with L3. |
 | DEBT-020 | Surface/Deep switch snaps instead of fading; slider thumb (20px) and layer toggle (36-44px) are under the 44px touch guideline | `svg/MuscleCanvas.tsx`, `ui/SculptSlider.tsx`, `ui/LayerToggle.tsx` | Cosmetic. Measured 2026-11-15: deep muscles are removed within 60ms. **Partly fixed 2026-11-25** (Lane D Day 5, #84): the slider thumb, layer toggle and sidebar rows now have 44 px targets. The Surface/Deep snap is not addressed and stays open. |
 | DEBT-021 | **RESOLVED 2026-11-25** (Lane D Day 5, #84: `useTheme` follows the prop and the `<html>` class; sidebar uses semantic tokens). ~~Switching theme without a reload leaves the muscle selector in the old theme; selected-muscle rows in the sidebar are near-invisible in light theme~~ | `src/features/mcl/hooks/useTheme*`, `ui/SelectionSidebar.tsx` | Seen 2026-11-15. Neither file was changed by the sculpt work. |
@@ -1092,7 +1142,11 @@ All items tracked in `AUDIT_AND_IDEAS.md`. Summary:
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Privacy Policy published | Draft | Rewritten 2026-11-21 from `docs/store/DATA_INVENTORY.md` (Lane A Day 4): `docs/privacy-policy.md` and `/legal`. Waiting on Lincoln's placeholders and the L9 review |
+| Privacy Policy published | Draft, ready for L9 | Rewritten 2026-11-21 (Lane A Day 4); finalised 2026-11-28 (Lane A Day 8) with Sentry, PostHog and Vercel Analytics disclosures, the deletion wipe, local notifications, rights, complaint right and proposed legal bases. GDPR pre-review: `docs/store/GDPR_PRE_REVIEW.md`; reviewer copy: `docs/store/PRIVACY_FOR_REVIEW.md` |
+| GDPR Art. 9 — explicit consent for synced health data | **Gap** | DEBT-155. Not collected by the sign-in or sync flow |
+| GDPR Art. 27 — EU representative | Lincoln decides | Pre-review D-5: geo-restrict EEA/UK/CH for v1 (default) or appoint one |
+| GDPR Art. 28 — DPAs (Supabase, Vercel, Sentry, PostHog) | Not yet accepted | Pre-review D-10 |
+| GDPR Art. 7 — crash reports and usage statistics separate, off by default, revocable at once | Done | #98 |
 | GDPR Art. 13 — workout/fitness data disclosed | Done | "What We Store" section in Legal.tsx |
 | GDPR Art. 13 — readiness/recovery data disclosed | Done | Added 2026-04-30 |
 | GDPR Art. 13 — nutrition data disclosed | Partial | Mentioned in "What We Store"; OpenFoodFacts disclosure added 2026-04-29 |

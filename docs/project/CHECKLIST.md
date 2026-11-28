@@ -2,7 +2,7 @@
 
 > The quick view: what's done, what's in progress, and what's left. It's updated after every step.
 > `BOARD.md` has the full day-by-day grid and the gate checklists; this page is the short version.
-> **Last updated:** 2026-11-26 (Lane A Day 7). **Wave 1 is complete** (all PRs through #69 merged); Gate 1 is waiting on Lincoln's L10 and L11. **Wave 2 is merged** through #94 except Lane C's #75, which waits on your `$pageview` decision and is **not in 1.1.0**. Open: Lane A Day 7 (v1.1.0, this PR). Then Gate 2 (you).
+> **Last updated:** 2026-11-28 (Lane A Day 8). **Wave 1 is complete**; Gate 1's app checks pass, and its database checks wait on L10 and L11 (on hold). **Wave 2 is merged** except Lane C Day 6, which is in progress. Open: Lane A Day 8 (GDPR pre-review pack for L9, this PR). Gate 3 waits, by your decision.
 
 ## Done
 
@@ -68,21 +68,29 @@
 | 58 | **Merged #92** Lane H Day 7: Android release bundle built in CI; mobile release guide; iOS privacy manifest matches the store answers; no encryption question on each build; Android compile fix | `2d63859` |
 | 59 | **Merged #91** Lane D Day 7: CI fails on high or critical npm advisories; Dependabot weekly updates | `b7dc219` |
 | 60 | **Merged #94** Lane A Day 6: store listing copy (both stores) and a script that captures 24 store screenshots and checks the copy's length and wording | `b3ed114` |
-| 61 | Lane A Day 7: **v1.1.0** in `package.json`, iOS and Android; What's new entry; final release notes (analytics not included); screenshot script always stops its server | PR #95 |
+| 61 | **Merged #95** Lane A Day 7: **v1.1.0** in `package.json`, iOS and Android; What's new entry; final release notes (analytics not included); screenshot script always stops its server | `9a1a767` |
+| 62 | **Merged #97** Lane F Day 7: migration 009 wipes a deleted item's content on the server; production migration steps in two parts | `20bf477` |
+| 63 | **Merged #96** Coordinator: deleted items still disappear from other devices when their content is wiped (must ship before 009 goes to production) | `dbcf484` |
+| 64 | **Merged #75** Lane C Day 4: opt-in usage statistics with PostHog EU, nothing sent without a key and consent; Vercel Analytics off in the apps | `8c97252` |
+| 65 | **Merged #98** Lane C Day 5: crash reports and usage statistics are separate switches, both off by default, and turning one off works at once | `12be8f5` |
+| 66 | **Merged #99** Lane B Day 6: honest home headline; no coach or premium wording while the coach flag is off | `79c03ab` |
+| 67 | **Merged #100** Coordinator: Gate 1 checks (app side passes) and your 2026-11-27 decisions | `cffb4a7` |
+| 68 | Lane A Day 8: final privacy text; GDPR pre-review (`docs/store/GDPR_PRE_REVIEW.md`); clean copy for the reviewer (`docs/store/PRIVACY_FOR_REVIEW.md`) | This PR |
 
 ## In progress
 
 | What | Status |
 |---|---|
-| Gate 1 | **Waiting on you:** L10 (staging Supabase) and L11 (email-code template). Everything else for Gate 1 is merged |
-| Lane C Day 4 (#75) | **Waiting on you:** OK the contract #9 `$pageview` change. Not in 1.1.0; it goes in a later release |
+| Gate 1 | App checks pass (2026-11-27). Database checks wait on L10 (staging Supabase, on hold) and L11 (email-code template) |
+| Lane C Day 6 | In progress: error-boundary tests, source maps, Vercel Analytics URL masking (DEBT-149) |
+| L9 legal review | **Go.** The pack is ready: answer the 12 decisions in `docs/store/GDPR_PRE_REVIEW.md` §D (2 need your answer: D-1 controller name and address, D-2 support email; the rest have defaults), then send `PRIVACY_FOR_REVIEW.md` and §C's questions to a qualified reviewer |
 | Store forms and listing | **Waiting on you:** the questions in `docs/store/APPLE_PRIVACY.md`, `GOOGLE_DATA_SAFETY.md`, `COMPLIANCE.md` and `LISTING.md` (minimum age, L6 keys, domain, support email, copyright holder, name clearance). Health and the encryption exemption were applied with their defaults in #92. Google's wording couldn't be checked from here |
 
 ## Next up, in order
 
 0. **Gate 2 (you):** merge this PR into `preview_b`, run the Gate 2 checklist in `BOARD.md`, promote `preview_b` to `main` and tag `v1.1.0`.
 1. **Gate 1 (you):** create the staging Supabase project and apply migrations 001–008 (repair 001–006 first; steps in `docs/SUPABASE_MIGRATIONS.md`), add the email-code template (`docs/IOS_DEVELOPMENT.md`, "Auth email"), deploy `delete-account` (its README), then run the checklist in `BOARD.md`.
-2. **Lane C:** #75 (analytics) once you OK the `$pageview` change, then its Day 5 consent entries.
+2. **Lane C:** Day 6 (in progress). **New, recommended before launch:** the health-data consent screen at first sign-in (DEBT-155; Lanes H, E, F), see the pre-review §A row 9.3.
 3. **Wave 3 (Days 8–10):** device checks with Lane H, Spanish (J1, J2), final privacy text, screenshots on the final build, readiness rubric.
 
 ## Still remaining
@@ -111,9 +119,9 @@
 - [x] Sync on sign-out, plans on the engine (Lane E Day 7, #81); sign-out now clears device data
 - [x] Account deletion in the app (Lane F, #73; the function is deployed at L10)
 - [ ] Sessions that last (✅ #74); native plugins (✅ #83); notifications (✅ #89)
-- [ ] Analytics and consent (Lane C, #75 open); end-to-end test (✅ #78) and accessibility part 1 (✅ #84)
+- [ ] Analytics and consent (✅ #75, #98; Day 6 in progress); end-to-end test (✅ #78) and accessibility part 1 (✅ #84)
 - [x] Privacy policy (#77), store forms (#88), listing copy and screenshot script (#94)
-- [ ] v1.1.0 release: versions, changelog, release notes (Lane A Day 7, PR open)
+- [x] v1.1.0 release: versions, changelog, release notes (Lane A Day 7, #95)
 - [x] CI gates: npm audit and Dependabot (Lane D, #91); Android release bundle (Lane H, #92)
 - [x] Express retired (Lane F Day 5, #80)
 - [ ] **Gate 2:** production database, v1.1.0 to `main`, first store test builds (needs L4)
@@ -135,7 +143,7 @@
 | D1–D6 Decisions | ✅ Acknowledged; defaults apply |
 | L12 Review and merge PRs | ✅ Wave 1 merged (#44–#69), reviewed and merged on your instruction |
 | L4 Apple and Google developer enrollment | ⏸ Deferred. Start at least a week before Gate 2, because the first store uploads and the 14-day Play test need it |
-| L10 Staging Supabase project | ⬜ Needed for Gate 1. **Before the first `supabase db push`, run `supabase migration repair --status applied 001 … 006`** (DEBT-053; steps in `docs/SUPABASE_MIGRATIONS.md`) |
+| L10 Staging Supabase project | ⏸ On hold (2026-11-27). Needed for Gate 1. **Before the first `supabase db push`, run `supabase migration repair --status applied 001 … 006`** (DEBT-053; steps in `docs/SUPABASE_MIGRATIONS.md`) |
 | L11 Email code in the Supabase email template | ⬜ Needed when Lane H Day 3 lands |
 | First native build on a Mac and in Android Studio | ⬜ Checks Lane H's release settings: code shrinking, signing, privacy manifest |
 | L1 Revoke the old Supabase key | ⬜ |
@@ -143,9 +151,9 @@
 | L5 Name and trademark search | ⬜ |
 | L6 Sentry and PostHog accounts | ⬜ |
 | L2 Production database migrations | ⬜ Before Gate 2 |
-| L7 Test devices | ⬜ Day 8 |
+| L7 Test devices | ⏸ Deferred until everything else is ready (2026-11-27) |
 | L8 Android testers | ⬜ Before Gate 2 |
-| L9 Legal review | ⬜ Days 8–10 |
+| L9 Legal review | 🟡 Go (2026-11-27). Pack ready: `docs/store/GDPR_PRE_REVIEW.md`, `docs/store/PRIVACY_FOR_REVIEW.md` |
 | Branch protection on `main` and `preview_b` | ⬜ Require `test`, `e2e`, `edge-functions` and `audit` (steps in `handoffs/2026-11-26-lane-d-day-7.md`) |
 | GitHub repository variables for the Android CI bundle | ⬜ `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PUBLIC_APP_ORIGIN` (production values), before a CI bundle goes to Play |
 | Android signing secrets | ⬜ The four `ANDROID_KEYSTORE_*` secrets (steps in `docs/RELEASE_MOBILE.md`). Without them the CI bundle is unsigned and you upload a locally built one |
@@ -163,11 +171,12 @@ Each has a default that applies unless you change it.
 9. When a circle's creator deletes their account, the circle stays for its other members. (Default: yes.)
 10. Coach mode switched on before the flag existed is switched off and isn't restored if coach is turned on later. (Default: acceptable.)
 11. **Store forms:** declare body measurements, nutrition and readiness as **Health** as well as Fitness? (Default: yes; then Lane H updates the iOS privacy manifest.)
-12. **Minimum age:** 13? (No default; the policy says "13 [Lincoln to confirm]".)
+12. **Minimum age:** the GDPR pre-review recommends **16** (decision D-4). The policy still says 13 until you answer.
 13. **Support email** for the privacy policy and Play's deletion page. (No default; must not be a personal address.)
-14. **Deleted items in the cloud (DEBT-097):** keep their content until account deletion (Play's "delete data without deleting the account" stays **No**), or purge it when an item is deleted (then **Yes**)? (No default; the form says No until you decide.)
+14. ~~**Deleted items in the cloud (DEBT-097)**~~ **Decided: wipe** (#96, #97). Play's answer becomes **Yes** when 009 is on production.
 15. **Health (question 11) and the encryption exemption:** applied with their defaults in #92 (manifest has Health; `ITSAppUsesNonExemptEncryption` is NO). Say if either should change.
 16. **Copyright holder** for Apple's Copyright field: your legal name or a company? (No default.)
 17. **Support URL:** use `/about` until there's a support page? (Default: yes.)
-18. **Home screen wording (DEBT-142):** the hero says plans are "Intelligent, personalized, and undeniably effective". Keep it? (Default: keep; the store listing doesn't use it.)
+18. ~~**Home screen wording (DEBT-142)**~~ **Replaced** in #99.
 19. **Android CI on PRs:** runs on pushes to `main`/`preview_b` and on `lane-h/*` PRs. (Default: keep it that way.)
+20. **GDPR pre-review decisions D-1 to D-12:** see `docs/store/GDPR_PRE_REVIEW.md` §D. Defaults apply except D-1 (controller name and address) and D-2 (support email).

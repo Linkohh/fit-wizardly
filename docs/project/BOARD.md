@@ -34,11 +34,13 @@ All seven lanes run in parallel. There are no dependencies between them.
 ### Gate 1 checklist (Lincoln, end of Day 3)
 - [x] All Wave 1 PRs merged (#44–#69, plus docs #70). Verified 2026-11-20: every lane's Day 1–3 deliverable is present in the code
 - [x] CI green on `preview_b` (`aed5017`: 1056/1056 tests, lint 0 errors, typecheck, build, DB harness)
-- [ ] Migrations 007 and 008 applied to the **staging** Supabase project (L10)
+> **Status 2026-11-27 (coordinator, `8c97252`):** app checks pass; database checks wait on L10 and L11, which Lincoln has put on hold.
+
+- [ ] Migrations 007 and 008 applied to the **staging** Supabase project (L10). *On hold with L10*
 - [ ] Beta site: the words "AI-powered" appear nowhere (page title, install prompt, About, Guide). *Passed on a local production build; Lincoln confirms on the beta URL*
 - [ ] Beta site: no menu, command palette or URL reaches Circles, Clients, Templates or Revenue. *Passed locally: all four URLs show 404*
-- [ ] Beta site as a guest: build a plan, log one workout, log one meal, close the tab, reopen. All three are still there
-- [ ] Beta site: sign in with the 6-digit email code (after L11)
+- [ ] Beta site as a guest: build a plan, log one workout, log one meal, close the tab, reopen. All three are still there. *Passed locally 2026-11-27 (Playwright lifter loop; meal checked by script, saved in device storage)*
+- [ ] Beta site: sign in with the 6-digit email code (after L11). *Waits on L10/L11*
 - [ ] Beta site: load once, go offline, reload. The app opens. *Passed locally*
 - [ ] Bugs found are filed as buffer tasks for the relevant lanes
 
@@ -48,18 +50,20 @@ All seven lanes run in parallel. There are no dependencies between them.
 
 | Lane | Day 4 | Day 5 | Day 6 | Day 7 |
 |---|---|---|---|---|
-| **A** | ✅ PR #77 (`7a04c58`) · 4.1 Privacy policy and terms rewritten from the inventory, web deletion section `#delete-account`; draft for L9 | ✅ PR #88 (`5a5b678`) · 4.2 Store form answer sheets (`APPLE_PRIVACY.md`, `GOOGLE_DATA_SAFETY.md`, `COMPLIANCE.md`); Days 5–6 handoffs folded in | ✅ PR #94 (`b3ed114`) · 4.3 Listing copy (`docs/store/LISTING.md`); `scripts/store-screenshots.mjs` (24 screenshots, 4 sizes, copy check); Day 7 of D and H and #93 folded in | 🔵 PR #95 · 1.8 v1.1.0: `package.json`, iOS (1.1.0, build 2) and Android (1.1.0, code 2); changelog entry; release notes final (analytics not in 1.1.0); screenshot script stops its server when Chromium fails (#94 review); Gate 2 checklist |
-| **B** | ✅ PR #76 (`6c63b2a`) · 3.6c Fewer taps to the first plan (14 → 11) | ✅ PR #82 (`354edc6`) · Buffer: plan card numbers, logger strings, no empty Full Body day and fair session volume, Start Over i18n, stepper names (DEBT-105, 106, 108, 102 closed) | ➖ | ➖ |
-| **C** | 🔵 PR #75 · 3.2 `track()` and PostHog EU adapter; wire events. **Held for Lincoln's OK on the contract #9 `$pageview` change** | ⬜ Consent entries; disclosure text to Lane A (after #75) | ⬜ Error-boundary tests; source maps (if L6 done) | ➖ Lane C's Wave 2 is **not in 1.1.0** (#75 held) |
+| **A** | ✅ PR #77 (`7a04c58`) · 4.1 Privacy policy and terms rewritten from the inventory, web deletion section `#delete-account`; draft for L9 | ✅ PR #88 (`5a5b678`) · 4.2 Store form answer sheets (`APPLE_PRIVACY.md`, `GOOGLE_DATA_SAFETY.md`, `COMPLIANCE.md`); Days 5–6 handoffs folded in | ✅ PR #94 (`b3ed114`) · 4.3 Listing copy (`docs/store/LISTING.md`); `scripts/store-screenshots.mjs` (24 screenshots, 4 sizes, copy check); Day 7 of D and H and #93 folded in | ✅ PR #95 (`9a1a767`) · 1.8 v1.1.0: `package.json`, iOS (1.1.0, build 2) and Android (1.1.0, code 2); changelog entry; release notes final (analytics not in 1.1.0); screenshot script stops its server when Chromium fails (#94 review); Gate 2 checklist |
+| **B** | ✅ PR #76 (`6c63b2a`) · 3.6c Fewer taps to the first plan (14 → 11) | ✅ PR #82 (`354edc6`) · Buffer: plan card numbers, logger strings, no empty Full Body day and fair session volume, Start Over i18n, stepper names (DEBT-105, 106, 108, 102 closed) | ✅ PR #99 (`79c03ab`) · Buffer: honest home headline (DEBT-142) and neutral coach wording with the flag off (DEBT-140); empty-plan kicker fixed in review (DEBT-148); `coachWording.test.ts` | ➖ |
+| **C** | ✅ PR #75 (`8c97252`) · 3.2 `track()` and PostHog EU adapter; events wired; `$pageview` contract change approved by Lincoln (2026-11-26); DEBT-127 fixed; `vendor-posthog` kept out of the precache | ✅ PR #98 (`12be8f5`) · Separate crash-report and usage-statistics toggles, both off by default; revoking stops Sentry, PostHog and Vercel Analytics with no reload; disclosure text to Lane A | 🟡 In progress · Error-boundary tests; source maps (if L6 done); Vercel Analytics URL masking (DEBT-149) | ➖ Lane C's Wave 2 merged after the 1.1.0 cut, so it ships in 1.2.0 |
 | **D** | ✅ PR #78 (`5acbeac`) · 3.5 Playwright lifter loop with reload; `e2e` and `edge-functions` CI jobs; finish-workout and set-logger fixes; `vendor-sentry` chunk (DEBT-091) | ✅ PR #84 (`9d23b1b`) · 3.4 part 1: named sliders, RIR contrast, 44 px targets, `MotionConfig`, MCL theme (DEBT-020 targets, DEBT-021, DEBT-107 closed); axe scan in the E2E | ✅ PR #90 (`e88c727`) · 3.4 Wizard Enter key (DEBT-025 closed); `useKeyboard()` in SetLogger; stepper allow-list entry removed | ✅ PR #91 (`b7dc219`) · 4.5 `audit` CI job (`npm audit --audit-level=high`, passing after #93); Dependabot (weekly npm and Actions); DEBT-129 closed |
 | **E** | ✅ PR #59 (`0513fd0`) · 1.4 part 1: sync engine, outbox, tests; 3 review findings fixed | ✅ PR #64 (`a621a4f`) · 1.4 part 2: seven collections and change tracking | ✅ PR #66 (`12fbcbb`) · 1.4 part 3: triggers, first sign-in upload, indicator; 2 review findings fixed | ✅ PR #81 (`2b4d190`) · 1.4 part 4: safe sign-out (sync, warn, erase; DEBT-045 closed); plans on the engine; 2 review findings fixed. **Lane E's Wave 2 is done** |
-| **F** | ✅ PR #73 (`1708d12`) · 1.5 part 2: deletion UI, guest erase, export v3 (DEBT-059 closed) | ✅ PR #80 (`bea0fb7`) · 1.7 Express retired (D1): `server/`, `apiClient`, CI server steps and dev proxy removed | ✅ PR #87 (`cb93576`) · Circle query shapes and plans tombstones tested under 008; no 009 needed | ➖ Buffer |
+| **F** | ✅ PR #73 (`1708d12`) · 1.5 part 2: deletion UI, guest erase, export v3 (DEBT-059 closed) | ✅ PR #80 (`bea0fb7`) · 1.7 Express retired (D1): `server/`, `apiClient`, CI server steps and dev proxy removed | ✅ PR #87 (`cb93576`) · Circle query shapes and plans tombstones tested under 008; no 009 needed | ✅ PR #97 (`20bf477`) · Migration 009 wipes deleted items' content (DEBT-097, Lincoln: wipe); production migration steps (L2 in two parts); `--remote` fix (DEBT-146) |
 | **H** | ✅ PR #74 (`d2a49ae`) · 2.2 Session storage adapter; ADR 12; DEBT-079, DEBT-085 | ✅ PR #83 (`8a92b6a`) · 2.4 part 1: status bar, splash, keyboard and share helpers (contract #10); native unverified on devices | ✅ PR #89 (`0ce6a64`) · 2.4 part 2: local notifications (rest timer, workout reminders); native unverified on devices | ✅ PR #92 (`2d63859`) · 4.5 `android` CI job (release `.aab`, signed when the 4 secrets exist); `docs/RELEASE_MOBILE.md`; privacy manifest (DEBT-126) and `ITSAppUsesNonExemptEncryption` (DEBT-128) closed; Android compile fix |
 
-**Also merged in Wave 2:** coordinator PR #85 (`35a52f1`), the Light / System / Dark crossfade restored (`src/lib/themeFade.ts`); #86 (`aaa63b7`), Day 6 briefs with the Day 5 carry-overs for D, F and H; and #93 (`fe4789f`), the 3 critical and 11 high npm advisories fixed (Capacitor ^8.6.3, react-router-dom ^7.18.7, transitive packages re-resolved with npm 10) so #91's audit gate passes.
+**Wave 2 status (2026-11-28):** everything is merged except Lane C Day 6, which is in progress.
+
+**Also merged in Wave 2:** coordinator PR #96 (`dbcf484`), deleted rows matched by key so wiped content still deletes on other devices (must ship before 009 reaches production); #100 (`cffb4a7`), Gate 1 check results and Lincoln's 2026-11-27 decisions; coordinator PR #85 (`35a52f1`), the Light / System / Dark crossfade restored (`src/lib/themeFade.ts`); #86 (`aaa63b7`), Day 6 briefs with the Day 5 carry-overs for D, F and H; and #93 (`fe4789f`), the 3 critical and 11 high npm advisories fixed (Capacitor ^8.6.3, react-router-dom ^7.18.7, transitive packages re-resolved with npm 10) so #91's audit gate passes.
 
 ### Gate 2 checklist (Lincoln, end of Day 7)
-> Added on Day 7: v1.1.0 is cut without Lane C's #75 (analytics), which stays held for your `$pageview` decision. The TestFlight and Play items need L4, which is deferred.
+> Added on Day 7: v1.1.0 is cut without Lane C's #75 (analytics). #75 and #98 merged afterwards (2026-11-26/27) and ship in 1.2.0. L2 is now two parts: 007 and 008 at Gate 2, then 009 once the #96 client change is released. The TestFlight and Play items need L4, which is deferred.
 
 - [ ] All Wave 2 PRs merged in merge order (#75 excepted, see above); CI green, including the Playwright job
 - [ ] All three version sources say 1.1.0: `package.json`, Xcode (`MARKETING_VERSION`, build 2), Android (`versionName`, `versionCode 2`). What's new on `/about` shows 1.1.0
@@ -77,7 +81,7 @@ All seven lanes run in parallel. There are no dependencies between them.
 
 | Lane | Day 8 | Day 9 | Day 10 |
 |---|---|---|---|
-| **A** | ⬜ Final privacy text; send for review (L9) | ⬜ Screenshots and listing | ⬜ 4.6 Readiness rubric; v1.2.0 notes; submission checklist |
+| **A** | 🔵 Day 8 PR · Final privacy text (Sentry, PostHog, Vercel Analytics, deletion wipe, notifications, rights, legal bases); `GDPR_PRE_REVIEW.md`; `PRIVACY_FOR_REVIEW.md` for L9; Wave 2 folded in | ⬜ Screenshots and listing | ⬜ 4.6 Readiness rubric; v1.2.0 notes; submission checklist |
 | **D** | ⬜ Device-test triage with H; Playwright regressions | ⬜ Regressions | ➖ |
 | **E** | ⬜ Sync fixes from device testing | ⬜ Buffer | ➖ |
 | **H** | ⬜ 2.7 Device checklist with Lincoln; fixes | ⬜ Device fixes | ⬜ Release build docs; v1.2.0 native version bump |
@@ -85,6 +89,8 @@ All seven lanes run in parallel. There are no dependencies between them.
 | **J2** | ⬜ 3.3 `components/nutrition` and untranslated pages moved to `t()` | ⬜ `features/mcl` UI (DEBT-019) | ⬜ Spanish for those keys |
 
 ### Gate 3 checklist (Lincoln, end of Day 10)
+> **Waits** (Lincoln, 2026-11-27): no store review or submission until Gate 1 and Wave 2 are finished. L9 goes ahead now.
+
 - [ ] Readiness rubric (`docs/readiness-rubric.md`) at 70% or higher
 - [ ] Every item on the device checklist (LANE-H, Day 8) passes on a real iPhone and Android phone
 - [ ] The app is fully usable in Spanish on the lifter screens
@@ -111,16 +117,16 @@ Full detail is in [`lanes/LANE-L.md`](lanes/LANE-L.md).
 | L0 | Merge Day 0 PR; start Wave 1 lanes | Day 0 | ✅ PR #44 merged. Lane E started first as a trial; other lanes wait until the trial is reviewed |
 | D1–D6 | Answer the open decisions (defaults apply otherwise) | Days 1–5 | ✅ Acknowledged 2026-11-17: defaults apply unless Lincoln changes one |
 | L1 | Revoke the legacy Supabase key (SEC-001) | Day 1 | ⬜ |
-| L4 | Apple Developer and Google Play Console enrolment; create app records | Deferred | ⏸ Deferred by Lincoln (2026-11-17) until store work is near. **Effect:** Gate 2's TestFlight and Play uploads, and the 14-day Play test, can't start until enrolment is approved, so Android launch moves back by however long enrolment is deferred |
+| L4 | Apple Developer and Google Play Console enrolment; create app records | Deferred | ⏸ Deferred by Lincoln (2026-11-17; reaffirmed 2026-11-27 as a side burner) until store work is near. **Effect:** Gate 2's TestFlight and Play uploads, and the 14-day Play test, can't start until enrolment is approved, so Android launch moves back by however long enrolment is deferred |
 | L3 | Domain for the app | Day 2 | ⬜ |
 | L5 | Name and trademark search | Day 3 | ⬜ |
 | L6 | Sentry and PostHog accounts; keys in Vercel | Day 3 | ⬜ |
-| L10 | Staging Supabase project | Day 3 | ⬜ |
+| L10 | Staging Supabase project | Day 3 | ⏸ On hold (Lincoln, 2026-11-27). Gate 1's database checks wait on it |
 | L11 | Supabase email template with `{{ .Token }}` | Day 3 | ⬜ |
 | L8 | Recruit 12 or more Android testers | Day 7 | ⬜ |
 | L2 | Production migrations | Gate 2 | ⬜ |
-| L7 | iPhone, Android phone, and a Mac with Xcode available | Day 8 | ⬜ |
-| L9 | Legal review of privacy policy and terms | Days 8–10 | ⬜ Draft ready (Lane A Day 4): [`docs/privacy-policy.md`](../privacy-policy.md). First fill in its placeholders table |
+| L7 | iPhone, Android phone, and a Mac with Xcode available | Day 8 | ⏸ Deferred by Lincoln (2026-11-27) until everything else is ready |
+| L9 | Legal review of privacy policy and terms | Days 8–10 | 🟡 **Go** (Lincoln, 2026-11-27): GDPR plus applicable US state laws. Pack ready (Lane A Day 8): [`GDPR_PRE_REVIEW.md`](../store/GDPR_PRE_REVIEW.md) (12 decisions for Lincoln, 11 questions for the lawyer) and the clean copy [`PRIVACY_FOR_REVIEW.md`](../store/PRIVACY_FOR_REVIEW.md). A qualified person signs off |
 | L12 | Review and merge PRs daily, in merge order | Daily | 🟡 Wave 1 / Day 1 (#47–#53) and Day 2 (#54–#60) merged on Lincoln's instruction |
 
 ## Open decisions
@@ -129,7 +135,13 @@ Full detail is in [`lanes/LANE-L.md`](lanes/LANE-L.md).
 |---|---|---|---|---|
 | D1 | Retire the Express server? | Yes | Day 5 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
 | D2 | Keep users signed in across restarts? | Yes | Day 4 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
-| D3 | Launch languages | English and Spanish | Day 2 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
+| D3 | Launch languages | English and Spanish | Day 2 | **Confirmed 2026-11-27: English + Spanish.** The picker stays able to add languages later; J1 and J2 stay in the plan |
 | D4 | iPhone only (no iPad) for v1? | Yes | Day 1 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
 | D5 | Analytics tool | PostHog EU | Day 4 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
 | D6 | Keep `AGENTS.md` / context-mode? | No, delete it | Day 1 | Default applies (acknowledged 2026-11-17, not individually confirmed) |
+| — | DEBT-097 deleted items in the cloud | — | Day 7 | **Wipe** (2026-11-26): migration 009 (#97), client #96 |
+| — | Contract #9 `$pageview` | — | Day 4 | **Approved** (2026-11-26); #75 merged |
+| — | DEBT-142 home headline | — | Day 6 | Left to the coordinator: **replace** with "Science-based workout plans, built around you." (#99) |
+| — | L4 store enrolment, L7 device testing, L10 staging | — | — | **On hold** (2026-11-27) |
+| — | Gate 3 (store review and submission) | — | Day 10 | **Wait** (2026-11-27) |
+| — | L9 legal review | — | Days 8–10 | **Go** (2026-11-27): GDPR and the US state laws that apply |

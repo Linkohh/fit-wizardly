@@ -63,4 +63,17 @@ describe('LegalPage account-deletion anchor (Google Play web deletion URL)', () 
     expect(screen.getByText(en.legal.draft.title)).toBeInTheDocument();
     expect(screen.queryByText(/100% on your device/i)).not.toBeInTheDocument();
   });
+
+  it('discloses crash reports and usage statistics as separate opt-ins, and the deletion wipe', () => {
+    renderLegalAt('/legal?tab=privacy');
+    const recipients = document.getElementById('who-receives-it');
+    expect(recipients).toHaveTextContent('Send crash reports');
+    expect(recipients).toHaveTextContent('Share anonymous usage statistics');
+    expect(recipients).toHaveTextContent('PostHog EU Cloud (Frankfurt, Germany)');
+    expect(recipients).not.toHaveTextContent(/PostHog \(planned\)|not switched on yet|coming soon/i);
+    expect(document.getElementById('how-long-we-keep-it')).toHaveTextContent('deletion marker');
+    // Unconfirmed facts stay visibly bracketed, and no placeholder is left unfilled.
+    expect(document.body).toHaveTextContent('[Lincoln confirms:');
+    expect(document.body.textContent).not.toMatch(/\{\{\w+\}\}/);
+  });
 });
