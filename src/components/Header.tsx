@@ -563,7 +563,7 @@ export function Header() {
           </motion.div>
           {isWizardRoute ? (
             <span className="hidden sm:inline text-xs font-semibold uppercase tracking-[0.32em] text-muted-foreground">
-              {t('header.intake_mode', 'Coach Intake')}
+              {t('header.intake_mode', 'Guided setup')}
             </span>
           ) : (
             <span className="text-3xl font-bold gradient-text hidden lg:inline">FitWizard</span>

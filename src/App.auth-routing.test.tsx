@@ -170,9 +170,23 @@ vi.mock('@/components/ui/tooltip', () => ({
   TooltipProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-vi.mock('@vercel/analytics/react', () => ({
-  Analytics: () => <div data-testid="vercel-analytics" />,
+const vercelAnalyticsProps = vi.hoisted(() => ({
+  beforeSend: undefined as
+    | ((event: { type: 'pageview' | 'event'; url: string }) => { type: 'pageview' | 'event'; url: string } | null)
+    | undefined,
 }));
+
+vi.mock('@vercel/analytics/react', () => ({
+  Analytics: ({ beforeSend }: { beforeSend?: typeof vercelAnalyticsProps.beforeSend }) => {
+    vercelAnalyticsProps.beforeSend = beforeSend;
+    return <div data-testid="vercel-analytics" />;
+  },
+}));
+
+/** Read through a function so TypeScript doesn't narrow the captured prop to `undefined`. */
+function capturedVercelBeforeSend() {
+  return vercelAnalyticsProps.beforeSend;
+}
 
 vi.mock('./components/OnboardingGuard', () => ({
   OnboardingGuard: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -383,6 +397,27 @@ describe('App auth routing', () => {
 
       expect(await screen.findByText('Onboarding Page')).toBeInTheDocument();
       expect(screen.getAllByTestId('vercel-analytics')).toHaveLength(1);
+    } finally {
+      localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
+    }
+  });
+
+  it('gives Vercel Analytics a beforeSend that masks invite codes, ids and query strings', async () => {
+    vercelAnalyticsProps.beforeSend = undefined;
+    localStorage.setItem(ANALYTICS_CONSENT_STORAGE_KEY, 'true');
+
+    try {
+      renderAt('/onboarding');
+      expect(await screen.findByTestId('vercel-analytics')).toBeInTheDocument();
+
+      const beforeSend = capturedVercelBeforeSend();
+      expect(beforeSend).toBeTypeOf('function');
+      expect(
+        beforeSend?.({
+          type: 'pageview',
+          url: 'https://fitwizard.app/circles/join/SECRET42?utm_source=chat#welcome',
+        }),
+      ).toEqual({ type: 'pageview', url: 'https://fitwizard.app/circles/join/:code' });
     } finally {
       localStorage.removeItem(ANALYTICS_CONSENT_STORAGE_KEY);
     }

@@ -40,7 +40,19 @@ const mocks = vi.hoisted(() => ({
   captureError: vi.fn(),
 }));
 
-const pageState = vi.hoisted(() => ({ planThrows: true }));
+const pageState = vi.hoisted(() => ({
+  planThrows: true,
+  // Which heavy page has a crashing child (Lane C Day 6 hardening tests).
+  childThrowsIn: null as null | 'plan' | 'workout' | 'analytics',
+}));
+
+/** A nested component deep inside a page, the way a chart or set row would crash. */
+function CrashingChild({ page }: { page: 'plan' | 'workout' | 'analytics' }) {
+  if (pageState.childThrowsIn === page) {
+    throw new Error(`${page} child exploded`);
+  }
+  return <span>{page} child ok</span>;
+}
 
 vi.mock('@/lib/monitoring', () => ({
   captureError: mocks.captureError,
@@ -128,8 +140,29 @@ vi.mock('./pages/Plan', () => ({
     if (pageState.planThrows) {
       throw new Error('Plan exploded');
     }
-    return <div>Plan Page</div>;
+    return (
+      <div>
+        Plan Page
+        <CrashingChild page="plan" />
+      </div>
+    );
   },
+}));
+vi.mock('./components/logging/WorkoutLogger', () => ({
+  WorkoutLogger: () => (
+    <div>
+      Workout Logger Page
+      <CrashingChild page="workout" />
+    </div>
+  ),
+}));
+vi.mock('./pages/Analytics', () => ({
+  default: () => (
+    <div>
+      Analytics Page
+      <CrashingChild page="analytics" />
+    </div>
+  ),
 }));
 vi.mock('./components/circles/JoinCircleHandler', () => ({
   JoinCircleHandler: () => <div>Join Circle Handler</div>,
@@ -163,6 +196,7 @@ describe('App per-route error boundary', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     pageState.planThrows = true;
+    pageState.childThrowsIn = null;
     // React logs caught render errors; keep the test output readable.
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     Object.defineProperty(window, 'matchMedia', {
@@ -214,5 +248,59 @@ describe('App per-route error boundary', () => {
 
     expect(await screen.findByText('Index Page')).toBeInTheDocument();
     expect(screen.queryByText('This page hit a problem.')).not.toBeInTheDocument();
+  });
+});
+
+describe('App per-route error boundary: heavy pages with a crashing child', () => {
+  const cases = [
+    { page: 'plan', path: '/plan', healthyText: 'Plan Page' },
+    { page: 'workout', path: '/workout/plan-1/0', healthyText: 'Workout Logger Page' },
+    { page: 'analytics', path: '/analytics', healthyText: 'Analytics Page' },
+  ] as const;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    pageState.planThrows = false;
+    pageState.childThrowsIn = null;
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: vi.fn().mockImplementation((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it.each(cases)('$path renders normally when nothing throws', async ({ page, path, healthyText }) => {
+    renderAt(path);
+
+    expect(await screen.findByText(healthyText)).toBeInTheDocument();
+    expect(screen.getByText(`${page} child ok`)).toBeInTheDocument();
+  });
+
+  it.each(cases)('$path shows the route fallback when a child throws', async ({ page, path, healthyText }) => {
+    pageState.childThrowsIn = page;
+    renderAt(path);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('This page hit a problem.');
+    expect(screen.queryByText(healthyText)).not.toBeInTheDocument();
+    // The shell stays up and the global boundary is not used.
+    expect(screen.getByText('Header')).toBeInTheDocument();
+    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+    expect(mocks.captureError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: `${page} child exploded` }),
+      expect.objectContaining({ componentStack: expect.any(String) }),
+    );
   });
 });
