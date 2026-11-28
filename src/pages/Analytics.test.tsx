@@ -215,6 +215,14 @@ describe('Analytics page command center', () => {
     expect(screen.getByText('Coach Notes')).toBeInTheDocument();
   });
 
+  it('uses no coach wording in the header when the coach flag is off (DEBT-140)', () => {
+    vi.stubEnv('VITE_FEATURE_COACH', 'false');
+    render(<Analytics />);
+
+    expect(screen.getByText(/Training signals for what changed/)).toBeInTheDocument();
+    expect(screen.queryByText(/coach/i)).not.toBeInTheDocument();
+  });
+
   it('hides Coach Notes when the coach flag is off, even if Coach Mode is persisted on', () => {
     vi.stubEnv('VITE_FEATURE_COACH', 'false');
     mocks.trainerState.isTrainerMode = true;

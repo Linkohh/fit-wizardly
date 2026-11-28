@@ -91,9 +91,11 @@ export default function Analytics() {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-2"
             >
-                <h1 className="font-display text-3xl font-bold gradient-text">Analytics Command Center</h1>
+                <h1 className="font-display text-3xl font-bold gradient-text">
+                    {t('analytics.header.title', 'Analytics Command Center')}
+                </h1>
                 <p className="max-w-2xl text-muted-foreground">
-                    Coaching signals for what changed, what matters, and the next best training move.
+                    {t('analytics.header.subtitle', 'Training signals for what changed, what matters, and your next best training move.')}
                 </p>
             </motion.div>
 

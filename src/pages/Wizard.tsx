@@ -240,7 +240,7 @@ export default function WizardPage() {
       <div className="mb-8 space-y-4">
         <div className="flex flex-wrap items-center gap-3">
           <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-primary/80">
-            {t('wizard.eyebrow', 'Coach-built intake')}
+            {t('wizard.eyebrow', 'Guided setup')}
           </span>
           <span className="inline-flex items-center rounded-full border border-border/70 bg-background/24 px-3 py-1 text-sm text-muted-foreground backdrop-blur-md md:bg-background/40">
             {t('wizard.estimate', 'About 2 minutes')}

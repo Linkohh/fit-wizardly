@@ -1,4 +1,14 @@
 {
+    "analytics": {
+        "header": {
+            "title": "Central de análises",
+            "subtitle": "Sinais de treino sobre o que mudou, o que importa e o seu próximo melhor passo."
+        },
+        "weekly_notes": {
+            "title": "Notas semanais",
+            "description": "Um resumo semanal em linguagem simples."
+        }
+    },
     "app": {
         "name": "FitWizard",
         "tagline": "Planos de treino baseados em ciência, feitos para você."
@@ -133,6 +143,9 @@
         },
         "cta": "Comece Grátis",
         "no_credit_card": "Sem cartão de crédito • Crie seu plano em segundos"
+    },
+    "hero": {
+        "tagline": "Planos de treino baseados em ciência, feitos para você."
     },
     "wizard": {
         "title": "Crie Seu Plano de Treino",
@@ -312,6 +325,7 @@
         "swipe_back": "Deslize para voltar"
     },
     "header": {
+        "intake_mode": "Configuração guiada",
         "quick_links": {
             "label": "Sobre e ajuda",
             "about": "Sobre",

@@ -285,7 +285,7 @@ export function GoalStep() {
               <span className="text-sm font-medium">{t('wizard.goal.personalize_title', 'Make it personal')}</span>
             </div>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {t('wizard.goal.personalize_helper', 'Add your name, a short goal note, or coach notes without crowding the core training decisions.')}
+              {t('wizard.goal.personalize_helper', 'Add your name or a short goal note without crowding the core training decisions.')}
             </p>
           </div>
 

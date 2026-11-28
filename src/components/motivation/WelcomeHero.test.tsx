@@ -155,6 +155,13 @@ describe('WelcomeHero tilt integration', () => {
     });
   });
 
+  it('shows the science-based tagline instead of outcome claims (DEBT-142)', () => {
+    renderHero();
+
+    expect(screen.getByText('Science-based workout plans, built around you.')).toBeInTheDocument();
+    expect(screen.queryByText(/undeniably|intelligent/i)).not.toBeInTheDocument();
+  });
+
   it('does not show sensor CTA on desktop and still forwards pointer move', () => {
     const { container } = renderHero();
 

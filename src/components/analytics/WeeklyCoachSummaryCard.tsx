@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { ClipboardList, Sparkles, Target, Zap } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePlanStore } from '@/stores/planStore';
@@ -12,6 +13,7 @@ interface WeeklyCoachSummaryCardProps {
 }
 
 export function WeeklyCoachSummaryCard({ now }: WeeklyCoachSummaryCardProps) {
+  const { t } = useTranslation();
   const workoutLogs = usePlanStore((state) => state.workoutLogs);
   const preferredWeightUnit = usePlanStore((state) => state.preferredWeightUnit);
   const readinessLogs = useReadinessStore((state) => state.logs);
@@ -34,9 +36,11 @@ export function WeeklyCoachSummaryCard({ now }: WeeklyCoachSummaryCardProps) {
             <div>
               <CardTitle className="gradient-text flex items-center gap-2">
                 <ClipboardList className="h-5 w-5" />
-                Coach Notes
+                {t('analytics.weekly_notes.title', 'Weekly notes')}
               </CardTitle>
-              <CardDescription>A weekly readout in plain coaching language.</CardDescription>
+              <CardDescription>
+                {t('analytics.weekly_notes.description', 'A weekly readout in plain language.')}
+              </CardDescription>
             </div>
             <InsightQualityBadge quality={summary.stats.sessionsThisWeek === 0 ? 'needs_data' : summary.confidence} />
           </div>

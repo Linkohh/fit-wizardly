@@ -1,4 +1,14 @@
 {
+    "analytics": {
+        "header": {
+            "title": "Centro de análisis",
+            "subtitle": "Señales de entrenamiento sobre qué cambió, qué importa y tu siguiente mejor paso."
+        },
+        "weekly_notes": {
+            "title": "Notas semanales",
+            "description": "Un resumen semanal en lenguaje claro."
+        }
+    },
     "app": {
         "name": "FitWizard",
         "tagline": "Planes de entrenamiento basados en la ciencia, hechos para ti."
@@ -21,9 +31,7 @@
         "full": "Máximo",
         "potential": "Potencial",
         "description": "Crea el plan de entrenamiento perfecto adaptado a tus objetivos.",
-        "intelligent": "Inteligente",
-        "personalized": "personalizado",
-        "effective": "innegablemente efectivo",
+        "tagline": "Planes de entrenamiento basados en la ciencia, hechos a tu medida.",
         "start": "Comienza Tu Evolución",
         "view_plan": "Ver Plan Actual",
         "enable_motion_tilt": "Activar inclinación por movimiento",
@@ -98,6 +106,7 @@
     },
     "wizard": {
         "title": "Crea Tu Plan de Entrenamiento",
+        "eyebrow": "Configuración guiada",
         "steps": {
             "goal": "Objetivo",
             "equipment": "Equipamiento",
@@ -275,7 +284,7 @@
             "title": "Aún No Has Generado un Plan",
             "description": "Crea tu plan de entrenamiento personalizado usando el asistente.",
             "cta": "Iniciar Asistente",
-            "kicker": "TU CAMINO FITNESS",
+            "kicker": "CONFIGURACIÓN GUIADA",
             "headline": "Tu plan empieza aquí",
             "coach_copy": "Tu entrenador está listo. Responde algunas preguntas y obtén un plan diseñado para tus objetivos, horario y equipo.",
             "cta_primary": "Crear Mi Plan",
@@ -368,6 +377,7 @@
         "confirm": "Confirmar"
     },
     "header": {
+        "intake_mode": "Configuración guiada",
         "logo_tooltip": "Tu camino hacia el máximo potencial fitness",
         "theme": {
             "light": "Claro",

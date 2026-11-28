@@ -153,7 +153,7 @@ const AnimatedBadge = memo(function AnimatedBadge() {
 // --- Main Component ---
 
 export function WelcomeHero() {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const [showBackground, setShowBackground] = useState(false);
     const [isRequestingPermission, setIsRequestingPermission] = useState(false);
@@ -346,16 +346,10 @@ export function WelcomeHero() {
                     transition={{ duration: 0.6, delay: 0.6 }}
                     className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed drop-shadow-[0_2px_4px_rgba(255,255,255,0.85)] dark:drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]"
                 >
-                    {t('hero.description')}
+                    {t('hero.description')}{' '}
                     <motion.span
                         className="text-foreground font-semibold hover:text-primary transition-colors duration-300"
-                    > {t('hero.intelligent')}</motion.span>,
-                    <motion.span
-                        className="text-foreground font-semibold hover:text-primary transition-colors duration-300"
-                    > {t('hero.personalized')}</motion.span>, {i18n.language === 'es' ? 'e' : 'and'}
-                    <motion.span
-                        className="text-foreground font-semibold hover:text-primary transition-colors duration-300"
-                    > {t('hero.effective')}</motion.span>.
+                    >{t('hero.tagline', 'Science-based workout plans, built around you.')}</motion.span>
                 </motion.p>
 
                 <motion.div

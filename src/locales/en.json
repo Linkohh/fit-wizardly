@@ -1,4 +1,14 @@
 {
+    "analytics": {
+        "header": {
+            "title": "Analytics Command Center",
+            "subtitle": "Training signals for what changed, what matters, and your next best training move."
+        },
+        "weekly_notes": {
+            "title": "Weekly notes",
+            "description": "A weekly readout in plain language."
+        }
+    },
     "app": {
         "name": "FitWizard",
         "tagline": "Science-based workout plans, built around you."
@@ -25,9 +35,7 @@
         "full": "Full",
         "potential": "Potential",
         "description": "Craft the perfect workout plan tailored to your goals.",
-        "intelligent": "Intelligent",
-        "personalized": "personalized",
-        "effective": "undeniably effective",
+        "tagline": "Science-based workout plans, built around you.",
         "start": "Start Your Evolution",
         "view_plan": "View Current Plan",
         "enable_motion_tilt": "Enable Motion Tilt",
@@ -154,7 +162,7 @@
     },
     "wizard": {
         "title": "Create Your Workout Plan",
-        "eyebrow": "Coach-built intake",
+        "eyebrow": "Guided setup",
         "estimate": "About 2 minutes",
         "subtitle": "Answer six focused questions and we will shape a realistic training plan around your goals, schedule, equipment, and limitations.",
         "step_counter": "Step {{current}} of {{total}}",
@@ -189,7 +197,7 @@
             "error_description": "Failed to generate plan. Please try again."
         },
         "goal": {
-            "personalize_badge": "Coach-guided intake",
+            "personalize_badge": "Personalize your plan",
             "lets_know_you": "Let's get to know you",
             "name_on_plan": "Your name will appear on your personalized workout plan",
             "first_name": "First Name",
@@ -212,7 +220,7 @@
             "experience_subtitle": "We use this to match recovery demand, weekly volume, and how advanced the plan should feel.",
             "selected_label": "Selected",
             "personalize_title": "Make it personal",
-            "personalize_helper": "Add your name, a short goal note, or coach notes without crowding the core training decisions.",
+            "personalize_helper": "Add your name or a short goal note without crowding the core training decisions.",
             "personalize_toggle": "Add personal details",
             "options": {
                 "strength": {
@@ -277,8 +285,8 @@
         "review": {
             "title": "Review Your Plan",
             "subtitle": "Confirm your selections before generating",
-            "coach_summary": "Coach summary",
-            "coach_summary_copy": "Scan the prescription like a coach would: confirm the goal, weekly commitment, equipment, muscle focus, and any guardrails before the plan is generated.",
+            "coach_summary": "Plan summary",
+            "coach_summary_copy": "Check the goal, weekly commitment, equipment, muscle focus, and any guardrails before the plan is generated.",
             "personalized_plan": "Personalized Workout Plan",
             "goal_experience": "Goal & Experience",
             "goal_experience_detail": "This sets the training emphasis, recovery demand, and the phase we recommend first.",
@@ -309,7 +317,7 @@
             "selected_count": "{{count}} muscle groups selected",
             "selected_empty": "Choose at least one focus area to shape the split.",
             "equipment_title": "Available tools",
-            "coaching_note_title": "Coach note",
+            "coaching_note_title": "How this works",
             "coaching_note_copy": "Your selections here drive exercise choice, weekly volume, and how each day in the split is balanced.",
             "auto_pick": "Let FitWizard choose",
             "auto_pick_hint": "Picks a balanced full-body focus. You can change it on the map."
@@ -354,7 +362,7 @@
             "title": "No Plan Generated Yet",
             "description": "Create your personalized workout plan using the wizard.",
             "cta": "Start Wizard",
-            "kicker": "PREMIUM COACH INTAKE",
+            "kicker": "GUIDED SETUP",
             "headline": "Build a plan that actually fits your life",
             "coach_copy": "Answer a few focused questions and get a training plan shaped around your goal, weekly schedule, equipment, and limitations.",
             "time_to_plan": "Takes about 2 minutes",
@@ -533,6 +541,7 @@
         "about": "About FitWizard"
     },
     "header": {
+        "intake_mode": "Guided setup",
         "logo_tooltip": "Your path to peak fitness potential",
         "theme": {
             "light": "Light",
