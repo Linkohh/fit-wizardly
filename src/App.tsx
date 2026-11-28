@@ -14,14 +14,11 @@ import { useThemeStore } from "@/stores/themeStore";
 import { PageTransition } from "@/components/ui/page-transition";
 import { ErrorBoundary, type ErrorFallbackProps } from "@/components/ErrorBoundary";
 import { RouteErrorFallback } from "@/components/RouteErrorFallback";
-import { TrainerGuard } from "./components/TrainerGuard";
 import { OnboardingGuard } from "./components/OnboardingGuard";
 import { useAuthStore } from "./stores/authStore";
 import { useTrainerStore } from "./stores/trainerStore";
 import { CommandPalette } from "@/components/CommandPalette";
 import { OfflineBanner } from "@/components/ui/offline-banner";
-import { RequireAuth } from "@/components/RequireAuth";
-import { usePlanStore } from "@/stores/planStore";
 import { useGlobalClickFeedback } from "@/hooks/useGlobalClickFeedback";
 import { Footer } from "@/components/Footer";
 import { ConsentModal } from "@/components/legal/ConsentModal";
@@ -31,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { isNativeApp } from "@/lib/platform";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { useAnalyticsConsent } from "@/lib/analytics/useAnalyticsConsent";
+import { maskVercelAnalyticsEvent } from "@/lib/analytics/vercelAnalytics";
 import { usePageViews } from "@/lib/analytics/usePageViews";
 import { useScrollActivity } from "@/hooks/use-scroll-activity";
 import { NavigationDirectionProvider } from "@/contexts/navigation-direction-context";
@@ -81,6 +79,18 @@ const WorkoutLogger = lazy(() =>
     default: module.WorkoutLogger,
   }))
 );
+// Coach and circle routes only exist while their feature flag is on (both default off),
+// so their guards are lazy too: they stay out of the startup bundle for the v1 release.
+const RequireAuth = lazy(() =>
+  import("@/components/RequireAuth").then((module) => ({
+    default: module.RequireAuth,
+  }))
+);
+const TrainerGuard = lazy(() =>
+  import("./components/TrainerGuard").then((module) => ({
+    default: module.TrainerGuard,
+  }))
+);
 const CircleLayout = lazy(() =>
   import("./components/circles/CircleLayout").then((module) => ({
     default: module.CircleLayout,
@@ -124,7 +134,7 @@ const CircleDashboardTab = lazy(() =>
 
 const queryClient = new QueryClient();
 
-// Auth initialization wrapper
+// Theme sync wrapper
 function ThemeProvider({ children }: { children: React.ReactNode }) {
   const resolvedTheme = useThemeStore((state) => state.resolvedTheme);
   const syncSystemTheme = useThemeStore((state) => state.syncSystemTheme);
@@ -337,7 +347,7 @@ const App = () => {
   useStatusBarTheme();
   const nativeApp = isNativeApp();
   usePageViews();
-  // One consent key for every analytics tool (DEBT-061): fitwizard_analytics_consent.
+  // Usage statistics consent (fitwizard_analytics_consent) covers PostHog and Vercel Web Analytics.
   const hasAnalyticsConsent = useAnalyticsConsent();
   const [shouldRenderLivingBackground, setShouldRenderLivingBackground] = useState(false);
 
@@ -441,7 +451,7 @@ const App = () => {
                 {!nativeApp && <Footer />}
               </div>
               {/* Web only (DEBT-127): Vercel Analytics has no place inside the native apps. */}
-              {!nativeApp && hasAnalyticsConsent && <VercelAnalytics />}
+              {!nativeApp && hasAnalyticsConsent && <VercelAnalytics beforeSend={maskVercelAnalyticsEvent} />}
             </AuthProvider>
           </ThemeProvider>
         </TooltipProvider>
